@@ -1,0 +1,6 @@
+---
+blank_issues_enabled: false
+contact_links:
+  - name: Report security vulnerabilities in Kubara
+    url: https://docs.kubara.io/latest-stable/6_reference/security/
+    about: Please read here how you can report security vulnerabilities in Kubara.
