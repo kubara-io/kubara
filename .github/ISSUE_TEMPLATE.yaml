@@ -1,16 +1,17 @@
----
 name: Bug or Feature Request
 description: Report a bug, suggest a feature, or ask a question related to Kubara
 title: "[Issue]: "
 labels: ["triage"]
 assignees: []
+
 body:
   - type: markdown
     attributes:
       value: |
         ## 📝 Summary
-        Please read first <a target="_blank" href="https://docs.kubara.io/latest-stable/5_community/contributing/">how to contribute to Kubara</a>.
+        Please read first <a target="_blank" href="https://docs.kubara.io/latest-stable/5_community/contributing/">how to contribute to Kubara</a>.  
         Briefly describe the issue or request. What is the problem, question, or improvement you're raising?
+
   - type: textarea
     id: summary
     attributes:
@@ -18,6 +19,7 @@ body:
       placeholder: "Kubara does not install correctly when using custom CRDs..."
     validations:
       required: true
+
   - type: dropdown
     id: type-of-issue
     attributes:
@@ -29,6 +31,7 @@ body:
         - 🧪 Improvement or refactor
     validations:
       required: true
+
   - type: textarea
     id: description
     attributes:
@@ -39,6 +42,7 @@ body:
         - Actual: Helm deployment hangs indefinitely.
     validations:
       required: true
+
   - type: textarea
     id: steps
     attributes:
@@ -48,6 +52,7 @@ body:
         1. Run `kubara init`
         2. Apply config X
         3. Observe error Y
+
   - type: textarea
     id: environment
     attributes:
@@ -59,6 +64,7 @@ body:
         - Helm version: 3.13
         - Platform: kind
         - OS/Arch: Ubuntu 22.04 / amd64
+
   - type: checkboxes
     id: checklist
     attributes:
@@ -69,11 +75,13 @@ body:
         - label: I am using the latest version of Kubara
         - label: The issue is reproducible
         - label: This is not a duplicate
+
   - type: input
     id: related
     attributes:
       label: 🔗 Related Issues / References
-      placeholder: "# 42, # 123"
+      placeholder: "#42, #123"
+
   - type: textarea
     id: additional
     attributes:
