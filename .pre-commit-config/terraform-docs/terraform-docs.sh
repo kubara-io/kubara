@@ -2,7 +2,7 @@
 
 DIR_NAMES=""
 CONFIG_FILE_PATH=".pre-commit-config/terraform-docs"
-TERRAFORM_DOCS_IMAGE="quay.io/terraform-docs/terraform-docs:0.20.0"
+TERRAFORM_DOCS_IMAGE="quay.io/terraform-docs/terraform-docs:0.21.0"
 CMD_FOUND=$(which terraform-docs)
 
 for file in "$@"; do
