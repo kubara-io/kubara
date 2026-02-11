@@ -1,14 +1,13 @@
+---
 name: Pull Request
 description: Submit a change to Kubara (CLI, templates, modules or docs)
 title: "[PR]: "
 labels: ["pending-review"]
-
 body:
   - type: markdown
     attributes:
       value: |
-        Please read first <a target="_blank" href="https://docs.kubara.io/latest-stable/5_community/contributing/">how to contribute to Kubara</a>.  
-
+        Please read first <a target="_blank" href="https://docs.kubara.io/latest-stable/5_community/contributing/">how to contribute to Kubara</a>.
   - type: textarea
     id: summary
     attributes:
@@ -16,7 +15,6 @@ body:
       placeholder: "What does this PR do? e.g. 'Adds Terraform module for SKE setup'"
     validations:
       required: true
-
   - type: checkboxes
     id: type
     attributes:
@@ -28,14 +26,12 @@ body:
         - label: 📝 Documentation
         - label: 🧪 Test or CI change
         - label: ♻️ Refactor / cleanup
-
   - type: checkboxes
     id: breaking
     attributes:
       label: ⚠️ Is this a breaking change?
       options:
         - label: Yes, this change breaks existing functionality (explain in summary)
-
   - type: checkboxes
     id: testing
     attributes:
@@ -45,13 +41,11 @@ body:
         - label: Manually tested (local/dev cluster)
         - label: Unit tested
         - label: Not tested (explain why in comments)
-
   - type: input
     id: related
     attributes:
       label: 🔗 Related Issues / Tickets
-      placeholder: "e.g. Closes #42, Related to #99"
-
+      placeholder: "e.g. Closes # 42, Related to # 99"
   - type: checkboxes
     id: checklist
     attributes:
@@ -61,7 +55,6 @@ body:
         - label: Linting and style checks pass
         - label: Comments added for complex logic
         - label: Documentation updated (if applicable)
-
   - type: textarea
     id: context
     attributes:
