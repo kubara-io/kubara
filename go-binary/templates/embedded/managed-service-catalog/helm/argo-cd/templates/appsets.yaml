@@ -1,0 +1,4 @@
+{{- $ctx := .}}
+{{- range (.Values.bootstrapValues).applicationSets }}
+{{- include "templateLibrary.argocd.applicationset" (list . $ctx) }}
+{{- end }}

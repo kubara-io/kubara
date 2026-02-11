@@ -1,0 +1,59 @@
+{{- if and .Values.bestPractices.enabled (dig "bestPractices" "verifyImage" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-image
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Verify Image
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.7.0
+    policies.kyverno.io/description: >-
+      Using the Cosign project, OCI images may be signed to ensure supply chain
+      security is maintained. Those signatures can be verified before pulling into
+      a cluster. This policy checks the signature of an image repo called
+      ghcr.io/kyverno/test-verify-image to ensure it has been signed by verifying
+      its signature against the provided public key. This policy serves as an illustration for
+      how to configure a similar rule and will require replacing with your image(s) and keys.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "bestPractices" "verifyImage" "webhookFailurePolicy" "Ignore" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{dig "bestPractices" "verifyImage" "enableBackgroundScanning" "false" (merge .Values)}}
+  rules:
+    - name: verify-image
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+        {{- if (hasKey (dig "bestPractices" "verifyImage" dict (merge .Values)) "excludeNamespaces") }}
+      exclude:
+        any:
+          - resources:
+              namespaces:
+                {{- range (dig "bestPractices" "verifyImage" "excludeNamespaces" list (merge .Values)) }}
+                - {{ . }}
+                {{- end }}
+        {{- end }}
+      verifyImages:
+          {{- range (dig "bestPractices" "verifyImage" "imagesAndPublicKeyPairs" list (merge .Values)) }}
+        - imageReferences:
+            - {{ .image | quote }}
+            {{- if .pullSecret }}
+          imageRegistryCredentials:
+            secrets:
+              - {{ .pullSecret }}
+            {{- end }}
+          required: true
+          mutateDigest: {{ .mutateDigest | default (dig "bestPractices" "verifyImage" "mutateDigest" true (merge $.Values)) }}
+          verifyDigest: {{ .verifyDigest | default (dig "bestPractices" "verifyImage" "verifyDigest" true (merge $.Values)) }}
+          attestors:
+            - entries:
+                - keys:
+                    publicKeys: |-
+  {{ .key | indent 24 }}
+          {{- end }}
+  {{- end }}

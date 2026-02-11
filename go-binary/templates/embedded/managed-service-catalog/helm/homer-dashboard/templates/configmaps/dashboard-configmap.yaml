@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-config
+  labels:
+    app: homer
+data:
+  config.yml: |
+    {{- with .Values.dashboardConfig }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}

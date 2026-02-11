@@ -1,0 +1,43 @@
+letsencrypt: true
+clusterIssuer:
+  name: change-me
+  email: change-me
+  server: change-me # optional
+cert-manager:
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      memory: 100Mi
+  prometheus:
+    servicemonitor:
+      enabled: false
+      labels:
+        monitoring.instance: change-me
+  installCRDs: true
+  serviceAccount:
+    automountServiceAccountToken: true
+  webhook:
+    timeoutSeconds: 15 #set timeout to 15 seconds because of gardener, see: https://github.com/gardener/gardener/blob/master/docs/usage/shoot/shoot_status.md#constraints
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 100Mi
+  cainjector:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 100Mi
+  startupapicheck:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        memory: 32Mi
+namespace: {}

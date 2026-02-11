@@ -1,0 +1,38 @@
+serviceMonitor:
+  enabled: false
+  additionalLabels:
+    monitoring.instance: change-me
+ingress:
+  enabled: false
+  host: change-me
+  path: "/"
+  annotations: {}
+image:
+  tag: v25.11.1
+  repository: b4bz/homer
+  pullPolicy: "IfNotPresent"
+container:
+  port: 8080
+service:
+  port: 8080
+health:
+  liveness:
+    initialDelaySeconds: 10
+    failureThreshold: 5
+  readiness:
+    initialDelaySeconds: 10
+    failureThreshold: 5
+resources:
+  requests:
+    cpu: 10m
+    memory: 100Mi
+  limits:
+    memory: 100Mi
+#storage: {}
+#  volumeMounts:
+#  volumes:
+autoscale:
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+  maxReplicas: 2
+  minReplicas: 1

@@ -1,0 +1,40 @@
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+policy-reporter:
+  imagePullSecrets:
+    - name: image-pull-secret
+  replicaCount: 1
+  metrics:
+    enabled: true
+  monitoring:
+    serviceMonitor:
+      labels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  ui:
+    enabled: true
+    ingress:
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      enabled: true
+      {{- end }}
+      className: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+        {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+        {{- end }}
+        nginx.ingress.kubernetes.io/rewrite-target: /$1
+      hosts:
+        - host: {{ .cluster.dnsName }}
+          paths:
+            - path: "/kyverno/(.*)"
+              pathType: ImplementationSpecific
+      tls:
+        - secretName: tls-kyverno-ui
+          hosts:
+            - {{ .cluster.dnsName }}

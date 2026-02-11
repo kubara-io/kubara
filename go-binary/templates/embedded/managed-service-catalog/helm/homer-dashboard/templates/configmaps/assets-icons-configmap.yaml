@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: homer-assets-icons
+  labels:
+    app: homer
+binaryData:
+  {{- range $path, $_ := .Files.Glob "assets/icons/*" }}
+  {{ $path | base | trimSuffix (ext $path) }}: {{ $.Files.Get $path | b64enc }}
+  {{- end }}

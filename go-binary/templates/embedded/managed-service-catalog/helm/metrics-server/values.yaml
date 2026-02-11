@@ -1,0 +1,19 @@
+namespace: {}
+metrics-server:
+  imagePullSecrets: []
+  metrics:
+    enabled: true
+  serviceMonitor:
+    enabled: false
+    additionalLabels:
+      monitoring.instance: change-me
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      memory: 100Mi
+  apiService:
+    insecureSkipTLSVerify: true
+  args:
+    - --kubelet-insecure-tls

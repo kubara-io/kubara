@@ -1,0 +1,22 @@
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged
+poolName: first-pool
+addresses:
+  - {{ .cluster.privateLoadBalancerIP }}/32
+
+metallb:
+  imagePullSecrets:
+    - name: image-pull-secret
+  prometheus:
+    serviceMonitor:
+      speaker:
+        additionalLabels:
+          monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+      controller:
+        additionalLabels:
+          monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"

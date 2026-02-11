@@ -1,0 +1,52 @@
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+
+
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  secrets:
+    - target: oauth2-credentials
+      dataFrom:
+        - remoteKey: oauth2_credentials
+
+oauth2-proxy:
+  imagePullSecrets:
+    - name: image-pull-secret
+  config:
+    existingSecret: oauth2-credentials
+    configFile: |-
+      reverse_proxy = true
+      redirect_url = "https://{{ .cluster.dnsName }}/oauth2/callback"
+      email_domains = [ "*" ]
+      cookie_secure = true
+      upstreams = [ "file:///dev/null" ]
+      github_org = "{{ .cluster.ssoOrg }}"
+      github_team = "{{ .cluster.ssoTeam }}"
+      provider = "github"
+      scope = "read:user user:email read:org"
+  ingress:
+    className: nginx
+    annotations:
+      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+      {{- if (eq .cluster.services.metalLb.status "enabled") }}
+      external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+      {{- end }}
+    enabled: true
+    path: /oauth2
+    hosts:
+      - {{ .cluster.dnsName }}
+    tls:
+      - secretName: tls-oauth2-proxy
+        hosts:
+          - {{ .cluster.dnsName }}
+  metrics:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      labels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"

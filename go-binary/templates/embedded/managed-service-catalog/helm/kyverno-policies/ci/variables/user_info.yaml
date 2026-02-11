@@ -1,0 +1,9 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: UserInfo
+metadata:
+  name: user-info
+clusterRoles:
+  - cluster-admin
+  - admin
+userInfo:
+  username: molybdenum@somecorp.com

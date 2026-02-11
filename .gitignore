@@ -1,0 +1,13 @@
+.DS_Store
+.idea/
+.vscode/
+
+
+./dist
+.act/
+.actrc
+
+# kubara program
+kubara_*amd64*
+kubara_*arm64*
+kubara

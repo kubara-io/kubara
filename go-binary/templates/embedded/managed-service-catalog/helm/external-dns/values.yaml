@@ -1,0 +1,95 @@
+# creates an ExternalSecret that looks for the specified remote-keys (remote secret names) to inject into webhook pod
+externalSecrets:
+  secretStoreRef:
+    kind: change-me
+    name: change-me
+  secrets:
+    - target: external-dns-webhook
+      data:
+        - remoteKey: change-me
+          remoteKeyProperty: project_id
+          secretKey: "PROJECT_ID"
+        - remoteKey: change-me
+          remoteKeyProperty: auth_token
+          secretKey: "AUTH_TOKEN"
+
+namespace:
+  annotations: {}
+  labels: {}
+
+external-dns:
+  txtOwnerId: change-me
+  domainFilters:
+    - change-me
+  sources:
+    - ingress
+  policy: sync
+  serviceMonitor:
+    enabled: false
+    additionalLabels:
+      monitoring.instance: change-me
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      memory: 100Mi
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    capabilities:
+      drop: [ "ALL" ]
+  extraVolumes:
+    - name: stackit-sa-authentication
+      secret:
+        secretName: external-dns-webhook
+        items:
+          - key: SA_KEY_JSON
+            path: sa_key.json
+  provider:
+    name: webhook
+    webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+        limits:
+          memory: 100Mi
+      image:
+        repository: change-me
+        tag: change-me
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        capabilities:
+          drop: [ "ALL" ]
+      livenessProbe:
+        httpGet:
+          port: 8888
+      readinessProbe:
+        httpGet:
+          port: 8888
+      extraVolumeMounts:
+        - name: stackit-sa-authentication
+          mountPath: /var/run/secrets/stackit
+      env:
+        - name: AUTH_KEY_PATH
+          value: /var/run/secrets/stackit/sa_key.json
+        - name: PROJECT_ID
+          valueFrom:
+            secretKeyRef:
+              name: external-dns-webhook
+              key: PROJECT_ID

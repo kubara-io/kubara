@@ -1,0 +1,479 @@
+kyverno-policies:
+  podSecurityStandard: "baseline"
+  autogenControllers: none
+  skipBackgroundRequests: false
+  validationAllowExistingViolations: false
+  policyExclude:
+    disallow-host-path:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kube-prometheus-stack-prometheus-node-exporter-*
+            namespaces:
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - loki-promtail-*
+            namespaces:
+              - loki
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+    certificate-duration-max-100days:
+      any:
+        - resources:
+            kinds:
+              - Certificate
+            names:
+              - ingress-nginx-admission
+              - ingress-nginx-root-cert
+            namespaces:
+              - ingress-nginx
+        - resources:
+            kinds:
+              - Certificate
+            names:
+              - kube-prometheus-stack-admission
+              - kube-prometheus-stack-root-cert
+            namespaces:
+              - kube-prometheus-stack
+    limit-dnsnames:
+      any:
+        - resources:
+            kinds:
+              - Certificate
+            names:
+              - ingress-nginx-admission
+            namespaces:
+              - ingress-nginx
+        - resources:
+            kinds:
+              - Certificate
+            names:
+              - kube-prometheus-stack-admission
+            namespaces:
+              - kube-prometheus-stack
+    require-pod-disruption-budget:
+      any:
+        - resources:
+            kinds:
+              - Deployment
+            names:
+              - csi-resizer
+              - csi-snapshotter
+            namespaces:
+              - longhorn
+    require-readonly-root-filesystem:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - ingress-nginx-controller-*
+            namespaces:
+              - ingress-nginx
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kube-prometheus-stack-grafana-*
+            namespaces:
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    disallow-host-ports:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kube-prometheus-stack-prometheus-node-exporter-*
+            namespaces:
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    disallow-host-namespaces:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kube-prometheus-stack-prometheus-node-exporter-*
+            namespaces:
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+    disallow-privileged-containers:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - longhorn
+              - kube-system
+    disallow-privilege-escalation:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    disallow-capabilities:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    disallow-capabilities-strict:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    require-requests-limits:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - longhorn
+              - kube-system
+        # request-limits for metallb-speaker initContainers cannot be set in the official helm chart
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    restrict-volume-types:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kube-prometheus-stack-prometheus-node-exporter-*
+            namespaces:
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - loki-promtail-*
+            namespaces:
+              - loki
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+    require-run-as-non-root-user:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - loki-promtail-*
+            namespaces:
+              - loki
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - longhorn-driver-deployer-*
+            namespaces:
+              - longhorn
+    require-run-as-nonroot:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - loki-promtail-*
+            namespaces:
+              - loki
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+    restrict-seccomp-strict:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+              - metallb
+    require-pod-probes:
+      any:
+        - resources:
+            kinds:
+              - Pod
+            namespaces:
+              - kube-system
+              - longhorn
+              - loki
+              - kube-prometheus-stack
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - metallb-speaker-*
+            namespaces:
+              - metallb
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - cert-manager-cainjector-*
+            namespaces:
+              - cert-manager
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - external-secrets-*
+            namespaces:
+              - external-secrets
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - kyverno-background-controller-*
+              - kyverno-reports-controller-*
+            namespaces:
+              - kyverno
+global:
+  k8sVersion: ""
+  kyvernoVersion: autodetect
+  # -- default for every policy. Can be overriden by policies actionOverride
+  actionOverride: Audit
+  # -- allow issuing certificates from this issuerDomain. Multiple domains separated by "|"
+  # -- e.g. set *.my.domain for allowing acme.my.domain/foo/bar
+  allowedIssuerDomains: change-me
+  # -- specify registries which are trusted. Multiple registries separated by "|"
+  allowedImageRegistries: change-me
+
+# Kyverno Policies:
+argoCD:
+  enabled: true
+  preventDefaultProject:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    actionOverride: "Audit"
+    enableBackgroundScanning: true
+  preventUpdatesToProject:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    actionOverride: "Audit"
+    enableBackgroundScanning: true
+
+itGrundschutz:
+  base:
+    enabled: true
+    restrictImageRegistries:
+      enabled: false
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+      allowedRegistries:
+        - "docker.io/*"
+        - "quay.io/*"
+        - "ghcr.io/*"
+      excludeNamespaces:
+        - kube-system
+  standard:
+    enabled: true
+    createDefaultNetworkPolicyExistingNamespaces:
+      # -- if set to true a default-deny network policy will be created in every existing namespace
+      enabled: false
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+    createDefaultNetworkPolicyNewNamespaces:
+      # -- if set to true a default-deny network policy will be created in every new namespace
+      enabled: false
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+    disallowPrivilegedContainers:
+      enabled: true
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+    disallowPrivilegeEscalation:
+      enabled: true
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+    requirePodProbes:
+      enabled: true
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+    requireRequestsAndLimits:
+      enabled: true
+      webhookFailurePolicy: "Fail"
+      enableBackgroundScanning: true
+      actionOverride: "Audit"
+
+bestPractices:
+  enabled: true
+  disallowDefaultNamespace:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  disallowLatestTag:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  requirePodDisruptionBudget:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  requireReadOnlyRootFilesystem:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  verifyImage:
+    enabled: false
+    actionOverride: "Audit"
+    enableBackgroundScanning: true
+    webhookFailurePolicy: "Ignore"
+    mutateDigest: true
+    verifyDigest: true
+    excludeNamespaces:
+      - kube-system
+    imagesAndPublicKeyPairs:
+      - image: "ghcr.io/kyverno/test-verify-image*"
+        key: |
+          -----BEGIN PUBLIC KEY-----
+          MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE8nXRh950IZbRj8Ra/N9sbqOPZrfM
+          5/KAQN0/KjHcorm/J5yctVd7iEcnessRQjU917hmKO6JWVGHpDguIyakZA==
+          -----END PUBLIC KEY-----
+      - image: "registry.example.com/trusted/*"
+        key: |
+          -----BEGIN PUBLIC KEY-----
+          XYZ1234567890ABCDEFGHIJKLMNOPQRST==
+          -----END PUBLIC KEY-----
+        pullSecret: regcred-prod
+        mutateDigest: false  # Optional override
+        verifyDigest: true   # Optional override
+certManager:
+  enabled: true
+  limitDnsNames:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  limitDuration:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  restrictIssuer:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+nginxIngress:
+  enabled: true
+  disallowIngressSnippets:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  restrictAnnotations:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"
+  restrictIngressPaths:
+    enabled: true
+    webhookFailurePolicy: "Fail"
+    enableBackgroundScanning: true
+    actionOverride: "Audit"

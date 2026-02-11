@@ -1,0 +1,22 @@
+clusterIssuer:
+  name: {{ .cluster.services.certManager.clusterIssuer.name }}
+  email: {{ .cluster.services.certManager.clusterIssuer.email }}
+  server: {{ .cluster.services.certManager.clusterIssuer.server | default "https://acme-v02.api.letsencrypt.org/directory" }}
+
+
+cert-manager:
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+  prometheus:
+    servicemonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      labels:
+        monitoring.instance: {{ .cluster.name}}-{{ .cluster.stage}}
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"

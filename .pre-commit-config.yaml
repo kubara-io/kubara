@@ -1,0 +1,60 @@
+---
+ci:
+  skip: [terraform-docs]
+default_install_hook_types:
+  - pre-commit
+  - pre-push
+  - commit-msg
+default_stages:
+  - pre-commit
+  - pre-push
+exclude: \.md$|__snapshot__
+repos:
+  # Conventional Commits
+  - repo: https://github.com/compilerla/conventional-pre-commit
+    rev: v4.2.0
+    hooks:
+      - id: conventional-pre-commit
+        stages:
+          - commit-msg
+        args: []
+  # YAML
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-yaml
+        exclude: templates/
+        args:
+          - --allow-multiple-documents
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+        exclude: \.md$|\.forgejo
+  - repo: https://github.com/lyz-code/yamlfix/
+    rev: 1.17.0
+    hooks:
+      - id: yamlfix
+        args:
+          - -c
+          - .pre-commit-config/yamlfix.toml
+        exclude: templates/|\.md$|\.forgejo
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.37.1
+    hooks:
+      - id: yamllint
+        args:
+          - -c
+          - .pre-commit-config/yamllint.yaml
+          - --format
+          - parsable
+        exclude: templates/|\.md$|\.forgejo
+  - repo: local
+    hooks:
+      - id: terraform-docs
+        name: Terraform Docs
+        entry: .pre-commit-config/terraform-docs/terraform-docs.sh
+        verbose: true
+        files: go-binary/templates/embedded/managed-service-catalog/terraform/modules/.*/
+        language: script
+        require_serial: true
+        types: [file]
+        pass_filenames: true

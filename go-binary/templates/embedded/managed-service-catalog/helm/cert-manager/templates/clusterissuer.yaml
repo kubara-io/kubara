@@ -1,0 +1,16 @@
+{{ if eq true .Values.letsencrypt }}
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: {{ .Values.clusterIssuer.name }}
+spec:
+  acme:
+    email: {{ .Values.clusterIssuer.email }}
+    server: {{ .Values.clusterIssuer.server }}
+    privateKeySecretRef:
+      name: {{ .Values.clusterIssuer.name }}
+    solvers:
+    - http01:
+        ingress:
+          ingressClassName: nginx
+{{ end }}

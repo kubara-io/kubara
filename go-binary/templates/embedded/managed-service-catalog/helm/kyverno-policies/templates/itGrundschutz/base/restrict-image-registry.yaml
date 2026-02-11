@@ -1,0 +1,62 @@
+{{- if and .Values.itGrundschutz.base.enabled (dig "itGrundschutz" "base" "restrictImageRegistries" "enabled" true (merge .Values)) }}
+{{- $allowedRegistries := dig "bestPractices" "restrictImageRegistries" "allowedRegistries" list (merge .Values) }}
+{{- $excludeNamespaces := dig "bestPractices" "restrictImageRegistries" "excludeNamespaces" list (merge .Values) }}
+
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restrict-image-registries
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Restrict Image Registries
+    policies.kyverno.io/category: IT-Grundschutz (base)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: container
+    policies.kyverno.io/description: >-
+      Images from unknown, public registries can be of dubious quality and may not be
+      scanned and secured, representing a high degree of risk. Requiring use of known, approved
+      registries helps reduce threat exposure by ensuring image pulls only come from them. This
+      policy validates that container images only originate from the registry `eu.foo.io` or
+      `bar.io`. Use of this policy requires customization to define your allowable registries.
+      This policy ensures IT-Grundschutz-rules: SYS.1.6.A6, SYS.1.6.A12, SYS.1.6.A13
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "base" "restrictImageRegistries" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "base" "restrictImageRegistries" "enableBackgroundScanning" true (merge .Values) }}
+  rules:
+    - name: "validate-image-registries"
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        failureAction: {{ dig "itGrundschutz" "base" "restrictImageRegistries" "actionOverride" "Audit" (merge .Values)}}
+        message: >-
+          Unknown image registries. Expected images to match: {{ join " | " $allowedRegistries }}.
+          Found:
+            ephemeralContainers={{`{{ request.object.spec.ephemeralContainers[*].image }}`}},
+            initContainers={{`{{ request.object.spec.initContainers[*].image }}`}},
+            containers={{`{{ request.object.spec.containers[*].image }}`}}
+        pattern:
+          spec:
+            =(ephemeralContainers):
+              - image: {{ join " | " $allowedRegistries }}
+            =(initContainers):
+              - image: {{ join " | " $allowedRegistries }}
+            containers:
+              - image: {{ join " | " $allowedRegistries }}
+      {{- if $excludeNamespaces }}
+      exclude:
+        any:
+          - resources:
+              namespaces:
+              {{- range $excludeNamespaces }}
+                - {{ . }}
+              {{- end }}
+      {{- end }}
+{{- end }}

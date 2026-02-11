@@ -1,0 +1,97 @@
+---
+site_name: Kubara - Docs
+site_url: 'https://kubara-docs.apps.01.cf.eu01.stackit.cloud'
+repo_url: 'https://kubara.git.onstackit.cloud/STACKIT/kubara'
+docs_dir: 'content'
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Core Concept: 1_getting_started/overview_core_concept.md
+      - Prerequisites: 1_getting_started/prerequisites.md
+      - Bootstrap Your Platform: 1_getting_started/bootstrap_process.md
+  - Managing Your Platform:
+      - Add Worker Cluster: 2_managing_your_platform/add_worker_cluster.md
+      - Add Project: 2_managing_your_platform/add_app_project.md
+      - Add Repository: 2_managing_your_platform/add_app_repository.md
+      - Add AppSet: 2_managing_your_platform/add_appset.md
+      - Add Application: 2_managing_your_platform/add_application.md
+      - Add SSO: 2_managing_your_platform/add_sso.md
+      - SSO Examples: 2_managing_your_platform/add_sso_examples.md
+  - Components:
+      - Overview: 3_components/components_overview.md
+      - Add or Replace Components: 3_components/add_or_replace_components.md
+      - Network:
+          - ExternalDNS: 3_components/network_external_dns.md
+      - Security:
+          - Certificates: 3_components/security_certificates.md
+      - Observability:
+          - Dashboards: 3_components/observability_dashboards.md
+          - Metrics: 3_components/observability_metrics.md
+          - Alerts: 3_components/observability_alerts.md
+          - Logs: 3_components/observability_logs.md
+  - Architecture:
+      - Architecture overview: 4_architecture/architecture_overview.md
+      - Decisions:
+          - ADR: 7_decisions/ADR.md
+          - ADR-Index: 7_decisions/ADR-index.md
+  - Community:
+      - Contributing: 5_community/contributing.md
+      - Maintainers: 5_community/maintainers.md
+      - Support: 5_community/support.md
+  - Reference:
+      - Release Cycle & Updates: 6_reference/release_cycle_and_updates.md
+      - FAQ: 6_reference/faq.md
+      - Code of Conduct: 6_reference/code_of_conduct.md
+      - Security: 6_reference/security.md
+      - Licence: 6_reference/licence.md
+not_in_nav: |
+  7_decisions/ADR-template.md
+  7_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
+plugins:
+  - search
+  - mkdocs-plugin-open-external-links-in-new-tab
+markdown_extensions:
+  - attr_list
+  - def_list
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+# pre-commit yaml linter incompability, works without as well.
+#          format: !!python/name:pymdownx.superfences.fence_code_format
+theme:
+  name: material
+  custom_dir: overrides
+  logo: images/logo.svg
+  features:
+    - search.suggest
+    - navigation.sections
+  palette:
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+extra_css:
+  - stylesheets/extra.css
+# https://jimandreas.github.io/mkdocs-material/reference/variables/
+# Set variables as key-value pairs here
+extra:
+  # This var is used automatically by theme "materials" to enable docs version switching
+  version:
+    provider: mike
+    alias: true
+    default: latest-stable
+strict: true

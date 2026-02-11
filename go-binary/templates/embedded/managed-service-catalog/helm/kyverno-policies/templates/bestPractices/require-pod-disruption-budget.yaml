@@ -1,0 +1,63 @@
+{{- if and .Values.bestPractices.enabled (dig "bestPractices" "requirePodDisruptionBudget" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-pod-disruption-budget
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Require PodDisruptionBudget
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Deployment, PodDisruptionBudget
+    policies.kyverno.io/description: >-
+      PodDisruptionBudget resources are useful to ensuring minimum availability
+      is maintained at all times. This policy checks all incoming Deployments and StatefulSets
+      to ensure they have a matching, preexisting PodDisruptionBudget.
+      Note: This policy must be run in `enforce` mode to ensure accuracy.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "bestPractices" "requirePodDisruptionBudget" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "bestPractices" "requirePodDisruptionBudget" "enableBackgroundScanning" true (merge .Values) }}
+  rules:
+    - name: require-pod-disruption-budget
+      match:
+        any:
+          - resources:
+              kinds:
+                - Deployment
+                - StatefulSet
+      preconditions:
+        all:
+          - key: {{ `"{{request.operation || 'BACKGROUND'}}"` }}
+            operator: Equals
+            value: CREATE
+          - key: {{ `"{{ request.object.spec.replicas }}"` }}
+            operator: GreaterThanOrEquals
+            value: 3
+      context:
+        - name: pdb_count
+          apiCall:
+            urlPath: "/apis/policy/v1/namespaces/{{`{{request.namespace}}`}}/poddisruptionbudgets"
+            method: GET
+            jmesPath: {{ `"items[?label_match(spec.selector.matchLabels, `}}`{{`{{request.object.spec.template.metadata.labels}}`}}`{{`)] | length(@)"` }}
+      skipBackgroundRequests: true
+      {{- with index .Values "kyverno-policies" "policyExclude" "require-pod-disruption-budget" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "bestPractices" "requirePodDisruptionBudget" "actionOverride" "Audit" (merge .Values)}}
+        message: "There is no corresponding PodDisruptionBudget found for this Deployment."
+        deny:
+          conditions:
+            any:
+              - key: {{ `"{{pdb_count || '0'}}"` }}
+                operator: LessThan
+                value: 1
+
+{{- end }}

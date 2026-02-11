@@ -1,0 +1,3 @@
+{{- range (.Values.bootstrapValues).repositories }}
+{{- include "templateLibrary.externalSecrets.argocd.repository" . }}
+{{- end }}

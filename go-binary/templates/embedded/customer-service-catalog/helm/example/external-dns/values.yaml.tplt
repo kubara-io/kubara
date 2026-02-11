@@ -1,0 +1,37 @@
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  secrets:
+    - target: external-dns-webhook
+      data:
+        - remoteKey: "dns_zone_admin"
+          remoteKeyProperty: "project_id"
+          secretKey: "PROJECT_ID"
+        - remoteKeyProperty: "sa_key_json"
+          remoteKey: "dns_zone_admin"
+          secretKey: "SA_KEY_JSON"
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+external-dns:
+  txtOwnerId: {{ .cluster.name}}-{{ .cluster.stage}}
+  domainFilters:
+    - {{ .cluster.dnsName}}
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+    security:
+      allowInsecureImages: true
+  provider:
+    webhook:
+      image:
+        repository: ghcr.io/stackitcloud/external-dns-stackit-webhook
+        tag: v0.3.2
+  serviceMonitor:
+    {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+    enabled: true
+    {{- end }}
+    additionalLabels:
+      monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"

@@ -1,0 +1,34 @@
+---
+version: 2
+project_name: kubara
+gitea_urls:
+  api: https://kubara.git.onstackit.cloud/api/v1
+  download: https://kubara.git.onstackit.cloud
+release:
+  gitea:
+    owner: STACKIT
+    name: kubara
+  draft: false
+  replace_existing_draft: true
+builds:
+  - id: kubara
+    main: ./main.go
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X 'main.version={{ .Tag }}'
+      - -X 'main.commit={{ .Commit }}'
+      - -X 'main.date={{ .Date }}'
+archives:
+  - id: binaries
+    ids:
+      - kubara
+    formats:
+      - binary
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"

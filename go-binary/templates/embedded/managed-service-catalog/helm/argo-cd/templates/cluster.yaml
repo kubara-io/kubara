@@ -1,0 +1,3 @@
+{{- range (.Values.bootstrapValues).cluster }}
+{{- include "templateLibrary.argocd.cluster" . }}
+{{- end }}

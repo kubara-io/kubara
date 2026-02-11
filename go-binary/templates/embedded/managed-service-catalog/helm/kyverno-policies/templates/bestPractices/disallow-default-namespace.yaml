@@ -1,0 +1,56 @@
+{{- if and .Values.bestPractices.enabled (dig "bestPractices" "disallowDefaultNamespace" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: "disallow-default-namespace"
+  annotations:
+    policies.kyverno.io/title: Disallow Default Namespace
+    policies.kyverno.io/category: Best Practices
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: namespace
+    pod-policies.kyverno.io/autogen-controllers: none  # disable autogen, because a pod ns can only be the same ns as the deployment
+    policies.kyverno.io/description: >-
+      Kubernetes Namespaces are an optional feature that provide a way to segment and
+      isolate cluster resources across multiple applications and users. As a best
+      practice, workloads should be isolated with Namespaces. Namespaces should be required
+      and the default (empty) Namespace should not be used. This policy validates that Pods
+      specify a Namespace name other than `default`.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "bestPractices" "disallowDefaultNamespace" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "bestPractices" "disallowDefaultNamespace" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: validate-namespace
+      match:
+        resources:
+          kinds:
+            - Pod
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "bestPractices" "disallowDefaultNamespace" "actionOverride" "Audit" (merge .Values)}}
+        message: "Using 'default' namespace is not allowed."
+        pattern:
+          metadata:
+            namespace: "!default"
+    - name: validate-podcontroller-namespace
+      match:
+        resources:
+          kinds:
+            - DaemonSet
+            - Deployment
+            - Job
+            - StatefulSet
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "bestPractices" "disallowDefaultNamespace" "actionOverride" "Audit" (merge .Values)}}
+        message: "Using 'default' namespace is not allowed for pod controllers."
+        pattern:
+          metadata:
+            namespace: "!default"
+{{- end }}

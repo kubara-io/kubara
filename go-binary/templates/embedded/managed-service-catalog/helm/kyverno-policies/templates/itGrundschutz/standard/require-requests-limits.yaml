@@ -1,0 +1,63 @@
+{{- if and .Values.bestPractices.enabled (dig "itGrundschutz" "standard" "requireRequestsAndLimits" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: "require-requests-limits"
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Require Limits and Requests
+    policies.kyverno.io/category: IT-Grundschutz (standard)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      As application workloads share cluster resources, it is important to limit resources
+      requested and consumed by each Pod. It is recommended to require resource requests and
+      limits per Pod, especially for memory and CPU. If a Namespace level request or limit is specified,
+      defaults will automatically be applied to each Pod based on the LimitRange configuration.
+      This policy validates that all containers have something specified for memory and CPU
+      requests and memory limits.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "standard" "requireRequestsAndLimits" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "standard" "requireRequestsAndLimits" "enableBackgroundScanning" true (merge .Values) }}
+  rules:
+    - name: "require-requests-limits"
+      skipBackgroundRequests: true
+      match:
+        any:
+        - resources:
+            kinds:
+            - Pod
+      {{- with index .Values "kyverno-policies" "policyExclude" "require-requests-limits" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      validate:
+        failureAction: {{ dig "itGrundschutz" "standard" "requireRequestsAndLimits" "actionOverride" "Audit" (merge .Values)}}
+        message: "CPU and memory resource requests and memory limits are required."
+        allowExistingViolations: true
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"
+            =(initContainers):
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"
+            =(ephemeralContainers):
+              - resources:
+                  requests:
+                    memory: "?*"
+                    cpu: "?*"
+                  limits:
+                    memory: "?*"
+{{- end }}

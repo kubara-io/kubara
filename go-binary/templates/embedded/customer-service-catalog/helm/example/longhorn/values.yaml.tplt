@@ -1,0 +1,42 @@
+longhorn:
+  privateRegistry:
+    registrySecret: image-pull-secret
+  metrics:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  defaultSettings:
+    defaultReplicaCount: "1"
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 1
+  ingress:
+    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    enabled: true
+    {{- end }}
+    ingressClassName: nginx
+    host: {{ .cluster.dnsName }}
+    tls: true
+    tlsSecret: tls-longhorn
+    path: "/longhorn(/|$)(.*)" # see path problems https://github.com/longhorn/longhorn/issues/1745
+    annotations:
+      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
+      nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+      {{- end }}
+      {{- if (eq .cluster.services.metalLb.status "enabled") }}
+      external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+      {{- end }}
+      nginx.ingress.kubernetes.io/rewrite-target: "/$2"
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

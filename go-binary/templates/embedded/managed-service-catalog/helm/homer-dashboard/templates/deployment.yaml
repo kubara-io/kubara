@@ -1,0 +1,111 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{.Release.Name }}
+spec:
+  selector:
+    matchLabels:
+      app: {{.Release.Name }}
+      release: {{.Release.Name }}
+  template:
+    metadata:
+      annotations:
+{{if .Values.annotations}}
+{{ toYaml .Values.annotations | indent 8 }}
+{{end}}
+        dashboard-config: {{ include (print $.Template.BasePath "/configmaps/dashboard-configmap.yaml") . | sha256sum }}
+      labels:
+        app: {{.Release.Name }}
+        release: {{.Release.Name }}
+    spec:
+      securityContext:
+        fsGroup: 10001
+        runAsUser: 1000
+        runAsGroup: 10001
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{.Release.Name }}
+          securityContext:
+            privileged: false
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ default "IfNotPresent" .Values.image.pullPolicy }}
+          args: [ 'run' ]
+          env:
+            {{- range $key, $value := .Values.env }}
+            - name: {{ printf "%s" $key | replace "." "_" | upper | quote }}
+              value: {{ $value | quote }}
+            {{- end }}
+          ports:
+            - name: app-internal
+              containerPort: {{ .Values.container.port }}
+          livenessProbe:
+            tcpSocket:
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: {{ default 20 .Values.health.liveness.initialDelaySeconds }}
+            periodSeconds: 30
+            failureThreshold: {{ default 5 .Values.health.liveness.failureThreshold}}
+          readinessProbe:
+            tcpSocket:
+              port: {{ .Values.container.port }}
+            initialDelaySeconds: {{ default 20 .Values.health.readiness.initialDelaySeconds }}
+            periodSeconds: 30
+            failureThreshold: {{ default 5 .Values.health.readiness.failureThreshold}}
+          volumeMounts:
+          {{- range $path, $_ := .Files.Glob "assets/icons/*" }}
+            - name: homer-assets-icons
+              subPath: {{ $path | base | trimSuffix (ext $path) }}
+              mountPath: "/www/assets/icons/{{ $path | base }}"
+          {{- end }}
+          {{- range $path, $_ := .Files.Glob "assets/tools/*" }}
+            - name: homer-assets-tools
+              subPath: {{ $path | base | trimSuffix (ext $path) }}
+              mountPath: "/www/assets/tools/{{ $path | base }}"
+          {{- end }}
+            - mountPath: "/tmp"
+              name: "temp-volume"
+            # homer dashboard config.yaml
+            - mountPath: "/www/assets/config.yml"
+              name: homer-config
+              subPath: "config.yml"
+            # homer dashboard config.yaml
+            - mountPath: "/lighttpd.conf"
+              name: lighttpd-config
+              subPath: lighttpd
+          {{- with .Values.storage }}
+          {{- with .volumeMounts }}
+          {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          resources:
+{{ toYaml .Values.resources | indent 12 }}
+      volumes:
+        - name: homer-assets-tools
+          configMap:
+            name: homer-assets-tools
+        - name: homer-assets-icons
+          configMap:
+            name: homer-assets-icons
+        - name: temp-volume
+          emptyDir: {}
+        - name: homer-config
+          configMap:
+            name: homer-config
+        - name: lighttpd-config
+          configMap:
+            name: lighttpd-config
+      {{- with .Values.storage }}
+      {{- with .volumes }}
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- end }}

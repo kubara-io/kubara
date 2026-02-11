@@ -1,0 +1,46 @@
+{{- if and .Values.bestPractices.enabled (dig "certManager" "limitDnsNames" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: cert-manager-limit-dnsnames
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Limit dnsNames
+    policies.kyverno.io/category: Cert-Manager
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Certificate
+    policies.kyverno.io/description: >-
+      Some applications will not accept certificates containing more than a single name.
+      This policy ensures that each certificate request contains
+      only one DNS name entry.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "certManager" "limitDnsNames" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "certManager" "limitDnsNames" "enableBackgroundScanning" false (merge .Values)}}
+  rules:
+    - name: limit-dnsnames
+      match:
+        any:
+        - resources:
+            kinds:
+            - Certificate
+      skipBackgroundRequests: true
+      {{- with index .Values "kyverno-policies" "policyExclude" "limit-dnsnames" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "certManager" "limitDnsNames" "actionOverride" "Audit" (merge .Values)}}
+        message: Only one dnsNames entry allowed per certificate request.
+        deny:
+          conditions:
+            all:
+            - key: {{ `"{{ request.object.spec.dnsNames || `}}`[]`{{` | length(@)}}"` }}
+              operator: GreaterThan
+              value: "1"
+{{- end }}

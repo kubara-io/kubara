@@ -1,0 +1,30 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "terraform": {
+    "fileMatch": ["\\.tf(\\.tplt)?$"]
+  },
+  "packageRules": [
+    {
+      "matchFiles": ["**/Chart.{yaml,yml}"],
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isMajor}}major{{/if}}{{#if isMinor}}minor{{/if}}{{#if isPatch}}patch{{/if}}\""
+        ],
+        "fileFilters": ["**/CHANGELOG.md"],
+        "executionMode": "update"
+      }
+    },
+    {
+      "description": "Run go mod tidy for all go module updates",
+      "matchManagers": ["gomod"],
+      "postUpdateOptions": ["gomodTidy"]
+    }
+  ]
+}

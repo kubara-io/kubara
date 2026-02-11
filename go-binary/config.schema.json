@@ -1,0 +1,502 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "clusters": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20,
+                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                    },
+                    "stage": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20,
+                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                    },
+                    "projectId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 36,
+                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                    },
+                    "dnsName": {
+                        "type": "string",
+                        "format": "hostname"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "controlplane",
+                            "workerplane"
+                        ]
+                    },
+                    "privateLoadBalancerIP": {
+                        "type": "string",
+                        "format": "ipv4"
+                    },
+                    "publicLoadbalancerIP": {
+                        "type": "string",
+                        "format": "ipv4"
+                    },
+                    "globalHelmChartRepo": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 30,
+                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                    },
+                    "ssoOrg": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 30,
+                        "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-_\\.]*[a-zA-Z0-9])?$"
+                    },
+                    "ssoTeam": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 30,
+                        "pattern": "^[a-zA-Z0-9]([a-zA-Z0-9-_\\.]*[a-zA-Z0-9])?$"
+                    },
+                    "terraform": {
+                        "type": "object",
+                        "properties": {
+                            "kubernetesType": {
+                                "type": "string",
+                                "enum": [
+                                    "edge",
+                                    "ske"
+                                ]
+                            },
+                            "dns": {
+                                "type": "object",
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "format": "hostname"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    }
+                                },
+                                "required": [
+                                    "name",
+                                    "email"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "dns",
+                            "kubernetesType"
+                        ]
+                    },
+                    "argocd": {
+                        "type": "object",
+                        "properties": {
+                            "repo": {
+                                "type": "object",
+                                "properties": {
+                                    "https": {
+                                        "type": "object",
+                                        "properties": {
+                                            "managed": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "url": {
+                                                        "type": "string",
+                                                        "format": "uri"
+                                                    },
+                                                    "targetRevision": {
+                                                        "type": "string",
+                                                        "minLength": 1
+                                                    },
+                                                    "path": {
+                                                        "type": "string",
+                                                        "minLength": 1,
+                                                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "url",
+                                                    "targetRevision"
+                                                ]
+                                            },
+                                            "customer": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "url": {
+                                                        "type": "string",
+                                                        "format": "uri"
+                                                    },
+                                                    "targetRevision": {
+                                                        "type": "string",
+                                                        "minLength": 1
+                                                    },
+                                                    "path": {
+                                                        "type": "string",
+                                                        "minLength": 1,
+                                                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "url",
+                                                    "targetRevision"
+                                                ]
+                                            }
+                                        },
+                                        "required": [
+                                            "managed",
+                                            "customer"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "https"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "repo"
+                        ]
+                    },
+                    "services": {
+                        "type": "object",
+                        "properties": {
+                            "argocd": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "certManager": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "properties": {
+                                            "clusterIssuer": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "name": {
+                                                        "type": "string"
+                                                    },
+                                                    "email": {
+                                                        "type": "string",
+                                                        "format": "email"
+                                                    },
+                                                    "server": {
+                                                        "type": "string",
+                                                        "format": "uri"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name",
+                                                    "email",
+                                                    "server"
+                                                ]
+                                            }
+                                        },
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "externalDns": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "externalSecrets": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "kubePrometheusStack": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "ingressNginx": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "kyverno": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "kyvernoPolicies": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "kyvernoPolicyReport": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "loki": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "homerDashboard": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "oauth2Proxy": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "metalLb": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "longhorn": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            },
+                            "metricsServer": {
+                                "type": "object",
+                                "properties": {
+                                    "status": {
+                                        "type": "string",
+                                        "enum": [
+                                            "enabled",
+                                            "disabled"
+                                        ]
+                                    },
+                                    "config": {
+                                        "type": "object",
+                                        "additionalProperties": true
+                                    }
+                                },
+                                "required": [
+                                    "status"
+                                ]
+                            }
+                        },
+                        "required": [
+                            "argocd",
+                            "externalSecrets",
+                            "certManager",
+                            "metalLb",
+                            "longhorn",
+                            "oauth2Proxy",
+                            "kubePrometheusStack",
+                            "metricsServer"
+                        ]
+                    }
+                },
+                "required": [
+                    "name",
+                    "stage",
+                    "projectId",
+                    "type",
+                    "dnsName",
+                    "terraform",
+                    "services"
+                ]
+            }
+        }
+    },
+    "required": [
+        "clusters"
+    ]
+}

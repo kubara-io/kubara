@@ -1,0 +1,249 @@
+kube-prometheus-stack:
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+    imageRegistry: "{{ .cluster.globalHelmChartRepo | default "" }}"
+  prometheusOperator:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+    prometheus:
+      monitor:
+        additionalLabels:
+          monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  prometheus:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+    ingress:
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+      enabled: true
+      {{- end }}
+      paths:
+        - /prometheus
+      pathType: ImplementationSpecific
+      hosts:
+        - {{ .cluster.dnsName }}
+      tls:
+        - secretName: tls-prometheus
+          hosts:
+            - {{ .cluster.dnsName }}
+
+
+    prometheusSpec:
+      retention: 10d
+      serviceMonitorSelector:
+        matchLabels:
+          monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 10Gi
+      externalUrl: https://{{ .cluster.dnsName }}/prometheus
+      routePrefix: /prometheus
+    thanosServiceMonitor:
+      serviceMonitor:
+        additionalLabels:
+          monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  alertmanager:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+    ingress:
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+      enabled: true
+      {{- end }}
+      paths:
+        - /alertmanager
+      pathType: ImplementationSpecific
+      hosts:
+        - {{ .cluster.dnsName }}
+      tls:
+        - secretName: tls-alertmanager
+          hosts:
+            - {{ .cluster.dnsName }}
+
+
+# Below is an example alertmanager.config section:
+# It demonstrates an advanced routing setup that includes Microsoft Teams (v2), a watchdog receiver
+# (e.g. for UptimeRobot) and a silenced route for informational alerts.
+# This config use webhook urls from secret-files (see alertmanagerSpec below)
+#
+#    config:
+#      route:
+#        receiver: msteams-notifications  # Default receiver if no route matches
+#        routes:
+#          # 1. Silence all alerts named "InfoInhibitor"
+#          - receiver: "null"
+#            matchers:
+#              - alertname =~ "InfoInhibitor"
+#          # 2. Route "Watchdog" alerts to UptimeRobot with a short repeat interval
+#          - receiver: uptimerobot
+#            repeat_interval: 1m
+#            matchers:
+#              - alertname =~ "Watchdog"
+#          # 3. Route all alerts with severity "warning" or "critical" to Microsoft Teams
+#          - receiver: 'msteams-notifications'
+#            matchers:
+#              - severity =~ "warning|critical"
+#            continue: true  # Continue to evaluate other routes after this one
+#      receivers:
+#        # Microsoft Teams v2 receiver using `msteamsv2_configs`
+#        - name: 'msteams-notifications'
+#          msteamsv2_configs:
+#            - send_resolved: true
+#              webhook_url_file: /etc/alertmanager/secrets/msteams-webhook-url
+#        # Watchdog/Uptime monitoring receiver
+#        - name: uptimerobot
+#          webhook_configs:
+#            - url_file: /etc/alertmanager/secrets/uptimerobot-webhook-url
+#        # Null receiver to discard matched alerts
+#        - name: "null"
+#      # Optional: Use custom templates for consistent alert formatting
+#      templates:
+#        - /etc/alertmanager/config/*.tmpl
+
+    alertmanagerSpec:
+#      # secrets for alertmanager config webhook urls
+#      secrets:
+#        - msteams-webhook-url
+#        - uptimerobot-webhook-url
+
+      externalUrl: https://{{ .cluster.dnsName }}/alertmanager
+      routePrefix: /alertmanager
+
+  kube-state-metrics:
+    prometheus:
+      monitor:
+        additionalLabels:
+          monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  kubeApiServer:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  kubelet:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  kubeControllerManager:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  coreDns:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  kubeDns:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  kubeScheduler:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  thanosRuler:
+    serviceMonitor:
+      additionalLabels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+  grafana:
+    admin:
+      existingSecret: grafana-admin-credentials
+      userKey: admin-user
+      passwordKey: admin-password
+    serviceMonitor:
+      labels:
+        monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
+    ingress:
+      ingressClassName: nginx
+      annotations:
+        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
+        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
+        nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+      enabled: true
+      {{- end }}
+      path: /grafana
+      pathType: ImplementationSpecific
+      hosts:
+        - {{ .cluster.dnsName }}
+      tls:
+        - secretName: tls-grafana
+          hosts:
+            - {{ .cluster.dnsName }}
+    envFromSecrets:
+      - name: oauth2-credentials
+    grafana.ini:
+      server:
+        root_url: https://{{ .cluster.dnsName }}/grafana/
+        serve_from_sub_path: true
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      auth.github:
+        name: "Github"
+        enabled: true
+        client_id: ${client-id}
+        client_secret: ${client-secret}
+        allow_sign_up: true
+        auto_login: false
+        scopes: "user:email,read:org"
+        allowed_organizations: "[\"{{ .cluster.ssoOrg}}\"]"
+        role_attribute_path: contains(groups[*], '@{{ .cluster.ssoOrg}}/{{ .cluster.ssoTeam}}') && 'Admin' || 'Viewer'
+       {{- end }}
+    additionalDataSources:
+      - access: proxy
+        isDefault: false
+        name: loki
+        type: loki
+        url: http://loki-headless.loki.svc.cluster.local:3100
+        version: 1
+prometheus-blackbox-exporter:
+  image:
+    pullSecrets:
+      - image-pull-secret
+  global:
+    imageRegistry: {{ .cluster.globalHelmChartRepo | default "quay.io" }}
+
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  secrets:
+    - target: grafana-admin-credentials
+      dataFrom:
+        - remoteKey: grafana_credentials
+    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    - target: oauth2-credentials
+      dataFrom:
+        - remoteKey: grafana_oauth2_credentials
+    {{- end }}
+
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

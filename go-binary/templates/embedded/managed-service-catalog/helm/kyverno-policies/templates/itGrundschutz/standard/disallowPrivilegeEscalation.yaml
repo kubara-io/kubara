@@ -1,0 +1,60 @@
+{{- if and .Values.itGrundschutz.standard.enabled (dig "itGrundschutz" "standard" "disallowPrivilegeEscalation" "enabled" true (merge .Values)) }}
+##########################################################################
+# Disallow Privilege escalation Flag
+##########################################################################
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privilege-escalation-itgrundschutz  # itgrundschutz in name, because kyverno has its own policy with the same name
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Disallow Privilege Escalation
+    policies.kyverno.io/category: IT-Grundschutz (standard)
+    policies.kyverno.io/severity: {{ dig "itGrundschutz" "standard" "disallowPrivilegeEscalation" "severity" "medium" (merge .Values)}}
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Pod, Deployment, StatefulSet, DaemonSet
+    policies.kyverno.io/description: >-
+      Privilege escalation, such as via set-user-ID or set-group-ID file mode, should not be allowed.
+      This policy ensures the `allowPrivilegeEscalation` field is set to `false`.
+      This Policy ensures IT-Grundschutz-Rules:
+      SYS.1.6.A17
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "standard" "disallowPrivilegeEscalation" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "standard" "disallowPrivilegeEscalation" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: privilege-escalation
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      {{- with index .Values "kyverno-policies" "policyExclude" "disallow-privilege-escalation" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "itGrundschutz" "standard" "disallowPrivilegeEscalation" "actionOverride" "Enforce" (merge .Values)}}
+        message: >-
+          Privilege escalation is disallowed. The fields
+          spec.containers[*].securityContext.allowPrivilegeEscalation,
+          spec.initContainers[*].securityContext.allowPrivilegeEscalation,
+          and spec.ephemeralContainers[*].securityContext.allowPrivilegeEscalation
+          must be set to `false`.
+        pattern:
+          spec:
+            =(ephemeralContainers):
+            - securityContext:
+                allowPrivilegeEscalation: "false"
+            =(initContainers):
+            - securityContext:
+                allowPrivilegeEscalation: "false"
+            containers:
+            - securityContext:
+                allowPrivilegeEscalation: "false"
+{{- end }}

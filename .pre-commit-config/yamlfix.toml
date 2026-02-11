@@ -1,0 +1,8 @@
+allow_duplicate_keys = true
+indent_mapping = 2
+indent_offset = 2
+indent_sequence = 4
+line_length = 120
+preserve_quotes = true
+explicit_start = true
+sequence_style = 'keep_style'

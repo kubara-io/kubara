@@ -1,0 +1,3 @@
+{{- range (.Values.bootstrapValues).projects }}
+{{ include "templateLibrary.argocd.project" . }}
+{{- end }}
