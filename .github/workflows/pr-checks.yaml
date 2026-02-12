@@ -323,15 +323,39 @@ jobs:
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
-      - name: Install Helm & kubeconform
+      - name: Cache Helm + kubeconform
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~/.local/bin/helm
+            ~/.local/bin/kubeconform
+          key: tools-helm-${{ env.HELM_VERSION }}-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install Helm (if missing)
         run: |
+          set -euo pipefail
           mkdir -p ~/.local/bin
-          curl -sSL "https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz" \
-            | tar xz --strip-components=1 -C ~/.local/bin linux-amd64/helm
-          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz" \
-            | tar xz -C ~/.local/bin kubeconform
-          export PATH="$HOME/.local/bin:$PATH"
-          helm version && kubeconform -v
+          
+          if ! [ -x "$HOME/.local/bin/helm" ]; then
+            curl -sSL "https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz" \
+              | tar xz --strip-components=1 -C ~/.local/bin linux-amd64/helm
+            chmod +x "$HOME/.local/bin/helm" || true
+          fi
+          
+          helm version
+
+      - name: Install kubeconform (if missing)
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.local/bin
+          
+          if ! [ -x "$HOME/.local/bin/kubeconform" ]; then
+            curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz" \
+              | tar xz -C ~/.local/bin kubeconform
+            chmod +x "$HOME/.local/bin/kubeconform" || true
+          fi
+          
+          kubeconform -v
 
       - name: Lint, render and validate Helm charts
         run: |
