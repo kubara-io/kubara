@@ -25,14 +25,18 @@ jobs:
         run: |
           set -euo pipefail
           BIN="$HOME/.local/bin/terraform-docs"
-          if [ ! -x "$BIN" ]; then
+          if [ -x "$BIN" ]; then
+            echo "[terraform-docs] Found existing binary (likely from cache): $BIN"
+          else
+            echo "[terraform-docs] Binary missing, downloading terraform-docs v${TERRAFORM_DOCS_VERSION}..."
             mkdir -p "$HOME/.local/bin"
             curl -fsSL -o /tmp/td.tgz \
-              "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-${TERRAFORM_DOCS_OS_ARCH}.tar.gz"
+              "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
             tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
             chmod +x "$BIN"
           fi
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          terraform-docs --version
       - uses: pre-commit/action@v3.0.1
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: always()
