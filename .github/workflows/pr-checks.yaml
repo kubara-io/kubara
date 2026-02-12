@@ -319,7 +319,7 @@ jobs:
         shell: bash
     steps:
       - name: Download generated kubara artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
@@ -454,7 +454,7 @@ jobs:
         shell: bash
     steps:
       - name: Download generated kubara artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v7
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
