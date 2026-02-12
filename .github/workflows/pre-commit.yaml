@@ -4,11 +4,38 @@ on:
   pull_request:
   push:
     branches: [main]
+env:
+  TERRAFORM_DOCS_VERSION: "0.20.0"
+  TERRAFORM_DOCS_OS_ARCH: "linux-amd64"
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      # Cache terraform-docs binary to avoid downloading it every run
+      - name: Cache terraform-docs
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/bin/terraform-docs
+          key: terraform-docs-${{ env.TERRAFORM_DOCS_VERSION }}-${{ env.TERRAFORM_DOCS_OS_ARCH }}
+
+      # Install terraform-docs into ~/.local/bin and add it to PATH
+      - name: Install terraform-docs (if missing)
+        run: |
+          set -euo pipefail
+          BIN="$HOME/.local/bin/terraform-docs"
+
+          if [ ! -x "$BIN" ]; then
+            mkdir -p "$HOME/.local/bin"
+            curl -fsSL -o /tmp/td.tgz \
+              "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-${TERRAFORM_DOCS_OS_ARCH}.tar.gz"
+            tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
+            chmod +x "$BIN"
+          fi
+
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       - uses: pre-commit/action@v3.0.1
       - uses: pre-commit-ci/lite-action@v1.1.0
         if: always()
