@@ -15,27 +15,26 @@ jobs:
 
       # Cache terraform-docs binary to avoid downloading it every run
       - name: Cache terraform-docs
-        uses: actions/cache@v4
+        id: cache-terraform-docs
+        uses: actions/cache@v5
         with:
           path: ~/.local/bin/terraform-docs
           key: terraform-docs-${{ env.TERRAFORM_DOCS_VERSION }}-${{ env.TERRAFORM_DOCS_OS_ARCH }}
 
       # Install terraform-docs into ~/.local/bin and add it to PATH
-      - name: Install terraform-docs (if missing)
+      - name: Install terraform-docs (cache miss)
+        if: steps.cache-terraform-docs.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
-          BIN="$HOME/.local/bin/terraform-docs"
-          if [ -x "$BIN" ]; then
-            echo "[terraform-docs] Found existing binary (likely from cache): $BIN"
-          else
-            echo "[terraform-docs] Binary missing, downloading terraform-docs v${TERRAFORM_DOCS_VERSION}..."
-            mkdir -p "$HOME/.local/bin"
-            curl -fsSL -o /tmp/td.tgz \
-              "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-linux-amd64.tar.gz"
-            tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
-            chmod +x "$BIN"
-          fi
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          echo "[terraform-docs] Cache miss -> downloading v${TERRAFORM_DOCS_VERSION}..."
+          mkdir -p "$HOME/.local/bin"
+          curl -fsSL -o /tmp/td.tgz \
+            "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-${TERRAFORM_DOCS_OS_ARCH}.tar.gz"
+          tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
+          chmod +x "$HOME/.local/bin/terraform-docs"
+      - name: Add terraform-docs to PATH & verify
+        run: |
+          set -euo pipefail
           terraform-docs --version
       - uses: pre-commit/action@v3.0.1
       - uses: pre-commit-ci/lite-action@v1.1.0

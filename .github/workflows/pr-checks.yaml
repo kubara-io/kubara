@@ -1,0 +1,484 @@
+---
+name: 'pr-checks'
+on:
+  push:
+    branches-ignore:
+      - 'master'
+      - 'renovate/**'
+    paths:
+      - 'go-binary/**'
+  pull_request:
+    branches:
+      - 'master'
+    paths:
+      - 'go-binary/**'
+  workflow_dispatch:
+env:
+  GO_VERSION: "1.25"
+  CODE_PATH: ${{ github.workspace }}/go-binary
+  REPORT_DIR: ${{ github.workspace }}/reports
+  RENDER_DIR: ${{ github.workspace }}/rendered
+  OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
+  GOSEC_VERSION: "v2.22.11"
+  GOLANGCI_LINT_VERSION: "v2.8.0"
+  ARTIFACT_RETENTION_DAYS: "15"
+  HELM_VERSION: "v4.1.0"
+  KUBECONFORM_VERSION: "v0.7.0"
+permissions:
+  contents: read
+  packages: read
+  security-events: write
+  actions: read
+jobs:
+  go-static-analysis:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.CODE_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: go-binary
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go-binary/go.sum
+      - name: Verify Go environment
+        run: |
+          set -euo pipefail
+          echo "Go version: $(go version)"
+          echo "GOPATH: $(go env GOPATH)"
+          echo "GOCACHE: $(go env GOCACHE)"
+
+          # Verify and tidy dependencies
+          go mod verify
+          go mod tidy -v
+
+          # Check for any changes after tidy
+          if ! git diff --exit-code go.mod go.sum; then
+            echo "::error::go.mod or go.sum is not up to date. Run 'go mod tidy' locally."
+            exit 1
+          fi
+      - name: Create report directory
+        run: mkdir -p "${{ env.REPORT_DIR }}"
+      - name: Check Go code formatting (gofmt)
+        run: |
+          set -euo pipefail
+          echo "Checking code formatting with gofmt..."
+          UNFORMATTED=$(gofmt -l . || true)
+          if [ -n "$UNFORMATTED" ]; then
+            echo "::error::The following files are not properly formatted:"
+            echo "$UNFORMATTED" | tee "${{ env.REPORT_DIR }}/gofmt-unformatted-files.txt"
+            echo "Generating diff output..."
+            gofmt -d . | tee "${{ env.REPORT_DIR }}/gofmt-diff.txt"
+            echo "::error::Please run 'gofmt -w .' locally to fix formatting."
+            exit 1
+          else
+            echo "All Go files are properly formatted."
+          fi
+      - name: Go Vet
+        run: |
+          go vet ./... 2>&1 | tee "${{ env.REPORT_DIR }}/vet-results.txt"
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          working-directory: ${{ env.CODE_PATH }}
+          args: |
+            --output.text.path stdout \
+            --output.html.path "${{ env.REPORT_DIR }}/golangci-results.html"
+      - name: Cache gosec
+        id: cache-gosec
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/bin/gosec
+          key: ${{ runner.os }}-gosec-${{ env.GOSEC_VERSION }}
+      - name: Install gosec (if not cached)
+        if: steps.cache-gosec.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.local/bin
+          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
+            | sh -s -- -b "$HOME/.local/bin" "${{ env.GOSEC_VERSION }}"
+      - name: Run gosec CLI
+        if: always()
+        run: |
+          set -euo pipefail
+
+          # Verify installation
+          gosec --version
+          echo "Current directory: $(pwd)"
+
+          # Find Go packages
+          echo "Finding Go packages..."
+          SCAN_DIRS=$(find . -name "*.go" -type f \
+            -not -path "./vendor/*" \
+            -not -path "./.git/*" \
+            -not -path "./pkg/mod/*" \
+            -not -path "./.cache/*" \
+            -print0 | xargs -0 dirname | sort -u)
+          echo "Found directories to scan:"
+          echo "$SCAN_DIRS" | sed 's/^/  - /'
+
+          # Run gosec with severity filtering
+          echo "Running gosec..."
+          if [ -n "$SCAN_DIRS" ]; then
+            # Generate SARIF report (always succeeds)
+            gosec -no-fail -fmt html -out "${{ env.REPORT_DIR }}/gosec-results.html" $SCAN_DIRS
+
+            # Run with severity threshold - only fail on HIGH severity issues
+            echo "Checking for HIGH severity issues..."
+            gosec -severity high -confidence medium -fmt text $SCAN_DIRS
+            GOSEC_EXIT_CODE=$?
+
+            # Only fail if HIGH severity issues found
+            if [ $GOSEC_EXIT_CODE -ne 0 ]; then
+              echo "❌ HIGH severity security issues found!"
+              exit 1
+            else
+              echo "✅ No HIGH severity security issues found"
+            fi
+          else
+            echo "❌ No Go packages found!"
+            exit 1
+          fi
+      - name: Upload static analysis results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: go-static-analysis-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: ${{ env.REPORT_DIR }}
+  go-unit-tests:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.CODE_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: go-binary
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go-binary/go.sum
+      - name: Create report directory
+        run: mkdir -p "${{ env.REPORT_DIR }}"
+      - name: Run Go Unit Tests
+        run: |
+          set -euo pipefail
+          echo "Running unit tests..."
+          go test \
+            -race \
+            -timeout=10m \
+            -coverprofile="${{ env.REPORT_DIR }}/coverage.out" \
+            -covermode=atomic \
+            -json \
+            ./... > "${{ env.REPORT_DIR }}/go-test-results.json"
+
+          # Generate Coverage report
+          echo "Test coverage summary:"
+          go tool cover -func="${{ env.REPORT_DIR }}/coverage.out" | tail -1
+          go tool cover -html="${{ env.REPORT_DIR }}/coverage.out" -o "${{ env.REPORT_DIR }}/coverage.html"
+
+          # Extract coverage percentage
+          COVERAGE=$(go tool cover -func="${{ env.REPORT_DIR }}/coverage.out" | tail -1 | awk '{print $3}')
+          echo "Test coverage: $COVERAGE"
+      - name: Upload test results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: go-test-results-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: ${{ env.REPORT_DIR }}
+  run-kubara-init-and-generate:
+    needs: [go-static-analysis, go-unit-tests]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ github.workspace }}
+    outputs:
+      success: ${{ steps.commit.outputs.success }}
+    env:
+      # env vars for kubara command
+      KUBARA_PROJECT_NAME: "kubara"
+      KUBARA_PROJECT_STAGE: "tst"
+      KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
+      KUBARA_DOCKERCONFIG_BASE64: "000000"
+      KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD: "000000"
+      KUBARA_ARGOCD_HELM_REPO_USERNAME: "git"
+      KUBARA_ARGOCD_HELM_REPO_PASSWORD: "000000"
+      KUBARA_ARGOCD_HELM_REPO_URL: "https://kubara.io/kubara.git"
+      KUBARA_ARGOCD_GIT_HTTPS_URL: "https://kubara.io/kubara.git"
+      KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
+      KUBARA_ARGOCD_GIT_USERNAME: "git"
+      KUBARA_DOMAIN_NAME: "stackit.run"
+      KUBARA_SECRETS_MANAGER_USERNAME: "000000"
+      KUBARA_SECRETS_MANAGER_USERNAME_BASE64: "000000"
+      KUBARA_SECRETS_MANAGER_PASSWORD_BASE64: "000000"
+      KUBARA_SECRETS_MANAGER_PATH: "000000"
+      KUBARA_SECRETS_MANAGER_URL: "https://prod.sm.eu01.stackit.cloud"
+      KUBARA_WORKER_SECRETS_MANAGER_USERNAME_BASE64: ""
+      KUBARA_WORKER_SECRETS_MANAGER_PASSWORD_BASE64: ""
+      KUBARA_PRIVATE_LOADBALANCER_IP: "0.0.0.0"
+      KUBARA_PUBLIC_LOADBALANCER_IP: "0.0.0.0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: go-binary
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache: true
+          cache-dependency-path: go-binary/go.sum
+      - name: Create output directory
+        run: |
+          echo "output dir: ${{ env.OUTPUT_GENERATED_DIR }}"
+          mkdir -p "${{ env.OUTPUT_GENERATED_DIR }}"
+      - name: Initialize kubara
+        run: |
+          cd go-binary
+          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
+          ENV_FILE="${{ env.OUTPUT_GENERATED_DIR }}/.env"
+          sed -i -e "s|^PROJECT_NAME=.*$|PROJECT_NAME='${{ env.KUBARA_PROJECT_NAME }}'|g" "$ENV_FILE"
+          sed -i -e "s|^PROJECT_STAGE=.*$|PROJECT_STAGE='${{ env.KUBARA_PROJECT_STAGE }}'|g" "$ENV_FILE"
+          sed -i -e "s|^STACKIT_PROJECT_ID=.*$|STACKIT_PROJECT_ID='${{ env.KUBARA_STACKIT_PROJECT_ID }}'|g" "$ENV_FILE"
+          sed -i -e "s|^DOCKERCONFIG_BASE64=.*$|DOCKERCONFIG_BASE64='${{ env.KUBARA_DOCKERCONFIG_BASE64 }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_WIZARD_ACCOUNT_PASSWORD=.*$|ARGOCD_WIZARD_ACCOUNT_PASSWORD='${{ env.KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_HELM_REPO_USERNAME=.*$|ARGOCD_HELM_REPO_USERNAME='${{ env.KUBARA_ARGOCD_HELM_REPO_USERNAME }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_HELM_REPO_PASSWORD=.*$|ARGOCD_HELM_REPO_PASSWORD='${{ env.KUBARA_ARGOCD_HELM_REPO_PASSWORD }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_HELM_REPO_URL=.*$|ARGOCD_HELM_REPO_URL='${{ env.KUBARA_ARGOCD_HELM_REPO_URL }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_GIT_HTTPS_URL=.*$|ARGOCD_GIT_HTTPS_URL='${{ env.KUBARA_ARGOCD_GIT_HTTPS_URL }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_GIT_PAT_OR_PASSWORD=.*$|ARGOCD_GIT_PAT_OR_PASSWORD='${{ env.KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD }}'|g" "$ENV_FILE"
+          sed -i -e "s|^ARGOCD_GIT_USERNAME=.*$|ARGOCD_GIT_USERNAME='${{ env.KUBARA_ARGOCD_GIT_USERNAME }}'|g" "$ENV_FILE"
+          sed -i -e "s|^DOMAIN_NAME=.*$|DOMAIN_NAME='${{ env.KUBARA_DOMAIN_NAME }}'|g" "$ENV_FILE"
+          sed -i -e "s|^SECRETS_MANAGER_USERNAME=.*$|SECRETS_MANAGER_USERNAME='${{ env.KUBARA_SECRETS_MANAGER_USERNAME }}'|g" "$ENV_FILE"
+          sed -i -e "s|^SECRETS_MANAGER_USERNAME_BASE64=.*$|SECRETS_MANAGER_USERNAME_BASE64='${{ env.KUBARA_SECRETS_MANAGER_USERNAME_BASE64 }}'|g" "$ENV_FILE"
+          sed -i -e "s|^SECRETS_MANAGER_PASSWORD_BASE64=.*$|SECRETS_MANAGER_PASSWORD_BASE64='${{ env.KUBARA_SECRETS_MANAGER_PASSWORD_BASE64 }}'|g" "$ENV_FILE"
+          sed -i -e "s|^SECRETS_MANAGER_PATH=.*$|SECRETS_MANAGER_PATH='${{ env.KUBARA_SECRETS_MANAGER_PATH }}'|g" "$ENV_FILE"
+          sed -i -e "s|^SECRETS_MANAGER_URL=.*$|SECRETS_MANAGER_URL='${{ env.KUBARA_SECRETS_MANAGER_URL }}'|g" "$ENV_FILE"
+          sed -i -e "s|^WORKER_SECRETS_MANAGER_USERNAME_BASE64=.*$|WORKER_SECRETS_MANAGER_USERNAME_BASE64='${{ env.KUBARA_WORKER_SECRETS_MANAGER_USERNAME_BASE64 }}'|g" "$ENV_FILE"
+          sed -i -e "s|^WORKER_SECRETS_MANAGER_PASSWORD_BASE64=.*$|WORKER_SECRETS_MANAGER_PASSWORD_BASE64='${{ env.KUBARA_WORKER_SECRETS_MANAGER_PASSWORD_BASE64 }}'|g" "$ENV_FILE"
+          sed -i -e "s|^PRIVATE_LOADBALANCER_IP=.*$|PRIVATE_LOADBALANCER_IP='${{ env.KUBARA_PRIVATE_LOADBALANCER_IP }}'|g" "$ENV_FILE"
+          sed -i -e "s|^PUBLIC_LOADBALANCER_IP=.*$|PUBLIC_LOADBALANCER_IP='${{ env.KUBARA_PUBLIC_LOADBALANCER_IP }}'|g" "$ENV_FILE"
+          cat "${{ env.OUTPUT_GENERATED_DIR }}/.env"
+          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
+          yq eval '.clusters[0].type = "controlplane"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+          yq eval '.clusters[0].ssoOrg = "Kubara"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+          yq eval '.clusters[0].ssoTeam = "Test"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+          yq eval '.clusters[0].terraform.kubernetesType = "ske"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+          yq eval '.clusters[0].terraform.kubernetesVersion = "1.35.0"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+          cat "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+      - name: Generate kubara artifacts
+        run: |
+          cd go-binary
+          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
+      - name: Upload generated helm and terraform files
+        uses: actions/upload-artifact@v6
+        with:
+          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: ${{ env.OUTPUT_GENERATED_DIR }}
+  helm-checks:
+    needs: run-kubara-init-and-generate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download generated kubara artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+      - name: Install Helm & kubeconform
+        run: |
+          mkdir -p ~/.local/bin
+          curl -sSL "https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz" \
+            | tar xz --strip-components=1 -C ~/.local/bin linux-amd64/helm
+          curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz" \
+            | tar xz -C ~/.local/bin kubeconform
+          export PATH="$HOME/.local/bin:$PATH"
+          helm version && kubeconform -v
+      - name: Lint, render and validate Helm charts
+        run: |
+          set -uo pipefail
+          export PATH="$HOME/.local/bin:$PATH"
+          KUBE_VERSION=$(yq -r '.clusters[] | select(.name == "kubara") | .terraform.kubernetesVersion' config.yaml)
+          mkdir -p "${{ env.REPORT_DIR }}/helm" "${{ env.RENDER_DIR }}"
+          MANAGED_BASE="managed-service-catalog/helm"
+          CUSTOMER_BASE="customer-service-catalog/helm/kubara"
+          echo "🔍 Scanning managed Helm charts..."
+          FAILED_CHARTS=()
+          for CHART in $(find "$MANAGED_BASE" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort); do
+            echo ""
+            echo "::group::Processing chart: $CHART"
+            MANAGED_CHART_PATH="$MANAGED_BASE/$CHART"
+            CUSTOMER_VALUES_FILE="$CUSTOMER_BASE/$CHART/values.yaml"
+            OUT_DIR="${{ env.RENDER_DIR }}/$CHART"
+            mkdir -p "$OUT_DIR"
+            if [[ ! -f "$MANAGED_CHART_PATH/Chart.yaml" ]]; then
+              echo "::warning::Missing Chart.yaml for $CHART - skipping"
+              echo "::endgroup::"
+              continue
+            fi
+            CHART_TYPE=$(yq '.type // "application"' "$MANAGED_CHART_PATH/Chart.yaml")
+            if [[ "$CHART_TYPE" == "library" ]]; then
+              echo "::notice::Skipping library chart '$CHART'"
+              echo "::endgroup::"
+              continue
+            fi
+            echo "📦 Running 'helm dependency update'..."
+            if ! helm dependency update "$MANAGED_CHART_PATH"; then
+              echo "::error file=$MANAGED_CHART_PATH/Chart.yaml::helm dependency update failed for $CHART"
+              FAILED_CHARTS+=("$CHART")
+              echo "::endgroup::"
+              continue
+            fi
+            echo "🧪 Running helm lint..."
+            if [[ -f "$CUSTOMER_VALUES_FILE" ]]; then
+              if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" \
+                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
+                echo "::error file=$CUSTOMER_VALUES_FILE::helm lint failed for $CHART"
+                FAILED_CHARTS+=("$CHART")
+              fi
+              echo "📄 Rendering chart with overlay values"
+              helm template --kube-version "$KUBE_VERSION" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
+            else
+              if ! helm lint --quiet "$MANAGED_CHART_PATH" \
+                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
+                echo "::error file=$MANAGED_CHART_PATH/Chart.yaml::helm lint failed for $CHART"
+                FAILED_CHARTS+=("$CHART")
+              fi
+              echo "📄 Rendering chart with default values"
+              helm template --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
+            fi
+            echo "🔎 Validating rendered manifests with kubeconform"
+            if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
+                -schema-location default \
+                -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json \
+                -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
+                -schema-location https://json.schemastore.org/{{.ResourceKind}}.json  \
+                "$OUT_DIR/render.yaml" \
+                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-kubeconform.log"; then
+              echo "::error file=$OUT_DIR/render.yaml::kubeconform failed for $CHART"
+              FAILED_CHARTS+=("$CHART")
+            fi
+            echo "✅ Finished processing: $CHART"
+            echo "::endgroup::"
+          done
+          echo ""
+          echo "────────────────────────────────────"
+          if [[ "${#FAILED_CHARTS[@]}" -gt 0 ]]; then
+            echo "::error::❌ The following Helm charts failed:"
+            for FAIL in "${FAILED_CHARTS[@]}"; do
+              echo "::error::   - $FAIL"
+            done
+            exit 1
+          else
+            echo "✅ All Helm charts passed validation."
+          fi
+      - name: Upload Helm validation results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: helm-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: |
+            ${{ env.REPORT_DIR }}/helm/
+            ${{ env.RENDER_DIR }}/
+  terraform-checks:
+    needs: run-kubara-init-and-generate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Download generated kubara artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.3
+      - name: Setup TFLint
+        uses: terraform-linters/setup-tflint@v6
+        with:
+          tflint_version: latest
+      - name: Validate Terraform modules and environments
+        run: |
+          set -eo pipefail
+          mkdir -p "${{ env.REPORT_DIR }}/terraform"
+          echo ""
+          echo "📦 Starting Terraform static analysis"
+          echo "──────────────────────────────────────────────"
+          FAILED_DIRS=()
+          TARGET_DIRS=(
+            "managed-service-catalog/terraform/modules"
+            "customer-service-catalog/terraform/kubara"
+          )
+          for BASE_DIR in "${TARGET_DIRS[@]}"; do
+            [[ -d "$BASE_DIR" ]] || continue
+            for DIR in "$BASE_DIR"/*; do
+              [[ -d "$DIR" ]] || continue
+              NAME="$(basename "$(dirname "$DIR")")-$(basename "$DIR")"
+              LOG="${{ env.REPORT_DIR }}/terraform/${NAME}.log"
+              echo "────────────────────────────────────────────"
+              echo "🔍 Checking: $DIR"
+              echo "📝 Report: $LOG"
+              echo "────────────────────────────────────────────"
+              echo "::group::Terraform check: $NAME"
+              echo "📂 Directory: $DIR" | tee "$LOG"
+              echo "📐 terraform fmt -check -diff" | tee -a "$LOG"
+              if ! terraform fmt -check -diff "$DIR" | tee -a "$LOG"; then
+                echo "::error file=$DIR::terraform fmt failed"
+                FAILED_DIRS+=("$DIR")
+              fi
+              echo "📋 terraform init (backend=false)" | tee -a "$LOG"
+              if ! terraform -chdir="$DIR" init -backend=false -input=false >> "$LOG" 2>&1; then
+                echo "::error file=$DIR::terraform init failed"
+                FAILED_DIRS+=("$DIR")
+              fi
+              echo "🧪 terraform validate" | tee -a "$LOG"
+              if ! terraform -chdir="$DIR" validate | tee -a "$LOG"; then
+                echo "::error file=$DIR::terraform validate failed"
+                FAILED_DIRS+=("$DIR")
+              fi
+              echo "🔎 tflint" | tee -a "$LOG"
+              if ! tflint --chdir "$DIR" | tee -a "$LOG"; then
+                echo "::error file=$DIR::tflint failed"
+                FAILED_DIRS+=("$DIR")
+              fi
+              echo "✅ Done: $DIR" | tee -a "$LOG"
+              echo "::endgroup::"
+            done
+          done
+          echo ""
+          echo "──────────────────────────────────────────────"
+          if [[ "${#FAILED_DIRS[@]}" -gt 0 ]]; then
+            echo "::error::❌ The following Terraform directories failed:"
+            for FAIL in "${FAILED_DIRS[@]}"; do
+              echo "::error::$FAIL"
+            done
+            exit 1
+          else
+            echo "✅ All Terraform checks passed."
+          fi
+      - name: Upload Terraform validation results
+        uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: terraform-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: ${{ env.REPORT_DIR }}/terraform
