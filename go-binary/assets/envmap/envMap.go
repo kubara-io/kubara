@@ -26,7 +26,7 @@ func (e *ErrorEnvMap) Unwrap() error {
 // EnvMap holds the expected variables
 type EnvMap struct {
 	_                                  struct{} `doc:"# ────────────────────────────────────────────────────────────────────────────────"`
-	_                                  struct{} `doc:"# Step 1: Init and Terraform ...later with \"kubara generate --terraform\""`
+	_                                  struct{} `doc:"# Step 1: Init and Terraform ...later with \"kubara --terraform\""`
 	_                                  struct{} `doc:"# ────────────────────────────────────────────────────────────────────────────────"`
 	_                                  struct{} `doc:"# ✅ These values MUST be known BEFORE running Terraform."`
 	_                                  struct{} `doc:"# 🔁 Everything in <angle brackets> MUST be replaced."`
@@ -79,7 +79,20 @@ type EnvMap struct {
 	PublicLoadbalancerIp               string   `default:"<...>" koanf:"PUBLIC_LOADBALANCER_IP" optional:"true"`
 }
 
-// Validate performs basic validation on the envMap
+// ValidateAll performs basic validation on the envMap and checks if bootstrap secrets are set.
+// Function validateSecrets requires function Validate to be run before
+func (em *EnvMap) ValidateAll() error {
+	if err := em.Validate(); err != nil {
+		return err
+	}
+	if err := em.validateSecrets(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Validate performs basic validation on the envMap.
+// It looks at all fields but only raises an error if non optional fields are not set or set to default.
 func (em *EnvMap) Validate() error {
 	v := reflect.ValueOf(em).Elem()
 	t := v.Type()
@@ -121,6 +134,58 @@ func (em *EnvMap) Validate() error {
 		return defaultIsSetE
 	}
 
+	return nil
+}
+
+// validateSecrets checks if bootstrapSecrets are set.
+// For full validation functions Validate and ValidateWorkerSecrets are also required
+func (em *EnvMap) validateSecrets() error {
+
+	var varsNotSet []string
+	var emptyVarsE *ErrorEnvMap
+
+	if em.SecretsManagerUsername == "" {
+		varsNotSet = append(varsNotSet, "SECRETS_MANAGER_USERNAME")
+	}
+	if em.SecretsManagerUsernameBase64 == "" {
+		varsNotSet = append(varsNotSet, "SECRETS_MANAGER_USERNAME_BASE64")
+	}
+	if em.SecretsManagerPasswordBase64 == "" {
+		varsNotSet = append(varsNotSet, "SECRETS_MANAGER_PASSWORD_BASE64")
+	}
+
+	if len(varsNotSet) > 0 {
+		errText := fmt.Sprintf("Vars not set: %+v", varsNotSet)
+		emptyVarsE = &ErrorEnvMap{
+			Message: errText,
+			Err:     ErrEnvsNotSet,
+		}
+		return emptyVarsE
+	}
+	return nil
+}
+
+// ValidateWorkerSecrets checks if bootstrapSecrets are set.
+// For full validation functions Validate and validateSecrets are also required
+func (em *EnvMap) ValidateWorkerSecrets() error {
+	var varsNotSet []string
+	var emptyVarsE *ErrorEnvMap
+
+	if em.WorkerSecretsManagerUsernameBase64 == "" {
+		varsNotSet = append(varsNotSet, "WORKER_SECRETS_MANAGER_USERNAME_BASE64")
+	}
+	if em.WorkerSecretsManagerPasswordBase64 == "" {
+		varsNotSet = append(varsNotSet, "WORKER_SECRETS_MANAGER_PASSWORD_BASE64")
+	}
+
+	if len(varsNotSet) > 0 {
+		errText := fmt.Sprintf("Vars not set: %+v", varsNotSet)
+		emptyVarsE = &ErrorEnvMap{
+			Message: errText,
+			Err:     ErrEnvsNotSet,
+		}
+		return emptyVarsE
+	}
 	return nil
 }
 

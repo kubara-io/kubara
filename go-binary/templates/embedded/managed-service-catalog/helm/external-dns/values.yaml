@@ -1,17 +1,5 @@
 # creates an ExternalSecret that looks for the specified remote-keys (remote secret names) to inject into webhook pod
-externalSecrets:
-  secretStoreRef:
-    kind: change-me
-    name: change-me
-  secrets:
-    - target: external-dns-webhook
-      data:
-        - remoteKey: change-me
-          remoteKeyProperty: project_id
-          secretKey: "PROJECT_ID"
-        - remoteKey: change-me
-          remoteKeyProperty: auth_token
-          secretKey: "AUTH_TOKEN"
+externalSecrets: {}
 
 namespace:
   annotations: {}
@@ -48,13 +36,6 @@ external-dns:
     runAsGroup: 65532
     capabilities:
       drop: [ "ALL" ]
-  extraVolumes:
-    - name: stackit-sa-authentication
-      secret:
-        secretName: external-dns-webhook
-        items:
-          - key: SA_KEY_JSON
-            path: sa_key.json
   provider:
     name: webhook
     webhook:
@@ -82,14 +63,3 @@ external-dns:
       readinessProbe:
         httpGet:
           port: 8888
-      extraVolumeMounts:
-        - name: stackit-sa-authentication
-          mountPath: /var/run/secrets/stackit
-      env:
-        - name: AUTH_KEY_PATH
-          value: /var/run/secrets/stackit/sa_key.json
-        - name: PROJECT_ID
-          valueFrom:
-            secretKeyRef:
-              name: external-dns-webhook
-              key: PROJECT_ID

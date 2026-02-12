@@ -18,3 +18,5 @@ external-secrets:
     {{- end }}
     additionalLabels:
       monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  bitwarden-sdk-server:
+    enabled: false

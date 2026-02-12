@@ -281,7 +281,7 @@
                                     "status"
                                 ]
                             },
-                            "ingressNginx": {
+                            "traefik": {
                                 "type": "object",
                                 "properties": {
                                     "status": {

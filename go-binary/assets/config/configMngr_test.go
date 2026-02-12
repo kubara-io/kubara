@@ -43,9 +43,11 @@ func TestManager_Load(t *testing.T) {
 clusters:
   - name: test-cluster
     stage: dev
+	ingressClassName: traefik
     projectId: "123e4567-e89b-12d3-a456-426614174000"
     type: controlplane
     dnsName: test-cluster.example.com
+    ingressClassName: traefik
     argocd:
       repo:
         https:
@@ -71,11 +73,12 @@ clusters:
 	expectedConfig := &Config{
 		Clusters: []Cluster{
 			{
-				Name:      "test-cluster",
-				Stage:     "dev",
-				ProjectID: "123e4567-e89b-12d3-a456-426614174000",
-				Type:      "controlplane",
-				DNSName:   "test-cluster.example.com",
+				Name:             "test-cluster",
+				Stage:            "dev",
+				IngressClassName: "traefik",
+				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
+				Type:             "controlplane",
+				DNSName:          "test-cluster.example.com",
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
 						HTTPS: &RepoType{
@@ -114,6 +117,7 @@ clusters:
 clusters:
   - name: 12345 # This should be a string
     stage: dev
+	ingressClassName: traefik
     projectId: "123e4567-e89b-12d3-a456-426614174000"
     type: controlplane
     dnsName: test-cluster.example.com
@@ -174,11 +178,12 @@ func TestManager_Validate(t *testing.T) {
 	validConfig := &Config{
 		Clusters: []Cluster{
 			{
-				Name:      "test-cluster",
-				Stage:     "dev",
-				ProjectID: "123e4567-e89b-12d3-a456-426614174000",
-				Type:      "controlplane",
-				DNSName:   "test-cluster.example.com",
+				Name:             "test-cluster",
+				Stage:            "dev",
+				IngressClassName: "traefik",
+				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
+				Type:             "controlplane",
+				DNSName:          "test-cluster.example.com",
 				Terraform: &Terraform{
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",
@@ -214,7 +219,7 @@ func TestManager_Validate(t *testing.T) {
 					ExternalDns:         GenericService{ServiceStatus{Status: StatusEnabled}},
 					ExternalSecrets:     GenericService{ServiceStatus{Status: StatusEnabled}},
 					KubePrometheusStack: GenericService{ServiceStatus{Status: StatusEnabled}},
-					IngressNginx:        GenericService{ServiceStatus{Status: StatusEnabled}},
+					Traefik:             GenericService{ServiceStatus{Status: StatusEnabled}},
 					Kyverno:             GenericService{ServiceStatus{Status: StatusEnabled}},
 					KyvernoPolicies:     GenericService{ServiceStatus{Status: StatusEnabled}},
 					KyvernoPolicyReport: GenericService{ServiceStatus{Status: StatusEnabled}},
@@ -304,11 +309,12 @@ func TestManager_SaveToFile(t *testing.T) {
 	testConfig := &Config{
 		Clusters: []Cluster{
 			{
-				Name:      "prod-cluster",
-				Stage:     "production",
-				ProjectID: "123e4567-e89b-12d3-a456-426614174000",
-				Type:      "controlplane",
-				DNSName:   "prod.example.com",
+				Name:             "prod-cluster",
+				Stage:            "production",
+				IngressClassName: "traefik",
+				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
+				Type:             "controlplane",
+				DNSName:          "prod.example.com",
 				// Keeping other fields zero for a clean test case
 				ArgoCD:   ArgoCD{},
 				Services: Services{},

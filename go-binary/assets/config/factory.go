@@ -17,6 +17,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		PublicLoadBalancerIP:  e.PublicLoadbalancerIp,
 		SSOOrg:                "<my-org>",
 		SSOTeam:               "<my-team>",
+		IngressClassName:      "traefik",
 		Terraform: &Terraform{
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
@@ -64,7 +65,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 					Status: StatusEnabled,
 				},
 			},
-			IngressNginx: GenericService{
+			Traefik: GenericService{
 				ServiceStatus: ServiceStatus{
 					Status: StatusEnabled,
 				},

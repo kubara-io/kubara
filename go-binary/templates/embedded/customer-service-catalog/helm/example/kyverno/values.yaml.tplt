@@ -38,9 +38,3 @@ kyverno:
       {{- end }}
       additionalLabels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
-  # FIX: https://github.com/kyverno/kyverno/issues/15116
-  kyverno-api:
-    labels:
-      app.kubernetes.io/managed-by: Helm
-    annotations:
-      meta.helm.sh/release-name: kyverno

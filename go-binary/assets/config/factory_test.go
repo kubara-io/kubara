@@ -33,6 +33,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		PublicLoadBalancerIP:  "203.0.113.10",
 		SSOOrg:                "<my-org>",
 		SSOTeam:               "<my-team>",
+		IngressClassName:      "traefik",
 		Terraform: &Terraform{
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
@@ -60,7 +61,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			ExternalDns:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			ExternalSecrets:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			KubePrometheusStack: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			IngressNginx:        GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
+			Traefik:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			Kyverno:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			KyvernoPolicies:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			KyvernoPolicyReport: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},

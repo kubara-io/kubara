@@ -2,13 +2,14 @@ package envmap
 
 import (
 	"fmt"
+	"os"
+	"reflect"
+	"strings"
+
 	"github.com/knadh/koanf/parsers/dotenv"
 	"github.com/knadh/koanf/providers/env/v2"
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
-	"os"
-	"reflect"
-	"strings"
 )
 
 // Manager handles reading and writing configuration
@@ -74,6 +75,18 @@ func (em *Manager) Load() error {
 
 func (em *Manager) Validate() error {
 	err := em.envMap.Validate()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (em *Manager) ValidateAll() error {
+	err := em.envMap.Validate()
+	if err != nil {
+		return err
+	}
+	err = em.envMap.validateSecrets()
 	if err != nil {
 		return err
 	}

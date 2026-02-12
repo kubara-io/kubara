@@ -4,11 +4,11 @@ ingress:
   {{- end }}
   host: {{ .cluster.dnsName }}
   path: "/"
+  ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
   annotations:
     cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
     {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-    nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
-    nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+    traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
     {{- end }}
     {{- if (eq .cluster.services.metalLb.status "enabled") }}
     external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
@@ -113,6 +113,6 @@ dashboardConfig:
         {{- end }}
     - name: "DevOps Links"
       items:
-        - name: "Kubara-Website"
-          logo: "assets/icons/stackit-logo.png"
-          url: "https://kubara.io"
+        - name: "Secretsmanager"
+          logo: "/assets/tools/secretsmanager.png"
+          url: "https://replace-me-with-your-url"

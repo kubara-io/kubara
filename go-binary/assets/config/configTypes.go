@@ -19,6 +19,8 @@ type Cluster struct {
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
+	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
+
 	Terraform *Terraform `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD     `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
 	Services  Services   `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
@@ -89,7 +91,7 @@ type Services struct {
 	ExternalDns         GenericService     `json:"externalDns" yaml:"externalDns" jsonschema:"required,title=ExternalDns Service,description=Configuration for ExternalDns"`
 	ExternalSecrets     GenericService     `json:"externalSecrets" yaml:"externalSecrets" jsonschema:"required,title=ExternalSecrets Service,description=Configuration for ExternalSecrets"`
 	KubePrometheusStack GenericService     `json:"kubePrometheusStack" yaml:"kubePrometheusStack" jsonschema:"required,title=KubePrometheusStack Service,description=Configuration for KubePrometheusStack"`
-	IngressNginx        GenericService     `json:"ingressNginx" yaml:"ingressNginx" jsonschema:"required,title=IngressNginx Service,description=Configuration for IngressNginx"`
+	Traefik             GenericService     `json:"traefik" yaml:"traefik" jsonschema:"required,title=Traefik Service,description=Configuration for Traefik"`
 	Kyverno             GenericService     `json:"kyverno" yaml:"kyverno" jsonschema:"required,title=Kyverno Service,description=Configuration for Kyverno"`
 	KyvernoPolicies     GenericService     `json:"kyvernoPolicies" yaml:"kyvernoPolicies" jsonschema:"required,title=KyvernoPolicies Service,description=Configuration for KyvernoPolicies"`
 	KyvernoPolicyReport GenericService     `json:"kyvernoPolicyReport" yaml:"kyvernoPolicyReport" jsonschema:"required,title=KyvernoPolicyReport Service,description=Configuration for KyvernoPolicyReport"`

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -13,6 +14,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 	"github.com/rs/zerolog/log"
 )
+
+// DecodeB64 decodes a b64 string into raw string
+func DecodeB64(from string) (string, error) {
+	dec, err := base64.StdEncoding.DecodeString(from)
+	if err != nil {
+		return "", fmt.Errorf("decoding string %s failed: %w", from, err)
+	}
+	return string(dec), nil
+}
 
 // FileExist returns true if the the File at path exist.
 // The absolute path of path is used for finding the File.
@@ -40,13 +50,23 @@ func FileExist(path string) (bool, error) {
 // GetFullPath returns the absolute path representation of "path"
 // if path is a relative path it returns the full path of "path" relative to "workDir"
 func GetFullPath(path, workDir string) (string, error) {
+	// Expand ~ to home directory (Unix/Linux/macOS convention)
+	if path == "~" || strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		if path == "~" {
+			return home, nil
+		}
+		path = filepath.Join(home, path[2:])
+	}
+
 	if filepath.IsAbs(path) {
 		return path, nil
 	}
-	jp := filepath.Join(workDir, path)
-	abs, err := filepath.Abs(jp)
 
-	return abs, err
+	return filepath.Abs(filepath.Join(workDir, path))
 }
 
 func IsZeroValue(v reflect.Value) bool {

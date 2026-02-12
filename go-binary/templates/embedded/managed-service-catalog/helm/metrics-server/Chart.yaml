@@ -2,11 +2,11 @@ apiVersion: v2
 name: metrics-server
 description: Umbrella Chart for metrics-server
 type: application
-version: 0.0.3
+version: 0.0.4
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.4
+    version: 0.0.6
   - name: metrics-server
     repository: https://kubernetes-sigs.github.io/metrics-server
     version: 3.13.0

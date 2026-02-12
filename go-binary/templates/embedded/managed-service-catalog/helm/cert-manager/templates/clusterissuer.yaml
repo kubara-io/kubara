@@ -12,5 +12,5 @@ spec:
     solvers:
     - http01:
         ingress:
-          ingressClassName: nginx
+          ingressClassName: {{ .Values.clusterIssuer.ingressClassName | default "traefik" }}
 {{ end }}

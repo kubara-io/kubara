@@ -1,0 +1,18 @@
+{{- $mw := .Values.middleware -}}
+{{- if and $mw $mw.name $mw.forwardAuth $mw.forwardAuth.address }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ $mw.name }}
+  namespace: {{ $mw.namespace | default .Release.Namespace }}
+spec:
+  forwardAuth:
+    address: {{ $mw.forwardAuth.address }}
+    trustForwardHeader: {{ $mw.forwardAuth.trustForwardHeader | default true }}
+    {{- if $mw.forwardAuth.authResponseHeaders }}
+    authResponseHeaders:
+      {{- range $mw.forwardAuth.authResponseHeaders }}
+      - {{ . }}
+      {{- end }}
+    {{- end }}
+{{- end }}
