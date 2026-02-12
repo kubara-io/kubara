@@ -224,7 +224,7 @@ jobs:
     outputs:
       success: ${{ steps.commit.outputs.success }}
     env:
-      # env vars for kubara command
+      # env vars for kubara scripts (.env template updates)
       KUBARA_PROJECT_NAME: "kubara"
       KUBARA_PROJECT_STAGE: "tst"
       KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
@@ -246,11 +246,17 @@ jobs:
       KUBARA_WORKER_SECRETS_MANAGER_PASSWORD_BASE64: ""
       KUBARA_PRIVATE_LOADBALANCER_IP: "0.0.0.0"
       KUBARA_PUBLIC_LOADBALANCER_IP: "0.0.0.0"
+
+      # config.yaml updates
+      KUBARA_CLUSTER_TYPE: "controlplane"
+      KUBARA_SSO_ORG: "Kubara"
+      KUBARA_SSO_TEAM: "Test"
+      KUBARA_KUBERNETES_TYPE: "ske"
+      KUBARA_KUBERNETES_VERSION: "1.35.0"
+
     steps:
       - name: Checkout
         uses: actions/checkout@v6
-        with:
-          sparse-checkout: go-binary
 
       - name: Setup Go
         uses: actions/setup-go@v6
@@ -264,40 +270,27 @@ jobs:
           echo "output dir: ${{ env.OUTPUT_GENERATED_DIR }}"
           mkdir -p "${{ env.OUTPUT_GENERATED_DIR }}"
 
-      - name: Initialize kubara
+      - name: kubara init --prep
         run: |
+          set -euo pipefail
           cd go-binary
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
-          ENV_FILE="${{ env.OUTPUT_GENERATED_DIR }}/.env"
-          sed -i -e "s|^PROJECT_NAME=.*$|PROJECT_NAME='${{ env.KUBARA_PROJECT_NAME }}'|g" "$ENV_FILE"
-          sed -i -e "s|^PROJECT_STAGE=.*$|PROJECT_STAGE='${{ env.KUBARA_PROJECT_STAGE }}'|g" "$ENV_FILE"
-          sed -i -e "s|^STACKIT_PROJECT_ID=.*$|STACKIT_PROJECT_ID='${{ env.KUBARA_STACKIT_PROJECT_ID }}'|g" "$ENV_FILE"
-          sed -i -e "s|^DOCKERCONFIG_BASE64=.*$|DOCKERCONFIG_BASE64='${{ env.KUBARA_DOCKERCONFIG_BASE64 }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_WIZARD_ACCOUNT_PASSWORD=.*$|ARGOCD_WIZARD_ACCOUNT_PASSWORD='${{ env.KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_HELM_REPO_USERNAME=.*$|ARGOCD_HELM_REPO_USERNAME='${{ env.KUBARA_ARGOCD_HELM_REPO_USERNAME }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_HELM_REPO_PASSWORD=.*$|ARGOCD_HELM_REPO_PASSWORD='${{ env.KUBARA_ARGOCD_HELM_REPO_PASSWORD }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_HELM_REPO_URL=.*$|ARGOCD_HELM_REPO_URL='${{ env.KUBARA_ARGOCD_HELM_REPO_URL }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_GIT_HTTPS_URL=.*$|ARGOCD_GIT_HTTPS_URL='${{ env.KUBARA_ARGOCD_GIT_HTTPS_URL }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_GIT_PAT_OR_PASSWORD=.*$|ARGOCD_GIT_PAT_OR_PASSWORD='${{ env.KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD }}'|g" "$ENV_FILE"
-          sed -i -e "s|^ARGOCD_GIT_USERNAME=.*$|ARGOCD_GIT_USERNAME='${{ env.KUBARA_ARGOCD_GIT_USERNAME }}'|g" "$ENV_FILE"
-          sed -i -e "s|^DOMAIN_NAME=.*$|DOMAIN_NAME='${{ env.KUBARA_DOMAIN_NAME }}'|g" "$ENV_FILE"
-          sed -i -e "s|^SECRETS_MANAGER_USERNAME=.*$|SECRETS_MANAGER_USERNAME='${{ env.KUBARA_SECRETS_MANAGER_USERNAME }}'|g" "$ENV_FILE"
-          sed -i -e "s|^SECRETS_MANAGER_USERNAME_BASE64=.*$|SECRETS_MANAGER_USERNAME_BASE64='${{ env.KUBARA_SECRETS_MANAGER_USERNAME_BASE64 }}'|g" "$ENV_FILE"
-          sed -i -e "s|^SECRETS_MANAGER_PASSWORD_BASE64=.*$|SECRETS_MANAGER_PASSWORD_BASE64='${{ env.KUBARA_SECRETS_MANAGER_PASSWORD_BASE64 }}'|g" "$ENV_FILE"
-          sed -i -e "s|^SECRETS_MANAGER_PATH=.*$|SECRETS_MANAGER_PATH='${{ env.KUBARA_SECRETS_MANAGER_PATH }}'|g" "$ENV_FILE"
-          sed -i -e "s|^SECRETS_MANAGER_URL=.*$|SECRETS_MANAGER_URL='${{ env.KUBARA_SECRETS_MANAGER_URL }}'|g" "$ENV_FILE"
-          sed -i -e "s|^WORKER_SECRETS_MANAGER_USERNAME_BASE64=.*$|WORKER_SECRETS_MANAGER_USERNAME_BASE64='${{ env.KUBARA_WORKER_SECRETS_MANAGER_USERNAME_BASE64 }}'|g" "$ENV_FILE"
-          sed -i -e "s|^WORKER_SECRETS_MANAGER_PASSWORD_BASE64=.*$|WORKER_SECRETS_MANAGER_PASSWORD_BASE64='${{ env.KUBARA_WORKER_SECRETS_MANAGER_PASSWORD_BASE64 }}'|g" "$ENV_FILE"
-          sed -i -e "s|^PRIVATE_LOADBALANCER_IP=.*$|PRIVATE_LOADBALANCER_IP='${{ env.KUBARA_PRIVATE_LOADBALANCER_IP }}'|g" "$ENV_FILE"
-          sed -i -e "s|^PUBLIC_LOADBALANCER_IP=.*$|PUBLIC_LOADBALANCER_IP='${{ env.KUBARA_PUBLIC_LOADBALANCER_IP }}'|g" "$ENV_FILE"
-          cat "${{ env.OUTPUT_GENERATED_DIR }}/.env"
+
+      - name: Update .env (strict template mode)
+        run: |
+          set -euo pipefail
+          .scripts/kubara-env-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/.env"
+
+      - name: kubara init
+        run: |
+          set -euo pipefail
+          cd go-binary
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
-          yq eval '.clusters[0].type = "controlplane"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
-          yq eval '.clusters[0].ssoOrg = "Kubara"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
-          yq eval '.clusters[0].ssoTeam = "Test"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
-          yq eval '.clusters[0].terraform.kubernetesType = "ske"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
-          yq eval '.clusters[0].terraform.kubernetesVersion = "1.35.0"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
-          cat "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+
+      - name: Update config.yaml (strict mode)
+        run: |
+          set -euo pipefail
+          .scripts/kubara-config-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/config.yaml"
 
       - name: Generate kubara artifacts
         run: |
