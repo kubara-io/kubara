@@ -3,7 +3,14 @@
 DIR_NAMES=""
 CONFIG_FILE_PATH=".pre-commit-config/terraform-docs"
 TERRAFORM_DOCS_IMAGE="quay.io/terraform-docs/terraform-docs:0.20.0"
-CMD_FOUND=$(which terraform-docs)
+# Detect terraform-docs on PATH (local install or injected by CI)
+CMD_FOUND="$(command -v terraform-docs || true)"
+
+if [ -n "$CMD_FOUND" ]; then
+  echo "[terraform-docs] Using local binary: $CMD_FOUND"
+else
+  echo "[terraform-docs] Using Docker image: $TERRAFORM_DOCS_IMAGE"
+fi
 
 for file in "$@"; do
   DIR_NAMES+="$(dirname "$file") "
