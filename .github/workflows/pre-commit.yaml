@@ -1,12 +1,13 @@
----
 name: pre-commit
 on:
   pull_request:
   push:
     branches: [main]
+
 env:
   TERRAFORM_DOCS_VERSION: "0.20.0"
   TERRAFORM_DOCS_OS_ARCH: "linux-amd64"
+
 jobs:
   pre-commit:
     runs-on: ubuntu-latest
@@ -22,7 +23,7 @@ jobs:
           key: terraform-docs-${{ env.TERRAFORM_DOCS_VERSION }}-${{ env.TERRAFORM_DOCS_OS_ARCH }}
 
       # Install terraform-docs into ~/.local/bin and add it to PATH
-      - name: Install terraform-docs (cache miss)
+      - name: Install terraform-docs (if not cached)
         if: steps.cache-terraform-docs.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
@@ -32,6 +33,7 @@ jobs:
             "https://github.com/terraform-docs/terraform-docs/releases/download/v${TERRAFORM_DOCS_VERSION}/terraform-docs-v${TERRAFORM_DOCS_VERSION}-${TERRAFORM_DOCS_OS_ARCH}.tar.gz"
           tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
           chmod +x "$HOME/.local/bin/terraform-docs"
+
       - name: Add terraform-docs to PATH & verify
         run: |
           set -euo pipefail

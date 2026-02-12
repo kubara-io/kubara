@@ -12,7 +12,7 @@ exclude: \.md$|__snapshot__
 repos:
   # Conventional Commits
   - repo: https://github.com/compilerla/conventional-pre-commit
-    rev: v4.2.0
+    rev: v4.3.0
     hooks:
       - id: conventional-pre-commit
         stages:
@@ -20,7 +20,7 @@ repos:
         args: []
   # YAML
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-yaml
         exclude: templates/
@@ -28,17 +28,17 @@ repos:
           - --allow-multiple-documents
       - id: end-of-file-fixer
       - id: trailing-whitespace
-        exclude: \.md$|\.forgejo
+        exclude: \.md$|\.github/
   - repo: https://github.com/lyz-code/yamlfix/
-    rev: 1.17.0
+    rev: 1.19.1
     hooks:
       - id: yamlfix
         args:
           - -c
           - .pre-commit-config/yamlfix.toml
-        exclude: templates/|\.md$|\.forgejo
+        exclude: templates/|\.md$|\.github/
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         args:
@@ -46,7 +46,7 @@ repos:
           - .pre-commit-config/yamllint.yaml
           - --format
           - parsable
-        exclude: templates/|\.md$|\.forgejo
+        exclude: templates/|\.md$|\.github/
   - repo: local
     hooks:
       - id: terraform-docs

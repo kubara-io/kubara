@@ -1,4 +1,3 @@
----
 name: 'pr-checks'
 on:
   push:
@@ -13,6 +12,7 @@ on:
     paths:
       - 'go-binary/**'
   workflow_dispatch:
+
 env:
   GO_VERSION: "1.25"
   CODE_PATH: ${{ github.workspace }}/go-binary
@@ -24,11 +24,13 @@ env:
   ARTIFACT_RETENTION_DAYS: "15"
   HELM_VERSION: "v4.1.0"
   KUBECONFORM_VERSION: "v0.7.0"
+
 permissions:
   contents: read
   packages: read
   security-events: write
   actions: read
+
 jobs:
   go-static-analysis:
     runs-on: ubuntu-latest
@@ -41,12 +43,14 @@ jobs:
         uses: actions/checkout@v6
         with:
           sparse-checkout: go-binary
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: go-binary/go.sum
+
       - name: Verify Go environment
         run: |
           set -euo pipefail
@@ -63,6 +67,7 @@ jobs:
             echo "::error::go.mod or go.sum is not up to date. Run 'go mod tidy' locally."
             exit 1
           fi
+
       - name: Create report directory
         run: mkdir -p "${{ env.REPORT_DIR }}"
       - name: Check Go code formatting (gofmt)
@@ -80,6 +85,7 @@ jobs:
           else
             echo "All Go files are properly formatted."
           fi
+
       - name: Go Vet
         run: |
           go vet ./... 2>&1 | tee "${{ env.REPORT_DIR }}/vet-results.txt"
@@ -91,12 +97,14 @@ jobs:
           args: |
             --output.text.path stdout \
             --output.html.path "${{ env.REPORT_DIR }}/golangci-results.html"
+
       - name: Cache gosec
         id: cache-gosec
         uses: actions/cache@v5
         with:
           path: ~/.local/bin/gosec
           key: ${{ runner.os }}-gosec-${{ env.GOSEC_VERSION }}
+
       - name: Install gosec (if not cached)
         if: steps.cache-gosec.outputs.cache-hit != 'true'
         run: |
@@ -104,6 +112,7 @@ jobs:
           mkdir -p ~/.local/bin
           curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
             | sh -s -- -b "$HOME/.local/bin" "${{ env.GOSEC_VERSION }}"
+
       - name: Run gosec CLI
         if: always()
         run: |
@@ -146,6 +155,7 @@ jobs:
             echo "❌ No Go packages found!"
             exit 1
           fi
+
       - name: Upload static analysis results
         uses: actions/upload-artifact@v6
         if: always()
@@ -153,6 +163,7 @@ jobs:
           name: go-static-analysis-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.REPORT_DIR }}
+
   go-unit-tests:
     runs-on: ubuntu-latest
     defaults:
@@ -164,12 +175,14 @@ jobs:
         uses: actions/checkout@v6
         with:
           sparse-checkout: go-binary
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: go-binary/go.sum
+
       - name: Create report directory
         run: mkdir -p "${{ env.REPORT_DIR }}"
       - name: Run Go Unit Tests
@@ -192,6 +205,7 @@ jobs:
           # Extract coverage percentage
           COVERAGE=$(go tool cover -func="${{ env.REPORT_DIR }}/coverage.out" | tail -1 | awk '{print $3}')
           echo "Test coverage: $COVERAGE"
+
       - name: Upload test results
         uses: actions/upload-artifact@v6
         if: always()
@@ -199,6 +213,7 @@ jobs:
           name: go-test-results-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.REPORT_DIR }}
+
   run-kubara-init-and-generate:
     needs: [go-static-analysis, go-unit-tests]
     runs-on: ubuntu-latest
@@ -236,16 +251,19 @@ jobs:
         uses: actions/checkout@v6
         with:
           sparse-checkout: go-binary
+
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
           cache: true
           cache-dependency-path: go-binary/go.sum
+
       - name: Create output directory
         run: |
           echo "output dir: ${{ env.OUTPUT_GENERATED_DIR }}"
           mkdir -p "${{ env.OUTPUT_GENERATED_DIR }}"
+
       - name: Initialize kubara
         run: |
           cd go-binary
@@ -280,16 +298,19 @@ jobs:
           yq eval '.clusters[0].terraform.kubernetesType = "ske"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
           yq eval '.clusters[0].terraform.kubernetesVersion = "1.35.0"' -i "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
           cat "${{ env.OUTPUT_GENERATED_DIR }}"/config.yaml
+
       - name: Generate kubara artifacts
         run: |
           cd go-binary
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
+
       - name: Upload generated helm and terraform files
         uses: actions/upload-artifact@v6
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.OUTPUT_GENERATED_DIR }}
+
   helm-checks:
     needs: run-kubara-init-and-generate
     runs-on: ubuntu-latest
@@ -301,6 +322,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+
       - name: Install Helm & kubeconform
         run: |
           mkdir -p ~/.local/bin
@@ -310,6 +332,7 @@ jobs:
             | tar xz -C ~/.local/bin kubeconform
           export PATH="$HOME/.local/bin:$PATH"
           helm version && kubeconform -v
+
       - name: Lint, render and validate Helm charts
         run: |
           set -uo pipefail
@@ -388,6 +411,7 @@ jobs:
           else
             echo "✅ All Helm charts passed validation."
           fi
+
       - name: Upload Helm validation results
         uses: actions/upload-artifact@v6
         if: always()
@@ -397,6 +421,7 @@ jobs:
           path: |
             ${{ env.REPORT_DIR }}/helm/
             ${{ env.RENDER_DIR }}/
+
   terraform-checks:
     needs: run-kubara-init-and-generate
     runs-on: ubuntu-latest
@@ -408,14 +433,17 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.3
+
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v6
         with:
           tflint_version: latest
+
       - name: Validate Terraform modules and environments
         run: |
           set -eo pipefail
@@ -475,6 +503,7 @@ jobs:
           else
             echo "✅ All Terraform checks passed."
           fi
+
       - name: Upload Terraform validation results
         uses: actions/upload-artifact@v6
         if: always()
