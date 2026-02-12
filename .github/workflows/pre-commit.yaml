@@ -34,7 +34,7 @@ jobs:
           tar -xzf /tmp/td.tgz -C "$HOME/.local/bin" terraform-docs
           chmod +x "$HOME/.local/bin/terraform-docs"
 
-      - name: Add terraform-docs to PATH & verify
+      - name: verify terraform-docs
         run: |
           set -euo pipefail
           terraform-docs --version
