@@ -307,17 +307,17 @@ func (sm *SecretManager) createClusterSecretStore(o *Options) (*externalsecretsv
 
 	// Validate that the name follows the expected pattern: <cluster-name>-<cluster-stage>
 	expectedName := fmt.Sprintf("%s-%s", o.ClusterConfig.Name, o.ClusterConfig.Stage)
-	if css.ObjectMeta.Name != expectedName {
+	if css.Name != expectedName {
 		log.Warn().
 			Str("expected", expectedName).
-			Str("actual", css.ObjectMeta.Name).
+			Str("actual", css.Name).
 			Msg("ClusterSecretStore name does not follow the pattern <cluster.name>-<cluster.stage>. Make sure to update any helm values reffering to the ClusterSecretStore accordingly")
 	}
 
 	log.Info().
 		Str("file", o.WithESCSSPath).
 		Str("cluster", o.ClusterConfig.Name).
-		Str("name", css.ObjectMeta.Name).
+		Str("name", css.Name).
 		Msg("Loaded ClusterSecretStore from file")
 	return css, nil
 }
