@@ -6,7 +6,7 @@ version: 0.1.2
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.6
+    version: 0.0.7
   - name: external-dns
     repository: https://kubernetes-sigs.github.io/external-dns/
     version: 1.20.0

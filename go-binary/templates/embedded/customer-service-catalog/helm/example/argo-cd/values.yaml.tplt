@@ -107,19 +107,28 @@ inClusterSecretLabels:
   metrics-server: "{{ .cluster.services.metricsServer.status | default "disabled" }}"
   metallb: "{{ .cluster.services.metalLb.status | default "disabled" }}"
   longhorn: "{{ .cluster.services.longhorn.status | default "disabled" }}"
-
 {{- end }}
+
 {{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
-    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+    bitwarden-com-demo:
+      kind: ClusterSecretStore
+      name: bitwarden-com-demo
+
   secrets:
-    - target: oauth2-credentials
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: argo_oauth2_credentials
 {{- end }}
-
 
 argo-cd:
   server:

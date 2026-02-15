@@ -1,23 +1,35 @@
 {{- define "templateLibrary.externalSecrets.es.generic" }}
 {{- $ := . }}
 {{- $globalStore := ($.Values.externalSecrets).secretStoreRef }}
-{{- range $item := ($.Values.externalSecrets).secrets }}
+{{- $stores := ($.Values.externalSecrets).secretStores }}
+{{- range $name, $item := ($.Values.externalSecrets).secrets }}
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
-  name: {{ $item.name | default (printf "%s-es" $item.target ) }}
+  name: {{ $item.name | default (printf "%s-es" $name ) }}
   namespace: {{ $.Release.Namespace }}
   labels:
     app.kubernetes.io/part-of: {{ $.Release.Name }}
 spec:
   refreshInterval: {{ $item.refreshInterval | default "5m" }}
-  {{- with $item.secretStoreRef | default $globalStore }}
+
+  {{- $storeRef := $globalStore }}
+  {{- if $item.secretStoreRef }}
+    {{- if kindIs "string" $item.secretStoreRef }}
+      {{- $storeRef = (get $stores $item.secretStoreRef) | default $globalStore }}
+    {{- else }}
+      {{- $storeRef = $item.secretStoreRef }}
+    {{- end }}
+  {{- end }}
+  {{- with $storeRef }}
   secretStoreRef:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+
   target:
-    name: {{ $item.target }}
+    name: {{ $item.target | default $name }}
     creationPolicy: Owner
+
   {{- if $item.data }}
   data:
     {{- range $data_item := $item.data }}

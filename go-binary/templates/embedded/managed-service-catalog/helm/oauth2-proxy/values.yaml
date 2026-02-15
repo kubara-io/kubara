@@ -1,7 +1,4 @@
 namespace: {}
-secretStoreRef:
-  kind: change-me
-  name: change-me
 oauth2-proxy:
   metrics:
     serviceMonitor:

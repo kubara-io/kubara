@@ -6,7 +6,7 @@ version: 0.0.4
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.6
+    version: 0.0.7
   - name: metrics-server
     repository: https://kubernetes-sigs.github.io/metrics-server
     version: 3.13.0

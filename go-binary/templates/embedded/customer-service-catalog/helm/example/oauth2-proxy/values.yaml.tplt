@@ -7,11 +7,22 @@ namespace:
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
-    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+    bitwarden-com-demo:
+      kind: ClusterSecretStore
+      name: bitwarden-com-demo
+
   secrets:
-    - target: oauth2-credentials
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: oauth2_credentials
+
 
 oauth2-proxy:
   imagePullSecrets:

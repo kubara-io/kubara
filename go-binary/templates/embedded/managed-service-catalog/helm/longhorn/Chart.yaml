@@ -6,7 +6,7 @@ version: 0.2.1
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.6
+    version: 0.0.7
   # https://artifacthub.io/packages/helm/argo/argo-cd
   - name: longhorn
     repository: https://charts.longhorn.io

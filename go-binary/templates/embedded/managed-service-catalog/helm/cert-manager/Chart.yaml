@@ -6,7 +6,7 @@ version: 0.1.4
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.6
+    version: 0.0.7
   - name: cert-manager
     version: v1.19.3
     repository: https://charts.jetstack.io

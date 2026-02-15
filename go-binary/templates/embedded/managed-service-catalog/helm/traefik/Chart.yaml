@@ -8,4 +8,4 @@ dependencies:
     repository: oci://ghcr.io/traefik/helm
   - name: template-library
     repository: file://../template-library
-    version: 0.0.6
+    version: 0.0.7

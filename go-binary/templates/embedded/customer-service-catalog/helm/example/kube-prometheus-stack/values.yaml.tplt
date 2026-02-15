@@ -225,17 +225,25 @@ prometheus-blackbox-exporter:
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
-    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
   secrets:
-    - target: grafana-admin-credentials
+    grafana-admin-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: grafana_credentials
+
     {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-    - target: oauth2-credentials
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: grafana_oauth2_credentials
     {{- end }}
-
 
 namespace:
   labels:

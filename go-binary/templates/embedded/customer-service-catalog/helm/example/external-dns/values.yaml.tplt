@@ -1,16 +1,24 @@
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
-    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
   secrets:
-    - target: external-dns-webhook
+    external-dns-webhook:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - remoteKey: "dns_zone_admin"
-          remoteKeyProperty: "project_id"
-          secretKey: "PROJECT_ID"
-        - remoteKeyProperty: "sa_key_json"
-          remoteKey: "dns_zone_admin"
-          secretKey: "SA_KEY_JSON"
+        - remoteKey: dns_zone_admin
+          remoteKeyProperty: project_id
+          secretKey: PROJECT_ID
+        - remoteKey: dns_zone_admin
+          remoteKeyProperty: sa_key_json
+          secretKey: SA_KEY_JSON
+
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"
