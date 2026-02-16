@@ -176,10 +176,10 @@ func TestGenerateCmd(t *testing.T) {
 					Name:             "test-cluster",
 					Stage:            "dev",
 					IngressClassName: "traefik",
-					ProjectID:        "12345678-1234-1234-1234-123456789012",
 					Type:             "controlplane",
 					DNSName:          "test.example.com",
 					Terraform: &config.Terraform{
+						ProjectID:         "00000000-0000-0000-0000-000000000000",
 						KubernetesType:    "ske",
 						KubernetesVersion: "1.28.0",
 						DNS: config.DNS{

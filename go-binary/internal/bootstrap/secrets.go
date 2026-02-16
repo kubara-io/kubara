@@ -86,76 +86,6 @@ func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Optio
 	return nil
 }
 
-// CreateWorkerSecrets creates all worker secrets
-func (sm *SecretManager) CreateWorkerSecrets(ctx context.Context, o *Options) error {
-	k8sOpts := k8s.DefaultApplyOptions()
-	k8sOpts.FieldManager = "kubara-worker-secrets"
-	k8sOpts.DryRun = o.DryRun
-
-	var manifest []byte
-	secrets := []*corev1.Secret{
-		sm.createImagePullSecret(o.EnvMap, externalSecretsNamespace),
-		sm.createWorkerSecretManagerCreds(o.EnvMap),
-	}
-
-	for _, secret := range secrets {
-		if secret == nil {
-			continue
-		}
-
-		yamlData, err := yaml.Marshal(secret)
-		if err != nil {
-			return fmt.Errorf("marshaling secret: %w", err)
-		}
-
-		manifest = append(manifest, yamlData...)
-		manifest = append(manifest, []byte("---\n")...)
-	}
-
-	if len(manifest) == 0 {
-		log.Info().Msg("No secrets to create")
-		return nil
-	}
-
-	// Apply all secrets in one API call
-	if err := sm.client.ApplyManifest(ctx, manifest, k8sOpts); err != nil {
-		return fmt.Errorf("applying worker secrets: %w", err)
-	}
-
-	log.Info().Msg("Created worker secrets successfully")
-	return nil
-}
-
-func (sm *SecretManager) createWorkerSecretManagerCreds(em *envmap.EnvMap) *corev1.Secret {
-	// Decode base64 encoded credentials
-	username, err := utils.DecodeB64(em.WorkerSecretsManagerUsernameBase64)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to decode WorkerSecretsManagerUsernameBase64")
-		return nil
-	}
-	password, err := utils.DecodeB64(em.WorkerSecretsManagerPasswordBase64)
-	if err != nil {
-		log.Error().Err(err).Msg("failed to decode WorkerSecretsManagerPasswordBase64")
-		return nil
-	}
-
-	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: "v1",
-			Kind:       "Secret",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "worker-secrets-manager-cred",
-			Namespace: externalSecretsNamespace,
-		},
-		Type: corev1.SecretTypeOpaque,
-		Data: map[string][]byte{
-			"username": []byte(username),
-			"password": []byte(password),
-		},
-	}
-}
-
 // createGitRepositorySecret creates the ArgoCD git repository secret
 func (sm *SecretManager) createGitRepositorySecret(em *envmap.EnvMap) *corev1.Secret {
 	return &corev1.Secret{
@@ -307,17 +237,17 @@ func (sm *SecretManager) createClusterSecretStore(o *Options) (*externalsecretsv
 
 	// Validate that the name follows the expected pattern: <cluster-name>-<cluster-stage>
 	expectedName := fmt.Sprintf("%s-%s", o.ClusterConfig.Name, o.ClusterConfig.Stage)
-	if css.Name != expectedName {
+	if css.ObjectMeta.Name != expectedName {
 		log.Warn().
 			Str("expected", expectedName).
-			Str("actual", css.Name).
+			Str("actual", css.ObjectMeta.Name).
 			Msg("ClusterSecretStore name does not follow the pattern <cluster.name>-<cluster.stage>. Make sure to update any helm values reffering to the ClusterSecretStore accordingly")
 	}
 
 	log.Info().
 		Str("file", o.WithESCSSPath).
 		Str("cluster", o.ClusterConfig.Name).
-		Str("name", css.Name).
+		Str("name", css.ObjectMeta.Name).
 		Msg("Loaded ClusterSecretStore from file")
 	return css, nil
 }

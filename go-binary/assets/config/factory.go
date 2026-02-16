@@ -8,17 +8,15 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 
 	return Cluster{
-		Name:                  e.ProjectName,
-		Stage:                 e.ProjectStage,
-		ProjectID:             e.StackitProjectId,
-		Type:                  "<controlplane or workerplane>",
-		DNSName:               dnsName,
-		PrivateLoadBalancerIP: e.PrivateLoadbalancerIp,
-		PublicLoadBalancerIP:  e.PublicLoadbalancerIp,
-		SSOOrg:                "<my-org>",
-		SSOTeam:               "<my-team>",
-		IngressClassName:      "traefik",
+		Name:             e.ProjectName,
+		Stage:            e.ProjectStage,
+		Type:             "<controlplane or workerplane>",
+		DNSName:          dnsName,
+		SSOOrg:           "<my-org>",
+		SSOTeam:          "<my-team>",
+		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{

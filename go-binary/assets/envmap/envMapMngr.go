@@ -86,10 +86,6 @@ func (em *Manager) ValidateAll() error {
 	if err != nil {
 		return err
 	}
-	err = em.envMap.validateSecrets()
-	if err != nil {
-		return err
-	}
 	return nil
 }
 

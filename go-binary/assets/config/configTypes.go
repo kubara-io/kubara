@@ -7,19 +7,18 @@ type Config struct {
 
 // Cluster defines the configuration for a single Kubernetes cluster.
 type Cluster struct {
-	Name      string `json:"name" yaml:"name" jsonschema:"required,title=Cluster Name,description=The unique name for the cluster.,minLength=1,example=my-prod-cluster"`
-	Stage     string `json:"stage" yaml:"stage" jsonschema:"required,title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
-	ProjectID string `json:"projectId" yaml:"projectId" jsonschema:"required,title=STACKIT Project ID,description=The UUID of the STACKIT project.,pattern=^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"`
-	Type      string `json:"type" yaml:"type" jsonschema:"required,title=Cluster Type,description=The type of the cluster,enum=controlplane,enum=worker,default=controlplane"`
-	DNSName   string `json:"dnsName" yaml:"dnsName" jsonschema:"required,title=Primary DNS Name,description=The fully qualified domain name for the cluster.,format=hostname,example=my-prod-cluster.example.com"`
-
-	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
-	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
+	Name    string `json:"name" yaml:"name" jsonschema:"required,title=Cluster Name,description=The unique name for the cluster.,minLength=1,example=my-prod-cluster"`
+	Stage   string `json:"stage" yaml:"stage" jsonschema:"required,title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
+	Type    string `json:"type" yaml:"type" jsonschema:"required,title=Cluster Type,description=The type of the cluster,enum=controlplane,enum=worker,default=controlplane"`
+	DNSName string `json:"dnsName" yaml:"dnsName" jsonschema:"required,title=Primary DNS Name,description=The fully qualified domain name for the cluster.,format=hostname,example=my-prod-cluster.example.com"`
 
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
 	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
+
+	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
+	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
 
 	Terraform *Terraform `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD     `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
@@ -27,6 +26,7 @@ type Cluster struct {
 }
 
 type Terraform struct {
+	ProjectID         string `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
 	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"required,title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
 	KubernetesVersion string `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
 	DNS               DNS    `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`

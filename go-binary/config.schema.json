@@ -19,12 +19,6 @@
                         "maxLength": 20,
                         "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
                     },
-                    "projectId": {
-                        "type": "string",
-                        "minLength": 1,
-                        "maxLength": 36,
-                        "pattern": "^[a-z0-9]([a-z0-9-]*[a-z0-9])?$"
-                    },
                     "dnsName": {
                         "type": "string",
                         "format": "hostname"
@@ -40,7 +34,7 @@
                         "type": "string",
                         "format": "ipv4"
                     },
-                    "publicLoadbalancerIP": {
+                    "publicLoadBalancerIP": {
                         "type": "string",
                         "format": "ipv4"
                     },
@@ -65,6 +59,10 @@
                     "terraform": {
                         "type": "object",
                         "properties": {
+                            "projectId": {
+                                "type": "string",
+                                "minLength": 1
+                            },
                             "kubernetesType": {
                                 "type": "string",
                                 "enum": [
@@ -91,6 +89,7 @@
                             }
                         },
                         "required": [
+                            "projectId",
                             "dns",
                             "kubernetesType"
                         ]
@@ -487,10 +486,8 @@
                 "required": [
                     "name",
                     "stage",
-                    "projectId",
                     "type",
                     "dnsName",
-                    "terraform",
                     "services"
                 ]
             }

@@ -24,18 +24,17 @@ const (
 
 // Options for bootstrap operations
 type Options struct {
-	Kubeconfig          string
-	ManagedCatalog      string
-	OverlayValues       string
-	WithES              bool
-	WithProm            bool
-	WithESCSSPath       string
-	CreateWorkerSecrets bool
-	EnvMap              *envmap.EnvMap
-	ClusterConfig       *config.Cluster
-	DryRun              bool
-	Timeout             time.Duration
-	ClusterName         string
+	Kubeconfig    string
+	ManagedCatalog string
+	OverlayValues string
+	WithES        bool
+	WithProm      bool
+	WithESCSSPath string
+	EnvMap        *envmap.EnvMap
+	ClusterConfig *config.Cluster
+	DryRun        bool
+	Timeout       time.Duration
+	ClusterName   string
 }
 
 type BootstrapChart struct {
@@ -129,29 +128,24 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("applying CRDs: %w", err)
 	}
 
-	// TODO: Test worker secrets/crd creation
 	// Step 5: Apply secrets before ArgoCD
 	if err := applySecrets(ctx, client, opts); err != nil {
 		return fmt.Errorf("applying secrets: %w", err)
 	}
 
-	if opts.CreateWorkerSecrets {
-		log.Info().Msg("Worker secrets created successfully")
-	} else {
-		// Step 6: Bootstrap ArgoCD
-		if err := bootstrapArgoCD(ctx, client, opts, argoChart); err != nil {
-			return fmt.Errorf("bootstrapping ArgoCD: %w", err)
-		}
-
-		// Step 7: Wait for ArgoCD to be ready
-		if err := waitForArgoCD(ctx, client, opts, argoChart); err != nil {
-			return fmt.Errorf("waiting for ArgoCD readiness: %w", err)
-		}
-
-		// Step 8: Print completion message
-		printCompletionMessage(opts)
-		log.Info().Msg("ArgoCD bootstrap completed successfully")
+	// Step 6: Bootstrap ArgoCD
+	if err := bootstrapArgoCD(ctx, client, opts, argoChart); err != nil {
+		return fmt.Errorf("bootstrapping ArgoCD: %w", err)
 	}
+
+	// Step 7: Wait for ArgoCD to be ready
+	if err := waitForArgoCD(ctx, client, opts, argoChart); err != nil {
+		return fmt.Errorf("waiting for ArgoCD readiness: %w", err)
+	}
+
+	// Step 8: Print completion message
+	printCompletionMessage(opts)
+	log.Info().Msg("ArgoCD bootstrap completed successfully")
 	return nil
 }
 
@@ -323,16 +317,9 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 
 	secretManager := NewSecretManager(client)
 
-	// Apply worker secrets (if flag is set skip other secrets)
-	if opts.CreateWorkerSecrets {
-		if err := secretManager.CreateWorkerSecrets(ctx, opts); err != nil {
-			return fmt.Errorf("applying worker secrets: %w", err)
-		}
-	} else {
-		// Apply control plane secrets
-		if err := secretManager.CreateControlPlaneSecrets(ctx, opts); err != nil {
-			return fmt.Errorf("applying control plane secrets: %w", err)
-		}
+	// Apply control plane secrets
+	if err := secretManager.CreateControlPlaneSecrets(ctx, opts); err != nil {
+		return fmt.Errorf("applying control plane secrets: %w", err)
 	}
 
 	log.Info().Msg("Secrets applied successfully")

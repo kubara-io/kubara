@@ -22,7 +22,6 @@ type BootstrapFlags struct {
 	WithES                 bool
 	WithProm               bool
 	ClusterSecretStorePath string
-	CreateWorkerSecrets    bool
 	ManagedCatalogPath     string
 	OverlayValuesPath      string
 	EnvFile                string
@@ -162,18 +161,17 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	return &bootstrap.Options{
-		Kubeconfig:          kubeconf,
-		ManagedCatalog:      managedAbsPath,
-		OverlayValues:       customerAbsPath,
-		WithES:              flags.WithES,
-		WithProm:            flags.WithProm,
-		WithESCSSPath:       cssAbsPath,
-		CreateWorkerSecrets: flags.CreateWorkerSecrets,
-		EnvMap:              envMap,
-		ClusterConfig:       clusterConfig,
-		DryRun:              flags.DryRun,
-		Timeout:             flags.Timeout,
-		ClusterName:         clusterName,
+		Kubeconfig:    kubeconf,
+		ManagedCatalog: managedAbsPath,
+		OverlayValues: customerAbsPath,
+		WithES:        flags.WithES,
+		WithProm:      flags.WithProm,
+		WithESCSSPath: cssAbsPath,
+		EnvMap:        envMap,
+		ClusterConfig: clusterConfig,
+		DryRun:        flags.DryRun,
+		Timeout:       flags.Timeout,
+		ClusterName:   clusterName,
 	}, nil
 }
 
@@ -200,12 +198,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Name:        "with-es-css-file",
 			Usage:       "Path to the ClusterSecretStore manifest file (supports go-template + sprig)",
 			Destination: &flags.ClusterSecretStorePath,
-		},
-		&cli.BoolFlag{
-			Name:        "create-secrets-worker",
-			Value:       false,
-			Usage:       "also create/apply the worker secret",
-			Destination: &flags.CreateWorkerSecrets,
 		},
 		&cli.StringFlag{
 			Name:        "managed-catalog",

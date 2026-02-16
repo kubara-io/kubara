@@ -36,8 +36,9 @@ func AddRepository(ctx context.Context, opts RepoOptions) error {
 		args = append(args, "--ca-file", opts.CAFile)
 	}
 
+	cmd := exec.Command("helm", args...)
 	var stdout, stderr bytes.Buffer
-	cmd := exec.CommandContext(ctx, "helm", args...)
+	cmd = exec.CommandContext(ctx, "helm", args...)
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 

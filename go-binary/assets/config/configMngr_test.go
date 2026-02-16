@@ -43,11 +43,11 @@ func TestManager_Load(t *testing.T) {
 clusters:
   - name: test-cluster
     stage: dev
-	ingressClassName: traefik
-    projectId: "123e4567-e89b-12d3-a456-426614174000"
     type: controlplane
     dnsName: test-cluster.example.com
     ingressClassName: traefik
+    terraform:
+      projectId: "00000000-0000-0000-0000-000000000000"
     argocd:
       repo:
         https:
@@ -76,9 +76,11 @@ clusters:
 				Name:             "test-cluster",
 				Stage:            "dev",
 				IngressClassName: "traefik",
-				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
 				Type:             "controlplane",
 				DNSName:          "test-cluster.example.com",
+				Terraform: &Terraform{
+					ProjectID: "00000000-0000-0000-0000-000000000000",
+				},
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
 						HTTPS: &RepoType{
@@ -117,10 +119,11 @@ clusters:
 clusters:
   - name: 12345 # This should be a string
     stage: dev
-	ingressClassName: traefik
-    projectId: "123e4567-e89b-12d3-a456-426614174000"
     type: controlplane
     dnsName: test-cluster.example.com
+    ingressClassName: traefik
+    terraform:
+      projectId: "00000000-0000-0000-0000-000000000000"
     argocd: {}
     services: {}
 `
@@ -181,10 +184,10 @@ func TestManager_Validate(t *testing.T) {
 				Name:             "test-cluster",
 				Stage:            "dev",
 				IngressClassName: "traefik",
-				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
 				Type:             "controlplane",
 				DNSName:          "test-cluster.example.com",
 				Terraform: &Terraform{
+					ProjectID:         "00000000-0000-0000-0000-000000000000",
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",
 					DNS: DNS{
@@ -247,7 +250,9 @@ func TestManager_Validate(t *testing.T) {
 	invalidConfigMissingField.Clusters[0].Name = "" // Name is required
 
 	invalidConfigPatternMismatch := deepCopy(validConfig)
-	invalidConfigPatternMismatch.Clusters[0].ProjectID = "not-a-valid-uuid"
+	clonedTerraformPattern := *invalidConfigPatternMismatch.Clusters[0].Terraform
+	clonedTerraformPattern.KubernetesVersion = "not-a-valid-version"
+	invalidConfigPatternMismatch.Clusters[0].Terraform = &clonedTerraformPattern
 
 	invalidConfigEnumMismatch := deepCopy(validConfig)
 	invalidConfigEnumMismatch.Clusters[0].Type = "invalid-type"
@@ -257,6 +262,24 @@ func TestManager_Validate(t *testing.T) {
 	clonedTerraform.DNS.Email = "not-an-email"
 	invalidConfigFormatMismatch.Clusters[0].Terraform = &clonedTerraform
 
+	validConfigWithoutTerraform := deepCopy(validConfig)
+	validConfigWithoutTerraform.Clusters[0].Terraform = nil
+
+	invalidConfigMissingTerraformField := deepCopy(validConfig)
+	clonedTerraformMissing := *invalidConfigMissingTerraformField.Clusters[0].Terraform
+	clonedTerraformMissing.ProjectID = "" // ProjectID is required in Terraform struct
+	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
+
+	validConfigWithLoadBalancerIPs := deepCopy(validConfig)
+	validConfigWithLoadBalancerIPs.Clusters[0].PrivateLoadBalancerIP = "192.168.1.10"
+	validConfigWithLoadBalancerIPs.Clusters[0].PublicLoadBalancerIP = "203.0.113.10"
+
+	invalidConfigInvalidPrivateIP := deepCopy(validConfig)
+	invalidConfigInvalidPrivateIP.Clusters[0].PrivateLoadBalancerIP = "not-an-ip"
+
+	invalidConfigInvalidPublicIP := deepCopy(validConfig)
+	invalidConfigInvalidPublicIP.Clusters[0].PublicLoadBalancerIP = "999.999.999.999"
+
 	tests := []struct {
 		name    string
 		config  *Config
@@ -265,6 +288,11 @@ func TestManager_Validate(t *testing.T) {
 		{
 			name:    "valid_config_should_pass_validation",
 			config:  validConfig,
+			wantErr: false,
+		},
+		{
+			name:    "valid_config_without_terraform_should_pass_validation",
+			config:  validConfigWithoutTerraform,
 			wantErr: false,
 		},
 		{
@@ -285,6 +313,26 @@ func TestManager_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_format_mismatch",
 			config:  invalidConfigFormatMismatch,
+			wantErr: true,
+		},
+		{
+			name:    "invalid_config_should_fail_on_missing_terraform_required_field",
+			config:  invalidConfigMissingTerraformField,
+			wantErr: true,
+		},
+		{
+			name:    "valid_config_with_loadbalancer_ips_should_pass_validation",
+			config:  validConfigWithLoadBalancerIPs,
+			wantErr: false,
+		},
+		{
+			name:    "invalid_config_should_fail_on_invalid_private_loadbalancer_ip",
+			config:  invalidConfigInvalidPrivateIP,
+			wantErr: true,
+		},
+		{
+			name:    "invalid_config_should_fail_on_invalid_public_loadbalancer_ip",
+			config:  invalidConfigInvalidPublicIP,
 			wantErr: true,
 		},
 	}
@@ -312,10 +360,12 @@ func TestManager_SaveToFile(t *testing.T) {
 				Name:             "prod-cluster",
 				Stage:            "production",
 				IngressClassName: "traefik",
-				ProjectID:        "123e4567-e89b-12d3-a456-426614174000",
 				Type:             "controlplane",
 				DNSName:          "prod.example.com",
 				// Keeping other fields zero for a clean test case
+				Terraform: &Terraform{
+					ProjectID: "00000000-0000-0000-0000-000000000000",
+				},
 				ArgoCD:   ArgoCD{},
 				Services: Services{},
 			},

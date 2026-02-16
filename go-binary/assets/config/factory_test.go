@@ -11,30 +11,25 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Data Setup ---
 	// 1. Create a sample environment map that will be the input to the function.
 	sampleEnvMap := &envmap.EnvMap{
-		ProjectName:           "kubara-test",
-		ProjectStage:          "dev",
-		DomainName:            "example.com",
-		StackitProjectId:      "123e4567-e89b-12d3-a456-426614174000",
-		PrivateLoadbalancerIp: "192.168.1.10",
-		PublicLoadbalancerIp:  "203.0.113.10",
-		ArgocdGitHttpsUrl:     "https://github.com/org/repo.git",
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
 	expectedDNSName := "kubara-test-dev.example.com"
 	expectedCluster := Cluster{
-		Name:                  "kubara-test",
-		Stage:                 "dev",
-		ProjectID:             "123e4567-e89b-12d3-a456-426614174000",
-		Type:                  "<controlplane or workerplane>",
-		DNSName:               expectedDNSName,
-		PrivateLoadBalancerIP: "192.168.1.10",
-		PublicLoadBalancerIP:  "203.0.113.10",
-		SSOOrg:                "<my-org>",
-		SSOTeam:               "<my-team>",
-		IngressClassName:      "traefik",
+		Name:             "kubara-test",
+		Stage:            "dev",
+		Type:             "<controlplane or workerplane>",
+		DNSName:          expectedDNSName,
+		SSOOrg:           "<my-org>",
+		SSOTeam:          "<my-team>",
+		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{
