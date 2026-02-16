@@ -220,6 +220,7 @@ func main() {
 			cmd.NewInitCmd(),
 			cmd.NewGenerateCmd(),
 			cmd.NewBootstrapCmd(),
+			cmd.NewSchemaCmd(),
 		},
 		Action: func(cCtx context.Context, cmd *cli.Command) error {
 			return NewAppAction(cmd)

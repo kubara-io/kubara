@@ -1,184 +1,21 @@
 package config
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
 )
 
-func TestNewConfigManager(t *testing.T) {
-	tests := []struct {
-		name     string
-		filePath string
-		want     *Manager
-	}{
-		{
-			name:     "Create a new config manager",
-			filePath: "/tmp/config.yaml",
-			want: &Manager{
-				filepath: "/tmp/config.yaml",
-				config:   &Config{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewConfigManager(tt.filePath)
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func TestManager_Load(t *testing.T) {
-	// Create a temporary directory for test files
-	tempDir := t.TempDir()
-
-	// 1. Valid YAML content for the success case
-	validYAML := `
-clusters:
-  - name: test-cluster
-    stage: dev
-    type: controlplane
-    dnsName: test-cluster.example.com
-    ingressClassName: traefik
-    terraform:
-      projectId: "00000000-0000-0000-0000-000000000000"
-    argocd:
-      repo:
-        https:
-          customer:
-            url: "https://github.com/customer/repo.git"
-            targetRevision: "main"
-          managed:
-            url: "https://github.com/managed/repo.git"
-            targetRevision: "main"
-    services:
-      certManager:
-        status: "enabled"
-        clusterIssuer:
-          name: "letsencrypt-prod"
-          email: "admin@example.com"
-          server: "https://acme-v02.api.letsencrypt.org/directory"
-`
-	validFilepath := filepath.Join(tempDir, "valid_config.yaml")
-	// Use require.NoError for setup, as the test cannot proceed if this fails.
-	require.NoError(t, os.WriteFile(validFilepath, []byte(validYAML), 0644), "Failed to create valid config file")
-
-	// Expected struct for the successful load case
-	expectedConfig := &Config{
-		Clusters: []Cluster{
-			{
-				Name:             "test-cluster",
-				Stage:            "dev",
-				IngressClassName: "traefik",
-				Type:             "controlplane",
-				DNSName:          "test-cluster.example.com",
-				Terraform: &Terraform{
-					ProjectID: "00000000-0000-0000-0000-000000000000",
-				},
-				ArgoCD: ArgoCD{
-					Repo: RepoProto{
-						HTTPS: &RepoType{
-							Customer: Repository{
-								URL:            "https://github.com/customer/repo.git",
-								TargetRevision: "main",
-							},
-							Managed: Repository{
-								URL:            "https://github.com/managed/repo.git",
-								TargetRevision: "main",
-							},
-						},
-					},
-				},
-				Services: Services{
-					CertManager: CertManagerService{
-						ServiceStatus: ServiceStatus{Status: StatusEnabled},
-						ClusterIssuer: ClusterIssuer{
-							Name:   "letsencrypt-prod",
-							Email:  "admin@example.com",
-							Server: "https://acme-v02.api.letsencrypt.org/directory",
-						},
-					},
-				},
-			},
-		},
-	}
-
-	// 2. Malformed YAML for the invalid format case
-	invalidYAML := `clusters: [name: invalid`
-	invalidYAMLFilepath := filepath.Join(tempDir, "invalid_yaml.yaml")
-	require.NoError(t, os.WriteFile(invalidYAMLFilepath, []byte(invalidYAML), 0644), "Failed to create invalid yaml file")
-
-	// 3. Valid YAML with a data type mismatch
-	mismatchYAML := `
-clusters:
-  - name: 12345 # This should be a string
-    stage: dev
-    type: controlplane
-    dnsName: test-cluster.example.com
-    ingressClassName: traefik
-    terraform:
-      projectId: "00000000-0000-0000-0000-000000000000"
-    argocd: {}
-    services: {}
-`
-	mismatchFilepath := filepath.Join(tempDir, "mismatch.yaml")
-	require.NoError(t, os.WriteFile(mismatchFilepath, []byte(mismatchYAML), 0644), "Failed to create mismatch config file")
-
-	// --- Test Cases Definition ---
-	tests := []struct {
-		name       string
-		filepath   string
-		wantConfig *Config
-		wantErr    bool
-	}{
-		{
-			name:       "Success: Correctly loads a valid config file",
-			filepath:   validFilepath,
-			wantConfig: expectedConfig,
-			wantErr:    false,
-		},
-		{
-			name:     "Error: File does not exist",
-			filepath: filepath.Join(tempDir, "non_existent_file.yaml"),
-			wantErr:  true,
-		},
-		{
-			name:     "Error: File has invalid YAML format",
-			filepath: invalidYAMLFilepath,
-			wantErr:  true,
-		},
-		{
-			name:     "Error: File has data type mismatch",
-			filepath: mismatchFilepath,
-			wantErr:  true,
-		},
-	}
-
-	// --- Test Execution ---
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cm := NewConfigManager(tt.filepath)
-			err := cm.Load()
-
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, tt.wantConfig, cm.GetConfig())
-			}
-		})
-	}
-}
-
-func TestManager_Validate(t *testing.T) {
-	// A base valid config to be used in tests.
-	validConfig := &Config{
+// Helper function to create a valid test config
+func newValidTestConfig() *Config {
+	return &Config{
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -236,48 +73,157 @@ func TestManager_Validate(t *testing.T) {
 			},
 		},
 	}
+}
 
-	// Helper function to deep copy the valid config
-	deepCopy := func(c *Config) *Config {
-		newConfig := *c
-		newConfig.Clusters = make([]Cluster, len(c.Clusters))
-		copy(newConfig.Clusters, c.Clusters)
-		return &newConfig
+// Helper function to deep copy a config
+func deepCopyConfig(c *Config) *Config {
+	newConfig := *c
+	newConfig.Clusters = make([]Cluster, len(c.Clusters))
+	copy(newConfig.Clusters, c.Clusters)
+	return &newConfig
+}
+
+func TestNewConfigManager(t *testing.T) {
+	tests := []struct {
+		name     string
+		filePath string
+		want     *Manager
+	}{
+		{
+			name:     "Create a new config manager",
+			filePath: "/tmp/config.yaml",
+			want: &Manager{
+				filepath: "/tmp/config.yaml",
+				config:   &Config{},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := NewConfigManager(tt.filePath)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestManager_Load(t *testing.T) {
+	tempDir := t.TempDir()
+
+	expectedConfig := newValidTestConfig()
+
+	validYAML, err := yaml.Marshal(expectedConfig)
+	require.NoError(t, err, "Failed to marshal valid config to YAML")
+
+	validFilepath := filepath.Join(tempDir, "valid_config.yaml")
+	require.NoError(t, os.WriteFile(validFilepath, validYAML, 0644), "Failed to create valid config file")
+
+	// Malformed YAML syntax
+	invalidYAML := `clusters: [name: invalid`
+	invalidYAMLFilepath := filepath.Join(tempDir, "invalid_yaml.yaml")
+	require.NoError(t, os.WriteFile(invalidYAMLFilepath, []byte(invalidYAML), 0644), "Failed to create invalid yaml file")
+
+	// Valid YAML but wrong data types (name should be string, not int)
+	mismatchYAML := `
+clusters:
+  - name: 12345
+    stage: dev
+    type: controlplane
+    dnsName: test-cluster.example.com
+    ingressClassName: traefik
+    terraform:
+      projectId: "00000000-0000-0000-0000-000000000000"
+    argocd: {}
+    services: {}
+`
+	mismatchFilepath := filepath.Join(tempDir, "mismatch.yaml")
+	require.NoError(t, os.WriteFile(mismatchFilepath, []byte(mismatchYAML), 0644), "Failed to create mismatch config file")
+
+	tests := []struct {
+		name       string
+		filepath   string
+		wantConfig *Config
+		wantErr    bool
+	}{
+		{
+			name:       "Success: Correctly loads a valid config file",
+			filepath:   validFilepath,
+			wantConfig: expectedConfig,
+			wantErr:    false,
+		},
+		{
+			name:     "Error: File does not exist",
+			filepath: filepath.Join(tempDir, "non_existent_file.yaml"),
+			wantErr:  true,
+		},
+		{
+			name:     "Error: File has invalid YAML format",
+			filepath: invalidYAMLFilepath,
+			wantErr:  true,
+		},
+		{
+			name:     "Error: File has data type mismatch",
+			filepath: mismatchFilepath,
+			wantErr:  true,
+		},
 	}
 
-	// --- Test Cases ---
-	invalidConfigMissingField := deepCopy(validConfig)
-	invalidConfigMissingField.Clusters[0].Name = "" // Name is required
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cm := NewConfigManager(tt.filepath)
+			err := cm.Load()
 
-	invalidConfigPatternMismatch := deepCopy(validConfig)
+			if tt.wantErr {
+				assert.Error(t, err)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tt.wantConfig, cm.GetConfig())
+			}
+		})
+	}
+}
+
+func TestManager_Validate(t *testing.T) {
+	validConfig := newValidTestConfig()
+
+	// Test required field validation
+	invalidConfigMissingField := deepCopyConfig(validConfig)
+	invalidConfigMissingField.Clusters[0].Name = ""
+
+	// Test pattern validation (version format)
+	invalidConfigPatternMismatch := deepCopyConfig(validConfig)
 	clonedTerraformPattern := *invalidConfigPatternMismatch.Clusters[0].Terraform
 	clonedTerraformPattern.KubernetesVersion = "not-a-valid-version"
 	invalidConfigPatternMismatch.Clusters[0].Terraform = &clonedTerraformPattern
 
-	invalidConfigEnumMismatch := deepCopy(validConfig)
+	// Test enum validation
+	invalidConfigEnumMismatch := deepCopyConfig(validConfig)
 	invalidConfigEnumMismatch.Clusters[0].Type = "invalid-type"
 
-	invalidConfigFormatMismatch := deepCopy(validConfig)
+	// Test format validation (email)
+	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
 	clonedTerraform := *invalidConfigFormatMismatch.Clusters[0].Terraform
 	clonedTerraform.DNS.Email = "not-an-email"
 	invalidConfigFormatMismatch.Clusters[0].Terraform = &clonedTerraform
 
-	validConfigWithoutTerraform := deepCopy(validConfig)
+	// Terraform is optional at the cluster level
+	validConfigWithoutTerraform := deepCopyConfig(validConfig)
 	validConfigWithoutTerraform.Clusters[0].Terraform = nil
 
-	invalidConfigMissingTerraformField := deepCopy(validConfig)
+	// But if Terraform is present, its required fields must be set
+	invalidConfigMissingTerraformField := deepCopyConfig(validConfig)
 	clonedTerraformMissing := *invalidConfigMissingTerraformField.Clusters[0].Terraform
-	clonedTerraformMissing.ProjectID = "" // ProjectID is required in Terraform struct
+	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
 
-	validConfigWithLoadBalancerIPs := deepCopy(validConfig)
+	// Test optional IP address fields
+	validConfigWithLoadBalancerIPs := deepCopyConfig(validConfig)
 	validConfigWithLoadBalancerIPs.Clusters[0].PrivateLoadBalancerIP = "192.168.1.10"
 	validConfigWithLoadBalancerIPs.Clusters[0].PublicLoadBalancerIP = "203.0.113.10"
 
-	invalidConfigInvalidPrivateIP := deepCopy(validConfig)
+	invalidConfigInvalidPrivateIP := deepCopyConfig(validConfig)
 	invalidConfigInvalidPrivateIP.Clusters[0].PrivateLoadBalancerIP = "not-an-ip"
 
-	invalidConfigInvalidPublicIP := deepCopy(validConfig)
+	invalidConfigInvalidPublicIP := deepCopyConfig(validConfig)
 	invalidConfigInvalidPublicIP.Clusters[0].PublicLoadBalancerIP = "999.999.999.999"
 
 	tests := []struct {
@@ -353,7 +299,6 @@ func TestManager_Validate(t *testing.T) {
 }
 
 func TestManager_SaveToFile(t *testing.T) {
-	// --- Test Data Setup ---
 	testConfig := &Config{
 		Clusters: []Cluster{
 			{
@@ -362,7 +307,6 @@ func TestManager_SaveToFile(t *testing.T) {
 				IngressClassName: "traefik",
 				Type:             "controlplane",
 				DNSName:          "prod.example.com",
-				// Keeping other fields zero for a clean test case
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
@@ -372,21 +316,16 @@ func TestManager_SaveToFile(t *testing.T) {
 		},
 	}
 
-	// --- Test Environment Setup ---
-	// Create a temporary directory for all test files. It will be cleaned up automatically.
 	tempDir := t.TempDir()
 
-	// Filepath for the successful save case
 	successfulFilepath := filepath.Join(tempDir, "config.yaml")
 
-	// Setup for the permission error case: a read-only directory
+	// Create a read-only directory to test permission errors
 	readOnlyDir := filepath.Join(tempDir, "readonly_dir")
-	// Use require here because the test cannot proceed if setup fails
 	require.NoError(t, os.Mkdir(readOnlyDir, 0755))
-	require.NoError(t, os.Chmod(readOnlyDir, 0555)) // r-x r-x r-x
+	require.NoError(t, os.Chmod(readOnlyDir, 0555))
 	permissionErrorFilepath := filepath.Join(readOnlyDir, "config.yaml")
 
-	// --- Test Cases Definition ---
 	type fields struct {
 		filepath string
 		config   *Config
@@ -395,7 +334,7 @@ func TestManager_SaveToFile(t *testing.T) {
 		name      string
 		fields    fields
 		wantErr   assert.ErrorAssertionFunc
-		postCheck func(t *testing.T, filepath string) // Add a function for checks after the save attempt
+		postCheck func(t *testing.T, filepath string)
 	}{
 		{
 			name: "Success: Correctly saves a valid config to a new file",
@@ -405,10 +344,8 @@ func TestManager_SaveToFile(t *testing.T) {
 			},
 			wantErr: assert.NoError,
 			postCheck: func(t *testing.T, filepath string) {
-				// Verify that the file was actually created.
 				assert.FileExists(t, filepath)
 
-				// Read the file and unmarshal it to verify its content.
 				savedBytes, err := os.ReadFile(filepath)
 				require.NoError(t, err, "Failed to read the newly saved file")
 
@@ -416,7 +353,6 @@ func TestManager_SaveToFile(t *testing.T) {
 				err = yaml.Unmarshal(savedBytes, &savedConfig)
 				require.NoError(t, err, "Saved file content should be valid YAML")
 
-				// Assert that the content saved to the file matches the original config.
 				assert.Equal(t, testConfig, &savedConfig)
 			},
 		},
@@ -428,13 +364,11 @@ func TestManager_SaveToFile(t *testing.T) {
 			},
 			wantErr: assert.Error,
 			postCheck: func(t *testing.T, filepath string) {
-				// Verify that the file was not created.
 				assert.NoFileExists(t, filepath)
 			},
 		},
 	}
 
-	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			cm := &Manager{
@@ -442,11 +376,9 @@ func TestManager_SaveToFile(t *testing.T) {
 				config:   tt.fields.config,
 			}
 
-			// This executes the assertion (assert.NoError or assert.Error) on the result of cm.SaveToFile()
 			err := cm.SaveToFile()
 			tt.wantErr(t, err, fmt.Sprintf("SaveToFile() with filepath %s", tt.fields.filepath))
 
-			// If a post-check function is defined for the test case, run it.
 			if tt.postCheck != nil {
 				tt.postCheck(t, tt.fields.filepath)
 			}
@@ -480,6 +412,76 @@ func TestManager_GetFilepath(t *testing.T) {
 				config:   tt.fields.config,
 			}
 			assert.Equalf(t, tt.want, cm.GetFilepath(), "GetFilepath()")
+		})
+	}
+}
+
+func TestGenerateSchema(t *testing.T) {
+	// Verify the generated schema catches validation errors
+	invalidConfig := &Config{
+		Clusters: []Cluster{
+			{
+				Name: "",
+			},
+		},
+	}
+
+	tests := []struct {
+		name          string
+		config        *Config
+		wantErr       bool
+		shouldBeValid bool
+	}{
+		{
+			name:          "Generated schema validates a valid config",
+			config:        newValidTestConfig(),
+			wantErr:       false,
+			shouldBeValid: true,
+		},
+		{
+			name:          "Generated schema rejects an invalid config",
+			config:        invalidConfig,
+			wantErr:       false,
+			shouldBeValid: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			schemaDoc, err := GenerateSchema()
+			if tt.wantErr {
+				assert.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			require.NotNil(t, schemaDoc)
+
+			schemaJSON, err := json.Marshal(schemaDoc)
+			require.NoError(t, err)
+			require.NotEmpty(t, schemaJSON)
+
+			// Compile and test the generated schema
+			const schemaURL = "mem://config.schema.json"
+			c := schemaValidator.NewCompiler()
+			c.AssertFormat()
+			err = c.AddResource(schemaURL, schemaDoc)
+			require.NoError(t, err)
+
+			compiled, err := c.Compile(schemaURL)
+			require.NoError(t, err)
+
+			var instance any
+			data, err := json.Marshal(tt.config)
+			require.NoError(t, err)
+			err = json.Unmarshal(data, &instance)
+			require.NoError(t, err)
+
+			err = compiled.Validate(instance)
+			if tt.shouldBeValid {
+				assert.NoError(t, err, "Schema should validate valid config")
+			} else {
+				assert.Error(t, err, "Schema should reject invalid config")
+			}
 		})
 	}
 }
