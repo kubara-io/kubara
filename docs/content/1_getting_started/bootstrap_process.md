@@ -15,7 +15,7 @@ Whether you're running on STACKIT Cloud or STACKIT Edge, we recommend using the 
 ### 1.1 Environment Configuration
 
 Refer to the [Prerequisites](prerequisites.md) guide and ensure all non-optional tasks in that guide are completed.<br>
-Don't forget to create a repository - all following steps should be executed from within that newly created repository.<br>
+Don't forget to create a new git repository - all following steps should be executed from within that newly created repository.<br>
 The easiest way is to run `kubara` inside the repository (but do not add the binary to git).
 
 ---
@@ -112,85 +112,91 @@ kubara generate --terraform
 
 Commit and push the generated files to your Git repository.
 
-> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
+### 2.1. Terraform Bootstrap
+> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).<br>
+> More information is available under [STACKIT Service Account](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/)
 
-Navigate to:
+After you've successfully created a STACKIT Service Account, you should have a .json with public and secret key inside of it. Put the absolute path of this .json into the 'set-env-changeme.sh' and source it.
+`source <path>/set-env-changeme.sh`
+The set-env-changeme.sh can be found inside the `customer-service-catalog/terraform/<cluster-name>/terraform` folder.
+This file stays on your computer and is included in the .gitignore. It is important that you keep your set-env-changeme.sh local and not accidentaly check it into the source versioning, as it contains secrets.
 
+Having sourced the set-env-change.me.sh now navigate to:
 ```bash
-customer-service-catalog/terraform/<cluster-name>/bootstrap-tfstate-backend
+cd customer-service-catalog/terraform/<cluster-name>/bootstrap-tfstate-backend
 ```
-
-Run:
-
+Inside the directory run:
 ```bash
 terraform init
 terraform plan
 terraform apply
 ```
-
-Use the output to configure Terraform backend credentials:
-
+After the programs have run successfully run this command: 
 ```bash
 terraform output debug
 ```
-
-
+Use the output to configure Terraform backend credentials:
+Set the files in the set-env-changeme.sh or .ps1 and source them. 
+Or you can export them manually via:
 ```bash
 export AWS_ACCESS_KEY_ID="<from terraform output>"
 export AWS_SECRET_ACCESS_KEY="<from terraform output>"
 ```
 
-Then proceed to:
+### 2.2. Provisioning Infrastructure
 
+Then change the directory to:
 ```bash
-customer-service-catalog/terraform/<cluster-name>/infrastructure
+cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 ```
 
 Run:
-
 ```bash
 terraform init
 terraform plan
 ```
 Check the values generated in env.auto.tfvars which is [automatically applied in your Terraform-Deployment.](https://developer.hashicorp.com/terraform/language/values/variables#assign-values-to-variables)
 
+The following command creates the Kubernetes cluster and all required infrastructure.
 ```bash
 terraform apply
 ```
-
-This creates the Kubernetes cluster and all required infrastructure.
 
 Export your kubeconfig:
 
 ```bash
 terraform output -json kubeconfig_raw | jq -r > k8s.yaml
 ```
+For easier reference, put this k8s.yaml inside your project root directory.
+This `k8s.yaml` also should **NOT** be included in your git.
 
-Export additional values to `.env` and `config.yaml`:
 
+Now having generated the config for kubernetes, we are ready for the setting up the .env for the second part.
+Inside the infrastructure directory run.
 ```bash
 terraform output
 ```
-
-Sensitive values (e.g., passwords):
-
+You can get \<sensitive\> values (e.g passwords) by executing:
 ```bash
-tf output vault_user_ro_password_b64
+terraform output vault_user_ro_password_b64
 ```
+Copy and paste the variables like `vault_user_ro_name` from the output into the to `.env` and `config.yaml`:
+In the .env the `SECRETS_MANAGER_PATH` is the `vault_instance_id` and the `SECRETS_MANAGER_URL` is the API endpoint for your secrets manager provider.
 
 > **Note:** Secrets for OAuth2 and Argo CD SSO are not created automatically. Use the provided `secrets.tf-<clustername>` file or insert them manually into Vault.
 
 If you use OAuth2, create a GitHub application as shown [here](../2_managing_your_platform/add_sso.md). We're transitioning to STACKIT Managed Git based on Forgejo.
 
-Set environment variables using:
+Set the OAuth2 environment variables in the set-env-change.sh and after having done that source them again using:
 
 ```bash
-source set-env.sh
+# Assuming you're still in the <path>/terraform/<project-name>/infrastructure folder
+source ../set-env-changeme.sh
 # or for PowerShell
-. .\set-env.ps1
+. .\set-env-changeme.ps1
 ```
-
-Rename `secrets.tf-<clustername>` to `secrets-2.tf` and apply:
+Then still inside the infrastructure directory, 
+rename `secrets.tf-<clustername>` to `secrets-2.tf` and apply:
 
 ```bash
 terraform apply
@@ -209,7 +215,10 @@ terraform state rm \
   random_password.oauth2_cookie_secret
 ```
 
-### 2.2 STACKIT Edge-Specific Notes
+#### Finally:
+Commit the files to your repo again. Pay attention not to commit secrets (e.g no k8s.yaml, secrets-*.tf, .env etc.)
+
+### 2.4. STACKIT Edge-Specific Notes
 
 The provisioning steps remain the same. The only difference lies in the Terraform output:
 
@@ -218,9 +227,8 @@ The provisioning steps remain the same. The only difference lies in the Terrafor
 
 You must manually create the Kubernetes cluster via the IEP/SIT cloud portal. This will be automated in the future.
 
-Now continue with Step 3.
+We can now continue with Step 3.
 
----
 
 ## 3. Helm
 
@@ -242,10 +250,11 @@ admin: change-me
 # ... rest of yaml
 ```
 These are located in the 
-`go-binary/templates/embedded/customer-service-catalog/helm/<cluster>/<chart>/values.yaml` 
+`/customer-service-catalog/helm/<cluster>/<chart>/values.yaml` 
 directory.
 
 The chart directoriees, where the values.yamls files need to be edited are: 
+
 * argo-cd
 * cert-manager
 * external-dns
