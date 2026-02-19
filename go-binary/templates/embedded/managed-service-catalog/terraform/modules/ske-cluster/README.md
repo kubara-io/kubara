@@ -17,7 +17,6 @@ module "ske_cluster" {
     {
       name               = "np-frontend"
       machine_type       = "c1.2"
-      os_version_min     = "4152.2.0"
       minimum            = 2
       maximum            = 4
       availability_zones = ["eu01-1", "eu01-2"]
@@ -29,7 +28,6 @@ module "ske_cluster" {
     {
       name               = "np-backend"
       machine_type       = "c1.2"
-      os_version_min     = "4152.2.0"
       minimum            = 2
       maximum            = 5
       availability_zones = ["eu01-1", "eu01-2", "eu01-3"]
@@ -76,7 +74,7 @@ No modules.
 | <a name="input_kubeconfig_path"></a> [kubeconfig\_path](#input\_kubeconfig\_path) | Filesystem path where the kubeconfig will be written if create\_kubeconfig\_local is true | `string` | `"~/.kube/config"` | no |
 | <a name="input_kubernetes_version_min"></a> [kubernetes\_version\_min](#input\_kubernetes\_version\_min) | Minimum Kubernetes version (e.g. "1.31.7"); uses latest if unset | `string` | `"1.31.8"` | no |
 | <a name="input_name"></a> [name](#input\_name) | Name of the SKE cluster. Can only container 11 characters | `string` | n/a | yes |
-| <a name="input_node_pools"></a> [node\_pools](#input\_node\_pools) | List of node pools. Each element must be an object with:<br/>- name               = string<br/>- machine\_type       = string<br/>- os\_version\_min     = string<br/>- minimum            = number<br/>- maximum            = number<br/>- availability\_zones = list(string)<br/>- labels             = map(string)<br/>- taints             = list(object({<br/>    key    = string<br/>    value  = string<br/>    effect = string<br/>  })) | <pre>list(object({<br/>    name               = string<br/>    machine_type       = string<br/>    os_version_min     = string<br/>    minimum            = number<br/>    maximum            = number<br/>    availability_zones = list(string)<br/>    labels             = map(string)<br/>    taints = list(object({<br/>      key    = string<br/>      value  = string<br/>      effect = string<br/>    }))<br/>  }))</pre> | `[]` | no |
+| <a name="input_node_pools"></a> [node\_pools](#input\_node\_pools) | List of node pools. Each element must be an object with:<br/>- name               = string<br/>- machine\_type       = string<br/>- os\_version\_min     = optional(string)<br/>- minimum            = number<br/>- maximum            = number<br/>- availability\_zones = list(string)<br/>- labels             = map(string)<br/>- taints             = list(object({<br/>    key    = string<br/>    value  = string<br/>    effect = string<br/>  })) | <pre>list(object({<br/>    name               = string<br/>    machine_type       = string<br/>    os_version_min     = optional(string)<br/>    minimum            = number<br/>    maximum            = number<br/>    availability_zones = list(string)<br/>    labels             = map(string)<br/>    taints = list(object({<br/>      key    = string<br/>      value  = string<br/>      effect = string<br/>    }))<br/>  }))</pre> | `[]` | no |
 | <a name="input_project_id"></a> [project\_id](#input\_project\_id) | STACKIT project ID to associate the cluster with | `string` | n/a | yes |
 | <a name="input_refresh"></a> [refresh](#input\_refresh) | Refresh token for the SKE cluster | `bool` | `true` | no |
 | <a name="input_region"></a> [region](#input\_region) | Region for the cluster; falls back to provider region if null | `string` | `"eu01"` | no |
