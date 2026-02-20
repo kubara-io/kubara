@@ -42,6 +42,7 @@ yq eval "${TYPE_PATH} = \"${CLUSTER_TYPE}\"" -i "$CFG"
 
 apply_yaml_if_set KUBARA_SSO_ORG             ".clusters[0].ssoOrg"
 apply_yaml_if_set KUBARA_SSO_TEAM            ".clusters[0].ssoTeam"
+apply_yaml_if_set KUBARA_STACKIT_PROJECT_ID  ".clusters[0].terraform.projectId"
 apply_yaml_if_set KUBARA_KUBERNETES_TYPE     ".clusters[0].terraform.kubernetesType"
 apply_yaml_if_set KUBARA_KUBERNETES_VERSION  ".clusters[0].terraform.kubernetesVersion"
 
