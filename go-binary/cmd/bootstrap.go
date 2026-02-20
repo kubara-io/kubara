@@ -161,17 +161,17 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	return &bootstrap.Options{
-		Kubeconfig:    kubeconf,
+		Kubeconfig:     kubeconf,
 		ManagedCatalog: managedAbsPath,
-		OverlayValues: customerAbsPath,
-		WithES:        flags.WithES,
-		WithProm:      flags.WithProm,
-		WithESCSSPath: cssAbsPath,
-		EnvMap:        envMap,
-		ClusterConfig: clusterConfig,
-		DryRun:        flags.DryRun,
-		Timeout:       flags.Timeout,
-		ClusterName:   clusterName,
+		OverlayValues:  customerAbsPath,
+		WithES:         flags.WithES,
+		WithProm:       flags.WithProm,
+		WithESCSSPath:  cssAbsPath,
+		EnvMap:         envMap,
+		ClusterConfig:  clusterConfig,
+		DryRun:         flags.DryRun,
+		Timeout:        flags.Timeout,
+		ClusterName:    clusterName,
 	}, nil
 }
 

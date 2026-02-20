@@ -24,17 +24,17 @@ const (
 
 // Options for bootstrap operations
 type Options struct {
-	Kubeconfig    string
+	Kubeconfig     string
 	ManagedCatalog string
-	OverlayValues string
-	WithES        bool
-	WithProm      bool
-	WithESCSSPath string
-	EnvMap        *envmap.EnvMap
-	ClusterConfig *config.Cluster
-	DryRun        bool
-	Timeout       time.Duration
-	ClusterName   string
+	OverlayValues  string
+	WithES         bool
+	WithProm       bool
+	WithESCSSPath  string
+	EnvMap         *envmap.EnvMap
+	ClusterConfig  *config.Cluster
+	DryRun         bool
+	Timeout        time.Duration
+	ClusterName    string
 }
 
 type BootstrapChart struct {

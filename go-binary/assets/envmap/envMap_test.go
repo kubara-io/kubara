@@ -210,11 +210,11 @@ func TestEnvMap_ValidateAll(t *testing.T) {
 
 func TestEnvMap_setDefaults(t *testing.T) {
 	tests := []struct {
-		name           string
-		envMap         *EnvMap
-		checkField     func(*EnvMap) string
-		expectedValue  string
-		fieldName      string
+		name          string
+		envMap        *EnvMap
+		checkField    func(*EnvMap) string
+		expectedValue string
+		fieldName     string
 	}{
 		{
 			name:   "Sets default for ProjectName when empty",

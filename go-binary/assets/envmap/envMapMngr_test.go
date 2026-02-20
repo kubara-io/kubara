@@ -334,7 +334,7 @@ func TestManager_SaveToFile(t *testing.T) {
 		ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
 		ArgocdGitPatOrPassword:      "github-token",
 		ArgocdGitUsername:           "git-user",
-		DomainName:         "example.com",
+		DomainName:                  "example.com",
 	}
 
 	successFilepath := filepath.Join(tempDir, "output.env")
