@@ -484,7 +484,7 @@ func TestManager_GenerateEnvExample(t *testing.T) {
 				outputStr := string(output)
 
 				// Check that documentation comments are included
-				assert.Contains(t, outputStr, "# Step 1: Init and Terraform")
+				assert.Contains(t, outputStr, "These values MUST be known BEFORE running Terraform.")
 				assert.Contains(t, outputStr, "### Project related values")
 
 				// Check that all required fields are present with default values
