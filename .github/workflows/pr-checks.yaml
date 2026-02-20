@@ -409,6 +409,9 @@ jobs:
               echo "📄 Rendering chart with default values"
               helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
             fi
+            # CRD status is server-populated and may contain null placeholders in chart output.
+            # Remove it before schema validation to avoid false negatives in kubeconform.
+            yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$OUT_DIR/render.yaml"
             echo "🔎 Validating rendered manifests with kubeconform"
             if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
                 -schema-location default \
