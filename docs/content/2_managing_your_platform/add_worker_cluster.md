@@ -1,39 +1,42 @@
 # Add Worker Cluster
 
-After you have deployed your controlplane, you can add additional Kubernetes worker clusters and manage them through Argo CD.
-The process is similar to the bootstrap process of your controlplane.
+After your control plane is running, you can add more Kubernetes worker clusters and manage them through Argo CD.
 
-There are two ways to add a worker cluster.
-If your worker cluster already exists, you need to follow different steps than when creating a new worker cluster using Terraform with Kubara.
-After following these steps, you should understand which parts are required in both cases.
+You can onboard:
 
+* a new cluster provisioned with Kubara Terraform templates, or
+* an existing cluster you already operate.
 
-## **Add information to `config.yaml`**
+The Argo CD integration flow is the same in both cases.
 
-You can add as many external clusters as you need by adding a new cluster block to `config.yaml`:
+## 1. Add worker cluster to `config.yaml`
+
+Add a new cluster entry:
 
 ```yaml
+clusters:
   - name: workload-0
     stage: dev
-    projectId: 38867e9e-...
-    type: workerplane
-    dnsName: your-domain.dev.stackit.run # used for creating ingresses and domain filters for external-dns
-    ssoOrg: xy-org
-    ssoTeam: xy-team
+    type: worker
+    dnsName: workload-0.dev.example.com
+    ingressClassName: traefik
+    ssoOrg: my-org
+    ssoTeam: my-team
     terraform:
+      projectId: <project-id>
       kubernetesType: ske
-      kubernetesVersion: 1.33.4
+      kubernetesVersion: 1.34
       dns:
-        name: your-domain.dev.stackit.run # used by Terraform to create a managed DNS zone
-        email: xy@kubara.io # not used for cert-manager issuer creation, only for contact purposes in StackIT
+        name: workload-0.dev.example.com
+        email: platform@example.com
     argocd:
       repo:
         https:
           customer:
-            url: https://kuba.....
+            url: https://git.example.com/platform/repo.git
             targetRevision: main
           managed:
-            url: https://kubar.....
+            url: https://git.example.com/platform/repo.git
             targetRevision: main
     services:
       argocd:
@@ -42,7 +45,7 @@ You can add as many external clusters as you need by adding a new cluster block 
         status: enabled
         clusterIssuer:
           name: letsencrypt-staging
-          email: xy@kubara.io # used for cert-manager cluster issuer creation
+          email: platform@example.com
           server: https://acme-staging-v02.api.letsencrypt.org/directory
       externalDns:
         status: enabled
@@ -50,7 +53,7 @@ You can add as many external clusters as you need by adding a new cluster block 
         status: enabled
       kubePrometheusStack:
         status: enabled
-      ingressNginx:
+      traefik:
         status: enabled
       kyverno:
         status: enabled
@@ -72,140 +75,119 @@ You can add as many external clusters as you need by adding a new cluster block 
         status: disabled
 ```
 
-
-## **Run Kubara to template the Terraform part**
-
-Once you`ve added the cluster information to `config.yaml`, run Kubara to generate the Terraform templates:
+## 2. Regenerate Terraform and Helm templates
 
 ```bash
-kubara --terraform
+kubara generate --terraform
+kubara generate --helm
 ```
 
-After that, you should see a new folder under
-`customer-service-catalog/terraform/cluster-name` with the name of your cluster.
+This creates/updates the worker cluster overlays in:
 
-Next, follow the same steps as when bootstrapping the controlplane:
-First, create the bucket and backend for Terraform, then apply the infrastructure to create the managed Vault, DNS zone, and Kubernetes cluster.
+* `customer-service-catalog/terraform/<worker-cluster-name>/...`
+* `customer-service-catalog/helm/<worker-cluster-name>/...`
 
-Extract the kubeconfig with:
+## 3. Prepare the worker cluster
 
-```bash
-terraform output -json kubeconfig_raw | jq -r > worker-cluster1.kubeconfig
-```
+If this is a new cluster, apply Terraform for the worker entry.
+If the cluster already exists, skip Terraform and continue.
 
-Also extract the Vault username and password to add them later to the `.env` file:
-
-```bash
-terraform output
-
-# get the sensitive password
-terraform output tf_output_vault_user_ro_password_b64
-```
-
-
-## **Add information to the `.env`**
-
-**Note:** Every time you create a new worker cluster, you need to replace the Vault credentials in the `.env` file.
-At the moment, only one cluster can be added at a time.
-
-```env
-....
-### Currently only one additional vault for all workers is supported
-# Sets the connection credentials for the worker vault
-WORKER_SECRETS_MANAGER_USERNAME_BASE64='c21nNTM..'
-WORKER_SECRETS_MANAGER_PASSWORD_BASE64='Nyl4...'
-```
-
-## **Add necessary manifests to Kubernetes**
-
-The worker cluster requires some manifests before it can be managed.
-You can create them using the Kubara binary:
-
-```bash
-kubara --kubeconfig /path/to/worker-cluster1.kubeconfig --create-secrets-worker
-```
-
-This will add the necessary secrets and Custom Resource Definitions to the `worker-cluster1`.
-
-
-## **Add kubeconfig to Vault**
-
-Add the cluster`s kubeconfig (YAML) to Vault.
-If you name the secret `my_clusters`, the secret`s key could be named `k8s-worker-0`:
+You need the worker cluster kubeconfig for registration in Argo CD.
+Store it in your secret backend (Vault/Secret Manager), for example:
 
 ```json
 {
   "my_clusters": {
-    "k8s-worker-0": "<the kubeconfig>",
-    "k8s-worker-99": "<another kubeconfig>"
+    "k8s-worker-0": "<worker kubeconfig yaml>"
   }
 }
 ```
 
-## **Modify Argo CD overlays**
+## 4. Prepare external-secrets credentials on the worker cluster
 
-Make sure the names match those you used in your project.
-With `additionalLabels`, you can define which apps will be deployed to your new cluster.
-The `remoteRef` directive points the ExternalSecret to the kubeconfig you added to Vault earlier.
+Create provider credentials as Kubernetes secret(s), for example:
 
-In your overlay values (`argo-cd/values.yaml`), set these directives:
+```bash
+# Bitwarden
+kubectl -n external-secrets create secret generic bitwarden-access-token \
+  --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
+
+# STACKIT Secrets Manager
+kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
+  --from-literal=username="<USERNAME>" \
+  --from-literal=password="<PASSWORD>"
+```
+
+Then configure the worker ClusterSecretStore in:
+`customer-service-catalog/helm/<worker-cluster-name>/external-secrets/additional-values.yaml`
+
+Example:
+
+```yaml
+clusterSecretStores:
+  - name: workload-0-dev
+    labels:
+      argocd.argoproj.io/instance: workload-0-external-secrets
+    provider:
+      vault:
+        auth:
+          userPass:
+            path: userpass
+            secretRef:
+              name: stackit-secrets-manager-cred
+              namespace: external-secrets
+              key: password
+            username: "<USERNAME>"
+        path: "<VAULT_PATH>"
+        server: "https://vault.example.com"
+        version: v2
+```
+
+## 5. Register worker cluster in Argo CD
+
+Update the control plane overlay:
+`customer-service-catalog/helm/<controlplane-cluster-name>/argo-cd/values.yaml`
 
 ```yaml
 bootstrapValues:
-    cluster:
-        - name: my-new-worker0
-          project: controlplane-production
-          remoteRef:
-              remoteKey: my_clusters
-              remoteKeyProperty: k8s-worker-0
-          secretStoreRef:
-              kind: ClusterSecretStore
-              name: <cluster.name>-<cluster.stage>
-          additionalLabels:
-              cert-manager: enabled
-              external-dns: enabled
-              external-secrets: enabled
-              ingress-nginx: enabled
-              kube-prometheus-stack: enabled
-              kyverno: enabled
-              kyverno-policies: enabled
-              kyverno-policy-reporter: enabled
-              loki: enabled
-              oauth2-proxy: enabled
+  cluster:
+    - name: my-new-worker0
+      project: controlplane-production
+      remoteRef:
+        remoteKey: my_clusters
+        remoteKeyProperty: k8s-worker-0
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: <controlplane-cluster-name>-<stage>
+      additionalLabels:
+        cert-manager: enabled
+        external-dns: enabled
+        external-secrets: enabled
+        traefik: enabled
+        kube-prometheus-stack: enabled
+        kyverno: enabled
+        kyverno-policies: enabled
+        kyverno-policy-reporter: enabled
+        loki: enabled
+        oauth2-proxy: enabled
 ```
 
-Here`s what happens behind the scenes (Argo CD values part only):
+The `remoteRef` points to the worker kubeconfig secret in your secret backend.
 
 ![Add Workload Cluster](../images/add-workload-cluster.png)
 
-## **Run the templater**
+## 6. Commit and roll out
 
-Once all information is added, run the templater with:
+Commit and push all updated files.
+
+If Argo CD manages itself, it will reconcile automatically.
+If not, run bootstrap again for your control plane cluster:
 
 ```bash
-kubara generate --helm
+kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
 
+## Additional notes
 
-You will notice a new directory inside the overlay folder. The directory name is derived from the cluster name you added
-in `config.yaml`.
-
-
-## **Push your changes to Git**
-
-Don`t forget to push your changes to the Git repository connected to your Argo CD instance.
-If Argo CD manages itself, it will automatically add the cluster and roll out the configured applications.
-
-
-## **Additional notes**
-
-- If you enable `oauth2-proxy`, make sure to set up OAuth apps in your SSO provider and add the credentials to the Vault used by External Secrets on the workload cluster.
-  Otherwise, the created `ExternalSecret` for `oauth2-proxy` won`t be able to fetch the credentials, and the deployment will fail.
-
-- If you alredy have a cluster, you can still use kubara to manage it.
-  - you will need to extract the kubeconfig of your existing cluster and add it to Vault as described above.
-  - you will need to extract the managed vault username and password and add them base64 encoded to the `.env` file as described above.
-  - after you add vault username and password to the `.env` file, you can run the --create-secrets-worker command to add necessary secrets to your existing cluster.
-  - then you will need to modify the config.yaml file and run kubara --helm to generate the helm overlays for your existing cluster.
-  - also dont forget to modify the argo-cd/values.yaml file to add the new cluster with correct remoteRe, secretStoreRef and additionalLabels
-  - finally push all changes to git repository
+* If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the worker cluster.
+* `additional-values.yaml` is optional but recommended for provider-specific overrides, because generated `values.yaml` can be re-rendered by Kubara.

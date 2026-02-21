@@ -24,7 +24,7 @@ graph TD
     B[🤖 'Kubara generate' <br> generates tf & charts] --> C;
     C[📤 Commit & Push to Git] --> D{Apply Terraform?};
     D -- Yes --> G[☁️ Apply Cloud Resources];
-    G --> I[🔑 Apply kubeconfig & 'Kubara --bootstrap-argocd'];
+    G --> I[🔑 Apply kubeconfig & 'kubara bootstrap <cluster-name>'];
     D -- No --> I;
     I --> F[Enjoy your Kubara Deployment 🎉];
 ```
@@ -32,9 +32,9 @@ graph TD
 1. Platform Engineer must set parameters in config files (⚠️Caution: Environment variables have priority over config values)
 2. "Kubara generate" templates and creates Terraform & Umbrella Helm-Charts.   
 Now you should commit and push your templates to your git and optionally apply Terraform
-3. "kubara --bootstrap-argocd" will rollout ArgoCD
-4. Kubara will push all secrets to the Secretsmanager for safe handling.
-Argo will manage it self and will roll out all [generated Helm Charts](../3_components/components_overview.md)
+3. `kubara bootstrap <cluster-name>` rolls out Argo CD and required CRDs to your control plane cluster.
+4. Secrets are synced via External Secrets based on your configured SecretStore/ClusterSecretStore.
+Argo CD manages itself and rolls out all [generated Helm Charts](../3_components/components_overview.md).
 
 
 

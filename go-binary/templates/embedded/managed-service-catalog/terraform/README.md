@@ -25,12 +25,13 @@ customer-service-catalog/
 └── terraform/
     └── <CLUSTERNAME>/
         ├── bootstrap-tfstate-backend/
-        └── infrastructure/
-            ├── env.auto.tfvars     # 🔧 Adjust this file, if you need
-            ├── main.tf
-            ├── variables.tf
-            ├── terraform.tf
-            └── set-env.sh/.ps1
+        ├── infrastructure/
+        │   ├── env.auto.tfvars     # 🔧 Adjust this file, if you need
+        │   ├── main.tf
+        │   ├── variables.tf
+        │   └── terraform.tf
+        ├── set-env-changeme.sh
+        └── set-env-changeme.ps1
 managed-service-catalog/
 └── terraform/
     └── modules/                   # Reusable Terraform modules
@@ -188,7 +189,7 @@ export AWS_SECRET_ACCESS_KEY="..."
 Then re-source your environment:
 
 ```bash
-source ../infrastructure/set-env.sh
+source ../set-env.sh
 ```
 
 ---

@@ -24,17 +24,31 @@ The general steps are:
 
 ## **Add Override Values to your customer-service-catalog**
 Add Override Values to your `customer-service-catalog`:<br>
-customer-service-catalog/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml
+customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml
+
+Optional: Add `additional-values.yaml` in the same chart folder for cluster-specific overrides.
+The generated ApplicationSet already references both `values.yaml` and `additional-values.yaml`.
 
 ## **Modify argoCD overlays**
 This is an example on how to add an AppSet to the controlplane.
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
 bootstrapValues:
-  applicationSets:
-    - apps:
-      - name: my-new-service # This will determine the generated AppName
-        path: my-new-servie-in-a-long-dir-name # This points to the directory you created for the chart inside managed-service-catalog
+  applicationSets:  # usually your existing controlplane key (for example "<cluster>-<stage>")
+    my-controlplane-dev:
+      projectName: my-controlplane-dev
+      managedServices:
+        repoURL: https://your-repo.example/managed.git
+        path: managed-service-catalog/helm
+        targetRevision: main
+      customerServices:
+        repoURL: https://your-repo.example/customer.git
+        path: customer-service-catalog/helm
+        targetRevision: main
+      apps:
+        my-new-service:
+          name: my-new-service # This will determine the generated AppName
+          path: my-new-servie-in-a-long-dir-name # This points to the directory you created for the chart inside managed-service-catalog
 inClusterSecretLabels:
   my-new-service: enabled
     
@@ -48,9 +62,9 @@ Do not forget to push your changes to the git repository that serves your argoCD
 If you let argoCD manage itself, it will add the configured application to the cluster.
 
 ## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see config.yaml#services.argocd.enabled="disabled") altering argocd values will have no affect until you run
+If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run
 ```bash
-kubara --bootstrap-argocd
+kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
 again
 
@@ -59,17 +73,19 @@ If you want to add an application that is stored in another repository you can u
 ```yaml
 bootstrapValues:
   applicationSets:
-    - apps:
-        - name: akv2k8s
+    my-controlplane-dev:
+      apps:
+        akv2k8s:
+          name: akv2k8s
           sources:
+            - repoURL: "https://your-repo.de/with-overlay-values"
+              targetRevision: "main"
+              ref: valuesRepo
             - repoURL: https://charts.spvapi.no
               chart: akv2k8s
               targetRevision: "2.7.3"
               helm:
                 valueFiles:
-                # Kepp the `{{name}}`. The AppSet Controller will inject the clustername in the variable
-                - "$valuesRepo/customer-service-catalog/helm/{{name}}/akv2k8s/values.yaml"
-            - repoURL: "https://your-repo.de/with-overlay-values"
-              targetRevision: "main"
-              ref: valuesRepo
+                  # Keep `{{name}}`: the AppSet controller injects the cluster name
+                  - "$valuesRepo/customer-service-catalog/helm/{{name}}/akv2k8s/values.yaml"
 ```

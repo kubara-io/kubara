@@ -69,8 +69,8 @@ Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrap_process.m
 
 - Install the CLI
 - Prepare your `.env` and `config.yaml`
-- Run `kubara init` and `kubara generate`
-- Bootstrap Argo CD with `kubara --bootstrap-argocd`
+- Run `kubara init`, `kubara schema` (optional) and `kubara generate`
+- Bootstrap Argo CD with `kubara bootstrap <cluster-name>`
 
 You're done 🎉
 
