@@ -25,7 +25,7 @@ variable "node_pools" {
 List of node pools. Each element must be an object with:
 - name               = string
 - machine_type       = string
-- os_version_min     = string
+- os_version_min     = optional(string)
 - minimum            = number
 - maximum            = number
 - availability_zones = list(string)
@@ -39,7 +39,7 @@ EOF
   type = list(object({
     name               = string
     machine_type       = string
-    os_version_min     = string
+    os_version_min     = optional(string)
     minimum            = number
     maximum            = number
     availability_zones = list(string)

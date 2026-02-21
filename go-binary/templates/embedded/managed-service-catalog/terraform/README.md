@@ -147,7 +147,6 @@ node_pools = [
             maximum            = 4
             minimum            = 2
             name               = "pool-infra"
-            os_version_min     = "4152.2.3"
             labels = {
                 "project" = "public-cloud-demo"
                 "role"    = "infra"
