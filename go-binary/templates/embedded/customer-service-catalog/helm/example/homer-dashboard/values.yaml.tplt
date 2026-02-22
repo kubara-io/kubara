@@ -111,6 +111,12 @@ dashboardConfig:
           subtitle: "Policy Reporter Dashboard"
           target: "_blank"
         {{- end }}
+        {{- if and (eq .cluster.services.traefik.status "enabled") (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        - name: "traefik"
+          url: "https://{{ .cluster.dnsName }}/traefik/dashboard/"
+          subtitle: "Traefik Dashboard"
+          target: "_blank"
+        {{- end }}
     - name: "DevOps Links"
       items:
         - name: "Secretsmanager"

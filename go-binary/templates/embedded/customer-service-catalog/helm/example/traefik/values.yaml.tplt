@@ -2,6 +2,25 @@ traefik:
   deployment:
     imagePullSecrets:
       - name: image-pull-secret
+  api:
+    dashboard: true
+    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    basePath: /traefik
+    {{- end }}
+  ingressRoute:
+    dashboard:
+      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      enabled: true
+      entryPoints:
+        - websecure
+      matchRule: Host(`{{ .cluster.dnsName }}`) && PathPrefix(`/traefik`)
+      middlewares:
+        - name: oauth-auth
+          namespace: oauth2-proxy
+      tls: {}
+      {{- else }}
+      enabled: false
+      {{- end }}
   metrics:
     prometheus:
       serviceMonitor:
