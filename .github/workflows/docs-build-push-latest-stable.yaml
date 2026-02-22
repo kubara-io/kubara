@@ -1,0 +1,72 @@
+name: build/publish docs latest-stable
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: docs-gh-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ./docs
+    steps:
+      - name: Checkout kubara repo
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+
+      - name: Set up Python
+        id: setup-python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14.3'
+          cache: 'pip'
+          cache-dependency-path: 'docs/Pipfile.lock'
+
+      - name: Cache pipenv virtualenvs
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/share/virtualenvs
+          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('docs/Pipfile.lock') }}
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          python -m pip install --user --no-warn-script-location pipenv
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/pipenv" install --deploy
+
+      - name: Configure git for mike deploy
+        run: |
+          set -euo pipefail
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Build and publish tagged release to gh-pages
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_REF_NAME}"
+          "$HOME/.local/bin/pipenv" run mike deploy \
+            --update-aliases \
+            --push \
+            --branch gh-pages \
+            "$VERSION" latest-stable
+
+          # Keep root docs landing page on the stable alias.
+          "$HOME/.local/bin/pipenv" run mike set-default \
+            --push \
+            --branch gh-pages \
+            latest-stable
+
