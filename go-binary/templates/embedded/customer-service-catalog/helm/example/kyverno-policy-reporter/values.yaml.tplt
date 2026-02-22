@@ -47,5 +47,4 @@ middleware:
   stripPrefix:
     prefixes:
       - /kyverno
-    forceSlash: false
 {{- end }}

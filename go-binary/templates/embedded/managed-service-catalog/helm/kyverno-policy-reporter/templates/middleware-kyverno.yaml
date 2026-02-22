@@ -11,5 +11,4 @@ spec:
       {{- range $mw.stripPrefix.prefixes }}
       - {{ . }}
       {{- end }}
-    forceSlash: {{ $mw.stripPrefix.forceSlash | default false }}
 {{- end }}
