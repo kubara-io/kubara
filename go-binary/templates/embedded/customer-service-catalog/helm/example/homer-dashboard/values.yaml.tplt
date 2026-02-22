@@ -113,6 +113,7 @@ dashboardConfig:
         {{- end }}
         {{- if and (eq .cluster.services.traefik.status "enabled") (eq .cluster.services.oauth2Proxy.status "enabled") }}
         - name: "traefik"
+          logo: "/assets/tools/traefik.png"
           url: "https://{{ .cluster.dnsName }}/traefik/dashboard/"
           subtitle: "Traefik Dashboard"
           target: "_blank"
