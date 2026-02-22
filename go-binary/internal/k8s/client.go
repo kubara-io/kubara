@@ -82,6 +82,26 @@ func NewClient(cfg Config) (*Client, error) {
 	}, nil
 }
 
+// RefreshDiscovery invalidates discovery cache and resets the REST mapper so
+// newly installed CRDs are discoverable within the same process.
+func (c *Client) RefreshDiscovery() {
+	if c == nil {
+		return
+	}
+
+	if c.Discovery != nil {
+		c.Discovery.Invalidate()
+	}
+
+	type resettableMapper interface {
+		Reset()
+	}
+
+	if mapper, ok := c.RESTMapper.(resettableMapper); ok {
+		mapper.Reset()
+	}
+}
+
 // initScheme initializes the scheme with CRD support
 func initScheme() error {
 	_ = apiextensions.AddToScheme(scheme.Scheme)

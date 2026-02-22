@@ -127,6 +127,9 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 	if err := applyCRDs(ctx, client, opts, bootstrapCharts); err != nil {
 		return fmt.Errorf("applying CRDs: %w", err)
 	}
+	// Refresh discovery/REST mapper so CRDs installed above are visible for
+	// subsequent server-side apply calls in the same bootstrap run.
+	client.RefreshDiscovery()
 
 	// Step 5: Apply secrets before ArgoCD
 	if err := applySecrets(ctx, client, opts); err != nil {

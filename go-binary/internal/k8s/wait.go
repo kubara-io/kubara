@@ -7,41 +7,54 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/watch"
 )
 
 // WaitForPod waits for a pod to be ready based on label selector
 func (c *Client) WaitForPod(ctx context.Context, namespace, labelSelector string) error {
-	watcher, err := c.Clientset.CoreV1().Pods(namespace).Watch(ctx, metav1.ListOptions{
-		LabelSelector: labelSelector,
-	})
-	if err != nil {
-		return fmt.Errorf("creating pod watcher: %w", err)
+	ticker := time.NewTicker(2 * time.Second)
+	defer ticker.Stop()
+	var lastErr error
+
+	checkReady := func() (bool, error) {
+		podList, err := c.Clientset.CoreV1().Pods(namespace).List(ctx, metav1.ListOptions{
+			LabelSelector: labelSelector,
+		})
+		if err != nil {
+			return false, err
+		}
+
+		for i := range podList.Items {
+			if isPodReady(&podList.Items[i]) {
+				return true, nil
+			}
+		}
+
+		return false, nil
 	}
-	defer watcher.Stop()
+
+	// Fast-path in case the pod is already ready when the wait starts.
+	if ready, err := checkReady(); err != nil {
+		lastErr = err
+	} else if ready {
+		return nil
+	}
 
 	for {
 		select {
-		case event, ok := <-watcher.ResultChan():
-			if !ok {
-				// Channel closed unexpectedly
-				return fmt.Errorf("watch channel closed unexpectedly")
-			}
-			if event.Type == watch.Deleted {
+		case <-ticker.C:
+			ready, err := checkReady()
+			if err != nil {
+				lastErr = err
 				continue
 			}
-
-			pod, ok := event.Object.(*corev1.Pod)
-			if !ok {
-				continue
-			}
-
-			if isPodReady(pod) {
+			if ready {
 				return nil
 			}
-
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for pod with selector %s to be ready", labelSelector)
+			if lastErr != nil {
+				return fmt.Errorf("timeout waiting for pod with selector %s to be ready (last list error: %v): %w", labelSelector, lastErr, ctx.Err())
+			}
+			return fmt.Errorf("timeout waiting for pod with selector %s to be ready: %w", labelSelector, ctx.Err())
 		}
 	}
 }
