@@ -6,10 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  issues: write
-  pull-requests: write
-  workflows: write
+  contents: read
 
 concurrency:
   group: renovate
