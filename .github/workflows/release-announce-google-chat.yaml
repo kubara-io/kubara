@@ -1,0 +1,102 @@
+name: announce release in Google Chat
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag to announce (e.g. v1.2.3)'
+        required: true
+        type: string
+      confirm_send:
+        description: 'Actually send the message to Google Chat'
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: read
+
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RELEASE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RELEASE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+
+      - name: Fetch GitHub release and compose message
+        id: compose
+        env:
+          TAG: ${{ inputs.tag }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          API="https://api.github.com/repos/${REPO}/releases/tags/${TAG}"
+          RESP=$(curl -sS -w "\nHTTP_STATUS:%{http_code}\n" \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${GITHUB_TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "$API")
+
+          STATUS=$(echo "$RESP" | sed -n 's/HTTP_STATUS://p')
+          BODY_JSON=$(echo "$RESP" | sed '/HTTP_STATUS:/d')
+
+          echo "HTTP status: ${STATUS}"
+          if [ "$STATUS" != "200" ]; then
+            echo "GitHub release API call failed (status ${STATUS})" >&2
+            echo "$BODY_JSON" >&2
+            exit 1
+          fi
+
+          NOTES_RAW=$(echo "$BODY_JSON" | jq -r '.body // ""')
+          URL=$(echo "$BODY_JSON" | jq -r '.html_url // ""')
+
+          PAYLOAD=$(jq -n \
+            --arg tag "$TAG" \
+            --arg url "$URL" \
+            --arg notes "$NOTES_RAW" \
+            '{
+              text:
+                ("*Kubara " + $tag + " is released now!*" + "\n\n" +
+                 "Hi Kubara Community! @all" + "\n" +
+                 "Happy to share that we released " + $tag + " of Kubara today: " + $url + "\n\n" +
+                 "Check out the release notes below and feel free to ask questions in this group." + "\n\n" +
+                 $notes)
+            }')
+
+          {
+            echo 'payload<<EOF'
+            echo "$PAYLOAD"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Preview message payload
+        env:
+          PAYLOAD: ${{ steps.compose.outputs.payload }}
+        run: |
+          printf '%s\n' "$PAYLOAD"
+
+      - name: Stop without sending (confirmation not enabled)
+        if: ${{ !inputs.confirm_send }}
+        run: |
+          echo "confirm_send=false -> preview only, no message sent."
+
+      - name: Send message to Google Chat
+        if: ${{ inputs.confirm_send }}
+        env:
+          GOOGLE_CHAT_WEBHOOK_URL: ${{ secrets.GOOGLE_CHAT_WEBHOOK_URL }}
+          PAYLOAD: ${{ steps.compose.outputs.payload }}
+        run: |
+          set -euo pipefail
+          curl -sS -X POST \
+            -H "Content-Type: application/json" \
+            --data "$PAYLOAD" \
+            "${GOOGLE_CHAT_WEBHOOK_URL}"
