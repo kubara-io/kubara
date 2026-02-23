@@ -5,5 +5,12 @@
     "aliases": [
       "latest-dev"
     ]
+  },
+  {
+    "version": "v0.6.0",
+    "title": "v0.6.0",
+    "aliases": [
+      "latest-stable"
+    ]
   }
 ]
