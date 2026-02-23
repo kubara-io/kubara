@@ -1,15 +1,40 @@
 ---
 version: 2
 project_name: kubara
-gitea_urls:
-  api: https://kubara.git.onstackit.cloud/api/v1
-  download: https://kubara.git.onstackit.cloud
 release:
-  gitea:
-    owner: STACKIT
+  github:
+    owner: kubara-io
     name: kubara
-  draft: false
+  draft: true
   replace_existing_draft: true
+changelog:
+  use: git
+  sort: asc
+  filters:
+    exclude:
+      - '^.*?Merge (pull request|branch).*$'
+      - '^.*?chore\(release\):.+$'
+  groups:
+    - title: Breaking changes
+      regexp: '^.*?[a-z]+(\([^)]+\))?!:.+$'
+      order: 1
+    - title: Features
+      regexp: '^.*?feat(\([^)]+\))?:.+$'
+      order: 10
+    - title: Bug fixes
+      regexp: '^.*?fix(\([^)]+\))?:.+$'
+      order: 20
+    - title: Dependency updates
+      regexp: '^.*?[a-z]+\((deps[^)]*)\)!?:.+$|^.*?deps(\([^)]+\))?!?:.+$|^.*?bump .+$'
+      order: 30
+    - title: Documentation
+      regexp: '^.*?docs(\([^)]+\))?!?:.+$'
+      order: 40
+    - title: CI / Build
+      regexp: '^.*?(build|ci)(\([^)]+\))?!?:.+$'
+      order: 50
+    - title: Other changes
+      order: 999
 builds:
   - id: kubara
     main: ./main.go
