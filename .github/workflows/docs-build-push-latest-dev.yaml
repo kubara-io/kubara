@@ -50,6 +50,11 @@ jobs:
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
           "$HOME/.local/bin/pipenv" install --deploy
 
+      - name: Validate docs build (strict)
+        run: |
+          set -euo pipefail
+          "$HOME/.local/bin/pipenv" run mkdocs build --strict
+
       - name: Configure git for mike deploy
         run: |
           set -euo pipefail
