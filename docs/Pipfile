@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 babel = "==2.18.0"
-backrefs = "==6.1"
+backrefs = "==6.2"
 certifi = "==2026.1.4"
 charset-normalizer = "==3.4.4"
 click = "==8.3.1"
