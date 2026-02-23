@@ -69,4 +69,3 @@ jobs:
             --push \
             --branch gh-pages \
             latest-stable
-

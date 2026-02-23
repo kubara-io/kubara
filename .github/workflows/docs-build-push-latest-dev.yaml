@@ -64,4 +64,3 @@ jobs:
             --push \
             --branch gh-pages \
             next latest-dev
-
