@@ -50,10 +50,8 @@ If you are relying on publicly available images (e.g. from dockerhub) you need a
     -  OAuth2-Proxy App (reverse proxy) that handles authentication for most dashboards
     -  Argo CD App that handles authentication for Argo CD  UI. Dex is used for handling Argo CD  RBAC once authenticated
     -  Grafana App that handles authentication for Grafana.
-- **Initial Kubernetes secrets for external-secrets (required when not using managed identities)**
-Create provider credential secret(s) in the target cluster namespace (usually `external-secrets`) before bootstrap.
-- **ClusterSecretStore definition (recommended)**
-Prepare a `ClusterSecretStore` manifest matching your provider, either applied manually or passed to `kubara bootstrap --with-es-css-file`.
+- **Credentials for external-secrets / secret backend (required when not using managed identities)**
+Prepare the provider credentials you will need later during bootstrap to create the Kubernetes secret(s) and configure external-secrets / `ClusterSecretStore` (see the bootstrap guide).
 
 ---
 

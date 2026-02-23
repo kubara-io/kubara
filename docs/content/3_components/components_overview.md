@@ -45,11 +45,11 @@ More tools will be added in future releases of the kubara framework.
 
 ## 5. Network
 
-| Tool                                                                                                                                                     | Description                                                                                                        | Functionality                  | Key Features                                                                            |
-|----------------------------------------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------| ------------------------------ | --------------------------------------------------------------------------------------- |
+| Tool                                                                             | Description                                                                                                        | Functionality                  | Key Features                                                                            |
+|----------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------------------| ------------------------------ | --------------------------------------------------------------------------------------- |
 | <div style="width: 80px;">![External DNS](../images/external-dns-logo.png)</div> | External DNS. Sync DNS records from Kubernetes to external DNS providers.                                          | DNS automation                 | - AWS Route53, Google DNS support<br>- Auto DNS updates<br>- Label-based mapping        |
-| <div style="width: 80px;">Traefik</div> | Traefik ingress controller for HTTP/HTTPS routing in Kubernetes. | Web traffic routing            | - Ingress and IngressRoute support<br>- Middleware support<br>- Path/host-based routing |
-| <div style="width: 80px;">![MetalLB](../images/metallb-logo.png) </div>  | MetallLB. Load balancer for bare-metal Kubernetes clusters.                                                        | Load balancing                 | - Layer 2 and BGP modes<br>- IP address pool management<br>- Simple configuration       |
+| <div style="width: 80px;">![Traefik](../images/traefik-logo.png)</div>            | Traefik ingress controller and API gateway for HTTP/HTTPS routing in Kubernetes. | Web traffic routing / API gateway | - Ingress and IngressRoute support<br>- Gateway API support<br>- Middleware support<br>- Path/host-based routing |
+| <div style="width: 80px;">![MetalLB](../images/metallb-logo.png) </div>          | MetallLB. Load balancer for bare-metal Kubernetes clusters.                                                        | Load balancing                 | - Layer 2 and BGP modes<br>- IP address pool management<br>- Simple configuration       |
 
 ---
 

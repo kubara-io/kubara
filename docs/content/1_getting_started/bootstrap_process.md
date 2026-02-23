@@ -25,10 +25,10 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 1. Run this command to scaffold essential setup files:
 
     ```bash
-     kubara init --prep
+    kubara init --prep
     ```
 
-   This will generate:
+    This will generate:
 
     * A `.gitignore` file to help prevent accidental commits of sensitive or unnecessary files
     * An `.env` file that serves as a template for your environment configuration.
@@ -36,17 +36,18 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 
 2. Update the values inside `.env`
 
-   > **⚠️ Handling .env Files**
-   .env files contain sensitive credentials and must be treated as secrets.
-   Never commit a plain .env file directly into Git.
-   If you really need it in the repository, make sure it is stored in encrypted form only.
-   Always add `.env` to `.gitignore` to avoid accidental commits.
-   For team collaboration, proven approaches include encrypted `.env` files in the repository, centralized secret management, or helper tools like `dotenv`.
-   Important: A plain .env file in Git exposes all secrets and must be avoided.
+    > **⚠️ Handling .env Files**
+    > `.env` files contain sensitive credentials and must be treated as secrets.
+    > Never commit a plain `.env` file directly into Git.
+    > If you really need it in the repository, make sure it is stored in encrypted form only.
+    > Always add `.env` to `.gitignore` to avoid accidental commits.
+    > For team collaboration, proven approaches include encrypted `.env` files in the repository, centralized secret management, or helper tools like `dotenv`.
+    > Important: A plain `.env` file in Git exposes all secrets and must be avoided.
 
 3. Check your values
-   > ⚠️ Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
-   > platform will be publicly available by default via your DNS zone.
+
+    > ⚠️ Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
+    > platform will be publicly available by default via your DNS zone.
 
 
 
@@ -87,11 +88,6 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ```
 
 ### 1.5 Update and Prepare Templates
-
-> ⚠️ This step still includes a chicken-and-egg scenario: you need a running cluster and secret backend access before all platform services can be deployed successfully.
-> For external-secrets, create provider credentials first (for example via `kubectl create secret ...`), then either:
-> 1. apply your `ClusterSecretStore` manually, or
-> 2. pass a `ClusterSecretStore` manifest to bootstrap with `--with-es-css-file`.
 
 > 💡 What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
 > 💡 Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
@@ -228,10 +224,7 @@ Sensitive output example:
 terraform output vault_user_ro_password_b64
 ```
 
-> **Note:** Initial external-secrets bootstrap credentials are no longer created from `.env`.
-> Create provider credential secret(s) in the cluster and provide/apply a `ClusterSecretStore` as described above.
-
-If you use OAuth2, create a GitHub application as shown [here](../2_managing_your_platform/add_sso.md). We're transitioning to STACKIT Managed Git based on Forgejo.
+If you use OAuth2, create a GitHub application as shown [here](../2_managing_your_platform/add_sso.md).
 
 If you want Terraform to create OAuth2-related Vault entries:
 
@@ -343,13 +336,61 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 > ⚠️ This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
 > To target a specific cluster, provide your own config with `--kubeconfig your-kubeconfig`
 
+For external-secrets, create provider credential secret(s) first (for example via `kubectl create secret ...`), then:
+
+A) **recommended for first bootstrap:** pass a `ClusterSecretStore` manifest to bootstrap with `--with-es-css-file` together with `--with-es-crds`, 
+
+or B) apply your `ClusterSecretStore` manually (only if external-secrets CRDs are already installed on the cluster).
+
+If the namespace does not exist yet, create it once before creating the provider credential secret(s):
+
+```bash
+kubectl create namespace external-secrets
+```
+
+Example provider credential secret(s) for the `ClusterSecretStore`:
+
+```bash
+## Bitwarden
+kubectl -n external-secrets create secret generic bitwarden-access-token \
+  --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
+
+## STACKIT Secrets Manager
+kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
+  --from-literal=username="<USERNAME>" \
+  --from-literal=password="<PASSWORD>"
+```
+
+Example `clustersecretstore.yaml` for `--with-es-css-file` (templating with `{{ .cluster.name }}` / `{{ .cluster.stage }}` is supported):
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  labels:
+    argocd.argoproj.io/instance: {{ .cluster.name }}-external-secrets
+  name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+spec:
+  provider:
+    vault:
+      auth:
+        userPass:
+          path: userpass
+          secretRef:
+            key: password
+            name: stackit-secrets-manager-cred
+            namespace: external-secrets
+          username: "<USERNAME>"
+      path: "<VAULT_PATH>"
+      server: "https://<your-secrets-manager-endpoint>"
+      version: v2
+```
+
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds
 ```
 
-Your platform should now be fully operational.
-
-If you want Kubara to apply a templated `ClusterSecretStore` manifest during bootstrap:
+Recommended for the first bootstrap with external-secrets: let Kubara apply a templated `ClusterSecretStore` manifest during bootstrap:
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> \
@@ -357,6 +398,8 @@ kubara bootstrap <cluster-name-from-config-yaml> \
   --with-es-css-file clustersecretstore.yaml \
   --with-es-crds --with-prometheus-crds
 ```
+
+After a successful bootstrap run, your platform should be operational.
 
 ---
 
