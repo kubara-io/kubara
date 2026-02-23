@@ -2,8 +2,8 @@ apiVersion: v2
 name: homer-dashboard
 description: homer-dashboard
 type: application
-version: 0.0.3
+version: 0.0.4
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.4
+    version: 0.0.7

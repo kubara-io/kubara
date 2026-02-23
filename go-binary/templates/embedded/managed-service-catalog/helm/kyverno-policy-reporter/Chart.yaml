@@ -2,11 +2,11 @@ apiVersion: v2
 name: kyverno-policy-reporter
 description: Umbrella Chart for kyverno-policy-reporter
 type: application
-version: 0.2.2
+version: 0.2.4
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.4
+    version: 0.0.7
   - name: policy-reporter
     repository: https://kyverno.github.io/policy-reporter
-    version: 3.7.1
+    version: 3.7.2

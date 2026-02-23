@@ -1,30 +1,30 @@
 {{- define "templateLibrary.argocd.applicationset" }}
 {{- $globalCtx := index . 1 }}
 {{- $localCtx := index . 0 }}
-{{- range $localCtx.apps }}
+{{- range $key, $app := $localCtx.apps }}
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: {{ .name }}
+  name: {{ $app.name }}
   namespace: {{ $globalCtx.Release.Namespace }}
 spec:
   generators:
     - clusters:
         selector:
           matchLabels:
-            {{ .name }}: enabled
+            {{ $app.name }}: enabled
   syncPolicy:
-    preserveResourcesOnDeletion: {{ default false .preserveResourcesOnDeletion }}
+    preserveResourcesOnDeletion: {{ default false $app.preserveResourcesOnDeletion }}
   template:
     metadata:
-      name: "{{ `{{name}}` }}-{{ .name }}"
+      name: "{{ `{{name}}` }}-{{ $app.name }}"
       annotations:
         argocd.argoproj.io/manifest-generate-paths: ".;.."
     spec:
-      project: {{ default $localCtx.projectName .projectName }}
+      project: {{ default $localCtx.projectName $app.projectName }}
       sources:
-        {{- if .sources }}
-        {{- toYaml .sources | nindent 8 }}
+        {{- if $app.sources }}
+        {{- toYaml $app.sources | nindent 8 }}
         {{- else }}
         {{- with $localCtx.customerServices }}
         - repoURL: {{ .repoURL }}
@@ -32,21 +32,22 @@ spec:
           ref: valuesRepo
         {{- end }}
         - repoURL: {{ $localCtx.managedServices.repoURL }}
-          path: "{{ $localCtx.managedServices.path }}/{{.path}}"
+          path: "{{ $localCtx.managedServices.path }}/{{$app.path}}"
           targetRevision: "{{ $localCtx.managedServices.targetRevision }}"
           helm:
             ignoreMissingValueFiles: true
-            releaseName: {{ .name }}
+            releaseName: {{ $app.name }}
             valueFiles:
               - "values.yaml"
-              - "$valuesRepo/{{ $localCtx.customerServices.path }}/{{ `{{name}}` }}/{{ .path }}/values.yaml"
+              - "$valuesRepo/{{ $localCtx.customerServices.path }}/{{ `{{name}}` }}/{{ $app.path }}/values.yaml"
+              - "$valuesRepo/{{ $localCtx.customerServices.path }}/{{ `{{name}}` }}/{{ $app.path }}/additional-values.yaml"
         {{- end }}
       destination:
         name: "{{ `{{name}}` }}"
-        namespace: {{ default .name .namespace }}
+        namespace: {{ default $app.name $app.namespace }}
       syncPolicy:
-        {{- if .syncPolicy }}
-        {{- toYaml .syncPolicy | nindent 8 -}}
+        {{- if $app.syncPolicy }}
+        {{- toYaml $app.syncPolicy | nindent 8 -}}
         {{- else }}
         automated:
           prune: true
@@ -60,9 +61,9 @@ spec:
           - ApplyOutOfSyncOnly=true
           - ServerSideApply=true
         {{- end }}
-      {{- if .ignoreApplicationDifferences }}
+      {{- if $app.ignoreApplicationDifferences }}
       ignoreApplicationDifferences:
-      {{- toYaml .ignoreApplicationDifferences | nindent 8 }}
+      {{- toYaml $app.ignoreApplicationDifferences | nindent 8 }}
       {{- end }}
 ---
 {{- end }}

@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"os"
@@ -13,6 +14,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 	"github.com/rs/zerolog/log"
 )
+
+// DecodeB64 decodes a b64 string into raw string
+func DecodeB64(from string) (string, error) {
+	dec, err := base64.StdEncoding.DecodeString(from)
+	if err != nil {
+		return "", fmt.Errorf("decoding string %s failed: %w", from, err)
+	}
+	return string(dec), nil
+}
 
 // FileExist returns true if the the File at path exist.
 // The absolute path of path is used for finding the File.
@@ -40,13 +50,23 @@ func FileExist(path string) (bool, error) {
 // GetFullPath returns the absolute path representation of "path"
 // if path is a relative path it returns the full path of "path" relative to "workDir"
 func GetFullPath(path, workDir string) (string, error) {
+	// Expand ~ to home directory (Unix/Linux/macOS convention)
+	if path == "~" || strings.HasPrefix(path, "~/") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", err
+		}
+		if path == "~" {
+			return home, nil
+		}
+		path = filepath.Join(home, path[2:])
+	}
+
 	if filepath.IsAbs(path) {
 		return path, nil
 	}
-	jp := filepath.Join(workDir, path)
-	abs, err := filepath.Abs(jp)
 
-	return abs, err
+	return filepath.Abs(filepath.Join(workDir, path))
 }
 
 func IsZeroValue(v reflect.Value) bool {
@@ -94,6 +114,12 @@ func AddGitignore(cwd string) error {
 
 	filename, _ := GetFullPath(".gitignore", cwd)
 
+	// Ensure the directory exists
+	dir := filepath.Dir(filename)
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+	}
+
 	if _, err := os.Stat(filename); err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			errW := os.WriteFile(filename, []byte(gitignoreKubara), 0600)
@@ -125,7 +151,7 @@ func AddGitignore(cwd string) error {
 
 	// Merge the files
 
-	err := mergeGitignoreFiles([]string{filename, temp.Name()}, ".gitignore")
+	err := mergeGitignoreFiles([]string{filename, temp.Name()}, filename, cwd)
 	if err != nil {
 		return err
 	}
@@ -134,7 +160,7 @@ func AddGitignore(cwd string) error {
 
 }
 
-func mergeGitignoreFiles(filePaths []string, outputPath string) error {
+func mergeGitignoreFiles(filePaths []string, outputPath string, basePath string) error {
 	var allLines []string
 	seenLines := make(map[string]bool)
 
@@ -153,7 +179,7 @@ func mergeGitignoreFiles(filePaths []string, outputPath string) error {
 		}
 	}
 
-	return writeGitignoreFile(outputPath, allLines)
+	return writeGitignoreFile(outputPath, allLines, basePath)
 }
 
 func readGitignoreLines(filePath string) ([]string, error) {
@@ -204,7 +230,7 @@ func readGitignoreLines(filePath string) ([]string, error) {
 	return lines, scanner.Err()
 }
 
-func writeGitignoreFile(outputPath string, lines []string) error {
+func writeGitignoreFile(outputPath string, lines []string, basePath string) error {
 	// Validate outputPath is not attempting path traversal
 	absPath, err := filepath.Abs(outputPath)
 	if err != nil {
@@ -216,25 +242,41 @@ func writeGitignoreFile(outputPath string, lines []string) error {
 		return fmt.Errorf("invalid output filename: must be .gitignore")
 	}
 
-	// Get current working directory and resolve symlinks
-	cwd, err := os.Getwd()
+	// Get absolute base path and resolve symlinks
+	absBasePath, err := filepath.Abs(basePath)
 	if err != nil {
-		return fmt.Errorf("failed to get working directory: %w", err)
-	}
-	resolvedCwd, err := filepath.EvalSymlinks(cwd)
-	if err != nil {
-		return fmt.Errorf("failed to resolve working directory: %w", err)
+		return fmt.Errorf("failed to get absolute base path: %w", err)
 	}
 
-	// Resolve symlinks in the target path
-	resolvedPath, err := filepath.EvalSymlinks(absPath)
-	if err != nil {
-		return fmt.Errorf("failed to resolve output path: %w", err)
+	// Ensure base directory exists
+	if err := os.MkdirAll(absBasePath, 0755); err != nil {
+		return fmt.Errorf("failed to create base directory: %w", err)
 	}
 
-	// Ensure the output path is within the current working directory
-	if !strings.HasPrefix(resolvedPath+string(filepath.Separator), resolvedCwd+string(filepath.Separator)) {
-		return fmt.Errorf("output path outside working directory")
+	resolvedBasePath, err := filepath.EvalSymlinks(absBasePath)
+	if err != nil {
+		return fmt.Errorf("failed to resolve base path: %w", err)
+	}
+
+	// Resolve symlinks in the target directory
+	targetDir := filepath.Dir(absPath)
+	resolvedDir, err := filepath.EvalSymlinks(targetDir)
+	if err != nil {
+		// If directory doesn't exist, create it first
+		if errors.Is(err, os.ErrNotExist) {
+			if mkdirErr := os.MkdirAll(targetDir, 0755); mkdirErr != nil {
+				return fmt.Errorf("failed to create directory: %w", mkdirErr)
+			}
+			resolvedDir = targetDir
+		} else {
+			return fmt.Errorf("failed to resolve directory path: %w", err)
+		}
+	}
+	resolvedPath := filepath.Join(resolvedDir, filepath.Base(absPath))
+
+	// Ensure the output path is within the specified base directory
+	if !strings.HasPrefix(resolvedPath+string(filepath.Separator), resolvedBasePath+string(filepath.Separator)) {
+		return fmt.Errorf("output path outside specified working directory")
 	}
 
 	file, err := os.Create(resolvedPath)

@@ -41,8 +41,8 @@ Do not forget to push your changes to the git repository that serves your argoCD
 If you let argoCD manage itself, it will add the configured application to the cluster.
 
 ## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see config.yaml#services.argocd.enabled="disabled") altering argocd values will have no affect until you run 
+If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run 
 ```bash
-kubara --bootstrap-argocd
+kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
 again

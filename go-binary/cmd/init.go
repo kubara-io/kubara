@@ -140,7 +140,7 @@ func (o *InitOptions) Run() error {
 				return errWrite
 			}
 			log.Info().Msgf("Generated dotenv in path: %v", em.GetFilepath())
-		} else if dotenvStatError != nil {
+		} else {
 			return dotenvStatError
 		}
 		return nil

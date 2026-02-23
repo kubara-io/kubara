@@ -173,12 +173,13 @@ func TestGenerateCmd(t *testing.T) {
 			// Create config file if not testing error case
 			if !tt.wantErr || tt.errContains != "failed to load config" {
 				configPath := createTestConfig(t, tempDir, config.Cluster{
-					Name:      "test-cluster",
-					Stage:     "dev",
-					ProjectID: "12345678-1234-1234-1234-123456789012",
-					Type:      "controlplane",
-					DNSName:   "test.example.com",
+					Name:             "test-cluster",
+					Stage:            "dev",
+					IngressClassName: "traefik",
+					Type:             "controlplane",
+					DNSName:          "test.example.com",
 					Terraform: &config.Terraform{
+						ProjectID:         "00000000-0000-0000-0000-000000000000",
 						KubernetesType:    "ske",
 						KubernetesVersion: "1.28.0",
 						DNS: config.DNS{
@@ -206,7 +207,7 @@ func TestGenerateCmd(t *testing.T) {
 						ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 						ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 						KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						IngressNginx:        config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+						Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 						Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 						KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 						KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},

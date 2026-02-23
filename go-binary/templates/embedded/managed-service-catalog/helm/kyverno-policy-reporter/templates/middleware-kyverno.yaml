@@ -1,0 +1,14 @@
+{{- $mw := .Values.middleware -}}
+{{- if and $mw $mw.name $mw.stripPrefix $mw.stripPrefix.prefixes }}
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: {{ $mw.name }}
+  namespace: {{ $mw.namespace | default .Release.Namespace }}
+spec:
+  stripPrefix:
+    prefixes:
+      {{- range $mw.stripPrefix.prefixes }}
+      - {{ . }}
+      {{- end }}
+{{- end }}

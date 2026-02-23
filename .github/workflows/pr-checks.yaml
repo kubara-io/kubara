@@ -1,20 +1,18 @@
 name: 'pr-checks'
 on:
   push:
-    branches-ignore:
-      - 'master'
-      - 'renovate/**'
+    branches:
+      - 'main'
     paths:
       - 'go-binary/**'
   pull_request:
     branches:
-      - 'master'
+      - 'main'
     paths:
       - 'go-binary/**'
   workflow_dispatch:
 
 env:
-  GO_VERSION: "1.25"
   CODE_PATH: ${{ github.workspace }}/go-binary
   REPORT_DIR: ${{ github.workspace }}/reports
   RENDER_DIR: ${{ github.workspace }}/rendered
@@ -47,7 +45,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: go-binary/go.mod
           cache: true
           cache-dependency-path: go-binary/go.sum
 
@@ -117,9 +115,16 @@ jobs:
         if: always()
         run: |
           set -euo pipefail
+          GOSEC_BIN="$HOME/.local/bin/gosec"
+
+          if [ ! -x "$GOSEC_BIN" ]; then
+            echo "::error::gosec binary not found at $GOSEC_BIN"
+            ls -la "$HOME/.local/bin" || true
+            exit 1
+          fi
 
           # Verify installation
-          gosec --version
+          "$GOSEC_BIN" --version
           echo "Current directory: $(pwd)"
 
           # Find Go packages
@@ -137,11 +142,11 @@ jobs:
           echo "Running gosec..."
           if [ -n "$SCAN_DIRS" ]; then
             # Generate SARIF report (always succeeds)
-            gosec -no-fail -fmt html -out "${{ env.REPORT_DIR }}/gosec-results.html" $SCAN_DIRS
+            "$GOSEC_BIN" -no-fail -fmt html -out "${{ env.REPORT_DIR }}/gosec-results.html" $SCAN_DIRS
 
             # Run with severity threshold - only fail on HIGH severity issues
             echo "Checking for HIGH severity issues..."
-            gosec -severity high -confidence medium -fmt text $SCAN_DIRS
+            "$GOSEC_BIN" -severity high -confidence medium -fmt text $SCAN_DIRS
             GOSEC_EXIT_CODE=$?
 
             # Only fail if HIGH severity issues found
@@ -179,7 +184,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: go-binary/go.mod
           cache: true
           cache-dependency-path: go-binary/go.sum
 
@@ -224,10 +229,9 @@ jobs:
     outputs:
       success: ${{ steps.commit.outputs.success }}
     env:
-      # env vars for kubara scripts (.env template updates)
+      # .env updates (must match go-binary/assets/envmap/EnvMap)
       KUBARA_PROJECT_NAME: "kubara"
       KUBARA_PROJECT_STAGE: "tst"
-      KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
       KUBARA_DOCKERCONFIG_BASE64: "000000"
       KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD: "000000"
       KUBARA_ARGOCD_HELM_REPO_USERNAME: "git"
@@ -237,17 +241,9 @@ jobs:
       KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
       KUBARA_ARGOCD_GIT_USERNAME: "git"
       KUBARA_DOMAIN_NAME: "stackit.run"
-      KUBARA_SECRETS_MANAGER_USERNAME: "000000"
-      KUBARA_SECRETS_MANAGER_USERNAME_BASE64: "000000"
-      KUBARA_SECRETS_MANAGER_PASSWORD_BASE64: "000000"
-      KUBARA_SECRETS_MANAGER_PATH: "000000"
-      KUBARA_SECRETS_MANAGER_URL: "https://prod.sm.eu01.stackit.cloud"
-      KUBARA_WORKER_SECRETS_MANAGER_USERNAME_BASE64: ""
-      KUBARA_WORKER_SECRETS_MANAGER_PASSWORD_BASE64: ""
-      KUBARA_PRIVATE_LOADBALANCER_IP: "0.0.0.0"
-      KUBARA_PUBLIC_LOADBALANCER_IP: "0.0.0.0"
 
       # config.yaml updates
+      KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
       KUBARA_CLUSTER_TYPE: "controlplane"
       KUBARA_SSO_ORG: "Kubara"
       KUBARA_SSO_TEAM: "Test"
@@ -261,7 +257,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version-file: go-binary/go.mod
           cache: true
           cache-dependency-path: go-binary/go.sum
 
@@ -355,6 +351,14 @@ jobs:
           set -uo pipefail
           export PATH="$HOME/.local/bin:$PATH"
           KUBE_VERSION=$(yq -r '.clusters[] | select(.name == "kubara") | .terraform.kubernetesVersion' config.yaml)
+          KUBE_PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name == "kubara") | .services.kubePrometheusStack.status // "disabled"' config.yaml)
+          HELM_TEMPLATE_API_ARGS=()
+          if [[ "$KUBE_PROMETHEUS_STATUS" == "enabled" ]]; then
+            HELM_TEMPLATE_API_ARGS+=(--api-versions "monitoring.coreos.com/v1")
+            echo "ℹ️ kubePrometheusStack is enabled; adding Helm API version: monitoring.coreos.com/v1"
+          else
+            echo "ℹ️ kubePrometheusStack is not enabled; rendering without monitoring.coreos.com/v1 API override"
+          fi
           mkdir -p "${{ env.REPORT_DIR }}/helm" "${{ env.RENDER_DIR }}"
           MANAGED_BASE="managed-service-catalog/helm"
           CUSTOMER_BASE="customer-service-catalog/helm/kubara"
@@ -393,7 +397,7 @@ jobs:
                 FAILED_CHARTS+=("$CHART")
               fi
               echo "📄 Rendering chart with overlay values"
-              helm template --kube-version "$KUBE_VERSION" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
+              helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
             else
               if ! helm lint --quiet "$MANAGED_CHART_PATH" \
                 | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
@@ -401,8 +405,11 @@ jobs:
                 FAILED_CHARTS+=("$CHART")
               fi
               echo "📄 Rendering chart with default values"
-              helm template --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
+              helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
             fi
+            # CRD status is server-populated and may contain null placeholders in chart output.
+            # Remove it before schema validation to avoid false negatives in kubeconform.
+            yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$OUT_DIR/render.yaml"
             echo "🔎 Validating rendered manifests with kubeconform"
             if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
                 -schema-location default \

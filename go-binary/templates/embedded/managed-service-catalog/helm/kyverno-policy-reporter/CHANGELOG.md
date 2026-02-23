@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.4] - 2026-02-23
+### Changed
+- Updated chart dependency version: policy-reporter 3.7.1 → 3.7.2
+
+## [0.2.3] - 2026-02-05
+### Changed
+- Updated chart dependency version: template-library 0.0.4 → 0.0.5
+
 ## [0.2.2] - 2026-01-08
 ### Changed
 - Use consistent naming scheme for change-me value
