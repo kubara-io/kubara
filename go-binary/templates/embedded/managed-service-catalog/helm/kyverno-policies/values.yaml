@@ -32,27 +32,12 @@ kyverno-policies:
             kinds:
               - Certificate
             names:
-              - ingress-nginx-admission
-              - ingress-nginx-root-cert
-            namespaces:
-              - ingress-nginx
-        - resources:
-            kinds:
-              - Certificate
-            names:
               - kube-prometheus-stack-admission
               - kube-prometheus-stack-root-cert
             namespaces:
               - kube-prometheus-stack
     limit-dnsnames:
       any:
-        - resources:
-            kinds:
-              - Certificate
-            names:
-              - ingress-nginx-admission
-            namespaces:
-              - ingress-nginx
         - resources:
             kinds:
               - Certificate
@@ -76,9 +61,9 @@ kyverno-policies:
             kinds:
               - Pod
             names:
-              - ingress-nginx-controller-*
+              - traefik-*
             namespaces:
-              - ingress-nginx
+              - traefik
         - resources:
             kinds:
               - Pod

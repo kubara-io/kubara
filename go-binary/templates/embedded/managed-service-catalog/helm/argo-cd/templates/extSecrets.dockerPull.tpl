@@ -1,3 +1,3 @@
-{{- range (.Values.bootstrapValues).dockerPullSecrets }}
-{{- include "templateLibrary.externalSecrets.dockerPullSecret-ces" . }}
+{{- range $key, $secret := (.Values.bootstrapValues).dockerPullSecrets }}
+{{- include "templateLibrary.externalSecrets.dockerPullSecret-ces" $secret }}
 {{- end }}

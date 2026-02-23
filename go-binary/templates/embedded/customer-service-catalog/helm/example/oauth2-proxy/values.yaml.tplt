@@ -7,11 +7,22 @@ namespace:
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
-    name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+    bitwarden-com-demo:
+      kind: ClusterSecretStore
+      name: bitwarden-com-demo
+
   secrets:
-    - target: oauth2-credentials
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: oauth2_credentials
+
 
 oauth2-proxy:
   imagePullSecrets:
@@ -23,13 +34,13 @@ oauth2-proxy:
       redirect_url = "https://{{ .cluster.dnsName }}/oauth2/callback"
       email_domains = [ "*" ]
       cookie_secure = true
-      upstreams = [ "file:///dev/null" ]
+      upstreams = [ "static://200" ]
       github_org = "{{ .cluster.ssoOrg }}"
       github_team = "{{ .cluster.ssoTeam }}"
       provider = "github"
       scope = "read:user user:email read:org"
   ingress:
-    className: nginx
+    className: {{ .cluster.ingressClassName | default "traefik" }}
     annotations:
       cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
       {{- if (eq .cluster.services.metalLb.status "enabled") }}
@@ -37,6 +48,7 @@ oauth2-proxy:
       {{- end }}
     enabled: true
     path: /oauth2
+    pathType: Prefix
     hosts:
       - {{ .cluster.dnsName }}
     tls:
@@ -50,3 +62,18 @@ oauth2-proxy:
       {{- end }}
       labels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+
+{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+middleware:
+  name: oauth-auth
+  namespace: oauth2-proxy
+
+  forwardAuth:
+    address: http://oauth2-proxy.oauth2-proxy.svc.cluster.local/oauth2/
+    trustForwardHeader: true
+
+    authResponseHeaders:
+      - X-Auth-Request-User
+      - X-Auth-Request-Email
+      - Authorization
+  {{- end }}
