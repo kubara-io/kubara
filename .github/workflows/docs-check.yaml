@@ -51,4 +51,3 @@ jobs:
         run: |
           set -euo pipefail
           "$HOME/.local/bin/pipenv" run mkdocs build --strict
-
