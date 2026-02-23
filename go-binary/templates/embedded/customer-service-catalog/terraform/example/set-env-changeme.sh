@@ -5,10 +5,10 @@ export STACKIT_SERVICE_ACCOUNT_KEY_PATH="/path/to/your-service-account.json"
 
 # S3 Bucket credentials (terraform remote state bucket)
 # known after "bootstrap-tfstate-backend" or add existing bucket
-# AWS_SECRET_ACCESS_KEY -> Terraform output: credential_secret_access_key (from "bootstrap-tfstate-backend" output)
-export AWS_SECRET_ACCESS_KEY=""
 # AWS_ACCESS_KEY_ID -> Terraform output credential_access_key (from "bootstrap-tfstate-backend" output)
 export AWS_ACCESS_KEY_ID=""
+# AWS_SECRET_ACCESS_KEY -> Terraform output: credential_secret_access_key (from "bootstrap-tfstate-backend" output)
+export AWS_SECRET_ACCESS_KEY=""
 
 # (optional) define grafana admin credentials. Leave as empty string to auto-generate credentials
 export TF_VAR_grafana_admin_user=""

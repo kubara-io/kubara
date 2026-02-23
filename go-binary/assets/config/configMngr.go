@@ -60,7 +60,8 @@ func (cm *Manager) Load() error {
 	return nil
 }
 
-func (cm *Manager) Validate() error {
+// GenerateSchema generates a JSON schema from the Config struct
+func GenerateSchema() (map[string]any, error) {
 	r := jsonschema.Reflector{
 		RequiredFromJSONSchemaTags: true,
 		ExpandedStruct:             true,
@@ -74,16 +75,26 @@ func (cm *Manager) Validate() error {
 		sch.ID = schemaURL
 	}
 
-	// Marshal to bytes then decode into map[string]any for tekuri v6
+	// Marshal to bytes then decode into map[string]any
 	b, err := json.Marshal(sch)
 	if err != nil {
-		return fmt.Errorf("marshal schema: %w", err)
+		return nil, fmt.Errorf("marshal schema: %w", err)
 	}
 	var schemaDoc map[string]any
 	if err := json.Unmarshal(b, &schemaDoc); err != nil {
-		return fmt.Errorf("unmarshal schema: %w", err)
+		return nil, fmt.Errorf("unmarshal schema: %w", err)
 	}
 
+	return schemaDoc, nil
+}
+
+func (cm *Manager) Validate() error {
+	schemaDoc, err := GenerateSchema()
+	if err != nil {
+		return err
+	}
+
+	const schemaURL = "mem://config.schema.json"
 	c := schemaValidator.NewCompiler()
 	c.AssertFormat()
 	if err := c.AddResource(schemaURL, schemaDoc); err != nil {

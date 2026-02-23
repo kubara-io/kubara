@@ -35,7 +35,6 @@ Here is how to do it: https://pre-commit.com/#temporarily-disabling-hooks
 .
 ├── README.md
 ├── config.schema.json
-├── config.yaml.initial
 ├── go.mod
 ├── go.sum
 ├── main.go

@@ -1,0 +1,10 @@
+{{- $cert := .Values.certificate -}}
+{{- if and $cert $cert.name $cert.secretName $cert.commonName (not .Values.letsencrypt) }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: {{ .Values.issuer.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  selfSigned: {}
+{{- end }}

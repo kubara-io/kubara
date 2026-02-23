@@ -1,0 +1,19 @@
+{{- $cert := .Values.certificate -}}
+{{- if and $cert $cert.name $cert.secretName $cert.commonName }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: {{ $cert.name }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  secretName: {{ $cert.secretName }}
+  duration: {{ $cert.duration | default "2160h" }}
+  renewBefore: {{ $cert.renewBefore | default "360h" }}
+  commonName: {{ $cert.commonName }}
+  dnsNames:
+    {{- range $cert.dnsNames }}
+    - {{ . }}
+    {{- end }}
+  issuerRef:
+    name: {{ $cert.issuerName | default .Values.issuer.name }}
+{{- end }}

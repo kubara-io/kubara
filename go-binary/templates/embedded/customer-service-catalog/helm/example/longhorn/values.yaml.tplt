@@ -17,7 +17,7 @@ longhorn:
     {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
     enabled: true
     {{- end }}
-    ingressClassName: nginx
+    ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
     host: {{ .cluster.dnsName }}
     tls: true
     tlsSecret: tls-longhorn
@@ -25,13 +25,11 @@ longhorn:
     annotations:
       cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
       {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-      nginx.ingress.kubernetes.io/auth-signin: https://$host/oauth2/start?rd=$escaped_request_uri
-      nginx.ingress.kubernetes.io/auth-url: https://$host/oauth2/auth
+      traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
       {{- end }}
       {{- if (eq .cluster.services.metalLb.status "enabled") }}
       external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
       {{- end }}
-      nginx.ingress.kubernetes.io/rewrite-target: "/$2"
 
 namespace:
   labels:

@@ -44,6 +44,9 @@ loki:
       volume_enabled: true
     ruler:
       enable_api: true
+    ingress:
+      enabled: false
+      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
   minio:
     enabled: false
   # Zero out replica counts of other deployment modes
