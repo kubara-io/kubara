@@ -39,6 +39,6 @@ jobs:
           RENOVATE_GITHUB_COM_TOKEN: ${{ steps.app-token.outputs.token }}
           RENOVATE_PR_HOURLY_LIMIT: 0
           RENOVATE_PR_CONCURRENT_LIMIT: 50
-          RENOVATE_ALLOWED_COMMANDS: '^(\\.\\/\\.scripts\\/renovate_bot_update_helm_changelog\\.sh.*|\\.\\/\\.pre-commit-config\\/terraform-docs\\/terraform-docs\\.sh.*)$'
+          RENOVATE_ALLOWED_COMMANDS: '^\./\.scripts/renovate_bot_update_helm_changelog\.sh.*$'
           # LOG_LEVEL: debug
           # RENOVATE_DRY_RUN: full

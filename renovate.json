@@ -22,20 +22,6 @@
       }
     },
     {
-      "description": "Regenerate terraform-docs for managed-service catalog modules",
-      "matchManagers": ["terraform"],
-      "matchFiles": ["go-binary/templates/embedded/managed-service-catalog/terraform/modules/**/*.tf"],
-      "postUpgradeTasks": {
-        "commands": [
-          "./.pre-commit-config/terraform-docs/terraform-docs.sh \"{{{packageFile}}}\""
-        ],
-        "fileFilters": [
-          "go-binary/templates/embedded/managed-service-catalog/terraform/modules/**/README.md"
-        ],
-        "executionMode": "update"
-      }
-    },
-    {
       "description": "Run go mod tidy for all go module updates",
       "matchManagers": ["gomod"],
       "postUpdateOptions": ["gomodTidy"]
