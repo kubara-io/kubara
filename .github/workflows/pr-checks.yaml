@@ -1,14 +1,13 @@
 name: 'pr-checks'
 on:
   push:
-    branches-ignore:
-      - 'master'
-      - 'renovate/**'
+    branches:
+      - 'main'
     paths:
       - 'go-binary/**'
   pull_request:
     branches:
-      - 'master'
+      - 'main'
     paths:
       - 'go-binary/**'
   workflow_dispatch:
