@@ -29,11 +29,25 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
+      - name: Read Python version from Pipfile
+        id: python-version
+        run: |
+          set -euo pipefail
+          PYTHON_VERSION="$(sed -nE 's/^python_full_version = "([^"]+)"/\1/p' Pipfile | head -n1)"
+          if [ -z "$PYTHON_VERSION" ]; then
+            PYTHON_VERSION="$(sed -nE 's/^python_version = "([^"]+)"/\1/p' Pipfile | head -n1)"
+          fi
+          if [ -z "$PYTHON_VERSION" ]; then
+            echo "::error::No python_full_version/python_version found in docs/Pipfile"
+            exit 1
+          fi
+          echo "version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Set up Python
         id: setup-python
         uses: actions/setup-python@v6
         with:
-          python-version: '3.14.3'
+          python-version: ${{ steps.python-version.outputs.version }}
           cache: 'pip'
           cache-dependency-path: 'docs/Pipfile.lock'
 
