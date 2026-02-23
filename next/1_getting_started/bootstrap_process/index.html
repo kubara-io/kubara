@@ -2286,29 +2286,30 @@ The easiest way is to run <code>kubara</code> inside the repository (but do not 
 <ol>
 <li>
 <p>Run this command to scaffold essential setup files:</p>
-<div class="highlight"><pre><span></span><code><span class="w"> </span>kubara<span class="w"> </span>init<span class="w"> </span>--prep
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span>--prep
 </code></pre></div>
-</li>
-</ol>
 <p>This will generate:</p>
-<pre><code>* A `.gitignore` file to help prevent accidental commits of sensitive or unnecessary files
-* An `.env` file that serves as a template for your environment configuration.
-  Fill all placeholders (`&lt;...&gt;`) before running `kubara init`.
-</code></pre>
-<ol>
-<li>Update the values inside <code>.env</code></li>
-</ol>
+<ul>
+<li>A <code>.gitignore</code> file to help prevent accidental commits of sensitive or unnecessary files</li>
+<li>An <code>.env</code> file that serves as a template for your environment configuration.
+  Fill all placeholders (<code>&lt;...&gt;</code>) before running <code>kubara init</code>.</li>
+</ul>
+</li>
+<li>
+<p>Update the values inside <code>.env</code></p>
 <blockquote>
 <p><strong>⚠️ Handling .env Files</strong>
-   .env files contain sensitive credentials and must be treated as secrets.
-   Never commit a plain .env file directly into Git.
-   If you really need it in the repository, make sure it is stored in encrypted form only.
-   Always add <code>.env</code> to <code>.gitignore</code> to avoid accidental commits.
-   For team collaboration, proven approaches include encrypted <code>.env</code> files in the repository, centralized secret management, or helper tools like <code>dotenv</code>.
-   Important: A plain .env file in Git exposes all secrets and must be avoided.</p>
+<code>.env</code> files contain sensitive credentials and must be treated as secrets.
+Never commit a plain <code>.env</code> file directly into Git.
+If you really need it in the repository, make sure it is stored in encrypted form only.
+Always add <code>.env</code> to <code>.gitignore</code> to avoid accidental commits.
+For team collaboration, proven approaches include encrypted <code>.env</code> files in the repository, centralized secret management, or helper tools like <code>dotenv</code>.
+Important: A plain <code>.env</code> file in Git exposes all secrets and must be avoided.</p>
 </blockquote>
-<ol>
-<li>Check your values<blockquote>
+</li>
+<li>
+<p>Check your values</p>
+<blockquote>
 <p>⚠️ Keep in mind that weak passwords such as <code>123456</code> for <code>ARGOCD_WIZARD_ACCOUNT_PASSWORD</code> are a bad idea, since your
 platform will be publicly available by default via your DNS zone.</p>
 </blockquote>
@@ -2336,10 +2337,6 @@ You can set a custom output file:</p>
 </code></pre></div>
 <h3 id="15-update-and-prepare-templates">1.5 Update and Prepare Templates</h3>
 <blockquote>
-<p>⚠️ This step still includes a chicken-and-egg scenario: you need a running cluster and secret backend access before all platform services can be deployed successfully.
-For external-secrets, create provider credentials first (for example via <code>kubectl create secret ...</code>), then either:
-1. apply your <code>ClusterSecretStore</code> manually, or
-2. pass a <code>ClusterSecretStore</code> manifest to bootstrap with <code>--with-es-css-file</code>.</p>
 <p>💡 What is "type:" in <code>config.yaml</code>: <code>controlplane</code> is your hub cluster, <code>worker</code> is your spoke cluster <a href="../../4_architecture/architecture_overview/#hubnspoke">Hub and Spoke Cluster</a>
 💡 Not using STACKIT Edge? Just remove the load balancer IPs from your <code>config.yaml</code>.</p>
 </blockquote>
@@ -2430,11 +2427,7 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 <p>Sensitive output example:</p>
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>vault_user_ro_password_b64
 </code></pre></div>
-<blockquote>
-<p><strong>Note:</strong> Initial external-secrets bootstrap credentials are no longer created from <code>.env</code>.
-Create provider credential secret(s) in the cluster and provide/apply a <code>ClusterSecretStore</code> as described above.</p>
-</blockquote>
-<p>If you use OAuth2, create a GitHub application as shown <a href="../../2_managing_your_platform/add_sso/">here</a>. We're transitioning to STACKIT Managed Git based on Forgejo.</p>
+<p>If you use OAuth2, create a GitHub application as shown <a href="../../2_managing_your_platform/add_sso/">here</a>.</p>
 <p>If you want Terraform to create OAuth2-related Vault entries:</p>
 <ul>
 <li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code></li>
@@ -2523,15 +2516,53 @@ Edit the generated files in:
 <p>⚠️ This command requires access to a Kubernetes cluster and, by default, uses <code>~/.kube/config</code>.
 To target a specific cluster, provide your own config with <code>--kubeconfig your-kubeconfig</code></p>
 </blockquote>
+<p>For external-secrets, create provider credential secret(s) first (for example via <code>kubectl create secret ...</code>), then:</p>
+<p>A) <strong>recommended for first bootstrap:</strong> pass a <code>ClusterSecretStore</code> manifest to bootstrap with <code>--with-es-css-file</code> together with <code>--with-es-crds</code>, </p>
+<p>or B) apply your <code>ClusterSecretStore</code> manually (only if external-secrets CRDs are already installed on the cluster).</p>
+<p>If the namespace does not exist yet, create it once before creating the provider credential secret(s):</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>external-secrets
+</code></pre></div>
+<p>Example provider credential secret(s) for the <code>ClusterSecretStore</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Bitwarden</span>
+kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>bitwarden-access-token<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span><span class="s2">"&lt;BITWARDEN_MACHINE_ACCOUNT_TOKEN&gt;"</span>
+
+<span class="c1">## STACKIT Secrets Manager</span>
+kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>stackit-secrets-manager-cred<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span><span class="s2">"&lt;USERNAME&gt;"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span><span class="s2">"&lt;PASSWORD&gt;"</span>
+</code></pre></div>
+<p>Example <code>clustersecretstore.yaml</code> for <code>--with-es-css-file</code> (templating with <code>{{ .cluster.name }}</code> / <code>{{ .cluster.stage }}</code> is supported):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">argocd.argoproj.io/instance</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.cluster.name</span><span class="w"> </span><span class="p p-Indicator">}}</span><span class="l l-Scalar l-Scalar-Plain">-external-secrets</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">.cluster.name</span><span class="nv"> </span><span class="s">}}-{{</span><span class="nv"> </span><span class="s">.cluster.stage</span><span class="nv"> </span><span class="s">}}"</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">vault</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">auth</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">userPass</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">userpass</span>
+<span class="w">          </span><span class="nt">secretRef</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit-secrets-manager-cred</span>
+<span class="w">            </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets</span>
+<span class="w">          </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;USERNAME&gt;"</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;VAULT_PATH&gt;"</span>
+<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">"https://&lt;your-secrets-manager-endpoint&gt;"</span>
+<span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
+</code></pre></div>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
-<p>Your platform should now be fully operational.</p>
-<p>If you want Kubara to apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>
+<p>Recommended for the first bootstrap with external-secrets: let Kubara apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--kubeconfig<span class="w"> </span>k8s.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
+<p>After a successful bootstrap run, your platform should be operational.</p>
 <hr>
 <h2 id="5-access-the-argo-cd-dashboard">5. Access the Argo CD Dashboard</h2>
 <blockquote>
