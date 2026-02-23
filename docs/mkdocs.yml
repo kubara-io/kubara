@@ -1,7 +1,7 @@
 ---
 site_name: Kubara - Docs
-site_url: 'https://kubara-docs.apps.01.cf.eu01.stackit.cloud'
-repo_url: 'https://kubara.git.onstackit.cloud/STACKIT/kubara'
+site_url: 'https://docs.kubara.io'
+repo_url: 'https://github.com/kubara-io/kubara'
 docs_dir: 'content'
 nav:
   - Home: index.md
