@@ -7,7 +7,7 @@ require (
 	github.com/external-secrets/external-secrets/apis v0.0.0-20260114215736-aaa906876cef
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.16.5
-	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/invopop/jsonschema v0.13.0
 	github.com/knadh/koanf/parsers/dotenv v1.1.1
 	github.com/knadh/koanf/parsers/yaml v1.1.0
