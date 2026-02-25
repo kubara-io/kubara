@@ -49,10 +49,23 @@ jobs:
         uses: pre-commit/action@v3.0.1
         continue-on-error: true
 
+      - name: Create GitHub App token for Renovate auto-fix pushes
+        id: renovate-app-token
+        if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (startsWith(github.event.pull_request.head.ref, 'renovate/') || contains(github.event.pull_request.user.login, 'renovate')) }}
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.RENOVATE_GITHUB_APP_ID }}
+          private-key: ${{ secrets.RENOVATE_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+
       - name: Auto-commit pre-commit fixes (same-repo PRs)
         id: autofix
         if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
         shell: bash
+        env:
+          AUTOFIX_PUSH_TOKEN: ${{ steps.renovate-app-token.outputs.token }}
         run: |
           set -euo pipefail
 
@@ -71,6 +84,9 @@ jobs:
           fi
 
           git commit -m "ci(pre-commit): apply auto-fixes"
+          if [ -n "${AUTOFIX_PUSH_TOKEN:-}" ]; then
+            git remote set-url origin "https://x-access-token:${AUTOFIX_PUSH_TOKEN}@github.com/${{ github.repository }}.git"
+          fi
           git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
