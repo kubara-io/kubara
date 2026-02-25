@@ -17,6 +17,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref || github.ref }}
+          fetch-depth: 0
 
       # Cache terraform-docs binary to avoid downloading it every run
       - name: Cache terraform-docs
@@ -42,6 +45,41 @@ jobs:
         run: |
           set -euo pipefail
           terraform-docs --version
-      - uses: pre-commit/action@v3.0.1
-      - uses: pre-commit-ci/lite-action@v1.1.0
+      - id: run-pre-commit
+        uses: pre-commit/action@v3.0.1
+        continue-on-error: true
+
+      - name: Auto-commit pre-commit fixes (same-repo PRs)
+        id: autofix
         if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git diff --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add -A
+          if git diff --cached --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          git commit -m "ci(pre-commit): apply auto-fixes"
+          git push origin "HEAD:${{ github.event.pull_request.head.ref }}"
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: ${{ always() && steps.run-pre-commit.outcome == 'failure' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name != github.repository }}
+
+      - name: Fail if pre-commit errors remain
+        if: ${{ steps.run-pre-commit.outcome == 'failure' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository || steps.autofix.outputs.committed != 'true') }}
+        shell: bash
+        run: |
+          echo "::error::pre-commit checks failed and no auto-fix commit was pushed."
+          exit 1
