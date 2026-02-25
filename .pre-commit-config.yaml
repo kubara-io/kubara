@@ -1,6 +1,4 @@
 ---
-ci:
-  skip: [terraform-docs]
 default_install_hook_types:
   - pre-commit
   - pre-push

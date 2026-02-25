@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   TERRAFORM_DOCS_VERSION: "0.20.0"
   TERRAFORM_DOCS_OS_ARCH: "linux-amd64"
@@ -39,3 +43,5 @@ jobs:
           set -euo pipefail
           terraform-docs --version
       - uses: pre-commit/action@v3.0.1
+      - uses: pre-commit-ci/lite-action@v1.1.0
+        if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository }}
