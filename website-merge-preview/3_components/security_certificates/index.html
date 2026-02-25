@@ -1,0 +1,2682 @@
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.kubara.io/website-merge-preview/3_components/security_certificates/">
+      
+      
+        <link rel="prev" href="../network_external_dns/">
+      
+      
+        <link rel="next" href="../observability_dashboards/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.1">
+    
+    
+      
+        <title>Certificates - Kubara</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&amp;display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#security-certificate-management" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You're not viewing the latest stable version.
+<a href="../../..">
+    <strong>Click here to go to latest-stable.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Kubara" class="md-header__button md-logo" aria-label="Kubara" data-md-component="logo">
+      
+  <img src="../../images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"></path></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Kubara
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Certificates
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo" aria-label="Switch to light mode" type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo" aria-label="Switch to dark mode" type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo" aria-label="Switch to system preference" type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"></path></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"></path></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"></path></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"></path></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kubara-io/kubara" title="Go to repository" class="md-source plugin_open_external_links_in_new_tab" data-md-component="source" target="_blank" rel="noopener noreferrer">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../../1_getting_started/overview_core_concept/" class="md-tabs__link">
+          
+  
+  
+  Getting Started
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Getting Started">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../1_getting_started/overview_core_concept/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Core Concept
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../1_getting_started/prerequisites/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Prerequisites
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../1_getting_started/bootstrap_process/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Bootstrap Your Platform
+        </a>
+      </li>
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-tabs__link">
+          
+  
+  
+  Managing Your Platform
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Managing Your Platform">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_worker_cluster/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add Worker Cluster
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_app_project/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add Project
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_app_repository/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add Repository
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_appset/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add AppSet
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_application/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add Application
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_sso/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add SSO
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../2_managing_your_platform/add_sso_examples/" class="kubara-tabs__dropdown-link" role="menuitem">
+          SSO Examples
+        </a>
+      </li>
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../components_overview/" class="md-tabs__link">
+          
+  
+  
+  Components
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Components">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../components_overview/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Overview
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../add_or_replace_components/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Add or Replace Components
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-group" aria-hidden="true">
+        Network
+      </li>
+      
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../network_external_dns/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          ExternalDNS
+        </a>
+      </li>
+    
+  
+
+    
+  
+    
+      <li class="kubara-tabs__dropdown-group" aria-hidden="true">
+        Security
+      </li>
+      
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--active kubara-tabs__dropdown-item--nested">
+        <a href="./" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          Certificates
+        </a>
+      </li>
+    
+  
+
+    
+  
+    
+      <li class="kubara-tabs__dropdown-group" aria-hidden="true">
+        Observability
+      </li>
+      
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../observability_dashboards/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          Dashboards
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../observability_metrics/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          Metrics
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../observability_alerts/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          Alerts
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../observability_logs/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          Logs
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../../4_architecture/architecture_overview/" class="md-tabs__link">
+          
+  
+  
+  Architecture
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Architecture">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../4_architecture/architecture_overview/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Architecture overview
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-group" aria-hidden="true">
+        Decisions
+      </li>
+      
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../../7_decisions/ADR/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          ADR
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item kubara-tabs__dropdown-item--nested">
+        <a href="../../7_decisions/ADR-index/" class="kubara-tabs__dropdown-link kubara-tabs__dropdown-link--nested" role="menuitem">
+          ADR-Index
+        </a>
+      </li>
+    
+  
+
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../../5_community/contributing/" class="md-tabs__link">
+          
+  
+  
+  Community
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Community">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../5_community/contributing/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Contributing
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../5_community/maintainers/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Maintainers
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../5_community/support/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Support
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../5_community/contact/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Contact
+        </a>
+      </li>
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item kubara-tabs__item kubara-tabs__item--has-dropdown">
+        <a href="../../6_reference/release_cycle_and_updates/" class="md-tabs__link">
+          
+  
+  
+  Reference
+
+        </a>
+        <div class="kubara-tabs__dropdown" role="menu" aria-label="Reference">
+          <ul class="kubara-tabs__dropdown-list">
+            
+  
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/release_cycle_and_updates/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Release Cycle &amp; Updates
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/faq/" class="kubara-tabs__dropdown-link" role="menuitem">
+          FAQ
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/code_of_conduct/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Code of Conduct
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/security/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Security
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/licence/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Licence
+        </a>
+      </li>
+    
+  
+    
+      <li class="kubara-tabs__dropdown-item">
+        <a href="../../6_reference/datenschutz/" class="kubara-tabs__dropdown-link" role="menuitem">
+          Datenschutz / Privacy
+        </a>
+      </li>
+    
+  
+
+          </ul>
+        </div>
+      </li>
+    
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Kubara" class="md-nav__button md-logo" aria-label="Kubara" data-md-component="logo">
+      
+  <img src="../../images/logo.svg" alt="logo">
+
+    </a>
+    Kubara
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kubara-io/kubara" title="Go to repository" class="md-source plugin_open_external_links_in_new_tab" data-md-component="source" target="_blank" rel="noopener noreferrer">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"></path></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2">
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concept
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prerequisites
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/bootstrap_process/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bootstrap Your Platform
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3">
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Managing Your Platform
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Managing Your Platform
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Worker Cluster
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_app_project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_app_repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_appset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add AppSet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_sso/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/add_sso_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Components
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../components_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_or_replace_components/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Add or Replace Components
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_3">
+        
+          
+          <label class="md-nav__link" for="__nav_4_3" id="__nav_4_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../network_external_dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ExternalDNS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Certificates
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Certificates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-certificate-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is Certificate Management?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-in-configyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration in config.yaml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration in config.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explanation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certificate-issuance-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certificate issuance flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-on-dns-externaldns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note on DNS / ExternalDNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+          
+          
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5">
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Observability
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability_dashboards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability_alerts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alerts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../observability_logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5">
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../4_architecture/architecture_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2">
+        
+          
+          <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Decisions
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Decisions
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_decisions/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_decisions/ADR-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6">
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_community/contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_community/maintainers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintainers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_community/support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_community/contact/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contact
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7">
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/release_cycle_and_updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Cycle &amp; Updates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/code_of_conduct/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of Conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/security/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/licence/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Licence
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_reference/datenschutz/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Datenschutz / Privacy
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-certificate-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is Certificate Management?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workflow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-in-configyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration in config.yaml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration in config.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#explanation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Explanation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#certificate-issuance-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Certificate issuance flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#note-on-dns-externaldns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Note on DNS / ExternalDNS
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="security-certificate-management">Security: Certificate Management</h1>
+<h2 id="what-is-certificate-management">What is Certificate Management?</h2>
+<p>With Kubara you can automatically manage <strong>TLS certificates</strong> in your Kubernetes cluster using <strong>cert-manager</strong> (see https://cert-manager.io/).<br>
+cert-manager handles requesting, renewing, and storing certificates so that your applications are always served with valid TLS.</p>
+<blockquote>
+<p>cert-manager will be rolled out as a <strong>Helm Chart</strong> via ArgoCD when you enable the service in your <code>config.yaml</code>.</p>
+</blockquote>
+<hr>
+<h2 id="workflow">Workflow</h2>
+<ol>
+<li><strong>Requirement: working domain</strong>  </li>
+<li>In order for a certificate provider to issue certificates, your domain must correctly resolve to the Ingress controller in the cluster.  </li>
+<li>When using ACME providers (e.g. Let's Encrypt), validation usually happens via <strong>http-01 challenges</strong>: the provider calls a special path (<code>/.well-known/acme-challenge/...</code>) on your domain.  </li>
+<li>
+<p>Whether you manage DNS records manually or automate them with <a href="../network_external_dns/">ExternalDNS</a> does not matter - what matters is that the domain resolves correctly.</p>
+</li>
+<li>
+<p><strong>Enable cert-manager</strong>  </p>
+</li>
+<li>In <code>config.yaml</code> you enable the service <code>certManager</code>.  </li>
+<li>Then you must <strong>rerun Kubara</strong> (<code>kubara generate --helm</code> or <code>kubara generate</code>) so that Helm values are re-rendered with the new settings.  </li>
+<li>
+<p>Then <strong>git commit &amp; push</strong> the Helm chart changes so that ArgoCD deploys cert-manager to the cluster.  </p>
+</li>
+<li>
+<p><strong>Configure ClusterIssuer</strong>  </p>
+</li>
+<li>Kubara automatically renders a <strong>ClusterIssuer</strong> that you can configure in <code>config.yaml</code>.  </li>
+<li>Typical parameters:  <ul>
+<li><strong>Email address</strong> (required for ACME providers)  </li>
+<li><strong>Server URL</strong> of the ACME provider (e.g. Let's Encrypt production or staging, or another ACME provider)  </li>
+</ul>
+</li>
+<li>
+<p>This allows you to choose any certificate provider you want to use.</p>
+</li>
+<li>
+<p><strong>Automatic certificates</strong>  </p>
+</li>
+<li>When you deploy an Ingress annotated with <code>cert-manager.io/cluster-issuer: &lt;issuer-name&gt;</code>, cert-manager will automatically request a TLS certificate.  </li>
+<li>The provider validates the domain (e.g. via http-01 challenge).  </li>
+<li>After successful validation the certificate is issued and stored as a Kubernetes Secret.  </li>
+<li>Ingress resources then automatically mount this Secret.  </li>
+<li>cert-manager renews certificates automatically before they expire.</li>
+</ol>
+<hr>
+<h2 id="configuration-in-configyaml">Configuration in <code>config.yaml</code></h2>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-cluster</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
+
+<span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
+
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">certManager</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">"admin@example.com"</span><span class="w">    </span><span class="c1"># Email for ACME</span>
+<span class="w">          </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">"https://acme-v02.api.letsencrypt.org/directory"</span><span class="w">   </span><span class="c1"># ACME URL (e.g. Let's Encrypt)</span>
+</code></pre></div>
+<h3 id="explanation">Explanation</h3>
+<ul>
+<li><strong><code>services.certManager.status</code></strong> → when set to <code>enabled</code>, cert-manager is templated into the Helm charts for deployment via ArgoCD  </li>
+<li><strong><code>services.certManager.config.email</code></strong> → email address registered with the ACME provider (required)  </li>
+<li><strong><code>services.certManager.config.server</code></strong> → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  </li>
+</ul>
+<hr>
+<h2 id="certificate-issuance-flow">Certificate issuance flow</h2>
+<ul>
+<li>cert-manager sends a request to the configured provider.  </li>
+<li>The provider validates the domain (e.g. via http-01 challenge).  </li>
+<li>After successful validation the certificate is issued.  </li>
+<li>cert-manager stores the certificate as a Kubernetes Secret.  </li>
+<li>Ingress resources reference this Secret automatically.  </li>
+<li>cert-manager renews certificates on time without manual action.</li>
+</ul>
+<hr>
+<h2 id="note-on-dns-externaldns">Note on DNS / ExternalDNS</h2>
+<ul>
+<li><a href="../network_external_dns/">ExternalDNS</a>  is <strong>not strictly required</strong>.  </li>
+<li>You can manage DNS records manually as long as the domain resolves to the cluster.  </li>
+<li>With <a href="../network_external_dns/">ExternalDNS</a>  it becomes easier, since records are created and updated automatically.  </li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="kubara-footer-legal">
+        <a href="https://www.stackit.de/de/impressum/?hidebanner=true" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">
+          Imprint
+        </a>
+        <span aria-hidden="true">·</span>
+        <a href="../../6_reference/datenschutz/">
+          Datenschutz / Privacy
+        </a>
+        <span aria-hidden="true">·</span>
+        <a href="../../5_community/contact/">
+          Contact
+        </a>
+      </div>
+      <div class="md-copyright">
+  
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.tabs", "navigation.tabs.sticky", "navigation.sections"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+        <script src="../../javascripts/home-effects.js"></script>
+      
+    
+  </body>
+</html>
