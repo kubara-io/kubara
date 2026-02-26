@@ -459,7 +459,7 @@ jobs:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
+        uses: hashicorp/setup-terraform@v4
         with:
           terraform_version: 1.9.3
 
