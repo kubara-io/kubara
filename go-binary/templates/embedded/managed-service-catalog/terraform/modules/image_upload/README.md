@@ -25,13 +25,13 @@ operating_system_version = "v1.9.5"
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.83.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.84.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.83.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.84.0 |
 
 ## Modules
 
@@ -41,7 +41,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_image.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.83.0/docs/resources/image) | resource |
+| [stackit_image.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.84.0/docs/resources/image) | resource |
 
 ## Inputs
 
