@@ -162,7 +162,7 @@ jobs:
           fi
 
       - name: Upload static analysis results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: go-static-analysis-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -212,7 +212,7 @@ jobs:
           echo "Test coverage: $COVERAGE"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: go-test-results-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -294,7 +294,7 @@ jobs:
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
 
       - name: Upload generated helm and terraform files
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -437,7 +437,7 @@ jobs:
           fi
 
       - name: Upload Helm validation results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: helm-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -529,7 +529,7 @@ jobs:
           fi
 
       - name: Upload Terraform validation results
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: terraform-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
