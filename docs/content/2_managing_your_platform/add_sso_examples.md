@@ -94,7 +94,7 @@ kube-prometheus-stack:
           key: client-secret
     grafana.ini:
       auth.github:
-        name: "Github"
+        name: "Forgejo"
         enabled: true
         client_id: ${client-id}
         client_secret: ${client-secret}
