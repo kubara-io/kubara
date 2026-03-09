@@ -135,7 +135,8 @@ kubara generate --terraform
 
 Commit and push the generated files to your Git repository.
 
-> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
+> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
+> Make sure your created Service Account has Project Owner permissions.
 
 ### 2.1 Terraform Bootstrap
 
