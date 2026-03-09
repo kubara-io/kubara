@@ -15,8 +15,11 @@ $env:AWS_ACCESS_KEY_ID="" # <known after initial state bucket creation>
 $env:TF_VAR_grafana_admin_user=""
 $env:TF_VAR_grafana_admin_password=""
 
-# add known credentials for oAuth2 Apps here
+# (optional) Docker Registry secret for pulling (private) images.
+# needs to be base64 encoded -> how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file
 $env:TF_VAR_image_pull_secret="" #base64
+
+# add known credentials for oAuth2 Apps here
 $env:TF_VAR_argo_oauth2_client_id=""
 $env:TF_VAR_argo_oauth2_client_secret=""
 $env:TF_VAR_grafana_oauth2_client_id=""

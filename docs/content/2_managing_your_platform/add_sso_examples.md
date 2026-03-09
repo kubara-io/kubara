@@ -135,7 +135,7 @@ Change values in: **"kubara/customer-service-catalog/helm/your-cluster/argo-cd/v
             config:
               clientID: $oauth2-credentials:client-id
               clientSecret: $oauth2-credentials:client-secret
-              baseURL: https://your-forgejo.domain
+              baseURL: https://yourproject.git.onstackit.cloud
               orgs:
                 - name: test-orga
                   teams:
@@ -154,7 +154,7 @@ Change values in: **"kubara/customer-service-catalog/helm/your-cluster/argo-cd/v
 
 Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml 
 Replace value of "name:" and "teams:" in "orgs.name:"
-Replace "baseURL: https://your-forgejo.domain" with your oauth2-Provider Domain (in this case: Your Forgejo).
+Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).
 And also replace "test-orga:Owners" according to your Organization Name and Team:
 ```bash
       policy.csv: |

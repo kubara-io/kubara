@@ -15,6 +15,19 @@ unify platform development across teams and environments.
   <img src="../../images/architecture-overview.jpg" alt="Kubara Architecture Overview" width="700"/>
 </p>
 
+## Directory Structure
+
+Kubara generates a specific directory structure in your Git repository to separate concerns:
+
+- **`managed-service-catalog/`**
+This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by Kubara. 
+You should generally not modify files in this directory, as they may be updated with new Kubara releases.
+
+
+- **`customer-service-catalog/`**
+It contains cluster-specific configurations and your custom values for the kubara setup.
+
+
 ## Architecture
 The Diagramm shows a typical Kubara Workflow when following the [manual](bootstrap_process.md)
 
