@@ -82,3 +82,6 @@ If you deactivate or replace applications (Y-axis) with others not part of the k
 | external-dns            |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
 | traefik                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |
 | metalLB                 | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              | X             |         |
+
+## Not enough?
+If the current toolset doesn't meet your needs or is missing key features, you can propose new tools [here](../5_community/contributing.md#integration-requirements-catalogue).

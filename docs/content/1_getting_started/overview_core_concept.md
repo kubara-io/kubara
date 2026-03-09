@@ -84,3 +84,6 @@ Argo CD manages itself and rolls out all [generated Helm Charts](../3_components
 - Standardize architecture and governance
 - Ensure security, compliance and observability
 - Empower teams through self-service and GitOps
+
+## Adding new tools 
+If the current toolset doesn't meet your needs or is missing key features, you can propose new tools [here](../5_community/contributing.md#integration-requirements-catalogue).
