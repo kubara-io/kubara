@@ -204,10 +204,11 @@ This creates the Kubernetes cluster and all required infrastructure.
 Export your kubeconfig:
 
 ```bash
-terraform output -json kubeconfig_raw | jq -r > k8s.yaml
+# change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
+terraform output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
 ```
 
-Keep this `k8s.yaml` local and do not commit it to Git.
+Keep this `kubara.yaml` local and do not commit it to Git.
 
 Review Terraform outputs:
 
