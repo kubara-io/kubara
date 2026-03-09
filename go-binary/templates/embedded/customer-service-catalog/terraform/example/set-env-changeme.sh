@@ -14,16 +14,17 @@ export AWS_SECRET_ACCESS_KEY=""
 export TF_VAR_grafana_admin_user=""
 export TF_VAR_grafana_admin_password=""
 
+# (optional) Docker Registry secret for pulling (private) images.
+# needs to be base64 encoded -> how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file
+export TF_VAR_image_pull_secret=""
+
 # add known credentials for oAuth2 Apps here
-export TF_VAR_image_pull_secret="" #base64 - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file
 export TF_VAR_argo_oauth2_client_id=""
 export TF_VAR_argo_oauth2_client_secret=""
 export TF_VAR_grafana_oauth2_client_id=""
 export TF_VAR_grafana_oauth2_client_secret=""
 export TF_VAR_oauth2_client_id=""
 export TF_VAR_oauth2_client_secret=""
-
-
 
 # terraform state rm \
 #    vault_kv_secret_v2.image_pull_secret \

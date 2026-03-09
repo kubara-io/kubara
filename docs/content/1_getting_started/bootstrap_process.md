@@ -135,7 +135,8 @@ kubara generate --terraform
 
 Commit and push the generated files to your Git repository.
 
-> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs).
+> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
+> Make sure your created Service Account has Project Owner permissions.
 
 ### 2.1 Terraform Bootstrap
 
@@ -204,10 +205,11 @@ This creates the Kubernetes cluster and all required infrastructure.
 Export your kubeconfig:
 
 ```bash
-terraform output -json kubeconfig_raw | jq -r > k8s.yaml
+# change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
+terraform output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
 ```
 
-Keep this `k8s.yaml` local and do not commit it to Git.
+Keep this `kubara.yaml` local and do not commit it to Git.
 
 Review Terraform outputs:
 
