@@ -2376,7 +2376,8 @@ You can set a custom output file:</p>
 </code></pre></div>
 <p>Commit and push the generated files to your Git repository.</p>
 <blockquote>
-<p>📘 You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Terraform provider documentation</a>.</p>
+<p>📘 You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Terraform provider documentation</a> &amp; <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">STACKIT Docs</a>.
+Make sure your created Service Account has Project Owner permissions.</p>
 </blockquote>
 <h3 id="21-terraform-bootstrap">2.1 Terraform Bootstrap</h3>
 <p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
@@ -2416,9 +2417,10 @@ Check the values generated in <code>env.auto.tfvars</code>, which is <a href="ht
 </code></pre></div>
 <p>This creates the Kubernetes cluster and all required infrastructure.</p>
 <p>Export your kubeconfig:</p>
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>-json<span class="w"> </span>kubeconfig_raw<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span>&gt;<span class="w"> </span>k8s.yaml
+<div class="highlight"><pre><span></span><code><span class="c1"># change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files</span>
+terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>kubeconfig_raw<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/.kube/kubara.yaml
 </code></pre></div>
-<p>Keep this <code>k8s.yaml</code> local and do not commit it to Git.</p>
+<p>Keep this <code>kubara.yaml</code> local and do not commit it to Git.</p>
 <p>Review Terraform outputs:</p>
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output
 </code></pre></div>

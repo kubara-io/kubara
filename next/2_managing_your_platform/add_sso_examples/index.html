@@ -2044,7 +2044,7 @@ which otherwise could lead to escaping-issues with special Characters, like back
 <span class="w">            </span><span class="no">config:</span>
 <span class="w">              </span><span class="no">clientID: $oauth2-credentials:client-id</span>
 <span class="w">              </span><span class="no">clientSecret: $oauth2-credentials:client-secret</span>
-<span class="w">              </span><span class="no">baseURL: https://your-forgejo.domain</span>
+<span class="w">              </span><span class="no">baseURL: https://yourproject.git.onstackit.cloud</span>
 <span class="w">              </span><span class="no">orgs:</span>
 <span class="w">                </span><span class="no">- name: test-orga</span>
 <span class="w">                  </span><span class="no">teams:</span>
@@ -2062,7 +2062,7 @@ which otherwise could lead to escaping-issues with special Characters, like back
 <strong>Replace the values of the following config variables accordingly to your setup:</strong>
 <p>Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml 
 Replace value of "name:" and "teams:" in "orgs.name:"
-Replace "baseURL: https://your-forgejo.domain" with your oauth2-Provider Domain (in this case: Your Forgejo).
+Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).
 And also replace "test-orga:Owners" according to your Organization Name and Team:
 </p><div class="highlight"><pre><span></span><code><span class="w">      </span>policy.csv:<span class="w"> </span><span class="p">|</span>
 <span class="w">        </span>g,<span class="w"> </span>test-orga:Owners,<span class="w"> </span>role:admin<span class="w">  </span>

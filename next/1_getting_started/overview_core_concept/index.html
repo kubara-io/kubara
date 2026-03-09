@@ -425,6 +425,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1807,6 +1818,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#directory-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Directory Structure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1872,6 +1894,19 @@ unify platform development across teams and environments.</p>
   <img src="../../images/architecture-overview.jpg" alt="Kubara Architecture Overview" width="700">
 </p>
 
+<h2 id="directory-structure">Directory Structure</h2>
+<p>Kubara generates a specific directory structure in your Git repository to separate concerns:</p>
+<ul>
+<li>
+<p><strong><code>managed-service-catalog/</code></strong>
+This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by Kubara. 
+You should generally not modify files in this directory, as they may be updated with new Kubara releases.</p>
+</li>
+<li>
+<p><strong><code>customer-service-catalog/</code></strong>
+It contains cluster-specific configurations and your custom values for the kubara setup.</p>
+</li>
+</ul>
 <h2 id="architecture">Architecture</h2>
 <p>The Diagramm shows a typical Kubara Workflow when following the <a href="../bootstrap_process/">manual</a></p>
 <pre class="mermaid"><code>graph TD
