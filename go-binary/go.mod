@@ -4,7 +4,7 @@ go 1.25.7
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260307173547-d0d5b60d34f8
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260309083031-a5d8a8555c71
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.17.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
