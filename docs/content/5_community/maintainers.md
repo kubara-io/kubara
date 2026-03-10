@@ -50,7 +50,8 @@ towards the quorum. Any removal vote can cover only one single person.
 
 Kubara maintainers have write access to the Kubara Repository.
 They can merge their own patches or patches from others. The current maintainers
-can be found in above. Maintainers collectively manage the project's resources and contributors.
+can be found in the list on top of the site. Maintainers collectively manage the 
+project's resources and contributors.
 
 This privilege is granted with some expectation of responsibility: maintainers
 are people who care about the Kubara project and want to help it grow and
