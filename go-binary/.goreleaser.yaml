@@ -36,12 +36,40 @@ changelog:
     - title: Other changes
       order: 999
 builds:
-  - id: kubara
+  # - id: kubara-linux
+  #   main: ./main.go
+  #   env:
+  #     - CGO_ENABLED=0
+  #   goos:
+  #     - linux
+  #   goarch:
+  #     - amd64
+  #     - arm64
+  #   ldflags:
+  #     - -s -w
+  #     - -X 'main.version={{ .Tag }}'
+  #     - -X 'main.commit={{ .Commit }}'
+  #     - -X 'main.date={{ .Date }}'
+  # - id: kubara-windows
+  #   main: ./main.go
+  #   env:
+  #     - CGO_ENABLED=0
+  #   goos:
+  #     - windows
+  #   goarch:
+  #     - amd64
+  #     - arm64
+  #   ldflags:
+  #     - -s -w
+  #     - -X 'main.version={{ .Tag }}'
+  #     - -X 'main.commit={{ .Commit }}'
+  #     - -X 'main.date={{ .Date }}'
+  - id: kubara-macos
     main: ./main.go
+    env:
+      - CGO_ENABLED=0
     goos:
-      - linux
       - darwin
-      - windows
     goarch:
       - amd64
       - arm64
@@ -51,9 +79,137 @@ builds:
       - -X 'main.commit={{ .Commit }}'
       - -X 'main.date={{ .Date }}'
 archives:
-  - id: binaries
+  # - id: windows-archives
+  #   ids:
+  #     - kubara-windows
+  #   formats:
+  #     - zip
+  #   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  # - id: unix-archives
+  #   ids:
+  #     - kubara-linux
+  #     - kubara-macos
+  #   formats:
+  #     - tar.gz
+  #   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: macos-archives
     ids:
-      - kubara
+      - kubara-macos
     formats:
-      - binary
+      - tar.gz
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+# nfpms:
+#   - id: linux-packages
+#     ids:
+#       - kubara-linux
+#     package_name: kubara
+#     homepage: https://github.com/kubara-io/kubara
+#     maintainer: Kubara Maintainers <noreply@github.com>
+#     description: Command-line interface for kubara.
+#     license: Apache-2.0
+#     formats:
+#       - deb
+#       - rpm
+#       - apk
+#     contents:
+#       - src: ../LICENSE
+#         dst: /usr/share/doc/kubara/copyright
+#         file_info:
+#           mode: 0644
+# snapcrafts:
+#   - ids:
+#       - kubara-linux
+#     name: kubara
+#     title: kubara
+#     summary: Command-line interface for kubara.
+#     description: Command-line interface for kubara.
+#     license: Apache-2.0
+#     confinement: classic
+#     grade: stable
+#     # Set to true once SNAPCRAFT_STORE_CREDENTIALS is configured and publishing is desired.
+#     publish: false
+# chocolateys:
+#   - name: kubara
+#     ids:
+#       - windows-archives
+#     package_source_url: https://github.com/kubara-io/kubara
+#     title: kubara
+#     authors: kubara-io
+#     project_url: https://github.com/kubara-io/kubara
+#     license_url: https://github.com/kubara-io/kubara/blob/main/LICENSE
+#     project_source_url: https://github.com/kubara-io/kubara
+#     docs_url: https://github.com/kubara-io/kubara/blob/main/README.md
+#     bug_tracker_url: https://github.com/kubara-io/kubara/issues
+#     tags: kubara cli
+#     summary: Command-line interface for kubara.
+#     description: Command-line interface for kubara.
+#     release_notes: https://github.com/kubara-io/kubara/releases/tag/{{ .Tag }}
+#     api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
+#     source_repo: https://push.chocolatey.org/
+#     # Keep disabled until a dedicated Chocolatey publish flow is in place.
+#     skip_publish: true
+notarize:
+  macos:
+    - # Whether this configuration is enabled or not.
+      #
+      # Default: false.
+      # Templates: allowed.
+      enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+
+      # IDs to use to filter the built binaries.
+      #
+      # Default: the project name.
+      ids:
+        - kubara-macos
+
+      # Before notarizing, we need to sign the binary.
+      # This block defines the configuration for doing so.
+      sign:
+        # The .p12 certificate file path or its base64'd contents.
+        #
+        # Templates: allowed.
+        certificate: "{{.Env.MACOS_SIGN_P12}}"
+
+        # The password to be used to open the certificate.
+        #
+        # Templates: allowed.
+        password: "{{.Env.MACOS_SIGN_PASSWORD}}"
+
+        # Allows to set the signature entitlements XML file.
+        #
+        # Templates: allowed.
+        # entitlements: ./path/to/entitlements.xml
+
+      # Then, we notarize the binaries.
+      #
+      # You can leave this section empty if you only want
+      # to sign the binaries.
+      notarize:
+        # The issuer ID.
+        # Its the UUID you see when creating the App Store Connect key.
+        #
+        # Templates: allowed.
+        issuer_id: "{{.Env.MACOS_NOTARY_ISSUER_ID}}"
+
+        # Key ID.
+        # You can see it in the list of App Store Connect Keys.
+        # It will also be in the ApiKey filename.
+        #
+        # Templates: allowed.
+        key_id: "{{.Env.MACOS_NOTARY_KEY_ID}}"
+
+        # The .p8 key file path or its base64'd contents.
+        #
+        # Templates: allowed.
+        key: "{{.Env.MACOS_NOTARY_KEY}}"
+
+        # Whether to wait for the notarization to finish.
+        # Not recommended, as it could take a really long time.
+        wait: true
+
+        # Timeout for the notarization.
+        # Beware of the overall `--timeout` time.
+        # This only has any effect if `wait` is true.
+        #
+        # Default: 10m.
+        # timeout: 20m
