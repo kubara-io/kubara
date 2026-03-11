@@ -126,7 +126,7 @@ archives:
 #     license: Apache-2.0
 #     confinement: classic
 #     grade: stable
-#     # Set to true once SNAPCRAFT_STORE_CREDENTIALS is configured and publishing is desired.
+#  # Set to true once SNAPCRAFT_STORE_CREDENTIALS is configured and publishing is desired.
 #     publish: false
 # chocolateys:
 #   - name: kubara
@@ -146,15 +146,15 @@ archives:
 #     release_notes: https://github.com/kubara-io/kubara/releases/tag/{{ .Tag }}
 #     api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
 #     source_repo: https://push.chocolatey.org/
-#     # Keep disabled until a dedicated Chocolatey publish flow is in place.
+#  # Keep disabled until a dedicated Chocolatey publish flow is in place.
 #     skip_publish: true
 notarize:
   macos:
-    - # Whether this configuration is enabled or not.
+      # Whether this configuration is enabled or not.
       #
       # Default: false.
       # Templates: allowed.
-      enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
+    - enabled: '{{ isEnvSet "MACOS_SIGN_P12" }}'
 
       # IDs to use to filter the built binaries.
       #
