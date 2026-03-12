@@ -1,7 +1,7 @@
 # Kubara
 
 ![Status: Internal Use](https://img.shields.io/badge/status-internal-lightgrey)
-![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)
+![Docs License: CC BY 4.0](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f)
 [![Chat: kubara Community](https://img.shields.io/badge/chat-kubara%20community-00AC47?logo=googlechat&logoColor=white)](https://mail.google.com/chat/u/0/#chat/space/AAQAKAHvYwo)
 
 ## 🤔 What is Kubara?
@@ -128,5 +128,5 @@ Releases are listed in the [Release section](https://kubara.git.onstackit.cloud/
 
 ## 📝 License
 
-This project is licensed under the [Apache 2.0 License](https://github.com/kubara-io/kubara/blob/main/LICENSE).
-Use it freely. No warranties. Contributions welcome.
+Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/LICENSE-docs.md).
+Software source code is licensed under [Apache 2.0](https://github.com/kubara-io/kubara/blob/main/LICENSE).

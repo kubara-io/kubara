@@ -43,7 +43,8 @@ nav:
       - FAQ: 6_reference/faq.md
       - Code of Conduct: 6_reference/code_of_conduct.md
       - Security: 6_reference/security.md
-      - License: https://github.com/kubara-io/kubara/blob/main/LICENSE
+      - Docs License (CC BY 4.0): https://github.com/kubara-io/kubara/blob/main/LICENSE-docs.md
+      - Software License (Apache 2.0): https://github.com/kubara-io/kubara/blob/main/LICENSE
 not_in_nav: |
   7_decisions/ADR-template.md
   7_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
