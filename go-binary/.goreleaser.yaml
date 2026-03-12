@@ -79,13 +79,18 @@ builds:
       - -X 'main.commit={{ .Commit }}'
       - -X 'main.date={{ .Date }}'
 archives:
-  - id: binaries
+  - id: windows-archives
+    ids:
+      - kubara-windows
+    formats:
+      - zip
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+  - id: unix-archives
     ids:
       - kubara-linux
-      - kubara-windows
       - kubara-macos
     formats:
-      - binary
+      - tar.gz
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 # nfpms:
 #   - id: linux-packages
