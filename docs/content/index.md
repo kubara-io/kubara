@@ -2,7 +2,7 @@
 
 ![Status: Internal Use](https://img.shields.io/badge/status-internal-lightgrey)
 ![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)
-[![Chat: kubara Community](https://img.shields.io/badge/chat-kubara%20community-00AC47?logo=googlechat&logoColor=white)](https://mail.google.com/chat/u/0/#chat/space/AAQAKAHvYwo)
+[![Chat: kubara Community](https://img.shields.io/badge/chat-kubara%20community-00AC47?logo=googlechat&logoColor=white)](https://github.com/kubara-io/kubara/discussions)
 
 ## 🤔 What is Kubara?
 
@@ -47,7 +47,7 @@ Kubara simplifies this with a single Go binary that:
 - Bootstraps your platform using Argo CD and GitOps
 - Allows easy onboarding of new clusters and workloads
 
-All based on real-world usage at Schwarz Industry and the experience of multiple engineering teams - so you don't have to reinvent the wheel.
+All based on real-world usage at Schwarz Group and the experience of multiple engineering teams - so you don't have to reinvent the wheel.
 
 
 
@@ -85,11 +85,14 @@ We're continuously improving Kubara. Upcoming features:
 - Support more cloud providers
 
 
-➡️ Track progress in the [Roadmap Board](https://kubara.git.onstackit.cloud/STACKIT/kubara/projects/3)
+
 
 ## 🎥/📝/🎙️ Multimedia
 
-- [🎥 From CI to Kubernetes Catalog: A Practical Guide to vCluster and GitOps | Linux Foundation | Webinar](https://www.youtube.com/watch?v=U4AgmEo3oV8)
+
+- [🎙️ Kubernetes Platform Blueprint | Co-Located Workshop with vCluster at KubeCon, 2026](https://www.vcluster.com/events/kubernetes-platform-blueprint)
+- [🎥 Free Course based on kubara, 2026 | Course at Platform Engineering University](https://university.platformengineering.org/introduction-to-gitops-for-platform-engineering)
+- [🎙️ How to build a Multi-Tenancy Internal Developer Platform with GitOps and vCluster | Talk at ContainerDays Hamburg, 2025](https://www.youtube.com/watch?v=yQsnA91Gtcs)
 - [🎥 How to build a multi-tenancy Internal Developer Platform with GitOps and vCluster | PlatformCon 2025 | Virtual Workshop ](https://www.youtube.com/watch?v=2wQ4w1NKfd4)
 - [🎥 Load Testing Argo CD at Scale with vCluster and GitOps | vCluster Labs | Webinar ](https://www.youtube.com/watch?v=0XEWn4VmiDE)
 - [🎙️The GitOps Blueprint: Multi-Tenant Kubernetes with Argo CD in 30 Minutes | Cloud X Summit 2025 | Talk](assets/The_GitOps_Blueprint_Multi-Tenant_Kubernetes_with_Argo_CD_in_30_Minutes.pdf)
@@ -99,8 +102,8 @@ We're continuously improving Kubara. Upcoming features:
 ## 🐣 Who's using Kubara?
 
 ### Internal
-- Schwarz Industry (IEP) - actively in use
-- Schwarz IT (SIT) - onboarding phase
+- Schwarz Industry - actively in use
+- Schwarz IT - actively in use
 
 ### External
 - Hamburg Port Authority (HPA) - evaluating multi-cloud use
@@ -111,7 +114,7 @@ We're continuously improving Kubara. Upcoming features:
 
 We 💙 contributions! Here's how to get started:
 
-1. Check the [Issues](https://kubara.git.onstackit.cloud/STACKIT/kubara/issues)
+1. Check the [Issues](https://github.com/kubara-io/kubara/issues)
 2. Open a new one if your problem isn't listed
 3. Want to fix something yourself? Go ahead and open a PR!
 4. Follow our [Commit Message Conventions](5_community/contributing.md)
@@ -123,7 +126,7 @@ We're happy to help and review 🙌
 ## 🏷️ Versioning
 
 Kubara follows [Semantic Versioning](http://semver.org/) in the `style v0.1.0-something`.
-Releases are listed in the [Release section](https://kubara.git.onstackit.cloud/STACKIT/kubara/releases).
+Releases are listed in the [Release section](https://github.com/kubara-io/kubara/releases).
 
 
 ## 📝 License
