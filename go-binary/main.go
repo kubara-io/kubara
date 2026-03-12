@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"fmt"
 	"kubara/cmd"
-	"net/mail"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,23 +20,7 @@ const (
 )
 
 var authors = []any{
-	mail.Address{
-		Name:    "Alexander Hoeft",
-		Address: "alexander.hoeft@iits-consulting.de",
-	},
-	mail.Address{
-		Name:    "Artem Lajko",
-		Address: "artem.lajko@iits-consulting.de",
-	},
-	mail.Address{
-		Name:    "Matthias Huether",
-		Address: "matthias.huether@iits-consulting.de",
-	},
-	mail.Address{
-		Name:    "Fabian Schmitt",
-		Address: "fabian-patrice.schmitt@stackit.cloud",
-	},
-}
+	"Contributors: https://github.com/kubara-io/kubara/graphs/contributors"}
 
 var (
 	version = "dev" //version is dynamically set at build time via ldflags by GoReleaser. Defaults to "dev" for local builds.
