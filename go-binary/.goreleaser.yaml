@@ -36,34 +36,34 @@ changelog:
     - title: Other changes
       order: 999
 builds:
-  # - id: kubara-linux
-  #   main: ./main.go
-  #   env:
-  #     - CGO_ENABLED=0
-  #   goos:
-  #     - linux
-  #   goarch:
-  #     - amd64
-  #     - arm64
-  #   ldflags:
-  #     - -s -w
-  #     - -X 'main.version={{ .Tag }}'
-  #     - -X 'main.commit={{ .Commit }}'
-  #     - -X 'main.date={{ .Date }}'
-  # - id: kubara-windows
-  #   main: ./main.go
-  #   env:
-  #     - CGO_ENABLED=0
-  #   goos:
-  #     - windows
-  #   goarch:
-  #     - amd64
-  #     - arm64
-  #   ldflags:
-  #     - -s -w
-  #     - -X 'main.version={{ .Tag }}'
-  #     - -X 'main.commit={{ .Commit }}'
-  #     - -X 'main.date={{ .Date }}'
+  - id: kubara-linux
+    main: ./main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X 'main.version={{ .Tag }}'
+      - -X 'main.commit={{ .Commit }}'
+      - -X 'main.date={{ .Date }}'
+  - id: kubara-windows
+    main: ./main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X 'main.version={{ .Tag }}'
+      - -X 'main.commit={{ .Commit }}'
+      - -X 'main.date={{ .Date }}'
   - id: kubara-macos
     main: ./main.go
     env:
@@ -79,24 +79,13 @@ builds:
       - -X 'main.commit={{ .Commit }}'
       - -X 'main.date={{ .Date }}'
 archives:
-  # - id: windows-archives
-  #   ids:
-  #     - kubara-windows
-  #   formats:
-  #     - zip
-  #   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-  # - id: unix-archives
-  #   ids:
-  #     - kubara-linux
-  #     - kubara-macos
-  #   formats:
-  #     - tar.gz
-  #   name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-  - id: macos-archives
+  - id: binaries
     ids:
+      - kubara-linux
+      - kubara-windows
       - kubara-macos
     formats:
-      - tar.gz
+      - binary
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 # nfpms:
 #   - id: linux-packages
