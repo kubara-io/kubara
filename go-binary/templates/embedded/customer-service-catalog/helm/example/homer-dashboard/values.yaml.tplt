@@ -28,46 +28,69 @@ serviceMonitor:
 dashboardConfig:
   title: "Kubara Developer Portal"
   subtitle: "{{ .cluster.stage }}"
-  logo: "assets/icons/stackit-logo.png"
+  logo: "assets/icons/kubara_logo.png"
 
   header: true
-  footer: '<p style="color:"#045464";"> Kubara Developer Portal</p>'
+  footer: '<p style="color:#334155;"> Kubara Developer Portal</p>'
   proxy:
     useCredentials: false
   connectivityCheck: true
 
+  defaults:
+    layout: list
+    colorTheme: dark
+
   # Optional theme customization
   theme: default
+
+  # Optional navbar links (top-right menu)
+  links:
+    - name: "Kubara-Homepage"
+      icon: "fas fa-globe"
+      url: "https://kubara.io/"
+      target: "_blank"
+    - name: "Kubara Repo"
+      icon: "fab fa-github"
+      url: "https://github.com/kubara-io/kubara"
+      target: "_blank"
+    - name: "Kubara Docs"
+      icon: "fas fa-book"
+      url: "https://docs.kubara.io/"
+      target: "_blank"
+    - name: "Homer-Dashboard Repo"
+      icon: "fab fa-github-alt"
+      url: "https://github.com/bastienwirtz/homer"
+      target: "_blank"
 
   # Optional theme customization (color overrrides)
   # overrrides can also be done using CSS vars
   colors:
     light:
-      highlight-primary: "#045464"    # deep teal
-      highlight-secondary: "#f8ea19"    # bright yellow
-      highlight-hover: "#347483"    #
-      background: "#f3f3f2"    # light gray
-      card-background: "#ffffff"    # white
-      text: "#161616"    # very dark gray
-      text-header: "#ffffff"    # white
-      text-title: "#161616"    # very dark gray
-      text-subtitle: "#045464"    # deep teal
-      card-shadow: "#00000026"  # black, 15% opacity
-      link: "#045464"    # deep teal
-      link-hover: "#045464"    # deep teal
+      highlight-primary: "#1E293B"    # slate header
+      highlight-secondary: "#334155"    # navbar slate
+      highlight-hover: "#475569"    # subtle slate hover
+      background: "#F3F6FA"    # cool light background
+      card-background: "#FFFFFF"    # white cards
+      text: "#0F172A"    # dark slate text
+      text-header: "#F8FAFC"    # light header text
+      text-title: "#0F172A"    # dark slate title
+      text-subtitle: "#475569"    # muted slate subtitle
+      card-shadow: "#0F172A1A"  # dark slate, 10% opacity
+      link: "#2563EB"    # blue link
+      link-hover: "#1D4ED8"    # darker blue hover
     dark:
-      highlight-primary: "#232b34"    #
-      highlight-secondary: "#374452"    #
-      highlight-hover: "#045464"    #
-      background: "#232b34"    # very dark gray
-      card-background: "#374452"    #
-      text: "#f3f3f2"    # light gray
-      text-header: "#ffffff"    # white
-      text-title: "#ded576"    # ochre yellow
-      text-subtitle: "#ffffff"    #
-      card-shadow: "#00000066"  # black, 40% opacity
-      link: "#374452"    #
-      link-hover: "#ded576"    # ochre yellow
+      highlight-primary: "#0A1E2D"    # use dark background for top header line
+      highlight-secondary: "#10283A"    # darker navbar surface
+      highlight-hover: "#14344A"    # subtle hover on dark navbar
+      background: "#0A1E2D"    # astro dark background
+      card-background: "#10283A"    # elevated dark surface
+      text: "#E5ECF6"    # astro dark-mode text
+      text-header: "#F7F8F8"    # astro dark heading text
+      text-title: "#F7F8F8"    # astro dark heading text
+      text-subtitle: "#A0E6E6"    # logo mint accent
+      card-shadow: "#00000066"
+      link: "#0ABEBE"    # astro primary teal
+      link-hover: "#006D75"    # deep teal accent
 
   # Services
   # First level array represent a group.
