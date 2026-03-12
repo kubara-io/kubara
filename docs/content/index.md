@@ -114,7 +114,7 @@ We 💙 contributions! Here's how to get started:
 1. Check the [Issues](https://kubara.git.onstackit.cloud/STACKIT/kubara/issues)
 2. Open a new one if your problem isn't listed
 3. Want to fix something yourself? Go ahead and open a PR!
-4. Follow our [Commit Message Conventions](5_community/contributing.md)
+4. Follow our [Commit Message Conventions](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#commit-and-pr-guidelines)
 
 We're happy to help and review 🙌
 
@@ -128,5 +128,5 @@ Releases are listed in the [Release section](https://kubara.git.onstackit.cloud/
 
 ## 📝 License
 
-This project is licensed under the [Apache 2.0 License](6_reference/licence.md).
+This project is licensed under the [Apache 2.0 License](https://github.com/kubara-io/kubara/blob/main/LICENSE).
 Use it freely. No warranties. Contributions welcome.

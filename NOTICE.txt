@@ -1,0 +1,7 @@
+Kubara
+Copyright (c) Kubara contributors
+
+This product includes software developed by contributors to the Kubara project.
+
+Kubara is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.

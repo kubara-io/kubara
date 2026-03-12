@@ -35,7 +35,7 @@ nav:
           - ADR: 7_decisions/ADR.md
           - ADR-Index: 7_decisions/ADR-index.md
   - Community:
-      - Contributing: 5_community/contributing.md
+      - Contributing: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
       - Maintainers: 5_community/maintainers.md
       - Support: 5_community/support.md
   - Reference:
@@ -43,7 +43,7 @@ nav:
       - FAQ: 6_reference/faq.md
       - Code of Conduct: 6_reference/code_of_conduct.md
       - Security: 6_reference/security.md
-      - Licence: 6_reference/licence.md
+      - License: https://github.com/kubara-io/kubara/blob/main/LICENSE
 not_in_nav: |
   7_decisions/ADR-template.md
   7_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
