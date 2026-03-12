@@ -18,19 +18,35 @@ It combines platform scaffolding, environment configuration, and production-read
 
 See [INSTALLATION.md](./INSTALLATION.md) for Linux, macOS, and Windows installation instructions.
 
-## Quick Start Commands
+## CLI Commands
 
-```bash
-kubara --help
-kubara init --prep
-kubara init
-kubara schema
-kubara generate --terraform
-kubara bootstrap <cluster-name>
+```text
+init       Initialize a new kubara directory
+generate   generates files from embedded templates and config.
+bootstrap  Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD
+schema     Generate JSON schema file for config structure
+help, h    Shows a list of commands or help for one command
+```
+
+## Global Options
+
+```text
+--kubeconfig string               Path to kubeconfig file (default: "~/.kube/config")
+--work-dir string, -w string      Working directory (default: ".")
+--config-file string, -c string   Path to the configuration file (default: "config.yaml")
+--env-file string                 Path to the .env file (default: ".env")
+--test-connection                 Check if Kubernetes cluster can be reached. List namespaces and exit
+--base64                          Enable base64 encode/decode mode
+--encode                          Base64 encode input
+--decode                          Base64 decode input
+--string string                   Input string for base64 operation
+--file string                     Input file path for base64 operation
+--help, -h                        show help
+--version, -v                     print the version
 ```
 
 For a complete end-to-end setup flow, see:
-<https://docs.kubara.io/1_getting_started/bootstrap_process/>
+<https://docs.kubara.io/latest-stable/1_getting_started/bootstrap_process/>
 
 ## Documentation
 
