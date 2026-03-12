@@ -18,6 +18,11 @@ It combines platform scaffolding, environment configuration, and production-read
 
 See [INSTALLATION.md](./INSTALLATION.md) for Linux, macOS, and Windows installation instructions.
 
+## Documentation
+
+- Public docs: <https://docs.kubara.io>
+- Local docs sources: [`docs/`](./docs)
+
 ## CLI Commands
 
 ```text
@@ -45,17 +50,10 @@ help, h    Shows a list of commands or help for one command
 --version, -v                     print the version
 ```
 
-For a complete end-to-end setup flow, see:
-<https://docs.kubara.io/latest-stable/1_getting_started/bootstrap_process/>
-
-## Documentation
-
-- Public docs: <https://docs.kubara.io>
-- Local docs sources: [`docs/`](./docs)
-
 ## Community and Support
 
 - Questions and bug reports: [GitHub Issues](https://github.com/kubara-io/kubara/issues)
+- Discussions and Q&A: [GitHub Discussions](https://github.com/kubara-io/kubara/discussions)
 - Team and contributor guidance: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Code of conduct: [docs/content/6_reference/code_of_conduct.md](./docs/content/6_reference/code_of_conduct.md)
 
