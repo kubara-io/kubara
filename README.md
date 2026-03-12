@@ -18,6 +18,20 @@ It combines platform scaffolding, environment configuration, and production-read
 
 See [INSTALLATION.md](./INSTALLATION.md) for Linux, macOS, and Windows installation instructions.
 
+## Quick Start Commands
+
+```bash
+kubara --help
+kubara init --prep
+kubara init
+kubara schema
+kubara generate --terraform
+kubara bootstrap <cluster-name>
+```
+
+For a complete end-to-end setup flow, see:
+<https://docs.kubara.io/1_getting_started/bootstrap_process/>
+
 ## Documentation
 
 - Public docs: <https://docs.kubara.io>
