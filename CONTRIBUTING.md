@@ -1,159 +1,218 @@
 # Contributing to Kubara
 
-Thank you for your interest in contributing to Kubara.
-We welcome bug reports, documentation improvements, and code changes.
+Thank you for your interest in contributing to **Kubara**!
+Whether you're fixing bugs, improving documentation, or adding features - all contributions are welcome.
 
-## Contributor vs. Maintainer
+## 🧑‍💻 Contributor vs. Maintainer
 
-- Contributors: anyone submitting issues, ideas, docs, or code changes.
-- Maintainers: core team members reviewing, approving, and merging changes.
-- Maintainer details: [docs/content/5_community/maintainers.md](./docs/content/5_community/maintainers.md)
+* **Contributors**: Anyone submitting code, docs or ideas via Issues or Pull Requests.
+* **Maintainers**: Core team members with permission to review, approve, and merge contributions. Maintainers help enforce standards and ensure quality.
+    * Maintainers: @alexander.hoeft @matthias.huether @felix.kammerer @artem.lajko
 
-## Reporting Issues
+## 🐛 Reporting Issues
 
-Open issues here: <https://github.com/kubara-io/kubara/issues>
+If you discover a bug or have a feature request, please open an issue in [Issues Tracker](https://kubara.git.onstackit.cloud/STACKIT/kubara/issues) and describe:
 
-Please include:
+* What's happening
+* Steps to reproduce
+* Expected vs. actual result
+* Logs or screenshots (if applicable)
 
-- What happened
-- Steps to reproduce
-- Expected vs. actual behavior
-- Logs/screenshots where relevant
+If you are open an issue, a template will guide you through the process.
 
-## Before You Start
+## 🚀 How to Contribute
 
-Before implementing a bug fix or feature, create or discuss an issue first.
-For larger topics or architectural changes, align on the approach before implementation.
-If a major technical decision is needed, document it with an ADR:
-[docs/content/7_decisions/ADR.md](./docs/content/7_decisions/ADR.md).
+### Before You Start Working on a Bug or Feature
 
-## Development Setup
+Before you begin working on a bug fix or implementing a new feature, please create an issue or feature request first (see above). 
+This allows us to briefly discuss the best approach to solving the problem and avoid duplicated efforts.
 
-Requirements:
+For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the Kubara Office Hours.
+For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](../7_decisions/ADR.md).
+For more information, please refer to our support documentation: [Support](support.md)
 
-- Go `1.25.7` (see `go-binary/go.mod`)
-- Git
-- `pre-commit` (recommended)
+### Preparations: Pre-commit Hooks
 
-Setup:
+We use pre-commit hooks to enforce coding standards and maintain code quality across the project.
+If you plan to contribute, please make sure to install and configure the hooks locally as well. They will help you adhere to the required standards before code is committed, ensuring a smoother development process.
+These hooks are also executed in the CI pipeline, and any violations will cause the pipeline to fail. So even if you bypass them locally, your code will not be accepted unless it passes all checks.
+You can find installation instructions here: https://kubara.git.onstackit.cloud/STACKIT/kubara/src/branch/master/go-binary/README.md
 
-```bash
-git clone https://github.com/kubara-io/kubara.git
-cd kubara
-pre-commit install --install-hooks
-```
+Once you have set up the pre-commit hooks, you can follow the steps below to start contributing:
 
-## Build and Validate
+1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](../7_decisions/ADR.md)
+2. **Fork** the repository and clone it locally, see also here: https://forgejo.org/docs/latest/user/pull-requests-and-git-flow/
+2. **Create a new branch** for your work
+3. **Implement your changes**
+4. **Run checks** before submitting
+5. **Commit** using [Conventional Commits](https://www.conventionalcommits.org)
+6. **Open a Pull Request** to the `dev` branch () -> Please note the chapter: Pull Requests: Conventions & Best Practices
 
-```bash
-cd go-binary
-go test ./...
-go build -o kubara .
-pre-commit run --all-files
-```
+### 🧩 Pull Requests: Conventions & Best Practices
 
-## Commit and PR Guidelines
+#### 📦 One PR per Topic
 
-### One PR per topic
+Avoid bundling multiple unrelated changes (e.g. fixing unrelated bugs or adding a bug fix and a new feature) in a single PR. Instead, create a separate PR for each topic.
 
-Keep pull requests focused on one change topic.
-Avoid bundling unrelated changes in one PR.
+This approach helps to:
 
-### PR title convention
+    Keep reviews focused and easier to manage
+    Write clear and meaningful PR titles
+    Improve the clarity of commit history and changelogs
+    Minimize risk when reverting changes
+    Small, focused PRs are easier to review, less prone to merge conflicts, and lead to a more maintainable codebase.
 
-Use Conventional Commits style:
+#### 🔤 PR Title Naming Convention
 
-- `feat:` for new features
-- `fix:` for bug fixes
-- `docs:` for documentation changes
-- `refactor:` for internal code improvements
-- `chore:` for tooling/maintenance/CI tasks
+PR titles should follow the structure of Conventional Commits, aligned with the main type of change introduced:
 
-### PR description requirements
+    feat: for new features
+    fix: for bug fixes
+    docs: for documentation changes
+    refactor: for internal code improvements
+    chore: for maintenance, tooling, or CI-related updates
 
-Fill the PR template completely and link related issues.
-A good PR should clearly explain:
+Examples:
 
-- What changed
-- Why it changed
-- How it was tested
-- Any rollout or review notes
+    feat: add password reset functionality
+    fix: handle null user session on login
+    docs: improve README with setup instructions
 
-### Review etiquette
+Keep it short and descriptive. Use a scope in parentheses if needed (e.g. fix(auth): ...).
 
-- Be open to feedback and iterate quickly.
-- Respond to comments in a timely manner.
-- Keep discussion focused on the specific change.
+#### 📝 PR Description Requirements
 
-## Branch Strategy
+A Pull Request template is automatically loaded when you open a new PR.
+Please fill it out completely and thoughtfully - it's there to help reviewers understand:
 
-- Create a dedicated feature branch for each change.
-- Keep your branch up to date with the target integration branch.
-- Use small, reviewable commits.
+    What your change does
+    Why it's needed
+    How it was implemented
+    Any relevant issues or tickets
+    Special notes for testing, review, or deployment
+
+Well-written descriptions lead to faster reviews and fewer misunderstandings.
+Do not leave the template empty or remove sections without reason - each part serves a purpose.
+
+## 🧠 Branch Strategy
+
+* `master`: Latest features - unstable, may change without notice
+* `tag/vX.X.X-XX`: tags point to the latest stable version
+* `<some-feat-branch>`: work on features
+
+## 💬 Code Review Etiquette
+
+We aim for respectful and constructive collaboration.
+Please:
+
+* Be open to feedback and iterative improvement
+* Respond to review comments in a timely manner
+* Avoid mixing unrelated changes in a single PR
+
+> A good PR tells a story: *what's changing, why it matters, and how to review it.*
 
 ## Integration Requirements Catalogue
 
-If you propose adding a new tool/component to Kubara, include a structured proposal.
+Are you missing a feature or you think that the software and community 
+would profit greatly if this new tool is included? 
+For that you can propose a new tool to be included in Kubara.
+In order to deliver the best possible software and to make maintenance easier for us and the community we have created a requirements catalogue
+that is required for any serious proposal.
+The catalogue is split into different parts, the numbers at the end indicate how many percentages they contribute to a proposal to be included.
+More on that in subchapter 5.
 
-### Strategic Alignment Criteria (40%)
+The following points describe based on what criteria the tool will be rated.
 
-- Core mission fit and community alignment
-- Architecture compatibility and API consistency
-- Dependency footprint and security posture
+## Strategic Alignment Criteria (40%)
+These requirements ensure that the tool to be proposed fit the current and future trajections of the project.
 
-### Operational Impact Assessment (30%)
+### 1.1 Vision Alignment (Weight: 25%)
+- **Core Mission Fit**: Tool directly supports Kubara's primary objectives
+- **Community Alignment**: Tool supports or enhances community-driven development
+- **Long-term Sustainability**: Active maintenance, clear roadmap, healthy contributor base
 
-- Maintenance overhead, release cadence, and security support
-- Integration complexity, migration path, and rollback strategy
+### 1.2 Technical Integration (Weight: 15%)
+- **Architecture Compatibility**: Minimal disruption to existing stack patterns
+- **API Consistency**: Aligns with established integration patterns
+- **Dependency Management**: No conflicting dependencies or version constraints
+- **Resource Footprint**: Acceptable CPU/memory/storage requirements
+- **Security and Best Practices**: Code validating, Image CVE scanning and linting by maintainers
 
-### Value Proposition Criteria (30%)
+## Operational Impact Assessment (30%)
+These requirements look at how mature the proposed tool is and if it is not tech cruft.
 
-- Problem/pain-point resolution and measurable value
-- Uniqueness vs. existing stack capabilities
-- Reasonable total cost of ownership and learning curve
+### 2.1 Maintenance Overhead (Weight: 15%)
+- **Update Frequency**: Reasonable release cycle (not excessive breaking changes)
+- **Security Support**: Active security patches and vulnerability response
+- **Documentation Quality**: Comprehensive, up-to-date documentation
+- **Community Support**: Active issue resolution and community engagement
+- **Maturity**: In which stage is the project (alpha, beta, GA)
+- **Adoption Rate**: How well is this tool established?
 
-### Evaluation Process
+### 2.2 Integration Complexity (Weight: 15%)
+- **Implementation Effort**: High effort for initial integration
+- **Migration Path**: Clear upgrade/downgrade procedures
+- **Rollback Strategy**: Defined removal process with minimal impact
 
-Include:
+## Value Proposition Criteria (30%)
+The following points look at if the tool proposed contribute something novel to the existing toolset in a way that leads to a net gain.
 
-- Problem statement
-- Alternatives analysis
-- Implementation plan
-- Success metrics
+### 3.1 Problem Solving (Weight: 20%)
+- **Pain Point Resolution**: Addresses specific user needs
+- **Value Gains**: General improvement in workflows or capabilities
+- **Feature Uniqueness**: Provides capabilities not available in current stack
+- **User Demand**: Evidence of community/team need (issues, requests, surveys)
 
-Review stages:
+### 3.2 Cost-Benefit Analysis (Weight: 10%)
+- **TCO Assessment**: Total cost of ownership is significantly lower than projected value
+- **Learning Curve**: Effort for the team to achieve proficiency
+- **Support Requirements**: No specialized skills or external dependencies
+- **Scalability Impact**: Positive or neutral effect on system scalability
 
-- Initial screening
-- Technical evaluation
-- Pilot testing (if needed)
-- Final maintainer decision
+## Evaluation Process
+What is required in the propoasl and how does the review look like?
 
-### Decision Matrix
+### 4.1 Submission Requirements
+- **Problem Statement**: Clear description of issue being solved
+- **Alternative Analysis**: Comparison with existing solutions
+- **Implementation Plan**: Technical approach and timeline
+- **Success Metrics**: Defined KPIs for measuring impact
 
-- Auto-approve: score >= 85/100 without critical failures
-- Conditional approve: score 70-84/100 with mitigation plan
-- Reject: score < 70/100 or critical failure
+### 4.2 Review Stages
+- **Initial Screening**: Basic compliance check
+- **Technical Evaluation**: Architecture and integration analysis
+- **Pilot Testing**: Limited scope implementation
+- **Final Decision**: Governance committee approval
 
-### Automatic Rejection Criteria
+## Decision Matrix
+Based on what percentages will a tool be included and on what criteria will the proposal fail.
 
-- Duplicate functionality without clear benefit
-- Proprietary dependencies or lock-in
-- No viable migration/rollback strategy
-- Unacceptable maintenance burden
+### 5.1 Scoring Thresholds
+- **Auto-Approve**: Score ≥ 85/100 with no critical failures
+- **Conditional Approve**: Score 70-84/100 with mitigation plan
+- **Reject**: Score < 70/100 or critical failure in any category
 
-## Documentation Changes
+### 5.2 Critical Failure Conditions
+- **Proprietary licensing or vendor lock-in**
+- **Open Source Compliance**: 100% open-source with permissive license (MIT, Apache 2.0, BSD)
+- **Security vulnerabilities without remediation path**
+- **Breaking changes to core functionality**
+- **> 100 hours integration effort**
+- **No active maintenance for > 6 months**
 
-- Update docs when behavior or interfaces change.
-- Keep links in `README.md` and docs navigation up to date.
+## Rejection Criteria
+The following is a list on critera which leads to the automatic rejection of the tool proposal.
 
-## Code of Conduct
+### 6.1 Automatic Rejection
+- **Duplicate functionality with existing tools**
+- **Requires proprietary dependencies**
+- **No clear migration path from current solutions**
+- **Exceeds resource allocation for maintenance**
 
-By participating, you agree to follow the project code of conduct:
-[docs/content/6_reference/code_of_conduct.md](./docs/content/6_reference/code_of_conduct.md)
+### 6.2 Rejection Response Template
+- **Clear explanation of decision criteria**
+- **Specific areas of non-compliance**
+- **Suggestions for alternative approaches**
+- **Path for resubmission**: Clear requirements for reconsideration
 
-## License
-
-By contributing, you agree to the repository licensing model:
-
-- Software/code contributions are licensed under Apache 2.0 ([LICENSE](./LICENSE)).
-- Documentation contributions are licensed under CC BY 4.0 ([LICENSE-docs](./LICENSE-docs)).
+Support: [Support](support.md)
