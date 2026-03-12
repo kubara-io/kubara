@@ -128,5 +128,5 @@ Releases are listed in the [Release section](https://kubara.git.onstackit.cloud/
 
 ## 📝 License
 
-Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/LICENSE-docs.md).
+Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/LICENSE-docs).
 Software source code is licensed under [Apache 2.0](https://github.com/kubara-io/kubara/blob/main/LICENSE).

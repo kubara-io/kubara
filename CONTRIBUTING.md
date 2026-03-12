@@ -156,4 +156,4 @@ By participating, you agree to follow the project code of conduct:
 By contributing, you agree to the repository licensing model:
 
 - Software/code contributions are licensed under Apache 2.0 ([LICENSE](./LICENSE)).
-- Documentation contributions are licensed under CC BY 4.0 ([LICENSE-docs.md](./LICENSE-docs.md)).
+- Documentation contributions are licensed under CC BY 4.0 ([LICENSE-docs](./LICENSE-docs)).
