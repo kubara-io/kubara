@@ -92,56 +92,6 @@ archives:
     formats:
       - tar.gz
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-# nfpms:
-#   - id: linux-packages
-#     ids:
-#       - kubara-linux
-#     package_name: kubara
-#     homepage: https://github.com/kubara-io/kubara
-#     maintainer: Kubara Maintainers <noreply@github.com>
-#     description: Command-line interface for kubara.
-#     license: Apache-2.0
-#     formats:
-#       - deb
-#       - rpm
-#       - apk
-#     contents:
-#       - src: ../LICENSE
-#         dst: /usr/share/doc/kubara/copyright
-#         file_info:
-#           mode: 0644
-# snapcrafts:
-#   - ids:
-#       - kubara-linux
-#     name: kubara
-#     title: kubara
-#     summary: Command-line interface for kubara.
-#     description: Command-line interface for kubara.
-#     license: Apache-2.0
-#     confinement: classic
-#     grade: stable
-#  # Set to true once SNAPCRAFT_STORE_CREDENTIALS is configured and publishing is desired.
-#     publish: false
-# chocolateys:
-#   - name: kubara
-#     ids:
-#       - windows-archives
-#     package_source_url: https://github.com/kubara-io/kubara
-#     title: kubara
-#     authors: kubara-io
-#     project_url: https://github.com/kubara-io/kubara
-#     license_url: https://github.com/kubara-io/kubara/blob/main/LICENSE
-#     project_source_url: https://github.com/kubara-io/kubara
-#     docs_url: https://github.com/kubara-io/kubara/blob/main/README.md
-#     bug_tracker_url: https://github.com/kubara-io/kubara/issues
-#     tags: kubara cli
-#     summary: Command-line interface for kubara.
-#     description: Command-line interface for kubara.
-#     release_notes: https://github.com/kubara-io/kubara/releases/tag/{{ .Tag }}
-#     api_key: "{{ .Env.CHOCOLATEY_API_KEY }}"
-#     source_repo: https://push.chocolatey.org/
-#  # Keep disabled until a dedicated Chocolatey publish flow is in place.
-#     skip_publish: true
 notarize:
   macos:
       # Whether this configuration is enabled or not.
