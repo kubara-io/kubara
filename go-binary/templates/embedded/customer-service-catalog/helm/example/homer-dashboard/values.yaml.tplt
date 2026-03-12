@@ -28,7 +28,7 @@ serviceMonitor:
 dashboardConfig:
   title: "Kubara Developer Portal"
   subtitle: "{{ .cluster.stage }}"
-  logo: "assets/icons/kubara_logo.png"
+  logo: "assets/icons/kubara_icon.png"
 
   header: true
   footer: '<p style="color:#334155;"> Kubara Developer Portal</p>'
