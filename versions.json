@@ -24,10 +24,15 @@
     "aliases": []
   },
   {
-    "version": "v0.0.0-notarytest.1",
-    "title": "v0.0.0-notarytest.1",
+    "version": "v0.0.0-notarytest.2",
+    "title": "v0.0.0-notarytest.2",
     "aliases": [
       "latest-stable"
     ]
+  },
+  {
+    "version": "v0.0.0-notarytest.1",
+    "title": "v0.0.0-notarytest.1",
+    "aliases": []
   }
 ]
