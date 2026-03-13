@@ -26,12 +26,12 @@ serviceMonitor:
   additionalLabels:
     monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
 dashboardConfig:
-  title: "Kubara Developer Portal"
+  title: "kubara Developer Portal"
   subtitle: "{{ .cluster.stage }}"
   logo: "assets/icons/stackit-logo.png"
 
   header: true
-  footer: '<p style="color:"#045464";"> Kubara Developer Portal</p>'
+  footer: '<p style="color:"#045464";"> kubara Developer Portal</p>'
   proxy:
     useCredentials: false
   connectivityCheck: true

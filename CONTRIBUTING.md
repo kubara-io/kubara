@@ -1,6 +1,6 @@
-# Contributing to Kubara
+# Contributing to kubara
 
-Thank you for your interest in contributing to **Kubara**!
+Thank you for your interest in contributing to **kubara**!
 Whether you're fixing bugs, improving documentation, or adding features - all contributions are welcome.
 
 ## 🧑‍💻 Contributor vs. Maintainer
@@ -27,7 +27,7 @@ If you are open an issue, a template will guide you through the process.
 Before you begin working on a bug fix or implementing a new feature, please create an issue or feature request first (see above). 
 This allows us to briefly discuss the best approach to solving the problem and avoid duplicated efforts.
 
-For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the Kubara Office Hours.
+For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the kubara Office Hours.
 For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
 For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
 
@@ -115,7 +115,7 @@ Please:
 
 Are you missing a feature or you think that the software and community 
 would profit greatly if this new tool is included? 
-For that you can propose a new tool to be included in Kubara.
+For that you can propose a new tool to be included in kubara.
 In order to deliver the best possible software and to make maintenance easier for us and the community we have created a requirements catalogue
 that is required for any serious proposal.
 The catalogue is split into different parts, the numbers at the end indicate how many percentages they contribute to a proposal to be included.
@@ -127,7 +127,7 @@ The following points describe based on what criteria the tool will be rated.
 These requirements ensure that the tool to be proposed fit the current and future trajections of the project.
 
 ### 1.1 Vision Alignment (Weight: 25%)
-- **Core Mission Fit**: Tool directly supports Kubara's primary objectives
+- **Core Mission Fit**: Tool directly supports kubara's primary objectives
 - **Community Alignment**: Tool supports or enhances community-driven development
 - **Long-term Sustainability**: Active maintenance, clear roadmap, healthy contributor base
 

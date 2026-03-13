@@ -1,5 +1,5 @@
 ---
-site_name: Kubara - Docs
+site_name: kubara - Docs
 site_url: 'https://docs.kubara.io'
 repo_url: 'https://github.com/kubara-io/kubara'
 docs_dir: 'content'
@@ -41,9 +41,9 @@ nav:
   - Reference:
       - Release Cycle & Updates: 6_reference/release_cycle_and_updates.md
       - FAQ: 6_reference/faq.md
-      - Code of Conduct: 6_reference/code_of_conduct.md
-      - Security: 6_reference/security.md
-      - Docs License (CC BY 4.0): https://github.com/kubara-io/kubara/blob/main/LICENSE-docs
+      - Code of Conduct: https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md
+      - Security: https://github.com/kubara-io/kubara/blob/main/SECURITY.md
+      - Docs License (CC BY 4.0): https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license
       - Software License (Apache 2.0): https://github.com/kubara-io/kubara/blob/main/LICENSE
 not_in_nav: |
   7_decisions/ADR-template.md
@@ -64,6 +64,7 @@ theme:
   name: material
   custom_dir: overrides
   logo: images/logo.svg
+  favicon: images/favicon.ico
   features:
     - search.suggest
     - navigation.sections

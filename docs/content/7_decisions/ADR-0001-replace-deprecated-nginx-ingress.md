@@ -1,12 +1,12 @@
 | status       | date       | decision-makers  | consulted          | informed           |
 |--------------|------------|------------------|--------------------|--------------------|
-| **accepted** | 2026-01-23 | Kubara-Team      | Internal community | Internal community |
+| **accepted** | 2026-01-23 | kubara-Team      | Internal community | Internal community |
 
 # Replace Deprecated Nginx Ingress
 
 ## Context and Problem Statement
 
-The `ingress-nginx` controller is deprecated; support ends in late March 2026 (see [ingress-nginx-retirement](https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/)). To prevent forced migrations for Kubara users shortly after release, we need a stable, long-term replacement now.
+The `ingress-nginx` controller is deprecated; support ends in late March 2026 (see [ingress-nginx-retirement](https://kubernetes.io/blog/2025/11/11/ingress-nginx-retirement/)). To prevent forced migrations for kubara users shortly after release, we need a stable, long-term replacement now.
 
 ## Decision Drivers
 
@@ -34,7 +34,7 @@ Chosen option: **"Traefik"**, because it acts as a robust "drop-in" replacement.
 
 ### Confirmation
 
-Validation via staging deployments within the Kubara stack, focusing on ingress routing and authentication (oauth2-proxy) compatibility.
+Validation via staging deployments within the kubara stack, focusing on ingress routing and authentication (oauth2-proxy) compatibility.
 
 ---
 
@@ -60,7 +60,7 @@ Validation via staging deployments within the Kubara stack, focusing on ingress 
 ### Istio
 
 * **Bad:** Significant resource overhead and complexity for a simple ingress replacement.
-* **Bad:** Overkill for the current requirements of the Kubara stack.
+* **Bad:** Overkill for the current requirements of the kubara stack.
 
 ## More Information
 

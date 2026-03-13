@@ -19,6 +19,7 @@ env:
   OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
   GOSEC_VERSION: "v2.22.11"
   GOLANGCI_LINT_VERSION: "v2.8.0"
+  GO_LICENSES_VERSION: "latest"
   ARTIFACT_RETENTION_DAYS: "15"
   HELM_VERSION: "v4.1.0"
   KUBECONFORM_VERSION: "v0.7.0"
@@ -219,8 +220,50 @@ jobs:
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.REPORT_DIR }}
 
+  go-license-compliance:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ env.CODE_PATH }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: go-binary
+
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: go-binary/go.mod
+          cache: true
+          cache-dependency-path: go-binary/go.sum
+
+      - name: Create report directory
+        run: mkdir -p "${{ env.REPORT_DIR }}/license-compliance"
+
+      - name: Install go-licenses
+        run: |
+          set -euo pipefail
+          go install github.com/google/go-licenses@${{ env.GO_LICENSES_VERSION }}
+          echo "GO_LICENSES_BIN=$(go env GOPATH)/bin/go-licenses" >> "$GITHUB_ENV"
+
+      - name: Generate third-party Go license report
+        run: |
+          set -euo pipefail
+          INCLUDE_ROOT_FILES=false GO_LICENSES_BIN="${GO_LICENSES_BIN}" \
+            ./scripts/generate_compliance_artifacts.sh "${{ env.REPORT_DIR }}/license-compliance"
+
+      - name: Upload go license compliance results
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: go-license-compliance-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: ${{ env.REPORT_DIR }}/license-compliance
+
   run-kubara-init-and-generate:
-    needs: [go-static-analysis, go-unit-tests]
+    needs: [go-static-analysis, go-unit-tests, go-license-compliance]
     runs-on: ubuntu-latest
     defaults:
       run:

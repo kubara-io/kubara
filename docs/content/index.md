@@ -1,13 +1,13 @@
-# Kubara
+# kubara
 
 ![Status: opensource](https://img.shields.io/badge/status-opensource-lightgrey)
 ![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)
 ![Docs License: CC BY 4.0](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f)
 ![GitHub Discussions](https://img.shields.io/github/discussions/kubara-io/kubara)
 
-## 🤔 What is Kubara?
+## 🤔 What is kubara?
 
-**Kubara** is a single binary CLI tool written in Go providing a lightweight framework for bootstrapping 
+**kubara** is a single binary CLI tool written in Go providing a lightweight framework for bootstrapping 
 Kubernetes platforms with production-proven best practices very easily.  
 
 This includes infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party 
@@ -15,14 +15,14 @@ tooling - all in a single reusable [GitOps](4_architecture/architecture_overview
 
 
 <p align="center">
-  <img src="images/architecture-overview.jpg" alt="Kubara Architecture Overview" width="700"/>
+  <img src="images/architecture-overview.jpg" alt="kubara Architecture Overview" width="700"/>
 </p>
 
 
-Kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and maximum 
+kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and maximum 
 consistency whether you're running on Cloud, Edge or Hybrid Setup.
 
-Kubara provides you with a reusable, extensible structure to build and operate your Kubernetes platform - including Terraform modules, Helm charts, and secrets management - while keeping configuration simple and declarative.  
+kubara provides you with a reusable, extensible structure to build and operate your Kubernetes platform - including Terraform modules, Helm charts, and secrets management - while keeping configuration simple and declarative.  
 
 
 
@@ -37,11 +37,11 @@ Kubara provides you with a reusable, extensible structure to build and operate y
 
 
 
-## 🙋 Why use Kubara?
+## 🙋 Why use kubara?
 
 Setting up a secure, multi-cluster Kubernetes platform is hard.
 
-Kubara simplifies this with a single Go binary that:
+kubara simplifies this with a single Go binary that:
 
 - Generates required configuration and secrets
 - Templatizes and deploys pre-vetted infrastructure components
@@ -54,7 +54,7 @@ All based on real-world usage at Schwarz Group and the experience of multiple en
 
 ## 🛠️ How does it work?
 
-Kubara takes care of:
+kubara takes care of:
 
 1. 📄 Initial configuration via `.env` and `config.yaml`
 2. 🧩 Rendering and deploying Terraform and Helm modules
@@ -79,7 +79,7 @@ You're done 🎉
 
 ## 🛣️ Roadmap
 
-We're continuously improving Kubara. Upcoming features:
+We're continuously improving kubara. Upcoming features:
 
 - Extend Pipelines
 - Add flavors: security, high availability, etc.
@@ -115,11 +115,11 @@ We're happy to help and review 🙌
 
 ## 🏷️ Versioning
 
-Kubara follows [Semantic Versioning](http://semver.org/) in the `style v0.1.0-something`.
+kubara follows [Semantic Versioning](http://semver.org/) in the `style v0.1.0-something`.
 Releases are listed in the [Release section](https://github.com/kubara-io/kubara/releases).
 
 
 ## 📝 License
 
-Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/LICENSE-docs).
+Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license).
 Software source code is licensed under [Apache 2.0](https://github.com/kubara-io/kubara/blob/main/LICENSE).

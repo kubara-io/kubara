@@ -1,13 +1,17 @@
-# Kubara
+<p align="center">
+  <img src="docs/content/images/logo.svg" alt="kubara logo" width="180" />
+</p>
+
+# kubara
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./LICENSE-docs)
+[![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./NOTICE.txt#documentation-license)
 [![Docs](https://img.shields.io/badge/docs-docs.kubara.io-1f6feb)](https://docs.kubara.io)
 
-Kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with a GitOps-first workflow.
+kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with a GitOps-first workflow.
 It combines platform scaffolding, environment configuration, and production-ready defaults in a single binary.
 
-## Why Kubara
+## Why kubara
 
 - One CLI for platform setup and lifecycle tasks
 - GitOps-native structure for repeatable deployments
@@ -55,7 +59,7 @@ help, h    Shows a list of commands or help for one command
 - Questions and bug reports: [GitHub Issues](https://github.com/kubara-io/kubara/issues)
 - Discussions and Q&A: [GitHub Discussions](https://github.com/kubara-io/kubara/discussions)
 - Team and contributor guidance: [CONTRIBUTING.md](./CONTRIBUTING.md)
-- Code of conduct: [docs/content/6_reference/code_of_conduct.md](./docs/content/6_reference/code_of_conduct.md)
+- Code of conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 
 ## Contributing
 
@@ -64,8 +68,8 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 
 ## License
 
-Kubara uses dual licensing:
+kubara uses dual licensing:
 
 - Software source code: [Apache 2.0](./LICENSE)
-- Documentation: [CC BY 4.0](./LICENSE-docs)
+- Documentation: [CC BY 4.0](./NOTICE.txt#documentation-license)
 - Additional notices: [NOTICE.txt](./NOTICE.txt)
