@@ -1,12 +1,5 @@
 [
   {
-    "version": "website-merge-preview",
-    "title": "website-merge-preview",
-    "aliases": [
-      "preview"
-    ]
-  },
-  {
     "version": "next",
     "title": "next",
     "aliases": [
