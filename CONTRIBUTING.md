@@ -7,7 +7,7 @@ Whether you're fixing bugs, improving documentation, or adding features - all co
 
 * **Contributors**: Anyone submitting code, docs or ideas via Issues or Pull Requests.
 * **Maintainers**: Core team members with permission to review, approve, and merge contributions. Maintainers help enforce standards and ensure quality.
-    * Maintainers: @alexander.hoeft @matthias.huether @felix.kammerer @artem.lajko
+[Current Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)
 
 ## 🐛 Reporting Issues
 
@@ -28,20 +28,20 @@ Before you begin working on a bug fix or implementing a new feature, please crea
 This allows us to briefly discuss the best approach to solving the problem and avoid duplicated efforts.
 
 For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the Kubara Office Hours.
-For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](../7_decisions/ADR.md).
-For more information, please refer to our support documentation: [Support](support.md)
+For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
+For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
 
 ### Preparations: Pre-commit Hooks
 
 We use pre-commit hooks to enforce coding standards and maintain code quality across the project.
 If you plan to contribute, please make sure to install and configure the hooks locally as well. They will help you adhere to the required standards before code is committed, ensuring a smoother development process.
 These hooks are also executed in the CI pipeline, and any violations will cause the pipeline to fail. So even if you bypass them locally, your code will not be accepted unless it passes all checks.
-You can find installation instructions here: https://kubara.git.onstackit.cloud/STACKIT/kubara/src/branch/master/go-binary/README.md
+You can find installation instructions here: [go-binary Readme.md](go-binary/README.md)
 
 Once you have set up the pre-commit hooks, you can follow the steps below to start contributing:
 
-1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](../7_decisions/ADR.md)
-2. **Fork** the repository and clone it locally, see also here: https://forgejo.org/docs/latest/user/pull-requests-and-git-flow/
+1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/)
+2. **Fork** the repository and clone it locally, see also here: https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
 2. **Create a new branch** for your work
 3. **Implement your changes**
 4. **Run checks** before submitting
@@ -215,4 +215,4 @@ The following is a list on critera which leads to the automatic rejection of the
 - **Suggestions for alternative approaches**
 - **Path for resubmission**: Clear requirements for reconsideration
 
-Support: [Support](support.md)
+Support: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
