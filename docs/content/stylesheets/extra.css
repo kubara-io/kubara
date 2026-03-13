@@ -36,10 +36,13 @@
     margin-bottom: 0;
     padding-top: 0;
     padding-bottom: 0;
+    width: auto;
 }
 .md-header__button.md-logo img, .md-header__button.md-logo svg {
     height: 3rem;
-    width: 9rem;
+    width: auto;
+    max-width: none;
+    display: block;
 }
 .mermaid {
     text-align: center;

@@ -1,9 +1,9 @@
 # Frequently Asked Questions
 
-## Is Kubara only usable on STACKIT?
+## Is kubara only usable on STACKIT?
 
-A clear and definite **NO**! Kubara was specifically designed to be
-provider-independent. Kubara is based on Kubernetes and the underlying
+A clear and definite **NO**! kubara was specifically designed to be
+provider-independent. kubara is based on Kubernetes and the underlying
 infrastructure plays a secondary role that needs to be considered depending on
 the use case.
 
@@ -11,7 +11,7 @@ the use case.
 
 ## How much does it cost?
 
-Even if Kubara itself costs nothing, implementing incurs costs. The
+Even if kubara itself costs nothing, implementing incurs costs. The
 exact costs depend on the setup and individual requirements and must be
 calculated individually.
 We recommend checking in advance which services are to be used to carry out
@@ -34,7 +34,7 @@ Services that may incur costs:
 
 ## What knowledge is required to use kubara
 
-Kubara includes a selection of standard tools, templates and best
+kubara includes a selection of standard tools, templates and best
 practices for professionally building and operating a Kubernetes platform. It
 is designed for users who are just starting out and want to build a Kubernetes
 platform. Nevertheless, the following skills are necessary to understand and
@@ -77,11 +77,11 @@ kubectl create secret docker-registry regcred
 
 ## Can I use kubara in a production environment?
 
-Kubara covers as many use cases as possible. Since every environment
+kubara covers as many use cases as possible. Since every environment
 is unique, it's very important to know the requirements and check whether all
 of them are met. If a requirement isn't met, don't worry! You always have the
 option to customize things.
-Kubara will be expanded in the future to cover special requirements such
+kubara will be expanded in the future to cover special requirements such
 as high availability, high security requirements or scalable infrastructures.
 
 ---
@@ -103,7 +103,7 @@ are regularly reviewed and taken into account when selecting products.
 
 Of course, you can decide by yourself which tools and settings to use.
 Predefined template structures allow you to standardize the use of tools
-and resources that can be expanded at any time. Kubara helps to avoid
+and resources that can be expanded at any time. kubara helps to avoid
 unnecessary complexity and redundancies, e.g. of code or manifests.
 
 ---

@@ -28,9 +28,9 @@ See more in the [Dashboards](../3_components/observability_dashboards.md) sectio
 
 
 
-## Kubara Standardization
+## kubara Standardization
 
-In Kubara, `ServiceMonitors` are enabled by default for all deployed applications. This ensures that each app exposes Prometheus-compatible metrics and is automatically included in centralized monitoring.
+In kubara, `ServiceMonitors` are enabled by default for all deployed applications. This ensures that each app exposes Prometheus-compatible metrics and is automatically included in centralized monitoring.
 
 We also apply consistent labels to every ServiceMonitor-for example, `monitoring.instance`-to simplify filtering and organization.
 

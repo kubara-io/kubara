@@ -315,9 +315,9 @@ global:
   actionOverride: Audit
   # -- allow issuing certificates from this issuerDomain. Multiple domains separated by "|"
   # -- e.g. set *.my.domain for allowing acme.my.domain/foo/bar
-  allowedIssuerDomains: change-me
+  # allowedIssuerDomains:
   # -- specify registries which are trusted. Multiple registries separated by "|"
-  allowedImageRegistries: change-me
+  # allowedImageRegistries: change-me
 
 # Kyverno Policies:
 argoCD:

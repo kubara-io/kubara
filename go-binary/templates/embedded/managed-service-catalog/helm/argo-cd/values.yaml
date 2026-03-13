@@ -21,7 +21,6 @@ argo-cd:
   notifications:
     enabled: false
   global:
-    domain: change-me  # dns name of argocd has to be set here, such as argocd-iep-qa.schwarz
     env:
       - name: "TZ"
         value: "Europe/Berlin"
@@ -133,8 +132,6 @@ argo-cd:
       enabled: false
       serviceMonitor:
         enabled: false
-        additionalLabels:
-          monitoring.instance: change-me
       rules:
         enabled: false
         spec:

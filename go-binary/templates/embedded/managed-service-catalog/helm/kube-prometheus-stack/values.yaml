@@ -1,10 +1,5 @@
 namespace: {}
-secretStoreRef:
-  kind: change-me
-  name: change-me
 kube-prometheus-stack:
-  global:
-    imageRegistry: change-me
   defaultRules:
     disabled:
       #NodeClockNotSynchronising: true
@@ -27,9 +22,6 @@ kube-prometheus-stack:
         memory: 100Mi
       limits:
         memory: 100Mi
-    serviceMonitor:
-      additionalLabels:
-        monitoring.instance: change-me
     admissionWebhooks:
       annotations:
         argocd.argoproj.io/hook: PreSync
@@ -63,8 +55,6 @@ kube-prometheus-stack:
     prometheus:
       monitor:
         enabled: true
-        additionalLabels:
-          monitoring.instance: change-me
     resources:
       requests:
         cpu: 10m
@@ -87,9 +77,6 @@ kube-prometheus-stack:
   prometheus:
     ingress:
       enabled: false
-    serviceMonitor:
-      additionalLabels:
-        monitoring.instance: change-me
     prometheusSpec:
       resources:
         requests:
@@ -104,31 +91,21 @@ kube-prometheus-stack:
         fsGroup: 2000
         seccompProfile:
           type: RuntimeDefault
-      externalUrl: change-me
-      routePrefix: change-me
       podAntiAffinity: "hard"
       # get podmonitors, servicemonitors and rules from all Namespaces, see https://github.com/prometheus-community/helm-charts/issues/106
       podMonitorSelectorNilUsesHelmValues: false
       ruleSelectorNilUsesHelmValues: false
       serviceMonitorSelectorNilUsesHelmValues: false
-      serviceMonitorSelector:
-        matchLabels:
-          monitoring.instance: change-me
       storageSpec:
         volumeClaimTemplate:
           spec:
             accessModes:
               - ReadWriteOnce
-            resources:
-              requests:
-                storage: change-me
   alertmanager:
     ingress:
       enabled: false
     alertmanagerSpec:
       podAntiAffinity: "hard"
-      externalUrl: change-me
-      routePrefix: change-me
       resources:
         requests:
           cpu: 10m
@@ -147,8 +124,6 @@ kube-prometheus-stack:
       enabled: false
     enabled: true
     serviceMonitor:
-      labels:
-        monitoring.instance: change-me
     resources:
       requests:
         cpu: 10m
@@ -234,8 +209,6 @@ kube-prometheus-stack:
 
 
 prometheus-blackbox-exporter:
-  global:
-    imageRegistry: change-me
   resources:
     requests:
       cpu: 10m

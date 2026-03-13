@@ -1,6 +1,6 @@
 # Add SSO Configuration (GitHub)
 
-How to Setup your GitHub for SSO with Kubara
+How to Setup your GitHub for SSO with kubara
 
 To enable full Single Sign-On experience, you’ll need:
 

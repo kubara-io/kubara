@@ -1,4 +1,3 @@
-clusterSecretStores: {} # change-me
 namespace: {}
 external-secrets:
   replicaCount: 1
@@ -20,8 +19,6 @@ external-secrets:
         memory: 100Mi
   serviceMonitor:
     enabled: false
-    additionalLabels:
-      monitoring.instance: change-me
   resources:
     requests:
       cpu: 10m

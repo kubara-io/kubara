@@ -13,7 +13,5 @@ longhorn:
   metrics:
     serviceMonitor:
       enabled: false
-      additionalLabels:
-        monitoring.instance: change-me
   preUpgradeChecker:
     jobEnabled: false

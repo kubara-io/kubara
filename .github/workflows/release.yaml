@@ -11,6 +11,7 @@ permissions:
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
+    environment: signing
     defaults:
       run:
         shell: bash
@@ -48,3 +49,16 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          # The base64 of the contents of your '.p12' key.
+          MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
+          # The password to open the '.p12' key.
+          MACOS_SIGN_PASSWORD: ${{ secrets.MACOS_SIGN_PASSWORD }}
+          # The base64 of the contents of your '.p8' key.
+          MACOS_NOTARY_KEY: ${{ secrets.MACOS_NOTARY_KEY }}
+          # The ID of the '.p8' key.
+          # You can find it in the filename, as well as the Apple Developer Portal website.
+          MACOS_NOTARY_KEY_ID: ${{ secrets.MACOS_NOTARY_KEY_ID }}
+          # The issuer UUID.
+          # You can find it in the Apple Developer Portal website.
+          MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
+          # CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}

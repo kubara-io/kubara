@@ -31,13 +31,13 @@ module "objectstorage_bucket" {
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
 | <a name="requirement_aws"></a> [aws](#requirement\_aws) | >= 6.12.0 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.85.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.86.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.85.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.86.0 |
 
 ## Modules
 
@@ -47,9 +47,9 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_objectstorage_bucket.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.85.0/docs/resources/objectstorage_bucket) | resource |
-| [stackit_objectstorage_credential.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.85.0/docs/resources/objectstorage_credential) | resource |
-| [stackit_objectstorage_credentials_group.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.85.0/docs/resources/objectstorage_credentials_group) | resource |
+| [stackit_objectstorage_bucket.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.86.0/docs/resources/objectstorage_bucket) | resource |
+| [stackit_objectstorage_credential.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.86.0/docs/resources/objectstorage_credential) | resource |
+| [stackit_objectstorage_credentials_group.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.86.0/docs/resources/objectstorage_credentials_group) | resource |
 
 ## Inputs
 

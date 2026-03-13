@@ -146,3 +146,6 @@ Before opening the PR, ensure:
 - [ ] alternatives are documented
 - [ ] consequences are explicitly stated
 - [ ] references/links are included (optional but recommended)
+
+## See also
+For creating proposals for new tools see [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue).

@@ -3,8 +3,6 @@ oauth2-proxy:
   metrics:
     serviceMonitor:
       enabled: false
-      labels:
-        monitoring.instance: change-me
   resources:
     requests:
       cpu: 10m
