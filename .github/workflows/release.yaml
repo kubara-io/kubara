@@ -12,8 +12,6 @@ jobs:
   goreleaser:
     runs-on: ubuntu-latest
     environment: signing
-    env:
-      GO_LICENSES_VERSION: "latest"
     defaults:
       run:
         shell: bash
@@ -41,18 +39,6 @@ jobs:
           go-version-file: go-binary/go.mod
           cache: true
           cache-dependency-path: go-binary/go.sum
-
-      - name: Install go-licenses
-        run: |
-          set -euo pipefail
-          go install github.com/google/go-licenses@${{ env.GO_LICENSES_VERSION }}
-
-      - name: Generate release compliance artifacts
-        run: |
-          set -euo pipefail
-          GO_LICENSES_BIN="$(go env GOPATH)/bin/go-licenses"
-          INCLUDE_ROOT_FILES=true GO_LICENSES_BIN="${GO_LICENSES_BIN}" \
-            ./scripts/generate_compliance_artifacts.sh ./compliance
 
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v7

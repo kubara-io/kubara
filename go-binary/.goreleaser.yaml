@@ -86,11 +86,9 @@ archives:
       - zip
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
-      - compliance/LICENSE
-      - compliance/NOTICE.txt
-      - compliance/THIRD_PARTY_HELM_DEPENDENCIES.md
-      - compliance/THIRD_PARTY_GO_LICENSES.csv
-      - compliance/licenses/**/*
+      - ../LICENSE
+      - ../NOTICE.md
+      - ../THIRD_PARTY_HELM_DEPENDENCIES.md
   - id: unix-archives
     ids:
       - kubara-linux
@@ -99,11 +97,9 @@ archives:
       - tar.gz
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     files:
-      - compliance/LICENSE
-      - compliance/NOTICE.txt
-      - compliance/THIRD_PARTY_HELM_DEPENDENCIES.md
-      - compliance/THIRD_PARTY_GO_LICENSES.csv
-      - compliance/licenses/**/*
+      - ../LICENSE
+      - ../NOTICE.md
+      - ../THIRD_PARTY_HELM_DEPENDENCIES.md
 notarize:
   macos:
       # Whether this configuration is enabled or not.

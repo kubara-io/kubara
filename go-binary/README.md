@@ -56,10 +56,3 @@ or use goreleaser with:
 ```
 goreleaser release --clean --skip=publish --config .goreleaser.yml
 ```
-
-Before running a local release build, generate compliance artifacts:
-
-```bash
-go install github.com/google/go-licenses@latest
-GO_LICENSES_BIN="$(go env GOPATH)/bin/go-licenses" ./scripts/generate_compliance_artifacts.sh ./compliance
-```

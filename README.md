@@ -5,7 +5,7 @@
 # kubara
 
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
-[![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./NOTICE.txt#documentation-license)
+[![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./NOTICE.md#documentation-license)
 [![Docs](https://img.shields.io/badge/docs-docs.kubara.io-1f6feb)](https://docs.kubara.io)
 
 kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with a GitOps-first workflow.
@@ -71,5 +71,5 @@ Please read [CONTRIBUTING.md](./CONTRIBUTING.md) before opening a pull request.
 kubara uses dual licensing:
 
 - Software source code: [Apache 2.0](./LICENSE)
-- Documentation: [CC BY 4.0](./NOTICE.txt#documentation-license)
-- Additional notices: [NOTICE.txt](./NOTICE.txt)
+- Documentation: [CC BY 4.0](./NOTICE.md#documentation-license)
+- Additional notices: [NOTICE.md](./NOTICE.md)
