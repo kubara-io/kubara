@@ -28,13 +28,13 @@ write_enabled = false
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.86.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.87.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.86.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.87.0 |
 
 ## Modules
 
@@ -44,8 +44,8 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_secretsmanager_instance.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.86.0/docs/resources/secretsmanager_instance) | resource |
-| [stackit_secretsmanager_user.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.86.0/docs/resources/secretsmanager_user) | resource |
+| [stackit_secretsmanager_instance.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.87.0/docs/resources/secretsmanager_instance) | resource |
+| [stackit_secretsmanager_user.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.87.0/docs/resources/secretsmanager_user) | resource |
 
 ## Inputs
 
