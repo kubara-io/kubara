@@ -1,6 +1,6 @@
 # Updates and Release Cycle
 
-We aim to publish a new release every 3 weeks.  
+We aim to publish a new release every 2 weeks.  
 Each release will include important information to help you understand what has changed and how to update your installation.
 
 ---

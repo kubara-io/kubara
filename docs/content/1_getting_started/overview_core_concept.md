@@ -21,7 +21,7 @@ Kubara generates a specific directory structure in your Git repository to separa
 
 - **`managed-service-catalog/`**
 This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by Kubara. 
-You should generally not modify files in this directory, as they may be updated with new Kubara releases.
+You should generally not modify files in this directory, as they may be updated with new kubara releases.
 
 
 - **`customer-service-catalog/`**
@@ -29,21 +29,21 @@ It contains cluster-specific configurations and your custom values for the kubar
 
 
 ## Architecture
-The Diagramm shows a typical Kubara Workflow when following the [manual](bootstrap_process.md)
+The Diagramm shows a typical kubara Workflow when following the [manual](bootstrap_process.md)
 
 ``` mermaid
 graph TD
     A[⚙️ Set .env-File & config.yaml] --> B;
-    B[🤖 'Kubara generate' <br> generates tf & charts] --> C;
+    B[🤖 'kubara generate' <br> generates tf & charts] --> C;
     C[📤 Commit & Push to Git] --> D{Apply Terraform?};
     D -- Yes --> G[☁️ Apply Cloud Resources];
     G --> I[🔑 Apply kubeconfig & 'kubara bootstrap <cluster-name>'];
     D -- No --> I;
-    I --> F[Enjoy your Kubara Deployment 🎉];
+    I --> F[Enjoy your kubara Deployment 🎉];
 ```
 
 1. Platform Engineer must set parameters in config files (⚠️Caution: Environment variables have priority over config values)
-2. "Kubara generate" templates and creates Terraform & Umbrella Helm-Charts.   
+2. "kubara generate" templates and creates Terraform & Umbrella Helm-Charts.   
 Now you should commit and push your templates to your git and optionally apply Terraform
 3. `kubara bootstrap <cluster-name>` rolls out Argo CD and required CRDs to your control plane cluster.
 4. Secrets are synced via External Secrets based on your configured SecretStore/ClusterSecretStore.
