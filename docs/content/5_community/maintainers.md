@@ -4,12 +4,11 @@ More details about our governance and how maintainers are selected can be found 
 
 ## Maintainers
 
-| Maintainer       | E-Mail                              | Affiliation        |
-| ---------------- | ----------------------------------- | ------------------ |
-| Felix Kammerer   | f.kammerer@schwarz-produktion.com   | Schwarz Produktion |
-| Alexander Hoeft  | alexander.hoeft@iits-consulting.de  | iits-consulting    |
-| Matthias Huether | matthias.huether@iits-consulting.de | iits-consulting    |
-| Artem Lajko      | artem.lajko@iits-consulting.de      | iits-consulting    |
+| Maintainer       | E-Mail                                | Affiliation              |
+|------------------|---------------------------------------|--------------------------|
+| Artem Lajko      | artem.lajko@iits-consulting.de        | iits-consulting          |
+| Matthias Huether | matthias.huether@iits-consulting.de   | iits-consulting          |
+| Fabian Schmitt   | fabian-patrice.schmitt@digits.schwarz | STACKIT / Schwarz Digits |
 
 ## Governance
 
@@ -45,23 +44,14 @@ Team members can be removed by 2/3 majority vote on the team mailing list. For
 this vote, the member in question is not eligible to vote and does not count
 towards the quorum. Any removal vote can cover only one single person.
 
-Upon death of a member, they leave the team automatically.
 
-The current team members are:
-
-| Maintainer       | E-Mail                              | Affiliation        |
-| ---------------- | ----------------------------------- | ------------------ |
-| Felix Kammerer   | f.kammerer@schwarz-produktion.com   | Schwarz Produktion |
-| Alexander Hoeft  | alexander.hoeft@iits-consulting.de  | iits-consulting    |
-| Matthias Huether | matthias.huether@iits-consulting.de | iits-consulting    |
-| Artem Lajko      | artem.lajko@iits-consulting.de      | iits-consulting    |
 
 ## Maintainers
 
-Kubara maintainers have write access to projects under the Kubara Forgejo organization.
+Kubara maintainers have write access to the Kubara Repository.
 They can merge their own patches or patches from others. The current maintainers
-can be found in above. Maintainers collectively
-manage the project's resources and contributors.
+can be found in the list on top of the site. Maintainers collectively manage the 
+project's resources and contributors.
 
 This privilege is granted with some expectation of responsibility: maintainers
 are people who care about the Kubara project and want to help it grow and
@@ -121,6 +111,6 @@ Signed commits verify your identity and help ensure that changes to the reposito
    ```bash
    git commit -S -m "Your commit message"
    ```
-   Push your changes as usual - Forgejo will show a "Verified" badge next to signed commits.
+   Push your changes as usual - Git will show a "Verified" badge next to signed commits.
 
 For a detailed step-by-step guide, see the [Codeberg GPG key documentation](https://docs.codeberg.org/security/gpg-key/).

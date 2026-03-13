@@ -7,8 +7,7 @@ Whether you're fixing bugs, improving documentation, or adding features - all co
 
 * **Contributors**: Anyone submitting code, docs or ideas via Issues or Pull Requests.
 * **Maintainers**: Core team members with permission to review, approve, and merge contributions. Maintainers help enforce standards and ensure quality.
-    * Maintainers: @alexander.hoeft @matthias.huether @felix.kammerer @artem.lajko
-
+  [Current Maintainers](maintainers.md)
 ---
 
 ## 🐛 Reporting Issues
