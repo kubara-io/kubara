@@ -2,7 +2,7 @@
 
 ## Reporting a Vulnerability
 
-If you discover a security vulnerability in Kubara, we encourage you to report it responsibly.
+If you discover a security vulnerability in kubara, we encourage you to report it responsibly.
 
 Please send an email to: **kubara@digits.schwarz**
 
@@ -42,4 +42,4 @@ Please do **not** use this process for:
 - Configuration tuning
 - Feature discussions
 
-For those topics, please open a Git issue or start a discussion thread.
+For those topics, please open a GitHub issue or start a discussion thread.

@@ -38,12 +38,13 @@ Examples of unacceptable behavior include:
 
 ## Enforcement Responsibilities
 
-Community leaders are responsible for clarifying and enforcing our standards of
+Project maintainers (see [Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/))
+are responsible for clarifying and enforcing our standards of
 acceptable behavior and will take appropriate and fair corrective action in
 response to any behavior that they deem inappropriate, threatening, offensive,
 or harmful.
 
-Community leaders have the right and responsibility to remove, edit, or reject
+Project maintainers have the right and responsibility to remove, edit, or reject
 comments, commits, code, wiki edits, issues, and other contributions that are
 not aligned to this Code of Conduct, and will communicate reasons for moderation
 decisions when appropriate.
@@ -58,17 +59,27 @@ representative at an online or offline event.
 
 ## Enforcement
 
+### Violations
+
+If you observe any instance of abusive, harassing, or otherwise unacceptable behavior,
+report it by email to the project maintainers at **kubara@digits.schwarz**.
+As a second channel, you can contact one or more maintainers directly by email
+(see [Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)).
+
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the community leaders responsible for enforcement at
-kubara@stackit.cloud.
+reported to the [project maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)
+responsible for enforcement at **kubara@digits.schwarz**.
+
+Please do **not** report Code of Conduct violations in public GitHub issues.
+
 All complaints will be reviewed and investigated promptly and fairly.
 
-All community leaders are obligated to respect the privacy and security of the
+All project maintainers are obligated to respect the privacy and security of the
 reporter of any incident.
 
 ## Enforcement Guidelines
 
-Community leaders will follow these Community Impact Guidelines in determining
+Project maintainers will follow these Community Impact Guidelines in determining
 the consequences for any action they deem in violation of this Code of Conduct:
 
 ### 1. Correction
@@ -76,7 +87,7 @@ the consequences for any action they deem in violation of this Code of Conduct:
 **Community Impact**: Use of inappropriate language or other behavior deemed
 unprofessional or unwelcome in the community.
 
-**Consequence**: A private, written warning from community leaders, providing
+**Consequence**: A private, written warning from project maintainers, providing
 clarity around the nature of the violation and an explanation of why the
 behavior was inappropriate. A public apology may be requested.
 

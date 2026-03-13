@@ -2,7 +2,7 @@
 
 ## What is ExternalDNS?
 
-With Kubara you can deploy **ExternalDNS** into your Kubernetes cluster (see https://kubernetes-sigs.github.io/external-dns/latest/).  
+With kubara you can deploy **ExternalDNS** into your Kubernetes cluster (see https://kubernetes-sigs.github.io/external-dns/latest/).  
 ExternalDNS ensures that DNS records are automatically created and updated as soon as you define Ingress, Service, or supported Traefik resources with hostnames.
 
 > ExternalDNS will be rolled out as a **Helm Chart** when you enable the service in your `config.yaml`.
@@ -12,14 +12,14 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 ## Workflow
 
 1. **Prepare DNS zone**  
-   - Kubara generates the necessary **Terraform definitions** (modules and variables) for DNS setup.  
+   - kubara generates the necessary **Terraform definitions** (modules and variables) for DNS setup.  
    - You then run **Terraform** yourself to actually create the zone.  
    - If you use your own domain, you must delegate the nameservers of this zone at your registrar.  
    - Provider-specific behavior depends on your DNS platform.
 
 2. **Enable ExternalDNS**  
    - In `config.yaml` you enable the service `externalDns`.  
-   - Then you must **rerun Kubara** (`kubara generate --terraform`, `kubara generate --helm` or `kubara generate`) so that Terraform files and Helm values are re-rendered with the new settings.  
+   - Then you must **rerun kubara** (`kubara generate --terraform`, `kubara generate --helm` or `kubara generate`) so that Terraform files and Helm values are re-rendered with the new settings.  
    - Configure provider-specific values in:
      - `customer-service-catalog/helm/<cluster-name>/external-dns/values.yaml`
      - optional `customer-service-catalog/helm/<cluster-name>/external-dns/additional-values.yaml`
@@ -59,7 +59,7 @@ clusters:
 ### Explanation
 
 - **`dnsName`** → base domain for the cluster  
-- **`terraform.dns`** → defines the zone for which Kubara generates Terraform code (name and contact email).
+- **`terraform.dns`** → defines the zone for which kubara generates Terraform code (name and contact email).
 - **`services.externalDns.status`** → when set to `enabled`, ExternalDNS is templated into the Helm charts for deployment via ArgoCD.
 - **provider-specific settings** → configure them in the chart overlay values (`values.yaml` / `additional-values.yaml`).
 

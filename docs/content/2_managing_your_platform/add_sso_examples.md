@@ -4,14 +4,14 @@
 **The following documentation provides configuration examples for SSO-Configuration   
 with STACKIT GIT (Forgejo based).**  
 
-These configurations are to enable Kubara & Forgejo Users to quick-start with SSO.  
+These configurations are to enable kubara & Forgejo Users to quick-start with SSO.  
 
 > ⚠️ **Prerequisites:**  
 > Create Application in Forgejo for Grafana, OAuth2Proxy & Argo   
 > [Forgejo Docs](https://forgejo.org/docs/next/user/oauth2-provider/#examples)    
 >
 > Same Callback URLs like GitHub  
->    [Kubara Docs: Add SSO GitHub](add_sso.md)
+>    [kubara Docs: Add SSO GitHub](add_sso.md)
 
 With that being said, we can not provide Support for any SSO issues as you  might want to configure some parameters   
 differently and the stable configuration might also be subject to change in the different Software-Projects.  

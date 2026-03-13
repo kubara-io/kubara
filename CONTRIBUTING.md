@@ -1,14 +1,13 @@
-# Contributing to Kubara
+# Contributing to kubara
 
-Thank you for your interest in contributing to **Kubara**!
+Thank you for your interest in contributing to **kubara**!
 Whether you're fixing bugs, improving documentation, or adding features - all contributions are welcome.
 
 ## 🧑‍💻 Contributor vs. Maintainer
 
 * **Contributors**: Anyone submitting code, docs or ideas via Issues or Pull Requests.
 * **Maintainers**: Core team members with permission to review, approve, and merge contributions. Maintainers help enforce standards and ensure quality.
-  [Current Maintainers](maintainers.md)
----
+[Current Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)
 
 ## 🐛 Reporting Issues
 
@@ -21,8 +20,6 @@ If you discover a bug or have a feature request, please open an issue in [Issues
 
 If you are open an issue, a template will guide you through the process.
 
----
-
 ## 🚀 How to Contribute
 
 ### Before You Start Working on a Bug or Feature
@@ -30,21 +27,21 @@ If you are open an issue, a template will guide you through the process.
 Before you begin working on a bug fix or implementing a new feature, please create an issue or feature request first (see above). 
 This allows us to briefly discuss the best approach to solving the problem and avoid duplicated efforts.
 
-For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the Kubara Office Hours.
-For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](../7_decisions/ADR.md).
-For more information, please refer to our support documentation: [Support](support.md)
+For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the kubara Office Hours.
+For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
+For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
 
 ### Preparations: Pre-commit Hooks
 
 We use pre-commit hooks to enforce coding standards and maintain code quality across the project.
 If you plan to contribute, please make sure to install and configure the hooks locally as well. They will help you adhere to the required standards before code is committed, ensuring a smoother development process.
 These hooks are also executed in the CI pipeline, and any violations will cause the pipeline to fail. So even if you bypass them locally, your code will not be accepted unless it passes all checks.
-You can find installation instructions here: https://kubara.git.onstackit.cloud/STACKIT/kubara/src/branch/master/go-binary/README.md
+You can find installation instructions here: [go-binary Readme.md](go-binary/README.md)
 
 Once you have set up the pre-commit hooks, you can follow the steps below to start contributing:
 
-1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](../7_decisions/ADR.md)
-2. **Fork** the repository and clone it locally, see also here: https://forgejo.org/docs/latest/user/pull-requests-and-git-flow/
+1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/)
+2. **Fork** the repository and clone it locally, see also here: https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
 2. **Create a new branch** for your work
 3. **Implement your changes**
 4. **Run checks** before submitting
@@ -97,15 +94,11 @@ Please fill it out completely and thoughtfully - it's there to help reviewers un
 Well-written descriptions lead to faster reviews and fewer misunderstandings.
 Do not leave the template empty or remove sections without reason - each part serves a purpose.
 
----
-
 ## 🧠 Branch Strategy
 
 * `master`: Latest features - unstable, may change without notice
 * `tag/vX.X.X-XX`: tags point to the latest stable version
 * `<some-feat-branch>`: work on features
-
----
 
 ## 💬 Code Review Etiquette
 
@@ -118,26 +111,23 @@ Please:
 
 > A good PR tells a story: *what's changing, why it matters, and how to review it.*
 
----
-
 ## Integration Requirements Catalogue
 
 Are you missing a feature or you think that the software and community 
 would profit greatly if this new tool is included? 
-For that you can propose a new tool to be included in Kubara.
+For that you can propose a new tool to be included in kubara.
 In order to deliver the best possible software and to make maintenance easier for us and the community we have created a requirements catalogue
 that is required for any serious proposal.
 The catalogue is split into different parts, the numbers at the end indicate how many percentages they contribute to a proposal to be included.
 More on that in subchapter 5.
 
----
 The following points describe based on what criteria the tool will be rated.
 
 ## Strategic Alignment Criteria (40%)
 These requirements ensure that the tool to be proposed fit the current and future trajections of the project.
 
 ### 1.1 Vision Alignment (Weight: 25%)
-- **Core Mission Fit**: Tool directly supports Kubara's primary objectives
+- **Core Mission Fit**: Tool directly supports kubara's primary objectives
 - **Community Alignment**: Tool supports or enhances community-driven development
 - **Long-term Sustainability**: Active maintenance, clear roadmap, healthy contributor base
 
@@ -147,8 +137,6 @@ These requirements ensure that the tool to be proposed fit the current and futur
 - **Dependency Management**: No conflicting dependencies or version constraints
 - **Resource Footprint**: Acceptable CPU/memory/storage requirements
 - **Security and Best Practices**: Code validating, Image CVE scanning and linting by maintainers
-
----
 
 ## Operational Impact Assessment (30%)
 These requirements look at how mature the proposed tool is and if it is not tech cruft.
@@ -166,8 +154,6 @@ These requirements look at how mature the proposed tool is and if it is not tech
 - **Migration Path**: Clear upgrade/downgrade procedures
 - **Rollback Strategy**: Defined removal process with minimal impact
 
----
-
 ## Value Proposition Criteria (30%)
 The following points look at if the tool proposed contribute something novel to the existing toolset in a way that leads to a net gain.
 
@@ -183,8 +169,6 @@ The following points look at if the tool proposed contribute something novel to 
 - **Support Requirements**: No specialized skills or external dependencies
 - **Scalability Impact**: Positive or neutral effect on system scalability
 
----
-
 ## Evaluation Process
 What is required in the propoasl and how does the review look like?
 
@@ -199,8 +183,6 @@ What is required in the propoasl and how does the review look like?
 - **Technical Evaluation**: Architecture and integration analysis
 - **Pilot Testing**: Limited scope implementation
 - **Final Decision**: Governance committee approval
-
----
 
 ## Decision Matrix
 Based on what percentages will a tool be included and on what criteria will the proposal fail.
@@ -218,8 +200,6 @@ Based on what percentages will a tool be included and on what criteria will the 
 - **> 100 hours integration effort**
 - **No active maintenance for > 6 months**
 
----
-
 ## Rejection Criteria
 The following is a list on critera which leads to the automatic rejection of the tool proposal.
 
@@ -235,6 +215,4 @@ The following is a list on critera which leads to the automatic rejection of the
 - **Suggestions for alternative approaches**
 - **Path for resubmission**: Clear requirements for reconsideration
 
-
---- 
-Support: [Support](support.md)
+Support: [Support](https://docs.kubara.io/latest-stable/5_community/support/)

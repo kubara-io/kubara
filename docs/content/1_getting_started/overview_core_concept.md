@@ -1,6 +1,6 @@
 # Core Concept
 
-`Kubara` is a framework and bootstraping tool for building and operating a production-grade Kubernetes platform. 
+`kubara` is a framework and bootstraping tool for building and operating a production-grade Kubernetes platform. 
 It is built to be a modular and opinionated foundation.  
 
 It provides a comprehensive, ready-to-extend framework that bundles
@@ -12,15 +12,15 @@ unify platform development across teams and environments.
 
 
 <p align="center">
-  <img src="../../images/architecture-overview.jpg" alt="Kubara Architecture Overview" width="700"/>
+  <img src="../../images/architecture-overview.jpg" alt="kubara Architecture Overview" width="700"/>
 </p>
 
 ## Directory Structure
 
-Kubara generates a specific directory structure in your Git repository to separate concerns:
+kubara generates a specific directory structure in your Git repository to separate concerns:
 
 - **`managed-service-catalog/`**
-This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by Kubara. 
+This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by kubara. 
 You should generally not modify files in this directory, as they may be updated with new kubara releases.
 
 
@@ -86,4 +86,4 @@ Argo CD manages itself and rolls out all [generated Helm Charts](../3_components
 - Empower teams through self-service and GitOps
 
 ## Adding new tools 
-If the current toolset doesn't meet your needs or is missing key features, you can propose new tools [here](../5_community/contributing.md#integration-requirements-catalogue).
+If the current toolset doesn't meet your needs or is missing key features, you can propose new tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue).

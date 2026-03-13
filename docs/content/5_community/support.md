@@ -8,7 +8,7 @@ We are currently using GitHub Discussions for all community chat, support, and a
 ---
 
 ## 🙌 Be respectful
-Our community follows the [Code of Conduct](../6_reference/code_of_conduct.md).  
+Our community follows the [Code of Conduct](https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md).  
 By participating, you agree to uphold a welcoming and inclusive environment for everyone.
 
 
