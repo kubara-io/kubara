@@ -21,9 +21,20 @@ jobs:
         shell: bash
         working-directory: ./docs
     steps:
+      - name: Create GitHub App token for docs publish
+        id: docs-app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_ID }}
+          private-key: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: |
+            ${{ github.event.repository.name }}
+
       - name: Checkout kubara repo
         uses: actions/checkout@v6
         with:
+          token: ${{ steps.docs-app-token.outputs.token }}
           fetch-depth: 0
           fetch-tags: true
 
