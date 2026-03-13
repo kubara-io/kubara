@@ -5,8 +5,6 @@ metrics-server:
     enabled: true
   serviceMonitor:
     enabled: false
-    additionalLabels:
-      monitoring.instance: change-me
   resources:
     requests:
       cpu: 10m

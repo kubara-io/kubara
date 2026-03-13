@@ -1,10 +1,7 @@
 serviceMonitor:
   enabled: false
-  additionalLabels:
-    monitoring.instance: change-me
 ingress:
   enabled: false
-  host: change-me
   path: "/"
   annotations: {}
 image:

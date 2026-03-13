@@ -1,8 +1,4 @@
 letsencrypt: true
-clusterIssuer:
-  name: change-me
-  email: change-me
-  server: change-me # optional
 cert-manager:
   resources:
     requests:
@@ -13,8 +9,6 @@ cert-manager:
   prometheus:
     servicemonitor:
       enabled: false
-      labels:
-        monitoring.instance: change-me
   installCRDs: true
   serviceAccount:
     automountServiceAccountToken: true

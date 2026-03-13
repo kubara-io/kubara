@@ -2,10 +2,6 @@ namespace: {}
 policy-reporter:
   # We explicitly remove all filters because we want a complete dashboard
   sourceFilters: []
-  monitoring:
-    serviceMonitor:
-      labels:
-        monitoring.instance: change-me
   plugin:
     kyverno:
       enabled: true
