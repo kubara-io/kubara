@@ -1,8 +1,8 @@
 # Kubara
 
-![Status: Internal Use](https://img.shields.io/badge/status-internal-lightgrey)
+![Status: opensource](https://img.shields.io/badge/status-opensource-lightgrey)
 ![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)
-[![Chat: kubara Community](https://img.shields.io/badge/chat-kubara%20community-00AC47?logo=googlechat&logoColor=white)](https://github.com/kubara-io/kubara/discussions)
+![GitHub Discussions](https://img.shields.io/github/discussions/kubara-io/kubara)
 
 ## 🤔 What is Kubara?
 
@@ -98,17 +98,6 @@ We're continuously improving Kubara. Upcoming features:
 - [🎙️The GitOps Blueprint: Multi-Tenant Kubernetes with Argo CD in 30 Minutes | Cloud X Summit 2025 | Talk](assets/The_GitOps_Blueprint_Multi-Tenant_Kubernetes_with_Argo_CD_in_30_Minutes.pdf)
 - [📝 How We Load Test Argo CD at Scale: 1,000 vClusters with GitOps on Kubernetes | Medium and ITNEXT | Blog](https://medium.com/itnext/how-we-load-test-argo-cd-at-scale-1-000-vclusters-with-gitops-on-kubernetes-d8ea2a8935b6)
 - [📝 How to Build a Multi-Tenant Kubernetes Platform with GitOps and vCluster | Medium and ITNEXT | Blog](https://medium.com/itnext/from-ci-to-kubernetes-catalog-building-a-composable-platform-with-gitops-and-vcluster-7e1decaa81da)
-
-## 🐣 Who's using Kubara?
-
-### Internal
-- Schwarz Industry - actively in use
-- Schwarz IT - actively in use
-
-### External
-- Hamburg Port Authority (HPA) - evaluating multi-cloud use
-- D.velop - preparing unified control plane for various cloud providers
-
 
 ## 🤝 Contributing
 
