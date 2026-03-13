@@ -1,0 +1,46 @@
+crds:
+  install: true
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+
+kyverno:
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+  admissionController:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  backgroundController:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  cleanupController:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  reportsController:
+    serviceMonitor:
+      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  # FIX: https://github.com/kyverno/kyverno/issues/15116
+  kyverno-api:
+    labels:
+      app.kubernetes.io/managed-by: Helm
+    annotations:
+      meta.helm.sh/release-name: kyverno

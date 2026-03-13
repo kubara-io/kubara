@@ -1,0 +1,29 @@
+terraform {
+  required_version = ">=1.9.3"
+  required_providers {
+    terraform = {
+      source = "terraform.io/builtin/terraform"
+    }
+    stackit = {
+      source  = "stackitcloud/stackit"
+      version = "0.87.0"
+    }
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.17.0"
+    }
+  }
+}
+
+module "objectstorage-bucket" {
+  source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
+
+  project_id             = var.project_id
+  credentials_group_name = var.credentials_group_name
+  bucket_name            = var.bucket_name
+}
+
+output "debug" {
+  value     = module.objectstorage-bucket
+  sensitive = true
+}

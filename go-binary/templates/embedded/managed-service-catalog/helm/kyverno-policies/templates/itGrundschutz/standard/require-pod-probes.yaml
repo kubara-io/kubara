@@ -1,0 +1,66 @@
+{{- if and .Values.itGrundschutz.standard.enabled (dig "itGrundschutz" "standard" "requirePodProbes" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-pod-probes
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Require Pod Probes
+    policies.kyverno.io/category: IT-Grundschutz (standard)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Liveness and readiness probes need to be configured to correctly manage a Pod's
+      lifecycle during deployments, restarts, and upgrades. For each Pod, a periodic
+      `livenessProbe` is performed by the kubelet to determine if the Pod's containers
+      are running or need to be restarted. A `readinessProbe` is used by Services
+      and Deployments to determine if the Pod is ready to receive network traffic.
+      This policy validates that all containers have one of livenessProbe, readinessProbe,
+      or startupProbe defined.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "standard" "requirePodProbes" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "standard" "requirePodProbes" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: validate-probes
+      skipBackgroundRequests: true
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      preconditions:
+        all:
+          - key: |-
+                {{`{{ request.operation || 'BACKGROUND' }}`}}
+            operator: AnyIn
+            value:
+              - CREATE
+              - UPDATE
+      {{- with index .Values "kyverno-policies" "policyExclude" "require-pod-probes" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      validate:
+        failureAction: {{ dig "itGrundschutz" "standard" "requirePodProbes" "actionOverride" "Audit" (merge .Values)}}
+        message: "Liveness, readiness, or startup probes are required for all containers."
+        allowExistingViolations: true
+        foreach:
+          - list: request.object.spec.containers[]
+            deny:
+              conditions:
+                all:
+                  - key: livenessProbe
+                    operator: AllNotIn
+                    value: {{ `"{{ element.keys(@)[] }}"` }}
+                  - key: startupProbe
+                    operator: AllNotIn
+                    value: {{ `"{{ element.keys(@)[] }}"` }}
+                  - key: readinessProbe
+                    operator: AllNotIn
+                    value: {{ `"{{ element.keys(@)[] }}"` }}
+{{- end }}

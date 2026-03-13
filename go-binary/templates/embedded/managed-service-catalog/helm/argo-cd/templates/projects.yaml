@@ -1,0 +1,3 @@
+{{- range $key, $project := (.Values.bootstrapValues).projects }}
+{{ include "templateLibrary.argocd.project" $project }}
+{{- end }}

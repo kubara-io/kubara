@@ -1,0 +1,40 @@
+{{- if and (index .Values "cert-manager" "prometheus" "servicemonitor" "enabled") (.Capabilities.APIVersions.Has "monitoring.coreos.com/v1") }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ template "cert-manager.fullname" . }}
+  labels:
+    app: {{ include "cert-manager.name" . }}
+    app.kubernetes.io/name: {{ include "cert-manager.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: "controller"
+spec:
+  groups:
+    - name: certmanager
+      rules:
+        - alert: CertManagerAbsent
+          annotations:
+            description: Cert Manager has disappeared from Prometheus service discovery.
+            summary: Cert Manager has disappeared from Prometheus service discovery.
+          expr: absent(up{job=~".+cert-manager|cert-manager"})
+          for: 1h
+          labels:
+            severity: high
+        - alert: CertManagerACMEProxyReachability
+          annotations:
+            description: Cert manager did not receive a successful response from the ACME proxy {{`{{ $labels.host }}`}}.
+            summary: Cert Manager did not receive a successful response from the ACME proxy {{`{{ $labels.host }}`}}.
+          expr: sum by (host, status, method) (rate(certmanager_http_acme_client_request_count{status!~"2.."}[1h])) > 0
+          for: 4h
+          labels:
+            severity: warning
+        - alert: CertManagerCertNotReady
+          annotations:
+            description: The cert {{`{{ $labels.name }}`}} is not ready to serve traffic.
+            summary: The cert {{`{{ $labels.name }}`}} is not ready to serve traffic.
+          expr: sum without (exported_namespace)(label_replace(max by (name, exported_namespace, condition, namespace) (certmanager_certificate_ready_status{condition!="True"}
+            == 1), "namespace", "$1", "exported_namespace", "(.+)"))
+          for: 24h
+          labels:
+            severity: high
+{{- end }}

@@ -1,0 +1,16 @@
+---
+# See https://yamllint.readthedocs.io/en/stable/configuration.html
+# See https://yamllint.readthedocs.io/en/stable/rules.html
+extends: default
+rules:
+  document-start:
+    present: true
+  document-end: disable
+  new-lines:
+    type: platform
+  line-length:
+    max: 120
+    level: warning
+    allow-non-breakable-words: true
+    allow-non-breakable-inline-mappings: true
+  comments-indentation: disable

@@ -1,0 +1,58 @@
+{{- if and .Values.itGrundschutz.standard.enabled (dig "itGrundschutz" "standard" "disallowPrivilegedContainers" "enabled" true (merge .Values)) }}
+##########################################################################
+# Disallow Privilege escalation Flag
+##########################################################################
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged-containers-itgrundschutz  # itgrundschutz in name, because kyverno has its own policy with the same name
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Disallow Privileged Containers
+    policies.kyverno.io/category: IT-Grundschutz (standard)
+    policies.kyverno.io/severity: {{ dig "itGrundschutz" "standard" "disallowPrivilegedContainers" "severity" "medium" (merge .Values)}}
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Container
+    policies.kyverno.io/description: >-
+      Privileged mode disables most security mechanisms and must not be allowed. This policy
+      ensures Pods do not call for privileged mode.
+      Kyverno will automatically generate a corresponding policy for pod controllers.
+      This Policy ensures IT-Grundschutz-rule:
+      SYS.1.6.A17
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "standard" "disallowPrivilegedContainers" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "standard" "disallowPrivilegedContainers" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: privileged-containers
+      match:
+        any:
+        - resources:
+            kinds:
+              - Pod
+      {{- with index .Values "kyverno-policies" "policyExclude" "disallow-privileged-containers" }}
+      exclude:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "itGrundschutz" "standard" "disallowPrivilegedContainers" "actionOverride" "Enforce" (merge .Values)}}
+        message: >-
+          Privileged mode is disallowed. The fields spec.containers[*].securityContext.privileged
+          and spec.initContainers[*].securityContext.privileged must be unset or set to `false`.
+        pattern:
+          spec:
+            =(ephemeralContainers):
+              - =(securityContext):
+                  =(privileged): "false"
+            =(initContainers):
+              - =(securityContext):
+                  =(privileged): "false"
+            containers:
+              - =(securityContext):
+                  =(privileged): "false"
+{{- end }}

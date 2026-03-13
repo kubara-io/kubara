@@ -1,0 +1,42 @@
+{{- if and .Values.argoCD.enabled (dig "argoCD" "preventDefaultProject" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: "application-prevent-default-project"
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Prevent Use of Default Project
+    policies.kyverno.io/category: ArgoCD
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Application
+    policies.kyverno.io/description: >-
+      This policy prevents the use of the default project in an Application.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "argoCD" "preventDefaultProject" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "argoCD" "preventDefaultProject" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: default-project
+      match:
+        any:
+        - resources:
+            kinds:
+              - Application
+      preconditions:
+        all:
+        - key: {{ `"{{ request.operation || 'BACKGROUND' }}"` }}
+          operator: NotEquals
+          value: DELETE
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "argoCD" "preventDefaultProject" "actionOverride" "Audit" (merge .Values)}}
+        message: "The default project may not be used in an Application."
+        pattern:
+          spec:
+            project: "!default"
+{{- end }}

@@ -1,0 +1,80 @@
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secrets:
+    external-dns-webhook:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      data:
+        - remoteKey: dns_zone_admin
+          remoteKeyProperty: project_id
+          secretKey: PROJECT_ID
+        - remoteKey: dns_zone_admin
+          remoteKeyProperty: sa_key_json
+          secretKey: SA_KEY_JSON
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+external-dns:
+  txtOwnerId: {{ .cluster.name}}-{{ .cluster.stage}}
+  domainFilters:
+    - {{ .cluster.dnsName}}
+  extraArgs:
+    - --source=traefik-proxy
+  rbac:
+    create: true
+    additionalPermissions:
+      - apiGroups: ["traefik.io"]
+        resources:
+          - ingressroutes
+          - ingressroutetcps
+          - ingressrouteudps
+          - tlsoptions
+          - tlsstores
+        verbs: ["get", "watch", "list"]
+      - apiGroups: [""]
+        resources:
+          - "namespaces"
+        verbs: ["get", "watch", "list"]
+  extraVolumes:
+    - name: stackit-sa-authentication
+      secret:
+        secretName: external-dns-webhook
+        items:
+          - key: SA_KEY_JSON
+            path: sa_key.json
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+    security:
+      allowInsecureImages: true
+  provider:
+    webhook:
+      image:
+        repository: ghcr.io/stackitcloud/external-dns-stackit-webhook
+        tag: v0.3.2
+      extraVolumeMounts:
+        - name: stackit-sa-authentication
+          mountPath: /var/run/secrets/stackit
+      env:
+        - name: AUTH_KEY_PATH
+          value: /var/run/secrets/stackit/sa_key.json
+        - name: PROJECT_ID
+          valueFrom:
+            secretKeyRef:
+              name: external-dns-webhook
+              key: PROJECT_ID
+  serviceMonitor:
+    {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+    enabled: true
+    {{- end }}
+    additionalLabels:
+      monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"

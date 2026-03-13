@@ -1,0 +1,52 @@
+{{- if and .Values.itGrundschutz.standard.enabled (dig "itGrundschutz" "standard" "createDefaultNetworkPolicyNewNamespaces" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: create-default-network-policy-new-namespaces
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Create default-deny network policy for new namespaces
+    policies.kyverno.io/category: IT-Grundschutz (standard)
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Namespace, NetworkPolicy
+    policies.kyverno.io/description: >-
+      By default, Kubernetes allows communications across all Pods within a cluster.
+      The NetworkPolicy resource and a CNI plug-in that supports NetworkPolicy must be used to restrict
+      communications. A default NetworkPolicy should be configured for each Namespace to
+      default deny all ingress and egress traffic to the Pods in the Namespace. Application
+      teams can then configure additional NetworkPolicy resources to allow desired traffic
+      to application Pods from select sources. This policy will create a new NetworkPolicy resource
+      named `default-deny` which will deny all traffic anytime a new Namespace is created.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "itGrundschutz" "standard" "createDefaultNetworkPolicyNewNamespaces" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "itGrundschutz" "standard" "createDefaultNetworkPolicyNewNamespaces" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+  - name: create-default-deny-netpol-new-ns
+    skipBackgroundRequests: true
+    match:
+      any:
+      - resources:
+          kinds:
+          - Namespace
+    generate:
+      apiVersion: networking.k8s.io/v1
+      kind: NetworkPolicy
+      name: default-deny
+      namespace: {{ `"{{request.object.metadata.name}}"` }}
+      synchronize: true
+      data:
+        metadata:
+          labels:
+            created-by: kyverno
+        spec:
+          podSelector: {}
+          policyTypes:
+          - Ingress
+          - Egress
+
+{{- end }}

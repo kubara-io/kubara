@@ -1,0 +1,62 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "terraform": {
+    "fileMatch": ["\\.tf(\\.tplt)?$"]
+  },
+  "packageRules": [
+    {
+      "matchFiles": ["**/Chart.{yaml,yml}"],
+      "bumpVersions": [
+        {
+          "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
+          "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
+          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+        }
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isMajor}}major{{/if}}{{#if isMinor}}minor{{/if}}{{#if isPatch}}patch{{/if}}\""
+        ],
+        "fileFilters": ["**/CHANGELOG.md"],
+        "executionMode": "update"
+      }
+    },
+    {
+      "description": "Run go mod tidy for all go module updates",
+      "matchManagers": ["gomod"],
+      "postUpdateOptions": ["gomodTidy"]
+    },
+    {
+      "description": "Group k8s.io go modules (minor and patch)",
+      "matchManagers": ["gomod"],
+      "matchPackagePrefixes": ["k8s.io/"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "k8s.io go modules",
+      "groupSlug": "k8s-io-go-modules"
+    },
+    {
+      "description": "Group sigs.k8s.io go modules (minor and patch)",
+      "matchManagers": ["gomod"],
+      "matchPackagePrefixes": ["sigs.k8s.io/"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "sigs.k8s.io go modules",
+      "groupSlug": "sigs-k8s-io-go-modules"
+    },
+    {
+      "description": "Group golang.org/x go modules (minor and patch)",
+      "matchManagers": ["gomod"],
+      "matchPackagePrefixes": ["golang.org/x/"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "golang.org/x go modules",
+      "groupSlug": "golang-org-x-go-modules"
+    },
+    {
+      "description": "Group koanf go modules (minor and patch)",
+      "matchManagers": ["gomod"],
+      "matchPackagePrefixes": ["github.com/knadh/koanf/"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "koanf go modules",
+      "groupSlug": "koanf-go-modules"
+    }
+  ]
+}

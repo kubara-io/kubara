@@ -1,0 +1,25 @@
+{{- if and ( .Capabilities.APIVersions.Has "monitoring.coreos.com/v1" ) .Values.serviceMonitor.enabled -}}
+apiVersion: "monitoring.coreos.com/v1"
+kind: ServiceMonitor
+metadata:
+{{- if .Values.serviceMonitor.additionalAnnotations }}
+  annotations:
+    {{ toYaml .Values.serviceMonitor.additionalAnnotations | nindent 4 }}
+  {{- end }}
+  {{- if .Values.serviceMonitor.additionalLabels }}
+  labels:
+  {{ toYaml .Values.serviceMonitor.additionalLabels | nindent 4 }}
+  {{- end }}
+  name: {{ $.Release.Name }}-metrics
+  namespace: {{ $.Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      argocd.argoproj.io/instance: {{ $.Release.Name }}
+  namespaceSelector:
+    matchNames:
+      - {{ $.Release.Namespace }}
+  endpoints:
+    - port: health
+      path: /actuator/prometheus
+{{- end }}

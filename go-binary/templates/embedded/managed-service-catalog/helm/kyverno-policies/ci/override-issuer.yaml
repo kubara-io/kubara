@@ -1,0 +1,4 @@
+global:
+  allowedIssuerDomains: "foo.bar"
+softwareSupplyChainSecurity:
+  enabled: false

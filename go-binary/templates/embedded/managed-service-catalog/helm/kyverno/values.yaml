@@ -1,0 +1,14 @@
+namespace: {}
+kyverno:
+  admissionController:
+    serviceMonitor:
+      enabled: false
+  backgroundController:
+    serviceMonitor:
+      enabled: false
+  cleanupController:
+    serviceMonitor:
+      enabled: false
+  reportsController:
+    serviceMonitor:
+      enabled: false

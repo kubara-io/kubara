@@ -1,0 +1,23 @@
+# Can be removed when PathPrefix / instead of /homer is used
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: lighttpd-config
+  labels:
+    app: homer
+data:
+  lighttpd: |
+    include "/etc/lighttpd/mime-types.conf"
+    include_shell "/etc/lighttpd/ipv6.sh"
+
+    server.port            = env.PORT
+    server.modules         = ( "mod_alias", "mod_accesslog" )
+    server.username        = "lighttpd"
+    server.groupname       = "lighttpd"
+    server.document-root   = "/www"
+    alias.url              = ( env.SUBFOLDER => "/www" )
+    server.indexfiles      = ("index.html")
+    server.follow-symlink  = "enable"
+    server.feature-flags  += ( "server.clock-jump-restart" => 0 )
+    server.max-request-field-size = 65535
+    accesslog.filename = "/dev/fd/3"

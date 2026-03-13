@@ -1,0 +1,13 @@
+apiVersion: metallb.io/v1beta1
+kind: L2Advertisement
+metadata:
+  name: {{ .Release.Name }}-l2
+  namespace: {{ .Release.Namespace }}
+spec:
+  ipAddressPools:
+    - {{ .Values.poolName }}
+{{/*  nodeSelectors:*/}}
+{{/*    - matchLabels:*/}}
+{{/*        kubernetes.io/hostname: NodeA*/}}
+{{/*    - matchLabels:*/}}
+{{/*        kubernetes.io/hostname: NodeB*/}}

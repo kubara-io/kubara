@@ -1,0 +1,45 @@
+{{- if and .Values.argoCD.enabled (dig "argoCD" "preventUpdatesToProject" "enabled" true (merge .Values)) }}
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: application-prevent-updates-project
+  annotations:
+    pod-policies.kyverno.io/autogen-controllers: none
+    policies.kyverno.io/title: Prevent Updates to Project
+    policies.kyverno.io/category: ArgoCD
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/minversion: "1.6.0"
+    kyverno.io/kyverno-version: {{ .Values.global.kyvernoVersion | quote }}
+    kyverno.io/kubernetes-version: {{ .Values.global.k8sVersion | quote }}
+    policies.kyverno.io/subject: Application
+    policies.kyverno.io/description: >-
+      This policy prevents updates to the project field after an Application is created.
+spec:
+  webhookConfiguration:
+    failurePolicy: {{ dig "argoCD" "preventUpdatesToProject" "webhookFailurePolicy" "Fail" (merge .Values) }}
+    timeoutSeconds: 30
+  background: {{ dig "argoCD" "preventUpdatesToProject" "enableBackgroundScanning" true (merge .Values)}}
+  rules:
+    - name: project-updates
+      match:
+        any:
+        - resources:
+            kinds:
+              - Application
+      preconditions:
+        all:
+        - key: {{ `"{{ request.operation || 'BACKGROUND' }}"` }}
+          operator: Equals
+          value: UPDATE
+      skipBackgroundRequests: true
+      validate:
+        allowExistingViolations: true
+        failureAction: {{ dig "argoCD" "preventUpdatesToProject" "actionOverride" "Audit" (merge .Values)}}
+        message: "The spec.project cannot be changed once the Application is created."
+        deny:
+          conditions:
+            any:
+            - key: {{ `"{{ request.object.spec.project }}"` }}
+              operator: NotEquals
+              value: {{ `"{{ request.oldObject.spec.project }}"` }}
+{{- end }}

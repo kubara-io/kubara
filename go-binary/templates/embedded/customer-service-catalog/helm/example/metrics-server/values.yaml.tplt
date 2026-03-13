@@ -1,0 +1,11 @@
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+metrics-server:
+  imagePullSecrets:
+    - name: image-pull-secret
+  serviceMonitor:
+    additionalLabels:
+      monitoring:
+        instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
