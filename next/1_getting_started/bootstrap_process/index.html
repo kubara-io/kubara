@@ -18,12 +18,12 @@
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
-        <title>Bootstrap Your Platform - Kubara - Docs</title>
+        <title>Bootstrap Your Platform - kubara - Docs</title>
       
     
     
@@ -108,7 +108,7 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Kubara - Docs" class="md-header__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
@@ -121,7 +121,7 @@ You're not viewing the latest stable version.
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Kubara - Docs
+            kubara - Docs
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -255,12 +255,12 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Kubara - Docs" class="md-nav__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
     </a>
-    Kubara - Docs
+    kubara - Docs
   </label>
   
     <div class="md-nav__source">
@@ -1703,7 +1703,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/contributing/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1902,7 +1902,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/code_of_conduct/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1930,7 +1930,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/security/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/SECURITY.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1958,14 +1958,42 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/licence/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
   <span class="md-ellipsis">
     
   
-    Licence
+    Docs License (CC BY 4.0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/LICENSE" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software License (Apache 2.0)
   
 
     
@@ -2271,7 +2299,7 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="kubara-bootstrapping-guide-controlplane-setup">Kubara: Bootstrapping Guide - ControlPlane Setup</h1>
+<h1 id="kubara-bootstrapping-guide-controlplane-setup">kubara: Bootstrapping Guide - ControlPlane Setup</h1>
 <h2 id="introduction">Introduction</h2>
 <p>This guide provides a step-by-step process for bootstrapping your platform running on Kubernetes, including the necessary <a href="../prerequisites/">prerequisites</a>, architecture setup, and deployment instructions. Try to follow the instructions first. If you have any questions or issues, please reach out directly via Teams. If you're interested in the setup details, explore the Wiki pages.</p>
 <hr>
@@ -2360,7 +2388,7 @@ You can set a custom output file:</p>
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 <span class="nn">...</span>
 </code></pre></div>
-<p>Kubara generates resources in two stages:</p>
+<p>kubara generates resources in two stages:</p>
 <ul>
 <li><strong>Terraform modules and overlays</strong> to provision infrastructure and the Kubernetes cluster</li>
 <li><strong>Helm templates</strong> to deploy Argo CD and platform services</li>
@@ -2369,7 +2397,7 @@ You can set a custom output file:</p>
 <hr>
 <h2 id="2-terraform-provisioning-kubernetes-and-infrastructure-optional-recommended">2. Terraform: Provisioning Kubernetes and Infrastructure <em>(Optional, Recommended)</em></h2>
 <blockquote>
-<p>⚠️ In Kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
+<p>⚠️ In kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
 </blockquote>
 <p>Generate Terraform modules:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
@@ -2501,7 +2529,7 @@ Edit the generated files in:
 <li><code>values.yaml</code> as the main customer overlay file</li>
 <li>optional <code>additional-values.yaml</code> for overrides/extra values</li>
 </ul>
-<p>Kubara's generated ApplicationSet already references both files and ignores missing files, so you can add <code>additional-values.yaml</code> only when needed.</p>
+<p>kubara's generated ApplicationSet already references both files and ignores missing files, so you can add <code>additional-values.yaml</code> only when needed.</p>
 <p>Merge behavior reminder:</p>
 <ul>
 <li>maps/dictionaries are merged recursively</li>
@@ -2558,7 +2586,7 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 </code></pre></div>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
-<p>Recommended for the first bootstrap with external-secrets: let Kubara apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>
+<p>Recommended for the first bootstrap with external-secrets: let kubara apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--kubeconfig<span class="w"> </span>k8s.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml<span class="w"> </span><span class="se">\</span>

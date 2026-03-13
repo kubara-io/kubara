@@ -18,12 +18,12 @@
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
-        <title>ExternalDNS - Kubara - Docs</title>
+        <title>ExternalDNS - kubara - Docs</title>
       
     
     
@@ -108,7 +108,7 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Kubara - Docs" class="md-header__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
@@ -121,7 +121,7 @@ You're not viewing the latest stable version.
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Kubara - Docs
+            kubara - Docs
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -255,12 +255,12 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Kubara - Docs" class="md-nav__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
     </a>
-    Kubara - Docs
+    kubara - Docs
   </label>
   
     <div class="md-nav__source">
@@ -1538,7 +1538,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/contributing/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1737,7 +1737,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/code_of_conduct/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1765,7 +1765,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/security/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/SECURITY.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1793,14 +1793,42 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/licence/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
   <span class="md-ellipsis">
     
   
-    Licence
+    Docs License (CC BY 4.0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/LICENSE" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software License (Apache 2.0)
   
 
     
@@ -1941,7 +1969,7 @@ You're not viewing the latest stable version.
 
 <h1 id="network-externaldns">Network: ExternalDNS</h1>
 <h2 id="what-is-externaldns">What is ExternalDNS?</h2>
-<p>With Kubara you can deploy <strong>ExternalDNS</strong> into your Kubernetes cluster (see https://kubernetes-sigs.github.io/external-dns/latest/).<br>
+<p>With kubara you can deploy <strong>ExternalDNS</strong> into your Kubernetes cluster (see https://kubernetes-sigs.github.io/external-dns/latest/).<br>
 ExternalDNS ensures that DNS records are automatically created and updated as soon as you define Ingress, Service, or supported Traefik resources with hostnames.</p>
 <blockquote>
 <p>ExternalDNS will be rolled out as a <strong>Helm Chart</strong> when you enable the service in your <code>config.yaml</code>.</p>
@@ -1950,7 +1978,7 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <h2 id="workflow">Workflow</h2>
 <ol>
 <li><strong>Prepare DNS zone</strong>  </li>
-<li>Kubara generates the necessary <strong>Terraform definitions</strong> (modules and variables) for DNS setup.  </li>
+<li>kubara generates the necessary <strong>Terraform definitions</strong> (modules and variables) for DNS setup.  </li>
 <li>You then run <strong>Terraform</strong> yourself to actually create the zone.  </li>
 <li>If you use your own domain, you must delegate the nameservers of this zone at your registrar.  </li>
 <li>
@@ -1960,7 +1988,7 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <p><strong>Enable ExternalDNS</strong>  </p>
 </li>
 <li>In <code>config.yaml</code> you enable the service <code>externalDns</code>.  </li>
-<li>Then you must <strong>rerun Kubara</strong> (<code>kubara generate --terraform</code>, <code>kubara generate --helm</code> or <code>kubara generate</code>) so that Terraform files and Helm values are re-rendered with the new settings.  </li>
+<li>Then you must <strong>rerun kubara</strong> (<code>kubara generate --terraform</code>, <code>kubara generate --helm</code> or <code>kubara generate</code>) so that Terraform files and Helm values are re-rendered with the new settings.  </li>
 <li>Configure provider-specific values in:<ul>
 <li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/external-dns/values.yaml</code></li>
 <li>optional <code>customer-service-catalog/helm/&lt;cluster-name&gt;/external-dns/additional-values.yaml</code></li>
@@ -2002,7 +2030,7 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <h3 id="explanation">Explanation</h3>
 <ul>
 <li><strong><code>dnsName</code></strong> → base domain for the cluster  </li>
-<li><strong><code>terraform.dns</code></strong> → defines the zone for which Kubara generates Terraform code (name and contact email).</li>
+<li><strong><code>terraform.dns</code></strong> → defines the zone for which kubara generates Terraform code (name and contact email).</li>
 <li><strong><code>services.externalDns.status</code></strong> → when set to <code>enabled</code>, ExternalDNS is templated into the Helm charts for deployment via ArgoCD.</li>
 <li><strong>provider-specific settings</strong> → configure them in the chart overlay values (<code>values.yaml</code> / <code>additional-values.yaml</code>).</li>
 </ul>

@@ -18,12 +18,12 @@
         
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.4">
     
     
       
-        <title>Prerequisites - Kubara - Docs</title>
+        <title>Prerequisites - kubara - Docs</title>
       
     
     
@@ -108,7 +108,7 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="Kubara - Docs" class="md-header__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
@@ -121,7 +121,7 @@ You're not viewing the latest stable version.
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            Kubara - Docs
+            kubara - Docs
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -255,12 +255,12 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="Kubara - Docs" class="md-nav__button md-logo" aria-label="Kubara - Docs" data-md-component="logo">
+    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
   <img src="../../images/logo.svg" alt="logo">
 
     </a>
-    Kubara - Docs
+    kubara - Docs
   </label>
   
     <div class="md-nav__source">
@@ -1503,7 +1503,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/contributing/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1702,7 +1702,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/code_of_conduct/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1730,7 +1730,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/security/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/SECURITY.md" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
@@ -1758,14 +1758,42 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/licence/" class="md-nav__link">
+      <a href="https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
         
   
   
   <span class="md-ellipsis">
     
   
-    Licence
+    Docs License (CC BY 4.0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/LICENSE" class="md-nav__link plugin_open_external_links_in_new_tab" target="_blank" rel="noopener noreferrer">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software License (Apache 2.0)
   
 
     
@@ -1885,10 +1913,7 @@ entities can be added to .env to smoothen bootstrap process.</p>
 <li><code>helm</code></li>
 <li><code>git</code></li>
 <li><code>terraform</code> (optional, but recommended)</li>
-<li><code>kubara</code> for your OS (Windows, Linux, or MacOS) - you can download it from the <a href="https://github.com/kubara-io/kubara/releases" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">releases page</a></li>
-<li>If you running on MacOS (Darwin) you can get some issues with unknown source. You can fix this by running:<br>
-    <div class="highlight"><pre><span></span><code>xattr<span class="w"> </span>-d<span class="w"> </span>com.apple.quarantine<span class="w"> </span>./kubara
-</code></pre></div></li>
+<li><code>kubara</code> for your OS (Windows, Linux, or macOS) - follow the <a href="https://github.com/kubara-io/kubara/blob/main/INSTALLATION.md" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">installation guide</a></li>
 </ul>
 <blockquote>
 <p><strong>⚠️ Note: Internet access required</strong>
@@ -1896,10 +1921,10 @@ entities can be added to .env to smoothen bootstrap process.</p>
   Make sure you are not blocked by a firewall or proxy.</p>
 </blockquote>
 <h3 id="external-entities">External Entities</h3>
-<p>(included*): Kubara can generate templates for some entities from scratch. Provider examples below are not mandatory; use equivalents for your environment.</p>
+<p>(included*): kubara can generate templates for some entities from scratch. Provider examples below are not mandatory; use equivalents for your environment.</p>
 <ul>
 <li><strong>Git repository (or multiple repositories)</strong><br>
-  Used to store the code generated by the Kubara framework.<br>
+  Used to store the code generated by the kubara framework.<br>
   It is also used to configure and maintain your platform.<br>
 <em>Recommendation:</em> Create one repository per control plane. Each repository should contain both the control plane configuration and all related worker clusters.</li>
 <li><strong>Kubernetes Cluster (included*)</strong>
