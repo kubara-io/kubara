@@ -121,5 +121,5 @@ Releases are listed in the [Release section](https://github.com/kubara-io/kubara
 
 ## 📝 License
 
-Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/NOTICE.txt#documentation-license).
+Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license).
 Software source code is licensed under [Apache 2.0](https://github.com/kubara-io/kubara/blob/main/LICENSE).
