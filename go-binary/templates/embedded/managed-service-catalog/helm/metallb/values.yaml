@@ -37,14 +37,6 @@ metallb:
   prometheus:
     serviceMonitor:
       enabled: false
-      speaker:
-        additionalLabels:
-          monitoring.instance: change-me
       controller:
-        additionalLabels:
-          monitoring.instance: change-me
-poolName: change-me
-addresses:
-- change-me
 nodeSelectors: {}
 namespace: {}
