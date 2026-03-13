@@ -2,7 +2,7 @@
 
 ## What is Certificate Management?
 
-With Kubara you can automatically manage **TLS certificates** in your Kubernetes cluster using **cert-manager** (see https://cert-manager.io/).  
+With kubara you can automatically manage **TLS certificates** in your Kubernetes cluster using **cert-manager** (see https://cert-manager.io/).  
 cert-manager handles requesting, renewing, and storing certificates so that your applications are always served with valid TLS.
 
 > cert-manager will be rolled out as a **Helm Chart** via ArgoCD when you enable the service in your `config.yaml`.
@@ -18,11 +18,11 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 
 2. **Enable cert-manager**  
    - In `config.yaml` you enable the service `certManager`.  
-   - Then you must **rerun Kubara** (`kubara generate --helm` or `kubara generate`) so that Helm values are re-rendered with the new settings.  
+   - Then you must **rerun kubara** (`kubara generate --helm` or `kubara generate`) so that Helm values are re-rendered with the new settings.  
    - Then **git commit & push** the Helm chart changes so that ArgoCD deploys cert-manager to the cluster.  
 
 3. **Configure ClusterIssuer**  
-   - Kubara automatically renders a **ClusterIssuer** that you can configure in `config.yaml`.  
+   - kubara automatically renders a **ClusterIssuer** that you can configure in `config.yaml`.  
    - Typical parameters:  
      - **Email address** (required for ACME providers)  
      - **Server URL** of the ACME provider (e.g. Let's Encrypt production or staging, or another ACME provider)  

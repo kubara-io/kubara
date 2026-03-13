@@ -148,4 +148,4 @@ Before opening the PR, ensure:
 - [ ] references/links are included (optional but recommended)
 
 ## See also
-For creating proposals for new tools see [here](../5_community/contributing.md#integration-requirements-catalogue).
+For creating proposals for new tools see [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue).

@@ -1,4 +1,4 @@
-# Kubara: Bootstrapping Guide - ControlPlane Setup
+# kubara: Bootstrapping Guide - ControlPlane Setup
 
 
 
@@ -115,7 +115,7 @@ clusters:
 ...
 ```
 
-Kubara generates resources in two stages:
+kubara generates resources in two stages:
 
 * **Terraform modules and overlays** to provision infrastructure and the Kubernetes cluster
 * **Helm templates** to deploy Argo CD and platform services
@@ -125,7 +125,7 @@ If you are not using Terraform, you can skip directly to Step 3.
 ---
 ## 2. Terraform: Provisioning Kubernetes and Infrastructure *(Optional, Recommended)*
 
-> ⚠️ In Kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
+> ⚠️ In kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
 
 Generate Terraform modules:
 
@@ -264,7 +264,7 @@ The provisioning steps remain the same. The only difference lies in the Terrafor
 * You'll retrieve additional values like `privateLoadBalancerIP` and `publicLoadBalancerIP`
 * These need to be added to `config.yaml`
 
-You must manually create the Kubernetes cluster via the IEP/SIT cloud portal. This will be automated in the future.
+You must manually create the Kubernetes cluster via the cloud portal. This will be automated in the future.
 
 Now continue with Step 3.
 
@@ -317,7 +317,7 @@ Every generated app supports:
 * `values.yaml` as the main customer overlay file
 * optional `additional-values.yaml` for overrides/extra values
 
-Kubara's generated ApplicationSet already references both files and ignores missing files, so you can add `additional-values.yaml` only when needed.
+kubara's generated ApplicationSet already references both files and ignores missing files, so you can add `additional-values.yaml` only when needed.
 
 Merge behavior reminder:
 
@@ -392,7 +392,7 @@ spec:
 kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds
 ```
 
-Recommended for the first bootstrap with external-secrets: let Kubara apply a templated `ClusterSecretStore` manifest during bootstrap:
+Recommended for the first bootstrap with external-secrets: let kubara apply a templated `ClusterSecretStore` manifest during bootstrap:
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> \

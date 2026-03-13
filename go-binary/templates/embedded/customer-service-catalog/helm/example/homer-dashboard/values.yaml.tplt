@@ -26,7 +26,7 @@ serviceMonitor:
   additionalLabels:
     monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
 dashboardConfig:
-  title: "Kubara Developer Portal"
+  title: "kubara Developer Portal"
   subtitle: "{{ .cluster.stage }}"
   logo: "assets/icons/kubara_icon.png"
 

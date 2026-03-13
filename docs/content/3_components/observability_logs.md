@@ -17,9 +17,9 @@ Logs can be accessed directly in Grafana under **Explore > Loki**. This interfac
 
 You can find more about Grafana in the [Dashboards](../3_components/observability_dashboards.md) chapter.
 
-## Kubara Standardization
+## kubara Standardization
 
-In Kubara, **Promtail is enabled by default**. It is configured to automatically collect logs and enrich them with Kubernetes metadata such as namespace, pod name, container, and user-defined labels.
+In kubara, **Promtail is enabled by default**. It is configured to automatically collect logs and enrich them with Kubernetes metadata such as namespace, pod name, container, and user-defined labels.
 
 This ensures that logs from all applications are captured consistently and are immediately available for centralized analysis without per-project setup.
 

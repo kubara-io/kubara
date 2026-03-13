@@ -307,7 +307,7 @@ func writeGitignoreFile(outputPath string, lines []string, basePath string) erro
 
 const gitignoreKubara = `
 #########################################
-### Kubara gitignore ###
+### kubara gitignore ###
 # kubara program
 kubara_*amd64*
 kubara_*arm64*

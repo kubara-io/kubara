@@ -4,7 +4,7 @@ After your control plane is running, you can add more Kubernetes worker clusters
 
 You can onboard:
 
-* a new cluster provisioned with Kubara Terraform templates, or
+* a new cluster provisioned with kubara Terraform templates, or
 * an existing cluster you already operate.
 
 The Argo CD integration flow is the same in both cases.
@@ -190,4 +190,4 @@ kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ## Additional notes
 
 * If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the worker cluster.
-* `additional-values.yaml` is optional but recommended for provider-specific overrides, because generated `values.yaml` can be re-rendered by Kubara.
+* `additional-values.yaml` is optional but recommended for provider-specific overrides, because generated `values.yaml` can be re-rendered by kubara.
