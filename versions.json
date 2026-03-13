@@ -12,10 +12,5 @@
     "aliases": [
       "latest-dev"
     ]
-  },
-  {
-    "version": "v0.0.0-notarytest.1",
-    "title": "v0.0.0-notarytest.1",
-    "aliases": []
   }
 ]
