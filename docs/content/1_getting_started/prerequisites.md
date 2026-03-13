@@ -14,7 +14,7 @@ entities can be added to .env to smoothen bootstrap process.
 - `helm`
 - `git`
 - `terraform` (optional, but recommended)
-- `kubara` for your OS (Windows, Linux, or MacOS) - you can download it from the [releases page](https://kubara.git.onstackit.cloud/STACKIT/kubara/releases)
+- `kubara` for your OS (Windows, Linux, or MacOS) - you can download it from the [releases page](https://github.com/kubara-io/kubara/releases)
   - If you running on MacOS (Darwin) you can get some issues with unknown source. You can fix this by running:<br>
     ```bash
     xattr -d com.apple.quarantine ./kubara
