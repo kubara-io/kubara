@@ -3,7 +3,7 @@ terraform {
   required_providers {
     stackit = {
       source  = "stackitcloud/stackit"
-      version = "0.86.0"
+      version = "0.87.0"
     }
 
     aws = {
