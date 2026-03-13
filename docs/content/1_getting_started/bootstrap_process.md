@@ -264,7 +264,7 @@ The provisioning steps remain the same. The only difference lies in the Terrafor
 * You'll retrieve additional values like `privateLoadBalancerIP` and `publicLoadBalancerIP`
 * These need to be added to `config.yaml`
 
-You must manually create the Kubernetes cluster via the IEP/SIT cloud portal. This will be automated in the future.
+You must manually create the Kubernetes cluster via the cloud portal. This will be automated in the future.
 
 Now continue with Step 3.
 
