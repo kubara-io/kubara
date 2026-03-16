@@ -114,7 +114,7 @@ cloud-native applications.
 
      GitOps automates the deployment process. Changes to the Git repository
      (such as code updates or configuration changes) trigger automated
-     processes (argoCD) that sync the repository with the Kubernetes cluster.
+     processes (Argo CD) that sync the repository with the Kubernetes cluster.
      This reduces manual intervention and speeds up release cycles.
 
    - **Faster and Reliable Releases**:

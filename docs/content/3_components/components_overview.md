@@ -31,7 +31,7 @@ More tools will be added in future releases of the kubara framework.
 | <div style="width: 80px;">![Cert Manager](../images/cert-manager-logo.png)</div>                                                                                      | Cert Manager. Automates TLS certificate creation and management.                | TLS certificate automation | - ACME support<br>- Auto renewal<br>- Ingress integration                           |
 | <div style="width: 80px;">![External Secrets](../images/external-secrets-logo.png)</div> | External Secrets Operator. Sync secrets from external backends into Kubernetes. | Secret synchronization     | - Vault, AWS, GCP support<br>- Auto updates<br>- Encryption                         |
 | <div style="width: 80px;">![Kyverno](../images/kyverno-logo.png)</div> | Kyverno. Kubernetes-native policy engine for governance and security.           | Policy management          | - Validation and mutation<br>- Custom policies<br>- GitOps friendly                 |
-| <div style="width: 80px;">![OAuth Proxy](../images/oauth-proxy-logo.png) </div>  | OAuth2 proxy for authenticating web applications.                               | Auth via OAuth2/OIDC       | - Google, GitHub, OIDC support<br>- Easy integration<br>- Access control via tokens |
+| <div style="width: 80px;">![OAuth2 Proxy](../images/oauth-proxy-logo.png) </div>  | OAuth2 Proxy for authenticating web applications.                               | Auth via OAuth2/OIDC       | - Google, GitHub, OIDC support<br>- Easy integration<br>- Access control via tokens |
 
 ---
 

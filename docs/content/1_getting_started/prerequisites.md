@@ -44,7 +44,7 @@ A Container registry (e.g. JFrog or Harbor) that serves the applications
 - **Docker Hub Account (optional but recommended)**
 If you are relying on publicly available images (e.g. from dockerhub) you need an user account to pull without rate limits.
 - **OAuth2 Apps (optional but recommended)**
-    In total we use three Oauth2 Apps:
+    In total we use three OAuth2 Apps:
     -  OAuth2-Proxy App (reverse proxy) that handles authentication for most dashboards
     -  Argo CD App that handles authentication for Argo CD  UI. Dex is used for handling Argo CD  RBAC once authenticated
     -  Grafana App that handles authentication for Grafana.

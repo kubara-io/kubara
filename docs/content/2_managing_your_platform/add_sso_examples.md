@@ -7,7 +7,7 @@ with STACKIT GIT (Forgejo based).**
 These configurations are to enable kubara & Forgejo Users to quick-start with SSO.  
 
 > ⚠️ **Prerequisites:**  
-> Create Application in Forgejo for Grafana, OAuth2Proxy & Argo   
+> Create Application in Forgejo for Grafana, OAuth2 Proxy & Argo CD
 > [Forgejo Docs](https://forgejo.org/docs/next/user/oauth2-provider/#examples)    
 >
 > Same Callback URLs like GitHub  
@@ -23,7 +23,7 @@ Below are working examples when these Docs are released.
 
 **They are based on:**  
 - [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/)  
-- [OAuth2Proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea)  
+- [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea)  
 - [Argo](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex) & [Dex](https://dexidp.io/docs/connectors/gitea/)  
 
 We recommend to take a look at them to make sure everything is configured as intended before  

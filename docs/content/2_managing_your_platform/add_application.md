@@ -16,7 +16,7 @@ For more information and possible configuration check:
 https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
 https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern
 
-## **Modify argoCD overlays**
+## **Modify Argo CD overlays**
 This is an example on how to add a simple application to a worker-cluster.
 Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your `argo-cd/values.yaml`.
@@ -40,11 +40,11 @@ That whats happening behind the scenes:
 ![Add Application](../images/add-application.png)
 
 ## **Push your changes to git**
-Do not forget to push your changes to the git repository that serves your argoCD application.
-If you let argoCD manage itself, it will add the configured application to the cluster.
+Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.
 
-## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run the following again:
+## **Run kubara bootstrap again (if Argo CD is not managing itself )**
+If Argo CD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering Argo CD values will have no effect until you run the following again:
 ```bash
 kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
