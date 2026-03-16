@@ -7,6 +7,7 @@ Each release will include important information to help you understand what has 
 
 ## Release contents
 Every release will include:
+
 - General release notes
 - Changes and new features
 - Breaking changes (if any)
@@ -21,6 +22,7 @@ Until then, please refer to the individual release notes for any update instruct
 ---
 
 ## Why a regular release cycle?
+
 - Predictable updates for users and maintainers
 - Faster delivery of new features and improvements
 - Easier tracking of breaking changes and migrations

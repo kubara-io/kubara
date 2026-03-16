@@ -5,6 +5,7 @@ Project.
 An Argo CD AppSet is a logical concept to create many ArgoCD applications with just one manifest.<br>
 This allows Users to spawn one service with different configurations on many namespaces and clusters.
 For more information and possible configuration check:<br>
+
 - https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml
 - https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
 
@@ -62,11 +63,10 @@ Do not forget to push your changes to the git repository that serves your argoCD
 If you let argoCD manage itself, it will add the configured application to the cluster.
 
 ## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run
+If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run the following again:
 ```bash
 kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
-again
 
 ## **Add App from another repository**
 If you want to add an application that is stored in another repository you can use the `sources:` directive. It supports all the fields argoCD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application

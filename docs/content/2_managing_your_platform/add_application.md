@@ -1,9 +1,12 @@
 # Add Application to Argo CD
-        This page describes adding additional apps to your platform.
-        Most likely this will be app-of-apps constructs to enable a self-service
-        approach for developer teams.
-        If you want to add applications to your base-stack use the
-        app-sets in conjunction with cluster labels instead.
+
+!!! note
+
+    This page describes adding additional apps to your platform.
+    Most likely this will be app-of-apps constructs to enable a self-service
+    approach for developer teams.
+    If you want to add applications to your base-stack use the
+    app-sets in conjunction with cluster labels instead.
 
 Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
 Project.
@@ -41,8 +44,7 @@ Do not forget to push your changes to the git repository that serves your argoCD
 If you let argoCD manage itself, it will add the configured application to the cluster.
 
 ## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run 
+If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run the following again:
 ```bash
 kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
-again
