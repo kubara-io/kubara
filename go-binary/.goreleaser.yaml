@@ -161,3 +161,16 @@ notarize:
         #
         # Default: 10m.
         # timeout: 20m
+brews:
+  - name: kubara
+    repository:
+      owner: kubara-io
+      name: homebrew-tap
+    description: "Your description of what Kubara does"
+    homepage: "https://github.com/kubara-io/kubara"
+    license: "MIT"
+    install: |
+      bin.install "kubara"
+    test: |
+      system "#{bin}/kubara", "--version"
+    skip_upload: "auto"
