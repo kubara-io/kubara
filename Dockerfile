@@ -10,9 +10,8 @@ ARG TARGETARCH
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -o kubara main.go
 
 
-FROM scratch
+FROM alpine
 
-COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /app/kubara /kubara
 
-ENTRYPOINT ["/kubara"]
+ENTRYPOINT ["/kubara", "--kubeconfig", "/kubeconfig"]
