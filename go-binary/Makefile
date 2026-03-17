@@ -2,7 +2,7 @@
 BINARY_NAME = kubara
 SRC = main.go
 
-.PHONY: all build run clean modtidy build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 test test-verbose test-coverage test-race lint format vet help
+.PHONY: all build run clean modtidy build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 build-freebsd-amd64 build-freebsd-arm64 test test-verbose test-coverage test-race lint format vet help
 
 # Default target: Build the binary for the local platform
 all: build
@@ -28,6 +28,8 @@ clean:
 	@rm -f $(BINARY_NAME)-darwin-arm64
 	@rm -f $(BINARY_NAME)-windows-amd64.exe
 	@rm -f $(BINARY_NAME)-windows-arm64.exe
+	@rm -f $(BINARY_NAME)-freebsd-amd64
+	@rm -f $(BINARY_NAME)-freebsd-arm64
 
 # Tidy the module files (go.mod and go.sum)
 modtidy:
@@ -77,7 +79,7 @@ lint:
 	fi
 
 # Build binaries for all common platforms
-build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64
+build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 build-freebsd-amd64 build-freebsd-arm64
 
 build-linux-amd64:
 	@echo "Building for Linux AMD64..."
@@ -103,6 +105,14 @@ build-windows-arm64:
 	@echo "Building for Windows ARM64..."
 	@GOOS=windows GOARCH=arm64 go build -o $(BINARY_NAME)-windows-arm64.exe $(SRC)
 
+build-freebsd-amd64:
+	@echo "Building for FreeBSD AMD64..."
+	@GOOS=freebsd GOARCH=amd64 go build -o $(BINARY_NAME)-freebsd-amd64 $(SRC)
+
+build-freebsd-arm64:
+	@echo "Building for FreeBSD ARM64..."
+	@GOOS=freebsd GOARCH=arm64 go build -o $(BINARY_NAME)-freebsd-arm64 $(SRC)
+
 help:
 	@echo "Go application targets:"
 	@echo "  build              - Build for current platform"
@@ -120,4 +130,5 @@ help:
 	@echo "  build-linux-*      - Build for Linux platforms"
 	@echo "  build-darwin-*     - Build for macOS platforms"
 	@echo "  build-windows-*    - Build for Windows platforms"
+	@echo "  build-freebsd-*    - Build for FreeBSD platforms"
 	@echo "  help               - Show this help"
