@@ -11,7 +11,7 @@ Whether you're fixing bugs, improving documentation, or adding features - all co
 
 ## 🐛 Reporting Issues
 
-If you discover a bug or have a feature request, please open an issue in [Issues Tracker](https://kubara.git.onstackit.cloud/STACKIT/kubara/issues) and describe:
+If you discover a bug or have a feature request, please open an issue in [Issues Tracker](https://github.com/kubara-io/kubara/issues) and describe:
 
 * What's happening
 * Steps to reproduce
