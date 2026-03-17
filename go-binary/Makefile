@@ -81,27 +81,27 @@ build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-a
 
 build-linux-amd64:
 	@echo "Building for Linux AMD64..."
-	@GOOS=linux GOARCH=amd64 go build -o $(BINARY_NAME)-linux-amd64 $(SRC)
+	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-linux-amd64 $(SRC)
 
 build-linux-arm64:
 	@echo "Building for Linux ARM64..."
-	@GOOS=linux GOARCH=arm64 go build -o $(BINARY_NAME)-linux-arm64 $(SRC)
+	@GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-linux-arm64 $(SRC)
 
 build-darwin-amd64:
 	@echo "Building for macOS AMD64..."
-	@GOOS=darwin GOARCH=amd64 go build -o $(BINARY_NAME)-darwin-amd64 $(SRC)
+	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-darwin-amd64 $(SRC)
 
 build-darwin-arm64:
 	@echo "Building for macOS ARM64..."
-	@GOOS=darwin GOARCH=arm64 go build -o $(BINARY_NAME)-darwin-arm64 $(SRC)
+	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-darwin-arm64 $(SRC)
 
 build-windows-amd64:
 	@echo "Building for Windows AMD64..."
-	@GOOS=windows GOARCH=amd64 go build -o $(BINARY_NAME)-windows-amd64.exe $(SRC)
+	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-windows-amd64.exe $(SRC)
 
 build-windows-arm64:
 	@echo "Building for Windows ARM64..."
-	@GOOS=windows GOARCH=arm64 go build -o $(BINARY_NAME)-windows-arm64.exe $(SRC)
+	@GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-windows-arm64.exe $(SRC)
 
 help:
 	@echo "Go application targets:"
