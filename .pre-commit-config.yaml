@@ -56,27 +56,3 @@ repos:
         require_serial: true
         types: [file]
         pass_filenames: true
-
-aurs:
-  - name: kubara-bin
-    ids:
-      - kubara-linux
-    homepage: "https://kubara.io/"
-    description: "Kubara CLI"
-    maintainers:
-      - "Kubara <kubara@digits.schwarz>"
-    license: "Apache-2.0"
-    private_key: "{{ .Env.AUR_KEY }}"
-    git_url: "ssh://aur@aur.archlinux.org/kubara-bin.git"
-    skip_upload: auto
-    provides:
-      - kubara
-    conflicts:
-      - kubara
-    package: |-
-      # bin
-      install -Dm755 "./kubara" "${pkgdir}/usr/bin/kubara"
-      install -Dm644 "./LICENSE" "${pkgdir}/usr/share/licenses/kubara/LICENSE"
-    commit_author:
-      name: goreleaserbot
-      email: bot@goreleaser.com
