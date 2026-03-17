@@ -29,11 +29,12 @@ jobs:
       - name: Install and setup uv
         uses: astral-sh/setup-uv@v7
         with:
+          version: '0.10.11'
           enable-cache: true
-          cache-dependency-path: 'docs/uv.lock'
+          cache-dependency-glob: 'docs/uv.lock'
 
       - name: Set up Python
-        run: uv python install
+        run: uv python install 3.14.3
 
       - name: Install dependencies
         run: uv sync --frozen
