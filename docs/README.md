@@ -1,42 +1,29 @@
-# Introduction 
+# Introduction
 https://www.mkdocs.org/getting-started/
 
 # Getting Started
-Requires Python version 3.14.3 (pyenv install 3.14.3)
-Its recommended to use pipenv for development.
+We use [uv](https://docs.astral.sh/uv/) for incredibly fast Python dependency and environment management. It requires Python 3.14.3, but **`uv` will automatically fetch and install this version for you** if it's missing from your system.
 
-
-## change directory to mkdocs directory
+## Change directory to mkdocs directory
 ```bash
 cd docs
 ```
 
-## install pipenv
+## Install uv (if not already installed)
+For MacOS/Linux, you can use the standalone installer:
 ```bash
-pip3 install pipenv
+curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
 ```
+*(Alternatively, check the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/) for Windows or Homebrew instructions).*
 
-## setup virtual env
+## Run mkdocs
+You don't even need to activate the virtual environment shell manually. You can run `mkdocs` directly through `uv`:
 ```bash
-pipenv --python 3.14.3
+make serve
 ```
+*(Note: If you prefer to activate the shell manually to run raw commands, use `source .venv/bin/activate` on Mac/Linux or `.venv\Scripts\activate` on Windows).*
 
-## install dependencies from Pipfile
-```bash
-pipenv install
-```
-
-## start shell in virtual env
-```bash
-pipenv shell
-```
-
-## run mkdocs
-```bash
-mkdocs serve
-```
-
-## see live rendering
+## See live rendering
 http://127.0.0.1:8000/
 
 
@@ -44,8 +31,8 @@ http://127.0.0.1:8000/
 https://squidfunk.github.io/mkdocs-material/reference/
 
 
-### used dependencies
+### Used dependencies
+These are now managed via `pyproject.toml` and locked in `uv.lock`:
 - mkdocs
 - mkdocs-material
 - mkdocs-macros-plugin
-
