@@ -146,6 +146,35 @@ cd - > /dev/null
 rm -rf "$TMP_DIR"
 
 echo "Installation complete!"
-echo "Make sure '$INSTALL_DIR' is in your system PATH."
-echo "You can verify the installation by running:"
-echo "kubara --version"
+
+# Use POSIX compliant string matching to check if INSTALL_DIR is already in PATH
+if case ":$PATH:" in *":$INSTALL_DIR:"*) false;; *) true;; esac; then
+
+    # Detect user's default shell
+    USER_SHELL=$(basename "$SHELL" 2>/dev/null || echo "bash")
+
+    case "$USER_SHELL" in
+        zsh)  RC_FILE="$HOME/.zshrc" ;;
+        bash) RC_FILE="$HOME/.bashrc" ;;
+        fish) RC_FILE="$HOME/.config/fish/config.fish" ;;
+        *)    RC_FILE="$HOME/.profile" ;;
+    esac
+
+    echo ""
+    echo "============================================================"
+    echo " NOTE: '$INSTALL_DIR' is not in your PATH."
+    echo " To use the 'kubara' command globally, run the following:"
+    echo "============================================================"
+
+    if [ "$USER_SHELL" = "fish" ]; then
+        echo "  fish_add_path $INSTALL_DIR"
+    else
+        echo "  echo 'export PATH=\"$INSTALL_DIR:\$PATH\"' >> $RC_FILE"
+        echo "  source $RC_FILE"
+    fi
+    echo "============================================================"
+else
+    echo ""
+    echo "You can verify the installation by running:"
+    echo "  kubara --version"
+fi
