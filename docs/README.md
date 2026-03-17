@@ -10,9 +10,9 @@ cd docs
 ```
 
 ## Install uv (if not already installed)
-For MacOS/Linux, you can use the standalone installer:
+For macOS/Linux, you can use the standalone installer:
 ```bash
-curl -LsSf [https://astral.sh/uv/install.sh](https://astral.sh/uv/install.sh) | sh
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 *(Alternatively, check the [official installation guide](https://docs.astral.sh/uv/getting-started/installation/) for Windows or Homebrew instructions).*
 
@@ -33,6 +33,7 @@ https://squidfunk.github.io/mkdocs-material/reference/
 
 ### Used dependencies
 These are now managed via `pyproject.toml` and locked in `uv.lock`:
+- mike
 - mkdocs
 - mkdocs-material
-- mkdocs-macros-plugin
+- mkdocs-plugin-open-external-links-in-new-tab

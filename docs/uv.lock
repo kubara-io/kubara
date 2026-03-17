@@ -1,6 +1,6 @@
 version = 1
 revision = 3
-requires-python = ">=3.14"
+requires-python = "==3.14.*"
 
 [[package]]
 name = "babel"
@@ -85,78 +85,18 @@ name = "docs"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
-    { name = "babel" },
-    { name = "backrefs" },
-    { name = "certifi" },
-    { name = "charset-normalizer" },
-    { name = "click" },
-    { name = "colorama" },
-    { name = "ghp-import" },
-    { name = "hjson" },
-    { name = "idna" },
-    { name = "jinja2" },
-    { name = "markdown" },
-    { name = "markupsafe" },
-    { name = "mergedeep" },
     { name = "mike" },
     { name = "mkdocs" },
-    { name = "mkdocs-get-deps" },
     { name = "mkdocs-material" },
-    { name = "mkdocs-material-extensions" },
     { name = "mkdocs-plugin-open-external-links-in-new-tab" },
-    { name = "packaging" },
-    { name = "paginate" },
-    { name = "pathspec" },
-    { name = "platformdirs" },
-    { name = "pygments" },
-    { name = "pymdown-extensions" },
-    { name = "python-dateutil" },
-    { name = "pyyaml" },
-    { name = "pyyaml-env-tag" },
-    { name = "requests" },
-    { name = "six" },
-    { name = "super-collections" },
-    { name = "termcolor" },
-    { name = "urllib3" },
-    { name = "watchdog" },
 ]
 
 [package.metadata]
 requires-dist = [
-    { name = "babel", specifier = "==2.18.0" },
-    { name = "backrefs", specifier = "==6.2" },
-    { name = "certifi", specifier = "==2026.2.25" },
-    { name = "charset-normalizer", specifier = "==3.4.5" },
-    { name = "click", specifier = "==8.3.1" },
-    { name = "colorama", specifier = "==0.4.6" },
-    { name = "ghp-import", specifier = "==2.1.0" },
-    { name = "hjson", specifier = "==3.1.0" },
-    { name = "idna", specifier = "==3.11" },
-    { name = "jinja2", specifier = "==3.1.6" },
-    { name = "markdown", specifier = "==3.10.2" },
-    { name = "markupsafe", specifier = "==3.0.3" },
-    { name = "mergedeep", specifier = "==1.3.4" },
     { name = "mike" },
     { name = "mkdocs" },
-    { name = "mkdocs-get-deps", specifier = "==0.2.2" },
     { name = "mkdocs-material" },
-    { name = "mkdocs-material-extensions", specifier = "==1.3.1" },
     { name = "mkdocs-plugin-open-external-links-in-new-tab", git = "https://github.com/z-aki/mkdocs-plugin-open-external-links-in-new-tab?rev=5ef62b9" },
-    { name = "packaging", specifier = "==26.0" },
-    { name = "paginate", specifier = "==0.5.7" },
-    { name = "pathspec", specifier = "==1.0.4" },
-    { name = "platformdirs", specifier = "==4.9.4" },
-    { name = "pygments", specifier = "==2.19.2" },
-    { name = "pymdown-extensions", specifier = "==10.21" },
-    { name = "python-dateutil", specifier = "==2.9.0.post0" },
-    { name = "pyyaml", specifier = "==6.0.3" },
-    { name = "pyyaml-env-tag", specifier = "==1.1" },
-    { name = "requests", specifier = "==2.32.5" },
-    { name = "six", specifier = "==1.17.0" },
-    { name = "super-collections", specifier = "==0.6.2" },
-    { name = "termcolor", specifier = "==3.3.0" },
-    { name = "urllib3", specifier = "==2.6.3" },
-    { name = "watchdog", specifier = "==6.0.0" },
 ]
 
 [[package]]
@@ -169,15 +109,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/d9/29/d40217cbe2f6b1359e00c6c307bb3fc876ba74068cbab3dde77f03ca0dc4/ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343", size = 10943, upload-time = "2022-05-02T15:47:16.11Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f7/ec/67fbef5d497f86283db54c22eec6f6140243aae73265799baaaa19cd17fb/ghp_import-2.1.0-py3-none-any.whl", hash = "sha256:8337dd7b50877f163d4c0289bc1f1c7f127550241988d568c1db512c4324a619", size = 11034, upload-time = "2022-05-02T15:47:14.552Z" },
-]
-
-[[package]]
-name = "hjson"
-version = "3.1.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/82/e5/0b56d723a76ca67abadbf7fb71609fb0ea7e6926e94fcca6c65a85b36a0e/hjson-3.1.0.tar.gz", hash = "sha256:55af475a27cf83a7969c808399d7bccdec8fb836a07ddbd574587593b9cdcf75", size = 40541, upload-time = "2022-08-13T02:53:01.919Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/1f/7f/13cd798d180af4bf4c0ceddeefba2b864a63c71645abc0308b768d67bb81/hjson-3.1.0-py3-none-any.whl", hash = "sha256:65713cdcf13214fb554eb8b4ef803419733f4f5e551047c9b711098ab7186b89", size = 54018, upload-time = "2022-08-13T02:52:59.899Z" },
 ]
 
 [[package]]
@@ -527,27 +458,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
-]
-
-[[package]]
-name = "super-collections"
-version = "0.6.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "hjson" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/e0/de/a0c3d1244912c260638f0f925e190e493ccea37ecaea9bbad7c14413b803/super_collections-0.6.2.tar.gz", hash = "sha256:0c8d8abacd9fad2c7c1c715f036c29f5db213f8cac65f24d45ecba12b4da187a", size = 31315, upload-time = "2025-09-30T00:37:08.067Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/17/43/47c7cf84b3bd74a8631b02d47db356656bb8dff6f2e61a4c749963814d0d/super_collections-0.6.2-py3-none-any.whl", hash = "sha256:291b74d26299e9051d69ad9d89e61b07b6646f86a57a2f5ab3063d206eee9c56", size = 16173, upload-time = "2025-09-30T00:37:07.104Z" },
-]
-
-[[package]]
-name = "termcolor"
-version = "3.3.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/46/79/cf31d7a93a8fdc6aa0fbb665be84426a8c5a557d9240b6239e9e11e35fc5/termcolor-3.3.0.tar.gz", hash = "sha256:348871ca648ec6a9a983a13ab626c0acce02f515b9e1983332b17af7979521c5", size = 14434, upload-time = "2025-12-29T12:55:21.882Z" }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/33/d1/8bb87d21e9aeb323cc03034f5eaf2c8f69841e40e4853c2627edf8111ed3/termcolor-3.3.0-py3-none-any.whl", hash = "sha256:cf642efadaf0a8ebbbf4bc7a31cec2f9b5f21a9f726f4ccbb08192c9c26f43a5", size = 7734, upload-time = "2025-12-29T12:55:20.718Z" },
 ]
 
 [[package]]
