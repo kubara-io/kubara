@@ -34,7 +34,7 @@ jobs:
             ${{ github.event.repository.name }}
 
       - name: Checkout kubara repo
-        uses: actions/checkout@v6 # Note: Adjusted to v4, which is the current latest for actions/checkout
+        uses: actions/checkout@v6
         with:
           token: ${{ steps.docs-app-token.outputs.token }}
           fetch-depth: 0
