@@ -1,0 +1,102 @@
+#!/bin/sh
+
+# Exit immediately if a command exits with a non-zero status
+set -e
+
+REPO="kubara-io/kubara"
+
+echo "Fetching the latest release version..."
+# Fetch the latest release tag via GitHub API
+LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+
+if [ -z "$LATEST_TAG" ]; then
+    echo "Error: Failed to fetch the latest version."
+    exit 1
+fi
+
+# The GitHub tag has a 'v' (e.g. v0.6.1), but filenames do not.
+# We use POSIX parameter expansion to strip the 'v'
+VERSION=${LATEST_TAG#v}
+
+echo "Latest version found: $LATEST_TAG"
+
+# Detect Operating System
+OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
+case "$OS_NAME" in
+    linux*) OS="linux" ;;
+    darwin*) OS="darwin" ;;
+    *) echo "Error: Unsupported OS '$OS_NAME'"; exit 1 ;;
+esac
+
+# Detect Architecture
+ARCH_NAME=$(uname -m)
+case "$ARCH_NAME" in
+    x86_64) ARCH="amd64" ;;
+    amd64) ARCH="amd64" ;;
+    aarch64) ARCH="arm64" ;;
+    arm64) ARCH="arm64" ;;
+    *) echo "Error: Unsupported architecture '$ARCH_NAME'"; exit 1 ;;
+esac
+
+echo "Detected Platform: $OS ($ARCH)"
+
+# Construct filenames based on detection
+FILENAME="kubara_${VERSION}_${OS}_${ARCH}.tar.gz"
+CHECKSUM_FILE="kubara_${VERSION}_checksums.txt"
+
+DOWNLOAD_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$FILENAME"
+CHECKSUM_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$CHECKSUM_FILE"
+
+# Use a temporary directory for safe downloading and extraction
+TMP_DIR=$(mktemp -d)
+cd "$TMP_DIR"
+
+echo "Downloading $FILENAME..."
+curl -sSL -o "$FILENAME" "$DOWNLOAD_URL"
+
+echo "Downloading checksum file..."
+curl -sSL -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
+
+echo "Verifying checksum..."
+# Isolate the exact file's checksum line so verification tools don't complain about missing OS/Arch files
+grep "$FILENAME" "$CHECKSUM_FILE" > checksum_check.txt
+
+# Linux usually uses sha256sum; macOS defaults to shasum
+if command -v sha256sum >/dev/null 2>&1; then
+    sha256sum -c checksum_check.txt
+elif command -v shasum >/dev/null 2>&1; then
+    shasum -a 256 -c checksum_check.txt
+else
+    echo "Error: Neither 'sha256sum' nor 'shasum' is installed. Cannot verify checksum."
+    exit 1
+fi
+
+echo "Checksum verification successful."
+
+echo "Extracting binary..."
+tar -xzf "$FILENAME"
+
+# Ensure the binary exists after extraction
+if [ ! -f "kubara" ]; then
+    echo "Error: 'kubara' binary was not found in the extracted archive."
+    exit 1
+fi
+
+INSTALL_DIR="$HOME/.local/bin"
+
+echo "Installing kubara to $INSTALL_DIR..."
+# Ensure the local bin directory exists
+mkdir -p "$INSTALL_DIR"
+
+# Move the binary without sudo
+mv kubara "$INSTALL_DIR/kubara"
+chmod +x "$INSTALL_DIR/kubara"
+
+# Clean up
+cd - > /dev/null
+rm -rf "$TMP_DIR"
+
+echo "Installation complete!"
+echo "Make sure '$INSTALL_DIR' is in your system PATH."
+echo "You can verify the installation by running:"
+echo "kubara --version"
