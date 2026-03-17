@@ -17,11 +17,7 @@ env:
   REPORT_DIR: ${{ github.workspace }}/reports
   RENDER_DIR: ${{ github.workspace }}/rendered
   OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
-  GOSEC_VERSION: "v2.22.11"
-  GOLANGCI_LINT_VERSION: "v2.8.0"
   ARTIFACT_RETENTION_DAYS: "15"
-  HELM_VERSION: "v4.1.0"
-  KUBECONFORM_VERSION: "v0.7.0"
 
 permissions:
   contents: read
@@ -90,26 +86,43 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: ${{ env.GOLANGCI_LINT_VERSION }}
+          version: latest
           working-directory: ${{ env.CODE_PATH }}
           args: |
             --output.text.path stdout \
             --output.html.path "${{ env.REPORT_DIR }}/golangci-results.html"
 
+      - name: Resolve gosec version
+        if: always()
+        id: gosec-version
+        run: |
+          set -euo pipefail
+          GOSEC_VERSION="$(curl -fsSL https://api.github.com/repos/securego/gosec/releases/latest | jq -r '.tag_name')"
+          if [ -z "$GOSEC_VERSION" ] || [ "$GOSEC_VERSION" = "null" ]; then
+            echo "::error::Failed to resolve latest gosec version"
+            exit 1
+          fi
+          echo "version=$GOSEC_VERSION" >> "$GITHUB_OUTPUT"
+
       - name: Cache gosec
+        if: always()
         id: cache-gosec
         uses: actions/cache@v5
         with:
           path: ~/.local/bin/gosec
-          key: ${{ runner.os }}-gosec-${{ env.GOSEC_VERSION }}
+          key: ${{ runner.os }}-gosec-${{ steps.gosec-version.outputs.version }}
 
-      - name: Install gosec (if not cached)
-        if: steps.cache-gosec.outputs.cache-hit != 'true'
+      - name: Install gosec
+        if: always()
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
-          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
-            | sh -s -- -b "$HOME/.local/bin" "${{ env.GOSEC_VERSION }}"
+          GOSEC_BIN="$HOME/.local/bin/gosec"
+
+          if [ ! -x "$GOSEC_BIN" ] || [ "${{ steps.cache-gosec.outputs.cache-hit }}" != "true" ]; then
+            curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
+              | sh -s -- -b "$HOME/.local/bin" "${{ steps.gosec-version.outputs.version }}"
+          fi
 
       - name: Run gosec CLI
         if: always()
@@ -146,11 +159,7 @@ jobs:
 
             # Run with severity threshold - only fail on HIGH severity issues
             echo "Checking for HIGH severity issues..."
-            "$GOSEC_BIN" -severity high -confidence medium -fmt text $SCAN_DIRS
-            GOSEC_EXIT_CODE=$?
-
-            # Only fail if HIGH severity issues found
-            if [ $GOSEC_EXIT_CODE -ne 0 ]; then
+            if ! "$GOSEC_BIN" -severity high -confidence medium -fmt text $SCAN_DIRS; then
               echo "❌ HIGH severity security issues found!"
               exit 1
             else
@@ -312,38 +321,50 @@ jobs:
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
-      - name: Cache Helm + kubeconform
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.local/bin/helm
-            ~/.local/bin/kubeconform
-          key: tools-helm-${{ env.HELM_VERSION }}-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
-
-      - name: Install Helm (if missing)
+      - name: Resolve Helm and kubeconform versions
+        id: tool-versions
         run: |
           set -euo pipefail
-          mkdir -p ~/.local/bin
-          
-          if ! [ -x "$HOME/.local/bin/helm" ]; then
-            curl -sSL "https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz" \
-              | tar xz --strip-components=1 -C ~/.local/bin linux-amd64/helm
-            chmod +x "$HOME/.local/bin/helm" || true
+          HELM_VERSION="$(curl -fsSL https://api.github.com/repos/helm/helm/releases/latest | jq -r '.tag_name')"
+          KUBECONFORM_VERSION="$(curl -fsSL https://api.github.com/repos/yannh/kubeconform/releases/latest | jq -r '.tag_name')"
+
+          if [ -z "$HELM_VERSION" ] || [ "$HELM_VERSION" = "null" ]; then
+            echo "::error::Failed to resolve latest Helm version"
+            exit 1
           fi
-          
-          helm version
+
+          if [ -z "$KUBECONFORM_VERSION" ] || [ "$KUBECONFORM_VERSION" = "null" ]; then
+            echo "::error::Failed to resolve latest kubeconform version"
+            exit 1
+          fi
+
+          echo "helm_version=$HELM_VERSION" >> "$GITHUB_OUTPUT"
+          echo "kubeconform_version=$KUBECONFORM_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ steps.tool-versions.outputs.helm_version }}
+
+      - name: Cache kubeconform
+        id: cache-kubeconform
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/bin/kubeconform
+          key: tools-kubeconform-${{ steps.tool-versions.outputs.kubeconform_version }}-${{ runner.os }}-${{ runner.arch }}
 
       - name: Install kubeconform (if missing)
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
           
-          if ! [ -x "$HOME/.local/bin/kubeconform" ]; then
-            curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz" \
+          if ! [ -x "$HOME/.local/bin/kubeconform" ] || [ "${{ steps.cache-kubeconform.outputs.cache-hit }}" != "true" ]; then
+            curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ steps.tool-versions.outputs.kubeconform_version }}/kubeconform-linux-amd64.tar.gz" \
               | tar xz -C ~/.local/bin kubeconform
             chmod +x "$HOME/.local/bin/kubeconform" || true
           fi
           
+          helm version
           kubeconform -v
 
       - name: Lint, render and validate Helm charts
