@@ -20,8 +20,8 @@ Please read first: https://docs.kubara.io/latest-stable/5_community/contributing
   - [ ] Unit tested
   - [ ] Not tested (explain why below)
     
-    ## 🔗 Related Issues / Tickets
-      <!-- e.g. Closes #42, Related to #99 -->
+  ## 🔗 Related Issues / Tickets
+  <!-- e.g. Closes #42, Related to #99 -->
   
   ## ✅ Checklist
   - [ ] Code compiles and passes all tests
@@ -29,5 +29,5 @@ Please read first: https://docs.kubara.io/latest-stable/5_community/contributing
   - [ ] Comments added for complex logic
   - [ ] Documentation updated (if applicable)
     
-    ## 📎 Additional Context (optional)
-      <!-- Add logs, screenshots, diagrams, or design notes. -->
+  ## 📎 Additional Context (optional)
+  <!-- Add logs, screenshots, diagrams, or design notes. -->
