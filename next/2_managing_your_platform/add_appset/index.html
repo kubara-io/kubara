@@ -685,10 +685,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -707,10 +707,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argocd-is-not-managing-itself" class="md-nav__link">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run kubara bootstrap again (if ArgoCD is not managing itself )
+        Run kubara bootstrap again (if Argo CD is not managing itself )
       
     </span>
   </a>
@@ -1912,10 +1912,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1934,10 +1934,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argocd-is-not-managing-itself" class="md-nav__link">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run kubara bootstrap again (if ArgoCD is not managing itself )
+        Run kubara bootstrap again (if Argo CD is not managing itself )
       
     </span>
   </a>
@@ -1978,11 +1978,13 @@ You're not viewing the latest stable version.
 <h1 id="add-appset-to-argo-cd">Add AppSet to Argo CD</h1>
 <p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
 Project.</p>
-<p>An Argo CD AppSet is a logical concept to create many ArgoCD applications with just one manifest.<br>
+<p>An Argo CD AppSet is a logical concept to create many Argo CD applications with just one manifest.<br>
 This allows Users to spawn one service with different configurations on many namespaces and clusters.
-For more information and possible configuration check:<br>
-- https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml
-- https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</p>
+For more information and possible configuration check:<br></p>
+<ul>
+<li>https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml</li>
+<li>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</li>
+</ul>
 <h2 id="add-chart-to-your-managed-service-catalog"><strong>Add Chart to your managed-service-catalog</strong></h2>
 <p>Add the Chart you want to add to your <code>managed-service-catalog</code>:<br>
 managed-service-catalog/helm/my-new-servie-in-a-long-dir-name/</p>
@@ -2000,7 +2002,7 @@ The general steps are:
 customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml</p>
 <p>Optional: Add <code>additional-values.yaml</code> in the same chart folder for cluster-specific overrides.
 The generated ApplicationSet already references both <code>values.yaml</code> and <code>additional-values.yaml</code>.</p>
-<h2 id="modify-argocd-overlays"><strong>Modify argoCD overlays</strong></h2>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
 <p>This is an example on how to add an AppSet to the controlplane.
 Add the following to your <code>argo-cd/values.yaml</code>.
 </p><div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
@@ -2023,17 +2025,16 @@ Add the following to your <code>argo-cd/values.yaml</code>.
 <span class="w">  </span><span class="nt">my-new-service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 </code></pre></div>
 <p>This is meant to be added to the same directive where all pre-configured appSets are defined.
-It will deploy the app to all ArgoCD clusters that have the label <code>my-new-service: enabled</code> set </p>
+It will deploy the app to all Argo CD clusters that have the label <code>my-new-service: enabled</code> set </p>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that serves your argoCD application.
-If you let argoCD manage itself, it will add the configured application to the cluster.</p>
-<h2 id="run-kubara-bootstrap-again-if-argocd-is-not-managing-itself"><strong>Run kubara bootstrap again (if ArgoCD is not managing itself )</strong></h2>
-<p>If ArgoCD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering argocd values will have no effect until you run
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
+<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
+<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
 </p><div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;controlplane-cluster-name-from-config-yaml&gt;
 </code></pre></div>
-again
 <h2 id="add-app-from-another-repository"><strong>Add App from another repository</strong></h2>
-<p>If you want to add an application that is stored in another repository you can use the <code>sources:</code> directive. It supports all the fields argoCD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
+<p>If you want to add an application that is stored in another repository you can use the <code>sources:</code> directive. It supports all the fields Argo CD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
 </p><div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">my-controlplane-dev</span><span class="p">:</span>

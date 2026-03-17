@@ -1900,11 +1900,13 @@ You're not viewing the latest stable version.
 
 
 <h1 id="prerequisites">Prerequisites</h1>
-<pre><code>    This will take you some time to setup, but it is worth it!
-    With this initial time invest you will save A LOT of time later.
-    To ease management of all the required external entities an IaC tool
-    like terraform is recommended.
-</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This will take you some time to setup, but it is worth it!
+With this initial time invest you will save A LOT of time later.
+To ease management of all the required external entities an IaC tool
+like terraform is recommended.</p>
+</div>
 <p>To setup and use the kubara framework these are tools and external entities you need to prepare. Information from the external
 entities can be added to .env to smoothen bootstrap process.</p>
 <h3 id="required-tools">Required Tools</h3>
@@ -1942,7 +1944,7 @@ A Container registry (e.g. JFrog or Harbor) that serves the applications</li>
 <li><strong>Docker Hub Account (optional but recommended)</strong>
 If you are relying on publicly available images (e.g. from dockerhub) you need an user account to pull without rate limits.</li>
 <li><strong>OAuth2 Apps (optional but recommended)</strong>
-    In total we use three Oauth2 Apps:<ul>
+    In total we use three OAuth2 Apps:<ul>
 <li>OAuth2-Proxy App (reverse proxy) that handles authentication for most dashboards</li>
 <li>Argo CD App that handles authentication for Argo CD  UI. Dex is used for handling Argo CD  RBAC once authenticated</li>
 <li>Grafana App that handles authentication for Grafana.</li>

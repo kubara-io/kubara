@@ -680,10 +680,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -702,10 +702,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argocd-is-not-managing-itself" class="md-nav__link">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run kubara bootstrap again (if ArgoCD is not managing itself )
+        Run kubara bootstrap again (if Argo CD is not managing itself )
       
     </span>
   </a>
@@ -1835,10 +1835,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1857,10 +1857,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argocd-is-not-managing-itself" class="md-nav__link">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run kubara bootstrap again (if ArgoCD is not managing itself )
+        Run kubara bootstrap again (if Argo CD is not managing itself )
       
     </span>
   </a>
@@ -1888,19 +1888,21 @@ You're not viewing the latest stable version.
 
 
 <h1 id="add-application-to-argo-cd">Add Application to Argo CD</h1>
-<pre><code>    This page describes adding additional apps to your platform.
-    Most likely this will be app-of-apps constructs to enable a self-service
-    approach for developer teams.
-    If you want to add applications to your base-stack use the
-    app-sets in conjunction with cluster labels instead.
-</code></pre>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page describes adding additional apps to your platform.
+Most likely this will be app-of-apps constructs to enable a self-service
+approach for developer teams.
+If you want to add applications to your base-stack use the
+app-sets in conjunction with cluster labels instead.</p>
+</div>
 <p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
 Project.</p>
 <p>An Argo CD App is the logical concept to encapsulate manifests needed to deploy an application onto kubernetes.
 For more information and possible configuration check:
 https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
 https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern</p>
-<h2 id="modify-argocd-overlays"><strong>Modify argoCD overlays</strong></h2>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
 <p>This is an example on how to add a simple application to a worker-cluster.
 Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your <code>argo-cd/values.yaml</code>.
@@ -1920,13 +1922,12 @@ Add the following to your <code>argo-cd/values.yaml</code>.
 <p>That whats happening behind the scenes:</p>
 <p><img alt="Add Application" src="../../images/add-application.png"></p>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that serves your argoCD application.
-If you let argoCD manage itself, it will add the configured application to the cluster.</p>
-<h2 id="run-kubara-bootstrap-again-if-argocd-is-not-managing-itself"><strong>Run kubara bootstrap again (if ArgoCD is not managing itself )</strong></h2>
-<p>If ArgoCD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering argocd values will have no effect until you run 
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
+<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
+<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
 </p><div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;controlplane-cluster-name-from-config-yaml&gt;
 </code></pre></div>
-again
 
 
 

@@ -1986,7 +1986,7 @@ You're not viewing the latest stable version.
 <li><strong>Node Exporter</strong> provides system-level metrics (CPU, memory, disk I/O, etc.).</li>
 <li><strong>kube-state-metrics</strong> exposes metrics about the state of Kubernetes resources (e.g., Deployments, CronJobs, StatefulSets).</li>
 <li><strong>ServiceMonitors</strong> and <strong>PodMonitors</strong> define which services Prometheus should scrape.</li>
-<li>Configuration is managed declaratively using Helm charts and GitOps (via ArgoCD).</li>
+<li>Configuration is managed declaratively using Helm charts and GitOps (via Argo CD).</li>
 </ul>
 <h2 id="accessing-prometheus">Accessing Prometheus</h2>
 <p>The <strong>Prometheus UI</strong> is accessible via Ingress at:</p>
@@ -1998,7 +1998,7 @@ See more in the <a href="../observability_dashboards/">Dashboards</a> section.</
 <h2 id="kubara-standardization">kubara Standardization</h2>
 <p>In kubara, <code>ServiceMonitors</code> are enabled by default for all deployed applications. This ensures that each app exposes Prometheus-compatible metrics and is automatically included in centralized monitoring.</p>
 <p>We also apply consistent labels to every ServiceMonitor-for example, <code>monitoring.instance</code>-to simplify filtering and organization.</p>
-<p>Example snippet from the ArgoCD Helm chart <code>values.yaml</code>:</p>
+<p>Example snippet from the Argo CD Helm chart <code>values.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>

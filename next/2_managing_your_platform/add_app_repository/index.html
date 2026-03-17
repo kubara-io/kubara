@@ -635,10 +635,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1846,10 +1846,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argocd-overlays" class="md-nav__link">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argoCD overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1888,7 +1888,7 @@ You're not viewing the latest stable version.
 
 
 <h1 id="add-repository-to-argo-cd">Add Repository to Argo CD</h1>
-<p>To deploy applications with argoCD we need to connect Repositories. This is also useful if you want to give developers
+<p>To deploy applications with Argo CD we need to connect Repositories. This is also useful if you want to give developers
 a way to deploy their applications onto your platform without much intervention on your side.</p>
 <p>An Argo CD  App Repository is a logical concept to control where applications may be deployed from.
 For more information check:
@@ -1901,7 +1901,7 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="modify-argocd-overlays"><strong>Modify argoCD overlays</strong></h2>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
 <p>Add the following to your <code>argo-cd/values.yaml</code>.
 </p><div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-mock</span>
@@ -1920,8 +1920,8 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <p>That whats happening behind the scenes:</p>
 <p><img alt="Add Repository" src="../../images/add-repository.png"></p>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that serves your argoCD application.
-If you let argoCD manage itself, it will add the configured repository to your cluster.</p>
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured repository to your cluster.</p>
 
 
 

@@ -599,7 +599,7 @@ You're not viewing the latest stable version.
   <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argo-cd overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1827,7 +1827,7 @@ You're not viewing the latest stable version.
   <a href="#modify-argo-cd-overlays" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify argo-cd overlays
+        Modify Argo CD overlays
       
     </span>
   </a>
@@ -1872,14 +1872,14 @@ management and handles the Continuous Deployment of other applications (includin
 <code>Who is allowed to do what and whereto.</code>
 For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/projects/</p>
-<h2 id="modify-argo-cd-overlays"><strong>Modify argo-cd overlays</strong></h2>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
 <p>Add the following to your <code>argo-cd/values.yaml</code>.
 </p><div class="highlight"><pre><span></span><code><span class="nt">projects</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-ske-worker-0 project</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-worker-0</span>
 <span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
 <span class="w">    </span><span class="c1"># You can add as many allowed Repos in here as you like</span>
-<span class="w">    </span><span class="c1"># Must be added to argoCD before</span>
+<span class="w">    </span><span class="c1"># Must be added to Argo CD before</span>
 <span class="w">    </span><span class="nt">sourceRepos</span><span class="p">:</span>
 <span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">registry.onstackit.cloud/stackit-edge-cloud-blueprint</span>
 </code></pre></div>

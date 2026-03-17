@@ -2508,21 +2508,23 @@ Example:
 Edit the generated files in:
 <code>customer-service-catalog/helm/&lt;cluster&gt;/&lt;chart&gt;/values.yaml</code>
 <p>Source templates are embedded in the binary under <code>go-binary/templates/embedded/...</code>, but you should only edit generated files in your repository.</p>
-<p>The chart directories where values usually need review are:
-* argo-cd
-* cert-manager
-* external-dns
-* external-secrets
-* homer-dashboard
-* traefik
-* kube-prometheus-stack
-* kyverno-policy-reporter
-* kyverno
-* loki
-* longhorn
-* metallb
-* metrics-server
-* oauth2-proxy</p>
+<p>The chart directories where values usually need review are:</p>
+<ul>
+<li>argo-cd</li>
+<li>cert-manager</li>
+<li>external-dns</li>
+<li>external-secrets</li>
+<li>homer-dashboard</li>
+<li>traefik</li>
+<li>kube-prometheus-stack</li>
+<li>kyverno-policy-reporter</li>
+<li>kyverno</li>
+<li>loki</li>
+<li>longhorn</li>
+<li>metallb</li>
+<li>metrics-server</li>
+<li>oauth2-proxy</li>
+</ul>
 <h3 id="31-additional-value-files-and-ci-value-files">3.1 Additional value files and CI value files</h3>
 <p>Every generated app supports:</p>
 <ul>

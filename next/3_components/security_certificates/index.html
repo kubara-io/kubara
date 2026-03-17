@@ -1994,7 +1994,7 @@ You're not viewing the latest stable version.
 <p>With kubara you can automatically manage <strong>TLS certificates</strong> in your Kubernetes cluster using <strong>cert-manager</strong> (see https://cert-manager.io/).<br>
 cert-manager handles requesting, renewing, and storing certificates so that your applications are always served with valid TLS.</p>
 <blockquote>
-<p>cert-manager will be rolled out as a <strong>Helm Chart</strong> via ArgoCD when you enable the service in your <code>config.yaml</code>.</p>
+<p>cert-manager will be rolled out as a <strong>Helm Chart</strong> via Argo CD when you enable the service in your <code>config.yaml</code>.</p>
 </blockquote>
 <hr>
 <h2 id="workflow">Workflow</h2>
@@ -2011,7 +2011,7 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 <li>In <code>config.yaml</code> you enable the service <code>certManager</code>.  </li>
 <li>Then you must <strong>rerun kubara</strong> (<code>kubara generate --helm</code> or <code>kubara generate</code>) so that Helm values are re-rendered with the new settings.  </li>
 <li>
-<p>Then <strong>git commit &amp; push</strong> the Helm chart changes so that ArgoCD deploys cert-manager to the cluster.  </p>
+<p>Then <strong>git commit &amp; push</strong> the Helm chart changes so that Argo CD deploys cert-manager to the cluster.</p>
 </li>
 <li>
 <p><strong>Configure ClusterIssuer</strong>  </p>
@@ -2052,7 +2052,7 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 </code></pre></div>
 <h3 id="explanation">Explanation</h3>
 <ul>
-<li><strong><code>services.certManager.status</code></strong> → when set to <code>enabled</code>, cert-manager is templated into the Helm charts for deployment via ArgoCD  </li>
+<li><strong><code>services.certManager.status</code></strong> → when set to <code>enabled</code>, cert-manager is templated into the Helm charts for deployment via Argo CD</li>
 <li><strong><code>services.certManager.config.email</code></strong> → email address registered with the ACME provider (required)  </li>
 <li><strong><code>services.certManager.config.server</code></strong> → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  </li>
 </ul>

@@ -1972,7 +1972,7 @@ with STACKIT GIT (Forgejo based).</strong>  </p>
 <p>These configurations are to enable kubara &amp; Forgejo Users to quick-start with SSO.  </p>
 <blockquote>
 <p>⚠️ <strong>Prerequisites:</strong><br>
-Create Application in Forgejo for Grafana, OAuth2Proxy &amp; Argo <br>
+Create Application in Forgejo for Grafana, OAuth2 Proxy &amp; Argo CD
 <a href="https://forgejo.org/docs/next/user/oauth2-provider/#examples" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Forgejo Docs</a>    </p>
 <p>Same Callback URLs like GitHub<br>
 <a href="../add_sso/">kubara Docs: Add SSO GitHub</a></p>
@@ -1984,7 +1984,7 @@ Sometimes you use Gitea Providers and sometimes its GitHub - <strong>Keep that i
 <p>Below are working examples when these Docs are released.</p>
 <p><strong>They are based on:</strong><br>
 - <a href="https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Grafana</a><br>
-- <a href="https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">OAuth2Proxy</a><br>
+- <a href="https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">OAuth2 Proxy</a><br>
 - <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Argo</a> &amp; <a href="https://dexidp.io/docs/connectors/gitea/" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Dex</a>  </p>
 <p>We recommend to take a look at them to make sure everything is configured as intended before<br>
 you finally apply your SSO config.</p>
@@ -2017,7 +2017,7 @@ you finally apply your SSO config.</p>
 </ul>
 <hr>
 <h3 id="forgejo-sso-config-for-grafana">Forgejo SSO config for Grafana:</h3>
-<p>(as part of Kube-Prometheus-Stack Helm-Chart)</p>
+<p>(As part of Kube-Prometheus-Stack Helm-Chart)</p>
 <h3 id="secrets"><strong>Secrets</strong></h3>
 <p>The "grafana.ini" Parts get rendered into a Grafana-Config File and it's better to include your <br>
 Secret  into your Container as an Environment-Variable. Env-Variables won't be touched in the rendering process 
@@ -2055,10 +2055,12 @@ which otherwise could lead to escaping-issues with special Characters, like back
 <span class="w">        </span><span class="nt">api_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/api/v1/user</span>
 </code></pre></div>
 <strong>Replace the values of the following config variables accordingly to your setup:</strong>
-<p>Replace "your-forgejo.domain" in the following variables and keep the trailing paths: (like /login/...)
-- auth_url
-- token_url 
-- api_url</p>
+<p>Replace "your-forgejo.domain" in the following variables and keep the trailing paths: (like /login/...)</p>
+<ul>
+<li>auth_url</li>
+<li>token_url </li>
+<li>api_url</li>
+</ul>
 <hr>
 <h3 id="forgejo-sso-config-for-argo">Forgejo SSO config for Argo:</h3>
 <p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/argo-cd/values.yaml"</strong></p>
@@ -2088,12 +2090,14 @@ which otherwise could lead to escaping-issues with special Characters, like back
 <span class="w">      </span><span class="nt">policy.default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">role:readonly</span>
 </code></pre></div>
 <strong>Replace the values of the following config variables accordingly to your setup:</strong>
-<p>Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml 
-Replace value of "name:" and "teams:" in "orgs.name:"
-Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).
-And also replace "test-orga:Owners" according to your Organization Name and Team:
-</p><div class="highlight"><pre><span></span><code><span class="w">      </span>policy.csv:<span class="w"> </span><span class="p">|</span>
-<span class="w">        </span>g,<span class="w"> </span>test-orga:Owners,<span class="w"> </span>role:admin<span class="w">  </span>
+<ul>
+<li>Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml </li>
+<li>Replace value of "name:" and "teams:" in "orgs.name:"</li>
+<li>Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).</li>
+</ul>
+<p>And also replace "test-orga:Owners" according to your Organization Name and Team:</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">policy.csv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">g, test-orga:Owners, role:admin  </span>
 </code></pre></div>
 <h2 id="other">Other</h2>
 <p><strong>Feel free to contribute further configurations that are verified as working.</strong></p>
