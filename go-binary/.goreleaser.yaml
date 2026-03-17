@@ -182,7 +182,7 @@ dockers:
     use: buildx
     goos: linux
     goarch: amd64
-    dockerfile: Dockerfile # Path to your Dockerfile
+    dockerfile: ../Dockerfile
     build_flag_templates:
       - "--platform=linux/amd64"
 
@@ -192,10 +192,9 @@ dockers:
     use: buildx
     goos: linux
     goarch: arm64
-    dockerfile: Dockerfile
+    dockerfile: ../Dockerfile
     build_flag_templates:
       - "--platform=linux/arm64"
-
 docker_manifests:
   # Create the multi-arch 'vX.X.X' tag
   - name_template: "ghcr.io/kubara/kubara:{{ .Version }}"
