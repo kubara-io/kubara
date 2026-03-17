@@ -38,7 +38,8 @@ type DNS struct {
 }
 
 type ArgoCD struct {
-	Repo RepoProto `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	Repo     RepoProto `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo RepoProto `json:"helmRepo" yaml:"helmRepo" jsonschema:"title= ArgoCD Helm Charts Repository"`
 }
 
 type RepoProto struct {
