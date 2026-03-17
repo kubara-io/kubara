@@ -11,7 +11,7 @@ Execute our install script:
 curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh
 ```
 
-## Download Release Assets
+## Download Release A   ssets
 
 Get binaries from:
 
