@@ -9,7 +9,7 @@ body:
     attributes:
       value: |
         ## 📝 Summary
-        Please read first <a target="_blank" href="https://docs.kubara.io/latest-stable/5_community/contributing/">how to contribute to Kubara</a>.
+        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
         Briefly describe the issue or request. What is the problem, question, or improvement you're raising?
 
   - type: textarea
