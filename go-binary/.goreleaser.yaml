@@ -78,6 +78,20 @@ builds:
       - -X 'main.version={{ .Tag }}'
       - -X 'main.commit={{ .Commit }}'
       - -X 'main.date={{ .Date }}'
+  - id: kubara-freebsd
+    main: ./main.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - freebsd
+    goarch:
+      - amd64
+      - arm64
+    ldflags:
+      - -s -w
+      - -X 'main.version={{ .Tag }}'
+      - -X 'main.commit={{ .Commit }}'
+      - -X 'main.date={{ .Date }}'
 archives:
   - id: windows-archives
     ids:
@@ -91,6 +105,7 @@ archives:
     ids:
       - kubara-linux
       - kubara-macos
+      - kubara-freebsd
     formats:
       - tar.gz
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
