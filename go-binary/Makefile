@@ -1,6 +1,7 @@
 # Go application Makefile
 BINARY_NAME = kubara
 SRC = main.go
+BUILD_ENV ?= CGO_ENABLED=0
 
 .PHONY: all build run clean modtidy build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 test test-verbose test-coverage test-race lint format vet help
 
@@ -10,7 +11,7 @@ all: build
 # Build the binary in the project root
 build:
 	@echo "Building $(BINARY_NAME) for current platform..."
-	@go build -o $(BINARY_NAME) $(SRC)
+	@$(BUILD_ENV) go build -o $(BINARY_NAME) $(SRC)
 
 # Run the application without building a persistent binary
 run:
@@ -81,27 +82,27 @@ build-all: build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-a
 
 build-linux-amd64:
 	@echo "Building for Linux AMD64..."
-	@GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-linux-amd64 $(SRC)
+	@GOOS=linux GOARCH=amd64 $(BUILD_ENV) go build -o $(BINARY_NAME)-linux-amd64 $(SRC)
 
 build-linux-arm64:
 	@echo "Building for Linux ARM64..."
-	@GOOS=linux GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-linux-arm64 $(SRC)
+	@GOOS=linux GOARCH=arm64 $(BUILD_ENV) go build -o $(BINARY_NAME)-linux-arm64 $(SRC)
 
 build-darwin-amd64:
 	@echo "Building for macOS AMD64..."
-	@GOOS=darwin GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-darwin-amd64 $(SRC)
+	@GOOS=darwin GOARCH=amd64 $(BUILD_ENV) go build -o $(BINARY_NAME)-darwin-amd64 $(SRC)
 
 build-darwin-arm64:
 	@echo "Building for macOS ARM64..."
-	@GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-darwin-arm64 $(SRC)
+	@GOOS=darwin GOARCH=arm64 $(BUILD_ENV) go build -o $(BINARY_NAME)-darwin-arm64 $(SRC)
 
 build-windows-amd64:
 	@echo "Building for Windows AMD64..."
-	@GOOS=windows GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-windows-amd64.exe $(SRC)
+	@GOOS=windows GOARCH=amd64 $(BUILD_ENV) go build -o $(BINARY_NAME)-windows-amd64.exe $(SRC)
 
 build-windows-arm64:
 	@echo "Building for Windows ARM64..."
-	@GOOS=windows GOARCH=arm64 CGO_ENABLED=0 go build -o $(BINARY_NAME)-windows-arm64.exe $(SRC)
+	@GOOS=windows GOARCH=arm64 $(BUILD_ENV) go build -o $(BINARY_NAME)-windows-arm64.exe $(SRC)
 
 help:
 	@echo "Go application targets:"
