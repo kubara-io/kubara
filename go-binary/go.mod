@@ -1,10 +1,10 @@
 module kubara
 
-go 1.25.7
+go 1.26.1
 
 require (
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260313124138-3b3cf7ae76da
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260316180332-fed3824a0ef6
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.17.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
