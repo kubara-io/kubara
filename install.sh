@@ -5,9 +5,69 @@ set -e
 
 REPO="kubara-io/kubara"
 
+# Wrapper for curl to handle HTTP errors gracefully and print API/Server responses
+curl_wrap() {
+    _sc_is_dl=0
+    _sc_out_file=""
+
+    # Parse arguments to see if an output file (-o) is specified
+    for _sc_arg do
+        if [ "$_sc_is_dl" -eq 2 ]; then
+            _sc_out_file="$_sc_arg"
+            _sc_is_dl=1
+        elif [ "$_sc_arg" = "-o" ]; then
+            _sc_is_dl=2
+        fi
+    done
+
+    _sc_tmp_err=$(mktemp)
+    _sc_tmp_out=$(mktemp)
+
+    if [ "$_sc_is_dl" -eq 1 ]; then
+        # File download mode (curl writes body to $_sc_out_file directly)
+        _sc_http_code=$(curl -sS -w "%{http_code}" "$@" 2>"$_sc_tmp_err")
+        case "$_sc_http_code" in
+            2*|3*) ;; # Success
+            *)
+                echo "Error: curl failed with HTTP status ${_sc_http_code:-UNKNOWN}" >&2
+                cat "$_sc_tmp_err" >&2
+                if [ -f "$_sc_out_file" ] && [ -s "$_sc_out_file" ]; then
+                    echo "Server response:" >&2
+                    cat "$_sc_out_file" >&2
+                    echo "" >&2
+                fi
+                rm -f "$_sc_tmp_err" "$_sc_tmp_out"
+                return 1
+                ;;
+        esac
+    else
+        # Standard output mode (e.g., API requests in pipelines)
+        _sc_http_code=$(curl -sS -w "%{http_code}" -o "$_sc_tmp_out" "$@" 2>"$_sc_tmp_err")
+        case "$_sc_http_code" in
+            2*|3*) ;; # Success
+            *)
+                echo "Error: curl failed with HTTP status ${_sc_http_code:-UNKNOWN}" >&2
+                cat "$_sc_tmp_err" >&2
+                if [ -s "$_sc_tmp_out" ]; then
+                    echo "Server response:" >&2
+                    cat "$_sc_tmp_out" >&2
+                    echo "" >&2
+                fi
+                rm -f "$_sc_tmp_err" "$_sc_tmp_out"
+                return 1
+                ;;
+        esac
+        # Output the successful response to stdout so pipelines (like grep) still work
+        cat "$_sc_tmp_out"
+    fi
+
+    rm -f "$_sc_tmp_err" "$_sc_tmp_out"
+}
+
 echo "Fetching the latest release version..."
 # Fetch the latest release tag via GitHub API
-LATEST_TAG=$(curl -s "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+# Using curl_wrap. On rate-limit, it will print the GH JSON and return 1, failing the script.
+LATEST_TAG=$(curl_wrap "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
 
 if [ -z "$LATEST_TAG" ]; then
     echo "Error: Failed to fetch the latest version."
@@ -31,10 +91,8 @@ esac
 # Detect Architecture
 ARCH_NAME=$(uname -m)
 case "$ARCH_NAME" in
-    x86_64) ARCH="amd64" ;;
-    amd64) ARCH="amd64" ;;
-    aarch64) ARCH="arm64" ;;
-    arm64) ARCH="arm64" ;;
+    x86_64|amd64) ARCH="amd64" ;;
+    aarch64|arm64) ARCH="arm64" ;;
     *) echo "Error: Unsupported architecture '$ARCH_NAME'"; exit 1 ;;
 esac
 
@@ -52,10 +110,11 @@ TMP_DIR=$(mktemp -d)
 cd "$TMP_DIR"
 
 echo "Downloading $FILENAME..."
-curl -sSL -o "$FILENAME" "$DOWNLOAD_URL"
+# Note: Added -L so curl follows redirects, which GitHub releases require
+curl_wrap -L -o "$FILENAME" "$DOWNLOAD_URL"
 
 echo "Downloading checksum file..."
-curl -sSL -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
+curl_wrap -L -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
 
 echo "Verifying checksum..."
 # Isolate the exact file's checksum line so verification tools don't complain about missing OS/Arch files
