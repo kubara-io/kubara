@@ -40,23 +40,23 @@ is designed for users who are just starting out and want to build a Kubernetes
 platform. Nevertheless, the following skills are necessary to understand and
 use kubara:
 
-1.) **Linux Basics:** Understanding of basic `Linux` commands and operations.
+1. **Linux Basics:** Understanding of basic `Linux` commands and operations.
 
-2.) **Following Documentation:** Ability to follow detailed technical
+2. **Following Documentation:** Ability to follow detailed technical
 documentation and step-by-step guides.
 
-3.) **Version Control:** Basic experience with `Git` for managing code and
+3. **Version Control:** Basic experience with `Git` for managing code and
 configurations.
 
-4.) **Container Fundamentals:** Basic knowledge of `containerization` and `Docker`.
+4. **Container Fundamentals:** Basic knowledge of `containerization` and `Docker`.
 
-5.) **Kubernetes Concepts:** Familiarity with basic `Kubernetes` concepts like
+5. **Kubernetes Concepts:** Familiarity with basic `Kubernetes` concepts like
 `pods`, `services`, and `deployments`.
 
-6.) **Network Practices:** Understanding the basics of network communication
+6. **Network Practices:** Understanding the basics of network communication
 like `api`, `firewall` and `proxy`.
 
-7.) **Security Practices:** Understanding of basic security practices like
+7. **Security Practices:** Understanding of basic security practices like
 `authentication`, `authorization` and `policies`.
 
 ---

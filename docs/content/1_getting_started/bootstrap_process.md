@@ -295,6 +295,7 @@ Edit the generated files in:
 Source templates are embedded in the binary under `go-binary/templates/embedded/...`, but you should only edit generated files in your repository.
 
 The chart directories where values usually need review are:
+
 * argo-cd
 * cert-manager
 * external-dns

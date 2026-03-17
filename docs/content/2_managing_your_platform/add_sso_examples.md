@@ -7,7 +7,7 @@ with STACKIT GIT (Forgejo based).**
 These configurations are to enable kubara & Forgejo Users to quick-start with SSO.  
 
 > ⚠️ **Prerequisites:**  
-> Create Application in Forgejo for Grafana, OAuth2Proxy & Argo   
+> Create Application in Forgejo for Grafana, OAuth2 Proxy & Argo CD
 > [Forgejo Docs](https://forgejo.org/docs/next/user/oauth2-provider/#examples)    
 >
 > Same Callback URLs like GitHub  
@@ -23,7 +23,7 @@ Below are working examples when these Docs are released.
 
 **They are based on:**  
 - [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/)  
-- [OAuth2Proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea)  
+- [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea)  
 - [Argo](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex) & [Dex](https://dexidp.io/docs/connectors/gitea/)  
 
 We recommend to take a look at them to make sure everything is configured as intended before  
@@ -66,7 +66,7 @@ Replace values of
 
 
 ### Forgejo SSO config for Grafana:   
-(as part of Kube-Prometheus-Stack Helm-Chart)
+(As part of Kube-Prometheus-Stack Helm-Chart)
 
 ### **Secrets**
 
@@ -112,6 +112,7 @@ kube-prometheus-stack:
 **Replace the values of the following config variables accordingly to your setup:**
 
 Replace "your-forgejo.domain" in the following variables and keep the trailing paths: (like /login/...)
+
 - auth_url
 - token_url 
 - api_url
@@ -152,11 +153,13 @@ Change values in: **"kubara/customer-service-catalog/helm/your-cluster/argo-cd/v
 ```
 **Replace the values of the following config variables accordingly to your setup:**
 
-Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml 
-Replace value of "name:" and "teams:" in "orgs.name:"
-Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).
+* Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml 
+* Replace value of "name:" and "teams:" in "orgs.name:"
+* Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).
+
 And also replace "test-orga:Owners" according to your Organization Name and Team:
-```bash
+
+```yaml
       policy.csv: |
         g, test-orga:Owners, role:admin  
 ```

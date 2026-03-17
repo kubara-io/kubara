@@ -11,7 +11,7 @@ To collect, store, and visualize metrics, we use the **kube-prometheus-stack**, 
 - **Node Exporter** provides system-level metrics (CPU, memory, disk I/O, etc.).
 - **kube-state-metrics** exposes metrics about the state of Kubernetes resources (e.g., Deployments, CronJobs, StatefulSets).
 - **ServiceMonitors** and **PodMonitors** define which services Prometheus should scrape.
-- Configuration is managed declaratively using Helm charts and GitOps (via ArgoCD).
+- Configuration is managed declaratively using Helm charts and GitOps (via Argo CD).
 
 ## Accessing Prometheus
 
@@ -34,7 +34,7 @@ In kubara, `ServiceMonitors` are enabled by default for all deployed application
 
 We also apply consistent labels to every ServiceMonitor-for example, `monitoring.instance`-to simplify filtering and organization.
 
-Example snippet from the ArgoCD Helm chart `values.yaml`:
+Example snippet from the Argo CD Helm chart `values.yaml`:
 
 ```yaml
 controller:

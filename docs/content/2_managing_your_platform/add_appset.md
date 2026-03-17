@@ -2,9 +2,10 @@
 Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
 Project.
 
-An Argo CD AppSet is a logical concept to create many ArgoCD applications with just one manifest.<br>
+An Argo CD AppSet is a logical concept to create many Argo CD applications with just one manifest.<br>
 This allows Users to spawn one service with different configurations on many namespaces and clusters.
 For more information and possible configuration check:<br>
+
 - https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml
 - https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
 
@@ -29,7 +30,7 @@ customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values
 Optional: Add `additional-values.yaml` in the same chart folder for cluster-specific overrides.
 The generated ApplicationSet already references both `values.yaml` and `additional-values.yaml`.
 
-## **Modify argoCD overlays**
+## **Modify Argo CD overlays**
 This is an example on how to add an AppSet to the controlplane.
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
@@ -55,21 +56,20 @@ inClusterSecretLabels:
 ```
 
 This is meant to be added to the same directive where all pre-configured appSets are defined.
-It will deploy the app to all ArgoCD clusters that have the label `my-new-service: enabled` set 
+It will deploy the app to all Argo CD clusters that have the label `my-new-service: enabled` set 
 
 ## **Push your changes to git**
-Do not forget to push your changes to the git repository that serves your argoCD application.
-If you let argoCD manage itself, it will add the configured application to the cluster.
+Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.
 
-## **Run kubara bootstrap again (if ArgoCD is not managing itself )**
-If ArgoCD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering argocd values will have no effect until you run
+## **Run kubara bootstrap again (if Argo CD is not managing itself )**
+If Argo CD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering Argo CD values will have no effect until you run the following again:
 ```bash
 kubara bootstrap <controlplane-cluster-name-from-config-yaml>
 ```
-again
 
 ## **Add App from another repository**
-If you want to add an application that is stored in another repository you can use the `sources:` directive. It supports all the fields argoCD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
+If you want to add an application that is stored in another repository you can use the `sources:` directive. It supports all the fields Argo CD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
 ```yaml
 bootstrapValues:
   applicationSets:

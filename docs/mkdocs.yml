@@ -53,6 +53,7 @@ plugins:
   - mkdocs-plugin-open-external-links-in-new-tab
 markdown_extensions:
   - attr_list
+  - admonition
   - def_list
   - pymdownx.superfences:
       custom_fences:

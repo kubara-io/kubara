@@ -12,7 +12,7 @@ The `ingress-nginx` controller is deprecated; support ends in late March 2026 (s
 
 * **Maintainability:** Avoid self-built images or manual Helm chart maintenance.
 * **Compatibility:** Stick to **Ingress API** for now to ensure compatibility with existing Helm charts and tools.
-* **Ecosystem Readiness:** While Gateway API is stable as a specification, its implementation in upstream charts (ArgoCD, Prometheus, etc.) is still inconsistent or incomplete.
+* **Ecosystem Readiness:** While Gateway API is stable as a specification, its implementation in upstream charts (Argo CD, Prometheus, etc.) is still inconsistent or incomplete.
 * **User Experience:** Must remain beginner-friendly.
 
 ## Considered Options

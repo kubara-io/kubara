@@ -25,8 +25,8 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
      - optional `customer-service-catalog/helm/<cluster-name>/external-dns/additional-values.yaml`
    - Next steps:  
      - run `terraform apply` to provision DNS resources,  
-     - **git commit & push** the Helm chart changes so that ArgoCD/Flux deploys them to the cluster.  
-   - At this point the ExternalDNS Helm Chart will be deployed from ArgoCD in the cluster.  
+     - **git commit & push** the Helm chart changes so that Argo CD/Flux deploys them to the cluster.  
+   - At this point the ExternalDNS Helm Chart will be deployed from Argo CD in the cluster.  
 
 3. **Automatic records**  
    - When you deploy an application with Ingress or Service including a hostname (e.g. `app.example.com`), ExternalDNS automatically creates the corresponding DNS record in your configured zone.  
@@ -60,7 +60,7 @@ clusters:
 
 - **`dnsName`** → base domain for the cluster  
 - **`terraform.dns`** → defines the zone for which kubara generates Terraform code (name and contact email).
-- **`services.externalDns.status`** → when set to `enabled`, ExternalDNS is templated into the Helm charts for deployment via ArgoCD.
+- **`services.externalDns.status`** → when set to `enabled`, ExternalDNS is templated into the Helm charts for deployment via Argo CD.
 - **provider-specific settings** → configure them in the chart overlay values (`values.yaml` / `additional-values.yaml`).
 
 ---

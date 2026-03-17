@@ -8,7 +8,7 @@ An Argo CD App Project is a logical concept to control:
 For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 
-## **Modify argo-cd overlays**
+## **Modify Argo CD overlays**
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
 projects:
@@ -16,7 +16,7 @@ projects:
     name: k8s-worker-0
     namespace: argocd
     # You can add as many allowed Repos in here as you like
-    # Must be added to argoCD before
+    # Must be added to Argo CD before
     sourceRepos:
       - registry.onstackit.cloud/stackit-edge-cloud-blueprint
 ```
