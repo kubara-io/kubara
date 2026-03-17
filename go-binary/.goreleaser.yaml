@@ -164,10 +164,10 @@ notarize:
 brews:
   - name: kubara
     repository:
-      owner: kubara-io
+      owner: adrherna01     
       name: homebrew-tap
-    description: "Your description of what Kubara does"
-    homepage: "https://github.com/kubara-io/kubara"
+    description: "Kubara CLI tool for managing my Go binaries"
+    homepage: "https://github.com/adrherna01/kubara"
     license: "MIT"
     install: |
       bin.install "kubara"
