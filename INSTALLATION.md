@@ -3,6 +3,12 @@
 kubara is distributed as prebuilt release archives.
 You do not need Go installed to run the CLI.
 
+## Using the install script
+
+Execute our install script:
+
+`curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh`
+
 ## Download Release Assets
 
 Get binaries from:
