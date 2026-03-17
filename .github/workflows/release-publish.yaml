@@ -7,6 +7,7 @@ on:
 jobs:
   publish-tap:
     runs-on: ubuntu-latest
+    environment: signing
     steps:
       - name: Checkout kubara repo
         uses: actions/checkout@v6
