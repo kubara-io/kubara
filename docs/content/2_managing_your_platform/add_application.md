@@ -1,7 +1,7 @@
 # Add Application to Argo CD
 
 !!! note
-
+    
     This page describes adding additional apps to your platform.
     Most likely this will be app-of-apps constructs to enable a self-service
     approach for developer teams.
