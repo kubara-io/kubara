@@ -7,6 +7,7 @@ release:
     name: kubara
   draft: true
   replace_existing_draft: true
+  replace_existing_artifacts: true
 changelog:
   use: git
   sort: asc
@@ -161,3 +162,15 @@ notarize:
         #
         # Default: 10m.
         # timeout: 20m
+homebrew_casks:
+  - name: kubara
+    repository:
+      owner: kubara-io
+      name: homebrew-tap
+    description: "Kubara is a single binary CLI tool written in Go providing a lightweight framework for bootstrapping Kubernetes\
+      \ platforms with production-proven best practices"
+    homepage: "https://github.com/kubara-io/kubara"
+    license: "Apache-2.0"
+    binaries:
+      - kubara
+    skip_upload: "auto"
