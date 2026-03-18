@@ -7,7 +7,9 @@ RUN curl -fsSL -o terraform.zip https://releases.hashicorp.com/terraform/1.14.7/
     && mv terraform /usr/local/bin/terraform
 
 FROM alpine
-COPY kubara /kubara
+ARG TARGETPLATFORM
+
+COPY $TARGETPLATFORM/kubara /kubara
 COPY --from=terraform-downloader /usr/local/bin/terraform /usr/local/bin/terraform
 
 RUN apk add --no-cache helm kubectl

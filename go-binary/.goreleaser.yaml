@@ -162,6 +162,8 @@ notarize:
         #
         # Default: 10m.
         # timeout: 20m
+
+
 homebrew_casks:
   - name: kubara
     repository:
@@ -175,35 +177,10 @@ homebrew_casks:
       - kubara
     skip_upload: "auto"
 
-dockers:
-  # Build the AMD64 image
-  - image_templates:
-      - "ghcr.io/kubara/kubara:{{ .Version }}-amd64"
-    use: buildx
-    goos: linux
-    goarch: amd64
-    dockerfile: ../Dockerfile
-    build_flag_templates:
-      - "--platform=linux/amd64"
-
-  # Build the ARM64 image
-  - image_templates:
-      - "ghcr.io/kubara/kubara:{{ .Version }}-arm64"
-    use: buildx
-    goos: linux
-    goarch: arm64
-    dockerfile: ../Dockerfile
-    build_flag_templates:
-      - "--platform=linux/arm64"
-docker_manifests:
-  # Create the multi-arch 'vX.X.X' tag
-  - name_template: "ghcr.io/kubara/kubara:{{ .Version }}"
-    image_templates:
-      - "ghcr.io/kubara/kubara:{{ .Version }}-amd64"
-      - "ghcr.io/kubara/kubara:{{ .Version }}-arm64"
-
-  # Create the multi-arch 'latest' tag
-  - name_template: "ghcr.io/kubara/kubara:latest"
-    image_templates:
-      - "ghcr.io/kubara/kubara:{{ .Version }}-amd64"
-      - "ghcr.io/kubara/kubara:{{ .Version }}-arm64"
+dockers_v2:
+  - dockerfile: ../Dockerfile
+    images:
+      - "ghcr.io/kubara/kubara"
+    tags:
+      - "{{ .Version }}"
+      - "latest"
