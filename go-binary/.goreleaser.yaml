@@ -168,17 +168,10 @@ homebrew_casks:
       owner: kubara-io
       name: homebrew-tap
     description: "Kubara CLI tool for managing my Go binaries"
-<<<<<<< Updated upstream
-    homepage: "https://github.com/adrherna01/kubara"
-    license: "Apache-2.0"
-    binaries:
-      - kubara
-=======
     homepage: "https://github.com/kubara-io/kubara"
     license: "MIT"
-    install: |
+    install:
       bin.install "kubara"
     test: |
       system "#{bin}/kubara", "--version"
->>>>>>> Stashed changes
     skip_upload: "auto"
