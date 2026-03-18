@@ -20,7 +20,7 @@ It combines platform scaffolding, environment configuration, and production-read
 
 ## Installation
 
-See [INSTALLATION.md](./INSTALLATION.md) for Linux, macOS, and Windows installation instructions.
+See [INSTALLATION.md](docs/content/1_getting_started/installation.md) for Linux, macOS, and Windows installation instructions.
 
 ## Documentation
 
