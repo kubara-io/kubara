@@ -11,6 +11,18 @@ brew tap kubara-io/homebrew-tap
 brew install kubara
 ```
 
+## 2. Using APT (Ubuntu/Debian)
+
+### 1.Download the key securely
+curl -fsSL https://docs.kubara.io/apt-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubara.gpg
+
+### 2. Add the repo
+echo "deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://docs.kubara.io stable main" | sudo tee /etc/apt/sources.list.d/kubara.list > /dev/null
+
+### 3. Update and install
+sudo apt update
+sudo apt install -y kubara
+
 ## 2. Using the Install Script (macOS / Linux)
 
 You can automatically download and install the CLI by executing our install script:
