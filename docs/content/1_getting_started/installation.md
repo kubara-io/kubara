@@ -6,11 +6,20 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
 
 === "Homebrew (macOS / Linux)"
 
-    The simplest way to install on macOS or Linux is via Homebrew:
-
+    **Install**
     ```shell
     brew tap kubara-io/tap
     brew install kubara
+    ```
+
+    **Update**
+    ```shell
+    brew upgrade kubara
+    ```
+
+    **Uninstall**
+    ```shell
+    brew uninstall kubara
     ```
 
 === "APT (Ubuntu / Debian)"
@@ -31,12 +40,25 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
     sudo apt install -y kubara
     ```
 
+    **Uninstall**
+    ```shell
+    sudo apt remove kubara
+    ```
+
 === "Install Script (macOS / Linux)"
 
-    You can automatically download and install the CLI by executing our install script:
-
+    **Install**
     ```shell
     curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh
+    ```
+
+    **Upgrade**
+
+    Run above command again
+
+    **Uninstall**
+    ```shell
+    rm $HOME/.local/bin/kubara
     ```
 
 === "Manual Download"
@@ -46,6 +68,7 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
     Get binaries from: <https://github.com/kubara-io/kubara/releases>
 
     Current release artifacts:
+
     - Linux: `kubara_<version>_linux_amd64.tar.gz`, `kubara_<version>_linux_arm64.tar.gz`
     - macOS: `kubara_<version>_darwin_amd64.tar.gz`, `kubara_<version>_darwin_arm64.tar.gz`
     - Windows: `kubara_<version>_windows_amd64.zip`, `kubara_<version>_windows_arm64.zip`
