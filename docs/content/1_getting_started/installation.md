@@ -45,6 +45,18 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
     sudo apt remove kubara
     ```
 
+=== "Docker (Universal)"
+
+    **Run**
+    ```bash
+    docker run --rm \
+    -u $(id -u):$(id -g) \
+    -v ~/.kube/config:/kubeconfig:ro \
+    -v $(pwd):/workspace \
+    -w /workspace \
+    ghcr.io/kubara/kubara/kubara <your-command>
+    ```
+
 === "Install Script (macOS / Linux)"
 
     **Install**
