@@ -4,6 +4,8 @@ on:
   push:
     tags:
       - 'v*.*.*'
+  release:
+    types: [published]
 
 permissions:
   contents: write
@@ -38,6 +40,7 @@ jobs:
           cache-dependency-path: go-binary/go.sum
 
       - name: Run GoReleaser
+        if: github.event_name == 'push'
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
@@ -59,3 +62,14 @@ jobs:
           # You can find it in the Apple Developer Portal website.
           MACOS_NOTARY_ISSUER_ID: ${{ secrets.MACOS_NOTARY_ISSUER_ID }}
           # CHOCOLATEY_API_KEY: ${{ secrets.CHOCOLATEY_API_KEY }}
+
+      - name: Run GoReleaser
+        if: github.event_name == 'release' && github.event.action == 'published'
+        uses: goreleaser/goreleaser-action@v7
+        with:
+          distribution: goreleaser
+          version: '~> v2'
+          workdir: go-binary
+          args: release --clean
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
