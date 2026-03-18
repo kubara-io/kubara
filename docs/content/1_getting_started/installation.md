@@ -34,7 +34,7 @@ sudo apt install -y kubara
 You can automatically download and install the CLI by executing our install script:
 
 ```shell
-curl -sSLf [https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh](https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh) | sh
+curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh
 ```
 
 ## 3. Manual Download (Release Assets)
