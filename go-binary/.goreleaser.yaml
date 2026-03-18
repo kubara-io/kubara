@@ -3,7 +3,7 @@ version: 2
 project_name: kubara
 release:
   github:
-    owner: adrherna01
+    owner: kubara-io
     name: kubara
   draft: true
   replace_existing_draft: true
@@ -168,7 +168,7 @@ homebrew_casks:
       owner: adrherna01
       name: homebrew-tap
     description: "Kubara CLI tool for managing my Go binaries"
-    homepage: "https://github.com/adrherna01/kubara"
+    homepage: "https://github.com/kubara-io/kubara"
     license: "Apache-2.0"
     binaries:
       - kubara
