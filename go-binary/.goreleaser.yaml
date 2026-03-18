@@ -182,3 +182,16 @@ dockers_v2:
       - "{{ .Version }}"
       - "latest"
     sbom: false
+nfpms:
+  - id: kubara-packages
+    ids:
+      - kubara-linux
+
+    maintainer: "Kubara Maintainer <kubara@schwary.digits>"
+
+    formats:
+      - apk
+      - deb
+      - rpm
+      - termux.deb
+      - archlinux
