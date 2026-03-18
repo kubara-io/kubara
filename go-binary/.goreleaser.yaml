@@ -181,3 +181,4 @@ dockers_v2:
     tags:
       - "{{ .Version }}"
       - "latest"
+    sbom: false
