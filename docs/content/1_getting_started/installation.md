@@ -7,7 +7,7 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
 The simplest way to install on macOS is via Homebrew:
 
 ```shell
-brew tap kubara-io/homebrew-tap
+brew tap kubara-io/tap
 brew install kubara
 ```
 
