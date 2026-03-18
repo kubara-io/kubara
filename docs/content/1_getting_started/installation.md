@@ -1,40 +1,38 @@
 # Installation
 
-kubara is distributed as prebuilt release archives.
-You do not need Go installed to run the CLI.
+kubara is distributed as prebuilt release archives. You do not need Go installed to run the CLI.
 
-## Using brew (MacOS)
+## 1. Using Homebrew (macOS)
+
+The simplest way to install on macOS is via Homebrew:
 
 ```shell
 brew tap kubara-io/homebrew-tap
 brew install kubara
 ```
 
-## Using the install script
+## 2. Using the Install Script (macOS / Linux)
 
-Execute our install script:
+You can automatically download and install the CLI by executing our install script:
 
 ```shell
-curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh
+curl -sSLf [https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh](https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh) | sh
 ```
 
-## Download Release Assets
+## 3. Manual Download (Release Assets)
 
-Get binaries from:
+If you prefer to install manually or are using Windows, you can download the prebuilt binaries directly.
 
-<https://github.com/kubara-io/kubara/releases>
-
-Optional: verify checksums after download (see [Verify Checksums](#verify-checksums)).
+Get binaries from: <https://github.com/kubara-io/kubara/releases>
 
 Current release artifacts:
-
 - Linux: `kubara_<version>_linux_amd64.tar.gz`, `kubara_<version>_linux_arm64.tar.gz`
 - macOS: `kubara_<version>_darwin_amd64.tar.gz`, `kubara_<version>_darwin_arm64.tar.gz`
 - Windows: `kubara_<version>_windows_amd64.zip`, `kubara_<version>_windows_arm64.zip`
 
-## Linux / macOS (Terminal)
+### Linux / macOS (Terminal)
 
-Run the following commands in your terminal:
+Download the appropriate `.tar.gz` file for your system, then run the following commands in your terminal:
 
 ```bash
 tar -xzf kubara_<version>_<os>_<arch>.tar.gz
@@ -43,29 +41,27 @@ sudo mv kubara /usr/local/bin/kubara
 kubara --help
 ```
 
-## Windows
+### Windows
 
-Download the matching Windows `.zip` release asset and extract it.
-
-Open a terminal (PowerShell) in the extracted folder and run:
+1. Download the matching Windows `.zip` release asset and extract it.
+2. Open a terminal (PowerShell) in the extracted folder and run:
 
 ```powershell
 .\kubara.exe --help
 ```
 
-Optional: move `kubara.exe` to a directory in your `PATH`.
+*Optional: Move `kubara.exe` to a directory included in your system's `PATH` variable for easier access.*
 
-## Verify Checksums
+### Verify Checksums (Optional)
 
-Each release includes a checksum file.
-Run these checksum commands in your terminal on Linux/macOS:
+Each release includes a checksum file. To verify the integrity of your download on Linux or macOS, run the following in your terminal:
 
+**Linux:**
 ```bash
 sha256sum kubara_<version>_<os>_<arch>.<ext>
 ```
 
-On macOS you can also use:
-
+**macOS:**
 ```bash
 shasum -a 256 kubara_<version>_<os>_<arch>.<ext>
 ```
