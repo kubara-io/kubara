@@ -162,8 +162,6 @@ notarize:
         #
         # Default: 10m.
         # timeout: 20m
-
-
 homebrew_casks:
   - name: kubara
     repository:
@@ -176,7 +174,6 @@ homebrew_casks:
     binaries:
       - kubara
     skip_upload: "auto"
-
 dockers_v2:
   - dockerfile: ../Dockerfile
     images:
