@@ -1,4 +1,4 @@
-FROM alpine AS terraform-downloader
+FROM --platform=$BUILDPLATFORM alpine AS terraform-downloader
 ARG TARGETARCH
 
 RUN apk add --no-cache curl unzip
