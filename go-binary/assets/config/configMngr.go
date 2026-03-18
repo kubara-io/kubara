@@ -14,7 +14,7 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/knadh/koanf/v2"
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
-	goYaml "gopkg.in/yaml.v3"
+	goYaml "go.yaml.in/yaml/v3"
 
 	"github.com/knadh/koanf/parsers/yaml"
 )

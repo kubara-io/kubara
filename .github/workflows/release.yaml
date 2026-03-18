@@ -28,6 +28,7 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: |
             ${{ github.event.repository.name }}
+            homebrew-tap
 
       - name: Set up Go
         uses: actions/setup-go@v6
@@ -37,6 +38,7 @@ jobs:
           cache-dependency-path: go-binary/go.sum
 
       - name: Run GoReleaser
+        if: github.event_name == 'push'
         uses: goreleaser/goreleaser-action@v7
         with:
           distribution: goreleaser
