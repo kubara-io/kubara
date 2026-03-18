@@ -17,6 +17,14 @@ env:
   REPORT_DIR: ${{ github.workspace }}/reports
   RENDER_DIR: ${{ github.workspace }}/rendered
   OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
+  # renovate: datasource=github-releases depName=golangci/golangci-lint
+  GOLANGCI_LINT_VERSION: "v2.8.0"
+  # renovate: datasource=github-releases depName=securego/gosec
+  GOSEC_VERSION: "v2.22.11"
+  # renovate: datasource=github-releases depName=yannh/kubeconform
+  KUBECONFORM_VERSION: "v0.7.0"
+  # renovate: datasource=github-releases depName=terraform-linters/tflint
+  TFLINT_VERSION: "v0.61.0"
   ARTIFACT_RETENTION_DAYS: "15"
 
 permissions:
@@ -86,43 +94,41 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
         with:
-          version: latest
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
           working-directory: ${{ env.CODE_PATH }}
           args: |
             --output.text.path stdout \
             --output.html.path "${{ env.REPORT_DIR }}/golangci-results.html"
 
-      - name: Resolve gosec version
-        if: always()
-        id: gosec-version
-        run: |
-          set -euo pipefail
-          GOSEC_VERSION="$(curl -fsSL https://api.github.com/repos/securego/gosec/releases/latest | jq -r '.tag_name')"
-          if [ -z "$GOSEC_VERSION" ] || [ "$GOSEC_VERSION" = "null" ]; then
-            echo "::error::Failed to resolve latest gosec version"
-            exit 1
-          fi
-          echo "version=$GOSEC_VERSION" >> "$GITHUB_OUTPUT"
-
       - name: Cache gosec
-        if: always()
         id: cache-gosec
         uses: actions/cache@v5
         with:
           path: ~/.local/bin/gosec
-          key: ${{ runner.os }}-gosec-${{ steps.gosec-version.outputs.version }}
+          key: ${{ runner.os }}-${{ runner.arch }}-gosec-${{ env.GOSEC_VERSION }}
 
-      - name: Install gosec
-        if: always()
+      - name: Install gosec (if not cached)
+        if: steps.cache-gosec.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
-          GOSEC_BIN="$HOME/.local/bin/gosec"
+          VERSION_NO_V="${{ env.GOSEC_VERSION }}"
+          VERSION_NO_V="${VERSION_NO_V#v}"
+          BASE_URL="https://github.com/securego/gosec/releases/download/${{ env.GOSEC_VERSION }}"
+          ARCHIVE="gosec_${VERSION_NO_V}_linux_amd64.tar.gz"
+          SHA256="$(curl -fsSL "$BASE_URL/gosec_${VERSION_NO_V}_checksums.txt" | awk -v file="$ARCHIVE" '$2 == file {print $1}')"
+          TMP_ARCHIVE="$(mktemp)"
 
-          if [ ! -x "$GOSEC_BIN" ] || [ "${{ steps.cache-gosec.outputs.cache-hit }}" != "true" ]; then
-            curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
-              | sh -s -- -b "$HOME/.local/bin" "${{ steps.gosec-version.outputs.version }}"
+          if [ -z "$SHA256" ]; then
+            echo "::error::Failed to resolve checksum for $ARCHIVE"
+            exit 1
           fi
+
+          curl -fsSL "$BASE_URL/$ARCHIVE" -o "$TMP_ARCHIVE"
+          echo "$SHA256  $TMP_ARCHIVE" | sha256sum -c -
+          tar xzf "$TMP_ARCHIVE" -C "$HOME/.local/bin" gosec
+          rm -f "$TMP_ARCHIVE"
+          chmod +x "$HOME/.local/bin/gosec"
 
       - name: Run gosec CLI
         if: always()
@@ -321,50 +327,36 @@ jobs:
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
-      - name: Resolve Helm and kubeconform versions
-        id: tool-versions
+      - name: Verify preinstalled Helm
         run: |
           set -euo pipefail
-          HELM_VERSION="$(curl -fsSL https://api.github.com/repos/helm/helm/releases/latest | jq -r '.tag_name')"
-          KUBECONFORM_VERSION="$(curl -fsSL https://api.github.com/repos/yannh/kubeconform/releases/latest | jq -r '.tag_name')"
-
-          if [ -z "$HELM_VERSION" ] || [ "$HELM_VERSION" = "null" ]; then
-            echo "::error::Failed to resolve latest Helm version"
-            exit 1
-          fi
-
-          if [ -z "$KUBECONFORM_VERSION" ] || [ "$KUBECONFORM_VERSION" = "null" ]; then
-            echo "::error::Failed to resolve latest kubeconform version"
-            exit 1
-          fi
-
-          echo "helm_version=$HELM_VERSION" >> "$GITHUB_OUTPUT"
-          echo "kubeconform_version=$KUBECONFORM_VERSION" >> "$GITHUB_OUTPUT"
-
-      - name: Setup Helm
-        uses: azure/setup-helm@v4
-        with:
-          version: ${{ steps.tool-versions.outputs.helm_version }}
+          helm version --short
 
       - name: Cache kubeconform
         id: cache-kubeconform
         uses: actions/cache@v5
         with:
           path: ~/.local/bin/kubeconform
-          key: tools-kubeconform-${{ steps.tool-versions.outputs.kubeconform_version }}-${{ runner.os }}-${{ runner.arch }}
+          key: tools-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
 
       - name: Install kubeconform (if missing)
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
           
-          if ! [ -x "$HOME/.local/bin/kubeconform" ] || [ "${{ steps.cache-kubeconform.outputs.cache-hit }}" != "true" ]; then
-            curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ steps.tool-versions.outputs.kubeconform_version }}/kubeconform-linux-amd64.tar.gz" \
-              | tar xz -C ~/.local/bin kubeconform
-            chmod +x "$HOME/.local/bin/kubeconform" || true
+          if ! [ -x "$HOME/.local/bin/kubeconform" ]; then
+            KUBECONFORM_ARCHIVE="kubeconform-linux-amd64.tar.gz"
+            KUBECONFORM_BASE_URL="https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}"
+            KUBECONFORM_SHA256="$(curl -fsSL "$KUBECONFORM_BASE_URL/CHECKSUMS" | awk '/  kubeconform-linux-amd64.tar.gz$/ {print $1}')"
+            TMP_ARCHIVE="$(mktemp)"
+
+            curl -fsSL "$KUBECONFORM_BASE_URL/$KUBECONFORM_ARCHIVE" -o "$TMP_ARCHIVE"
+            echo "$KUBECONFORM_SHA256  $TMP_ARCHIVE" | sha256sum -c -
+            tar xzf "$TMP_ARCHIVE" -C "$HOME/.local/bin" kubeconform
+            rm -f "$TMP_ARCHIVE"
+            chmod +x "$HOME/.local/bin/kubeconform"
           fi
           
-          helm version
           kubeconform -v
 
       - name: Lint, render and validate Helm charts
@@ -487,7 +479,7 @@ jobs:
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v6
         with:
-          tflint_version: latest
+          tflint_version: ${{ env.TFLINT_VERSION }}
 
       - name: Validate Terraform modules and environments
         run: |
