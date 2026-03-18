@@ -2,7 +2,7 @@
 
 kubara is distributed as prebuilt release archives. You do not need Go installed to run the CLI.
 
-## 1. Using Homebrew (macOS)
+## 1. Using Homebrew (macOS/Linux)
 
 The simplest way to install on macOS is via Homebrew:
 
