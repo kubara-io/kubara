@@ -15,7 +15,6 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
-		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
@@ -47,18 +46,6 @@ func TestNewClusterFromEnv(t *testing.T) {
 					},
 					Managed: Repository{
 						URL:            "https://github.com/org/repo.git",
-						TargetRevision: "main",
-					},
-				},
-			},
-			HelmRepo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            "https://charts.example.com",
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            "https://charts.example.com",
 						TargetRevision: "main",
 					},
 				},

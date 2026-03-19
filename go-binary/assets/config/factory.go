@@ -36,18 +36,6 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 						TargetRevision: "main",
 					},
 				}},
-			HelmRepo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            e.ArgocdHelmRepoUrl,
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            e.ArgocdHelmRepoUrl,
-						TargetRevision: "main",
-					},
-				},
-			},
 		},
 		Services: Services{
 			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
