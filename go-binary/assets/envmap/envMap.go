@@ -32,7 +32,6 @@ type EnvMap struct {
 	_                           struct{} `doc:"\n### Project related values"`
 	ProjectName                 string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                string   `default:"<...>" koanf:"PROJECT_STAGE"`
-	_                           struct{} `doc:"\n### STACKIT Portal related values"`
 	_                           struct{} `doc:"\n### Docker related values"`
 	_                           struct{} `doc:"# see https://docs.docker.com/reference/cli/docker/login/"`
 	_                           struct{} `doc:"# after successful login you can look inside envMap.json in your docker directory (~/.docker/envMap.json) on Linux/Mac"`
