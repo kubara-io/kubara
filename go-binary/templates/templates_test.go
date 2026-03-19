@@ -330,7 +330,7 @@ func TestTemplateFiles(t *testing.T) {
 			},
 		},
 		{
-			name:     "Success: Falls back to git repo URL when helm repo is missing",
+			name:     "Success: Uses git repos when helm repo is missing",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
 				"cluster": map[string]interface{}{
@@ -383,6 +383,7 @@ func TestTemplateFiles(t *testing.T) {
 				assert.NoError(t, results[0].Error)
 				assert.Contains(t, results[0].Content, "https://github.com/example/repo")
 				assert.NotContains(t, results[0].Content, "<no value>")
+				assert.NotContains(t, results[0].Content, "https://charts.example.com")
 			},
 		},
 		{
