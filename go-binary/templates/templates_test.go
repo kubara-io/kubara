@@ -303,18 +303,7 @@ func TestTemplateFiles(t *testing.T) {
 							},
 						},
 						"helmRepo": map[string]interface{}{
-							"https": map[string]interface{}{
-								"managed": map[string]interface{}{
-									"url":            "https://charts.example.com",
-									"path":           "managed-service-catalog/helm",
-									"targetRevision": "main",
-								},
-								"customer": map[string]interface{}{
-									"url":            "https://charts.example.com",
-									"path":           "customer-service-catalog/helm",
-									"targetRevision": "main",
-								},
-							},
+							"url": "https://charts.example.com",
 						},
 					},
 				},

@@ -38,10 +38,8 @@ type DNS struct {
 }
 
 type ArgoCD struct {
-	Repo RepoProto `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	// HelmRepo reuses RepoProto for schema compatibility. Both managed/customer
-	// entries currently carry the same optional Helm repository URL.
-	HelmRepo RepoProto `json:"helmRepo" yaml:"helmRepo" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	Repo     RepoProto       `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo *HelmRepository `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
 }
 
 type RepoProto struct {
@@ -58,6 +56,10 @@ type RepoType struct {
 type Repository struct {
 	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
 	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"required,title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
+}
+
+type HelmRepository struct {
+	URL string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Helm repository URL or OCI registry URL (without oci:// prefix),minLength=1"`
 }
 
 type ServiceStatus struct {

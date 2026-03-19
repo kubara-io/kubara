@@ -57,17 +57,8 @@ func TestNewClusterFromEnv(t *testing.T) {
 					},
 				},
 			},
-			HelmRepo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            "https://charts.example.com",
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            "https://charts.example.com",
-						TargetRevision: "main",
-					},
-				},
+			HelmRepo: &HelmRepository{
+				URL: "https://charts.example.com",
 			},
 		},
 		// The statuses of services are hardcoded in the function, so we mirror them here.
@@ -90,7 +81,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
-	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = RepoProto{}
+	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
 
 	// --- Test Cases Definition ---
 	type args struct {

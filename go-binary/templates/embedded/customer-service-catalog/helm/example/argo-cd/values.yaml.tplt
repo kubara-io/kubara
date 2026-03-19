@@ -17,9 +17,9 @@ bootstrapValues:
       name: "{{ .cluster.name }}-{{ .cluster.stage }}"
       namespace: argocd
       description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
-      {{- if .cluster.argocd.helmRepo.https.customer.url }}
+      {{- if .cluster.argocd.helmRepo.url }}
       sourceRepos:
-        - "{{ .cluster.argocd.helmRepo.https.customer.url }}"
+        - "{{ .cluster.argocd.helmRepo.url }}"
       {{- end }}
       orphanedResources:
         warn: false
