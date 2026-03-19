@@ -344,7 +344,7 @@ func TestTemplateFiles(t *testing.T) {
 			},
 		},
 		{
-			name:     "Success: Keeps sourceRepos on git repos when optional helm repo is missing",
+			name:     "Success: Omits sourceRepos when optional helm repo is missing",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
 				"cluster": map[string]interface{}{
