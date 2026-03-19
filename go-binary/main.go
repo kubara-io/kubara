@@ -5,9 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 	"kubara/cmd"
+	"kubara/internal/updatecheck"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/rs/zerolog"
@@ -66,6 +68,7 @@ func execOrFatal(name string, args ...string) {
 var (
 	kubeconfigFilePath string
 	testK8sConnection  bool
+	checkUpdateFlag    bool
 	base64Mode         bool
 	encodeFlag         bool
 	decodeFlag         bool
@@ -121,6 +124,10 @@ func NewAppAction(cmd *cli.Command) error {
 	switch {
 	case testK8sConnection:
 		testConnection(kubeconfigFilePath)
+	case checkUpdateFlag:
+		if err := updatecheck.PrintLiveCheck(version, os.Stdout); err != nil {
+			return cli.Exit(fmt.Sprintf("Error: update check failed: %v", err), 1)
+		}
 	default:
 		cli.ShowAppHelpAndExit(cmd, 0)
 	}
@@ -188,6 +195,12 @@ func main() {
 			Usage:       "Input file path for base64 operation",
 			Destination: &inputFile,
 		},
+		&cli.BoolFlag{
+			Name:        "check-update",
+			Value:       false,
+			Usage:       "Check online for a newer kubara release",
+			Destination: &checkUpdateFlag,
+		},
 	}
 
 	app := &cli.Command{
@@ -195,10 +208,10 @@ func main() {
 		Version:     version,
 		Authors:     authors,
 		Copyright:   "",
-		Usage:       "",
+		Usage:       "Opinionated CLI for Kubernetes platform engineering",
 		Flags:       flags,
 		UsageText:   "",
-		Description: "",
+		Description: "kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with GitOps-first workflows.",
 		Commands: []*cli.Command{
 			cmd.NewInitCmd(),
 			cmd.NewGenerateCmd(),
@@ -209,6 +222,11 @@ func main() {
 			return NewAppAction(cmd)
 		},
 	}
+
+	if !slices.Contains(os.Args[1:], "--check-update") {
+		updatecheck.NotifyIfNewReleaseAvailable(version, os.Stderr)
+	}
+
 	if err := app.Run(context.Background(), os.Args); err != nil {
 		log.Fatal().Err(err).Msg("Error running program")
 	}
