@@ -342,10 +342,13 @@ func printCompletionMessage(opts *Options) {
 	if envMap.DomainName != "" {
 		dns = envMap.DomainName
 	}
+	if opts.ClusterConfig.DNSName != "" {
+		dns = opts.ClusterConfig.DNSName
+	}
 
 	ingressMsg := ""
 	if dns != "" {
-		ingressMsg = fmt.Sprintf(" or try: http://%s/argocd (if ingress is running)", dns)
+		ingressMsg = fmt.Sprintf(" or try: https://%s/argocd (if ingress is running)", dns)
 	}
 
 	log.Info().Msgf(`

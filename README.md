@@ -50,9 +50,14 @@ help, h    Shows a list of commands or help for one command
 --decode                          Base64 decode input
 --string string                   Input string for base64 operation
 --file string                     Input file path for base64 operation
+--check-update                    Check online for a newer kubara release
 --help, -h                        show help
 --version, -v                     print the version
 ```
+
+## Update Check
+
+- kubara checks for newer GitHub releases on each run; disable with `KUBARA_UPDATE_CHECK=0`; run `kubara --check-update` for a live check.
 
 ## Community and Support
 
