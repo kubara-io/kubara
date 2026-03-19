@@ -20,8 +20,9 @@ bootstrapValues:
       sourceRepos:
         - "{{ .cluster.argocd.repo.https.managed.url }}"
         - "{{ .cluster.argocd.repo.https.customer.url }}"
-        {{- if .cluster.argocd.helmRepo.https.customer.url }}
-        - "{{ .cluster.argocd.helmRepo.https.customer.url }}"
+        {{- if or .cluster.argocd.helmRepo.https.managed.url .cluster.argocd.helmRepo.https.customer.url }}
+        - "{{ .cluster.argocd.helmRepo.https.managed.url | default .cluster.argocd.helmRepo.https.customer.url }}"
+        - "{{ .cluster.argocd.helmRepo.https.customer.url | default .cluster.argocd.helmRepo.https.managed.url }}"
         {{- end }}
       orphanedResources:
         warn: false

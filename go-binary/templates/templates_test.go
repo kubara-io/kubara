@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"sigs.k8s.io/yaml"
 )
 
 //go:embed all:embedded
@@ -326,7 +327,23 @@ func TestTemplateFiles(t *testing.T) {
 				assert.NotEmpty(t, results[0].Content)
 				assert.Contains(t, results[0].Content, "test-cluster")
 				assert.Contains(t, results[0].Content, "dev")
-				assert.Contains(t, results[0].Content, "https://charts.example.com")
+
+				var rendered map[string]interface{}
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]interface{})
+				require.True(t, ok)
+				projects, ok := bootstrapValues["projects"].(map[string]interface{})
+				require.True(t, ok)
+				project, ok := projects["test-cluster-dev"].(map[string]interface{})
+				require.True(t, ok)
+				sourceRepos, ok := project["sourceRepos"].([]interface{})
+				require.True(t, ok)
+				require.Len(t, sourceRepos, 4)
+				assert.Equal(t, "https://github.com/example/repo", sourceRepos[0])
+				assert.Equal(t, "https://github.com/example/repo", sourceRepos[1])
+				assert.Equal(t, "https://charts.example.com", sourceRepos[2])
+				assert.Equal(t, "https://charts.example.com", sourceRepos[3])
 			},
 		},
 		{
@@ -381,9 +398,22 @@ func TestTemplateFiles(t *testing.T) {
 				require.Len(t, results, 1)
 				assert.Equal(t, "customer-service-catalog/helm/example/argo-cd/values.yaml.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
-				assert.Contains(t, results[0].Content, "https://github.com/example/repo")
+
+				var rendered map[string]interface{}
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]interface{})
+				require.True(t, ok)
+				projects, ok := bootstrapValues["projects"].(map[string]interface{})
+				require.True(t, ok)
+				project, ok := projects["test-cluster-dev"].(map[string]interface{})
+				require.True(t, ok)
+				sourceRepos, ok := project["sourceRepos"].([]interface{})
+				require.True(t, ok)
+				require.Len(t, sourceRepos, 2)
+				assert.Equal(t, "https://github.com/example/repo", sourceRepos[0])
+				assert.Equal(t, "https://github.com/example/repo", sourceRepos[1])
 				assert.NotContains(t, results[0].Content, "<no value>")
-				assert.NotContains(t, results[0].Content, "https://charts.example.com")
 			},
 		},
 		{
