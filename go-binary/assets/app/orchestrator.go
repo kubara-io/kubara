@@ -25,6 +25,8 @@ func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) {
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
 			if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				if cfg.Clusters[i].ArgoCD.HelmRepo.HTTPS == nil {
+					// HelmRepo currently shares RepoType with git repos, so both entries
+					// mirror the same optional URL.
 					cfg.Clusters[i].ArgoCD.HelmRepo.HTTPS = &config.RepoType{
 						Customer: config.Repository{
 							TargetRevision: "main",

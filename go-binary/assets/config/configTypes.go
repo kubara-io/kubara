@@ -38,7 +38,9 @@ type DNS struct {
 }
 
 type ArgoCD struct {
-	Repo     RepoProto `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	Repo RepoProto `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	// HelmRepo reuses RepoProto for schema compatibility. Both managed/customer
+	// entries currently carry the same optional Helm repository URL.
 	HelmRepo RepoProto `json:"helmRepo" yaml:"helmRepo" jsonschema:"title=ArgoCD Helm Charts Repository"`
 }
 

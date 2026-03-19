@@ -21,6 +21,8 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		},
 	}
 	if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+		// HelmRepo currently shares RepoType with git repos, so both entries mirror
+		// the same optional URL.
 		argoCD.HelmRepo = RepoProto{
 			HTTPS: &RepoType{
 				Customer: Repository{
