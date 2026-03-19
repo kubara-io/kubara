@@ -24,19 +24,18 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: ArgoCD{
-			Repo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            e.ArgocdGitHttpsUrl,
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            e.ArgocdGitHttpsUrl,
-						TargetRevision: "main",
-					},
-				}},
-		},
+		ArgoCD: ArgoCD{Repo: RepoProto{
+			HTTPS: &RepoType{
+				Customer: Repository{
+					URL:            e.ArgocdGitHttpsUrl,
+					TargetRevision: "main",
+				},
+				Managed: Repository{
+					URL:            e.ArgocdGitHttpsUrl,
+					TargetRevision: "main",
+				},
+			},
+		}},
 		Services: Services{
 			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
 			CertManager: CertManagerService{
