@@ -20,7 +20,7 @@ It combines platform scaffolding, environment configuration, and production-read
 
 ## Installation
 
-See [INSTALLATION.md](./INSTALLATION.md) for Linux, macOS, and Windows installation instructions.
+See [INSTALLATION.md](docs/content/1_getting_started/installation.md) for Linux, macOS, and Windows installation instructions.
 
 ## Documentation
 
@@ -50,9 +50,14 @@ help, h    Shows a list of commands or help for one command
 --decode                          Base64 decode input
 --string string                   Input string for base64 operation
 --file string                     Input file path for base64 operation
+--check-update                    Check online for a newer kubara release
 --help, -h                        show help
 --version, -v                     print the version
 ```
+
+## Update Check
+
+- kubara checks for newer GitHub releases on each run; disable with `KUBARA_UPDATE_CHECK=0`; run `kubara --check-update` for a live check.
 
 ## Community and Support
 

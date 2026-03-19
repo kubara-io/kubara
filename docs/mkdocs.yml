@@ -7,6 +7,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Core Concept: 1_getting_started/overview_core_concept.md
+      - Installation: 1_getting_started/installation.md
       - Prerequisites: 1_getting_started/prerequisites.md
       - Bootstrap Your Platform: 1_getting_started/bootstrap_process.md
   - Managing Your Platform:
@@ -55,6 +56,8 @@ markdown_extensions:
   - attr_list
   - admonition
   - def_list
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
@@ -69,6 +72,7 @@ theme:
   features:
     - search.suggest
     - navigation.sections
+    - content.code.copy
   palette:
     # Palette toggle for automatic mode
     - media: "(prefers-color-scheme)"

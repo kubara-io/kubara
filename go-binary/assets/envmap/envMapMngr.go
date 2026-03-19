@@ -109,7 +109,7 @@ func (em *Manager) SaveToFile(path string) error {
 		if koanfKey == "" {
 			continue
 		}
-		b.WriteString(fmt.Sprintf("%s='%v'\n", koanfKey, fieldVal.Interface()))
+		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
 	}
 
 	return os.WriteFile(path, []byte(b.String()), 0600)
@@ -137,7 +137,7 @@ func (em *Manager) GenerateEnvExample() ([]byte, error) {
 		if koanfKey != "" {
 			// Use the default value from the tag, or the current value
 			defaultVal := fieldType.Tag.Get("default")
-			b.WriteString(fmt.Sprintf("%s='%s'\n", koanfKey, defaultVal))
+			fmt.Fprintf(&b, "%s='%s'\n", koanfKey, defaultVal)
 		}
 	}
 

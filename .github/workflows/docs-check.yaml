@@ -26,42 +26,18 @@ jobs:
       - name: Checkout kubara repo
         uses: actions/checkout@v6
 
-      - name: Read Python version from Pipfile
-        id: python-version
-        run: |
-          set -euo pipefail
-          PYTHON_VERSION="$(sed -nE 's/^python_full_version = "([^"]+)"/\1/p' Pipfile | head -n1)"
-          if [ -z "$PYTHON_VERSION" ]; then
-            PYTHON_VERSION="$(sed -nE 's/^python_version = "([^"]+)"/\1/p' Pipfile | head -n1)"
-          fi
-          if [ -z "$PYTHON_VERSION" ]; then
-            echo "::error::No python_full_version/python_version found in docs/Pipfile"
-            exit 1
-          fi
-          echo "version=$PYTHON_VERSION" >> "$GITHUB_OUTPUT"
+      - name: Install and setup uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: '0.10.11'
+          enable-cache: true
+          cache-dependency-glob: 'docs/uv.lock'
 
       - name: Set up Python
-        id: setup-python
-        uses: actions/setup-python@v6
-        with:
-          python-version: ${{ steps.python-version.outputs.version }}
-          cache: 'pip'
-          cache-dependency-path: 'docs/Pipfile.lock'
-
-      - name: Cache pipenv virtualenvs
-        uses: actions/cache@v5
-        with:
-          path: ~/.local/share/virtualenvs
-          key: ${{ runner.os }}-python-${{ steps.setup-python.outputs.python-version }}-pipenv-${{ hashFiles('docs/Pipfile.lock') }}
+        run: uv python install 3.14.3
 
       - name: Install dependencies
-        run: |
-          set -euo pipefail
-          python -m pip install --user --no-warn-script-location pipenv
-          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
-          "$HOME/.local/bin/pipenv" install --deploy
+        run: uv sync --frozen
 
       - name: Validate docs build (strict)
-        run: |
-          set -euo pipefail
-          "$HOME/.local/bin/pipenv" run mkdocs build --strict
+        run: uv run mkdocs build --strict
