@@ -18,7 +18,7 @@ bootstrapValues:
       namespace: argocd
       description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
       sourceRepos:
-        - "registry.onstackit.cloud/stackit-edge-cloud-blueprint"
+        - "{{ .cluster.argocd.helmRepo.https.customer.url | default "registry.onstackit.cloud/stackit-edge-cloud-blueprint" }}"
       orphanedResources:
         warn: false
         ignore:

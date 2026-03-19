@@ -15,6 +15,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
@@ -37,18 +38,32 @@ func TestNewClusterFromEnv(t *testing.T) {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: ArgoCD{Repo: RepoProto{
-			HTTPS: &RepoType{
-				Customer: Repository{
-					URL:            "https://github.com/org/repo.git",
-					TargetRevision: "main",
-				},
-				Managed: Repository{
-					URL:            "https://github.com/org/repo.git",
-					TargetRevision: "main",
+		ArgoCD: ArgoCD{
+			Repo: RepoProto{
+				HTTPS: &RepoType{
+					Customer: Repository{
+						URL:            "https://github.com/org/repo.git",
+						TargetRevision: "main",
+					},
+					Managed: Repository{
+						URL:            "https://github.com/org/repo.git",
+						TargetRevision: "main",
+					},
 				},
 			},
-		}},
+			HelmRepo: RepoProto{
+				HTTPS: &RepoType{
+					Customer: Repository{
+						URL:            "https://charts.example.com",
+						TargetRevision: "main",
+					},
+					Managed: Repository{
+						URL:            "https://charts.example.com",
+						TargetRevision: "main",
+					},
+				},
+			},
+		},
 		// The statuses of services are hardcoded in the function, so we mirror them here.
 		Services: Services{
 			Argocd:              GenericService{ServiceStatus{Status: StatusDisabled}},
