@@ -17,6 +17,12 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
+	sampleEnvMapWithoutHelmRepo := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
@@ -83,6 +89,8 @@ func TestNewClusterFromEnv(t *testing.T) {
 			Longhorn:            GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
 		},
 	}
+	expectedClusterWithoutHelmRepo := expectedCluster
+	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = RepoProto{}
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -99,6 +107,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 				e: sampleEnvMap,
 			},
 			want: expectedCluster,
+		},
+		{
+			name: "should not set helmRepo when no helm repo URL is provided",
+			args: args{
+				e: sampleEnvMapWithoutHelmRepo,
+			},
+			want: expectedClusterWithoutHelmRepo,
 		},
 	}
 

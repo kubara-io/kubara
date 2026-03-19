@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kubara/utils"
 	"reflect"
+	"strings"
 )
 
 type ErrorEnvMap struct {
@@ -40,9 +41,10 @@ type EnvMap struct {
 	_                           struct{} `doc:"\n### Argo CD related values"`
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
 	_                           struct{} `doc:"\n### Helm repository values"`
-	ArgocdHelmRepoUsername      string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_USERNAME"`
-	ArgocdHelmRepoPassword      string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_PASSWORD"`
-	ArgocdHelmRepoUrl           string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_URL"`
+	_                           struct{} `doc:"# Optional: leave empty if you do not use a separate Helm registry."`
+	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
+	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
+	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 	_                           struct{} `doc:"\n### Git repository values"`
 	ArgocdGitHttpsUrl           string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL"`
 	ArgocdGitPatOrPassword      string   `default:"<...>" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD"`
@@ -83,7 +85,7 @@ func (em *EnvMap) Validate() error {
 				varsNotSet = append(varsNotSet, fieldName)
 			}
 		}
-		if utils.IsDefaultValue(field, defaultTagVal) {
+		if utils.IsDefaultValue(field, defaultTagVal) && !isOptional {
 			defaultIsSet = append(defaultIsSet, fieldName)
 		}
 	}
@@ -124,4 +126,11 @@ func (em *EnvMap) setDefaults() {
 			}
 		}
 	}
+}
+
+// IsConfiguredEnvValue reports whether a value is explicitly configured by the user.
+// Empty strings and legacy "<...>" placeholders are treated as not configured.
+func IsConfiguredEnvValue(v string) bool {
+	trimmed := strings.TrimSpace(v)
+	return trimmed != "" && trimmed != "<...>"
 }

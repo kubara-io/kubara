@@ -18,7 +18,7 @@ bootstrapValues:
       namespace: argocd
       description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
       sourceRepos:
-        - "{{ .cluster.argocd.helmRepo.https.customer.url }}"
+        - "{{ .cluster.argocd.helmRepo.https.customer.url | default .cluster.argocd.repo.https.customer.url }}"
       orphanedResources:
         warn: false
         ignore:

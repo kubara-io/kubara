@@ -330,6 +330,62 @@ func TestTemplateFiles(t *testing.T) {
 			},
 		},
 		{
+			name:     "Success: Falls back to git repo URL when helm repo is missing",
+			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]interface{}{
+					"type":    "controlplane",
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"ssoOrg":  "myorg",
+					"ssoTeam": "myteam",
+					"services": map[string]interface{}{
+						"oauth2Proxy": map[string]interface{}{
+							"status": "enabled",
+						},
+						"certManager": map[string]interface{}{
+							"status": "enabled",
+							"clusterIssuer": map[string]interface{}{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"metalLb": map[string]interface{}{
+							"status": "enabled",
+						},
+						"kubePrometheusStack": map[string]interface{}{
+							"status": "enabled",
+						},
+					},
+					"publicLoadbalancerIP": "1.2.3.4",
+					"argocd": map[string]interface{}{
+						"repo": map[string]interface{}{
+							"https": map[string]interface{}{
+								"managed": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.Equal(t, "customer-service-catalog/helm/example/argo-cd/values.yaml.tplt", results[0].Path)
+				assert.NoError(t, results[0].Error)
+				assert.Contains(t, results[0].Content, "https://github.com/example/repo")
+				assert.NotContains(t, results[0].Content, "<no value>")
+			},
+		},
+		{
 			name:     "Success: Successfully copy non-template files",
 			fileList: []string{"managed-service-catalog/terraform/modules/ske-cluster/main.tf"},
 			context:  map[string]any{},

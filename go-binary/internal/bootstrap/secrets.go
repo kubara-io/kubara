@@ -138,6 +138,10 @@ func (sm *SecretManager) createImagePullSecret(em *envmap.EnvMap, namespace stri
 
 // createHelmRepositorySecret creates the Helm repository secret
 func (sm *SecretManager) createHelmRepositorySecret(em *envmap.EnvMap) *corev1.Secret {
+	if !envmap.IsConfiguredEnvValue(em.ArgocdHelmRepoUrl) {
+		return nil
+	}
+
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",

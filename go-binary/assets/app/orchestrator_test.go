@@ -83,3 +83,76 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.HTTPS.Managed.URL)
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.HTTPS.Customer.URL)
 }
+
+func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
+	cfg := &config.Config{
+		Clusters: []config.Cluster{
+			{
+				Name:    "kubara-test",
+				Stage:   "stage",
+				DNSName: "kubara-test-stage.example.com",
+				Terraform: &config.Terraform{
+					DNS: config.DNS{
+						Name: "kubara-test-stage.example.com",
+					},
+				},
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						HTTPS: &config.RepoType{
+							Customer: config.Repository{
+								URL:            "https://github.com/old/repo.git",
+								TargetRevision: "main",
+							},
+							Managed: config.Repository{
+								URL:            "https://github.com/old/repo.git",
+								TargetRevision: "main",
+							},
+						},
+					},
+					HelmRepo: config.RepoProto{
+						HTTPS: &config.RepoType{
+							Customer: config.Repository{
+								URL:            "https://charts.old.example.com",
+								TargetRevision: "main",
+							},
+							Managed: config.Repository{
+								URL:            "https://charts.old.example.com",
+								TargetRevision: "main",
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	e := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
+	}
+
+	CreateOrUpdateClusterFromEnv(cfg, e)
+
+	require.Len(t, cfg.Clusters, 1)
+	updated := cfg.Clusters[0]
+	require.NotNil(t, updated.ArgoCD.HelmRepo.HTTPS)
+	assert.Equal(t, "https://charts.old.example.com", updated.ArgoCD.HelmRepo.HTTPS.Managed.URL)
+	assert.Equal(t, "https://charts.old.example.com", updated.ArgoCD.HelmRepo.HTTPS.Customer.URL)
+}
+
+func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
+	cfg := &config.Config{}
+	e := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
+	}
+
+	CreateOrUpdateClusterFromEnv(cfg, e)
+
+	require.Len(t, cfg.Clusters, 1)
+	cluster := cfg.Clusters[0]
+	assert.Nil(t, cluster.ArgoCD.HelmRepo.HTTPS)
+}

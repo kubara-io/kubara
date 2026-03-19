@@ -493,6 +493,9 @@ func TestManager_GenerateEnvExample(t *testing.T) {
 				assert.Contains(t, outputStr, "DOMAIN_NAME='<...>'")
 				assert.Contains(t, outputStr, "DOCKERCONFIG_BASE64='<...>'")
 				assert.Contains(t, outputStr, "ARGOCD_WIZARD_ACCOUNT_PASSWORD='<...>'")
+				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_USERNAME=''")
+				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_PASSWORD=''")
+				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_URL=''")
 			},
 		},
 		{

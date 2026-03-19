@@ -6,6 +6,34 @@ import "kubara/assets/envmap"
 // values and information from an EnvMap.
 func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	argoCD := ArgoCD{
+		Repo: RepoProto{
+			HTTPS: &RepoType{
+				Customer: Repository{
+					URL:            e.ArgocdGitHttpsUrl,
+					TargetRevision: "main",
+				},
+				Managed: Repository{
+					URL:            e.ArgocdGitHttpsUrl,
+					TargetRevision: "main",
+				},
+			},
+		},
+	}
+	if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+		argoCD.HelmRepo = RepoProto{
+			HTTPS: &RepoType{
+				Customer: Repository{
+					URL:            e.ArgocdHelmRepoUrl,
+					TargetRevision: "main",
+				},
+				Managed: Repository{
+					URL:            e.ArgocdHelmRepoUrl,
+					TargetRevision: "main",
+				},
+			},
+		}
+	}
 
 	return Cluster{
 		Name:             e.ProjectName,
@@ -24,32 +52,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: ArgoCD{
-			Repo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            e.ArgocdGitHttpsUrl,
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            e.ArgocdGitHttpsUrl,
-						TargetRevision: "main",
-					},
-				},
-			},
-			HelmRepo: RepoProto{
-				HTTPS: &RepoType{
-					Customer: Repository{
-						URL:            e.ArgocdHelmRepoUrl,
-						TargetRevision: "main",
-					},
-					Managed: Repository{
-						URL:            e.ArgocdHelmRepoUrl,
-						TargetRevision: "main",
-					},
-				},
-			},
-		},
+		ArgoCD: argoCD,
 		Services: Services{
 			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
 			CertManager: CertManagerService{
