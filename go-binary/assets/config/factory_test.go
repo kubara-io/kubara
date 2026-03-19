@@ -23,6 +23,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
+	sampleEnvMapWithOCIHelmRepo := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
+	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
@@ -82,6 +89,10 @@ func TestNewClusterFromEnv(t *testing.T) {
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
 	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
+	expectedClusterWithOCIHelmRepo := expectedCluster
+	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
+		URL: "registry-1.docker.io/bitnamicharts",
+	}
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -105,6 +116,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 				e: sampleEnvMapWithoutHelmRepo,
 			},
 			want: expectedClusterWithoutHelmRepo,
+		},
+		{
+			name: "should normalize oci helm repo URL",
+			args: args{
+				e: sampleEnvMapWithOCIHelmRepo,
+			},
+			want: expectedClusterWithOCIHelmRepo,
 		},
 	}
 

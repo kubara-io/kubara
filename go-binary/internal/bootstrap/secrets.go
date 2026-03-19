@@ -141,6 +141,18 @@ func (sm *SecretManager) createHelmRepositorySecret(em *envmap.EnvMap) *corev1.S
 	if !envmap.IsConfiguredEnvValue(em.ArgocdHelmRepoUrl) {
 		return nil
 	}
+	helmRepoURL := envmap.NormalizeHelmRepoURL(em.ArgocdHelmRepoUrl)
+	stringData := map[string]string{
+		"url":      helmRepoURL,
+		"name":     "helm-chart-repository",
+		"password": em.ArgocdHelmRepoPassword,
+		"project":  fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
+		"type":     "helm",
+		"username": em.ArgocdHelmRepoUsername,
+	}
+	if envmap.IsOCIHelmRepoURL(em.ArgocdHelmRepoUrl) {
+		stringData["enableOCI"] = "true"
+	}
 
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -157,16 +169,8 @@ func (sm *SecretManager) createHelmRepositorySecret(em *envmap.EnvMap) *corev1.S
 				"managed-by": "argocd.argoproj.io",
 			},
 		},
-		Type: corev1.SecretTypeOpaque,
-		StringData: map[string]string{
-			"enableOCI": "true",
-			"url":       em.ArgocdHelmRepoUrl,
-			"name":      "helm-chart-repository",
-			"password":  em.ArgocdHelmRepoPassword,
-			"project":   fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
-			"type":      "helm",
-			"username":  em.ArgocdHelmRepoUsername,
-		},
+		Type:       corev1.SecretTypeOpaque,
+		StringData: stringData,
 	}
 }
 

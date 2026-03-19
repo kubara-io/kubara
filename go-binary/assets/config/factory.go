@@ -21,8 +21,9 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		},
 	}
 	if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+		helmRepoURL := envmap.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 		argoCD.HelmRepo = &HelmRepository{
-			URL: e.ArgocdHelmRepoUrl,
+			URL: helmRepoURL,
 		}
 	}
 

@@ -42,6 +42,7 @@ type EnvMap struct {
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
 	_                           struct{} `doc:"\n### Helm repository values"`
 	_                           struct{} `doc:"# Optional: leave empty if you do not use a separate Helm registry."`
+	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or oci://... / registry... (OCI Helm registry)."`
 	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
 	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
 	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
@@ -133,4 +134,26 @@ func (em *EnvMap) setDefaults() {
 func IsConfiguredEnvValue(v string) bool {
 	trimmed := strings.TrimSpace(v)
 	return trimmed != "" && trimmed != "<...>"
+}
+
+// NormalizeHelmRepoURL normalizes Helm repository inputs for ArgoCD.
+// If oci:// is provided, it is removed because ArgoCD helm repository
+// credentials expect the registry URL without the scheme.
+func NormalizeHelmRepoURL(v string) string {
+	trimmed := strings.TrimSpace(v)
+	if strings.HasPrefix(strings.ToLower(trimmed), "oci://") {
+		return trimmed[len("oci://"):]
+	}
+	return trimmed
+}
+
+// IsOCIHelmRepoURL reports whether a Helm repository URL should be treated
+// as OCI. HTTPS/HTTP URLs are treated as classic Helm repos.
+func IsOCIHelmRepoURL(v string) bool {
+	normalized := NormalizeHelmRepoURL(v)
+	if normalized == "" {
+		return false
+	}
+	lower := strings.ToLower(normalized)
+	return !strings.HasPrefix(lower, "https://") && !strings.HasPrefix(lower, "http://")
 }

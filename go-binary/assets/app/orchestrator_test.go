@@ -142,3 +142,21 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 	cluster := cfg.Clusters[0]
 	assert.Nil(t, cluster.ArgoCD.HelmRepo)
 }
+
+func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
+	cfg := &config.Config{}
+	e := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
+		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
+	}
+
+	CreateOrUpdateClusterFromEnv(cfg, e)
+
+	require.Len(t, cfg.Clusters, 1)
+	cluster := cfg.Clusters[0]
+	require.NotNil(t, cluster.ArgoCD.HelmRepo)
+	assert.Equal(t, "registry-1.docker.io/bitnamicharts", cluster.ArgoCD.HelmRepo.URL)
+}
