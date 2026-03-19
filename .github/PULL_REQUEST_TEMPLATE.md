@@ -1,4 +1,4 @@
-Please read first: https://docs.kubara.io/latest-stable/5_community/contributing/
+Please read first: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
   
 ## 📝 Summary
 <!-- What does this PR do? e.g. "Adds Terraform module for SKE setup" -->

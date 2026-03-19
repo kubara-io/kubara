@@ -56,6 +56,8 @@ markdown_extensions:
   - attr_list
   - admonition
   - def_list
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.superfences:
       custom_fences:
         - name: mermaid
