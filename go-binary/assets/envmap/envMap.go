@@ -42,7 +42,8 @@ type EnvMap struct {
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
 	_                           struct{} `doc:"\n### Helm repository values"`
 	_                           struct{} `doc:"# Optional: leave empty if you do not use a separate Helm registry."`
-	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or oci://... / registry... (OCI Helm registry)."`
+	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
+	_                           struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
 	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
 	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
 	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
