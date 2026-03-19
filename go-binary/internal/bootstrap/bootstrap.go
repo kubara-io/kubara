@@ -3,7 +3,6 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -329,29 +328,44 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 	return nil
 }
 
+// Helper struct for seperation of concerns and better testability
+type CompletionLogConfig struct {
+	ProjectName    string
+	ProjectStage   string
+	DomainName     string
+	WizardPassword string
+	ClusterDNSName string
+}
+
 // printCompletionMessage prints the completion message with access instructions
 func printCompletionMessage(opts *Options) {
 	if opts.DryRun {
 		log.Info().Msg("[DRY-RUN] ArgoCD bootstrap completed successfully")
-		return
+	} else {
+		config := CompletionLogConfig{}
+		config.ProjectName = opts.EnvMap.ProjectStage
+		config.ProjectStage = opts.EnvMap.ProjectStage
+		config.DomainName = opts.EnvMap.DomainName
+		config.ClusterDNSName = opts.ClusterConfig.DNSName
+		config.WizardPassword = opts.EnvMap.ArgocdWizardAccountPassword
+		log.Info().Msg(CreateCompletionMessage(config))
 	}
-	envMap := opts.EnvMap
-	password := envMap.ArgocdWizardAccountPassword
+}
 
-	dns := os.Getenv("DNS_NAME")
-	if envMap.DomainName != "" {
-		dns = envMap.DomainName
+// CreateCompletionMessage take a given CompletionLogConfig
+// Depending on the fields set inside the config, the function returns a formatted message with either the full url being present or omitted
+func CreateCompletionMessage(config CompletionLogConfig) string {
+	formattedOutput := ""
+	// TODO: check are they ever not set?
+	if config.ProjectName != "" && config.ProjectStage != "" {
+		domainName := config.DomainName
+		if config.ClusterDNSName != "" {
+			domainName = config.ClusterDNSName
+		}
+		completeDomainName := config.ProjectName + "-" + config.ProjectStage + "." + domainName
+		formattedOutput = fmt.Sprintf(" or try: http://%s/argocd (if ingress is running)", completeDomainName)
 	}
-	if opts.ClusterConfig.DNSName != "" {
-		dns = opts.ClusterConfig.DNSName
-	}
-
-	ingressMsg := ""
-	if dns != "" {
-		ingressMsg = fmt.Sprintf(" or try: https://%s/argocd (if ingress is running)", dns)
-	}
-
-	log.Info().Msgf(`
+	return fmt.Sprintf(`
 🎉 ArgoCD bootstrap complete!
 
 You can access the Argo CD UI with user "wizard" and your chosen password "%s" at:
@@ -363,6 +377,5 @@ Then open: http://localhost:8080/argocd%s
 📝 Next steps:
 1. Log in with username: wizard
 2. Configure your applications
-3. Set up monitoring and logging as needed
-`, password, ingressMsg)
+3. Set up monitoring and logging as needed`, config.WizardPassword, formattedOutput)
 }
