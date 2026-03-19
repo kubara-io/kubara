@@ -339,11 +339,8 @@ func TestTemplateFiles(t *testing.T) {
 				require.True(t, ok)
 				sourceRepos, ok := project["sourceRepos"].([]interface{})
 				require.True(t, ok)
-				require.Len(t, sourceRepos, 4)
-				assert.Equal(t, "https://github.com/example/repo", sourceRepos[0])
-				assert.Equal(t, "https://github.com/example/repo", sourceRepos[1])
-				assert.Equal(t, "https://charts.example.com", sourceRepos[2])
-				assert.Equal(t, "https://charts.example.com", sourceRepos[3])
+				require.Len(t, sourceRepos, 1)
+				assert.Equal(t, "https://charts.example.com", sourceRepos[0])
 			},
 		},
 		{
@@ -408,11 +405,8 @@ func TestTemplateFiles(t *testing.T) {
 				require.True(t, ok)
 				project, ok := projects["test-cluster-dev"].(map[string]interface{})
 				require.True(t, ok)
-				sourceRepos, ok := project["sourceRepos"].([]interface{})
-				require.True(t, ok)
-				require.Len(t, sourceRepos, 2)
-				assert.Equal(t, "https://github.com/example/repo", sourceRepos[0])
-				assert.Equal(t, "https://github.com/example/repo", sourceRepos[1])
+				_, hasSourceRepos := project["sourceRepos"]
+				assert.False(t, hasSourceRepos)
 				assert.NotContains(t, results[0].Content, "<no value>")
 			},
 		},

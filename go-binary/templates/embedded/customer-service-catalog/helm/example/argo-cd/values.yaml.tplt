@@ -17,13 +17,10 @@ bootstrapValues:
       name: "{{ .cluster.name }}-{{ .cluster.stage }}"
       namespace: argocd
       description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
+      {{- if .cluster.argocd.helmRepo.https.customer.url }}
       sourceRepos:
-        - "{{ .cluster.argocd.repo.https.managed.url }}"
-        - "{{ .cluster.argocd.repo.https.customer.url }}"
-        {{- if or .cluster.argocd.helmRepo.https.managed.url .cluster.argocd.helmRepo.https.customer.url }}
-        - "{{ .cluster.argocd.helmRepo.https.managed.url | default .cluster.argocd.helmRepo.https.customer.url }}"
-        - "{{ .cluster.argocd.helmRepo.https.customer.url | default .cluster.argocd.helmRepo.https.managed.url }}"
-        {{- end }}
+        - "{{ .cluster.argocd.helmRepo.https.customer.url }}"
+      {{- end }}
       orphanedResources:
         warn: false
         ignore:
