@@ -52,7 +52,7 @@ jobs:
       - name: Create GitHub App token for Renovate auto-fix pushes
         id: renovate-app-token
         if: ${{ always() && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && (startsWith(github.event.pull_request.head.ref, 'renovate/') || contains(github.event.pull_request.user.login, 'renovate')) }}
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.RENOVATE_GITHUB_APP_ID }}
           private-key: ${{ secrets.RENOVATE_GITHUB_APP_PRIVATE_KEY }}

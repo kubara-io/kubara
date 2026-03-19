@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Create GitHub App token for docs publish
         id: docs-app-token
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_ID }}
           private-key: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_PRIVATE_KEY }}
