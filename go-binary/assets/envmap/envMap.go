@@ -40,13 +40,6 @@ type EnvMap struct {
 	DockerconfigBase64          string   `default:"<...>" koanf:"DOCKERCONFIG_BASE64"`
 	_                           struct{} `doc:"\n### Argo CD related values"`
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
-	_                           struct{} `doc:"\n### Helm repository values"`
-	_                           struct{} `doc:"# Optional: leave empty if you do not use a separate Helm registry."`
-	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
-	_                           struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
-	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
-	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
-	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 	_                           struct{} `doc:"\n### Git repository values"`
 	ArgocdGitHttpsUrl           string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL"`
 	ArgocdGitPatOrPassword      string   `default:"<...>" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD"`
@@ -56,6 +49,13 @@ type EnvMap struct {
 	_                           struct{} `doc:"# The resulting dnsZone name will be a concatenation of <PROJECT_NAME>-<PROJECT_STAGE>.<DOMAIN_NAME>"`
 	_                           struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
 	DomainName                  string   `default:"<...>" koanf:"DOMAIN_NAME"`
+	_                           struct{} `doc:"\n### Optional values"`
+	_                           struct{} `doc:"# Helm repository values (leave empty to disable)."`
+	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
+	_                           struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
+	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
+	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
+	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 }
 
 // ValidateAll performs basic validation on the envMap.
