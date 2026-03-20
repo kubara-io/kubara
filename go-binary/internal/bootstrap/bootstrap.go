@@ -328,11 +328,8 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 	return nil
 }
 
-// Helper struct for seperation of concerns and better testability
+// CompletionLogConfig contains the data needed to render the bootstrap completion output.
 type CompletionLogConfig struct {
-	ProjectName    string
-	ProjectStage   string
-	DomainName     string
 	WizardPassword string
 	ClusterDNSName string
 }
@@ -343,28 +340,26 @@ func printCompletionMessage(opts *Options) {
 		log.Info().Msg("[DRY-RUN] ArgoCD bootstrap completed successfully")
 	} else {
 		config := CompletionLogConfig{}
-		config.ProjectName = opts.EnvMap.ProjectStage
-		config.ProjectStage = opts.EnvMap.ProjectStage
-		config.DomainName = opts.EnvMap.DomainName
-		config.ClusterDNSName = opts.ClusterConfig.DNSName
+		if opts.ClusterConfig != nil {
+			config.ClusterDNSName = opts.ClusterConfig.DNSName
+		}
 		config.WizardPassword = opts.EnvMap.ArgocdWizardAccountPassword
 		log.Info().Msg(CreateCompletionMessage(config))
 	}
 }
 
-// CreateCompletionMessage take a given CompletionLogConfig
-// Depending on the fields set inside the config, the function returns a formatted message with either the full url being present or omitted
+func completionIngressHost(config CompletionLogConfig) string {
+	return config.ClusterDNSName
+}
+
+// CreateCompletionMessage returns the formatted completion message.
 func CreateCompletionMessage(config CompletionLogConfig) string {
 	formattedOutput := ""
-	// TODO: check are they ever not set?
-	if config.ProjectName != "" && config.ProjectStage != "" {
-		domainName := config.DomainName
-		if config.ClusterDNSName != "" {
-			domainName = config.ClusterDNSName
-		}
-		completeDomainName := config.ProjectName + "-" + config.ProjectStage + "." + domainName
-		formattedOutput = fmt.Sprintf(" or try: http://%s/argocd (if ingress is running)", completeDomainName)
+	ingressHost := completionIngressHost(config)
+	if ingressHost != "" {
+		formattedOutput = fmt.Sprintf(" or try: https://%s/argocd (if ingress is running)", ingressHost)
 	}
+
 	return fmt.Sprintf(`
 🎉 ArgoCD bootstrap complete!
 
