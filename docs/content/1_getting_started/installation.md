@@ -27,6 +27,25 @@ You do not need Go installed to run the CLI.
     brew uninstall kubara
     ```
 
+=== "APT"
+
+    **Install**
+
+    ```bash
+    sudo install -d -m 0755 /etc/apt/keyrings
+    curl -fsSL https://apt.kubara.io/apt-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubara.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://apt.kubara.io stable main" | sudo tee /etc/apt/sources.list.d/kubara.list > /dev/null
+    sudo apt update
+    sudo apt install -y kubara
+    ```
+
+    **Uninstall**
+
+    ```bash
+    sudo apt remove -y kubara
+    sudo rm -f /etc/apt/sources.list.d/kubara.list /etc/apt/keyrings/kubara.gpg
+    sudo apt update
+    ```
 === "Docker"
 
     For commands that need cluster access (e.g. `bootstrap`), mount your kubeconfig:
