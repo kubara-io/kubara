@@ -12,7 +12,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: gh-pages-publish # Changed: Matches the APT repo to prevent git push conflicts
+  group: docs-gh-pages
   cancel-in-progress: false
 
 jobs:

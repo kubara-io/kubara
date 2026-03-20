@@ -33,8 +33,8 @@ You do not need Go installed to run the CLI.
 
     ```bash
     sudo install -d -m 0755 /etc/apt/keyrings
-    curl -fsSL https://docs.kubara.io/apt-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubara.gpg
-    echo "deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://docs.kubara.io stable main" | sudo tee /etc/apt/sources.list.d/kubara.list > /dev/null
+    curl -fsSL https://apt.kubara.io/apt-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubara.gpg
+    echo "deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://apt.kubara.io stable main" | sudo tee /etc/apt/sources.list.d/kubara.list > /dev/null
     sudo apt update
     sudo apt install -y kubara
     ```

@@ -186,12 +186,6 @@ nfpms:
   - id: kubara-packages
     ids:
       - kubara-linux
-
     maintainer: "Kubara Maintainer <kubara@schwary.digits>"
-
     formats:
-      - apk
       - deb
-      - rpm
-      - termux.deb
-      - archlinux
