@@ -1,93 +1,73 @@
 # Installation
 
-kubara is distributed as prebuilt release archives. You do not need Go installed to run the CLI.
+kubara is distributed via Homebrew and as prebuilt release archives.
+You do not need Go installed to run the CLI.
 
 ## Installation Methods
 
-=== "Homebrew (macOS / Linux)"
+=== "Homebrew"
 
     **Install**
-    ```shell
+
+    ```bash
     brew tap kubara-io/tap
     brew install kubara
+    kubara --help
     ```
 
     **Update**
-    ```shell
+
+    ```bash
     brew upgrade kubara
     ```
 
     **Uninstall**
-    ```shell
+
+    ```bash
     brew uninstall kubara
     ```
 
-=== "APT (Ubuntu / Debian)"
+=== "Docker"
 
-    **1. Download the key securely**
-    ```shell
-    curl -fsSL https://docs.kubara.io/apt-public.key | sudo gpg --dearmor -o /etc/apt/keyrings/kubara.gpg
-    ```
+    For commands that need cluster access (e.g. `bootstrap`), mount your kubeconfig:
 
-    **2. Add the repo**
-    ```shell
-    echo "deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://docs.kubara.io stable main" | sudo tee /etc/apt/sources.list.d/kubara.list > /dev/null
-    ```
-
-    **3. Update and install**
-    ```shell
-    sudo apt update
-    sudo apt install -y kubara
-    ```
-
-    **Uninstall**
-    ```shell
-    sudo apt remove kubara
-    ```
-
-=== "Docker (Universal)"
-
-    **Run**
     ```bash
     docker run --rm \
-    -u $(id -u):$(id -g) \
-    -v ~/.kube/config:/kubeconfig:ro \
-    -v $(pwd):/workspace \
-    -w /workspace \
-    ghcr.io/kubara/kubara/kubara <your-command>
+      -u $(id -u):$(id -g) \
+      -v ~/.kube/config:/kubeconfig:ro \
+      -v $(pwd):/workspace \
+      -w /workspace \
+      ghcr.io/kubara-io/kubara <your-command>
     ```
 
-=== "Install Script (macOS / Linux)"
+    For local-only commands (e.g. `init`, `generate`, `schema`), kubeconfig is not required:
 
-    **Install**
-    ```shell
+    ```bash
+    docker run --rm \
+      -u $(id -u):$(id -g) \
+      -v $(pwd):/workspace \
+      -w /workspace \
+      ghcr.io/kubara-io/kubara <your-command>
+    ```
+
+=== "Install Script"
+
+    ```bash
     curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh | sh
+    kubara --help
     ```
 
-    **Upgrade**
+    The script downloads the latest release for your platform and verifies checksums automatically.
 
-    Run above command again
+=== "Manual (macOS/Linux)"
 
-    **Uninstall**
-    ```shell
-    rm $HOME/.local/bin/kubara
-    ```
+    Download the matching release archive from:
 
-=== "Manual Download"
-
-    If you prefer to install manually or are using Windows, you can download the prebuilt binaries directly.
-
-    Get binaries from: <https://github.com/kubara-io/kubara/releases>
+    <https://github.com/kubara-io/kubara/releases>
 
     Current release artifacts:
-
     - Linux: `kubara_<version>_linux_amd64.tar.gz`, `kubara_<version>_linux_arm64.tar.gz`
     - macOS: `kubara_<version>_darwin_amd64.tar.gz`, `kubara_<version>_darwin_arm64.tar.gz`
-    - Windows: `kubara_<version>_windows_amd64.zip`, `kubara_<version>_windows_arm64.zip`
-
-    **Linux / macOS (Terminal)**
-
-    Download the appropriate `.tar.gz` file for your system, then run the following commands in your terminal:
 
     ```bash
     tar -xzf kubara_<version>_<os>_<arch>.tar.gz
@@ -96,26 +76,35 @@ kubara is distributed as prebuilt release archives. You do not need Go installed
     kubara --help
     ```
 
-    **Windows**
+=== "Manual (Windows)"
 
-    1. Download the matching Windows `.zip` release asset and extract it.
-    2. Open a terminal (PowerShell) in the extracted folder and run:
+    Download the matching Windows `.zip` release asset from:
+
+    <https://github.com/kubara-io/kubara/releases>
+
+    Current release artifacts:
+    - `kubara_<version>_windows_amd64.zip`
+    - `kubara_<version>_windows_arm64.zip`
+
+    Open a terminal (PowerShell) in the extracted folder and run:
 
     ```powershell
     .\kubara.exe --help
     ```
 
-    *Optional: Move `kubara.exe` to a directory included in your system's `PATH` variable for easier access.*
+    Optional: move `kubara.exe` to a directory in your `PATH`.
 
-    ## Verify Checksums (Optional)
-    
-    Each release includes a checksum file. To verify the integrity of your download on Linux or macOS, run the following in your terminal:
-    
-    **Linux:**
-    ```bash
-    sha256sum kubara_<version>_<os>_<arch>.<ext>
-    ```
-    
-    **MacOS**
-    shasum -a 256 kubara_<version>_<os>_<arch>.<ext>
-    ```
+## Verify Checksums
+
+Each release includes a checksum file.
+Run these checksum commands in your terminal on Linux/macOS:
+
+```bash
+sha256sum kubara_<version>_<os>_<arch>.<ext>
+```
+
+On macOS you can also use:
+
+```bash
+shasum -a 256 kubara_<version>_<os>_<arch>.<ext>
+```

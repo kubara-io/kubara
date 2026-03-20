@@ -177,7 +177,7 @@ homebrew_casks:
 dockers_v2:
   - dockerfile: ../Dockerfile
     images:
-      - "ghcr.io/kubara/kubara"
+      - "ghcr.io/kubara-io/kubara"
     tags:
       - "{{ .Version }}"
       - "latest"
