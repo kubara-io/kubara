@@ -3,7 +3,6 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -329,29 +328,39 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 	return nil
 }
 
+// CompletionLogConfig contains the data needed to render the bootstrap completion output.
+type CompletionLogConfig struct {
+	WizardPassword string
+	ClusterDNSName string
+}
+
 // printCompletionMessage prints the completion message with access instructions
 func printCompletionMessage(opts *Options) {
 	if opts.DryRun {
 		log.Info().Msg("[DRY-RUN] ArgoCD bootstrap completed successfully")
-		return
+	} else {
+		config := CompletionLogConfig{}
+		if opts.ClusterConfig != nil {
+			config.ClusterDNSName = opts.ClusterConfig.DNSName
+		}
+		config.WizardPassword = opts.EnvMap.ArgocdWizardAccountPassword
+		log.Info().Msg(CreateCompletionMessage(config))
 	}
-	envMap := opts.EnvMap
-	password := envMap.ArgocdWizardAccountPassword
+}
 
-	dns := os.Getenv("DNS_NAME")
-	if envMap.DomainName != "" {
-		dns = envMap.DomainName
-	}
-	if opts.ClusterConfig.DNSName != "" {
-		dns = opts.ClusterConfig.DNSName
+func completionIngressHost(config CompletionLogConfig) string {
+	return config.ClusterDNSName
+}
+
+// CreateCompletionMessage returns the formatted completion message.
+func CreateCompletionMessage(config CompletionLogConfig) string {
+	formattedOutput := ""
+	ingressHost := completionIngressHost(config)
+	if ingressHost != "" {
+		formattedOutput = fmt.Sprintf(" or try: https://%s/argocd (if ingress is running)", ingressHost)
 	}
 
-	ingressMsg := ""
-	if dns != "" {
-		ingressMsg = fmt.Sprintf(" or try: https://%s/argocd (if ingress is running)", dns)
-	}
-
-	log.Info().Msgf(`
+	return fmt.Sprintf(`
 🎉 ArgoCD bootstrap complete!
 
 You can access the Argo CD UI with user "wizard" and your chosen password "%s" at:
@@ -363,6 +372,5 @@ Then open: http://localhost:8080/argocd%s
 📝 Next steps:
 1. Log in with username: wizard
 2. Configure your applications
-3. Set up monitoring and logging as needed
-`, password, ingressMsg)
+3. Set up monitoring and logging as needed`, config.WizardPassword, formattedOutput)
 }
