@@ -15,6 +15,20 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+		ArgocdHelmRepoUrl: "https://charts.example.com",
+	}
+	sampleEnvMapWithoutHelmRepo := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+	}
+	sampleEnvMapWithOCIHelmRepo := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
@@ -37,18 +51,23 @@ func TestNewClusterFromEnv(t *testing.T) {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: ArgoCD{Repo: RepoProto{
-			HTTPS: &RepoType{
-				Customer: Repository{
-					URL:            "https://github.com/org/repo.git",
-					TargetRevision: "main",
-				},
-				Managed: Repository{
-					URL:            "https://github.com/org/repo.git",
-					TargetRevision: "main",
+		ArgoCD: ArgoCD{
+			Repo: RepoProto{
+				HTTPS: &RepoType{
+					Customer: Repository{
+						URL:            "https://github.com/org/repo.git",
+						TargetRevision: "main",
+					},
+					Managed: Repository{
+						URL:            "https://github.com/org/repo.git",
+						TargetRevision: "main",
+					},
 				},
 			},
-		}},
+			HelmRepo: &HelmRepository{
+				URL: "https://charts.example.com",
+			},
+		},
 		// The statuses of services are hardcoded in the function, so we mirror them here.
 		Services: Services{
 			Argocd:              GenericService{ServiceStatus{Status: StatusDisabled}},
@@ -68,6 +87,12 @@ func TestNewClusterFromEnv(t *testing.T) {
 			Longhorn:            GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
 		},
 	}
+	expectedClusterWithoutHelmRepo := expectedCluster
+	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
+	expectedClusterWithOCIHelmRepo := expectedCluster
+	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
+		URL: "registry-1.docker.io/bitnamicharts",
+	}
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -84,6 +109,20 @@ func TestNewClusterFromEnv(t *testing.T) {
 				e: sampleEnvMap,
 			},
 			want: expectedCluster,
+		},
+		{
+			name: "should not set helmRepo when no helm repo URL is provided",
+			args: args{
+				e: sampleEnvMapWithoutHelmRepo,
+			},
+			want: expectedClusterWithoutHelmRepo,
+		},
+		{
+			name: "should normalize oci helm repo URL",
+			args: args{
+				e: sampleEnvMapWithOCIHelmRepo,
+			},
+			want: expectedClusterWithOCIHelmRepo,
 		},
 	}
 

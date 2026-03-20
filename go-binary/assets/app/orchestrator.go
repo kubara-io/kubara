@@ -23,6 +23,12 @@ func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) {
 			cfg.Clusters[i].Terraform.DNS.Name = dnsName
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
+			if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+				helmRepoURL := envmap.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
+				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{
+					URL: helmRepoURL,
+				}
+			}
 
 			return
 		}

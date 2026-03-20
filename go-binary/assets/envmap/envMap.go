@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"kubara/utils"
 	"reflect"
+	"strings"
 )
 
 type ErrorEnvMap struct {
@@ -39,10 +40,6 @@ type EnvMap struct {
 	DockerconfigBase64          string   `default:"<...>" koanf:"DOCKERCONFIG_BASE64"`
 	_                           struct{} `doc:"\n### Argo CD related values"`
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
-	_                           struct{} `doc:"\n### Helm repository values"`
-	ArgocdHelmRepoUsername      string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_USERNAME"`
-	ArgocdHelmRepoPassword      string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_PASSWORD"`
-	ArgocdHelmRepoUrl           string   `default:"<...>" koanf:"ARGOCD_HELM_REPO_URL"`
 	_                           struct{} `doc:"\n### Git repository values"`
 	ArgocdGitHttpsUrl           string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL"`
 	ArgocdGitPatOrPassword      string   `default:"<...>" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD"`
@@ -52,6 +49,13 @@ type EnvMap struct {
 	_                           struct{} `doc:"# The resulting dnsZone name will be a concatenation of <PROJECT_NAME>-<PROJECT_STAGE>.<DOMAIN_NAME>"`
 	_                           struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
 	DomainName                  string   `default:"<...>" koanf:"DOMAIN_NAME"`
+	_                           struct{} `doc:"\n### Optional values"`
+	_                           struct{} `doc:"# Helm repository values (leave empty to disable)."`
+	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
+	_                           struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
+	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
+	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
+	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 }
 
 // ValidateAll performs basic validation on the envMap.
@@ -83,7 +87,7 @@ func (em *EnvMap) Validate() error {
 				varsNotSet = append(varsNotSet, fieldName)
 			}
 		}
-		if utils.IsDefaultValue(field, defaultTagVal) {
+		if utils.IsDefaultValue(field, defaultTagVal) && !isOptional {
 			defaultIsSet = append(defaultIsSet, fieldName)
 		}
 	}
@@ -124,4 +128,33 @@ func (em *EnvMap) setDefaults() {
 			}
 		}
 	}
+}
+
+// IsConfiguredEnvValue reports whether a value is explicitly configured by the user.
+// Empty strings and legacy "<...>" placeholders are treated as not configured.
+func IsConfiguredEnvValue(v string) bool {
+	trimmed := strings.TrimSpace(v)
+	return trimmed != "" && trimmed != "<...>"
+}
+
+// NormalizeHelmRepoURL normalizes Helm repository inputs for ArgoCD.
+// If oci:// is provided, it is removed because ArgoCD helm repository
+// credentials expect the registry URL without the scheme.
+func NormalizeHelmRepoURL(v string) string {
+	trimmed := strings.TrimSpace(v)
+	if strings.HasPrefix(strings.ToLower(trimmed), "oci://") {
+		return trimmed[len("oci://"):]
+	}
+	return trimmed
+}
+
+// IsOCIHelmRepoURL reports whether a Helm repository URL should be treated
+// as OCI. HTTPS/HTTP URLs are treated as classic Helm repos.
+func IsOCIHelmRepoURL(v string) bool {
+	normalized := NormalizeHelmRepoURL(v)
+	if normalized == "" {
+		return false
+	}
+	lower := strings.ToLower(normalized)
+	return !strings.HasPrefix(lower, "https://") && !strings.HasPrefix(lower, "http://")
 }
