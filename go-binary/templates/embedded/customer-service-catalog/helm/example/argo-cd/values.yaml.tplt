@@ -17,8 +17,10 @@ bootstrapValues:
       name: "{{ .cluster.name }}-{{ .cluster.stage }}"
       namespace: argocd
       description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
+      {{- if .cluster.argocd.helmRepo.url }}
       sourceRepos:
-        - "registry.onstackit.cloud/stackit-edge-cloud-blueprint"
+        - "{{ .cluster.argocd.helmRepo.url }}"
+      {{- end }}
       orphanedResources:
         warn: false
         ignore:
@@ -157,8 +159,8 @@ argo-cd:
         {{- if (eq .cluster.services.metalLb.status "enabled") }}
         external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
         {{- end }}
-  {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
   configs:
+    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
     cm:
       url: https://{{ .cluster.dnsName }}/argocd
       dex.config: |

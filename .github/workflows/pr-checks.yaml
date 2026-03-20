@@ -17,11 +17,15 @@ env:
   REPORT_DIR: ${{ github.workspace }}/reports
   RENDER_DIR: ${{ github.workspace }}/rendered
   OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
-  GOSEC_VERSION: "v2.22.11"
-  GOLANGCI_LINT_VERSION: "v2.8.0"
-  ARTIFACT_RETENTION_DAYS: "15"
-  HELM_VERSION: "v4.1.0"
+  # renovate: datasource=github-releases depName=golangci/golangci-lint
+  GOLANGCI_LINT_VERSION: "v2.11.3"
+  # renovate: datasource=github-releases depName=securego/gosec
+  GOSEC_VERSION: "v2.25.0"
+  # renovate: datasource=github-releases depName=yannh/kubeconform
   KUBECONFORM_VERSION: "v0.7.0"
+  # renovate: datasource=github-releases depName=terraform-linters/tflint
+  TFLINT_VERSION: "v0.61.0"
+  ARTIFACT_RETENTION_DAYS: "15"
 
 permissions:
   contents: read
@@ -101,15 +105,30 @@ jobs:
         uses: actions/cache@v5
         with:
           path: ~/.local/bin/gosec
-          key: ${{ runner.os }}-gosec-${{ env.GOSEC_VERSION }}
+          key: ${{ runner.os }}-${{ runner.arch }}-gosec-${{ env.GOSEC_VERSION }}
 
       - name: Install gosec (if not cached)
         if: steps.cache-gosec.outputs.cache-hit != 'true'
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
-          curl -sfL https://raw.githubusercontent.com/securego/gosec/master/install.sh \
-            | sh -s -- -b "$HOME/.local/bin" "${{ env.GOSEC_VERSION }}"
+          VERSION_NO_V="${{ env.GOSEC_VERSION }}"
+          VERSION_NO_V="${VERSION_NO_V#v}"
+          BASE_URL="https://github.com/securego/gosec/releases/download/${{ env.GOSEC_VERSION }}"
+          ARCHIVE="gosec_${VERSION_NO_V}_linux_amd64.tar.gz"
+          SHA256="$(curl -fsSL "$BASE_URL/gosec_${VERSION_NO_V}_checksums.txt" | awk -v file="$ARCHIVE" '$2 == file {print $1}')"
+          TMP_ARCHIVE="$(mktemp)"
+
+          if [ -z "$SHA256" ]; then
+            echo "::error::Failed to resolve checksum for $ARCHIVE"
+            exit 1
+          fi
+
+          curl -fsSL "$BASE_URL/$ARCHIVE" -o "$TMP_ARCHIVE"
+          echo "$SHA256  $TMP_ARCHIVE" | sha256sum -c -
+          tar xzf "$TMP_ARCHIVE" -C "$HOME/.local/bin" gosec
+          rm -f "$TMP_ARCHIVE"
+          chmod +x "$HOME/.local/bin/gosec"
 
       - name: Run gosec CLI
         if: always()
@@ -146,11 +165,7 @@ jobs:
 
             # Run with severity threshold - only fail on HIGH severity issues
             echo "Checking for HIGH severity issues..."
-            "$GOSEC_BIN" -severity high -confidence medium -fmt text $SCAN_DIRS
-            GOSEC_EXIT_CODE=$?
-
-            # Only fail if HIGH severity issues found
-            if [ $GOSEC_EXIT_CODE -ne 0 ]; then
+            if ! "$GOSEC_BIN" -severity high -confidence medium -fmt text $SCAN_DIRS; then
               echo "❌ HIGH severity security issues found!"
               exit 1
             else
@@ -312,26 +327,17 @@ jobs:
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
-      - name: Cache Helm + kubeconform
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.local/bin/helm
-            ~/.local/bin/kubeconform
-          key: tools-helm-${{ env.HELM_VERSION }}-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
-
-      - name: Install Helm (if missing)
+      - name: Verify preinstalled Helm
         run: |
           set -euo pipefail
-          mkdir -p ~/.local/bin
-          
-          if ! [ -x "$HOME/.local/bin/helm" ]; then
-            curl -sSL "https://get.helm.sh/helm-${{ env.HELM_VERSION }}-linux-amd64.tar.gz" \
-              | tar xz --strip-components=1 -C ~/.local/bin linux-amd64/helm
-            chmod +x "$HOME/.local/bin/helm" || true
-          fi
-          
-          helm version
+          helm version --short
+
+      - name: Cache kubeconform
+        id: cache-kubeconform
+        uses: actions/cache@v5
+        with:
+          path: ~/.local/bin/kubeconform
+          key: tools-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
 
       - name: Install kubeconform (if missing)
         run: |
@@ -339,9 +345,16 @@ jobs:
           mkdir -p ~/.local/bin
           
           if ! [ -x "$HOME/.local/bin/kubeconform" ]; then
-            curl -sSL "https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}/kubeconform-linux-amd64.tar.gz" \
-              | tar xz -C ~/.local/bin kubeconform
-            chmod +x "$HOME/.local/bin/kubeconform" || true
+            KUBECONFORM_ARCHIVE="kubeconform-linux-amd64.tar.gz"
+            KUBECONFORM_BASE_URL="https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}"
+            KUBECONFORM_SHA256="$(curl -fsSL "$KUBECONFORM_BASE_URL/CHECKSUMS" | awk '/  kubeconform-linux-amd64.tar.gz$/ {print $1}')"
+            TMP_ARCHIVE="$(mktemp)"
+
+            curl -fsSL "$KUBECONFORM_BASE_URL/$KUBECONFORM_ARCHIVE" -o "$TMP_ARCHIVE"
+            echo "$KUBECONFORM_SHA256  $TMP_ARCHIVE" | sha256sum -c -
+            tar xzf "$TMP_ARCHIVE" -C "$HOME/.local/bin" kubeconform
+            rm -f "$TMP_ARCHIVE"
+            chmod +x "$HOME/.local/bin/kubeconform"
           fi
           
           kubeconform -v
@@ -466,7 +479,7 @@ jobs:
       - name: Setup TFLint
         uses: terraform-linters/setup-tflint@v6
         with:
-          tflint_version: latest
+          tflint_version: ${{ env.TFLINT_VERSION }}
 
       - name: Validate Terraform modules and environments
         run: |

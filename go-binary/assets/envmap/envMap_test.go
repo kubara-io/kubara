@@ -130,6 +130,17 @@ func TestEnvMap_Validate(t *testing.T) {
 			errType: ErrDefaultIsSet,
 		},
 		{
+			name: "Missing optional helm repository fields passes validation",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdHelmRepoUsername = ""
+				em.ArgocdHelmRepoPassword = ""
+				em.ArgocdHelmRepoUrl = ""
+				return em
+			}(),
+			wantErr: false,
+		},
+		{
 			name: "Multiple missing required fields",
 			envMap: func() *EnvMap {
 				em := validEnvMap()
@@ -266,9 +277,9 @@ func TestEnvMap_setDefaults_AllFields(t *testing.T) {
 		assert.Equal(t, "<...>", em.ProjectStage)
 		assert.Equal(t, "<...>", em.DockerconfigBase64)
 		assert.Equal(t, "<...>", em.ArgocdWizardAccountPassword)
-		assert.Equal(t, "<...>", em.ArgocdHelmRepoUsername)
-		assert.Equal(t, "<...>", em.ArgocdHelmRepoPassword)
-		assert.Equal(t, "<...>", em.ArgocdHelmRepoUrl)
+		assert.Equal(t, "", em.ArgocdHelmRepoUsername)
+		assert.Equal(t, "", em.ArgocdHelmRepoPassword)
+		assert.Equal(t, "", em.ArgocdHelmRepoUrl)
 		assert.Equal(t, "<...>", em.ArgocdGitHttpsUrl)
 		assert.Equal(t, "<...>", em.ArgocdGitPatOrPassword)
 		assert.Equal(t, "<...>", em.ArgocdGitUsername)
@@ -340,4 +351,62 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 		assert.Contains(t, envMapErr.Message, "Vars are set to default:")
 		assert.Contains(t, envMapErr.Message, "PROJECT_NAME")
 	})
+}
+
+func TestIsConfiguredEnvValue(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  bool
+	}{
+		{name: "Configured URL", value: "https://charts.example.com", want: true},
+		{name: "Empty value", value: "", want: false},
+		{name: "Whitespace only", value: "   ", want: false},
+		{name: "Legacy placeholder", value: "<...>", want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, IsConfiguredEnvValue(tt.value))
+		})
+	}
+}
+
+func TestNormalizeHelmRepoURL(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  string
+	}{
+		{name: "Keeps HTTPS URL unchanged", value: "https://charts.example.com", want: "https://charts.example.com"},
+		{name: "Strips oci scheme", value: "oci://registry-1.docker.io/bitnamicharts", want: "registry-1.docker.io/bitnamicharts"},
+		{name: "Handles uppercase oci scheme", value: "OCI://registry.example.com/charts", want: "registry.example.com/charts"},
+		{name: "Trims whitespace", value: "  https://charts.example.com  ", want: "https://charts.example.com"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, NormalizeHelmRepoURL(tt.value))
+		})
+	}
+}
+
+func TestIsOCIHelmRepoURL(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		want  bool
+	}{
+		{name: "HTTPS repo is not OCI", value: "https://charts.example.com", want: false},
+		{name: "HTTP repo is not OCI", value: "http://charts.example.com", want: false},
+		{name: "Plain registry is OCI", value: "registry-1.docker.io/bitnamicharts", want: true},
+		{name: "OCI scheme is OCI", value: "oci://registry-1.docker.io/bitnamicharts", want: true},
+		{name: "Empty value is not OCI", value: "", want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, IsOCIHelmRepoURL(tt.value))
+		})
+	}
 }

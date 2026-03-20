@@ -1,5 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["customManagers:githubActionsVersions"],
   "terraform": {
     "fileMatch": ["\\.tf(\\.tplt)?$"]
   },

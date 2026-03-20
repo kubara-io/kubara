@@ -1,10 +1,11 @@
 module kubara
 
-go 1.25.7
+go 1.26.1
 
 require (
+	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260313124138-3b3cf7ae76da
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260319085515-0b4e1f9afb09
 	github.com/fatih/color v1.18.0
 	github.com/go-git/go-git/v5 v5.17.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
@@ -20,17 +21,16 @@ require (
 	github.com/urfave/cli/v3 v3.7.0
 	go.yaml.in/yaml/v3 v3.0.4
 	golang.org/x/crypto v0.49.0
-	k8s.io/api v0.35.2
-	k8s.io/apiextensions-apiserver v0.35.2
-	k8s.io/apimachinery v0.35.2
-	k8s.io/client-go v0.35.2
+	k8s.io/api v0.35.3
+	k8s.io/apiextensions-apiserver v0.35.3
+	k8s.io/apimachinery v0.35.3
+	k8s.io/client-go v0.35.3
 	sigs.k8s.io/yaml v1.6.0
 )
 
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
-	github.com/Masterminds/semver/v3 v3.4.0 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/buger/jsonparser v1.1.1 // indirect
