@@ -5,7 +5,8 @@
 With kubara you can automatically manage **TLS certificates** in your Kubernetes cluster using **cert-manager** (see https://cert-manager.io/).  
 cert-manager handles requesting, renewing, and storing certificates so that your applications are always served with valid TLS.
 
-> cert-manager will be rolled out as a **Helm Chart** via Argo CD when you enable the service in your `config.yaml`.
+!!! info
+    cert-manager will be rolled out as a **Helm Chart** via Argo CD when you enable the service in your `config.yaml`.
 
 ---
 
