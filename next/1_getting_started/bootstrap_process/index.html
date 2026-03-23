@@ -2353,22 +2353,23 @@ The easiest way is to run <code>kubara</code> inside the repository (but do not 
 </li>
 <li>
 <p>Update the values inside <code>.env</code></p>
-<blockquote>
-<p><strong>⚠️ Handling .env Files</strong>
-<code>.env</code> files contain sensitive credentials and must be treated as secrets.
+<div class="admonition danger">
+<p class="admonition-title">Handling .env Files</p>
+<p><code>.env</code> files contain sensitive credentials and must be treated as secrets.
 Never commit a plain <code>.env</code> file directly into Git.
 If you really need it in the repository, make sure it is stored in encrypted form only.
 Always add <code>.env</code> to <code>.gitignore</code> to avoid accidental commits.
 For team collaboration, proven approaches include encrypted <code>.env</code> files in the repository, centralized secret management, or helper tools like <code>dotenv</code>.
 Important: A plain <code>.env</code> file in Git exposes all secrets and must be avoided.</p>
-</blockquote>
+</div>
 </li>
 <li>
 <p>Check your values</p>
-<blockquote>
-<p>⚠️ Keep in mind that weak passwords such as <code>123456</code> for <code>ARGOCD_WIZARD_ACCOUNT_PASSWORD</code> are a bad idea, since your
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Keep in mind that weak passwords such as <code>123456</code> for <code>ARGOCD_WIZARD_ACCOUNT_PASSWORD</code> are a bad idea, since your
 platform will be publicly available by default via your DNS zone.</p>
-</blockquote>
+</div>
 </li>
 </ol>
 <h3 id="13-generate-base-configuration">1.3 Generate Base Configuration</h3>
@@ -2392,10 +2393,14 @@ You can set a custom output file:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># yaml-language-server: $schema=./config.schema.json</span>
 </code></pre></div>
 <h3 id="15-update-and-prepare-templates">1.5 Update and Prepare Templates</h3>
-<blockquote>
-<p>💡 What is "type:" in <code>config.yaml</code>: <code>controlplane</code> is your hub cluster, <code>worker</code> is your spoke cluster <a href="../../4_architecture/architecture_overview/#hubnspoke">Hub and Spoke Cluster</a>
-💡 Not using STACKIT Edge? Just remove the load balancer IPs from your <code>config.yaml</code>.</p>
-</blockquote>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>What is "type:" in <code>config.yaml</code>: <code>controlplane</code> is your hub cluster, <code>worker</code> is your spoke cluster <a href="../../4_architecture/architecture_overview/#hubnspoke">Hub and Spoke Cluster</a></p>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Not using STACKIT Edge? Just remove the load balancer IPs from your <code>config.yaml</code>.</p>
+</div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-name-from-env-file</span>
@@ -2424,17 +2429,19 @@ You can set a custom output file:</p>
 <p>If you are not using Terraform, you can skip directly to Step 3.</p>
 <hr>
 <h2 id="2-terraform-provisioning-kubernetes-and-infrastructure-optional-recommended">2. Terraform: Provisioning Kubernetes and Infrastructure <em>(Optional, Recommended)</em></h2>
-<blockquote>
-<p>⚠️ In kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
-</blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
+</div>
 <p>Generate Terraform modules:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>
 <p>Commit and push the generated files to your Git repository.</p>
-<blockquote>
-<p>📘 You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Terraform provider documentation</a> &amp; <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">STACKIT Docs</a>.
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">Terraform provider documentation</a> &amp; <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener noreferrer" class="plugin_open_external_links_in_new_tab">STACKIT Docs</a>.
 Make sure your created Service Account has Project Owner permissions.</p>
-</blockquote>
+</div>
 <h3 id="21-terraform-bootstrap">2.1 Terraform Bootstrap</h3>
 <p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
@@ -2499,9 +2506,10 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 .<span class="w"> </span>..<span class="se">\s</span>et-env.ps1
 terraform<span class="w"> </span>apply
 </code></pre></div>
-<blockquote>
-<p>⚠️ You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.</p>
-</blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.</p>
+</div>
 <p>To clean up:</p>
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>state<span class="w"> </span>rm<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>vault_kv_secret_v2.image_pull_secret<span class="w"> </span><span class="se">\</span>
@@ -2566,16 +2574,18 @@ Edit the generated files in:
 <li>lists/arrays replace previous values completely</li>
 </ul>
 <p>CI-specific values can be stored in chart-local CI files (for example <code>ci/ci-values.yaml</code>) to keep pipeline-only settings out of runtime overlays.</p>
-<blockquote>
-<p>⚠️ <strong>Don't forget to commit and push your changes to Git!</strong></p>
-</blockquote>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Don't forget to commit and push your changes to Git!</strong></p>
+</div>
 <hr>
 <h2 id="4-deploying-argo-cd">4. Deploying Argo CD</h2>
 <h3 id="41-bootstrap-the-control-plane">4.1 Bootstrap the Control Plane</h3>
-<blockquote>
-<p>⚠️ This command requires access to a Kubernetes cluster and, by default, uses <code>~/.kube/config</code>.
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This command requires access to a Kubernetes cluster and, by default, uses <code>~/.kube/config</code>.
 To target a specific cluster, provide your own config with <code>--kubeconfig your-kubeconfig</code></p>
-</blockquote>
+</div>
 <p>For external-secrets, create provider credential secret(s) first (for example via <code>kubectl create secret ...</code>), then:</p>
 <p>A) <strong>recommended for first bootstrap:</strong> pass a <code>ClusterSecretStore</code> manifest to bootstrap with <code>--with-es-css-file</code> together with <code>--with-es-crds</code>, </p>
 <p>or B) apply your <code>ClusterSecretStore</code> manually (only if external-secrets CRDs are already installed on the cluster).</p>
@@ -2625,10 +2635,11 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <p>After a successful bootstrap run, your platform should be operational.</p>
 <hr>
 <h2 id="5-access-the-argo-cd-dashboard">5. Access the Argo CD Dashboard</h2>
-<blockquote>
-<p><strong>Username:</strong> <code>wizard</code>
+<div class="admonition info">
+<p class="admonition-title">Argocd Local Login</p>
+<p><strong>Username:</strong> <code>wizard</code><br>
 <strong>Password:</strong> From <code>.env</code> (<code>ARGOCD_WIZARD_ACCOUNT_PASSWORD</code>)</p>
-</blockquote>
+</div>
 <ol>
 <li>Start port-forwarding:</li>
 </ol>

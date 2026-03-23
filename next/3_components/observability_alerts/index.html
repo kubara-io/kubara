@@ -2048,9 +2048,10 @@ which is included as part of the <a href="https://github.com/prometheus-communit
 </code></pre></div>
 <p>In this interface, active alerts can be viewed, silenced, and grouped. It also shows alert labels, status, and routing details.</p>
 <p><img alt="Alertmanager" src="../../images/alertmanager.jpeg"></p>
-<blockquote>
-<p><em>Note: Access to the Alertmanager UI can be secured through your ingress controller (e.g., via authentication middleware).</em></p>
-</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Access to the Alertmanager UI can be secured through your ingress controller (e.g. via authentication middleware).</p>
+</div>
 <h3 id="alerts-in-grafana">Alerts in Grafana</h3>
 <p><strong>Grafana</strong> also includes a built-in <strong>alerting dashboard</strong> where both legacy Prometheus alerts and Grafana-managed alerts can be viewed. This allows teams to:</p>
 <ul>
@@ -2062,9 +2063,10 @@ which is included as part of the <a href="https://github.com/prometheus-communit
 <p>You can access this via <strong>Alerting &gt; Alert Rules</strong> in the Grafana sidebar.</p>
 <p>You can find more about Grafana in the <a href="../observability_dashboards/">Dashboards</a> chapter.</p>
 <p><img alt="Grafana alerts" src="../../images/grafana-alerts.jpeg"></p>
-<blockquote>
-<p><em>Tip: The unified alerting system in Grafana supports rule grouping, templating, and annotations.</em></p>
-</blockquote>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>The unified alerting system in Grafana supports rule grouping, templating, and annotations.</p>
+</div>
 <h3 id="alerts-in-the-prometheus-ui">Alerts in the Prometheus UI</h3>
 <p>Prometheus itself also includes a simple interface for viewing alert rules and their current state.</p>
 <p>This can be accessed at:</p>
