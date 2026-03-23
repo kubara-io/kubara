@@ -121,9 +121,6 @@ externalSecrets:
     {{ .cluster.name }}-{{ .cluster.stage }}:
       kind: ClusterSecretStore
       name: {{ .cluster.name }}-{{ .cluster.stage }}
-    bitwarden-com-demo:
-      kind: ClusterSecretStore
-      name: bitwarden-com-demo
 
   secrets:
     oauth2-credentials:
