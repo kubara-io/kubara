@@ -90,7 +90,8 @@ In this interface, active alerts can be viewed, silenced, and grouped. It also s
 
 ![Alertmanager](../images/alertmanager.jpeg)
 
-> _Note: Access to the Alertmanager UI can be secured through your ingress controller (e.g., via authentication middleware)._
+!!! tip
+    Access to the Alertmanager UI can be secured through your ingress controller (e.g. via authentication middleware).
 
 ### Alerts in Grafana
 
@@ -107,7 +108,8 @@ You can find more about Grafana in the [Dashboards](../3_components/observabilit
 
 ![Grafana alerts](../images/grafana-alerts.jpeg)
 
-> _Tip: The unified alerting system in Grafana supports rule grouping, templating, and annotations._
+!!! tip
+    The unified alerting system in Grafana supports rule grouping, templating, and annotations.
 
 ### Alerts in the Prometheus UI
 
