@@ -22,7 +22,8 @@ To enable full Single Sign-On experience, you’ll need:
 * **Homepage URL:** `https://cp.<your-domain>.stackit.run`
 * **Callback URL:** `https://cp.<your-domain>.stackit.run/oauth2/callback`
 
-> Save the **Client ID** and generate a **Client Secret** for each app – you'll need them later.
+!!! tip
+    Save the **Client ID** and generate a **Client Secret** for each app – you'll need them later.
 
 For other providers, consult their documentation to find the correct URLs and settings.
 Here are some frequently used ones:

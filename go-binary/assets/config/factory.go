@@ -30,7 +30,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 	return Cluster{
 		Name:             e.ProjectName,
 		Stage:            e.ProjectStage,
-		Type:             "<controlplane or workerplane>",
+		Type:             "<controlplane or worker>",
 		DNSName:          dnsName,
 		SSOOrg:           "<my-org>",
 		SSOTeam:          "<my-team>",
