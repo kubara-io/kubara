@@ -53,7 +53,8 @@ In addition to the default dashboards, you can create custom dashboards tailored
 
 Dashboards can be created manually through the Grafana UI or defined as JSON files and managed via GitOps.
 
-> Note: Custom dashboards can be included via `dashboards.yaml` in the kube-prometheus-stack Helm chart for automated provisioning.
+!!! note
+    Custom dashboards can be included via `dashboards.yaml` in the kube-prometheus-stack Helm chart for automated provisioning.
 
 ## Dashboard Management
 
