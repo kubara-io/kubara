@@ -17,10 +17,10 @@ entities can be added to .env to smoothen bootstrap process.
 - `git`
 - `terraform` (optional, but recommended)
 - `kubara` for your OS (Windows, Linux, or macOS) - follow the [installation guide](https://github.com/kubara-io/kubara/blob/main/INSTALLATION.md)
-    
-> **⚠️ Note: Internet access required**
->   You will also need access to the internet to download the necessary Helm charts and CRDs.
->   Make sure you are not blocked by a firewall or proxy.
+
+!!! warning "Internet access required"
+    You will also need access to the internet to download the necessary Helm charts and CRDs.
+    Make sure you are not blocked by a firewall or proxy.
 
 ### External Entities
 (included\*): kubara can generate templates for some entities from scratch. Provider examples below are not mandatory; use equivalents for your environment.

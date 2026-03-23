@@ -37,7 +37,7 @@ spec:
   {{- end }}
   sourceNamespaces:
   {{- if .sourceNamespaces }}
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml .sourceNamespaces | nindent 4 }}
   {{- else }}
     - "*"
   {{- end }}

@@ -36,18 +36,19 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 
 2. Update the values inside `.env`
 
-    > **⚠️ Handling .env Files**
-    > `.env` files contain sensitive credentials and must be treated as secrets.
-    > Never commit a plain `.env` file directly into Git.
-    > If you really need it in the repository, make sure it is stored in encrypted form only.
-    > Always add `.env` to `.gitignore` to avoid accidental commits.
-    > For team collaboration, proven approaches include encrypted `.env` files in the repository, centralized secret management, or helper tools like `dotenv`.
-    > Important: A plain `.env` file in Git exposes all secrets and must be avoided.
+    !!! danger "Handling .env Files"
+        `.env` files contain sensitive credentials and must be treated as secrets.
+        Never commit a plain `.env` file directly into Git.
+        If you really need it in the repository, make sure it is stored in encrypted form only.
+        Always add `.env` to `.gitignore` to avoid accidental commits.
+        For team collaboration, proven approaches include encrypted `.env` files in the repository, centralized secret management, or helper tools like `dotenv`.
+        Important: A plain `.env` file in Git exposes all secrets and must be avoided.
 
 3. Check your values
 
-    > ⚠️ Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
-    > platform will be publicly available by default via your DNS zone.
+    !!! warning
+        Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
+        platform will be publicly available by default via your DNS zone.
 
 
 
@@ -89,8 +90,10 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 
 ### 1.5 Update and Prepare Templates
 
-> 💡 What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
-> 💡 Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
+!!! info
+    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
+!!! tip
+    Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
 Example:
 
@@ -125,7 +128,8 @@ If you are not using Terraform, you can skip directly to Step 3.
 ---
 ## 2. Terraform: Provisioning Kubernetes and Infrastructure *(Optional, Recommended)*
 
-> ⚠️ In kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
+!!! warning
+    In kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
 
 Generate Terraform modules:
 
@@ -135,8 +139,9 @@ kubara generate --terraform
 
 Commit and push the generated files to your Git repository.
 
-> 📘 You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
-> Make sure your created Service Account has Project Owner permissions.
+!!! info 
+    You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
+    Make sure your created Service Account has Project Owner permissions.
 
 ### 2.1 Terraform Bootstrap
 
@@ -244,7 +249,8 @@ source ../set-env.sh
 terraform apply
 ```
 
-> ⚠️ You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.
+!!! warning
+     You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.
 
 To clean up:
 
@@ -328,7 +334,8 @@ Merge behavior reminder:
 CI-specific values can be stored in chart-local CI files (for example `ci/ci-values.yaml`) to keep pipeline-only settings out of runtime overlays.
 
 
-> ⚠️ **Don't forget to commit and push your changes to Git!**
+!!! warning
+    **Don't forget to commit and push your changes to Git!**
 
 ---
 
@@ -336,8 +343,9 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 ### 4.1 Bootstrap the Control Plane
 
-> ⚠️ This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
-> To target a specific cluster, provide your own config with `--kubeconfig your-kubeconfig`
+!!! warning
+    This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
+    To target a specific cluster, provide your own config with `--kubeconfig your-kubeconfig`
 
 For external-secrets, create provider credential secret(s) first (for example via `kubectl create secret ...`), then:
 
@@ -408,8 +416,9 @@ After a successful bootstrap run, your platform should be operational.
 
 ## 5. Access the Argo CD Dashboard
 
-> **Username:** `wizard`
-> **Password:** From `.env` (`ARGOCD_WIZARD_ACCOUNT_PASSWORD`)
+!!! info "Argocd Local Login"
+    **Username:** `wizard`  
+    **Password:** From `.env` (`ARGOCD_WIZARD_ACCOUNT_PASSWORD`)
 
 1. Start port-forwarding:
 

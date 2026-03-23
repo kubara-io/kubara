@@ -6,11 +6,12 @@ This page provides an overview of all Architecture Decision Records (ADRs) in **
 
 ## Overview
 
-| ADR                                                       | Title                             | Status    |
-|-----------------------------------------------------------|-----------------------------------|-----------|
-| [ADR-0001](ADR-0001-replace-deprecated-nginx-ingress.md)  | Replace Deprecated Nginx Ingress  | accepted  |
+| ADR                                                      | Title                            | Status   |
+| -------------------------------------------------------- | -------------------------------- | -------- |
+| [ADR-0001](ADR-0001-replace-deprecated-nginx-ingress.md) | Replace Deprecated Nginx Ingress | accepted |
 
-> Add new ADRs to this table once created (or generate this page automatically via CI.)
+!!! info
+    Add new ADRs to this table once created (or generate this page automatically via CI.)
 
 ## Status values
 
