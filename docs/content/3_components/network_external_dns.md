@@ -5,7 +5,8 @@
 With kubara you can deploy **ExternalDNS** into your Kubernetes cluster (see https://kubernetes-sigs.github.io/external-dns/latest/).  
 ExternalDNS ensures that DNS records are automatically created and updated as soon as you define Ingress, Service, or supported Traefik resources with hostnames.
 
-> ExternalDNS will be rolled out as a **Helm Chart** when you enable the service in your `config.yaml`.
+!!! info
+    ExternalDNS will be rolled out as a **Helm Chart** when you enable the service in your `config.yaml`.
 
 ---
 
