@@ -34,7 +34,7 @@ func TestNewGenerateCmd(t *testing.T) {
 	command := cmd.NewGenerateCmd()
 
 	assert.Equal(t, "generate", command.Name)
-	assert.Equal(t, "generates files from embedded templates and config.", command.Usage)
+	assert.Equal(t, "generates files from embedded templates and the config file for both helm and terraform", command.Usage)
 	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--dry-run]", command.UsageText)
 	assert.Equal(t, "generate reads config values and templates the embedded helm and terraform files.", command.Description)
 
