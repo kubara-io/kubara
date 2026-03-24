@@ -464,8 +464,7 @@ This will use the values from `.env2` to generate `config2.yaml`.
 Render Terraform modules and Helm charts for the new ControlPlane:
 
 ```bash
-./kubara --config-file config2.yaml generate --terraform
-./kubara --config-file config2.yaml generate --helm
+./kubara --config-file config2.yaml generate 
 ```
 
 Finally, bootstrap your additional ControlPlane:
