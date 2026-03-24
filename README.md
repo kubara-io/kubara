@@ -31,7 +31,7 @@ See [INSTALLATION.md](docs/content/1_getting_started/installation.md) for Linux,
 
 ```text
 init       Initialize a new kubara directory
-generate   generates files from embedded templates and config.
+generate   generates files for both terraform and helm from embedded templates and config.
 bootstrap  Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD
 schema     Generate JSON schema file for config structure
 help, h    Shows a list of commands or help for one command
