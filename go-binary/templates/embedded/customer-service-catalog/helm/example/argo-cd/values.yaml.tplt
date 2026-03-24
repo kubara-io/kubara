@@ -111,7 +111,6 @@ inClusterSecretLabels:
   longhorn: "{{ .cluster.services.longhorn.status | default "disabled" }}"
 {{- end }}
 
-{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -122,6 +121,7 @@ externalSecrets:
       kind: ClusterSecretStore
       name: {{ .cluster.name }}-{{ .cluster.stage }}
 
+{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
   secrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
