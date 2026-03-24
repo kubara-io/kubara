@@ -120,9 +120,6 @@ externalSecrets:
     {{ .cluster.name }}-{{ .cluster.stage }}:
       kind: ClusterSecretStore
       name: {{ .cluster.name }}-{{ .cluster.stage }}
-    bitwarden-com-demo:
-      kind: ClusterSecretStore
-      name: bitwarden-com-demo
 
 {{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
   secrets:
