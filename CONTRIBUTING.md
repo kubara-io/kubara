@@ -31,6 +31,19 @@ For larger topics, such as fundamental or strategic decisions, we recommend disc
 For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
 For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
 
+### AI-Assisted Contributions
+
+This repository defines shared AI assistant guidance in `AGENTS.md`.
+`CLAUDE.md` is a compatibility wrapper for Claude-based tooling and should stay aligned with `AGENTS.md`.
+
+When changing AI workflow or guardrails:
+
+1. Update `AGENTS.md` (and `CLAUDE.md` if needed) in the same PR.
+2. Keep rules concise, stable, and tool-agnostic.
+3. Prefer references to canonical docs/code over volatile implementation details.
+
+AI-assisted contributions follow the same quality bar as manual changes (focused diffs, relevant tests, and docs updates when behavior changes).
+
 ### Preparations: Pre-commit Hooks
 
 We use pre-commit hooks to enforce coding standards and maintain code quality across the project.
