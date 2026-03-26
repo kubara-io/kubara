@@ -23,6 +23,7 @@ clusters:
     ssoOrg: my-org
     ssoTeam: my-team
     terraform:
+      provider: stackit # currently supported: stackit
       projectId: <project-id>
       kubernetesType: ske
       kubernetesVersion: 1.34

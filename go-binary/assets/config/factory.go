@@ -36,6 +36,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",

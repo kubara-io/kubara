@@ -48,6 +48,7 @@ clusters:
     dnsName: example.com
 
     terraform:
+      provider: stackit # currently supported: stackit
       dns:
         name: "example-zone"
         email: "hostmaster@example.com"

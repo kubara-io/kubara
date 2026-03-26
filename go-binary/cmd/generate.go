@@ -10,6 +10,7 @@ import (
 	"kubara/utils"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
 	"github.com/fatih/color"
@@ -167,7 +168,7 @@ func buildTemplateContext(clusterBlock config.Cluster) (map[string]any, error) {
 }
 
 func (o *GenerateOptions) resolveOutputPath(result templates.TemplateResult, clusterName string) string {
-	trimmedPath := result.Path
+	trimmedPath := templates.StripProviderPath(result.Path)
 	// 1. Rename 'example' directory to cluster name
 	trimmedPath = strings.ReplaceAll(trimmedPath, "example", clusterName)
 	// 2. Remove the template extension
@@ -176,6 +177,37 @@ func (o *GenerateOptions) resolveOutputPath(result templates.TemplateResult, clu
 	trimmedPath = strings.ReplaceAll(trimmedPath, templates.DefaultManagedCatalogPath, o.ManagedCatalogPath)
 	trimmedPath = strings.ReplaceAll(trimmedPath, templates.DefaultOverlayValuesPath, o.OverlayValuesPath)
 	return trimmedPath
+}
+
+func supportedProviderList() string {
+	providers := make([]string, 0, len(templates.SupportedProviders))
+	for provider := range templates.SupportedProviders {
+		providers = append(providers, provider)
+	}
+	sort.Strings(providers)
+	return strings.Join(providers, ", ")
+}
+
+func resolveProvider(clusterBlock config.Cluster) (string, error) {
+	if clusterBlock.Terraform == nil {
+		return "", fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
+	}
+	provider := strings.ToLower(strings.TrimSpace(clusterBlock.Terraform.Provider))
+	if provider == "" {
+		return "", fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+	}
+	if provider == "<provider>" {
+		return "", fmt.Errorf(
+			"cluster %q still uses placeholder provider %q; supported providers: %s",
+			clusterBlock.Name,
+			clusterBlock.Terraform.Provider,
+			supportedProviderList(),
+		)
+	}
+	if !templates.SupportedProviders[provider] {
+		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %s", provider, clusterBlock.Name, supportedProviderList())
+	}
+	return provider, nil
 }
 
 func (o *GenerateOptions) cleanupOldFiles() error {
@@ -239,7 +271,19 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 			return nil, fmt.Errorf("failed to build template context for cluster %s: %w", clusterBlock.Name, err)
 		}
 
-		clusterTplResults, err := templates.TemplateAllFiles(o.TemplateType, tmplContext)
+		provider := ""
+		if o.TemplateType != templates.Helm {
+			provider, err = resolveProvider(clusterBlock)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		clusterTplResults, err := templates.TemplateAllFilesForProvider(
+			o.TemplateType,
+			tmplContext,
+			provider,
+		)
 		if err != nil {
 			return nil, fmt.Errorf("could not template files: %w", err)
 		}
