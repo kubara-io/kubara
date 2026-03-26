@@ -222,6 +222,97 @@ func TestGetEmbeddedTemplatesList_ErrorCases(t *testing.T) {
 	})
 }
 
+func TestGetEmbeddedTemplatesListForProvider(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	stackitList, err := GetEmbeddedTemplatesListForProvider(Terraform, "stackit")
+	require.NoError(t, err)
+	require.NotEmpty(t, stackitList)
+	assert.Condition(t, func() bool {
+		for _, p := range stackitList {
+			if strings.Contains(p, "/providers/stackit/") {
+				return true
+			}
+		}
+		return false
+	}, "expected stackit provider paths")
+
+	azureList, err := GetEmbeddedTemplatesListForProvider(Terraform, "azure")
+	require.NoError(t, err)
+	require.NotEmpty(t, azureList)
+	for _, p := range azureList {
+		assert.NotContains(t, p, "/providers/stackit/")
+	}
+}
+
+func TestSelectTemplatesForProvider_PrefersProviderSpecificFile(t *testing.T) {
+	files := []string{
+		"managed-service-catalog/terraform/modules/iam/main.tf",
+		"managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf",
+		"managed-service-catalog/terraform/providers/otc/modules/iam/main.tf",
+		"managed-service-catalog/terraform/modules/iam/variables.tf",
+	}
+
+	selected := selectTemplatesForProvider(files, "stackit")
+
+	assert.Contains(t, selected, "managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf")
+	assert.NotContains(t, selected, "managed-service-catalog/terraform/modules/iam/main.tf")
+	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/otc/modules/iam/main.tf")
+	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/variables.tf")
+	require.Len(t, selected, 2)
+}
+
+func TestSelectTemplatesForProvider_FallsBackToCommonFile(t *testing.T) {
+	files := []string{
+		"managed-service-catalog/terraform/modules/iam/main.tf",
+		"managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf",
+		"managed-service-catalog/terraform/modules/iam/variables.tf",
+	}
+
+	selected := selectTemplatesForProvider(files, "azure")
+
+	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/main.tf")
+	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf")
+	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/variables.tf")
+	require.Len(t, selected, 2)
+}
+
+func TestStripProviderPath(t *testing.T) {
+	tests := []struct {
+		name  string
+		input string
+		want  string
+	}{
+		{
+			name:  "strips providers/stackit under terraform",
+			input: "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt",
+			want:  "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt",
+		},
+		{
+			name:  "strips providers/stackit under managed terraform",
+			input: "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf",
+			want:  "managed-service-catalog/terraform/modules/ske-cluster/main.tf",
+		},
+		{
+			name:  "leaves non-provider terraform path unchanged",
+			input: "managed-service-catalog/terraform/images/public-cloud-0.png",
+			want:  "managed-service-catalog/terraform/images/public-cloud-0.png",
+		},
+		{
+			name:  "does not strip providers/<name> outside terraform or helm context",
+			input: "some-catalog/providers/stackit/file.txt",
+			want:  "some-catalog/providers/stackit/file.txt",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert.Equal(t, tt.want, StripProviderPath(tt.input))
+		})
+	}
+}
+
 func TestTemplateFiles(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -232,7 +323,7 @@ func TestTemplateFiles(t *testing.T) {
 	}{
 		{
 			name:     "Success: Successfully template terraform files",
-			fileList: []string{"customer-service-catalog/terraform/example/infrastructure/main.tf.tplt"},
+			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
 				"var": map[string]interface{}{
 					"project_id": "12345",
@@ -248,7 +339,7 @@ func TestTemplateFiles(t *testing.T) {
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 1)
-				assert.Equal(t, "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NotEmpty(t, results[0].Content)
 				// The ${var.name} syntax is Terraform syntax, not go template, so it won't be substituted
@@ -524,12 +615,12 @@ func TestTemplateFiles(t *testing.T) {
 		},
 		{
 			name:     "Success: Successfully copy non-template files",
-			fileList: []string{"managed-service-catalog/terraform/modules/ske-cluster/main.tf"},
+			fileList: []string{"managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf"},
 			context:  map[string]any{},
 			wantErr:  false,
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 1)
-				assert.Equal(t, "managed-service-catalog/terraform/modules/ske-cluster/main.tf", results[0].Path)
+				assert.Equal(t, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf", results[0].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NotEmpty(t, results[0].Content)
 				assert.Contains(t, results[0].Content, "stackit_ske_cluster")
@@ -549,7 +640,7 @@ func TestTemplateFiles(t *testing.T) {
 		},
 		{
 			name:     "Error: Handle template execution error",
-			fileList: []string{"customer-service-catalog/terraform/example/infrastructure/main.tf.tplt"},
+			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
 				"var": map[string]interface{}{
 					"project_id": "12345",
@@ -564,14 +655,14 @@ func TestTemplateFiles(t *testing.T) {
 			wantErr: true,
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 1)
-				assert.Equal(t, "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt", results[0].Path)
 				assert.Error(t, results[0].Error)
 				assert.Empty(t, results[0].Content)
 			},
 		},
 		{
 			name:     "Success: Handle missing keys (no error with default behavior)",
-			fileList: []string{"customer-service-catalog/terraform/example/infrastructure/main.tf.tplt"},
+			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
 				// Missing cluster.terraform.kubernetesType - should not cause error
 				"var": map[string]interface{}{
@@ -581,7 +672,7 @@ func TestTemplateFiles(t *testing.T) {
 			wantErr: false, // Go templates silently ignore missing keys by default
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 1)
-				assert.Equal(t, "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NotEmpty(t, results[0].Content)
 				// Template should render but missing variables will be empty
@@ -590,9 +681,9 @@ func TestTemplateFiles(t *testing.T) {
 		{
 			name: "Error: Handle mixed file list with some errors",
 			fileList: []string{
-				"customer-service-catalog/terraform/example/infrastructure/main.tf.tplt",
+				"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt",
 				"non-existent/file.tplt",
-				"managed-service-catalog/terraform/modules/ske-cluster/main.tf",
+				"managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf",
 			},
 			context: map[string]any{
 				"var": map[string]interface{}{
@@ -611,7 +702,7 @@ func TestTemplateFiles(t *testing.T) {
 				require.Len(t, results, 3)
 
 				// First file should succeed
-				assert.Equal(t, "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NotEmpty(t, results[0].Content)
 
@@ -621,7 +712,7 @@ func TestTemplateFiles(t *testing.T) {
 				assert.Empty(t, results[1].Content)
 
 				// Third file should succeed
-				assert.Equal(t, "managed-service-catalog/terraform/modules/ske-cluster/main.tf", results[2].Path)
+				assert.Equal(t, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf", results[2].Path)
 				assert.NoError(t, results[2].Error)
 				assert.NotEmpty(t, results[2].Content)
 			},

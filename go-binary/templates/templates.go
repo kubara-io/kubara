@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io/fs"
 	"path/filepath"
+	"sort"
 	"strings"
 	"text/template"
 
@@ -27,7 +28,14 @@ const (
 	tmplRoot                  string = "embedded"
 	DefaultManagedCatalogPath string = "managed-service-catalog"
 	DefaultOverlayValuesPath  string = "customer-service-catalog"
+	providerFolderName        string = "providers"
 )
+
+// SupportedProviders lists every provider that has embedded templates.
+// Add new entries here when introducing provider-specific template directories.
+var SupportedProviders = map[string]bool{
+	"stackit": true,
+}
 
 var templateName = map[TemplateType]string{
 	Terraform: "terraform",
@@ -40,6 +48,11 @@ type TemplateResult struct {
 	Path    string // Original relative path
 	Content string // Templated content
 	Error   error  // Any error that occurred during templating
+}
+
+type selectedTemplate struct {
+	sourcePath       string
+	providerSpecific bool
 }
 
 func (tt TemplateType) String() string {
@@ -81,6 +94,100 @@ func GetEmbeddedTemplatesList(tplType TemplateType) ([]string, error) {
 	}
 
 	return out, err
+}
+
+func normalizeProviderName(provider string) string {
+	return strings.ToLower(strings.TrimSpace(provider))
+}
+
+func splitProviderPath(relPath string) (string, string, bool) {
+	normalized := filepath.ToSlash(relPath)
+	parts := strings.Split(normalized, "/")
+	for idx := 0; idx+1 < len(parts); idx++ {
+		if parts[idx] != providerFolderName {
+			continue
+		}
+
+		// Only treat this segment as a provider selector when it appears
+		// directly inside a template-type directory (terraform or helm).
+		// This prevents stripping unrelated "providers/<x>" segments that
+		// may appear elsewhere in the path.
+		if idx == 0 || (parts[idx-1] != "terraform" && parts[idx-1] != "helm") {
+			continue
+		}
+
+		provider := strings.ToLower(parts[idx+1])
+		if provider == "" {
+			return normalized, "", false
+		}
+
+		stripped := append([]string{}, parts[:idx]...)
+		stripped = append(stripped, parts[idx+2:]...)
+		return strings.Join(stripped, "/"), provider, true
+	}
+
+	return normalized, "", false
+}
+
+// StripProviderPath removes a provider selector segment from a relative
+// template path (e.g. ".../providers/stackit/...") if present.
+func StripProviderPath(relPath string) string {
+	stripped, _, _ := splitProviderPath(relPath)
+	return stripped
+}
+
+// GetEmbeddedTemplatesListForProvider returns template paths for one provider.
+// Files under ".../providers/<provider>/..." are included only for that provider.
+// Provider-specific files override common files with the same stripped path.
+func GetEmbeddedTemplatesListForProvider(tplType TemplateType, provider string) ([]string, error) {
+	files, err := GetEmbeddedTemplatesList(tplType)
+	if err != nil {
+		return nil, err
+	}
+
+	return selectTemplatesForProvider(files, provider), nil
+}
+
+func selectTemplatesForProvider(files []string, provider string) []string {
+	selectedProvider := normalizeProviderName(provider)
+	sortedFiles := append([]string(nil), files...)
+	sort.Strings(sortedFiles)
+
+	selected := make(map[string]selectedTemplate, len(sortedFiles))
+	keys := make([]string, 0, len(sortedFiles))
+
+	for _, sourcePath := range sortedFiles {
+		strippedPath, sourceProvider, isProviderSpecific := splitProviderPath(sourcePath)
+		if isProviderSpecific && sourceProvider != selectedProvider {
+			continue
+		}
+
+		current, exists := selected[strippedPath]
+		if !exists {
+			selected[strippedPath] = selectedTemplate{
+				sourcePath:       sourcePath,
+				providerSpecific: isProviderSpecific,
+			}
+			keys = append(keys, strippedPath)
+			continue
+		}
+
+		// Provider-specific files override common files for the same output path.
+		if isProviderSpecific && !current.providerSpecific {
+			selected[strippedPath] = selectedTemplate{
+				sourcePath:       sourcePath,
+				providerSpecific: true,
+			}
+		}
+	}
+
+	sort.Strings(keys)
+	out := make([]string, 0, len(keys))
+	for _, key := range keys {
+		out = append(out, selected[key].sourcePath)
+	}
+
+	return out
 }
 
 // TemplateFiles processes all the specified template files using html/template
@@ -142,7 +249,13 @@ func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
 
 // TemplateAllFiles is a convenience function that gets the file list and templates them
 func TemplateAllFiles(tplType TemplateType, data any) ([]TemplateResult, error) {
-	fileList, err := GetEmbeddedTemplatesList(tplType)
+	return TemplateAllFilesForProvider(tplType, data, "")
+}
+
+// TemplateAllFilesForProvider is a convenience function that gets the
+// provider-filtered file list and templates it.
+func TemplateAllFilesForProvider(tplType TemplateType, data any, provider string) ([]TemplateResult, error) {
+	fileList, err := GetEmbeddedTemplatesListForProvider(tplType, provider)
 	if err != nil {
 		return nil, err
 	}
