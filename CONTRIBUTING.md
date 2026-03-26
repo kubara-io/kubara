@@ -18,7 +18,7 @@ If you discover a bug or have a feature request, please open an issue in [Issues
 * Expected vs. actual result
 * Logs or screenshots (if applicable)
 
-If you are open an issue, a template will guide you through the process.
+If you open an issue, a template will guide you through the process.
 
 ## 🚀 How to Contribute
 
