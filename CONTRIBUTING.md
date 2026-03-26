@@ -43,6 +43,7 @@ When changing AI workflow or guardrails:
 3. Prefer references to canonical docs/code over volatile implementation details.
 
 AI-assisted contributions follow the same quality bar as manual changes (focused diffs, relevant tests, and docs updates when behavior changes).
+All contributions, including AI-assisted ones, must be in English (code, comments, commit messages, PR descriptions, and issues).
 
 ### Preparations: Pre-commit Hooks
 
@@ -74,11 +75,11 @@ Once you have set up the pre-commit hooks, you can follow the steps below to sta
 
 1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/)
 2. **Fork** the repository and clone it locally, see also here: https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
-2. **Create a new branch** for your work
-3. **Implement your changes**
-4. **Run checks** before submitting
-5. **Commit** using [Conventional Commits](https://www.conventionalcommits.org)
-6. **Open a Pull Request** to the `dev` branch () -> Please note the chapter: Pull Requests: Conventions & Best Practices
+3. **Create a new branch** for your work
+4. **Implement your changes**
+5. **Run checks** before submitting
+6. **Commit** using [Conventional Commits](https://www.conventionalcommits.org)
+7. **Open a Pull Request** to the `main` branch -> Please note the chapter: Pull Requests: Conventions & Best Practices
 
 ### 🧩 Pull Requests: Conventions & Best Practices
 
@@ -128,7 +129,7 @@ Do not leave the template empty or remove sections without reason - each part se
 
 ## 🧠 Branch Strategy
 
-* `master`: Latest features - unstable, may change without notice
+* `main`: Latest features - unstable, may change without notice
 * `tag/vX.X.X-XX`: tags point to the latest stable version
 * `<some-feat-branch>`: work on features
 

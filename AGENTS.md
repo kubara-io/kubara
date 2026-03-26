@@ -29,15 +29,6 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - `docs/`: MkDocs site managed with `uv`
 - Root `Makefile`: monorepo entry point delegating to `go-binary/` and `docs/`
 
-## Canonical CLI Flow
-1. `kubara init --prep`
-2. `kubara init` (or `--overwrite` when updating from `.env`)
-3. Optional: `kubara schema`
-4. `kubara generate --terraform` and/or `kubara generate --helm`
-5. `kubara bootstrap <cluster-name>`
-
-Keep this flow high-level here; detailed provider-specific steps belong in docs.
-
 ## Working Style
 - Keep changes focused; avoid mixing unrelated fixes.
 - Follow existing naming and file organization.
@@ -45,6 +36,7 @@ Keep this flow high-level here; detailed provider-specific steps belong in docs.
 - Do not reformat unrelated files.
 - Keep code, comments, commit messages, PR titles/descriptions, and issues in English.
 - When behavior changes, update the nearest relevant docs in the same change.
+- Use the PR and issue templates; fill required sections and do not remove template structure.
 
 ## Validation (Smallest Relevant First)
 - Go tests: `make test` or `cd go-binary && make test`
