@@ -18,7 +18,7 @@ If you discover a bug or have a feature request, please open an issue in [Issues
 * Expected vs. actual result
 * Logs or screenshots (if applicable)
 
-If you are open an issue, a template will guide you through the process.
+If you open an issue, a template will guide you through the process.
 
 ## 🚀 How to Contribute
 
@@ -30,6 +30,20 @@ This allows us to briefly discuss the best approach to solving the problem and a
 For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the kubara Office Hours.
 For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
 For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
+
+### AI-Assisted Contributions
+
+This repository defines shared AI assistant guidance in `AGENTS.md`.
+`CLAUDE.md` is a compatibility wrapper for Claude-based tooling and should stay aligned with `AGENTS.md`.
+
+When changing AI workflow or guardrails:
+
+1. Update `AGENTS.md` (and `CLAUDE.md` if needed) in the same PR.
+2. Keep rules concise, stable, and tool-agnostic.
+3. Prefer references to canonical docs/code over volatile implementation details.
+
+AI-assisted contributions follow the same quality bar as manual changes (focused diffs, relevant tests, and docs updates when behavior changes).
+All contributions, including AI-assisted ones, must be in English (code, comments, commit messages, PR descriptions, and issues).
 
 ### Preparations: Pre-commit Hooks
 
@@ -61,11 +75,11 @@ Once you have set up the pre-commit hooks, you can follow the steps below to sta
 
 1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/)
 2. **Fork** the repository and clone it locally, see also here: https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
-2. **Create a new branch** for your work
-3. **Implement your changes**
-4. **Run checks** before submitting
-5. **Commit** using [Conventional Commits](https://www.conventionalcommits.org)
-6. **Open a Pull Request** to the `dev` branch () -> Please note the chapter: Pull Requests: Conventions & Best Practices
+3. **Create a new branch** for your work
+4. **Implement your changes**
+5. **Run checks** before submitting
+6. **Commit** using [Conventional Commits](https://www.conventionalcommits.org)
+7. **Open a Pull Request** to the `main` branch -> Please note the chapter: Pull Requests: Conventions & Best Practices
 
 ### 🧩 Pull Requests: Conventions & Best Practices
 
@@ -115,7 +129,7 @@ Do not leave the template empty or remove sections without reason - each part se
 
 ## 🧠 Branch Strategy
 
-* `master`: Latest features - unstable, may change without notice
+* `main`: Latest features - unstable, may change without notice
 * `tag/vX.X.X-XX`: tags point to the latest stable version
 * `<some-feat-branch>`: work on features
 

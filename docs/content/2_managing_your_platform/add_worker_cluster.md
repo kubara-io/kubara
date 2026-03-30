@@ -78,8 +78,8 @@ clusters:
 ## 2. Regenerate Terraform and Helm templates
 
 ```bash
-kubara generate --terraform
-kubara generate --helm
+# kubara generate creates both helm and terraform files by default
+kubara generate
 ```
 
 This creates/updates the worker cluster overlays in:
