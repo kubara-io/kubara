@@ -2017,7 +2017,7 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <p><strong>Enable ExternalDNS</strong>  </p>
 </li>
 <li>In <code>config.yaml</code> you enable the service <code>externalDns</code>.  </li>
-<li>Then you must <strong>rerun kubara</strong> (<code>kubara generate --terraform</code>, <code>kubara generate --helm</code> or <code>kubara generate</code>) so that Terraform files and Helm values are re-rendered with the new settings.  </li>
+<li>Then you must <strong>rerun kubara</strong> (<code>kubara generate</code>) so that Terraform files and Helm values are re-rendered with the new settings.  </li>
 <li>Configure provider-specific values in:<ul>
 <li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/external-dns/values.yaml</code></li>
 <li>optional <code>customer-service-catalog/helm/&lt;cluster-name&gt;/external-dns/additional-values.yaml</code></li>

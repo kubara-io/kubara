@@ -2672,8 +2672,9 @@ Fill out <code>.env2</code> with the required values. Generate a new config file
 </code></pre></div>
 <p>This will use the values from <code>.env2</code> to generate <code>config2.yaml</code>.</p>
 <p>Render Terraform modules and Helm charts for the new ControlPlane:</p>
-<div class="highlight"><pre><span></span><code>./kubara<span class="w"> </span>--config-file<span class="w"> </span>config2.yaml<span class="w"> </span>generate<span class="w"> </span>--terraform
-./kubara<span class="w"> </span>--config-file<span class="w"> </span>config2.yaml<span class="w"> </span>generate<span class="w"> </span>--helm
+<div class="highlight"><pre><span></span><code><span class="c1"># default: generates both Helm and Terraform</span>
+<span class="c1"># use --helm or --terraform to generate only one type</span>
+./kubara<span class="w"> </span>--config-file<span class="w"> </span>config2.yaml<span class="w"> </span>generate
 </code></pre></div>
 <p>Finally, bootstrap your additional ControlPlane:</p>
 <div class="highlight"><pre><span></span><code>./kubara<span class="w"> </span>--env-file<span class="w"> </span>.env2<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config2-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
