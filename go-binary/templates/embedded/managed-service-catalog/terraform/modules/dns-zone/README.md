@@ -20,13 +20,13 @@ module "dns_zone" {
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.88.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.89.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.88.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.89.0 |
 
 ## Modules
 
@@ -36,7 +36,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_dns_zone.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.88.0/docs/resources/dns_zone) | resource |
+| [stackit_dns_zone.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/dns_zone) | resource |
 
 ## Inputs
 

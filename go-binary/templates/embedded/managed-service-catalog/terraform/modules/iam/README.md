@@ -21,14 +21,14 @@ ttl_days   = 180
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.88.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.89.0 |
 | <a name="requirement_time"></a> [time](#requirement\_time) | 0.13.1 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.88.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.89.0 |
 | <a name="provider_time"></a> [time](#provider\_time) | 0.13.1 |
 
 ## Modules
@@ -39,10 +39,10 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_authorization_project_role_assignment.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.88.0/docs/resources/authorization_project_role_assignment) | resource |
-| [stackit_service_account.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.88.0/docs/resources/service_account) | resource |
-| [stackit_service_account_key.no_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.88.0/docs/resources/service_account_key) | resource |
-| [stackit_service_account_key.with_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.88.0/docs/resources/service_account_key) | resource |
+| [stackit_authorization_project_role_assignment.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/authorization_project_role_assignment) | resource |
+| [stackit_service_account.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/service_account) | resource |
+| [stackit_service_account_key.no_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/service_account_key) | resource |
+| [stackit_service_account_key.with_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/service_account_key) | resource |
 | [time_rotating.rotate](https://registry.terraform.io/providers/hashicorp/time/0.13.1/docs/resources/rotating) | resource |
 
 ## Inputs
