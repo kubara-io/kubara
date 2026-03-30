@@ -50,9 +50,9 @@ func NewGenerateCmd() *cli.Command {
 	flags := NewGenerateFlags()
 	cmd := &cli.Command{
 		Name:        "generate",
-		Usage:       "generates files from embedded templates and config.",
+		Usage:       "generates files from embedded templates and the config file; by default for both Helm and Terraform",
 		UsageText:   "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--dry-run]",
-		Description: "generate reads config values and templates the embedded helm and terraform files.",
+		Description: "generate reads config values and templates the embedded Helm and Terraform files.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
