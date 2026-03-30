@@ -24,6 +24,7 @@ func newValidTestConfig() *Config {
 				Type:             "controlplane",
 				DNSName:          "test-cluster.example.com",
 				Terraform: &Terraform{
+					Provider:          "stackit",
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",

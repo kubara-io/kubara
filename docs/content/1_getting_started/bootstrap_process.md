@@ -109,6 +109,7 @@ clusters:
     ssoOrg: <oidc-org>
     ssoTeam: <org-team>
     terraform:
+      provider: stackit # currently supported: stackit
       projectId: <project-id>
       kubernetesType: <ske or edge>
       kubernetesVersion: 1.34
