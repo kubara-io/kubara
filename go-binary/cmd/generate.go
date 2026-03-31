@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"kubara/assets/config"
+	"kubara/assets/envmap"
 	"kubara/templates"
 	"kubara/utils"
 	"os"
@@ -24,6 +25,7 @@ type GenerateOptions struct {
 	ConfigFilePath     string
 	ManagedCatalogPath string
 	OverlayValuesPath  string
+	EnvPath            string
 }
 
 type GenerateFlags struct {
@@ -70,25 +72,23 @@ func NewGenerateCmd() *cli.Command {
 func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ToOptions, Could not get working directory: %w", err)
 	}
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("ToOptions, Could not get configFilePath: %w", err)
 	}
-	managedCatalogPath := cmd.String("managed-catalog")
-	if !filepath.IsAbs(managedCatalogPath) {
-		managedCatalogPath, err = utils.GetFullPath(managedCatalogPath, cwd)
-		if err != nil {
-			return nil, err
-		}
+	managedCatalogPath, err := utils.GetFullPath(cmd.String("managed-catalog"), cwd)
+	if err != nil {
+		return nil, fmt.Errorf("ToOptions, Could not get managed catalog path: %w", err)
 	}
-	overlayValuesPath := cmd.String("overlay-values")
-	if !filepath.IsAbs(overlayValuesPath) {
-		overlayValuesPath, err = utils.GetFullPath(overlayValuesPath, cwd)
-		if err != nil {
-			return nil, err
-		}
+	overlayValuesPath, err := utils.GetFullPath(cmd.String("overlay-values"), cwd)
+	if err != nil {
+		return nil, fmt.Errorf("ToOptions, Could not get overlay values path: %w", err)
+	}
+	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
+	if err != nil {
+		return nil, fmt.Errorf("ToOptions, Could not Env full path: %w", err)
 	}
 
 	o := &GenerateOptions{
@@ -98,6 +98,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 		ConfigFilePath:     configFilePath,
 		ManagedCatalogPath: managedCatalogPath,
 		OverlayValuesPath:  overlayValuesPath,
+		EnvPath:            envPath,
 	}
 
 	if flags.Helm && !flags.Terraform {
@@ -148,7 +149,7 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 
 // buildTemplateContext creates a map from a config.Cluster struct.
 // It converts the struct to a map using JSON tag names for template variables.
-func buildTemplateContext(clusterBlock config.Cluster) (map[string]any, error) {
+func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[string]any, error) {
 	// Convert struct to JSON using JSON tags (camelCase)
 	clusterJSON, err := json.Marshal(clusterBlock)
 	if err != nil {
@@ -158,11 +159,22 @@ func buildTemplateContext(clusterBlock config.Cluster) (map[string]any, error) {
 	// Convert JSON back to map with camelCase keys
 	var clusterMap map[string]interface{}
 	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal cluster JSON to map: %w", err)
+		return nil, fmt.Errorf("failed to unmarshal clusterJSON to map: %w", err)
+	}
+
+	// Convert EnvMap Part
+	envJSON, err := json.Marshal(em)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshall envmap to JSON: %w", err)
+	}
+	var envMap map[string]interface{}
+	if err := json.Unmarshal(envJSON, &envMap); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal envJSON to envMap")
 	}
 
 	return map[string]any{
 		"cluster": clusterMap,
+		"env":     envMap,
 	}, nil
 }
 
@@ -226,6 +238,7 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
 	}
+	fmt.Println("config ile path", o.ConfigFilePath)
 	if errValidate := cm.Validate(); errValidate != nil {
 		return nil, fmt.Errorf("config validation failed: %w", errValidate)
 	}
@@ -233,8 +246,13 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 	cnf := cm.GetConfig()
 	var allResults []templates.TemplateResult
 
+	dotEnvMap, err := envmap.GetCurrentDotEnv(o.EnvPath)
+	if err != nil {
+		return nil, fmt.Errorf("processClusters could not load env from envPath:%w", err)
+	}
+
 	for _, clusterBlock := range cnf.Clusters {
-		tmplContext, err := buildTemplateContext(clusterBlock)
+		tmplContext, err := buildTemplateContext(clusterBlock, dotEnvMap)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build template context for cluster %s: %w", clusterBlock.Name, err)
 		}
