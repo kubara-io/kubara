@@ -400,6 +400,52 @@ func TestTemplateFiles(t *testing.T) {
 			},
 		},
 		{
+			name: "Success: Successfully template set-env-changeme.sh and .ps1",
+			fileList: []string{"customer-service-catalog/terraform/example/set-env-changeme.sh.tplt",
+				"customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt",
+			},
+			context: map[string]any{
+				"env": map[string]interface{}{
+					"DockerconfigBase64": "<very-sneaky-config>",
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 2)
+				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.sh.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt", results[1].Path)
+				assert.NoError(t, results[0].Error)
+				assert.NoError(t, results[1].Error)
+				assert.NotEmpty(t, results[0].Content)
+				assert.NotEmpty(t, results[1].Content)
+				assert.Contains(t, results[0].Content, "export TF_VAR_image_pull_secret=\"<very-sneaky-config>\"")
+				assert.Contains(t, results[1].Content, "$env:TF_VAR_image_pull_secret=\"<very-sneaky-config>\"")
+			},
+		},
+		{
+			name: "Success: Empty string .env value leaves set-env-changeme.sh and .ps1 empty aswell",
+			fileList: []string{"customer-service-catalog/terraform/example/set-env-changeme.sh.tplt",
+				"customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt",
+			},
+			context: map[string]any{
+				"env": map[string]interface{}{
+					"DockerconfigBase64": "",
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 2)
+				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.sh.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt", results[1].Path)
+				assert.NoError(t, results[0].Error)
+				assert.NoError(t, results[1].Error)
+				assert.NotEmpty(t, results[0].Content)
+				assert.NotEmpty(t, results[1].Content)
+				assert.Contains(t, results[0].Content, "export TF_VAR_image_pull_secret=\"\"")
+				assert.Contains(t, results[1].Content, "$env:TF_VAR_image_pull_secret=\"\"")
+			},
+		},
+		{
 			name:     "Success: Keep ArgoCD rbac and params under configs when oauth2 is disabled",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{

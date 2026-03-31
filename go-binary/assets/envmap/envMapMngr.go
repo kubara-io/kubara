@@ -29,6 +29,13 @@ func NewEnvMapManager(filePath, delim, envPrfx string) *Manager {
 	}
 }
 
+// SetEnvMap receives an envMap and sets it to the manager
+// Returns newly set map
+func (em *Manager) SetEnvMap(envMap EnvMap) EnvMap {
+	em.envMap = &envMap
+	return *em.envMap
+}
+
 func (em *Manager) SetDefaults() {
 	em.envMap.setDefaults()
 }
@@ -44,7 +51,7 @@ func (em *Manager) GetFilepath() string {
 // Load loads variables from file and environment
 func (em *Manager) Load() error {
 	// Load from file first (if it exists)
-	if _, err := os.Stat(em.filepath); err == nil {
+	if _, fileErr := os.Stat(em.filepath); fileErr == nil {
 		if err := em.K.Load(file.Provider(em.filepath), dotenv.Parser()); err != nil {
 			return fmt.Errorf("error loading file: %w", err)
 		}
@@ -142,4 +149,21 @@ func (em *Manager) GenerateEnvExample() ([]byte, error) {
 	}
 
 	return []byte(b.String()), nil
+}
+
+// GetCurrentDotEnv returns a new EnvMap for a filepath
+// The function looks at the file loads and validates the EnvMap
+// Encapsulates loading and validation with EnvMapManager
+func GetCurrentDotEnv(filePath string) (EnvMap, error) {
+	manager := NewEnvMapManager(filePath, ".", "")
+	if err := manager.Load(); err != nil {
+		return EnvMap{}, fmt.Errorf("Could not load env file: %w", err)
+	}
+	unvalidatedEnv := *manager.GetConfig()
+	if err := unvalidatedEnv.Validate(); err != nil {
+		return EnvMap{}, fmt.Errorf("GetCurrentDotEnv could not validate the envmap: %w", err)
+	}
+	validatedEnv := unvalidatedEnv
+
+	return validatedEnv, nil
 }
