@@ -26,13 +26,13 @@ volume_performance_class = "storage_premium_perf1"
 | Name | Version |
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.89.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.90.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.89.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.90.0 |
 
 ## Modules
 
@@ -42,14 +42,14 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_network.edgecloud-network](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/network) | resource |
-| [stackit_network_interface.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/network_interface) | resource |
-| [stackit_public_ip.public_ip](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/public_ip) | resource |
-| [stackit_security_group.public_ip_sec_group](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/security_group) | resource |
-| [stackit_security_group_rule.public_ip_sec_group_ingress_443](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/security_group_rule) | resource |
-| [stackit_security_group_rule.public_ip_sec_group_ingress_80](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/security_group_rule) | resource |
-| [stackit_server.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/server) | resource |
-| [stackit_volume.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/volume) | resource |
+| [stackit_network.edgecloud-network](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/network) | resource |
+| [stackit_network_interface.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/network_interface) | resource |
+| [stackit_public_ip.public_ip](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/public_ip) | resource |
+| [stackit_security_group.public_ip_sec_group](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/security_group) | resource |
+| [stackit_security_group_rule.public_ip_sec_group_ingress_443](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/security_group_rule) | resource |
+| [stackit_security_group_rule.public_ip_sec_group_ingress_80](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/security_group_rule) | resource |
+| [stackit_server.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/server) | resource |
+| [stackit_volume.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/volume) | resource |
 
 ## Inputs
 

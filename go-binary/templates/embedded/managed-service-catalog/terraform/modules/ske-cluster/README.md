@@ -44,14 +44,14 @@ module "ske_cluster" {
 |------|---------|
 | <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) | >=1.9.3 |
 | <a name="requirement_local"></a> [local](#requirement\_local) | 2.7.0 |
-| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.89.0 |
+| <a name="requirement_stackit"></a> [stackit](#requirement\_stackit) | 0.90.0 |
 
 ## Providers
 
 | Name | Version |
 |------|---------|
 | <a name="provider_local"></a> [local](#provider\_local) | 2.7.0 |
-| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.89.0 |
+| <a name="provider_stackit"></a> [stackit](#provider\_stackit) | 0.90.0 |
 
 ## Modules
 
@@ -62,8 +62,8 @@ No modules.
 | Name | Type |
 |------|------|
 | [local_file.kubeconfig](https://registry.terraform.io/providers/hashicorp/local/2.7.0/docs/resources/file) | resource |
-| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/ske_cluster) | resource |
-| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.89.0/docs/resources/ske_kubeconfig) | resource |
+| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_cluster) | resource |
+| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_kubeconfig) | resource |
 
 ## Inputs
 
