@@ -3,7 +3,7 @@ terraform {
   required_providers {
     stackit = {
       source  = "stackitcloud/stackit"
-      version = "0.89.0"
+      version = "0.90.0"
     }
     time = {
       source  = "hashicorp/time"
