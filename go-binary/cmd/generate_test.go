@@ -234,10 +234,10 @@ func TestGenerateCmd(t *testing.T) {
 					DockerconfigBase64:          "DockerConfig",
 					ArgocdWizardAccountPassword: "wizardpassword",
 					ArgocdGitHttpsUrl:           "https://example.com",
-					ArgocdGitUsername:           "Hans Dieter",
+					ArgocdGitUsername:           "CoolCapybara",
 					ArgocdGitPatOrPassword:      "password",
 					ArgocdHelmRepoUrl:           "https://example.com",
-					ArgocdHelmRepoUsername:      "Hans Dieter",
+					ArgocdHelmRepoUsername:      "CoolCapybara",
 					ArgocdHelmRepoPassword:      "password",
 					DomainName:                  "example.com",
 				})

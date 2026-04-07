@@ -157,24 +157,14 @@ func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[st
 	}
 
 	// Convert JSON back to map with camelCase keys
-	var clusterMap map[string]interface{}
+	var clusterMap map[string]any
 	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal clusterJSON to map: %w", err)
 	}
 
-	// Convert EnvMap Part
-	envJSON, err := json.Marshal(em)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshall envmap to JSON: %w", err)
-	}
-	var envMap map[string]interface{}
-	if err := json.Unmarshal(envJSON, &envMap); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal envJSON to envMap")
-	}
-
 	return map[string]any{
 		"cluster": clusterMap,
-		"env":     envMap,
+		"env":     em,
 	}, nil
 }
 
@@ -238,7 +228,6 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
 	}
-	fmt.Println("config ile path", o.ConfigFilePath)
 	if errValidate := cm.Validate(); errValidate != nil {
 		return nil, fmt.Errorf("config validation failed: %w", errValidate)
 	}
@@ -248,7 +237,7 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 
 	dotEnvMap, err := envmap.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
-		return nil, fmt.Errorf("processClusters could not load env from envPath:%w", err)
+		return nil, fmt.Errorf("failed to load env from envPath:%w", err)
 	}
 
 	for _, clusterBlock := range cnf.Clusters {
