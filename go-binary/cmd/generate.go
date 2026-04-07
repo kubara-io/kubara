@@ -72,23 +72,23 @@ func NewGenerateCmd() *cli.Command {
 func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, fmt.Errorf("ToOptions, Could not get working directory: %w", err)
+		return nil, fmt.Errorf("failed to get working directory: %w", err)
 	}
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("ToOptions, Could not get configFilePath: %w", err)
+		return nil, fmt.Errorf("failed to get configFilePath: %w", err)
 	}
 	managedCatalogPath, err := utils.GetFullPath(cmd.String("managed-catalog"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("ToOptions, Could not get managed catalog path: %w", err)
+		return nil, fmt.Errorf("failed to get managed catalog path: %w", err)
 	}
 	overlayValuesPath, err := utils.GetFullPath(cmd.String("overlay-values"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("ToOptions, Could not get overlay values path: %w", err)
+		return nil, fmt.Errorf("failed to get overlay values path: %w", err)
 	}
 	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("ToOptions, Could not Env full path: %w", err)
+		return nil, fmt.Errorf("failed to get full envPath: %w", err)
 	}
 
 	o := &GenerateOptions{

@@ -228,6 +228,7 @@ func TestGenerateCmd(t *testing.T) {
 						Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 					},
 				})
+				//dummy values
 				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
 					ProjectName:                 "project-name",
 					ProjectStage:                "project-stage",
@@ -250,7 +251,6 @@ func TestGenerateCmd(t *testing.T) {
 				}
 				tt.flags = append(globalFlags, tt.flags...)
 			}
-			//dummy values
 
 			if tt.setup != nil {
 				tt.setup(t, tempDir)
