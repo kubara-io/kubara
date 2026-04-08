@@ -51,7 +51,10 @@ not_in_nav: |
   7_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
 plugins:
   - search
-  - mkdocs-plugin-open-external-links-in-new-tab
+  - privacy:
+      assets: false
+      links_attr_map:
+        target: _blank
 markdown_extensions:
   - attr_list
   - admonition

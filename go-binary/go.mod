@@ -5,7 +5,7 @@ go 1.26.1
 require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260330082620-a03283cd516a
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260405190846-0bf238798da0
 	github.com/fatih/color v1.19.0
 	github.com/go-git/go-git/v5 v5.17.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
@@ -33,7 +33,7 @@ require (
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/bahlo/generic-list-go v0.2.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
-	github.com/buger/jsonparser v1.1.1 // indirect
+	github.com/buger/jsonparser v1.1.2 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.13.0 // indirect
