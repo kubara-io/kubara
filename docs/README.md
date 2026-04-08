@@ -36,4 +36,3 @@ These are now managed via `pyproject.toml` and locked in `uv.lock`:
 - mike
 - mkdocs
 - mkdocs-material
-- mkdocs-plugin-open-external-links-in-new-tab
