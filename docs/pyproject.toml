@@ -8,5 +8,4 @@ dependencies = [
     "mike",
     "mkdocs",
     "mkdocs-material",
-    "mkdocs-plugin-open-external-links-in-new-tab @ git+https://github.com/z-aki/mkdocs-plugin-open-external-links-in-new-tab@5ef62b9"
 ]
