@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"kubara/assets/config"
+	"kubara/assets/envmap"
 	"kubara/cmd"
 	"kubara/templates"
 
@@ -96,6 +97,15 @@ func TestGenerateCmd(t *testing.T) {
 			errContains: "failed to load config",
 		},
 		{
+			name: "error with non-existent env file",
+			flags: []string{
+				"--env-file", "/non/existent/.env",
+				"--dry-run",
+			},
+			wantErr:     true,
+			errContains: "Vars not set",
+		},
+		{
 			name: "successful terraform file generation",
 			flags: []string{
 				"--terraform",
@@ -165,7 +175,6 @@ func TestGenerateCmd(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
@@ -219,11 +228,26 @@ func TestGenerateCmd(t *testing.T) {
 						Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 					},
 				})
+				//dummy values
+				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
+					ProjectName:                 "project-name",
+					ProjectStage:                "project-stage",
+					DockerconfigBase64:          "DockerConfig",
+					ArgocdWizardAccountPassword: "wizardpassword",
+					ArgocdGitHttpsUrl:           "https://example.com",
+					ArgocdGitUsername:           "CoolCapybara",
+					ArgocdGitPatOrPassword:      "password",
+					ArgocdHelmRepoUrl:           "https://example.com",
+					ArgocdHelmRepoUsername:      "CoolCapybara",
+					ArgocdHelmRepoPassword:      "password",
+					DomainName:                  "example.com",
+				})
 
 				// Add global flags
 				globalFlags := []string{
 					"--config-file", configPath,
 					"--work-dir", tempDir,
+					"--env-file", envPath,
 				}
 				tt.flags = append(globalFlags, tt.flags...)
 			}
@@ -276,6 +300,21 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 	return configPath
 }
 
+// createTestEnv writes an envMap to the file system
+// It returns the file path
+// Takes a directory and an EnvMap and validates the envMap before writing it
+func createTestEnv(t *testing.T, dir string, env envmap.EnvMap) string {
+	envPath := filepath.Join(dir, ".env")
+
+	manager := envmap.NewEnvMapManager(envPath, ".", "")
+	manager.SetEnvMap(env)
+	err := manager.ValidateAndSaveToFile(envPath)
+
+	require.NoError(t, err)
+
+	return envPath
+}
+
 func createTestApp(commands ...*cli.Command) *cli.Command {
 	return &cli.Command{
 		Name:     "kubara",
@@ -288,6 +327,10 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 			&cli.StringFlag{
 				Name:  "work-dir",
 				Usage: "Working directory",
+			},
+			&cli.StringFlag{
+				Name:  "env-file",
+				Usage: "Path to the .env file",
 			},
 		},
 	}

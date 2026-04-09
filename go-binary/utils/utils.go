@@ -48,7 +48,8 @@ func FileExist(path string) (bool, error) {
 }
 
 // GetFullPath returns the absolute path representation of "path"
-// if path is a relative path it returns the full path of "path" relative to "workDir"
+// If path is a relative path it returns the full path of "path" relative to "workDir"
+// If Path is already absolute, returns it
 func GetFullPath(path, workDir string) (string, error) {
 	// Expand ~ to home directory (Unix/Linux/macOS convention)
 	if path == "~" || strings.HasPrefix(path, "~/") {
