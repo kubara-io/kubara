@@ -195,6 +195,6 @@ nfpms:
   - id: kubara-packages
     ids:
       - kubara-linux
-    maintainer: "Kubara Maintainer <kubara@schwarz.digits>"
+    maintainer: "Kubara Maintainer <kubara@digits.schwarz>"
     formats:
       - deb
