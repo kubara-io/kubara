@@ -7,6 +7,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./NOTICE.md#documentation-license)
 [![Docs](https://img.shields.io/badge/docs-docs.kubara.io-1f6feb)](https://docs.kubara.io)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara?ref=badge_shield)
 
 kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with a GitOps-first workflow.
 It combines platform scaffolding, environment configuration, and production-ready defaults in a single binary.
@@ -78,3 +79,6 @@ kubara uses dual licensing:
 - Software source code: [Apache 2.0](./LICENSE)
 - Documentation: [CC BY 4.0](./NOTICE.md#documentation-license)
 - Additional notices: [NOTICE.md](./NOTICE.md)
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara?ref=badge_large)
