@@ -1,6 +1,9 @@
 ---
 version: 2
 project_name: kubara
+before:
+  hooks:
+    - sh -c 'go-licenses report . --ignore kubara > licenses.csv'
 release:
   github:
     owner: kubara-io
@@ -8,6 +11,8 @@ release:
   draft: true
   replace_existing_draft: true
   replace_existing_artifacts: true
+  extra_files:
+    - glob: licenses.csv
 changelog:
   use: git
   sort: asc
@@ -174,6 +179,10 @@ homebrew_casks:
     binaries:
       - kubara
     skip_upload: "auto"
+sboms:
+  - artifacts: archive
+    documents:
+      - "{{ .ArtifactName }}.sbom.json"
 dockers_v2:
   - dockerfile: ../Dockerfile
     images:
@@ -186,6 +195,6 @@ nfpms:
   - id: kubara-packages
     ids:
       - kubara-linux
-    maintainer: "Kubara Maintainer <kubara@schwary.digits>"
+    maintainer: "Kubara Maintainer <kubara@schwarz.digits>"
     formats:
       - deb
