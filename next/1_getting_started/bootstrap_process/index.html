@@ -2498,6 +2498,7 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 <p>If you want Terraform to create OAuth2-related Vault entries:</p>
 <ul>
 <li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code></li>
+<li><code>TF_Var_image_pull_secret</code> will already be set by kubara with what is present in the .env</li>
 <li>In <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/infrastructure</code>, copy <code>secrets.tf-example</code> to <code>secrets-2.tf</code> and adjust values if needed</li>
 </ul>
 <p>Load the variables and apply:</p>
