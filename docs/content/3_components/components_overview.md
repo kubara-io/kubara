@@ -20,6 +20,7 @@ More tools will be added in future releases of the kubara framework.
 |--------------------------------------------------------------------------------| -------------------------------------------------------------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------- |
 | <div style="width: 80px;">![Prometheus](../images/prometheus-logo.png)</div>   | Kube-Prometheus-Stack. Monitoring and alerting toolkit using Prometheus, Grafana, and Alertmanager. | Monitoring for Kubernetes   | - Prometheus metrics<br>- Grafana dashboards<br>- Alertmanager notifications<br>- Pre-configured alerts |
 | <div style="width: 80px;">![Grafana Loki](../images/grafana_loki-logo.png)</div>  | Grafana Loki. Log aggregation system for Kubernetes logs. | Log collection and analysis | - Grafana integration<br>- Label-based filtering<br>- Efficient log storage<br>- Scalable architecture  |
+| <div style="width: 80px;">![Grafana Loki](../images/promtail-logo.png)</div>  | <b> Promtail</b><br> Agent on server for reading local log files (Deprecated)| Finding log files on a machine and sending them to loki | Automatically discover running servers and figure which logs belong to which service
 | <div style="width: 80px;">![Metrics Server](../images/metrics-server-logo.png)</div> | Metrics Server. Collects resource metrics from Kubernetes nodes and pods. | Resource metric collection  | - Integrates with Horizontal Pod Autoscaler<br>- Lightweight<br>- Kubelet-based collection              |
 
 ---
@@ -57,7 +58,7 @@ More tools will be added in future releases of the kubara framework.
 
 | Tool                                                                                                                                        | Description                                                       | Functionality       | Key Features                                             |
 |---------------------------------------------------------------------------------------------------------------------------------------------| ----------------------------------------------------------------- | ------------------- | -------------------------------------------------------- |
-| <div style="width: 80px;">![Forgejo](../images/forgejo-logo.png) </div> | Forgejo. Managed Git service with CI/CD integration from STACKIT. | Git repo management | - Web UI<br>- User management<br>- Repos <br>- Pipelines |
+| <div style="width: 80px;">![Github](../images/github-logo.png) </div> | <b> Github <br> </b> Managed Git service with CI/CD integration through Actions. | Git repo management | - Web UI <br>- Repos <br> - Pipelines |
 
 ---
 
