@@ -43,6 +43,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",

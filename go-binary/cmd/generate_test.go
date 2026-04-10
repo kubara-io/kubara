@@ -122,6 +122,13 @@ func TestGenerateCmd(t *testing.T) {
 				entries, err := os.ReadDir(terraformDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
+
+				// Provider selector folders are internal to embedded templates
+				// and must not leak into generated output paths.
+				_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
+				require.NoError(t, err)
+				_, err = os.Stat(filepath.Join(terraformDir, "providers"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
 			},
 		},
 		{
@@ -164,6 +171,10 @@ func TestGenerateCmd(t *testing.T) {
 				entries, err := os.ReadDir(terraformDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
+				_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
+				require.NoError(t, err)
+				_, err = os.Stat(filepath.Join(terraformDir, "providers"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
 
 				// Check overlay files were generated with cluster name
 				overlayDir := filepath.Join(tempDir, "custom-overlay")
@@ -188,6 +199,7 @@ func TestGenerateCmd(t *testing.T) {
 					Type:             "controlplane",
 					DNSName:          "test.example.com",
 					Terraform: &config.Terraform{
+						Provider:          "stackit",
 						ProjectID:         "00000000-0000-0000-0000-000000000000",
 						KubernetesType:    "ske",
 						KubernetesVersion: "1.28.0",
@@ -228,6 +240,7 @@ func TestGenerateCmd(t *testing.T) {
 						Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 					},
 				})
+
 				//dummy values
 				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
 					ProjectName:                 "project-name",
@@ -281,6 +294,121 @@ func TestGenerateCmd(t *testing.T) {
 	}
 }
 
+func TestGenerateCmd_MissingProviderFails(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "no-provider-cluster",
+		Stage:   "dev",
+		Type:    "controlplane",
+		DNSName: "test.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "",
+			ProjectID:         "00000000-0000-0000-0000-000000000000",
+			KubernetesType:    "ske",
+			KubernetesVersion: "1.28.0",
+			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: config.Services{
+			Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
+			ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Loki:                config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+		},
+	})
+
+	app := createTestApp(cmd.NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
+	err := app.Run(context.Background(), args)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "/terraform/provider")
+}
+
+func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "placeholder-provider-cluster",
+		Stage:   "dev",
+		Type:    "controlplane",
+		DNSName: "test.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "<provider>",
+			ProjectID:         "00000000-0000-0000-0000-000000000000",
+			KubernetesType:    "ske",
+			KubernetesVersion: "1.28.0",
+			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: config.Services{
+			Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
+			ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Loki:                config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+		},
+	})
+
+	app := createTestApp(cmd.NewGenerateCmd())
+
+	//dummy values
+	createTestEnv(t, tempDir, envmap.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
+
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
+	err := app.Run(context.Background(), args)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "placeholder provider")
+	assert.Contains(t, err.Error(), "supported providers: stackit")
+}
+
 // Helper function
 
 func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
@@ -323,14 +451,17 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 			&cli.StringFlag{
 				Name:  "config-file",
 				Usage: "Path to the configuration file",
+				Value: "config.yaml",
 			},
 			&cli.StringFlag{
 				Name:  "work-dir",
 				Usage: "Working directory",
+				Value: ".",
 			},
 			&cli.StringFlag{
 				Name:  "env-file",
 				Usage: "Path to the .env file",
+				Value: ".env",
 			},
 		},
 	}

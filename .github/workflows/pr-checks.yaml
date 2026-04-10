@@ -259,6 +259,7 @@ jobs:
 
       # config.yaml updates
       KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
+      KUBARA_TERRAFORM_PROVIDER: "stackit"
       KUBARA_CLUSTER_TYPE: "controlplane"
       KUBARA_SSO_ORG: "Kubara"
       KUBARA_SSO_TEAM: "Test"
