@@ -492,8 +492,8 @@ func TestTemplateFiles(t *testing.T) {
 		},
 		{
 			name: "Success: Successfully template set-env-changeme.sh and .ps1",
-			fileList: []string{"customer-service-catalog/terraform/example/set-env-changeme.sh.tplt",
-				"customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt",
+			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.sh.tplt",
+				"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt",
 			},
 			context: map[string]any{
 				"env": map[string]interface{}{
@@ -503,8 +503,8 @@ func TestTemplateFiles(t *testing.T) {
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 2)
-				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.sh.tplt", results[0].Path)
-				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt", results[1].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.sh.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt", results[1].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NoError(t, results[1].Error)
 				assert.NotEmpty(t, results[0].Content)
@@ -515,8 +515,8 @@ func TestTemplateFiles(t *testing.T) {
 		},
 		{
 			name: "Success: Empty string .env value leaves set-env-changeme.sh and .ps1 empty aswell",
-			fileList: []string{"customer-service-catalog/terraform/example/set-env-changeme.sh.tplt",
-				"customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt",
+			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.sh.tplt",
+				"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt",
 			},
 			context: map[string]any{
 				"env": map[string]interface{}{
@@ -526,8 +526,8 @@ func TestTemplateFiles(t *testing.T) {
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
 				require.Len(t, results, 2)
-				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.sh.tplt", results[0].Path)
-				assert.Equal(t, "customer-service-catalog/terraform/example/set-env-changeme.ps1.tplt", results[1].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.sh.tplt", results[0].Path)
+				assert.Equal(t, "customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt", results[1].Path)
 				assert.NoError(t, results[0].Error)
 				assert.NoError(t, results[1].Error)
 				assert.NotEmpty(t, results[0].Content)
