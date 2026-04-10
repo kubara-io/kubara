@@ -240,6 +240,7 @@ func TestGenerateCmd(t *testing.T) {
 						Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
 					},
 				})
+
 				//dummy values
 				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
 					ProjectName:                 "project-name",
@@ -385,6 +386,22 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	})
 
 	app := createTestApp(cmd.NewGenerateCmd())
+
+	//dummy values
+	createTestEnv(t, tempDir, envmap.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
+
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
@@ -434,14 +451,17 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 			&cli.StringFlag{
 				Name:  "config-file",
 				Usage: "Path to the configuration file",
+				Value: "config.yaml",
 			},
 			&cli.StringFlag{
 				Name:  "work-dir",
 				Usage: "Working directory",
+				Value: ".",
 			},
 			&cli.StringFlag{
 				Name:  "env-file",
 				Usage: "Path to the .env file",
+				Value: ".env",
 			},
 		},
 	}
