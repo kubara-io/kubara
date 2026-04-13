@@ -908,17 +908,6 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-cicd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. CI/CD
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#custom-resource-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1975,17 +1964,6 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#6-cicd" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. CI/CD
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#custom-resource-dependencies" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2079,6 +2057,12 @@ More tools will be added in future releases of the kubara framework.</p>
 <td>Grafana Loki. Log aggregation system for Kubernetes logs.</td>
 <td>Log collection and analysis</td>
 <td>- Grafana integration<br>- Label-based filtering<br>- Efficient log storage<br>- Scalable architecture</td>
+</tr>
+<tr>
+<td><div style="width: 80px;"><img alt="Grafana Loki" src="../../images/promtail-logo.png" /></div></td>
+<td><b> Promtail</b><br> Agent on server for reading local log files (Deprecated)</td>
+<td>Finding log files on a machine and sending them to loki</td>
+<td>Automatically discover running servers and figure which logs belong to which service</td>
 </tr>
 <tr>
 <td><div style="width: 80px;"><img alt="Metrics Server" src="../../images/metrics-server-logo.png" /></div></td>
@@ -2178,27 +2162,6 @@ More tools will be added in future releases of the kubara framework.</p>
 </tr>
 </tbody>
 </table>
-<hr />
-<h2 id="6-cicd">6. CI/CD</h2>
-<table>
-<thead>
-<tr>
-<th>Tool</th>
-<th>Description</th>
-<th>Functionality</th>
-<th>Key Features</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><div style="width: 80px;"><img alt="Forgejo" src="../../images/forgejo-logo.png" /> </div></td>
-<td>Forgejo. Managed Git service with CI/CD integration from STACKIT.</td>
-<td>Git repo management</td>
-<td>- Web UI<br>- User management<br>- Repos <br>- Pipelines</td>
-</tr>
-</tbody>
-</table>
-<hr />
 <h2 id="custom-resource-dependencies">Custom Resource Dependencies</h2>
 <p>If you deactivate or replace applications (Y-axis) with others not part of the kubara framework, be sure to resolve custom resource dependencies such as ServiceMonitors, Certificates, and Secrets accordingly.</p>
 <table>
