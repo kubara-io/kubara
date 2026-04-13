@@ -1,0 +1,3 @@
+oauth2-proxy:
+  ingress:
+    className: nginx

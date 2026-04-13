@@ -1,0 +1,6 @@
+argo-cd:
+  server:
+    ingressGrpc:
+      ingressClassName: gce
+    ingress:
+      ingressClassName: gce

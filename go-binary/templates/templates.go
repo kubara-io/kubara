@@ -11,6 +11,7 @@ import (
 	"text/template"
 
 	"github.com/Masterminds/sprig/v3"
+	"go.yaml.in/yaml/v3"
 )
 
 //go:embed all:embedded
@@ -41,6 +42,18 @@ var templateName = map[TemplateType]string{
 	Terraform: "terraform",
 	Helm:      "helm",
 	All:       "all",
+}
+
+func templateFuncMap() template.FuncMap {
+	funcs := sprig.FuncMap()
+	funcs["toYaml"] = func(v any) (string, error) {
+		out, err := yaml.Marshal(v)
+		if err != nil {
+			return "", err
+		}
+		return strings.TrimSuffix(string(out), "\n"), nil
+	}
+	return funcs
 }
 
 // TemplateResult represents the result of templating a single file
@@ -213,8 +226,8 @@ func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
 		if strings.HasSuffix(fullPath, ".tplt") {
 			// Parse the template
 			// Using relPath as name to aid debugging
-			//tmpl, err := template.New(relPath).Funcs(sprig.FuncMap()).Option("missingkey=error").Parse(string(content))
-			tmpl, err := template.New(relPath).Funcs(sprig.FuncMap()).Parse(string(content))
+			//tmpl, err := template.New(relPath).Funcs(templateFuncMap()).Option("missingkey=error").Parse(string(content))
+			tmpl, err := template.New(relPath).Funcs(templateFuncMap()).Parse(string(content))
 			if err != nil {
 				result.Error = err
 				results = append(results, result)

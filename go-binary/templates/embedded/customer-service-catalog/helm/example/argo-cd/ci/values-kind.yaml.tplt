@@ -1,0 +1,6 @@
+argo-cd:
+  server:
+    ingressGrpc:
+      ingressClassName: nginx
+    ingress:
+      ingressClassName: nginx

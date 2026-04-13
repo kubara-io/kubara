@@ -1,0 +1,7 @@
+loki:
+  singleBinary:
+    persistence:
+      storageClass: standard-rwo
+  loki:
+    ingress:
+      ingressClassName: gce

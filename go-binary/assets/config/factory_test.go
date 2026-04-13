@@ -35,13 +35,12 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// This is what we expect the function to return.
 	expectedDNSName := "kubara-test-dev.example.com"
 	expectedCluster := Cluster{
-		Name:             "kubara-test",
-		Stage:            "dev",
-		Type:             "<controlplane or worker>",
-		DNSName:          expectedDNSName,
-		SSOOrg:           "<my-org>",
-		SSOTeam:          "<my-team>",
-		IngressClassName: "traefik",
+		Name:    "kubara-test",
+		Stage:   "dev",
+		Type:    "<controlplane or worker>",
+		DNSName: expectedDNSName,
+		SSOOrg:  "<my-org>",
+		SSOTeam: "<my-team>",
 		Terraform: &Terraform{
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
@@ -71,16 +70,16 @@ func TestNewClusterFromEnv(t *testing.T) {
 		},
 		// The statuses of services are hardcoded in the function, so we mirror them here.
 		Services: Services{
-			Argocd:              GenericService{ServiceStatus{Status: StatusDisabled}},
+			Argocd:              GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
 			CertManager:         CertManagerService{ServiceStatus: ServiceStatus{Status: StatusEnabled}, ClusterIssuer: ClusterIssuer{Name: "letsencrypt-staging", Email: "yourname@your-domain.de", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
 			ExternalDns:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			ExternalSecrets:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			KubePrometheusStack: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
+			KubePrometheusStack: PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
 			Traefik:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			Kyverno:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			KyvernoPolicies:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			KyvernoPolicyReport: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			Loki:                GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
+			Loki:                PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
 			HomerDashboard:      GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			Oauth2Proxy:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
 			MetricsServer:       GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},

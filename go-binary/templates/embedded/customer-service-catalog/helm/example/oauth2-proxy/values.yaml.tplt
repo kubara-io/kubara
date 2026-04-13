@@ -1,3 +1,9 @@
+{{- $oauth2ProxyIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $oauth2ProxyIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $oauth2ProxyIngressAnnotations = mergeOverwrite $oauth2ProxyIngressAnnotations (dig "cluster" "services" "oauth2Proxy" "ingress" "annotations" (dict) .) -}}
+
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"
@@ -37,12 +43,11 @@ oauth2-proxy:
       provider = "github"
       scope = "read:user user:email read:org"
   ingress:
-    className: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+    className: {{ . }}
+{{- end }}
     annotations:
-      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-      {{- if (eq .cluster.services.metalLb.status "enabled") }}
-      external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-      {{- end }}
+{{ toYaml $oauth2ProxyIngressAnnotations | nindent 6 }}
     enabled: true
     path: /oauth2
     pathType: Prefix

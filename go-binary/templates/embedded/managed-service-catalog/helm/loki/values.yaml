@@ -30,7 +30,6 @@ loki:
     enabled: false  # for the canary
   ingress:
     enabled: false
-    ingressClassName: traefik
   read:
     extraArgs:
       - '-config.expand-env=true'

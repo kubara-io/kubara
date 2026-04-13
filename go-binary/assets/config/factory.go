@@ -28,13 +28,12 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 	}
 
 	return Cluster{
-		Name:             e.ProjectName,
-		Stage:            e.ProjectStage,
-		Type:             "<controlplane or worker>",
-		DNSName:          dnsName,
-		SSOOrg:           "<my-org>",
-		SSOTeam:          "<my-team>",
-		IngressClassName: "traefik",
+		Name:    e.ProjectName,
+		Stage:   e.ProjectStage,
+		Type:    "<controlplane or worker>",
+		DNSName: dnsName,
+		SSOOrg:  "<my-org>",
+		SSOTeam: "<my-team>",
 		Terraform: &Terraform{
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
@@ -47,7 +46,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		},
 		ArgoCD: argoCD,
 		Services: Services{
-			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
+			Argocd: GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
 			CertManager: CertManagerService{
 				ServiceStatus: ServiceStatus{
 					Status: StatusEnabled,
@@ -68,9 +67,11 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 					Status: StatusEnabled,
 				},
 			},
-			KubePrometheusStack: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
+			KubePrometheusStack: PersistentService{
+				GenericService: GenericService{
+					ServiceStatus: ServiceStatus{
+						Status: StatusEnabled,
+					},
 				},
 			},
 			Traefik: GenericService{
@@ -93,9 +94,11 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 					Status: StatusEnabled,
 				},
 			},
-			Loki: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
+			Loki: PersistentService{
+				GenericService: GenericService{
+					ServiceStatus: ServiceStatus{
+						Status: StatusEnabled,
+					},
 				},
 			},
 			HomerDashboard: GenericService{

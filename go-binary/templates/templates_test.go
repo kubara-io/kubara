@@ -491,6 +491,158 @@ func TestTemplateFiles(t *testing.T) {
 			},
 		},
 		{
+			name:     "Success: Omits optional ingress and storage class settings when they are not configured",
+			fileList: []string{"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "disabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+				assert.NotContains(t, results[0].Content, "ingressClassName:")
+				assert.NotContains(t, results[0].Content, "storageClassName:")
+
+				var rendered map[string]interface{}
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+			},
+		},
+		{
+			name:     "Success: Merges service ingress annotations with defaults",
+			fileList: []string{"customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "enabled",
+						},
+						"traefik": map[string]any{
+							"status": "enabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+						"homerDashboard": map[string]any{
+							"status": "enabled",
+							"ingress": map[string]any{
+								"annotations": map[string]any{
+									"cert-manager.io/cluster-issuer":             "letsencrypt-custom",
+									"nginx.ingress.kubernetes.io/rewrite-target": "/",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+
+				var rendered map[string]any
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				ingress, ok := rendered["ingress"].(map[string]any)
+				require.True(t, ok)
+				annotations, ok := ingress["annotations"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, "letsencrypt-custom", annotations["cert-manager.io/cluster-issuer"])
+				assert.Equal(t, "oauth2-proxy-oauth-auth@kubernetescrd", annotations["traefik.ingress.kubernetes.io/router.middlewares"])
+				assert.Equal(t, "/", annotations["nginx.ingress.kubernetes.io/rewrite-target"])
+			},
+		},
+		{
+			name:     "Success: Skips traefik middleware annotation when traefik is disabled",
+			fileList: []string{"customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "enabled",
+						},
+						"traefik": map[string]any{
+							"status": "disabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+						"homerDashboard": map[string]any{
+							"status": "enabled",
+							"ingress": map[string]any{
+								"annotations": map[string]any{
+									"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
+								},
+							},
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+
+				var rendered map[string]any
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				ingress, ok := rendered["ingress"].(map[string]any)
+				require.True(t, ok)
+				annotations, ok := ingress["annotations"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, "letsencrypt-prod", annotations["cert-manager.io/cluster-issuer"])
+				assert.NotContains(t, annotations, "traefik.ingress.kubernetes.io/router.middlewares")
+				assert.Equal(t, "http://oauth2-proxy/oauth2/auth", annotations["nginx.ingress.kubernetes.io/auth-url"])
+			},
+		},
+		{
 			name: "Success: Successfully template set-env-changeme.sh and .ps1",
 			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.sh.tplt",
 				"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt",

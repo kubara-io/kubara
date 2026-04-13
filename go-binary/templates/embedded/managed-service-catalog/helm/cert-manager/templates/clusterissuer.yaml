@@ -11,6 +11,10 @@ spec:
       name: {{ .Values.clusterIssuer.name }}
     solvers:
     - http01:
+{{- if .Values.clusterIssuer.ingressClassName }}
         ingress:
-          ingressClassName: {{ .Values.clusterIssuer.ingressClassName | default "traefik" }}
+          ingressClassName: {{ .Values.clusterIssuer.ingressClassName }}
+{{- else }}
+        ingress: {}
+{{- end }}
 {{ end }}

@@ -19,7 +19,6 @@ clusters:
     stage: dev
     type: worker
     dnsName: workload-0.dev.example.com
-    ingressClassName: traefik
     ssoOrg: my-org
     ssoTeam: my-team
     terraform:
@@ -54,6 +53,7 @@ clusters:
         status: enabled
       kubePrometheusStack:
         status: enabled
+        storageClassName: standard-rwo # optional
       traefik:
         status: enabled
       kyverno:
@@ -64,6 +64,7 @@ clusters:
         status: enabled
       loki:
         status: enabled
+        storageClassName: standard-rwo # optional
       homerDashboard:
         status: enabled
       oauth2Proxy:
@@ -75,6 +76,23 @@ clusters:
       longhorn:
         status: disabled
 ```
+
+### Optional: Ingress annotation overrides
+
+Each service supports an optional `ingress.annotations` map that is merged with kubara's default annotations when rendering the service values files.
+This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.
+
+```yaml
+services:
+  kubePrometheusStack:
+    status: enabled
+    ingress:
+      annotations:
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+```
+
+User-provided annotations are merged on top of kubara defaults using `mergeOverwrite`: values for the same key are overwritten, but kubara defaults that are not present in the override map are preserved.
 
 ## 2. Regenerate Terraform and Helm templates
 

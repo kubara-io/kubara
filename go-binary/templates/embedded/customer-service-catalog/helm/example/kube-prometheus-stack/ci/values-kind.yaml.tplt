@@ -1,0 +1,15 @@
+kube-prometheus-stack:
+  prometheus:
+    ingress:
+      ingressClassName: nginx
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard
+  alertmanager:
+    ingress:
+      ingressClassName: nginx
+  grafana:
+    ingress:
+      ingressClassName: nginx

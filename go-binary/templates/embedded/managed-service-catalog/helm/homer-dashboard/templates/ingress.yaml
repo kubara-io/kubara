@@ -9,7 +9,9 @@ metadata:
     {{- toYaml . | nindent 4}}
   {{- end }}
 spec:
-  ingressClassName: {{ .Values.ingress.ingressClassName | default "traefik" }}
+{{- with .Values.ingress.ingressClassName }}
+  ingressClassName: {{ . }}
+{{- end }}
   rules:
     - host: {{ .Values.ingress.host }}
       http:

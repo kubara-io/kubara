@@ -1,0 +1,7 @@
+loki:
+  singleBinary:
+    persistence:
+      storageClass: gp3
+  loki:
+    ingress:
+      ingressClassName: alb

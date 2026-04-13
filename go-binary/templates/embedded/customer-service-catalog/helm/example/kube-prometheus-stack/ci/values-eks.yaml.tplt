@@ -1,0 +1,15 @@
+kube-prometheus-stack:
+  prometheus:
+    ingress:
+      ingressClassName: alb
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: gp3
+  alertmanager:
+    ingress:
+      ingressClassName: alb
+  grafana:
+    ingress:
+      ingressClassName: alb

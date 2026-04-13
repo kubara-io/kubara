@@ -1,3 +1,12 @@
+{{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $longhornIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $longhornIngressAnnotations = mergeOverwrite $longhornIngressAnnotations (dig "cluster" "services" "longhorn" "ingress" "annotations" (dict) .) -}}
+
 longhorn:
   privateRegistry:
     registrySecret: image-pull-secret
@@ -17,19 +26,15 @@ longhorn:
     {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
     enabled: true
     {{- end }}
-    ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+    ingressClassName: {{ . }}
+{{- end }}
     host: {{ .cluster.dnsName }}
     tls: true
     tlsSecret: tls-longhorn
     path: "/longhorn(/|$)(.*)" # see path problems https://github.com/longhorn/longhorn/issues/1745
     annotations:
-      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-      traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
-      {{- end }}
-      {{- if (eq .cluster.services.metalLb.status "enabled") }}
-      external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-      {{- end }}
+{{ toYaml $longhornIngressAnnotations | nindent 6 }}
 
 namespace:
   labels:

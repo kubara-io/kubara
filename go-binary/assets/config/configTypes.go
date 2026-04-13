@@ -15,7 +15,7 @@ type Cluster struct {
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
-	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
+	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=Optional ingress class to use for this cluster.,minLength=1"`
 
 	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
 	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
@@ -67,8 +67,18 @@ type ServiceStatus struct {
 	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
 }
 
+type IngressOverrides struct {
+	Annotations map[string]string `json:"annotations,omitempty" yaml:"annotations,omitempty" jsonschema:"title=Ingress Annotations,description=Optional ingress annotations that are merged with kubara defaults."`
+}
+
 type GenericService struct {
 	ServiceStatus `yaml:",inline" jsonschema:"required,title=ServiceStatus"`
+	Ingress       *IngressOverrides `json:"ingress,omitempty" yaml:"ingress,omitempty" jsonschema:"title=Ingress Overrides,description=Optional ingress settings for this service."`
+}
+
+type PersistentService struct {
+	GenericService   `yaml:",inline" jsonschema:"required,title=GenericService"`
+	StorageClassName string `json:"storageClassName,omitempty" yaml:"storageClassName,omitempty" jsonschema:"title=Storage Class,description=Optional storage class for services that provision persistent volumes.,minLength=1"`
 }
 
 type Status string
@@ -96,12 +106,12 @@ type Services struct {
 	CertManager         CertManagerService `json:"certManager" yaml:"certManager" jsonschema:"required,title=CertManager Service,description=Configuration for CertManager"`
 	ExternalDns         GenericService     `json:"externalDns" yaml:"externalDns" jsonschema:"required,title=ExternalDns Service,description=Configuration for ExternalDns"`
 	ExternalSecrets     GenericService     `json:"externalSecrets" yaml:"externalSecrets" jsonschema:"required,title=ExternalSecrets Service,description=Configuration for ExternalSecrets"`
-	KubePrometheusStack GenericService     `json:"kubePrometheusStack" yaml:"kubePrometheusStack" jsonschema:"required,title=KubePrometheusStack Service,description=Configuration for KubePrometheusStack"`
+	KubePrometheusStack PersistentService  `json:"kubePrometheusStack" yaml:"kubePrometheusStack" jsonschema:"required,title=KubePrometheusStack Service,description=Configuration for KubePrometheusStack"`
 	Traefik             GenericService     `json:"traefik" yaml:"traefik" jsonschema:"required,title=Traefik Service,description=Configuration for Traefik"`
 	Kyverno             GenericService     `json:"kyverno" yaml:"kyverno" jsonschema:"required,title=Kyverno Service,description=Configuration for Kyverno"`
 	KyvernoPolicies     GenericService     `json:"kyvernoPolicies" yaml:"kyvernoPolicies" jsonschema:"required,title=KyvernoPolicies Service,description=Configuration for KyvernoPolicies"`
 	KyvernoPolicyReport GenericService     `json:"kyvernoPolicyReport" yaml:"kyvernoPolicyReport" jsonschema:"required,title=KyvernoPolicyReport Service,description=Configuration for KyvernoPolicyReport"`
-	Loki                GenericService     `json:"loki" yaml:"loki" jsonschema:"required,title=Loki Service,description=Configuration for Loki"`
+	Loki                PersistentService  `json:"loki" yaml:"loki" jsonschema:"required,title=Loki Service,description=Configuration for Loki"`
 	HomerDashboard      GenericService     `json:"homerDashboard" yaml:"homerDashboard" jsonschema:"required,title=HomerDashboard Service,description=Configuration for HomerDashboard"`
 	Oauth2Proxy         GenericService     `json:"oauth2Proxy" yaml:"oauth2Proxy" jsonschema:"required,title=oauth2Proxy Service,description=Configuration for oaOauth2Proxy"`
 	MetricsServer       GenericService     `json:"metricsServer" yaml:"metricsServer" jsonschema:"required,title=MetricsServer Service,description=Configuration for MetricsServer"`
