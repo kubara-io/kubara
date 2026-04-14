@@ -149,6 +149,9 @@ func TestGetEmbeddedTemplatesList(t *testing.T) {
 				for _, p := range list {
 					assert.Contains(t, p, "helm")
 					assert.False(t, strings.Contains(p, "terraform"), "Helm list should not include Terraform paths: %s", p)
+					if strings.HasPrefix(p, "customer-service-catalog/helm/") {
+						assert.False(t, strings.Contains(p, "/ci/"), "Customer Helm list should not include CI-only profile files: %s", p)
+					}
 				}
 			},
 		},
