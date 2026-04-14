@@ -41,7 +41,7 @@ func applyDefaultsStruct(v reflect.Value) {
 		field := t.Field(i)
 		fv := v.Field(i)
 
-		// Skip unexported fields 
+		// Skip unexported fields
 		if !fv.CanSet() {
 			continue
 		}
