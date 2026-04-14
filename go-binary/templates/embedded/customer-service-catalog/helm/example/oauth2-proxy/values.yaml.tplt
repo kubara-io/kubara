@@ -1,8 +1,4 @@
-{{- $oauth2ProxyIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{- if (eq .cluster.services.metalLb.status "enabled") -}}
-{{- $_ := set $oauth2ProxyIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
-{{- end -}}
-{{- $oauth2ProxyIngressAnnotations = mergeOverwrite $oauth2ProxyIngressAnnotations (dig "cluster" "services" "oauth2Proxy" "ingress" "annotations" (dict) .) -}}
+{{- $oauth2ProxyIngressAnnotations := dig "computed" "ingressAnnotations" "oauth2Proxy" (dict) . -}}
 
 namespace:
   labels:

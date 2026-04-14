@@ -129,21 +129,8 @@ externalSecrets:
         - remoteKey: argo_oauth2_credentials
 {{- end }}
 
-{{ $argocdUserIngressAnnotations := dig "cluster" "services" "argocd" "ingress" "annotations" (dict) . -}}
-{{ $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{ if (eq .cluster.services.metalLb.status "enabled") -}}
-{{ $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
-{{ end -}}
-{{ $argocdIngressGrpcAnnotations = mergeOverwrite $argocdIngressGrpcAnnotations $argocdUserIngressAnnotations -}}
-
-{{ $argocdIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{ if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
-{{ $_ := set $argocdIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
-{{ end -}}
-{{ if (eq .cluster.services.metalLb.status "enabled") -}}
-{{ $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
-{{ end -}}
-{{ $argocdIngressAnnotations = mergeOverwrite $argocdIngressAnnotations $argocdUserIngressAnnotations -}}
+{{ $argocdIngressGrpcAnnotations := dig "computed" "ingressAnnotations" "argocd" "grpc" (dict) . }}
+{{ $argocdIngressAnnotations := dig "computed" "ingressAnnotations" "argocd" "ingress" (dict) . }}
 
 argo-cd:
   server:

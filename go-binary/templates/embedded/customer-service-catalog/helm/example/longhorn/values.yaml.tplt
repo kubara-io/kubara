@@ -1,11 +1,4 @@
-{{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
-{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
-{{- end -}}
-{{- if (eq .cluster.services.metalLb.status "enabled") -}}
-{{- $_ := set $longhornIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
-{{- end -}}
-{{- $longhornIngressAnnotations = mergeOverwrite $longhornIngressAnnotations (dig "cluster" "services" "longhorn" "ingress" "annotations" (dict) .) -}}
+{{- $longhornIngressAnnotations := dig "computed" "ingressAnnotations" "longhorn" (dict) . -}}
 
 longhorn:
   privateRegistry:

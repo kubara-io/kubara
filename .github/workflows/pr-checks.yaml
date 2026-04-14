@@ -323,6 +323,12 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Checkout CI overlay profiles
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            go-binary/templates/ci-overlays
+
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
         with:
@@ -413,15 +419,13 @@ jobs:
               echo "📄 Rendering chart with overlay values"
               helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
 
-              PROFILE_DIR="${{ env.CODE_PATH }}/templates/embedded/customer-service-catalog/helm/example/$CHART/ci"
+              PROFILE_DIR="${{ env.CODE_PATH }}/templates/ci-overlays/helm/$CHART"
               if [[ -d "$PROFILE_DIR" ]]; then
                 shopt -s nullglob
-                PROFILE_FILES=("$PROFILE_DIR"/*.yaml "$PROFILE_DIR"/*.yaml.tplt)
+                PROFILE_FILES=("$PROFILE_DIR"/*.yaml)
                 shopt -u nullglob
                 for PROFILE_FILE in "${PROFILE_FILES[@]}"; do
-                  PROFILE_NAME="$(basename "$PROFILE_FILE")"
-                  PROFILE_NAME="${PROFILE_NAME%.yaml.tplt}"
-                  PROFILE_NAME="${PROFILE_NAME%.yaml}"
+                  PROFILE_NAME="$(basename "$PROFILE_FILE" .yaml)"
                   echo "🧪 Running helm lint with profile: $PROFILE_NAME"
                   if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" \
                     | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint-${PROFILE_NAME}.log"; then

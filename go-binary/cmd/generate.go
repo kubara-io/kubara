@@ -164,8 +164,9 @@ func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[st
 	}
 
 	return map[string]any{
-		"cluster": clusterMap,
-		"env":     em,
+		"cluster":  clusterMap,
+		"env":      em,
+		"computed": buildTemplateComputed(clusterBlock),
 	}, nil
 }
 

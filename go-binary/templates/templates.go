@@ -86,14 +86,7 @@ func makeWalkDirFunc(tmplRoot string, out *[]string) fs.WalkDirFunc {
 			return err
 		}
 
-		// Keep CI profile overlays internal to kubara repository.
-		// They are used by CI lint/render jobs, but should not be generated into customer output.
-		relPath := filepath.ToSlash(rel)
-		if strings.HasPrefix(relPath, DefaultOverlayValuesPath+"/helm/") && strings.Contains(relPath, "/ci/") {
-			return nil
-		}
-
-		*out = append(*out, relPath)
+		*out = append(*out, filepath.ToSlash(rel))
 		return nil
 	}
 }

@@ -401,6 +401,20 @@ func TestTemplateFiles(t *testing.T) {
 						},
 					},
 				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+						},
+					},
+				},
 			},
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
@@ -472,6 +486,20 @@ func TestTemplateFiles(t *testing.T) {
 						},
 					},
 				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+						},
+					},
+				},
 			},
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
@@ -516,6 +544,13 @@ func TestTemplateFiles(t *testing.T) {
 						},
 						"kubePrometheusStack": map[string]any{
 							"status": "enabled",
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"kubePrometheusStack": map[string]any{
+							"cert-manager.io/cluster-issuer": "letsencrypt-prod",
 						},
 					},
 				},
@@ -567,6 +602,15 @@ func TestTemplateFiles(t *testing.T) {
 									"nginx.ingress.kubernetes.io/rewrite-target": "/",
 								},
 							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"homerDashboard": map[string]any{
+							"cert-manager.io/cluster-issuer":                   "letsencrypt-custom",
+							"traefik.ingress.kubernetes.io/router.middlewares": "oauth2-proxy-oauth-auth@kubernetescrd",
+							"nginx.ingress.kubernetes.io/rewrite-target":       "/",
 						},
 					},
 				},
@@ -623,6 +667,14 @@ func TestTemplateFiles(t *testing.T) {
 									"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
 								},
 							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"homerDashboard": map[string]any{
+							"cert-manager.io/cluster-issuer":       "letsencrypt-prod",
+							"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
 						},
 					},
 				},
@@ -733,6 +785,20 @@ func TestTemplateFiles(t *testing.T) {
 									"path":           "customer-service-catalog/helm",
 									"targetRevision": "main",
 								},
+							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
 							},
 						},
 					},
