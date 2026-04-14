@@ -8,8 +8,8 @@ type Config struct {
 // Cluster defines the configuration for a single Kubernetes cluster.
 type Cluster struct {
 	Name    string `json:"name" yaml:"name" jsonschema:"required,title=Cluster Name,description=The unique name for the cluster.,minLength=1,example=my-prod-cluster"`
-	Stage   string `json:"stage" yaml:"stage" jsonschema:"required,title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
-	Type    string `json:"type" yaml:"type" jsonschema:"required,title=Cluster Type,description=The type of the cluster,enum=controlplane,enum=worker,default=controlplane"`
+	Stage   string `json:"stage" yaml:"stage" jsonschema:"title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
+	Type    string `json:"type" yaml:"type" jsonschema:"title=Cluster Type,description=The type of the cluster,enum=controlplane,enum=worker,default=controlplane"`
 	DNSName string `json:"dnsName" yaml:"dnsName" jsonschema:"required,title=Primary DNS Name,description=The fully qualified domain name for the cluster.,format=hostname,example=my-prod-cluster.example.com"`
 
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
@@ -26,9 +26,9 @@ type Cluster struct {
 }
 
 type Terraform struct {
-	Provider          string `json:"provider" yaml:"provider" jsonschema:"required,title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Currently supported providers: stackit.,minLength=1,example=stackit"`
+	Provider          string `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Currently supported providers: stackit.,minLength=1,default=stackit"`
 	ProjectID         string `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
-	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"required,title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
+	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
 	KubernetesVersion string `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
 	DNS               DNS    `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
 }
@@ -56,7 +56,7 @@ type RepoType struct {
 
 type Repository struct {
 	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
-	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"required,title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
+	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
 }
 
 type HelmRepository struct {
@@ -64,7 +64,7 @@ type HelmRepository struct {
 }
 
 type ServiceStatus struct {
-	Status Status `json:"status" yaml:"status" jsonschema:"required,title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
+	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
 }
 
 type GenericService struct {
@@ -82,7 +82,7 @@ const (
 type ClusterIssuer struct {
 	Name   string `json:"name" yaml:"name" jsonschema:"required,title=Issuer Name,description=Name of the ClusterIssuer resource.,minLength=1,example=letsencrypt-staging,default=letsencrypt-staging"`
 	Email  string `json:"email" yaml:"email" jsonschema:"required,title=ACME Email,description=The email address for Let's Encrypt registration.,format=email"`
-	Server string `json:"server" yaml:"server" jsonschema:"required,title=ACME Server,description=The ACME server URL.,format=uri,default=https://acme-staging-v02.api.letsencrypt.org/directory"`
+	Server string `json:"server" yaml:"server" jsonschema:"title=ACME Server,description=The ACME server URL.,format=uri,default=https://acme-staging-v02.api.letsencrypt.org/directory"`
 }
 
 // CertManagerService defines the specific, nested configuration for cert-manager.

@@ -260,8 +260,9 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
 	}
-	if errValidate := cm.Validate(); errValidate != nil {
-		return nil, fmt.Errorf("config validation failed: %w", errValidate)
+
+	if err := cm.Validate(); err != nil {
+		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
 	cnf := cm.GetConfig()

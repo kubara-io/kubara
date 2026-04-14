@@ -57,6 +57,8 @@ func (cm *Manager) Load() error {
 		return fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	applyDefaults(cm.config)
+
 	return nil
 }
 
@@ -68,7 +70,7 @@ func GenerateSchema() (map[string]any, error) {
 		AllowAdditionalProperties:  false,
 	}
 	// Build schema from the root using a single reflector
-	sch := r.ReflectFromType(reflect.TypeOf(Config{}))
+	sch := r.ReflectFromType(reflect.TypeFor[Config]())
 
 	const schemaURL = "mem://config.schema.json"
 	if sch.ID == "" {
@@ -116,9 +118,8 @@ func (cm *Manager) Validate() error {
 	}
 
 	if err := compiled.Validate(instance); err != nil {
-		var verr *schemaValidator.ValidationError
-		if errors.As(err, &verr) {
-			return fmt.Errorf("config validation failed: %v", verr.Causes)
+		if verr, ok := errors.AsType[*schemaValidator.ValidationError](err); ok {
+			return fmt.Errorf("config validation errors: %v", verr.Causes)
 		}
 		return fmt.Errorf("config not valid: %w", err)
 	}

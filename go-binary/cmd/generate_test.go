@@ -294,7 +294,7 @@ func TestGenerateCmd(t *testing.T) {
 	}
 }
 
-func TestGenerateCmd_MissingProviderFails(t *testing.T) {
+func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
 	configPath := createTestConfig(t, tempDir, config.Cluster{
@@ -336,11 +336,36 @@ func TestGenerateCmd_MissingProviderFails(t *testing.T) {
 		},
 	})
 
+	//dummy values
+	createTestEnv(t, tempDir, envmap.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
+
 	app := createTestApp(cmd.NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "/terraform/provider")
+	require.NoError(t, err)
+
+	terraformDir := filepath.Join(tempDir, "managed-service-catalog", "terraform")
+	entries, err := os.ReadDir(terraformDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, entries)
+
+	// Provider ske-cluster directory and main.tf exists
+	// as stackit is the default provider when none is specified.
+	_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
+	require.NoError(t, err)
+
 }
 
 func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
