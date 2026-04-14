@@ -532,7 +532,7 @@ clusters:
 	c := cm.GetConfig().Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should be defaulted")
 	assert.Equal(t, "controlplane", c.Type, "Type should be defaulted")
-	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
+	assert.Empty(t, c.IngressClassName, "IngressClassName should remain empty when not set")
 
 	assert.NoError(t, cm.Validate(), "Validate should pass after defaults are applied")
 }

@@ -13,7 +13,7 @@ func TestApplyDefaults_ClusterLevelDefaults(t *testing.T) {
 				Name:    "test",
 				DNSName: "test.example.com",
 				// Should get defaults for:
-				// Stage, Type, IngressClassName
+				// Stage, Type
 			},
 		},
 	}
@@ -23,7 +23,7 @@ func TestApplyDefaults_ClusterLevelDefaults(t *testing.T) {
 	c := cfg.Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should default to dev")
 	assert.Equal(t, "controlplane", c.Type, "Type should default to controlplane")
-	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should default to traefik")
+	assert.Empty(t, c.IngressClassName, "IngressClassName should remain empty when not set")
 }
 
 func TestApplyDefaults_DoesNotOverwriteExplicitValues(t *testing.T) {
