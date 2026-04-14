@@ -1,4 +1,11 @@
-{{- $homerIngressAnnotations := dig "computed" "ingressAnnotations" "homerDashboard" (dict) . -}}
+{{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homerDashboard" "ingress" "annotations" (dict) .) -}}
 
 ingress:
   {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}

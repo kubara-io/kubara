@@ -28,12 +28,13 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 	}
 
 	return Cluster{
-		Name:    e.ProjectName,
-		Stage:   e.ProjectStage,
-		Type:    "<controlplane or worker>",
-		DNSName: dnsName,
-		SSOOrg:  "<my-org>",
-		SSOTeam: "<my-team>",
+		Name:             e.ProjectName,
+		Stage:            e.ProjectStage,
+		Type:             "<controlplane or worker>",
+		DNSName:          dnsName,
+		SSOOrg:           "<my-org>",
+		SSOTeam:          "<my-team>",
+		IngressClassName: "traefik",
 		Terraform: &Terraform{
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",

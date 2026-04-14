@@ -15,7 +15,7 @@ type Cluster struct {
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
-	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=Optional ingress class to use for this cluster.,minLength=1"`
+	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
 
 	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
 	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`

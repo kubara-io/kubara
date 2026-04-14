@@ -327,7 +327,7 @@ jobs:
         uses: actions/checkout@v6
         with:
           sparse-checkout: |
-            go-binary/templates/ci-overlays
+            .github/helm-profiles
 
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
@@ -419,12 +419,10 @@ jobs:
               echo "📄 Rendering chart with overlay values"
               helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
 
-              PROFILE_DIR="${{ env.CODE_PATH }}/templates/ci-overlays/helm/$CHART"
+              PROFILE_DIR=".github/helm-profiles/$CHART"
               if [[ -d "$PROFILE_DIR" ]]; then
-                shopt -s nullglob
-                PROFILE_FILES=("$PROFILE_DIR"/*.yaml)
-                shopt -u nullglob
-                for PROFILE_FILE in "${PROFILE_FILES[@]}"; do
+                for PROFILE_FILE in "$PROFILE_DIR"/*.yaml; do
+                  [[ -e "$PROFILE_FILE" ]] || continue
                   PROFILE_NAME="$(basename "$PROFILE_FILE" .yaml)"
                   echo "🧪 Running helm lint with profile: $PROFILE_NAME"
                   if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" \
@@ -446,10 +444,8 @@ jobs:
               echo "📄 Rendering chart with default values"
               helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
             fi
-            shopt -s nullglob
-            RENDER_FILES=("$OUT_DIR"/render*.yaml)
-            shopt -u nullglob
-            for RENDER_FILE in "${RENDER_FILES[@]}"; do
+            for RENDER_FILE in "$OUT_DIR"/render*.yaml; do
+              [[ -e "$RENDER_FILE" ]] || continue
               RENDER_NAME="$(basename "$RENDER_FILE" .yaml)"
               # CRD status is server-populated and may contain null placeholders in chart output.
               # Remove it before schema validation to avoid false negatives in kubeconform.

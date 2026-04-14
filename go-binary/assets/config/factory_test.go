@@ -35,12 +35,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// This is what we expect the function to return.
 	expectedDNSName := "kubara-test-dev.example.com"
 	expectedCluster := Cluster{
-		Name:    "kubara-test",
-		Stage:   "dev",
-		Type:    "<controlplane or worker>",
-		DNSName: expectedDNSName,
-		SSOOrg:  "<my-org>",
-		SSOTeam: "<my-team>",
+		Name:             "kubara-test",
+		Stage:            "dev",
+		Type:             "<controlplane or worker>",
+		DNSName:          expectedDNSName,
+		SSOOrg:           "<my-org>",
+		SSOTeam:          "<my-team>",
+		IngressClassName: "traefik",
 		Terraform: &Terraform{
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
