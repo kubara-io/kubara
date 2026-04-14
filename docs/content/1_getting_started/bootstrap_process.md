@@ -182,7 +182,6 @@ Use the output to configure Terraform backend credentials:
 
 ```bash
 terraform output debug | grep -E "credential_access_key|credential_secret_access_key"
-
 ```
 
 You can set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `set-env.sh` / `set-env.ps1` and source the file again, or export them directly:
