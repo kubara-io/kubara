@@ -154,13 +154,15 @@ Before the first `terraform init`, prepare and load your environment variables:
 ```bash
 cd customer-service-catalog/terraform/<cluster-name>
 cp set-env-changeme.sh set-env.sh
+```
+Set at least `STACKIT_SERVICE_ACCOUNT_KEY_PATH` in `set-env.sh` / `set-env.ps1` before sourcing.
+```bash
 source set-env.sh
 # or for PowerShell
 # cp set-env-changeme.ps1 set-env.ps1
 # . .\set-env.ps1
 ```
 
-Set at least `STACKIT_SERVICE_ACCOUNT_KEY_PATH` in `set-env.sh` / `set-env.ps1` before sourcing.
 
 Then navigate to:
 
