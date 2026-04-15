@@ -77,11 +77,7 @@ func resolveServicesPath(catalogPath string) (string, error) {
 	if errors.Is(err, os.ErrNotExist) {
 		return cleaned, nil
 	}
-	if !errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("failed to stat catalog services path %q: %w", servicesDir, err)
-	}
-
-	return cleaned, nil
+	return "", fmt.Errorf("failed to stat catalog services path %q: %w", servicesDir, err)
 }
 
 func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
