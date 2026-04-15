@@ -1,0 +1,76 @@
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+
+
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secrets:
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: oauth2_credentials
+
+
+oauth2-proxy:
+  imagePullSecrets:
+    - name: image-pull-secret
+  config:
+    existingSecret: oauth2-credentials
+    configFile: |-
+      reverse_proxy = true
+      redirect_url = "https://{{ .cluster.dnsName }}/oauth2/callback"
+      email_domains = [ "*" ]
+      cookie_secure = true
+      upstreams = [ "static://200" ]
+      github_org = "{{ .cluster.ssoOrg }}"
+      github_team = "{{ .cluster.ssoTeam }}"
+      provider = "github"
+      scope = "read:user user:email read:org"
+  ingress:
+    className: {{ .cluster.ingressClassName | default "traefik" }}
+    annotations:
+      cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+      {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
+      external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+      {{- end }}
+    enabled: true
+    path: /oauth2
+    pathType: Prefix
+    hosts:
+      - {{ .cluster.dnsName }}
+    tls:
+      - secretName: tls-oauth2-proxy
+        hosts:
+          - {{ .cluster.dnsName }}
+  metrics:
+    serviceMonitor:
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+      enabled: true
+      {{- end }}
+      labels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+middleware:
+  name: oauth-auth
+  namespace: oauth2-proxy
+
+  forwardAuth:
+    address: http://oauth2-proxy.oauth2-proxy.svc.cluster.local/oauth2/
+    trustForwardHeader: true
+
+    authResponseHeaders:
+      - X-Auth-Request-User
+      - X-Auth-Request-Email
+      - Authorization
+  {{- end }}

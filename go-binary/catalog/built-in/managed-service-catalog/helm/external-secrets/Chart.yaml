@@ -1,0 +1,13 @@
+---
+apiVersion: v2
+name: externalSecrets
+description: Umbrella Chart for external-secrets
+type: application
+version: 0.8.0
+dependencies:
+  - name: template-library
+    repository: file://../template-library
+    version: 0.0.7
+  - name: external-secrets
+    repository: https://charts.external-secrets.io/
+    version: 2.3.0  # https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets

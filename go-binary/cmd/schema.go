@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"kubara/assets/config"
+	"kubara/catalog"
 	"kubara/utils"
 	"os"
 	"path/filepath"
@@ -15,6 +16,7 @@ import (
 
 type SchemaOptions struct {
 	outputFilePath string
+	catalogOptions catalog.LoadOptions
 }
 
 type SchemaFlags struct {
@@ -32,7 +34,7 @@ func NewSchemaCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:      "schema",
 		Usage:     "Generate JSON schema file for config structure",
-		UsageText: "schema [--output]",
+		UsageText: "schema [--output] [--catalog <path> [--catalog-overwrite]]",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
@@ -57,8 +59,14 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 		return nil, err
 	}
 
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	o := &SchemaOptions{
 		outputFilePath: outputFilePath,
+		catalogOptions: catalogOptions,
 	}
 	return o, nil
 }
@@ -79,7 +87,7 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 
 func (o *SchemaOptions) Run() error {
 	// Generate schema
-	schemaDoc, err := config.GenerateSchema()
+	schemaDoc, err := config.GenerateSchemaWithCatalog(o.catalogOptions)
 	if err != nil {
 		return fmt.Errorf("failed to generate schema: %w", err)
 	}

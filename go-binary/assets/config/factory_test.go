@@ -1,10 +1,13 @@
 package config
 
 import (
+	"kubara/catalog"
 	"kubara/assets/envmap"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewClusterFromEnv(t *testing.T) {
@@ -69,23 +72,23 @@ func TestNewClusterFromEnv(t *testing.T) {
 				URL: "https://charts.example.com",
 			},
 		},
-		// The statuses of services are hardcoded in the function, so we mirror them here.
+		// The service defaults are catalog-driven; mirror expected built-in values.
 		Services: Services{
-			Argocd:              GenericService{ServiceStatus{Status: StatusDisabled}},
-			CertManager:         CertManagerService{ServiceStatus: ServiceStatus{Status: StatusEnabled}, ClusterIssuer: ClusterIssuer{Name: "letsencrypt-staging", Email: "yourname@your-domain.de", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
-			ExternalDns:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			ExternalSecrets:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			KubePrometheusStack: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			Traefik:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			Kyverno:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			KyvernoPolicies:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			KyvernoPolicyReport: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			Loki:                GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			HomerDashboard:      GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			Oauth2Proxy:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-			MetricsServer:       GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
-			MetalLb:             GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
-			Longhorn:            GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
+			"argo-cd":                 {Status: StatusDisabled},
+			"cert-manager":            {Status: StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "yourname@your-domain.de", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+			"external-dns":            {Status: StatusEnabled},
+			"external-secrets":        {Status: StatusEnabled},
+			"kube-prometheus-stack":   {Status: StatusEnabled},
+			"traefik":                 {Status: StatusEnabled},
+			"kyverno":                 {Status: StatusEnabled},
+			"kyverno-policies":        {Status: StatusEnabled},
+			"kyverno-policy-reporter": {Status: StatusEnabled},
+			"loki":                    {Status: StatusEnabled},
+			"homer-dashboard":         {Status: StatusEnabled},
+			"oauth2-proxy":            {Status: StatusEnabled},
+			"metrics-server":          {Status: StatusDisabled},
+			"metallb":                 {Status: StatusDisabled},
+			"longhorn":                {Status: StatusDisabled},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
@@ -130,7 +133,23 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, NewClusterFromEnv(tt.args.e), "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
+			got, err := NewClusterFromEnv(tt.args.e)
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})
 	}
+}
+
+func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+	sampleEnvMap := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+	}
+
+	_, err := NewClusterFromEnvWithCatalog(sampleEnvMap, catalog.LoadOptions{
+		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
+	})
+	require.Error(t, err)
 }

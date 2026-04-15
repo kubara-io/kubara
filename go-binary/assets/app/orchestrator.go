@@ -2,13 +2,18 @@ package app
 
 import (
 	"fmt"
+	"kubara/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
 )
 
 // CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
 // or creates it if it doesn't exist.
-func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) {
+func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) error {
+	return CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+}
+
+func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 
@@ -30,12 +35,16 @@ func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) {
 				}
 			}
 
-			return
+			return nil
 		}
 	}
 
 	// If the loop completes without returning, the cluster was not found.
 	fmt.Printf("No cluster named '%s' found, creating a new one...\n", clusterName)
-	newCluster := config.NewClusterFromEnv(e)
+	newCluster, err := config.NewClusterFromEnvWithCatalog(e, catalogOptions)
+	if err != nil {
+		return err
+	}
 	cfg.Clusters = append(cfg.Clusters, newCluster)
+	return nil
 }

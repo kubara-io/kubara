@@ -1,0 +1,146 @@
+{{- if (eq .cluster.type "controlplane") -}}
+bootstrapValues:
+  dockerPullSecrets:
+    image-pull-secret:
+      name: image-pull-secret
+      matchNamespaceLabels:
+        project-name: "{{ .cluster.name }}"
+        stage: "{{ .cluster.stage }}"
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+      remoteRef:
+        remoteKey: docker_config
+        remoteKeyProperty: pull-secret
+  projects:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+      namespace: argocd
+      description: "{{ .cluster.name }}-{{ .cluster.stage }} project"
+      {{- if .cluster.argocd.helmRepo.url }}
+      sourceRepos:
+        - "{{ .cluster.argocd.helmRepo.url }}"
+      {{- end }}
+      orphanedResources:
+        warn: false
+        ignore:
+          - kind: Secret
+            name: cert-manager-webhook-ca
+
+  applicationSets:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      projectName: "{{ .cluster.name }}-{{ .cluster.stage }}"
+      managedServices:
+        repoURL: "{{ .cluster.argocd.repo.https.managed.url }}"
+        path: "{{ .cluster.argocd.repo.https.managed.path | default "managed-service-catalog/helm" }}"
+        targetRevision: "{{ .cluster.argocd.repo.https.managed.targetRevision }}"
+      customerServices:
+        repoURL: "{{ .cluster.argocd.repo.https.customer.url }}"
+        path: "{{ .cluster.argocd.repo.https.customer.path | default "customer-service-catalog/helm" }}"
+        targetRevision: "{{ .cluster.argocd.repo.https.customer.targetRevision }}"
+      apps:
+{{- range $serviceName := keys .cluster.services | sortAlpha }}
+        {{ $serviceName }}:
+          name: {{ $serviceName }}
+          path: {{ $serviceName }}
+{{- end }}
+
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+inClusterName: {{ .cluster.name }}
+inClusterSecretLabels:
+{{- if (eq .cluster.type "controlplane") }}
+##Controlplane labels
+{{- range $serviceName := keys .cluster.services | sortAlpha }}
+  {{ $serviceName }}: "{{ index $.cluster.services $serviceName "status" | default "disabled" }}"
+{{- end }}
+{{- end }}
+
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+  secrets:
+    oauth2-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: argo_oauth2_credentials
+{{- end }}
+
+argo-cd:
+  server:
+    ingressGrpc:
+      enabled: true
+      path: "/argocd"
+      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+    ingress:
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+      enabled: true
+      {{- end }}
+      path: "/argocd"
+      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+      tls: true
+      annotations:
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+        traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
+        {{- end }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
+        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
+        {{- end }}
+  configs:
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+    cm:
+      url: https://{{ .cluster.dnsName }}/argocd
+      dex.config: |
+        connectors:
+          - type: github
+            id: github
+            name: GitHub
+            config:
+              clientID: $oauth2-credentials:client-id
+              clientSecret: $oauth2-credentials:client-secret
+              orgs:
+                - name: {{ .cluster.ssoOrg }}
+    {{- end }}
+    rbac:
+      policy.default: role:readonly
+      policy.csv: |
+        g, {{ .cluster.ssoOrg }}:{{ .cluster.ssoTeam}}, role:admin
+    params:
+      server.rootpath: /argocd
+      server.basehref: /argocd
+      server.insecure: true
+  global:
+    domain: {{ .cluster.dnsName }}
+    revisionHistoryLimit: 5
+    imagePullSecrets:
+      - name: image-pull-secret
+  controller:
+    metrics:
+      enabled: true
+      rules:
+        enabled: false
+      serviceMonitor:
+        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+        enabled: true
+        {{- end }}
+        additionalLabels:
+          monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+{{- end }}

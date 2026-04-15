@@ -1,8 +1,10 @@
 package app
 
 import (
+	"path/filepath"
 	"testing"
 
+	"kubara/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
 
@@ -47,7 +49,8 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
 	updated := cfg.Clusters[0]
@@ -70,7 +73,8 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
@@ -119,7 +123,8 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
 	updated := cfg.Clusters[0]
@@ -136,7 +141,8 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
@@ -153,10 +159,27 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
 
-	CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
 	require.NotNil(t, cluster.ArgoCD.HelmRepo)
 	assert.Equal(t, "registry-1.docker.io/bitnamicharts", cluster.ArgoCD.HelmRepo.URL)
+}
+
+func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+	cfg := &config.Config{}
+	e := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
+	}
+
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{
+		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
+	})
+	require.Error(t, err)
+	require.Empty(t, cfg.Clusters)
 }

@@ -1,11 +1,23 @@
 package config
 
-import "kubara/assets/envmap"
+import (
+	"kubara/catalog"
+	"kubara/assets/envmap"
+)
 
 // NewClusterFromEnv creates a new Cluster configuration populated with default
 // values and information from an EnvMap.
-func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
+func NewClusterFromEnv(e *envmap.EnvMap) (Cluster, error) {
+	return NewClusterFromEnvWithCatalog(e, catalog.LoadOptions{})
+}
+
+func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
+	if err != nil {
+		return Cluster{}, err
+	}
+
 	argoCD := ArgoCD{
 		Repo: RepoProto{
 			HTTPS: &RepoType{
@@ -45,84 +57,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: argoCD,
-		Services: Services{
-			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
-			CertManager: CertManagerService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-				ClusterIssuer: ClusterIssuer{
-					Name:   "letsencrypt-staging",
-					Email:  "yourname@your-domain.de",
-					Server: "https://acme-staging-v02.api.letsencrypt.org/directory",
-				},
-			},
-			ExternalDns: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			ExternalSecrets: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			KubePrometheusStack: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			Traefik: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			Kyverno: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			KyvernoPolicies: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			KyvernoPolicyReport: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			Loki: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			HomerDashboard: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			Oauth2Proxy: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
-				},
-			},
-			MetricsServer: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusDisabled,
-				},
-			},
-			MetalLb: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusDisabled,
-				},
-			},
-			Longhorn: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusDisabled,
-				},
-			},
-		},
-	}
+		ArgoCD:   argoCD,
+		Services: services,
+	}, nil
 }

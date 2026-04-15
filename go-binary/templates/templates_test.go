@@ -1,18 +1,19 @@
 package templates
 
 import (
-	"embed"
 	"io/fs"
 	"strings"
 	"testing"
+	"testing/fstest"
+
+	"kubara/catalog"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/yaml"
 )
 
-//go:embed all:embedded
-var testTemplatesFS embed.FS
+var testTemplatesFS = catalog.BuiltInFS()
 
 // helper function to setup test filesystem with correct root path
 func setupTestFS(t *testing.T) func() {
@@ -25,8 +26,28 @@ func setupTestFS(t *testing.T) func() {
 	}
 }
 
+func fullServiceContext() map[string]interface{} {
+	return map[string]interface{}{
+		"argo-cd":                 map[string]interface{}{"status": "enabled"},
+		"cert-manager":            map[string]interface{}{"status": "enabled", "config": map[string]interface{}{"clusterIssuer": map[string]interface{}{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+		"external-dns":            map[string]interface{}{"status": "enabled"},
+		"external-secrets":        map[string]interface{}{"status": "enabled"},
+		"kube-prometheus-stack":   map[string]interface{}{"status": "enabled"},
+		"traefik":                 map[string]interface{}{"status": "enabled"},
+		"kyverno":                 map[string]interface{}{"status": "enabled"},
+		"kyverno-policies":        map[string]interface{}{"status": "enabled"},
+		"kyverno-policy-reporter": map[string]interface{}{"status": "enabled"},
+		"loki":                    map[string]interface{}{"status": "enabled"},
+		"homer-dashboard":         map[string]interface{}{"status": "enabled"},
+		"oauth2-proxy":            map[string]interface{}{"status": "disabled"},
+		"metrics-server":          map[string]interface{}{"status": "disabled"},
+		"metallb":                 map[string]interface{}{"status": "disabled"},
+		"longhorn":                map[string]interface{}{"status": "disabled"},
+	}
+}
+
 // getEmbeddedTemplatesListTest temporarily sets templatesFSNew for testing
-func getEmbeddedTemplatesListTest(tplType TemplateType, testFS embed.FS) ([]string, error) {
+func getEmbeddedTemplatesListTest(tplType TemplateType, testFS fs.FS) ([]string, error) {
 	originalFS := templatesFSNew
 	templatesFSNew = testFS
 	defer func() { templatesFSNew = originalFS }()
@@ -74,9 +95,9 @@ func TestMakeWalkDirFunc(t *testing.T) {
 	testFS := testTemplatesFS
 
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Verify that files are collected (not directories)
@@ -88,7 +109,7 @@ func TestMakeWalkDirFunc(t *testing.T) {
 
 	// Test error propagation if WalkDir encounters an error
 	var errorFiles []string
-	errorWalkFunc := makeWalkDirFunc("embedded", &errorFiles)
+	errorWalkFunc := makeWalkDirFunc(tmplRoot, &errorFiles)
 	// Intentionally walk non-existent path to trigger error
 	err = fs.WalkDir(testFS, "nonexistent", errorWalkFunc)
 	assert.Error(t, err)
@@ -101,7 +122,7 @@ func TestMakeWalkDirFunc_RelPathError(t *testing.T) {
 	var files []string
 	walkFunc := makeWalkDirFunc("nonexistent-root", &files) // Invalid root
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	// Should still work but paths might be relative to nonexistent root
 	require.NoError(t, err)
 }
@@ -110,9 +131,9 @@ func TestMakeWalkDirFunc_DirectoryFiltering(t *testing.T) {
 	// Test that directories are properly filtered out
 	testFS := testTemplatesFS
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Ensure no directory entries (ending with /) are included
@@ -201,7 +222,7 @@ func TestGetEmbeddedTemplatesList(t *testing.T) {
 
 	// Additional test: Error if root does not exist (simulate by overriding)
 	t.Run("Error on non-existent root for All", func(t *testing.T) {
-		invalidFS := embed.FS{} // Empty FS
+		invalidFS := fstest.MapFS{} // Empty FS
 		list, err := getEmbeddedTemplatesListTest(All, invalidFS)
 		assert.Error(t, err)
 		assert.Empty(t, list)
@@ -361,19 +382,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -435,19 +458,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -548,19 +573,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "disabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -766,12 +793,36 @@ func TestTemplateAllFiles(t *testing.T) {
 					"stage":      "dev",
 				},
 				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "test-cluster",
-					"stage": "dev",
+					"type":             "controlplane",
+					"name":             "test-cluster",
+					"stage":            "dev",
+					"dnsName":          "test.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
 					"terraform": map[string]interface{}{
 						"kubernetesType": "ske",
 					},
+					"argocd": map[string]interface{}{
+						"repo": map[string]interface{}{
+							"https": map[string]interface{}{
+								"managed": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+						"helmRepo": map[string]interface{}{
+							"url": "https://charts.example.com",
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // No errors expected with valid context
@@ -803,16 +854,19 @@ func TestTemplateAllFiles(t *testing.T) {
 		{
 			name:    "Error: Handle template execution errors in all files",
 			tplType: All,
-			context: map[string]any{}, // Missing required variables - but go template doesn't fail by default
-			wantErr: false,            // Changed to false since go template doesn't fail on missing vars
+			context: map[string]any{},
+			wantErr: true,
 			validate: func(t *testing.T, results []TemplateResult) {
 				assert.NotEmpty(t, results)
-				// Should have both template and static files, but templates may have empty content
 				templateFiles := 0
 				staticSuccess := 0
+				templateErrors := 0
 				for _, result := range results {
 					if strings.HasSuffix(result.Path, ".tplt") {
 						templateFiles++
+						if result.Error != nil {
+							templateErrors++
+						}
 					} else {
 						if result.Error == nil {
 							staticSuccess++
@@ -820,6 +874,7 @@ func TestTemplateAllFiles(t *testing.T) {
 					}
 				}
 				assert.Greater(t, templateFiles, 0, "Should have template files")
+				assert.Greater(t, templateErrors, 0, "Should have template errors with empty context")
 				assert.Greater(t, staticSuccess, 0, "Should have successful static files")
 			},
 		},
@@ -852,9 +907,30 @@ func TestTemplateAllFiles(t *testing.T) {
 			tplType: Helm,
 			context: map[string]any{
 				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "helm-cluster",
-					"stage": "production",
+					"type":             "controlplane",
+					"name":             "helm-cluster",
+					"stage":            "production",
+					"dnsName":          "helm.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
+					"argocd": map[string]interface{}{
+						"repo": map[string]interface{}{
+							"https": map[string]interface{}{
+								"managed": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // Changed to false with proper context

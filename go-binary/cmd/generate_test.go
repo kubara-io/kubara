@@ -17,6 +17,26 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+func testServicesEnabled() config.Services {
+	return config.Services{
+		"argo-cd":                 {Status: config.StatusEnabled},
+		"cert-manager":            {Status: config.StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+		"external-dns":            {Status: config.StatusEnabled},
+		"external-secrets":        {Status: config.StatusEnabled},
+		"kube-prometheus-stack":   {Status: config.StatusEnabled},
+		"traefik":                 {Status: config.StatusEnabled},
+		"kyverno":                 {Status: config.StatusEnabled},
+		"kyverno-policies":        {Status: config.StatusEnabled},
+		"kyverno-policy-reporter": {Status: config.StatusEnabled},
+		"loki":                    {Status: config.StatusEnabled},
+		"homer-dashboard":         {Status: config.StatusEnabled},
+		"oauth2-proxy":            {Status: config.StatusEnabled},
+		"metrics-server":          {Status: config.StatusEnabled},
+		"metallb":                 {Status: config.StatusEnabled},
+		"longhorn":                {Status: config.StatusEnabled},
+	}
+}
+
 func TestNewGenerateFlags(t *testing.T) {
 	t.Parallel()
 
@@ -36,7 +56,7 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
-	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--dry-run]", command.UsageText)
+	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "generate reads config values and templates the embedded Helm and Terraform files.", command.Description)
 
 	// Check that flags are added
@@ -222,23 +242,7 @@ func TestGenerateCmd(t *testing.T) {
 							},
 						},
 					},
-					Services: config.Services{
-						Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
-						ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						Loki:                config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-						Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-					},
+					Services: testServicesEnabled(),
 				})
 
 				//dummy values
@@ -317,23 +321,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 				},
 			},
 		},
-		Services: config.Services{
-			Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
-			ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Loki:                config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-		},
+		Services: testServicesEnabled(),
 	})
 
 	//dummy values
@@ -391,23 +379,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 				},
 			},
 		},
-		Services: config.Services{
-			Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
-			ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KubePrometheusStack: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Loki:                config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-			Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
-		},
+		Services: testServicesEnabled(),
 	})
 
 	app := createTestApp(cmd.NewGenerateCmd())
@@ -487,6 +459,16 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 				Name:  "env-file",
 				Usage: "Path to the .env file",
 				Value: ".env",
+			},
+			&cli.StringFlag{
+				Name:  "catalog",
+				Usage: "Path to external ServiceDefinition catalog directory.",
+				Value: "",
+			},
+			&cli.BoolFlag{
+				Name:  "catalog-overwrite",
+				Usage: "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
+				Value: false,
 			},
 		},
 	}

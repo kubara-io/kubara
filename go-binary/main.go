@@ -69,6 +69,8 @@ var (
 	kubeconfigFilePath string
 	testK8sConnection  bool
 	checkUpdateFlag    bool
+	catalogPath        string
+	catalogOverwrite   bool
 	base64Mode         bool
 	encodeFlag         bool
 	decodeFlag         bool
@@ -159,6 +161,18 @@ func main() {
 			Name:  "env-file",
 			Value: ".env",
 			Usage: "Path to the .env file",
+		},
+		&cli.StringFlag{
+			Name:        "catalog",
+			Value:       "",
+			Usage:       "Path to external ServiceDefinition catalog directory.",
+			Destination: &catalogPath,
+		},
+		&cli.BoolFlag{
+			Name:        "catalog-overwrite",
+			Value:       false,
+			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
+			Destination: &catalogOverwrite,
 		},
 		&cli.BoolFlag{
 			Name:        "test-connection",
