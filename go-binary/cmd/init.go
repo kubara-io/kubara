@@ -182,7 +182,9 @@ func (o *InitOptions) Run() error {
 		}
 
 		if fileExist, _ := utils.FileExist(cm.GetFilepath()); fileExist {
-			app.CreateOrUpdateClusterFromEnvWithCatalog(cm.GetConfig(), em.GetConfig(), o.catalogLoadOptions())
+			if err := app.CreateOrUpdateClusterFromEnvWithCatalog(cm.GetConfig(), em.GetConfig(), o.catalogLoadOptions()); err != nil {
+				return fmt.Errorf("error creating/updating cluster from env: %w", err)
+			}
 		} else {
 			return fmt.Errorf("error loading config file. %s", CnfLoadErr)
 		}
@@ -214,7 +216,10 @@ func (o *InitOptions) Run() error {
 			log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
 			return fmt.Errorf("error validating env: %w", EnvValidateErr)
 		}
-		newCluster := config.NewClusterFromEnvWithCatalog(em.GetConfig(), o.catalogLoadOptions())
+		newCluster, err := config.NewClusterFromEnvWithCatalog(em.GetConfig(), o.catalogLoadOptions())
+		if err != nil {
+			return fmt.Errorf("error creating cluster from env: %w", err)
+		}
 		cm.GetConfig().Clusters = []config.Cluster{newCluster}
 		errSave := cm.SaveToFile()
 		if errSave != nil {

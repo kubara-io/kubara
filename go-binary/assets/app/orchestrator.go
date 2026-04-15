@@ -9,11 +9,11 @@ import (
 
 // CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
 // or creates it if it doesn't exist.
-func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) {
-	CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) error {
+	return CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 }
 
-func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMap, catalogOptions catalog.LoadOptions) {
+func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 
@@ -35,12 +35,16 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMa
 				}
 			}
 
-			return
+			return nil
 		}
 	}
 
 	// If the loop completes without returning, the cluster was not found.
 	fmt.Printf("No cluster named '%s' found, creating a new one...\n", clusterName)
-	newCluster := config.NewClusterFromEnvWithCatalog(e, catalogOptions)
+	newCluster, err := config.NewClusterFromEnvWithCatalog(e, catalogOptions)
+	if err != nil {
+		return err
+	}
 	cfg.Clusters = append(cfg.Clusters, newCluster)
+	return nil
 }

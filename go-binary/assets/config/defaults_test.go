@@ -128,6 +128,44 @@ func TestApplyDefaults_EmbeddedServiceStatusDefaults(t *testing.T) {
 	assert.Equal(t, StatusEnabled, cfg.Clusters[0].Services["cert-manager"].Status, "empty cert-manager status should default to built-in default")
 }
 
+func TestApplyDefaults_WorkerClusterServicesDefaultToDisabled(t *testing.T) {
+	cfg := &Config{
+		Clusters: []Cluster{
+			{
+				Type:     "worker",
+				Services: Services{},
+			},
+		},
+	}
+
+	applyDefaults(cfg)
+	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
+	assert.NoError(t, err)
+
+	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["cert-manager"].Status)
+	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["external-dns"].Status)
+	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["traefik"].Status)
+}
+
+func TestApplyDefaults_WorkerClusterKeepsExplicitServiceStatus(t *testing.T) {
+	cfg := &Config{
+		Clusters: []Cluster{
+			{
+				Type: "worker",
+				Services: Services{
+					"cert-manager": {Status: StatusEnabled},
+				},
+			},
+		},
+	}
+
+	applyDefaults(cfg)
+	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
+	assert.NoError(t, err)
+
+	assert.Equal(t, StatusEnabled, cfg.Clusters[0].Services["cert-manager"].Status)
+}
+
 func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
 	cfg := &Config{
 		Clusters: []Cluster{

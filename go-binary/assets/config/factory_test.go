@@ -1,10 +1,13 @@
 package config
 
 import (
+	"kubara/assets/catalog"
 	"kubara/assets/envmap"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewClusterFromEnv(t *testing.T) {
@@ -130,7 +133,23 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, NewClusterFromEnv(tt.args.e), "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
+			got, err := NewClusterFromEnv(tt.args.e)
+			require.NoError(t, err)
+			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})
 	}
+}
+
+func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+	sampleEnvMap := &envmap.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+	}
+
+	_, err := NewClusterFromEnvWithCatalog(sampleEnvMap, catalog.LoadOptions{
+		DistributionPath: filepath.Join(t.TempDir(), "does-not-exist"),
+	})
+	require.Error(t, err)
 }
