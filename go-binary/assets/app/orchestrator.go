@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"kubara/assets/catalog"
+	"kubara/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
 )

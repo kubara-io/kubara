@@ -56,11 +56,11 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
-	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--force|--overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--force|--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "generate reads config values and templates the embedded Helm and Terraform files.", command.Description)
 
 	// Check that flags are added
-	require.Len(t, command.Flags, 7)
+	require.Len(t, command.Flags, 5)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -72,8 +72,6 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["dry-run"])
 	assert.True(t, flagNames["managed-catalog"])
 	assert.True(t, flagNames["overlay-values"])
-	assert.True(t, flagNames["catalog"])
-	assert.True(t, flagNames["overwrite"])
 }
 
 func TestGenerateCmd(t *testing.T) {
@@ -461,6 +459,17 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 				Name:  "env-file",
 				Usage: "Path to the .env file",
 				Value: ".env",
+			},
+			&cli.StringFlag{
+				Name:  "catalog",
+				Usage: "Path to external ServiceDefinition catalog directory.",
+				Value: "",
+			},
+			&cli.BoolFlag{
+				Name:    "catalog-overwrite",
+				Aliases: []string{"force"},
+				Usage:   "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
+				Value:   false,
 			},
 		},
 	}

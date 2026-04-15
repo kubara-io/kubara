@@ -19,8 +19,6 @@ func TestNewSchemaFlags(t *testing.T) {
 	flags := cmd.NewSchemaFlags()
 
 	assert.Equal(t, "config.schema.json", flags.OutputFlag)
-	assert.Equal(t, "", flags.CatalogPath)
-	assert.False(t, flags.CatalogOverride)
 }
 
 func TestNewSchemaCmd(t *testing.T) {
@@ -30,9 +28,9 @@ func TestNewSchemaCmd(t *testing.T) {
 
 	assert.Equal(t, "schema", command.Name)
 	assert.Equal(t, "Generate JSON schema file for config structure", command.Usage)
-	assert.Equal(t, "schema [--output] [--catalog <path> [--force|--overwrite]]", command.UsageText)
+	assert.Equal(t, "schema [--output] [--catalog <path> [--force|--catalog-overwrite]]", command.UsageText)
 
-	require.Len(t, command.Flags, 3)
+	require.Len(t, command.Flags, 1)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -40,8 +38,6 @@ func TestNewSchemaCmd(t *testing.T) {
 	}
 
 	assert.True(t, flagNames["output"])
-	assert.True(t, flagNames["catalog"])
-	assert.True(t, flagNames["overwrite"])
 }
 
 func TestSchemaCmd(t *testing.T) {

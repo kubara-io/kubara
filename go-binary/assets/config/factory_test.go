@@ -1,7 +1,7 @@
 package config
 
 import (
-	"kubara/assets/catalog"
+	"kubara/catalog"
 	"kubara/assets/envmap"
 	"path/filepath"
 	"testing"

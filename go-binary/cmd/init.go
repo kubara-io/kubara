@@ -4,9 +4,9 @@ import (
 	"context"
 	"fmt"
 	"kubara/assets/app"
-	"kubara/assets/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
+	"kubara/catalog"
 	"kubara/utils"
 	"os"
 	"path/filepath"
@@ -22,8 +22,7 @@ type InitOptions struct {
 	configFilePath string
 	dotEnvFilePath string
 	envVarPrefix   string
-	catalogPath    string
-	catalogForce   bool
+	catalogOptions catalog.LoadOptions
 }
 
 type InitFlags struct {
@@ -31,8 +30,6 @@ type InitFlags struct {
 	ForceFlag     bool
 	EnvFileFlag   string
 	EnvPrefixFlag string
-	CatalogPath   string
-	CatalogForce  bool
 }
 
 func NewInitFlags() *InitFlags {
@@ -41,8 +38,6 @@ func NewInitFlags() *InitFlags {
 		ForceFlag:     false,
 		EnvFileFlag:   ".env",
 		EnvPrefixFlag: "KUBARA_",
-		CatalogPath:   "",
-		CatalogForce:  false,
 	}
 }
 
@@ -75,12 +70,9 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	if err != nil {
 		return nil, err
 	}
-	catalogPath := ""
-	if flags.CatalogPath != "" {
-		catalogPath, err = utils.GetFullPath(flags.CatalogPath, cwd)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get catalog path: %w", err)
-		}
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
 	}
 
 	o := &InitOptions{
@@ -90,8 +82,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 		configFilePath: configFilePath,
 		dotEnvFilePath: dotEnvFilePath,
 		envVarPrefix:   flags.EnvPrefixFlag,
-		catalogPath:    catalogPath,
-		catalogForce:   flags.CatalogForce,
+		catalogOptions: catalogOptions,
 	}
 	return o, nil
 }
@@ -115,19 +106,6 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Value:       flags.EnvPrefixFlag,
 			Usage:       "Prefix for envs read from envVars",
 			Destination: &flags.EnvPrefixFlag,
-		},
-		&cli.StringFlag{
-			Name:        "catalog",
-			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog directory.",
-			Destination: &flags.CatalogPath,
-		},
-		&cli.BoolFlag{
-			Name:        "force",
-			Aliases:     []string{"catalog-overwrite"},
-			Value:       flags.CatalogForce,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-			Destination: &flags.CatalogForce,
 		},
 	}
 
@@ -237,8 +215,5 @@ func (o *InitOptions) Run() error {
 }
 
 func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
-	return catalog.LoadOptions{
-		CatalogPath: o.catalogPath,
-		Overwrite:   o.catalogForce,
-	}
+	return o.catalogOptions
 }
