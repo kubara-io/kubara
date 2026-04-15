@@ -552,6 +552,55 @@ clusters:
 	assert.NotContains(t, string(rewrittenRaw), "certManager:")
 }
 
+func TestManager_Load_V1Alpha1ConfigSkipsMigration(t *testing.T) {
+	// A v1alpha1 config with inline keys is an invalid/inconsistent state.
+	// The migration must NOT run for already-versioned configs. Inline keys
+	// are ignored by the decoder; catalog defaults fill missing config values.
+	inlineKeysYAML := `
+version: v1alpha1
+clusters:
+  - name: migrated-cluster
+    dnsName: migrated.example.com
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+    services:
+      cert-manager:
+        status: enabled
+        clusterIssuer:
+          email: migrated@example.com
+      external-dns:
+        status: enabled
+`
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "v1alpha1-with-inline.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(inlineKeysYAML), 0644))
+
+	cm := NewConfigManager(configPath)
+	require.NoError(t, cm.Load())
+
+	services := cm.GetConfig().Clusters[0].Services
+	certManager, ok := services["cert-manager"]
+	require.True(t, ok)
+	assert.Equal(t, StatusEnabled, certManager.Status)
+
+	// Inline keys are not migrated for v1alpha1 configs. The decoder ignores
+	// them and catalog defaults are applied instead.
+	issuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "yourname@your-domain.de", issuer["email"], "catalog default should be used, not the ignored inline value")
+
+	// The config file should NOT have been rewritten (no migration occurred).
+	rewrittenRaw, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(rewrittenRaw), "clusterIssuer:", "original file should be unchanged")
+}
+
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
 	// A minimal YAML that only provides required fields and omits all fields
 	// that have defaults. After Load() applies defaults, Validate() must pass.
