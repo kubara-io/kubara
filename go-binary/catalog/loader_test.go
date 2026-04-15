@@ -75,6 +75,25 @@ spec:
 	assert.Contains(t, err.Error(), `apiVersion must be "kubara.io/v1alpha1"`)
 }
 
+func TestLoad_RejectsNonCanonicalServiceName(t *testing.T) {
+	tempDir := t.TempDir()
+	servicesDir := filepath.Join(tempDir, "services")
+	require.NoError(t, os.MkdirAll(servicesDir, 0750))
+	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "cert-manager.yaml"), []byte(`
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: certManager
+spec:
+  chartPath: cert-manager
+  status: enabled
+`), 0644))
+
+	_, err := Load(LoadOptions{CatalogPath: tempDir})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `uses non-canonical name "certManager", must be "cert-manager"`)
+}
+
 func TestCanonicalServiceName(t *testing.T) {
 	assert.Equal(t, "cert-manager", CanonicalServiceName("certManager"))
 	assert.Equal(t, "metallb", CanonicalServiceName("metalLb"))
