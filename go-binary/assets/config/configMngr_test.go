@@ -48,28 +48,21 @@ func newValidTestConfig() *Config {
 					},
 				},
 				Services: Services{
-					CertManager: CertManagerService{
-						ServiceStatus: ServiceStatus{Status: StatusEnabled},
-						ClusterIssuer: ClusterIssuer{
-							Name:   "letsencrypt-prod",
-							Email:  "cert@example.com",
-							Server: "https://acme-v02.api.letsencrypt.org/directory",
-						},
-					},
-					Argocd:              GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					ExternalDns:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					ExternalSecrets:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KubePrometheusStack: PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
-					Traefik:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Kyverno:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KyvernoPolicies:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KyvernoPolicyReport: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Loki:                PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
-					HomerDashboard:      GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Oauth2Proxy:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					MetricsServer:       GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					MetalLb:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Longhorn:            GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
+					"argo-cd":                 {Status: StatusEnabled},
+					"cert-manager":            {Status: StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
+					"external-dns":            {Status: StatusEnabled},
+					"external-secrets":        {Status: StatusEnabled},
+					"kube-prometheus-stack":   {Status: StatusEnabled},
+					"traefik":                 {Status: StatusEnabled},
+					"kyverno":                 {Status: StatusEnabled},
+					"kyverno-policies":        {Status: StatusEnabled},
+					"kyverno-policy-reporter": {Status: StatusEnabled},
+					"loki":                    {Status: StatusEnabled},
+					"homer-dashboard":         {Status: StatusEnabled},
+					"oauth2-proxy":            {Status: StatusEnabled},
+					"metrics-server":          {Status: StatusEnabled},
+					"metallb":                 {Status: StatusEnabled},
+					"longhorn":                {Status: StatusEnabled},
 				},
 			},
 		},
@@ -487,6 +480,70 @@ func TestGenerateSchema(t *testing.T) {
 	}
 }
 
+func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
+	schemaDoc, err := GenerateSchema()
+	require.NoError(t, err)
+
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	require.True(t, ok)
+
+	servicesDef, ok := defs["Services"].(map[string]any)
+	require.True(t, ok)
+
+	properties, ok := servicesDef["properties"].(map[string]any)
+	require.True(t, ok)
+
+	assert.Contains(t, properties, "cert-manager")
+	assert.Contains(t, properties, "argo-cd")
+	assert.Contains(t, properties, "metallb")
+}
+
+func TestManager_Load_NormalizesLegacyServiceConfig(t *testing.T) {
+	legacyYAML := `
+clusters:
+  - name: legacy-cluster
+    dnsName: legacy.example.com
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+    services:
+      certManager:
+        clusterIssuer:
+          email: legacy@example.com
+      externalDns: {}
+`
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "legacy-config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
+
+	cm := NewConfigManager(configPath)
+	require.NoError(t, cm.Load())
+
+	services := cm.GetConfig().Clusters[0].Services
+
+	certManager, ok := services["cert-manager"]
+	require.True(t, ok)
+	assert.Equal(t, StatusEnabled, certManager.Status)
+
+	issuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "legacy@example.com", issuer["email"])
+	assert.Equal(t, "letsencrypt-staging", issuer["name"])
+	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer["server"])
+
+	externalDNS, ok := services["external-dns"]
+	require.True(t, ok)
+	assert.Equal(t, StatusEnabled, externalDNS.Status)
+
+	_, hasLegacyKey := services["certManager"]
+	assert.False(t, hasLegacyKey, "legacy service key should be normalized to kebab-case")
+}
+
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
 	// A minimal YAML that only provides required fields and omits all fields
 	// that have defaults. After Load() applies defaults, Validate() must pass.
@@ -502,22 +559,23 @@ clusters:
           managed:
             url: "https://github.com/managed/repo.git"
     services:
-      argocd: {}
-      certManager:
-        clusterIssuer:
-          email: cert@example.com
-      externalDns: {}
-      externalSecrets: {}
-      kubePrometheusStack: {}
+      argo-cd: {}
+      cert-manager:
+        config:
+          clusterIssuer:
+            email: cert@example.com
+      external-dns: {}
+      external-secrets: {}
+      kube-prometheus-stack: {}
       traefik: {}
       kyverno: {}
-      kyvernoPolicies: {}
-      kyvernoPolicyReport: {}
+      kyverno-policies: {}
+      kyverno-policy-reporter: {}
       loki: {}
-      homerDashboard: {}
-      oauth2Proxy: {}
-      metricsServer: {}
-      metalLb: {}
+      homer-dashboard: {}
+      oauth2-proxy: {}
+      metrics-server: {}
+      metallb: {}
       longhorn: {}
 `
 

@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: oauth2-proxy
+spec:
+  chartPath: oauth2-proxy
+  default: enabled
+  clusterTypes:
+    - controlplane

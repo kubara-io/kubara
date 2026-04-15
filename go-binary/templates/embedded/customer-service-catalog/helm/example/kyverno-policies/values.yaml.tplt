@@ -1,4 +1,4 @@
 global:
-  allowedIssuerDomains: "{{ .cluster.services.certManager.clusterIssuer.server | default "https://acme*.api.letsencrypt.org/directory" }}"
+  allowedIssuerDomains: "{{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "server") | default "https://acme*.api.letsencrypt.org/directory" }}"
   allowedImageRegistries: |
    "${ARGOCD_GIT_HTTPS_URL}/*|${ARGOCD_HELM_REPO_URL}/*"

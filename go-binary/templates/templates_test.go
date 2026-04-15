@@ -25,6 +25,26 @@ func setupTestFS(t *testing.T) func() {
 	}
 }
 
+func fullServiceContext() map[string]interface{} {
+	return map[string]interface{}{
+		"argo-cd":                 map[string]interface{}{"status": "enabled"},
+		"cert-manager":            map[string]interface{}{"status": "enabled", "config": map[string]interface{}{"clusterIssuer": map[string]interface{}{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+		"external-dns":            map[string]interface{}{"status": "enabled"},
+		"external-secrets":        map[string]interface{}{"status": "enabled"},
+		"kube-prometheus-stack":   map[string]interface{}{"status": "enabled"},
+		"traefik":                 map[string]interface{}{"status": "enabled"},
+		"kyverno":                 map[string]interface{}{"status": "enabled"},
+		"kyverno-policies":        map[string]interface{}{"status": "enabled"},
+		"kyverno-policy-reporter": map[string]interface{}{"status": "enabled"},
+		"loki":                    map[string]interface{}{"status": "enabled"},
+		"homer-dashboard":         map[string]interface{}{"status": "enabled"},
+		"oauth2-proxy":            map[string]interface{}{"status": "disabled"},
+		"metrics-server":          map[string]interface{}{"status": "disabled"},
+		"metallb":                 map[string]interface{}{"status": "disabled"},
+		"longhorn":                map[string]interface{}{"status": "disabled"},
+	}
+}
+
 // getEmbeddedTemplatesListTest temporarily sets templatesFSNew for testing
 func getEmbeddedTemplatesListTest(tplType TemplateType, testFS embed.FS) ([]string, error) {
 	originalFS := templatesFSNew
@@ -364,19 +384,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -452,19 +474,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -755,19 +779,21 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+						"oauth2-proxy": map[string]interface{}{
 							"status": "disabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]interface{}{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]interface{}{
+								"clusterIssuer": map[string]interface{}{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]interface{}{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]interface{}{
 							"status": "enabled",
 						},
 					},
@@ -987,12 +1013,36 @@ func TestTemplateAllFiles(t *testing.T) {
 					"stage":      "dev",
 				},
 				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "test-cluster",
-					"stage": "dev",
+					"type":             "controlplane",
+					"name":             "test-cluster",
+					"stage":            "dev",
+					"dnsName":          "test.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
 					"terraform": map[string]interface{}{
 						"kubernetesType": "ske",
 					},
+					"argocd": map[string]interface{}{
+						"repo": map[string]interface{}{
+							"https": map[string]interface{}{
+								"managed": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+						"helmRepo": map[string]interface{}{
+							"url": "https://charts.example.com",
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // No errors expected with valid context
@@ -1024,16 +1074,19 @@ func TestTemplateAllFiles(t *testing.T) {
 		{
 			name:    "Error: Handle template execution errors in all files",
 			tplType: All,
-			context: map[string]any{}, // Missing required variables - but go template doesn't fail by default
-			wantErr: false,            // Changed to false since go template doesn't fail on missing vars
+			context: map[string]any{},
+			wantErr: true,
 			validate: func(t *testing.T, results []TemplateResult) {
 				assert.NotEmpty(t, results)
-				// Should have both template and static files, but templates may have empty content
 				templateFiles := 0
 				staticSuccess := 0
+				templateErrors := 0
 				for _, result := range results {
 					if strings.HasSuffix(result.Path, ".tplt") {
 						templateFiles++
+						if result.Error != nil {
+							templateErrors++
+						}
 					} else {
 						if result.Error == nil {
 							staticSuccess++
@@ -1041,6 +1094,7 @@ func TestTemplateAllFiles(t *testing.T) {
 					}
 				}
 				assert.Greater(t, templateFiles, 0, "Should have template files")
+				assert.Greater(t, templateErrors, 0, "Should have template errors with empty context")
 				assert.Greater(t, staticSuccess, 0, "Should have successful static files")
 			},
 		},
@@ -1073,9 +1127,30 @@ func TestTemplateAllFiles(t *testing.T) {
 			tplType: Helm,
 			context: map[string]any{
 				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "helm-cluster",
-					"stage": "production",
+					"type":             "controlplane",
+					"name":             "helm-cluster",
+					"stage":            "production",
+					"dnsName":          "helm.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
+					"argocd": map[string]interface{}{
+						"repo": map[string]interface{}{
+							"https": map[string]interface{}{
+								"managed": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]interface{}{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // Changed to false with proper context
