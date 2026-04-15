@@ -21,7 +21,7 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 	if rawCatalogPath == "" {
 		return catalog.LoadOptions{
 			CatalogPath: "",
-			Overwrite:   cmd.Bool("overwrite"),
+			Overwrite:   cmd.Bool("catalog-overwrite"),
 		}, nil
 	}
 
@@ -32,6 +32,6 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 
 	return catalog.LoadOptions{
 		CatalogPath: absoluteCatalogPath,
-		Overwrite:   cmd.Bool("overwrite"),
+		Overwrite:   cmd.Bool("catalog-overwrite"),
 	}, nil
 }

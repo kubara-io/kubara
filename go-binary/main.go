@@ -169,7 +169,7 @@ func main() {
 			Destination: &catalogPath,
 		},
 		&cli.BoolFlag{
-			Name:        "overwrite",
+			Name:        "catalog-overwrite",
 			Value:       false,
 			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
 			Destination: &catalogOverwrite,
