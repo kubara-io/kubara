@@ -134,8 +134,8 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	cm := config.NewConfigManagerWithCatalog(configFilePath, catalog.LoadOptions{
-		DistributionPath: catalogPath,
-		Overwrite:        flags.CatalogOverwrite,
+		CatalogPath: catalogPath,
+		Overwrite:   flags.CatalogOverwrite,
 	})
 	if err := cm.Load(); err != nil {
 		return nil, fmt.Errorf("loading config from %s: %w", configFilePath, err)
@@ -230,7 +230,7 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 		&cli.StringFlag{
 			Name:        "catalog",
 			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog/distribution directory.",
+			Usage:       "Path to external ServiceDefinition catalog directory.",
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{

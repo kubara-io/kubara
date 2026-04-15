@@ -119,7 +119,7 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 		&cli.StringFlag{
 			Name:        "catalog",
 			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog/distribution directory.",
+			Usage:       "Path to external ServiceDefinition catalog directory.",
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
@@ -238,7 +238,7 @@ func (o *InitOptions) Run() error {
 
 func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
 	return catalog.LoadOptions{
-		DistributionPath: o.catalogPath,
-		Overwrite:        o.catalogForce,
+		CatalogPath: o.catalogPath,
+		Overwrite:   o.catalogForce,
 	}
 }

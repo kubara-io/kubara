@@ -3,8 +3,10 @@ apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
   name: longhorn
+  annotations:
+    kubara.io/category: storage
 spec:
   chartPath: longhorn
-  default: disabled
+  status: disabled
   clusterTypes:
     - controlplane

@@ -13,7 +13,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) (Cluster, error) {
 
 func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
-	services, err := newDefaultServicesFromCatalogWithOptions(catalogOptions, "")
+	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
 		return Cluster{}, err
 	}

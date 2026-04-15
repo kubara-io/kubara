@@ -161,7 +161,7 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 		},
 		&cli.StringFlag{
 			Name:        "catalog",
-			Usage:       "Path to external ServiceDefinition catalog/distribution directory.",
+			Usage:       "Path to external ServiceDefinition catalog directory.",
 			Value:       flags.CatalogPath,
 			Destination: &flags.CatalogPath,
 		},
@@ -329,8 +329,8 @@ func (o *GenerateOptions) writeTemplateResults(results []templates.TemplateResul
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) {
 	cm := config.NewConfigManagerWithCatalog(o.ConfigFilePath, catalog.LoadOptions{
-		DistributionPath: o.CatalogPath,
-		Overwrite:        o.CatalogOverwrite,
+		CatalogPath: o.CatalogPath,
+		Overwrite:   o.CatalogOverwrite,
 	})
 	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
