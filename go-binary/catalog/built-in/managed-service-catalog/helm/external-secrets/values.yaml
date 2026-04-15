@@ -1,3 +1,4 @@
+---
 namespace: {}
 external-secrets:
   replicaCount: 1

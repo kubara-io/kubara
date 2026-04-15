@@ -1,3 +1,4 @@
+---
 namespace: {}
 policy-reporter:
   # We explicitly remove all filters because we want a complete dashboard

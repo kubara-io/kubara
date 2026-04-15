@@ -1,10 +1,9 @@
+---
 # creates an ExternalSecret that looks for the specified remote-keys (remote secret names) to inject into webhook pod
 externalSecrets: {}
-
 namespace:
   annotations: {}
   labels: {}
-
 external-dns:
   sources:
     - ingress
@@ -30,7 +29,7 @@ external-dns:
     runAsUser: 65532
     runAsGroup: 65532
     capabilities:
-      drop: [ "ALL" ]
+      drop: ["ALL"]
   provider:
     name: webhook
     webhook:
@@ -48,7 +47,7 @@ external-dns:
         runAsUser: 65534
         runAsGroup: 65534
         capabilities:
-          drop: [ "ALL" ]
+          drop: ["ALL"]
       livenessProbe:
         httpGet:
           port: 8888

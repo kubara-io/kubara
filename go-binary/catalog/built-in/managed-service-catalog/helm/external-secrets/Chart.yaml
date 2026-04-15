@@ -1,3 +1,4 @@
+---
 apiVersion: v2
 name: externalSecrets
 description: Umbrella Chart for external-secrets

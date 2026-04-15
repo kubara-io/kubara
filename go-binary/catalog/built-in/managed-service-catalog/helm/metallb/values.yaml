@@ -1,3 +1,4 @@
+---
 metallb:
   controller:
     resources:
