@@ -1,3 +1,4 @@
+---
 letsencrypt: true
 cert-manager:
   resources:
@@ -13,7 +14,7 @@ cert-manager:
   serviceAccount:
     automountServiceAccountToken: true
   webhook:
-    timeoutSeconds: 15 #set timeout to 15 seconds because of gardener, see: https://github.com/gardener/gardener/blob/master/docs/usage/shoot/shoot_status.md#constraints
+    timeoutSeconds: 15  # set timeout to 15 seconds because of gardener, see: https://github.com/gardener/gardener/blob/master/docs/usage/shoot/shoot_status.md#constraints
     resources:
       requests:
         cpu: 10m

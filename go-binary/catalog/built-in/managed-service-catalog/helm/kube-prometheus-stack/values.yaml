@@ -1,10 +1,11 @@
+---
 namespace: {}
 kube-prometheus-stack:
   defaultRules:
     disabled:
-      #NodeClockNotSynchronising: true
+      # NodeClockNotSynchronising: true
       KubeCPUOvercommit: true
-      #KubeMemoryOvercommit: true
+      # KubeMemoryOvercommit: true
   # kubeControllerManager, kubeScheduler, kubeEtcd and kubeProxy are not reachable in cloud provider, they must be deactivated, because otherwise there alerts fire continuously
   # see: https://github.com/prometheus-operator/kube-prometheus/issues/1530
   kubeControllerManager:
@@ -207,8 +208,6 @@ kube-prometheus-stack:
       capabilities:
         drop:
           - ALL
-
-
 prometheus-blackbox-exporter:
   resources:
     requests:
@@ -229,7 +228,7 @@ prometheus-blackbox-exporter:
     runAsNonRoot: true
     allowPrivilegeEscalation: false
     capabilities:
-      drop: [ "ALL" ]
+      drop: ["ALL"]
   config:
     modules:
       http_2xx:

@@ -1,3 +1,4 @@
+---
 namespace: {}
 externalSecrets: {}
 defaultProject:
@@ -120,7 +121,6 @@ argo-cd:
         memory: 2000Mi
       limits:
         memory: 2500Mi
-
   controller:
     resources:
       requests:
@@ -135,37 +135,37 @@ argo-cd:
       rules:
         enabled: false
         spec:
-         - alert: ArgoAppMissing
-           expr: |
-             absent(argocd_app_info) == 1
-           for: 15m
-           labels:
-             severity: critical
-           annotations:
-             summary: "[Argo CD] No reported applications"
-             description: >
-               Argo CD has not reported any applications data for the past 15 minutes which
-               means that it must be down or not functioning properly.  This needs to be
-               resolved for this cloud to continue to maintain state.
-         - alert: ArgoAppNotSynced
-           expr: |
-             argocd_app_info{sync_status!="Synced"} == 1
-           for: 12h
-           labels:
-             severity: warning
-           annotations:
-             summary: "[{{`{{$labels.name}}`}}] Application not synchronized"
-             description: >
-               The application [{{`{{$labels.name}}`}} has not been synchronized for over
-               12 hours which means that the state of this cloud has drifted away from the
-               state inside Git.
-         - alert: ArgoAppUnhealthy
-           expr: |
-             argocd_app_info{health_status!="Healthy"} != 0
-           for: 15m
-           labels:
-             severity: warning
-           annotations:
-             summary: "[{{`{{$labels.name}}`}}] Application not synchronized"
-             description: >
-               The application [{{`{{$labels.name}}`}} is currently not healthy.
+          - alert: ArgoAppMissing
+            expr: |
+              absent(argocd_app_info) == 1
+            for: 15m
+            labels:
+              severity: critical
+            annotations:
+              summary: "[Argo CD] No reported applications"
+              description: >
+                Argo CD has not reported any applications data for the past 15 minutes which
+                means that it must be down or not functioning properly.  This needs to be
+                resolved for this cloud to continue to maintain state.
+          - alert: ArgoAppNotSynced
+            expr: |
+              argocd_app_info{sync_status!="Synced"} == 1
+            for: 12h
+            labels:
+              severity: warning
+            annotations:
+              summary: "[{{`{{$labels.name}}`}}] Application not synchronized"
+              description: >
+                The application [{{`{{$labels.name}}`}} has not been synchronized for over
+                12 hours which means that the state of this cloud has drifted away from the
+                state inside Git.
+          - alert: ArgoAppUnhealthy
+            expr: |
+              argocd_app_info{health_status!="Healthy"} != 0
+            for: 15m
+            labels:
+              severity: warning
+            annotations:
+              summary: "[{{`{{$labels.name}}`}}] Application not synchronized"
+              description: >-
+                The application [{{`{{$labels.name}}`}} is currently not healthy.
