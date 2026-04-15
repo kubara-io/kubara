@@ -12,8 +12,9 @@ import (
 type Status string
 
 const (
-	StatusEnabled  Status = "enabled"
-	StatusDisabled Status = "disabled"
+	ServiceDefinitionAPIVersion        = "kubara.io/v1alpha1"
+	StatusEnabled               Status = "enabled"
+	StatusDisabled              Status = "disabled"
 )
 
 type ServiceDefinition struct {
@@ -101,8 +102,12 @@ func (c Catalog) Clone() Catalog {
 }
 
 func (d ServiceDefinition) Validate() error {
-	if strings.TrimSpace(d.APIVersion) == "" {
+	apiVersion := strings.TrimSpace(d.APIVersion)
+	if apiVersion == "" {
 		return fmt.Errorf("missing apiVersion")
+	}
+	if apiVersion != ServiceDefinitionAPIVersion {
+		return fmt.Errorf("apiVersion must be %q", ServiceDefinitionAPIVersion)
 	}
 	if strings.TrimSpace(d.Kind) != "ServiceDefinition" {
 		return fmt.Errorf("kind must be ServiceDefinition")

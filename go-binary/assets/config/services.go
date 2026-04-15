@@ -11,16 +11,12 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
-func newDefaultServicesFromCatalog() Services {
-	return newDefaultServicesFromCatalogWithOptions(catalog.LoadOptions{})
-}
-
-func newDefaultServicesFromCatalogWithOptions(options catalog.LoadOptions) Services {
+func newDefaultServicesFromCatalogWithOptions(options catalog.LoadOptions, clusterType string) (Services, error) {
 	cat, err := catalog.Load(options)
 	if err != nil {
-		return fallbackServiceDefaults()
+		return nil, err
 	}
-	return serviceDefaultsFromCatalog(cat)
+	return serviceDefaultsFromCatalog(cat, clusterType), nil
 }
 
 func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error {
@@ -29,8 +25,8 @@ func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error
 		return fmt.Errorf("load catalog: %w", err)
 	}
 
-	defaults := serviceDefaultsFromCatalog(cat)
 	for i := range cfg.Clusters {
+		defaults := serviceDefaultsFromCatalog(cat, cfg.Clusters[i].Type)
 		normalized := normalizeServiceKeys(cfg.Clusters[i].Services)
 		if normalized == nil {
 			normalized = Services{}
@@ -115,11 +111,16 @@ func cloneServiceInstance(in ServiceInstance) ServiceInstance {
 	}
 }
 
-func serviceDefaultsFromCatalog(cat catalog.Catalog) Services {
+func serviceDefaultsFromCatalog(cat catalog.Catalog, clusterType string) Services {
 	out := make(Services, len(cat.Services))
 	for name, def := range cat.Services {
+		status := def.Spec.EffectiveDefaultStatus()
+		if !serviceAppliesToClusterType(def, clusterType) {
+			status = catalog.StatusDisabled
+		}
+
 		instance := ServiceInstance{
-			Status: toConfigStatus(def.Spec.EffectiveDefaultStatus()),
+			Status: toConfigStatus(status),
 			Config: extractDefaultsFromSchema(def.Spec.ConfigSchema),
 		}
 		out[name] = instance
@@ -213,26 +214,6 @@ func cloneMap(in map[string]any) map[string]any {
 	return out
 }
 
-func fallbackServiceDefaults() Services {
-	return Services{
-		"argo-cd":                 {Status: StatusDisabled},
-		"cert-manager":            {Status: StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "yourname@your-domain.de", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            {Status: StatusEnabled},
-		"external-secrets":        {Status: StatusEnabled},
-		"kube-prometheus-stack":   {Status: StatusEnabled},
-		"traefik":                 {Status: StatusEnabled},
-		"kyverno":                 {Status: StatusEnabled},
-		"kyverno-policies":        {Status: StatusEnabled},
-		"kyverno-policy-reporter": {Status: StatusEnabled},
-		"loki":                    {Status: StatusEnabled},
-		"homer-dashboard":         {Status: StatusEnabled},
-		"oauth2-proxy":            {Status: StatusEnabled},
-		"metrics-server":          {Status: StatusDisabled},
-		"metallb":                 {Status: StatusDisabled},
-		"longhorn":                {Status: StatusDisabled},
-	}
-}
-
 func (s *ServiceInstance) UnmarshalYAML(value *goYaml.Node) error {
 	var raw map[string]any
 	if err := value.Decode(&raw); err != nil {
@@ -244,6 +225,26 @@ func (s *ServiceInstance) UnmarshalYAML(value *goYaml.Node) error {
 	}
 	*s = instance
 	return nil
+}
+
+func serviceAppliesToClusterType(def catalog.ServiceDefinition, clusterType string) bool {
+	if len(def.Spec.ClusterTypes) == 0 {
+		return true
+	}
+
+	switch clusterType {
+	case "controlplane", "worker":
+		for _, allowed := range def.Spec.ClusterTypes {
+			if allowed == "*" || allowed == clusterType {
+				return true
+			}
+		}
+		return false
+	default:
+		// Unknown/placeholder cluster types keep the legacy behavior:
+		// expose all services with their definition defaults.
+		return true
+	}
 }
 
 func decodeServiceInstance(source any) (ServiceInstance, error) {
