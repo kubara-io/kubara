@@ -67,10 +67,6 @@ type ServiceStatus struct {
 	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
 }
 
-type GenericService struct {
-	ServiceStatus `yaml:",inline" jsonschema:"required,title=ServiceStatus"`
-}
-
 type Status string
 
 const (
@@ -78,33 +74,9 @@ const (
 	StatusDisabled Status = "disabled"
 )
 
-// ClusterIssuer defines the nested configuration for cert-manager's issuer.
-type ClusterIssuer struct {
-	Name   string `json:"name" yaml:"name" jsonschema:"required,title=Issuer Name,description=Name of the ClusterIssuer resource.,minLength=1,example=letsencrypt-staging,default=letsencrypt-staging"`
-	Email  string `json:"email" yaml:"email" jsonschema:"required,title=ACME Email,description=The email address for Let's Encrypt registration.,format=email"`
-	Server string `json:"server" yaml:"server" jsonschema:"title=ACME Server,description=The ACME server URL.,format=uri,default=https://acme-staging-v02.api.letsencrypt.org/directory"`
+type ServiceInstance struct {
+	Status Status         `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
+	Config map[string]any `json:"config,omitempty" yaml:"config,omitempty" jsonschema:"title=Service Config,description=Service-specific configuration"`
 }
 
-// CertManagerService defines the specific, nested configuration for cert-manager.
-type CertManagerService struct {
-	ServiceStatus `yaml:",inline"`
-	ClusterIssuer ClusterIssuer `json:"clusterIssuer" yaml:"clusterIssuer" jsonschema:"required,title=Cluster Issuer Configuration"`
-}
-
-type Services struct {
-	Argocd              GenericService     `json:"argocd" yaml:"argocd" jsonschema:"required,title=Argocd Service,description=Configuration for argoCD"`
-	CertManager         CertManagerService `json:"certManager" yaml:"certManager" jsonschema:"required,title=CertManager Service,description=Configuration for CertManager"`
-	ExternalDns         GenericService     `json:"externalDns" yaml:"externalDns" jsonschema:"required,title=ExternalDns Service,description=Configuration for ExternalDns"`
-	ExternalSecrets     GenericService     `json:"externalSecrets" yaml:"externalSecrets" jsonschema:"required,title=ExternalSecrets Service,description=Configuration for ExternalSecrets"`
-	KubePrometheusStack GenericService     `json:"kubePrometheusStack" yaml:"kubePrometheusStack" jsonschema:"required,title=KubePrometheusStack Service,description=Configuration for KubePrometheusStack"`
-	Traefik             GenericService     `json:"traefik" yaml:"traefik" jsonschema:"required,title=Traefik Service,description=Configuration for Traefik"`
-	Kyverno             GenericService     `json:"kyverno" yaml:"kyverno" jsonschema:"required,title=Kyverno Service,description=Configuration for Kyverno"`
-	KyvernoPolicies     GenericService     `json:"kyvernoPolicies" yaml:"kyvernoPolicies" jsonschema:"required,title=KyvernoPolicies Service,description=Configuration for KyvernoPolicies"`
-	KyvernoPolicyReport GenericService     `json:"kyvernoPolicyReport" yaml:"kyvernoPolicyReport" jsonschema:"required,title=KyvernoPolicyReport Service,description=Configuration for KyvernoPolicyReport"`
-	Loki                GenericService     `json:"loki" yaml:"loki" jsonschema:"required,title=Loki Service,description=Configuration for Loki"`
-	HomerDashboard      GenericService     `json:"homerDashboard" yaml:"homerDashboard" jsonschema:"required,title=HomerDashboard Service,description=Configuration for HomerDashboard"`
-	Oauth2Proxy         GenericService     `json:"oauth2Proxy" yaml:"oauth2Proxy" jsonschema:"required,title=oauth2Proxy Service,description=Configuration for oaOauth2Proxy"`
-	MetricsServer       GenericService     `json:"metricsServer" yaml:"metricsServer" jsonschema:"required,title=MetricsServer Service,description=Configuration for MetricsServer"`
-	MetalLb             GenericService     `json:"metalLb" yaml:"metalLb" jsonschema:"required,title=metalLb Service,description=Configuration for metalLb"`
-	Longhorn            GenericService     `json:"longhorn" yaml:"longhorn" jsonschema:"required,title=Longhorn Service,description=Configuration for Longhorn"`
-}
+type Services map[string]ServiceInstance

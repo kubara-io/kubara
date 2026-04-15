@@ -15,16 +15,16 @@ policy-reporter:
   ui:
     enabled: true
     ingress:
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       enabled: true
       {{- end }}
       className: {{ .cluster.ingressClassName | default "traefik" }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
         external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
         {{- end }}
-        {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
         traefik.ingress.kubernetes.io/router.middlewares: |
           oauth2-proxy-oauth-auth@kubernetescrd,
           kyverno-policy-reporter-strip-kyverno-prefix@kubernetescrd
@@ -39,7 +39,7 @@ policy-reporter:
         - secretName: tls-kyverno-ui
           hosts:
             - {{ .cluster.dnsName }}
-{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
 middleware:
   name: strip-kyverno-prefix
   namespace: kyverno-policy-reporter

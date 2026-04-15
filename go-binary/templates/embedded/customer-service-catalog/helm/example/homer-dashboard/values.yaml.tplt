@@ -1,16 +1,16 @@
 ingress:
-  {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+  {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
   enabled: true
   {{- end }}
   host: {{ .cluster.dnsName }}
   path: "/"
   ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
   annotations:
-    cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
     {{- end }}
-    {{- if (eq .cluster.services.metalLb.status "enabled") }}
+    {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
     external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
     {{- end }}
 namespace:
@@ -20,7 +20,7 @@ namespace:
 imagePullSecrets:
   - name: image-pull-secret
 serviceMonitor:
-  {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+  {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
   enabled: true
   {{- end }}
   additionalLabels:
@@ -103,7 +103,7 @@ dashboardConfig:
           url: "/argocd/"
           subtitle: "GitOps Deployment Dashboard"
           target: "_blank"
-        {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
         - name: "grafana"
           logo: "/assets/tools/grafana.png"
           url: "/grafana/"
@@ -120,21 +120,21 @@ dashboardConfig:
           subtitle: "Alertmanager Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if (eq .cluster.services.longhorn.status "enabled") }}
+        {{- if (eq (index .cluster.services "longhorn" "status") "enabled") }}
         - name: "longhorn"
           logo: "/assets/tools/longhorn.png"
           url: "/longhorn/"
           subtitle: "Storage Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if (eq .cluster.services.kyverno.status "enabled") }}
+        {{- if (eq (index .cluster.services "kyverno" "status") "enabled") }}
         - name: "kyverno"
           logo: "/assets/tools/kyverno.png"
           url: "/kyverno/"
           subtitle: "Policy Reporter Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if and (eq .cluster.services.traefik.status "enabled") (eq .cluster.services.oauth2Proxy.status "enabled") }}
+        {{- if and (eq (index .cluster.services "traefik" "status") "enabled") (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
         - name: "traefik"
           logo: "/assets/tools/traefik.png"
           url: "https://{{ .cluster.dnsName }}/traefik/dashboard/"

@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: kyverno
+spec:
+  chartPath: kyverno
+  default: enabled
+  clusterTypes:
+    - controlplane

@@ -4,12 +4,12 @@ traefik:
       - name: image-pull-secret
   api:
     dashboard: true
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     basePath: /traefik
     {{- end }}
   ingressRoute:
     dashboard:
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       enabled: true
       entryPoints:
         - websecure
@@ -21,7 +21,7 @@ traefik:
       {{- else }}
       enabled: false
       {{- end }}
-  {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+  {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
   extraObjects:
     - apiVersion: traefik.io/v1alpha1
       kind: Middleware
@@ -40,7 +40,7 @@ traefik:
   metrics:
     prometheus:
       serviceMonitor:
-        {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
         enabled: true
         {{- end }}
         additionalLabels:

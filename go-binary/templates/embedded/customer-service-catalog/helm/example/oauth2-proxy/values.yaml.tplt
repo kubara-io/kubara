@@ -39,8 +39,8 @@ oauth2-proxy:
   ingress:
     className: {{ .cluster.ingressClassName | default "traefik" }}
     annotations:
-      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-      {{- if (eq .cluster.services.metalLb.status "enabled") }}
+      cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+      {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
       external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
       {{- end }}
     enabled: true
@@ -54,13 +54,13 @@ oauth2-proxy:
           - {{ .cluster.dnsName }}
   metrics:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       labels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
 
-{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
 middleware:
   name: oauth-auth
   namespace: oauth2-proxy

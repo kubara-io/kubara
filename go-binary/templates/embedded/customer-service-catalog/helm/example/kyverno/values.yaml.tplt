@@ -12,28 +12,28 @@ kyverno:
       - name: image-pull-secret
   admissionController:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
   backgroundController:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
   cleanupController:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:
         monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
   reportsController:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:

@@ -3,7 +3,7 @@ longhorn:
     registrySecret: image-pull-secret
   metrics:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:
@@ -14,7 +14,7 @@ longhorn:
     defaultClass: true
     defaultClassReplicaCount: 1
   ingress:
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     enabled: true
     {{- end }}
     ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
@@ -23,11 +23,11 @@ longhorn:
     tlsSecret: tls-longhorn
     path: "/longhorn(/|$)(.*)" # see path problems https://github.com/longhorn/longhorn/issues/1745
     annotations:
-      cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
       {{- end }}
-      {{- if (eq .cluster.services.metalLb.status "enabled") }}
+      {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
       external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
       {{- end }}
 

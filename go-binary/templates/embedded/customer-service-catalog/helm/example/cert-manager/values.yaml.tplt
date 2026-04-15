@@ -1,7 +1,7 @@
 clusterIssuer:
-  name: {{ .cluster.services.certManager.clusterIssuer.name }}
-  email: {{ .cluster.services.certManager.clusterIssuer.email }}
-  server: {{ .cluster.services.certManager.clusterIssuer.server | default "https://acme-v02.api.letsencrypt.org/directory" }}
+  name: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+  email: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "email") }}
+  server: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "server") | default "https://acme-v02.api.letsencrypt.org/directory" }}
   ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
 
 
@@ -11,7 +11,7 @@ cert-manager:
       - name: image-pull-secret
   prometheus:
     servicemonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       labels:

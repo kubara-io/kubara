@@ -18,11 +18,11 @@ kube-prometheus-stack:
     ingress:
       ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
         external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
         {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
         traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
       enabled: true
       {{- end }}
@@ -63,11 +63,11 @@ kube-prometheus-stack:
     ingress:
       ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
         external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
         {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
         traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
       enabled: true
       {{- end }}
@@ -174,11 +174,11 @@ kube-prometheus-stack:
     ingress:
       ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
+        cert-manager.io/cluster-issuer: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
+        {{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
         external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
         {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
         traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
       enabled: true
       {{- end }}
@@ -196,7 +196,7 @@ kube-prometheus-stack:
       server:
         root_url: https://{{ .cluster.dnsName }}/grafana/
         serve_from_sub_path: true
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       auth.github:
         name: "Github"
         enabled: true
@@ -238,7 +238,7 @@ externalSecrets:
       dataFrom:
         - remoteKey: grafana_credentials
 
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:

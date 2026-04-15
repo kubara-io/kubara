@@ -14,7 +14,7 @@ loki:
       size: 5Gi
   monitoring:
     serviceMonitor:
-      {{ if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{ if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{ end }}
       labels:
@@ -79,7 +79,7 @@ promtail:
     imagePullSecrets:
       - name: image-pull-secret
   serviceMonitor:
-    {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+    {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
     enabled: true
     {{- end }}
     labels:

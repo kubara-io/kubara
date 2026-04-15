@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: kube-prometheus-stack
+spec:
+  chartPath: kube-prometheus-stack
+  default: enabled
+  clusterTypes:
+    - controlplane
