@@ -6,6 +6,7 @@ import (
 	"kubara/assets/app"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
+	"kubara/catalog"
 	"kubara/utils"
 	"os"
 	"path/filepath"
@@ -21,6 +22,7 @@ type InitOptions struct {
 	configFilePath string
 	dotEnvFilePath string
 	envVarPrefix   string
+	catalogOptions catalog.LoadOptions
 }
 
 type InitFlags struct {
@@ -68,6 +70,10 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
+	}
 
 	o := &InitOptions{
 		copyPrepFolder: flags.PrepFlag,
@@ -76,6 +82,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 		configFilePath: configFilePath,
 		dotEnvFilePath: dotEnvFilePath,
 		envVarPrefix:   flags.EnvPrefixFlag,
+		catalogOptions: catalogOptions,
 	}
 	return o, nil
 }
@@ -107,7 +114,7 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 
 func (o *InitOptions) Run() error {
 	em := envmap.NewEnvMapManager(o.dotEnvFilePath, ".", o.envVarPrefix)
-	cm := config.NewConfigManager(o.configFilePath)
+	cm := config.NewConfigManagerWithCatalog(o.configFilePath, o.catalogLoadOptions())
 
 	EnvLoadErr := em.Load()
 	CnfLoadErr := cm.Load()
@@ -153,7 +160,9 @@ func (o *InitOptions) Run() error {
 		}
 
 		if fileExist, _ := utils.FileExist(cm.GetFilepath()); fileExist {
-			app.CreateOrUpdateClusterFromEnv(cm.GetConfig(), em.GetConfig())
+			if err := app.CreateOrUpdateClusterFromEnvWithCatalog(cm.GetConfig(), em.GetConfig(), o.catalogLoadOptions()); err != nil {
+				return fmt.Errorf("error creating/updating cluster from env: %w", err)
+			}
 		} else {
 			return fmt.Errorf("error loading config file. %s", CnfLoadErr)
 		}
@@ -185,7 +194,10 @@ func (o *InitOptions) Run() error {
 			log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
 			return fmt.Errorf("error validating env: %w", EnvValidateErr)
 		}
-		newCluster := config.NewClusterFromEnv(em.GetConfig())
+		newCluster, err := config.NewClusterFromEnvWithCatalog(em.GetConfig(), o.catalogLoadOptions())
+		if err != nil {
+			return fmt.Errorf("error creating cluster from env: %w", err)
+		}
 		cm.GetConfig().Clusters = []config.Cluster{newCluster}
 		errSave := cm.SaveToFile()
 		if errSave != nil {
@@ -200,4 +212,8 @@ func (o *InitOptions) Run() error {
 
 	return nil
 
+}
+
+func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
+	return o.catalogOptions
 }

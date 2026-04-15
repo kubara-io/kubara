@@ -1,0 +1,12 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: argo-cd
+  annotations:
+    kubara.io/category: application-management
+spec:
+  chartPath: argo-cd
+  status: disabled
+  clusterTypes:
+    - controlplane

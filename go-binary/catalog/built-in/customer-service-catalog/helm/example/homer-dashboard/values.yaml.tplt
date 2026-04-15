@@ -1,0 +1,160 @@
+{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . -}}
+{{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
+{{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
+{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
+{{- $kubePrometheusStatus := dig "cluster" "services" "kube-prometheus-stack" "status" "disabled" . -}}
+{{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
+{{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
+{{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
+{{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
+{{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- if (eq $metallbStatus "enabled") -}}
+{{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homer-dashboard" "networking" "annotations" (dict) .) -}}
+
+ingress:
+  {{- if (eq $oauth2ProxyStatus "enabled") }}
+  enabled: true
+  {{- end }}
+  host: {{ .cluster.dnsName }}
+  path: "/"
+{{- with .cluster.ingressClassName }}
+  ingressClassName: {{ . }}
+{{- end }}
+  annotations:
+    {{- toYaml $homerIngressAnnotations | nindent 4 }}
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+imagePullSecrets:
+  - name: image-pull-secret
+serviceMonitor:
+  {{- if (eq $kubePrometheusStatus "enabled") }}
+  enabled: true
+  {{- end }}
+  additionalLabels:
+    monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+dashboardConfig:
+  title: "kubara Developer Portal"
+  subtitle: "{{ .cluster.stage }}"
+  logo: "assets/icons/kubara_icon.png"
+
+  header: true
+  footer: '<p style="color:#334155;"> Kubara Developer Portal</p>'
+  proxy:
+    useCredentials: false
+  connectivityCheck: true
+
+  defaults:
+    layout: list
+    colorTheme: dark
+
+  # Optional theme customization
+  theme: default
+
+  # Optional navbar links (top-right menu)
+  links:
+    - name: "Kubara-Homepage"
+      icon: "fas fa-globe"
+      url: "https://kubara.io/"
+      target: "_blank"
+    - name: "Kubara Repo"
+      icon: "fab fa-github"
+      url: "https://github.com/kubara-io/kubara"
+      target: "_blank"
+    - name: "Kubara Docs"
+      icon: "fas fa-book"
+      url: "https://docs.kubara.io/"
+      target: "_blank"
+    - name: "Homer-Dashboard Repo"
+      icon: "fab fa-github-alt"
+      url: "https://github.com/bastienwirtz/homer"
+      target: "_blank"
+
+  # Optional theme customization (color overrrides)
+  # overrrides can also be done using CSS vars
+  colors:
+    light:
+      highlight-primary: "#1E293B"    # slate header
+      highlight-secondary: "#334155"    # navbar slate
+      highlight-hover: "#475569"    # subtle slate hover
+      background: "#F3F6FA"    # cool light background
+      card-background: "#FFFFFF"    # white cards
+      text: "#0F172A"    # dark slate text
+      text-header: "#F8FAFC"    # light header text
+      text-title: "#0F172A"    # dark slate title
+      text-subtitle: "#475569"    # muted slate subtitle
+      card-shadow: "#0F172A1A"  # dark slate, 10% opacity
+      link: "#2563EB"    # blue link
+      link-hover: "#1D4ED8"    # darker blue hover
+    dark:
+      highlight-primary: "#0A1E2D"    # use dark background for top header line
+      highlight-secondary: "#10283A"    # darker navbar surface
+      highlight-hover: "#14344A"    # subtle hover on dark navbar
+      background: "#0A1E2D"    # astro dark background
+      card-background: "#10283A"    # elevated dark surface
+      text: "#E5ECF6"    # astro dark-mode text
+      text-header: "#F7F8F8"    # astro dark heading text
+      text-title: "#F7F8F8"    # astro dark heading text
+      text-subtitle: "#A0E6E6"    # logo mint accent
+      card-shadow: "#00000066"
+      link: "#0ABEBE"    # astro primary teal
+      link-hover: "#006D75"    # deep teal accent
+
+  # Services
+  # First level array represent a group.
+  # Leave only a "items" key if not using group (group name, icon & tagstyle are optional, section separation will not be displayed).
+  services:
+    - name: "Tools"
+      items:
+        - name: "argocd"
+          logo: "/assets/tools/argocd.png"
+          url: "/argocd/"
+          subtitle: "GitOps Deployment Dashboard"
+          target: "_blank"
+        {{- if (eq $kubePrometheusStatus "enabled") }}
+        - name: "grafana"
+          logo: "/assets/tools/grafana.png"
+          url: "/grafana/"
+          subtitle: "Monitoring Dashboards"
+          target: "_blank"
+        - name: "prometheus"
+          logo: "/assets/tools/prometheus.png"
+          url: "/prometheus/"
+          subtitle: "Prometheus Dashboard"
+          target: "_blank"
+        - name: "alertmanager"
+          logo: "/assets/tools/alertmanager.png"
+          url: "/alertmanager/"
+          subtitle: "Alertmanager Dashboard"
+          target: "_blank"
+        {{- end }}
+        {{- if (eq $longhornStatus "enabled") }}
+        - name: "longhorn"
+          logo: "/assets/tools/longhorn.png"
+          url: "/longhorn/"
+          subtitle: "Storage Dashboard"
+          target: "_blank"
+        {{- end }}
+        {{- if (eq $kyvernoStatus "enabled") }}
+        - name: "kyverno"
+          logo: "/assets/tools/kyverno.png"
+          url: "/kyverno/"
+          subtitle: "Policy Reporter Dashboard"
+          target: "_blank"
+        {{- end }}
+        {{- if and (eq $traefikStatus "enabled") (eq $oauth2ProxyStatus "enabled") }}
+        - name: "traefik"
+          logo: "/assets/tools/traefik.png"
+          url: "https://{{ .cluster.dnsName }}/traefik/dashboard/"
+          subtitle: "Traefik Dashboard"
+          target: "_blank"
+        {{- end }}
+    - name: "DevOps Links"
+      items:
+        - name: "Secretsmanager"
+          logo: "/assets/tools/secretsmanager.png"
+          url: "https://replace-me-with-your-url"

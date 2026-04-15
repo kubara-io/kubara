@@ -1,0 +1,45 @@
+{{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) -}}
+{{- if (and (eq (index .cluster.services "oauth2-proxy" "status") "enabled") (eq (index .cluster.services "traefik" "status") "enabled")) -}}
+{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- if (eq (index .cluster.services "metallb" "status") "enabled") -}}
+{{- $_ := set $longhornIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $longhornIngressAnnotations = mergeOverwrite $longhornIngressAnnotations (dig "cluster" "services" "longhorn" "networking" "annotations" (dict) .) -}}
+
+longhorn:
+  privateRegistry:
+    registrySecret: image-pull-secret
+  metrics:
+    serviceMonitor:
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+      enabled: true
+      {{- end }}
+      additionalLabels:
+        monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  defaultSettings:
+    defaultReplicaCount: "1"
+  persistence:
+    defaultClass: true
+    defaultClassReplicaCount: 1
+  ingress:
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+    enabled: true
+    {{- end }}
+{{- with .cluster.ingressClassName }}
+    ingressClassName: {{ . }}
+{{- end }}
+    host: {{ .cluster.dnsName }}
+    tls: true
+    tlsSecret: tls-longhorn
+    path: "/longhorn(/|$)(.*)" # see path problems https://github.com/longhorn/longhorn/issues/1745
+    annotations:
+      {{- toYaml $longhornIngressAnnotations | nindent 6 }}
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+    pod-security.kubernetes.io/enforce: privileged
+    pod-security.kubernetes.io/audit: privileged
+    pod-security.kubernetes.io/warn: privileged

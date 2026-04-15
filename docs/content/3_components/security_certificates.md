@@ -18,7 +18,7 @@ cert-manager handles requesting, renewing, and storing certificates so that your
    - Whether you manage DNS records manually or automate them with [ExternalDNS](../3_components/network_external_dns.md) does not matter - what matters is that the domain resolves correctly.
 
 2. **Enable cert-manager**  
-   - In `config.yaml` you enable the service `certManager`.  
+   - In `config.yaml` you enable the service `cert-manager`.  
    - Then you must **rerun kubara** (`kubara generate --helm` or `kubara generate`) so that Helm values are re-rendered with the new settings.  
    - Then **git commit & push** the Helm chart changes so that Argo CD deploys cert-manager to the cluster.
 
@@ -50,18 +50,19 @@ clusters:
     dnsName: example.com
 
     services:
-      certManager:
+      cert-manager:
         status: enabled
         config:
-          email: "admin@example.com"    # Email for ACME
-          server: "https://acme-v02.api.letsencrypt.org/directory"   # ACME URL (e.g. Let's Encrypt)
+          clusterIssuer:
+            email: "admin@example.com"    # Email for ACME
+            server: "https://acme-v02.api.letsencrypt.org/directory"   # ACME URL (e.g. Let's Encrypt)
 ```
 
 ### Explanation
 
-- **`services.certManager.status`** → when set to `enabled`, cert-manager is templated into the Helm charts for deployment via Argo CD
-- **`services.certManager.config.email`** → email address registered with the ACME provider (required)  
-- **`services.certManager.config.server`** → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  
+- **`services.cert-manager.status`** → when set to `enabled`, cert-manager is templated into the Helm charts for deployment via Argo CD
+- **`services.cert-manager.config.clusterIssuer.email`** → email address registered with the ACME provider (required)  
+- **`services.cert-manager.config.clusterIssuer.server`** → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  
 
 ---
 

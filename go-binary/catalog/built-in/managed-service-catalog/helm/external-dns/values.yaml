@@ -1,0 +1,56 @@
+---
+# creates an ExternalSecret that looks for the specified remote-keys (remote secret names) to inject into webhook pod
+externalSecrets: {}
+namespace:
+  annotations: {}
+  labels: {}
+external-dns:
+  sources:
+    - ingress
+  policy: sync
+  serviceMonitor:
+    enabled: false
+  resources:
+    requests:
+      cpu: 10m
+      memory: 100Mi
+    limits:
+      memory: 100Mi
+  podSecurityContext:
+    runAsNonRoot: true
+    fsGroup: 65534
+    seccompProfile:
+      type: RuntimeDefault
+  securityContext:
+    privileged: false
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
+    runAsUser: 65532
+    runAsGroup: 65532
+    capabilities:
+      drop: ["ALL"]
+  provider:
+    name: webhook
+    webhook:
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+        limits:
+          memory: 100Mi
+      securityContext:
+        privileged: false
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+        runAsNonRoot: true
+        runAsUser: 65534
+        runAsGroup: 65534
+        capabilities:
+          drop: ["ALL"]
+      livenessProbe:
+        httpGet:
+          port: 8888
+      readinessProbe:
+        httpGet:
+          port: 8888

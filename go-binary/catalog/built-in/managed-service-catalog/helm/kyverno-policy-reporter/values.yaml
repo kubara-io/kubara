@@ -1,0 +1,30 @@
+---
+namespace: {}
+policy-reporter:
+  # We explicitly remove all filters because we want a complete dashboard
+  sourceFilters: []
+  plugin:
+    kyverno:
+      enabled: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 100Mi
+        limits:
+          memory: 100Mi
+  ui:
+    enabled: false
+    resources:
+      requests:
+        cpu: 10m
+        memory: 100Mi
+      limits:
+        memory: 100Mi
+  ingress:
+    enabled: false
+  resources:
+    requests:
+      cpu: 30m
+      memory: 100Mi
+    limits:
+      memory: 100Mi

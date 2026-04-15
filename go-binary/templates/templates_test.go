@@ -1,21 +1,22 @@
 package templates
 
 import (
-	"embed"
 	"io/fs"
 	"strings"
 	"testing"
+	"testing/fstest"
+
+	"kubara/catalog"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/yaml"
 )
 
-//go:embed all:embedded
-var testTemplatesFS embed.FS
+var testTemplatesFS = catalog.BuiltInFS()
 
 // helper function to setup test filesystem with correct root path
-func setupTestFS(t *testing.T) func() {
+func setupTestFS(_ *testing.T) func() {
 	originalFS := templatesFSNew
 	templatesFSNew = testTemplatesFS
 
@@ -25,8 +26,28 @@ func setupTestFS(t *testing.T) func() {
 	}
 }
 
+func fullServiceContext() map[string]any {
+	return map[string]any{
+		"argo-cd":                 map[string]any{"status": "enabled"},
+		"cert-manager":            map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+		"external-dns":            map[string]any{"status": "enabled"},
+		"external-secrets":        map[string]any{"status": "enabled"},
+		"kube-prometheus-stack":   map[string]any{"status": "enabled"},
+		"traefik":                 map[string]any{"status": "enabled"},
+		"kyverno":                 map[string]any{"status": "enabled"},
+		"kyverno-policies":        map[string]any{"status": "enabled"},
+		"kyverno-policy-reporter": map[string]any{"status": "enabled"},
+		"loki":                    map[string]any{"status": "enabled"},
+		"homer-dashboard":         map[string]any{"status": "enabled"},
+		"oauth2-proxy":            map[string]any{"status": "disabled"},
+		"metrics-server":          map[string]any{"status": "disabled"},
+		"metallb":                 map[string]any{"status": "disabled"},
+		"longhorn":                map[string]any{"status": "disabled"},
+	}
+}
+
 // getEmbeddedTemplatesListTest temporarily sets templatesFSNew for testing
-func getEmbeddedTemplatesListTest(tplType TemplateType, testFS embed.FS) ([]string, error) {
+func getEmbeddedTemplatesListTest(tplType TemplateType, testFS fs.FS) ([]string, error) {
 	originalFS := templatesFSNew
 	templatesFSNew = testFS
 	defer func() { templatesFSNew = originalFS }()
@@ -74,9 +95,9 @@ func TestMakeWalkDirFunc(t *testing.T) {
 	testFS := testTemplatesFS
 
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Verify that files are collected (not directories)
@@ -88,7 +109,7 @@ func TestMakeWalkDirFunc(t *testing.T) {
 
 	// Test error propagation if WalkDir encounters an error
 	var errorFiles []string
-	errorWalkFunc := makeWalkDirFunc("embedded", &errorFiles)
+	errorWalkFunc := makeWalkDirFunc(tmplRoot, &errorFiles)
 	// Intentionally walk non-existent path to trigger error
 	err = fs.WalkDir(testFS, "nonexistent", errorWalkFunc)
 	assert.Error(t, err)
@@ -101,7 +122,7 @@ func TestMakeWalkDirFunc_RelPathError(t *testing.T) {
 	var files []string
 	walkFunc := makeWalkDirFunc("nonexistent-root", &files) // Invalid root
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	// Should still work but paths might be relative to nonexistent root
 	require.NoError(t, err)
 }
@@ -110,9 +131,9 @@ func TestMakeWalkDirFunc_DirectoryFiltering(t *testing.T) {
 	// Test that directories are properly filtered out
 	testFS := testTemplatesFS
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Ensure no directory entries (ending with /) are included
@@ -204,7 +225,7 @@ func TestGetEmbeddedTemplatesList(t *testing.T) {
 
 	// Additional test: Error if root does not exist (simulate by overriding)
 	t.Run("Error on non-existent root for All", func(t *testing.T) {
-		invalidFS := embed.FS{} // Empty FS
+		invalidFS := fstest.MapFS{} // Empty FS
 		list, err := getEmbeddedTemplatesListTest(All, invalidFS)
 		assert.Error(t, err)
 		assert.Empty(t, list)
@@ -328,13 +349,13 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Successfully template terraform files",
 			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 					"name":       "test-cluster",
 					"stage":      "dev",
 				},
-				"cluster": map[string]interface{}{
-					"terraform": map[string]interface{}{
+				"cluster": map[string]any{
+					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
 				},
@@ -356,62 +377,56 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Successfully template helm files",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
-				"cluster": map[string]interface{}{
+				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
-					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+					"services": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]any{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
+						},
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 					"publicLoadbalancerIP": "1.2.3.4",
-					"argocd": map[string]interface{}{
-						"repo": map[string]interface{}{
-							"https": map[string]interface{}{
-								"managed": map[string]interface{}{
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "managed-service-catalog/helm",
 									"targetRevision": "main",
 								},
-								"customer": map[string]interface{}{
+								"customer": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "customer-service-catalog/helm",
 									"targetRevision": "main",
 								},
 							},
 						},
-						"helmRepo": map[string]interface{}{
+						"helmRepo": map[string]any{
 							"url": "https://charts.example.com",
-						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"argocd": map[string]any{
-							"ingress": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
-							},
-							"grpc": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
-							},
 						},
 					},
 				},
@@ -425,16 +440,16 @@ func TestTemplateFiles(t *testing.T) {
 				assert.Contains(t, results[0].Content, "test-cluster")
 				assert.Contains(t, results[0].Content, "dev")
 
-				var rendered map[string]interface{}
+				var rendered map[string]any
 				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
 
-				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]interface{})
+				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]any)
 				require.True(t, ok)
-				projects, ok := bootstrapValues["projects"].(map[string]interface{})
+				projects, ok := bootstrapValues["projects"].(map[string]any)
 				require.True(t, ok)
-				project, ok := projects["test-cluster-dev"].(map[string]interface{})
+				project, ok := projects["test-cluster-dev"].(map[string]any)
 				require.True(t, ok)
-				sourceRepos, ok := project["sourceRepos"].([]interface{})
+				sourceRepos, ok := project["sourceRepos"].([]any)
 				require.True(t, ok)
 				require.Len(t, sourceRepos, 1)
 				assert.Equal(t, "https://charts.example.com", sourceRepos[0])
@@ -444,58 +459,52 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Omits sourceRepos when optional helm repo is missing",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
-				"cluster": map[string]interface{}{
+				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
-					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+					"services": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "enabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]any{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
+						},
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 					"publicLoadbalancerIP": "1.2.3.4",
-					"argocd": map[string]interface{}{
-						"repo": map[string]interface{}{
-							"https": map[string]interface{}{
-								"managed": map[string]interface{}{
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "managed-service-catalog/helm",
 									"targetRevision": "main",
 								},
-								"customer": map[string]interface{}{
+								"customer": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "customer-service-catalog/helm",
 									"targetRevision": "main",
 								},
-							},
-						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"argocd": map[string]any{
-							"ingress": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
-							},
-							"grpc": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
 							},
 						},
 					},
@@ -507,14 +516,14 @@ func TestTemplateFiles(t *testing.T) {
 				assert.Equal(t, "customer-service-catalog/helm/example/argo-cd/values.yaml.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
 
-				var rendered map[string]interface{}
+				var rendered map[string]any
 				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
 
-				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]interface{})
+				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]any)
 				require.True(t, ok)
-				projects, ok := bootstrapValues["projects"].(map[string]interface{})
+				projects, ok := bootstrapValues["projects"].(map[string]any)
 				require.True(t, ok)
-				project, ok := projects["test-cluster-dev"].(map[string]interface{})
+				project, ok := projects["test-cluster-dev"].(map[string]any)
 				require.True(t, ok)
 				_, hasSourceRepos := project["sourceRepos"]
 				assert.False(t, hasSourceRepos)
@@ -530,27 +539,28 @@ func TestTemplateFiles(t *testing.T) {
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"services": map[string]any{
-						"certManager": map[string]any{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]any{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"oauth2Proxy": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "disabled",
 						},
-						"metalLb": map[string]any{
+						"metallb": map[string]any{
 							"status": "disabled",
 						},
-						"kubePrometheusStack": map[string]any{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
 						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"kubePrometheusStack": map[string]any{
-							"cert-manager.io/cluster-issuer": "letsencrypt-prod",
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 				},
@@ -563,7 +573,7 @@ func TestTemplateFiles(t *testing.T) {
 				assert.NotContains(t, results[0].Content, "ingressClassName:")
 				assert.NotContains(t, results[0].Content, "storageClassName:")
 
-				var rendered map[string]interface{}
+				var rendered map[string]any
 				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
 			},
 		},
@@ -576,41 +586,40 @@ func TestTemplateFiles(t *testing.T) {
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"services": map[string]any{
-						"certManager": map[string]any{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]any{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"oauth2Proxy": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "enabled",
 						},
 						"traefik": map[string]any{
 							"status": "enabled",
 						},
-						"metalLb": map[string]any{
+						"metallb": map[string]any{
 							"status": "disabled",
 						},
-						"kubePrometheusStack": map[string]any{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
 						},
-						"homerDashboard": map[string]any{
+						"homer-dashboard": map[string]any{
 							"status": "enabled",
-							"ingress": map[string]any{
+							"networking": map[string]any{
 								"annotations": map[string]any{
 									"cert-manager.io/cluster-issuer":             "letsencrypt-custom",
 									"nginx.ingress.kubernetes.io/rewrite-target": "/",
 								},
 							},
 						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"homerDashboard": map[string]any{
-							"cert-manager.io/cluster-issuer":                   "letsencrypt-custom",
-							"traefik.ingress.kubernetes.io/router.middlewares": "oauth2-proxy-oauth-auth@kubernetescrd",
-							"nginx.ingress.kubernetes.io/rewrite-target":       "/",
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 				},
@@ -642,39 +651,39 @@ func TestTemplateFiles(t *testing.T) {
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"services": map[string]any{
-						"certManager": map[string]any{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]any{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"oauth2Proxy": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "enabled",
 						},
 						"traefik": map[string]any{
 							"status": "disabled",
 						},
-						"metalLb": map[string]any{
+						"metallb": map[string]any{
 							"status": "disabled",
 						},
-						"kubePrometheusStack": map[string]any{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
 						},
-						"homerDashboard": map[string]any{
+						"homer-dashboard": map[string]any{
 							"status": "enabled",
-							"ingress": map[string]any{
+							"networking": map[string]any{
 								"annotations": map[string]any{
 									"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
 								},
 							},
 						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"homerDashboard": map[string]any{
-							"cert-manager.io/cluster-issuer":       "letsencrypt-prod",
-							"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 				},
@@ -703,7 +712,7 @@ func TestTemplateFiles(t *testing.T) {
 				"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt",
 			},
 			context: map[string]any{
-				"env": map[string]interface{}{
+				"env": map[string]any{
 					"DockerconfigBase64": "<very-sneaky-config>",
 				},
 			},
@@ -726,7 +735,7 @@ func TestTemplateFiles(t *testing.T) {
 				"customer-service-catalog/terraform/providers/stackit/example/set-env-changeme.ps1.tplt",
 			},
 			context: map[string]any{
-				"env": map[string]interface{}{
+				"env": map[string]any{
 					"DockerconfigBase64": "",
 				},
 			},
@@ -747,58 +756,52 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Keep ArgoCD rbac and params under configs when oauth2 is disabled",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
-				"cluster": map[string]interface{}{
+				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
 					"stage":   "dev",
 					"dnsName": "test.example.com",
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
-					"services": map[string]interface{}{
-						"oauth2Proxy": map[string]interface{}{
+					"services": map[string]any{
+						"oauth2-proxy": map[string]any{
 							"status": "disabled",
 						},
-						"certManager": map[string]interface{}{
+						"cert-manager": map[string]any{
 							"status": "enabled",
-							"clusterIssuer": map[string]interface{}{
-								"name": "letsencrypt-prod",
+							"config": map[string]any{
+								"clusterIssuer": map[string]any{
+									"name": "letsencrypt-prod",
+								},
 							},
 						},
-						"metalLb": map[string]interface{}{
+						"metallb": map[string]any{
 							"status": "enabled",
 						},
-						"kubePrometheusStack": map[string]interface{}{
+						"kube-prometheus-stack": map[string]any{
 							"status": "enabled",
+						},
+						"longhorn": map[string]any{
+							"status": "disabled",
+						},
+						"kyverno": map[string]any{
+							"status": "disabled",
 						},
 					},
 					"publicLoadbalancerIP": "1.2.3.4",
-					"argocd": map[string]interface{}{
-						"repo": map[string]interface{}{
-							"https": map[string]interface{}{
-								"managed": map[string]interface{}{
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "managed-service-catalog/helm",
 									"targetRevision": "main",
 								},
-								"customer": map[string]interface{}{
+								"customer": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "customer-service-catalog/helm",
 									"targetRevision": "main",
 								},
-							},
-						},
-					},
-				},
-				"computed": map[string]any{
-					"ingressAnnotations": map[string]any{
-						"argocd": map[string]any{
-							"ingress": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
-							},
-							"grpc": map[string]any{
-								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
-								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
 							},
 						},
 					},
@@ -810,13 +813,13 @@ func TestTemplateFiles(t *testing.T) {
 				assert.Equal(t, "customer-service-catalog/helm/example/argo-cd/values.yaml.tplt", results[0].Path)
 				assert.NoError(t, results[0].Error)
 
-				var rendered map[string]interface{}
+				var rendered map[string]any
 				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
 
-				argoCD, ok := rendered["argo-cd"].(map[string]interface{})
+				argoCD, ok := rendered["argo-cd"].(map[string]any)
 				require.True(t, ok)
 
-				configs, ok := argoCD["configs"].(map[string]interface{})
+				configs, ok := argoCD["configs"].(map[string]any)
 				require.True(t, ok)
 
 				_, hasConfigRbac := configs["rbac"]
@@ -826,7 +829,7 @@ func TestTemplateFiles(t *testing.T) {
 				_, hasConfigCM := configs["cm"]
 				assert.False(t, hasConfigCM)
 
-				server, ok := argoCD["server"].(map[string]interface{})
+				server, ok := argoCD["server"].(map[string]any)
 				require.True(t, ok)
 				_, hasServerRbac := server["rbac"]
 				assert.False(t, hasServerRbac)
@@ -863,11 +866,11 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Error: Handle template execution error",
 			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 				},
-				"cluster": map[string]interface{}{
-					"terraform": map[string]interface{}{
+				"cluster": map[string]any{
+					"terraform": map[string]any{
 						// This will cause a runtime error when accessing cluster.terraform.kubernetesType
 						"kubernetesType": func() string { panic("template error") },
 					},
@@ -886,7 +889,7 @@ func TestTemplateFiles(t *testing.T) {
 			fileList: []string{"customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt"},
 			context: map[string]any{
 				// Missing cluster.terraform.kubernetesType - should not cause error
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 				},
 			},
@@ -907,13 +910,13 @@ func TestTemplateFiles(t *testing.T) {
 				"managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf",
 			},
 			context: map[string]any{
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 					"name":       "test-cluster",
 					"stage":      "dev",
 				},
-				"cluster": map[string]interface{}{
-					"terraform": map[string]interface{}{
+				"cluster": map[string]any{
+					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
 				},
@@ -981,18 +984,42 @@ func TestTemplateAllFiles(t *testing.T) {
 			name:    "Success: Successfully template all files of type All",
 			tplType: All,
 			context: map[string]any{
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 					"name":       "test-cluster",
 					"stage":      "dev",
 				},
-				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "test-cluster",
-					"stage": "dev",
-					"terraform": map[string]interface{}{
+				"cluster": map[string]any{
+					"type":             "controlplane",
+					"name":             "test-cluster",
+					"stage":            "dev",
+					"dnsName":          "test.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
+					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+						"helmRepo": map[string]any{
+							"url": "https://charts.example.com",
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // No errors expected with valid context
@@ -1024,16 +1051,19 @@ func TestTemplateAllFiles(t *testing.T) {
 		{
 			name:    "Error: Handle template execution errors in all files",
 			tplType: All,
-			context: map[string]any{}, // Missing required variables - but go template doesn't fail by default
-			wantErr: false,            // Changed to false since go template doesn't fail on missing vars
+			context: map[string]any{},
+			wantErr: true,
 			validate: func(t *testing.T, results []TemplateResult) {
 				assert.NotEmpty(t, results)
-				// Should have both template and static files, but templates may have empty content
 				templateFiles := 0
 				staticSuccess := 0
+				templateErrors := 0
 				for _, result := range results {
 					if strings.HasSuffix(result.Path, ".tplt") {
 						templateFiles++
+						if result.Error != nil {
+							templateErrors++
+						}
 					} else {
 						if result.Error == nil {
 							staticSuccess++
@@ -1041,6 +1071,7 @@ func TestTemplateAllFiles(t *testing.T) {
 					}
 				}
 				assert.Greater(t, templateFiles, 0, "Should have template files")
+				assert.Greater(t, templateErrors, 0, "Should have template errors with empty context")
 				assert.Greater(t, staticSuccess, 0, "Should have successful static files")
 			},
 		},
@@ -1048,13 +1079,13 @@ func TestTemplateAllFiles(t *testing.T) {
 			name:    "Success: Template all Terraform files",
 			tplType: Terraform,
 			context: map[string]any{
-				"var": map[string]interface{}{
+				"var": map[string]any{
 					"project_id": "12345",
 					"name":       "tf-cluster",
 					"stage":      "staging",
 				},
-				"cluster": map[string]interface{}{
-					"terraform": map[string]interface{}{
+				"cluster": map[string]any{
+					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
 				},
@@ -1072,10 +1103,31 @@ func TestTemplateAllFiles(t *testing.T) {
 			name:    "Success: Template all Helm files",
 			tplType: Helm,
 			context: map[string]any{
-				"cluster": map[string]interface{}{
-					"type":  "controlplane",
-					"name":  "helm-cluster",
-					"stage": "production",
+				"cluster": map[string]any{
+					"type":             "controlplane",
+					"name":             "helm-cluster",
+					"stage":            "production",
+					"dnsName":          "helm.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+					},
+					"services": fullServiceContext(),
 				},
 			},
 			wantErr: false, // Changed to false with proper context

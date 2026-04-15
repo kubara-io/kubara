@@ -106,48 +106,6 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 	assert.Equal(t, "release", https.Managed.TargetRevision, "explicit TargetRevision should not be overwritten")
 }
 
-func TestApplyDefaults_EmbeddedServiceStatusDefaults(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Services: Services{
-					Argocd:      GenericService{},
-					CertManager: CertManagerService{},
-				},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services.Argocd.Status, "empty service status should default to disabled")
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services.CertManager.Status, "empty cert-manager status should default to disabled")
-}
-
-func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Services: Services{
-					CertManager: CertManagerService{
-						ClusterIssuer: ClusterIssuer{
-							Email: "cert@example.com",
-							// Should get defaults for:
-							// Name and Server
-						},
-					},
-				},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-
-	issuer := cfg.Clusters[0].Services.CertManager.ClusterIssuer
-	assert.Equal(t, "letsencrypt-staging", issuer.Name, "ClusterIssuer Name should default to letsencrypt-staging")
-	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer.Server, "ClusterIssuer Server should default to ACME staging URL")
-}
-
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {
 	cfg := &Config{
 		Clusters: []Cluster{
