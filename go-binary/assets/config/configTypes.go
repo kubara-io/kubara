@@ -2,8 +2,11 @@ package config
 
 // Config is the root of the configuration structure.
 type Config struct {
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
+
+const ConfigVersionV1Alpha1 = "v1alpha1"
 
 // Cluster defines the configuration for a single Kubernetes cluster.
 type Cluster struct {

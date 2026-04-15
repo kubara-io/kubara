@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"kubara/assets/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
+	"kubara/catalog"
 	"kubara/templates"
 	"kubara/utils"
 	"os"
@@ -38,8 +38,6 @@ type GenerateFlags struct {
 	DryRun             bool
 	ManagedCatalogPath string
 	OverlayValuesPath  string
-	CatalogPath        string
-	CatalogOverwrite   bool
 }
 
 func NewGenerateFlags() *GenerateFlags {
@@ -49,8 +47,6 @@ func NewGenerateFlags() *GenerateFlags {
 		DryRun:             false,
 		ManagedCatalogPath: templates.DefaultManagedCatalogPath,
 		OverlayValuesPath:  templates.DefaultOverlayValuesPath,
-		CatalogPath:        "",
-		CatalogOverwrite:   false,
 	}
 }
 
@@ -61,7 +57,7 @@ func NewGenerateCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "generates files from embedded templates and the config file; by default for both Helm and Terraform",
-		UsageText:   "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--force|--overwrite]] [--dry-run]",
+		UsageText:   "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--force|--catalog-overwrite]] [--dry-run]",
 		Description: "generate reads config values and templates the embedded Helm and Terraform files.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -94,12 +90,9 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get overlay values path: %w", err)
 	}
-	catalogPath := ""
-	if flags.CatalogPath != "" {
-		catalogPath, err = utils.GetFullPath(flags.CatalogPath, cwd)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get catalog path: %w", err)
-		}
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
 	}
 	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
@@ -111,8 +104,8 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 		DryRun:             flags.DryRun,
 		CWD:                cwd,
 		ConfigFilePath:     configFilePath,
-		CatalogPath:        catalogPath,
-		CatalogOverwrite:   flags.CatalogOverwrite,
+		CatalogPath:        catalogOptions.CatalogPath,
+		CatalogOverwrite:   catalogOptions.Overwrite,
 		ManagedCatalogPath: managedCatalogPath,
 		OverlayValuesPath:  overlayValuesPath,
 		EnvPath:            envPath,
@@ -159,19 +152,6 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 			Value:       templates.DefaultOverlayValuesPath,
 			Destination: &flags.OverlayValuesPath,
 		},
-		&cli.StringFlag{
-			Name:        "catalog",
-			Usage:       "Path to external ServiceDefinition catalog directory.",
-			Value:       flags.CatalogPath,
-			Destination: &flags.CatalogPath,
-		},
-		&cli.BoolFlag{
-			Name:        "overwrite",
-			Aliases:     []string{"force"},
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-			Value:       flags.CatalogOverwrite,
-			Destination: &flags.CatalogOverwrite,
-		},
 	}
 
 	cmd.Flags = append(cmd.Flags, generateFlags...)
@@ -191,54 +171,11 @@ func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[st
 	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal clusterJSON to map: %w", err)
 	}
-	addLegacyServiceAliases(clusterMap)
 
 	return map[string]any{
 		"cluster": clusterMap,
 		"env":     em,
 	}, nil
-}
-
-func addLegacyServiceAliases(clusterMap map[string]any) {
-	servicesRaw, ok := clusterMap["services"]
-	if !ok {
-		return
-	}
-	services, ok := servicesRaw.(map[string]any)
-	if !ok {
-		return
-	}
-
-	aliases := catalog.LegacyServiceAliasMap()
-	for canonicalName, legacyName := range aliases {
-		canonicalRaw, exists := services[canonicalName]
-		if !exists {
-			continue
-		}
-
-		canonicalMap, ok := canonicalRaw.(map[string]any)
-		if !ok {
-			services[legacyName] = canonicalRaw
-			continue
-		}
-
-		legacyService := map[string]any{}
-		for k, v := range canonicalMap {
-			legacyService[k] = v
-		}
-
-		// Keep old templates functional during migration by exposing config keys
-		// also at service root (e.g. .services.certManager.clusterIssuer.*).
-		if configMap, ok := canonicalMap["config"].(map[string]any); ok {
-			for key, val := range configMap {
-				if _, exists := legacyService[key]; !exists {
-					legacyService[key] = val
-				}
-			}
-		}
-
-		services[legacyName] = legacyService
-	}
 }
 
 func (o *GenerateOptions) resolveOutputPath(result templates.TemplateResult, clusterName string) string {

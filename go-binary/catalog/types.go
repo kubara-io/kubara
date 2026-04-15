@@ -7,6 +7,7 @@ import (
 
 	"go.yaml.in/yaml/v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 type Status string
@@ -79,14 +80,9 @@ func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 		return nil
 	}
 
-	configSchemaBytes, err := json.Marshal(raw.ConfigSchema)
-	if err != nil {
-		return fmt.Errorf("marshal configSchema: %w", err)
-	}
-
 	var schema apiextensionsv1.JSONSchemaProps
-	if err := json.Unmarshal(configSchemaBytes, &schema); err != nil {
-		return fmt.Errorf("unmarshal configSchema into JSONSchemaProps: %w", err)
+	if err := runtime.DefaultUnstructuredConverter.FromUnstructured(raw.ConfigSchema, &schema); err != nil {
+		return fmt.Errorf("decode configSchema into JSONSchemaProps: %w", err)
 	}
 
 	s.ConfigSchema = &schema

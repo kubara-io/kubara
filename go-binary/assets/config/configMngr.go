@@ -9,8 +9,9 @@ import (
 	"path/filepath"
 	"reflect"
 	"sort"
+	"strings"
 
-	"kubara/assets/catalog"
+	"kubara/catalog"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/invopop/jsonschema"
@@ -64,9 +65,19 @@ func (cm *Manager) Load() error {
 		return fmt.Errorf("failed to decode config: %w", err)
 	}
 
+	migrated, err := migrateConfig(cm.config)
+	if err != nil {
+		return err
+	}
+
 	applyDefaults(cm.config)
 	if err := applyServiceCatalogDefaults(cm.config, cm.catalogOptions); err != nil {
 		return err
+	}
+	if migrated {
+		if err := cm.SaveToFile(); err != nil {
+			return fmt.Errorf("failed to persist migrated config: %w", err)
+		}
 	}
 
 	return nil
@@ -167,6 +178,10 @@ func (cm *Manager) GetFilepath() string {
 
 // SaveToFile saves the configuration to a YAML file
 func (cm *Manager) SaveToFile() error {
+	if strings.TrimSpace(cm.config.Version) == "" {
+		cm.config.Version = ConfigVersionV1Alpha1
+	}
+
 	// Ensure directory exists
 	filePath := cm.filepath
 	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
