@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -56,16 +55,16 @@ type ServiceSpec struct {
 	ConfigSchema *apiextensionsv1.JSONSchemaProps `yaml:"configSchema,omitempty"`
 }
 
-func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
-	type serviceSpecAlias struct {
-		ChartPath    string         `yaml:"chartPath"`
-		AppName      string         `yaml:"appName,omitempty"`
-		Status       Status         `yaml:"status"`
-		ClusterTypes []string       `yaml:"clusterTypes,omitempty"`
-		ConfigSchema map[string]any `yaml:"configSchema,omitempty"`
-	}
+type serviceSpecYAML struct {
+	ChartPath    string         `yaml:"chartPath"`
+	AppName      string         `yaml:"appName,omitempty"`
+	Status       Status         `yaml:"status"`
+	ClusterTypes []string       `yaml:"clusterTypes,omitempty"`
+	ConfigSchema map[string]any `yaml:"configSchema,omitempty"`
+}
 
-	var raw serviceSpecAlias
+func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
+	var raw serviceSpecYAML
 	if err := value.Decode(&raw); err != nil {
 		return err
 	}
@@ -89,6 +88,7 @@ func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
+// Catalog represents a set of service definitions keyed by canonical service name.
 type Catalog struct {
 	// Services maps canonical service names to definitions.
 	Services map[string]ServiceDefinition
@@ -129,15 +129,10 @@ func ToMap(schema *apiextensionsv1.JSONSchemaProps) (map[string]any, error) {
 	if schema == nil {
 		return nil, nil
 	}
-	b, err := json.Marshal(schema)
+
+	out, err := runtime.DefaultUnstructuredConverter.ToUnstructured(schema)
 	if err != nil {
-		return nil, fmt.Errorf("marshal schema: %w", err)
+		return nil, fmt.Errorf("convert schema to map: %w", err)
 	}
-
-	var out map[string]any
-	if err := json.Unmarshal(b, &out); err != nil {
-		return nil, fmt.Errorf("unmarshal schema: %w", err)
-	}
-
 	return out, nil
 }

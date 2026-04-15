@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"reflect"
-	"sort"
+	"strings"
 
 	"kubara/catalog"
 
@@ -18,7 +18,7 @@ func createServicesFromCatalogWithOptions(options catalog.LoadOptions, clusterTy
 	if err != nil {
 		return nil, err
 	}
-	return serviceDefaultsFromCatalog(cat, clusterType), nil
+	return createServicesFromCatalogDefaults(cat, clusterType), nil
 }
 
 func decodeServiceHook() mapstructure.DecodeHookFuncType {
@@ -37,7 +37,7 @@ func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error
 	}
 
 	for i := range cfg.Clusters {
-		defaults := serviceDefaultsFromCatalog(cat, cfg.Clusters[i].Type)
+		defaults := createServicesFromCatalogDefaults(cat, cfg.Clusters[i].Type)
 		currentServices := cfg.Clusters[i].Services
 		if currentServices == nil {
 			currentServices = Services{}
@@ -70,51 +70,6 @@ func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error
 	return nil
 }
 
-func normalizeServiceKeys(input Services) Services {
-	if input == nil {
-		return nil
-	}
-
-	normalized := make(Services, len(input))
-	keys := make([]string, 0, len(input))
-	for key := range input {
-		keys = append(keys, key)
-	}
-	sort.Strings(keys)
-
-	for _, key := range keys {
-		canonical := catalog.CanonicalServiceName(key)
-		if canonical == "" {
-			continue
-		}
-
-		// Canonical key wins when both canonical and legacy alias are present.
-		if key != canonical {
-			if _, canonicalExists := input[canonical]; canonicalExists {
-				continue
-			}
-		}
-
-		instance := input[key]
-		if existing, ok := normalized[canonical]; ok {
-			normalized[canonical] = mergeServiceInstances(existing, instance)
-			continue
-		}
-		normalized[canonical] = instance
-	}
-
-	return normalized
-}
-
-func mergeServiceInstances(base, override ServiceInstance) ServiceInstance {
-	out := cloneServiceInstance(base)
-	if override.Status != "" {
-		out.Status = override.Status
-	}
-	out.Config = mergeConfigDefaults(out.Config, override.Config)
-	return out
-}
-
 func cloneServiceInstance(in ServiceInstance) ServiceInstance {
 	return ServiceInstance{
 		Status: in.Status,
@@ -122,7 +77,7 @@ func cloneServiceInstance(in ServiceInstance) ServiceInstance {
 	}
 }
 
-func serviceDefaultsFromCatalog(cat catalog.Catalog, clusterType string) Services {
+func createServicesFromCatalogDefaults(cat catalog.Catalog, clusterType string) Services {
 	out := make(Services, len(cat.Services))
 	for name, def := range cat.Services {
 		status := def.Spec.Status
@@ -242,20 +197,17 @@ func serviceAppliesToClusterType(def catalog.ServiceDefinition, clusterType stri
 	if len(def.Spec.ClusterTypes) == 0 {
 		return true
 	}
-
-	switch clusterType {
-	case "controlplane", "worker":
-		for _, allowed := range def.Spec.ClusterTypes {
-			if allowed == "*" || allowed == clusterType {
-				return true
-			}
-		}
-		return false
-	default:
-		// Unknown/placeholder cluster types keep the legacy behavior:
-		// expose all services with their definition defaults.
+	clusterType = strings.TrimSpace(clusterType)
+	if clusterType == "" || strings.HasPrefix(clusterType, "<") {
+		// Scaffolding placeholders should keep definition defaults.
 		return true
 	}
+	for _, allowed := range def.Spec.ClusterTypes {
+		if allowed == "*" || allowed == clusterType {
+			return true
+		}
+	}
+	return false
 }
 
 func decodeServiceInstance(source any) (ServiceInstance, error) {
