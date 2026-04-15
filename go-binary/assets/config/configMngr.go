@@ -49,6 +49,10 @@ func (cm *Manager) Load() error {
 	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return fmt.Errorf("failed to parse yaml config: %w", err)
 	}
+	migrated, err := migrateRawConfig(raw)
+	if err != nil {
+		return err
+	}
 
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
@@ -63,11 +67,6 @@ func (cm *Manager) Load() error {
 	}
 	if err := decoder.Decode(raw); err != nil {
 		return fmt.Errorf("failed to decode config: %w", err)
-	}
-
-	migrated, err := migrateConfig(cm.config)
-	if err != nil {
-		return err
 	}
 
 	applyDefaults(cm.config)
