@@ -28,7 +28,7 @@ func TestNewSchemaCmd(t *testing.T) {
 
 	assert.Equal(t, "schema", command.Name)
 	assert.Equal(t, "Generate JSON schema file for config structure", command.Usage)
-	assert.Equal(t, "schema [--output] [--catalog <path> [--overwrite]]", command.UsageText)
+	assert.Equal(t, "schema [--output] [--catalog <path> [--catalog-overwrite]]", command.UsageText)
 
 	require.Len(t, command.Flags, 1)
 
@@ -145,10 +145,10 @@ spec:
 			errContains: "already exists in built-in catalog",
 		},
 		{
-			name: "catalog collision succeeds with overwrite",
+			name: "catalog collision succeeds with catalog-overwrite",
 			flags: []string{
 				"--catalog", "distribution",
-				"--overwrite",
+				"--catalog-overwrite",
 			},
 			setup: func(t *testing.T, tempDir string) {
 				servicesDir := filepath.Join(tempDir, "distribution", "services")
