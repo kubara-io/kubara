@@ -1,0 +1,12 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: external-dns
+  annotations:
+    kubara.io/category: networking
+spec:
+  chartPath: external-dns
+  status: enabled
+  clusterTypes:
+    - controlplane

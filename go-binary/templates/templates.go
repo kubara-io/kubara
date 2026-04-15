@@ -2,7 +2,6 @@ package templates
 
 import (
 	"bytes"
-	"embed"
 	"errors"
 	"io/fs"
 	"path/filepath"
@@ -10,12 +9,11 @@ import (
 	"strings"
 	"text/template"
 
+	"kubara/catalog"
+
 	"github.com/Masterminds/sprig/v3"
 	"go.yaml.in/yaml/v3"
 )
-
-//go:embed all:embedded
-var templatesFSNew embed.FS
 
 type TemplateType int
 
@@ -26,11 +24,13 @@ const (
 )
 
 const (
-	tmplRoot                  string = "embedded"
+	tmplRoot                  string = "built-in"
 	DefaultManagedCatalogPath string = "managed-service-catalog"
 	DefaultOverlayValuesPath  string = "customer-service-catalog"
 	providerFolderName        string = "providers"
 )
+
+var templatesFSNew fs.FS = catalog.BuiltInFS()
 
 // SupportedProviders lists every provider that has embedded templates.
 // Add new entries here when introducing provider-specific template directories.

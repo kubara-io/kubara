@@ -103,6 +103,11 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
+	}
+
 	// Load environment
 	em := envmap.NewEnvMapManager(envFilePath, ".", flags.EnvPrefixFlag)
 	if err := em.Load(); err != nil {
@@ -120,7 +125,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("getting config file path: %w", err)
 	}
 
-	cm := config.NewConfigManager(configFilePath)
+	cm := config.NewConfigManagerWithCatalog(configFilePath, catalogOptions)
 	if err := cm.Load(); err != nil {
 		return nil, fmt.Errorf("loading config from %s: %w", configFilePath, err)
 	}

@@ -1,0 +1,12 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: kyverno-policy-reporter
+  annotations:
+    kubara.io/category: security
+spec:
+  chartPath: kyverno-policy-reporter
+  status: enabled
+  clusterTypes:
+    - controlplane

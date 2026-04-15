@@ -1,0 +1,12 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: kyverno
+  annotations:
+    kubara.io/category: security
+spec:
+  chartPath: kyverno
+  status: enabled
+  clusterTypes:
+    - controlplane

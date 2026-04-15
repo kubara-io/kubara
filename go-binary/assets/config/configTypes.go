@@ -1,7 +1,12 @@
 package config
 
+import "kubara/assets/service"
+
+const ConfigVersionV1Alpha1 = "v1alpha1"
+
 // Config is the root of the configuration structure.
 type Config struct {
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
 
@@ -20,9 +25,9 @@ type Cluster struct {
 	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
 	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
 
-	Terraform *Terraform `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
-	ArgoCD    ArgoCD     `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
-	Services  Services   `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
+	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
+	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
+	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }
 
 type Terraform struct {
@@ -61,60 +66,4 @@ type Repository struct {
 
 type HelmRepository struct {
 	URL string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Helm repository URL or OCI registry URL (without oci:// prefix),minLength=1"`
-}
-
-type ServiceStatus struct {
-	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
-}
-
-type IngressOverrides struct {
-	Annotations map[string]string `json:"annotations,omitempty" yaml:"annotations,omitempty" jsonschema:"title=Ingress Annotations,description=Optional ingress annotations that are merged with kubara defaults."`
-}
-
-type GenericService struct {
-	ServiceStatus `yaml:",inline" jsonschema:"required,title=ServiceStatus"`
-	Ingress       *IngressOverrides `json:"ingress,omitempty" yaml:"ingress,omitempty" jsonschema:"title=Ingress Overrides,description=Optional ingress settings for this service."`
-}
-
-type PersistentService struct {
-	GenericService   `yaml:",inline" jsonschema:"required,title=GenericService"`
-	StorageClassName string `json:"storageClassName,omitempty" yaml:"storageClassName,omitempty" jsonschema:"title=Storage Class,description=Optional storage class for services that provision persistent volumes.,minLength=1"`
-}
-
-type Status string
-
-const (
-	StatusEnabled  Status = "enabled"
-	StatusDisabled Status = "disabled"
-)
-
-// ClusterIssuer defines the nested configuration for cert-manager's issuer.
-type ClusterIssuer struct {
-	Name   string `json:"name" yaml:"name" jsonschema:"required,title=Issuer Name,description=Name of the ClusterIssuer resource.,minLength=1,example=letsencrypt-staging,default=letsencrypt-staging"`
-	Email  string `json:"email" yaml:"email" jsonschema:"required,title=ACME Email,description=The email address for Let's Encrypt registration.,format=email"`
-	Server string `json:"server" yaml:"server" jsonschema:"title=ACME Server,description=The ACME server URL.,format=uri,default=https://acme-staging-v02.api.letsencrypt.org/directory"`
-}
-
-// CertManagerService defines the specific, nested configuration for cert-manager.
-type CertManagerService struct {
-	ServiceStatus `yaml:",inline"`
-	ClusterIssuer ClusterIssuer `json:"clusterIssuer" yaml:"clusterIssuer" jsonschema:"required,title=Cluster Issuer Configuration"`
-}
-
-type Services struct {
-	Argocd              GenericService     `json:"argocd" yaml:"argocd" jsonschema:"required,title=Argocd Service,description=Configuration for argoCD"`
-	CertManager         CertManagerService `json:"certManager" yaml:"certManager" jsonschema:"required,title=CertManager Service,description=Configuration for CertManager"`
-	ExternalDns         GenericService     `json:"externalDns" yaml:"externalDns" jsonschema:"required,title=ExternalDns Service,description=Configuration for ExternalDns"`
-	ExternalSecrets     GenericService     `json:"externalSecrets" yaml:"externalSecrets" jsonschema:"required,title=ExternalSecrets Service,description=Configuration for ExternalSecrets"`
-	KubePrometheusStack PersistentService  `json:"kubePrometheusStack" yaml:"kubePrometheusStack" jsonschema:"required,title=KubePrometheusStack Service,description=Configuration for KubePrometheusStack"`
-	Traefik             GenericService     `json:"traefik" yaml:"traefik" jsonschema:"required,title=Traefik Service,description=Configuration for Traefik"`
-	Kyverno             GenericService     `json:"kyverno" yaml:"kyverno" jsonschema:"required,title=Kyverno Service,description=Configuration for Kyverno"`
-	KyvernoPolicies     GenericService     `json:"kyvernoPolicies" yaml:"kyvernoPolicies" jsonschema:"required,title=KyvernoPolicies Service,description=Configuration for KyvernoPolicies"`
-	KyvernoPolicyReport GenericService     `json:"kyvernoPolicyReport" yaml:"kyvernoPolicyReport" jsonschema:"required,title=KyvernoPolicyReport Service,description=Configuration for KyvernoPolicyReport"`
-	Loki                PersistentService  `json:"loki" yaml:"loki" jsonschema:"required,title=Loki Service,description=Configuration for Loki"`
-	HomerDashboard      GenericService     `json:"homerDashboard" yaml:"homerDashboard" jsonschema:"required,title=HomerDashboard Service,description=Configuration for HomerDashboard"`
-	Oauth2Proxy         GenericService     `json:"oauth2Proxy" yaml:"oauth2Proxy" jsonschema:"required,title=oauth2Proxy Service,description=Configuration for oaOauth2Proxy"`
-	MetricsServer       GenericService     `json:"metricsServer" yaml:"metricsServer" jsonschema:"required,title=MetricsServer Service,description=Configuration for MetricsServer"`
-	MetalLb             GenericService     `json:"metalLb" yaml:"metalLb" jsonschema:"required,title=metalLb Service,description=Configuration for metalLb"`
-	Longhorn            GenericService     `json:"longhorn" yaml:"longhorn" jsonschema:"required,title=Longhorn Service,description=Configuration for Longhorn"`
 }

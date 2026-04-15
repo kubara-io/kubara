@@ -1,0 +1,22 @@
+clusterSecretStores: {}
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+external-secrets:
+  certController:
+    imagePullSecrets:
+      - name: image-pull-secret
+  webhook:
+    imagePullSecrets:
+      - name: image-pull-secret
+  imagePullSecrets:
+    - name: image-pull-secret
+  serviceMonitor:
+    {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+    enabled: true
+    {{- end }}
+    additionalLabels:
+      monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+  bitwarden-sdk-server:
+    enabled: false

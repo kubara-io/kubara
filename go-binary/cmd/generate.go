@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
+	"kubara/catalog"
 	"kubara/templates"
 	"kubara/utils"
 	"os"
@@ -24,6 +25,8 @@ type GenerateOptions struct {
 	DryRun             bool
 	CWD                string
 	ConfigFilePath     string
+	CatalogPath        string
+	CatalogOverwrite   bool
 	ManagedCatalogPath string
 	OverlayValuesPath  string
 	EnvPath            string
@@ -54,7 +57,7 @@ func NewGenerateCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "generates files from embedded templates and the config file; by default for both Helm and Terraform",
-		UsageText:   "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--dry-run]",
+		UsageText:   "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]",
 		Description: "generate reads config values and templates the embedded Helm and Terraform files.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -87,6 +90,10 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 	if err != nil {
 		return nil, fmt.Errorf("failed to get overlay values path: %w", err)
 	}
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
+	}
 	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get full envPath: %w", err)
@@ -97,6 +104,8 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 		DryRun:             flags.DryRun,
 		CWD:                cwd,
 		ConfigFilePath:     configFilePath,
+		CatalogPath:        catalogOptions.CatalogPath,
+		CatalogOverwrite:   catalogOptions.Overwrite,
 		ManagedCatalogPath: managedCatalogPath,
 		OverlayValuesPath:  overlayValuesPath,
 		EnvPath:            envPath,
@@ -256,7 +265,10 @@ func (o *GenerateOptions) writeTemplateResults(results []templates.TemplateResul
 
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) {
-	cm := config.NewConfigManager(o.ConfigFilePath)
+	cm := config.NewConfigManagerWithCatalog(o.ConfigFilePath, catalog.LoadOptions{
+		CatalogPath: o.CatalogPath,
+		Overwrite:   o.CatalogOverwrite,
+	})
 	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
 	}

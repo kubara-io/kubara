@@ -1,0 +1,12 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: metallb
+  annotations:
+    kubara.io/category: networking
+spec:
+  chartPath: metallb
+  status: disabled
+  clusterTypes:
+    - controlplane

@@ -39,39 +39,42 @@ clusters:
             url: https://git.example.com/platform/repo.git
             targetRevision: main
     services:
-      argocd:
+      argo-cd:
         status: enabled
-      certManager:
+      cert-manager:
         status: enabled
-        clusterIssuer:
-          name: letsencrypt-staging
-          email: platform@example.com
-          server: https://acme-staging-v02.api.letsencrypt.org/directory
-      externalDns:
+        config:
+          clusterIssuer:
+            name: letsencrypt-staging
+            email: platform@example.com
+            server: https://acme-staging-v02.api.letsencrypt.org/directory
+      external-dns:
         status: enabled
-      externalSecrets:
+      external-secrets:
         status: enabled
-      kubePrometheusStack:
+      kube-prometheus-stack:
         status: enabled
-        storageClassName: standard-rwo # optional
+        config:
+            storageClassName: standard-rwo # optional
       traefik:
         status: enabled
       kyverno:
         status: enabled
-      kyvernoPolicies:
+      kyverno-policies:
         status: enabled
-      kyvernoPolicyReport:
+      kyverno-policy-reporter:
         status: enabled
       loki:
         status: enabled
-        storageClassName: standard-rwo # optional
-      homerDashboard:
+        config:
+            storageClassName: standard-rwo # optional
+      homer-dashboard:
         status: enabled
-      oauth2Proxy:
+      oauth2-proxy:
         status: enabled
-      metricsServer:
+      metrics-server:
         status: disabled
-      metalLb:
+      metallb:
         status: disabled
       longhorn:
         status: disabled

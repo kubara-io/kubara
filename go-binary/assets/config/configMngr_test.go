@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"kubara/assets/service"
+
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -16,6 +18,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
+		Version: ConfigVersionV1Alpha1,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -47,29 +50,22 @@ func newValidTestConfig() *Config {
 						},
 					},
 				},
-				Services: Services{
-					CertManager: CertManagerService{
-						ServiceStatus: ServiceStatus{Status: StatusEnabled},
-						ClusterIssuer: ClusterIssuer{
-							Name:   "letsencrypt-prod",
-							Email:  "cert@example.com",
-							Server: "https://acme-v02.api.letsencrypt.org/directory",
-						},
-					},
-					Argocd:              GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					ExternalDns:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					ExternalSecrets:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KubePrometheusStack: PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
-					Traefik:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Kyverno:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KyvernoPolicies:     GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					KyvernoPolicyReport: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Loki:                PersistentService{GenericService: GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}}},
-					HomerDashboard:      GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Oauth2Proxy:         GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					MetricsServer:       GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					MetalLb:             GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
-					Longhorn:            GenericService{ServiceStatus: ServiceStatus{Status: StatusEnabled}},
+				Services: service.Services{
+					"argo-cd":                 {Status: service.StatusEnabled},
+					"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
+					"external-dns":            {Status: service.StatusEnabled},
+					"external-secrets":        {Status: service.StatusEnabled},
+					"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+					"traefik":                 {Status: service.StatusEnabled},
+					"kyverno":                 {Status: service.StatusEnabled},
+					"kyverno-policies":        {Status: service.StatusEnabled},
+					"kyverno-policy-reporter": {Status: service.StatusEnabled},
+					"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+					"homer-dashboard":         {Status: service.StatusEnabled},
+					"oauth2-proxy":            {Status: service.StatusEnabled},
+					"metrics-server":          {Status: service.StatusEnabled},
+					"metallb":                 {Status: service.StatusEnabled},
+					"longhorn":                {Status: service.StatusEnabled},
 				},
 			},
 		},
@@ -312,7 +308,7 @@ func TestManager_SaveToFile(t *testing.T) {
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
 				ArgoCD:   ArgoCD{},
-				Services: Services{},
+				Services: service.Services{},
 			},
 		},
 	}
@@ -487,6 +483,24 @@ func TestGenerateSchema(t *testing.T) {
 	}
 }
 
+func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
+	schemaDoc, err := GenerateSchema()
+	require.NoError(t, err)
+
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	require.True(t, ok)
+
+	servicesDef, ok := defs["Services"].(map[string]any)
+	require.True(t, ok)
+
+	properties, ok := servicesDef["properties"].(map[string]any)
+	require.True(t, ok)
+
+	assert.Contains(t, properties, "cert-manager")
+	assert.Contains(t, properties, "argo-cd")
+	assert.Contains(t, properties, "metallb")
+}
+
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
 	// A minimal YAML that only provides required fields and omits all fields
 	// that have defaults. After Load() applies defaults, Validate() must pass.
@@ -502,22 +516,23 @@ clusters:
           managed:
             url: "https://github.com/managed/repo.git"
     services:
-      argocd: {}
-      certManager:
-        clusterIssuer:
-          email: cert@example.com
-      externalDns: {}
-      externalSecrets: {}
-      kubePrometheusStack: {}
+      argo-cd: {}
+      cert-manager:
+        config:
+          clusterIssuer:
+            email: cert@example.com
+      external-dns: {}
+      external-secrets: {}
+      kube-prometheus-stack: {}
       traefik: {}
       kyverno: {}
-      kyvernoPolicies: {}
-      kyvernoPolicyReport: {}
+      kyverno-policies: {}
+      kyverno-policy-reporter: {}
       loki: {}
-      homerDashboard: {}
-      oauth2Proxy: {}
-      metricsServer: {}
-      metalLb: {}
+      homer-dashboard: {}
+      oauth2-proxy: {}
+      metrics-server: {}
+      metallb: {}
       longhorn: {}
 `
 
