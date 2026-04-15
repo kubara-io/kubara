@@ -49,18 +49,12 @@ func (cm *Manager) Load() error {
 		return fmt.Errorf("failed to parse yaml config: %w", err)
 	}
 
-	decodeHook := mapstructure.DecodeHookFuncType(func(from reflect.Type, to reflect.Type, source any) (any, error) {
-		if to != reflect.TypeFor[ServiceInstance]() {
-			return source, nil
-		}
-		return decodeServiceInstance(source)
-	})
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
 		Result:           cm.config,
 		Squash:           true,
-		DecodeHook:       decodeHook,
+		DecodeHook:       mapstructure.ComposeDecodeHookFunc(decodeServiceHook()),
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
 	if err != nil {
@@ -111,7 +105,7 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
-		return nil, fmt.Errorf("load service catalog: %w", err)
+		return nil, fmt.Errorf("failed loading catalog: %w", err)
 	}
 	if err := composeServiceSchema(schemaDoc, cat); err != nil {
 		return nil, err
@@ -199,7 +193,7 @@ func (cm *Manager) SaveToFile() error {
 func composeServiceSchema(schemaDoc map[string]any, cat catalog.Catalog) error {
 	defs, ok := schemaDoc["$defs"].(map[string]any)
 	if !ok {
-		return fmt.Errorf("schema missing $defs")
+		return fmt.Errorf("catalog schema is missing $defs")
 	}
 
 	servicesSchema, err := buildServicesSchema(cat)
@@ -223,7 +217,7 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 		definition := cat.Services[serviceName]
 		instanceSchema, err := buildServiceInstanceSchema(definition)
 		if err != nil {
-			return nil, fmt.Errorf("build schema for service %q: %w", serviceName, err)
+			return nil, fmt.Errorf("failed to build schema for service %q: %w", serviceName, err)
 		}
 		serviceProperties[serviceName] = instanceSchema
 		required = append(required, serviceName)
@@ -240,14 +234,12 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 }
 
 func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[string]any, error) {
-	defaultStatus := string(toConfigStatus(definition.Spec.EffectiveDefaultStatus()))
 	properties := map[string]any{
 		"status": map[string]any{
 			"type":        "string",
 			"title":       "Service Status",
 			"description": "The desired status of the service.",
 			"enum":        []any{string(StatusEnabled), string(StatusDisabled)},
-			"default":     defaultStatus,
 		},
 	}
 

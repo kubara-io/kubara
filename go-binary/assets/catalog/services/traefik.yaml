@@ -3,8 +3,10 @@ apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
   name: traefik
+  annotations:
+    kubara.io/category: networking
 spec:
   chartPath: traefik
-  default: enabled
+  status: enabled
   clusterTypes:
     - controlplane

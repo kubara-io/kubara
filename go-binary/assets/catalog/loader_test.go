@@ -29,10 +29,10 @@ metadata:
   name: argo-cd
 spec:
   chartPath: argo-cd
-  default: enabled
+  status: enabled
 `), 0644))
 
-	_, err := Load(LoadOptions{DistributionPath: tempDir})
+	_, err := Load(LoadOptions{CatalogPath: tempDir})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "already exists")
 }
@@ -48,10 +48,10 @@ metadata:
   name: argo-cd
 spec:
   chartPath: custom-argo-cd
-  default: enabled
+  status: enabled
 `), 0644))
 
-	cat, err := Load(LoadOptions{DistributionPath: tempDir, Overwrite: true})
+	cat, err := Load(LoadOptions{CatalogPath: tempDir, Overwrite: true})
 	require.NoError(t, err)
 	assert.Equal(t, "custom-argo-cd", cat.Services["argo-cd"].Spec.ChartPath)
 }
@@ -67,10 +67,10 @@ metadata:
   name: custom-service
 spec:
   chartPath: custom-service
-  default: enabled
+  status: enabled
 `), 0644))
 
-	_, err := Load(LoadOptions{DistributionPath: tempDir})
+	_, err := Load(LoadOptions{CatalogPath: tempDir})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), `apiVersion must be "kubara.io/v1alpha1"`)
 }

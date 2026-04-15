@@ -142,7 +142,7 @@ metadata:
   name: argo-cd
 spec:
   chartPath: custom-argo-cd
-  default: enabled
+  status: enabled
 `), 0644))
 			},
 			wantErr:     true,
@@ -164,7 +164,7 @@ metadata:
   name: argo-cd
 spec:
   chartPath: custom-argo-cd
-  default: enabled
+  status: enabled
 `), 0644))
 			},
 			wantErr: false,

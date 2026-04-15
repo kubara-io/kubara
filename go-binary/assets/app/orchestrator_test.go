@@ -178,7 +178,7 @@ func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFail
 	}
 
 	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{
-		DistributionPath: filepath.Join(t.TempDir(), "does-not-exist"),
+		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
 	})
 	require.Error(t, err)
 	require.Empty(t, cfg.Clusters)

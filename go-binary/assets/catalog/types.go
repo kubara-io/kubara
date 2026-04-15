@@ -12,30 +12,46 @@ import (
 type Status string
 
 const (
-	StatusEnabled  Status = "enabled"
+	// StatusEnabled marks a service as enabled.
+	StatusEnabled Status = "enabled"
+	// StatusDisabled marks a service as disabled.
 	StatusDisabled Status = "disabled"
 )
 
+// ServiceDefinitionAPIVersion is the supported ServiceDefinition apiVersion.
 const ServiceDefinitionAPIVersion = "kubara.io/v1alpha1"
 
+// ServiceDefinition describes a catalog service entry.
 type ServiceDefinition struct {
-	APIVersion string      `yaml:"apiVersion"`
-	Kind       string      `yaml:"kind"`
-	Metadata   Metadata    `yaml:"metadata"`
-	Spec       ServiceSpec `yaml:"spec"`
+	// APIVersion declares the schema version.
+	APIVersion string `yaml:"apiVersion"`
+	// Kind is expected to be ServiceDefinition.
+	Kind string `yaml:"kind"`
+	// Metadata contains identity and optional annotations.
+	Metadata Metadata `yaml:"metadata"`
+	// Spec contains runtime-relevant service settings.
+	Spec ServiceSpec `yaml:"spec"`
 }
 
+// Metadata contains metadata fields for a service definition.
 type Metadata struct {
-	Name        string            `yaml:"name"`
+	// Name is the canonical service name.
+	Name string `yaml:"name"`
+	// Annotations carries optional metadata.
 	Annotations map[string]string `yaml:"annotations,omitempty"`
 }
 
+// ServiceSpec contains the desired behavior and schema of a service.
 type ServiceSpec struct {
-	ChartPath    string                           `yaml:"chartPath"`
-	AppName      string                           `yaml:"appName,omitempty"`
-	Default      Status                           `yaml:"default,omitempty"`
-	Status       Status                           `yaml:"status,omitempty"` // compatibility with early proposal drafts
-	ClusterTypes []string                         `yaml:"clusterTypes,omitempty"`
+	// ChartPath points to the Helm chart path under managed catalog.
+	ChartPath string `yaml:"chartPath"`
+	// AppName optionally overrides the default Argo CD application name.
+	AppName string `yaml:"appName,omitempty"`
+	// Status defines the default status for the service.
+	Status Status `yaml:"status"`
+	// ClusterTypes limits the service to specific cluster types.
+	ClusterTypes []string `yaml:"clusterTypes,omitempty"`
+	// ConfigSchema describes config values using OpenAPI v3 schema props.
 	ConfigSchema *apiextensionsv1.JSONSchemaProps `yaml:"configSchema,omitempty"`
 }
 
@@ -43,8 +59,7 @@ func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 	type serviceSpecAlias struct {
 		ChartPath    string         `yaml:"chartPath"`
 		AppName      string         `yaml:"appName,omitempty"`
-		Default      Status         `yaml:"default,omitempty"`
-		Status       Status         `yaml:"status,omitempty"`
+		Status       Status         `yaml:"status"`
 		ClusterTypes []string       `yaml:"clusterTypes,omitempty"`
 		ConfigSchema map[string]any `yaml:"configSchema,omitempty"`
 	}
@@ -56,7 +71,6 @@ func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 
 	s.ChartPath = raw.ChartPath
 	s.AppName = raw.AppName
-	s.Default = raw.Default
 	s.Status = raw.Status
 	s.ClusterTypes = raw.ClusterTypes
 
@@ -79,18 +93,8 @@ func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 	return nil
 }
 
-func (s ServiceSpec) EffectiveDefaultStatus() Status {
-	switch {
-	case s.Default == StatusEnabled || s.Default == StatusDisabled:
-		return s.Default
-	case s.Status == StatusEnabled || s.Status == StatusDisabled:
-		return s.Status
-	default:
-		return StatusDisabled
-	}
-}
-
 type Catalog struct {
+	// Services maps canonical service names to definitions.
 	Services map[string]ServiceDefinition
 }
 
@@ -118,6 +122,9 @@ func (d ServiceDefinition) Validate() error {
 	}
 	if strings.TrimSpace(d.Spec.ChartPath) == "" {
 		return fmt.Errorf("missing spec.chartPath")
+	}
+	if d.Spec.Status != StatusEnabled && d.Spec.Status != StatusDisabled {
+		return fmt.Errorf(`spec.status must be either %q or %q`, StatusEnabled, StatusDisabled)
 	}
 	return nil
 }

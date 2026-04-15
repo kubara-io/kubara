@@ -19,8 +19,8 @@ const servicesDirectory = "services"
 var embeddedServicesFS embed.FS
 
 type LoadOptions struct {
-	DistributionPath string
-	Overwrite        bool
+	CatalogPath string
+	Overwrite   bool
 }
 
 func LoadBuiltIn() (Catalog, error) {
@@ -33,11 +33,11 @@ func Load(options LoadOptions) (Catalog, error) {
 		return Catalog{}, err
 	}
 
-	if strings.TrimSpace(options.DistributionPath) == "" {
+	if strings.TrimSpace(options.CatalogPath) == "" {
 		return builtIn, nil
 	}
 
-	externalRoot, err := resolveServicesPath(options.DistributionPath)
+	externalRoot, err := resolveServicesPath(options.CatalogPath)
 	if err != nil {
 		return Catalog{}, err
 	}
@@ -58,8 +58,8 @@ func Load(options LoadOptions) (Catalog, error) {
 	return merged, nil
 }
 
-func resolveServicesPath(distributionPath string) (string, error) {
-	cleaned := filepath.Clean(distributionPath)
+func resolveServicesPath(catalogPath string) (string, error) {
+	cleaned := filepath.Clean(catalogPath)
 
 	rootInfo, err := os.Stat(cleaned)
 	if err != nil {
