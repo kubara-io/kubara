@@ -15,7 +15,7 @@ import (
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/invopop/jsonschema"
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
-	goYaml "go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v3"
 )
 
 // Manager handles reading and writing configuration
@@ -45,7 +45,7 @@ func (cm *Manager) Load() error {
 	}
 
 	var raw map[string]any
-	if err := goYaml.Unmarshal(data, &raw); err != nil {
+	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return fmt.Errorf("failed to parse yaml config: %w", err)
 	}
 
@@ -181,7 +181,7 @@ func (cm *Manager) SaveToFile() error {
 
 	// Marshal to YAML
 	var b bytes.Buffer
-	encoder := goYaml.NewEncoder(&b)
+	encoder := yaml.NewEncoder(&b)
 	encoder.SetIndent(2)
 	err := encoder.Encode(cm.config)
 	if err != nil {

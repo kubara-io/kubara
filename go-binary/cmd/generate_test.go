@@ -73,7 +73,7 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["managed-catalog"])
 	assert.True(t, flagNames["overlay-values"])
 	assert.True(t, flagNames["catalog"])
-	assert.True(t, flagNames["force"])
+	assert.True(t, flagNames["overwrite"])
 }
 
 func TestGenerateCmd(t *testing.T) {
