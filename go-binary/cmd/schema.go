@@ -34,7 +34,7 @@ func NewSchemaCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:      "schema",
 		Usage:     "Generate JSON schema file for config structure",
-		UsageText: "schema [--output] [--catalog <path> [--force|--catalog-overwrite]]",
+		UsageText: "schema [--output] [--catalog <path> [--overwrite]]",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
