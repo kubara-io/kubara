@@ -1,3 +1,4 @@
+---
 apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
