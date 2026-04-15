@@ -4,7 +4,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/assets/catalog"
+	"kubara/catalog"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
 

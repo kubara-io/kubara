@@ -4,8 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"kubara/assets/catalog"
 	"kubara/assets/config"
+	"kubara/catalog"
 	"kubara/utils"
 	"os"
 	"path/filepath"
@@ -15,22 +15,17 @@ import (
 )
 
 type SchemaOptions struct {
-	outputFilePath  string
-	catalogPath     string
-	catalogOverride bool
+	outputFilePath string
+	catalogOptions catalog.LoadOptions
 }
 
 type SchemaFlags struct {
-	OutputFlag      string
-	CatalogPath     string
-	CatalogOverride bool
+	OutputFlag string
 }
 
 func NewSchemaFlags() *SchemaFlags {
 	return &SchemaFlags{
-		OutputFlag:      "config.schema.json",
-		CatalogPath:     "",
-		CatalogOverride: false,
+		OutputFlag: "config.schema.json",
 	}
 }
 
@@ -39,7 +34,7 @@ func NewSchemaCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:      "schema",
 		Usage:     "Generate JSON schema file for config structure",
-		UsageText: "schema [--output] [--catalog <path> [--force|--overwrite]]",
+		UsageText: "schema [--output] [--catalog <path> [--force|--catalog-overwrite]]",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
@@ -63,18 +58,15 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 	if err != nil {
 		return nil, err
 	}
-	catalogPath := ""
-	if flags.CatalogPath != "" {
-		catalogPath, err = utils.GetFullPath(flags.CatalogPath, cwd)
-		if err != nil {
-			return nil, fmt.Errorf("failed to get catalog path: %w", err)
-		}
+
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
 	}
 
 	o := &SchemaOptions{
-		outputFilePath:  outputFilePath,
-		catalogPath:     catalogPath,
-		catalogOverride: flags.CatalogOverride,
+		outputFilePath: outputFilePath,
+		catalogOptions: catalogOptions,
 	}
 	return o, nil
 }
@@ -88,19 +80,6 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Output file path for the JSON schema",
 			Destination: &flags.OutputFlag,
 		},
-		&cli.StringFlag{
-			Name:        "catalog",
-			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog directory.",
-			Destination: &flags.CatalogPath,
-		},
-		&cli.BoolFlag{
-			Name:        "overwrite",
-			Aliases:     []string{"force"},
-			Value:       flags.CatalogOverride,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-			Destination: &flags.CatalogOverride,
-		},
 	}
 
 	cmd.Flags = schemaFlags
@@ -108,10 +87,7 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 
 func (o *SchemaOptions) Run() error {
 	// Generate schema
-	schemaDoc, err := config.GenerateSchemaWithCatalog(catalog.LoadOptions{
-		CatalogPath: o.catalogPath,
-		Overwrite:   o.catalogOverride,
-	})
+	schemaDoc, err := config.GenerateSchemaWithCatalog(o.catalogOptions)
 	if err != nil {
 		return fmt.Errorf("failed to generate schema: %w", err)
 	}

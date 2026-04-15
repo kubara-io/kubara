@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"kubara/assets/catalog"
+	"kubara/catalog"
 
 	"github.com/stretchr/testify/assert"
 )

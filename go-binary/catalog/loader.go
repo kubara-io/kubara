@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"embed"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -14,9 +13,7 @@ import (
 )
 
 const servicesDirectory = "services"
-
-//go:embed services/*.yaml
-var embeddedServicesFS embed.FS
+const builtInServicesDirectory = builtInRootDirectory + "/" + servicesDirectory
 
 type LoadOptions struct {
 	CatalogPath string
@@ -24,7 +21,7 @@ type LoadOptions struct {
 }
 
 func LoadBuiltIn() (Catalog, error) {
-	return loadFromFS(embeddedServicesFS, servicesDirectory)
+	return loadFromFS(BuiltInFS(), builtInServicesDirectory)
 }
 
 func Load(options LoadOptions) (Catalog, error) {
@@ -123,6 +120,8 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
 		}
 
+		// Canonicalize legacy aliases (for example camelCase names) to the
+		// canonical kebab-case service name.
 		canonicalName := CanonicalServiceName(definition.Metadata.Name)
 		if canonicalName != definition.Metadata.Name {
 			definition.Metadata.Name = canonicalName

@@ -16,6 +16,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
+		Version: ConfigVersionV1Alpha1,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -523,6 +524,7 @@ clusters:
 
 	cm := NewConfigManager(configPath)
 	require.NoError(t, cm.Load())
+	assert.Equal(t, ConfigVersionV1Alpha1, cm.GetConfig().Version)
 
 	services := cm.GetConfig().Clusters[0].Services
 
@@ -542,6 +544,12 @@ clusters:
 
 	_, hasLegacyKey := services["certManager"]
 	assert.False(t, hasLegacyKey, "legacy service key should be normalized to kebab-case")
+
+	rewrittenRaw, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	assert.Contains(t, string(rewrittenRaw), "version: v1alpha1")
+	assert.Contains(t, string(rewrittenRaw), "cert-manager:")
+	assert.NotContains(t, string(rewrittenRaw), "certManager:")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {

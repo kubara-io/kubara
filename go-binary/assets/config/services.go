@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"sort"
 
-	"kubara/assets/catalog"
+	"kubara/catalog"
 
 	"github.com/go-viper/mapstructure/v2"
 	"go.yaml.in/yaml/v3"
@@ -38,33 +38,33 @@ func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error
 
 	for i := range cfg.Clusters {
 		defaults := serviceDefaultsFromCatalog(cat, cfg.Clusters[i].Type)
-		normalized := normalizeServiceKeys(cfg.Clusters[i].Services)
-		if normalized == nil {
-			normalized = Services{}
+		currentServices := cfg.Clusters[i].Services
+		if currentServices == nil {
+			currentServices = Services{}
 		}
 
 		for serviceName, defaultInstance := range defaults {
-			current, exists := normalized[serviceName]
+			current, exists := currentServices[serviceName]
 			if !exists {
-				normalized[serviceName] = cloneServiceInstance(defaultInstance)
+				currentServices[serviceName] = cloneServiceInstance(defaultInstance)
 				continue
 			}
 			if current.Status == "" {
 				current.Status = defaultInstance.Status
 			}
 			current.Config = mergeConfigDefaults(defaultInstance.Config, current.Config)
-			normalized[serviceName] = current
+			currentServices[serviceName] = current
 		}
 
 		// Unknown services should still default status to disabled if not explicitly set.
-		for name, instance := range normalized {
+		for name, instance := range currentServices {
 			if instance.Status == "" {
 				instance.Status = StatusDisabled
-				normalized[name] = instance
+				currentServices[name] = instance
 			}
 		}
 
-		cfg.Clusters[i].Services = normalized
+		cfg.Clusters[i].Services = currentServices
 	}
 
 	return nil

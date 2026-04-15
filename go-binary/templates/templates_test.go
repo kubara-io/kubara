@@ -1,18 +1,19 @@
 package templates
 
 import (
-	"embed"
 	"io/fs"
 	"strings"
 	"testing"
+	"testing/fstest"
+
+	"kubara/catalog"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"sigs.k8s.io/yaml"
 )
 
-//go:embed all:embedded
-var testTemplatesFS embed.FS
+var testTemplatesFS = catalog.BuiltInFS()
 
 // helper function to setup test filesystem with correct root path
 func setupTestFS(t *testing.T) func() {
@@ -46,7 +47,7 @@ func fullServiceContext() map[string]interface{} {
 }
 
 // getEmbeddedTemplatesListTest temporarily sets templatesFSNew for testing
-func getEmbeddedTemplatesListTest(tplType TemplateType, testFS embed.FS) ([]string, error) {
+func getEmbeddedTemplatesListTest(tplType TemplateType, testFS fs.FS) ([]string, error) {
 	originalFS := templatesFSNew
 	templatesFSNew = testFS
 	defer func() { templatesFSNew = originalFS }()
@@ -94,9 +95,9 @@ func TestMakeWalkDirFunc(t *testing.T) {
 	testFS := testTemplatesFS
 
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Verify that files are collected (not directories)
@@ -108,7 +109,7 @@ func TestMakeWalkDirFunc(t *testing.T) {
 
 	// Test error propagation if WalkDir encounters an error
 	var errorFiles []string
-	errorWalkFunc := makeWalkDirFunc("embedded", &errorFiles)
+	errorWalkFunc := makeWalkDirFunc(tmplRoot, &errorFiles)
 	// Intentionally walk non-existent path to trigger error
 	err = fs.WalkDir(testFS, "nonexistent", errorWalkFunc)
 	assert.Error(t, err)
@@ -121,7 +122,7 @@ func TestMakeWalkDirFunc_RelPathError(t *testing.T) {
 	var files []string
 	walkFunc := makeWalkDirFunc("nonexistent-root", &files) // Invalid root
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	// Should still work but paths might be relative to nonexistent root
 	require.NoError(t, err)
 }
@@ -130,9 +131,9 @@ func TestMakeWalkDirFunc_DirectoryFiltering(t *testing.T) {
 	// Test that directories are properly filtered out
 	testFS := testTemplatesFS
 	var files []string
-	walkFunc := makeWalkDirFunc("embedded", &files)
+	walkFunc := makeWalkDirFunc(tmplRoot, &files)
 
-	err := fs.WalkDir(testFS, "embedded", walkFunc)
+	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
 	require.NoError(t, err)
 
 	// Ensure no directory entries (ending with /) are included
@@ -221,7 +222,7 @@ func TestGetEmbeddedTemplatesList(t *testing.T) {
 
 	// Additional test: Error if root does not exist (simulate by overriding)
 	t.Run("Error on non-existent root for All", func(t *testing.T) {
-		invalidFS := embed.FS{} // Empty FS
+		invalidFS := fstest.MapFS{} // Empty FS
 		list, err := getEmbeddedTemplatesListTest(All, invalidFS)
 		assert.Error(t, err)
 		assert.Empty(t, list)

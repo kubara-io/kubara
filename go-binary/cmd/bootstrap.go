@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/assets/catalog"
 	"kubara/templates"
 	"os"
 	"os/signal"
@@ -25,8 +24,6 @@ type BootstrapFlags struct {
 	ClusterSecretStorePath string
 	ManagedCatalogPath     string
 	OverlayValuesPath      string
-	CatalogPath            string
-	CatalogOverwrite       bool
 	EnvFile                string
 	EnvPrefixFlag          string
 	DryRun                 bool
@@ -35,13 +32,11 @@ type BootstrapFlags struct {
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		WithES:           true,
-		WithProm:         true,
-		CatalogPath:      "",
-		CatalogOverwrite: false,
-		EnvFile:          ".env",
-		EnvPrefixFlag:    "KUBARA_",
-		Timeout:          2 * time.Minute,
+		WithES:        true,
+		WithProm:      true,
+		EnvFile:       ".env",
+		EnvPrefixFlag: "KUBARA_",
+		Timeout:       2 * time.Minute,
 	}
 }
 
@@ -108,12 +103,9 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	catalogPath := ""
-	if flags.CatalogPath != "" {
-		catalogPath, err = utils.GetFullPath(flags.CatalogPath, cwd)
-		if err != nil {
-			return nil, fmt.Errorf("getting catalog path failed: %w", err)
-		}
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	if err != nil {
+		return nil, err
 	}
 
 	// Load environment
@@ -133,10 +125,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("getting config file path: %w", err)
 	}
 
-	cm := config.NewConfigManagerWithCatalog(configFilePath, catalog.LoadOptions{
-		CatalogPath: catalogPath,
-		Overwrite:   flags.CatalogOverwrite,
-	})
+	cm := config.NewConfigManagerWithCatalog(configFilePath, catalogOptions)
 	if err := cm.Load(); err != nil {
 		return nil, fmt.Errorf("loading config from %s: %w", configFilePath, err)
 	}
@@ -226,19 +215,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Value:       templates.DefaultOverlayValuesPath,
 			Usage:       "Path to overlay values directory",
 			Destination: &flags.OverlayValuesPath,
-		},
-		&cli.StringFlag{
-			Name:        "catalog",
-			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog directory.",
-			Destination: &flags.CatalogPath,
-		},
-		&cli.BoolFlag{
-			Name:        "overwrite",
-			Aliases:     []string{"force"},
-			Value:       flags.CatalogOverwrite,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-			Destination: &flags.CatalogOverwrite,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",
