@@ -96,7 +96,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 	}
 	catalogPath := ""
 	if flags.CatalogPath != "" {
-		catalogPath, err = utils.GetFullPath(cmd.String("catalog"), cwd)
+		catalogPath, err = utils.GetFullPath(flags.CatalogPath, cwd)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get catalog path: %w", err)
 		}
@@ -166,8 +166,8 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
-			Name:        "force",
-			Aliases:     []string{"overwrite"},
+			Name:        "overwrite",
+			Aliases:     []string{"force"},
 			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
 			Value:       flags.CatalogOverwrite,
 			Destination: &flags.CatalogOverwrite,

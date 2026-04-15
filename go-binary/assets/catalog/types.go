@@ -5,17 +5,18 @@ import (
 	"fmt"
 	"strings"
 
-	goYaml "go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
 type Status string
 
 const (
-	ServiceDefinitionAPIVersion        = "kubara.io/v1alpha1"
-	StatusEnabled               Status = "enabled"
-	StatusDisabled              Status = "disabled"
+	StatusEnabled  Status = "enabled"
+	StatusDisabled Status = "disabled"
 )
+
+const ServiceDefinitionAPIVersion = "kubara.io/v1alpha1"
 
 type ServiceDefinition struct {
 	APIVersion string      `yaml:"apiVersion"`
@@ -38,7 +39,7 @@ type ServiceSpec struct {
 	ConfigSchema *apiextensionsv1.JSONSchemaProps `yaml:"configSchema,omitempty"`
 }
 
-func (s *ServiceSpec) UnmarshalYAML(value *goYaml.Node) error {
+func (s *ServiceSpec) UnmarshalYAML(value *yaml.Node) error {
 	type serviceSpecAlias struct {
 		ChartPath    string         `yaml:"chartPath"`
 		AppName      string         `yaml:"appName,omitempty"`

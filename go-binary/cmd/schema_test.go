@@ -41,7 +41,7 @@ func TestNewSchemaCmd(t *testing.T) {
 
 	assert.True(t, flagNames["output"])
 	assert.True(t, flagNames["catalog"])
-	assert.True(t, flagNames["force"])
+	assert.True(t, flagNames["overwrite"])
 }
 
 func TestSchemaCmd(t *testing.T) {
