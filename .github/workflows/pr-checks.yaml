@@ -365,7 +365,7 @@ jobs:
           set -uo pipefail
           export PATH="$HOME/.local/bin:$PATH"
           KUBE_VERSION=$(yq -r '.clusters[] | select(.name == "kubara") | .terraform.kubernetesVersion' config.yaml)
-          KUBE_PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name == "kubara") | .services.kubePrometheusStack.status // "disabled"' config.yaml)
+          KUBE_PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name == "kubara") | (.services."kube-prometheus-stack".status // .services.kubePrometheusStack.status // "disabled")' config.yaml)
           HELM_TEMPLATE_API_ARGS=()
           if [[ "$KUBE_PROMETHEUS_STATUS" == "enabled" ]]; then
             HELM_TEMPLATE_API_ARGS+=(--api-versions "monitoring.coreos.com/v1")
