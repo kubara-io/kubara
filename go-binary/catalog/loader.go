@@ -116,11 +116,14 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
 		}
 
-		// Canonicalize legacy aliases (for example camelCase names) to the
-		// canonical kebab-case service name.
+		// Reject non-canonical names. ServiceDefinitions are a new format
+		// and must use canonical kebab-case names from the start.
 		canonicalName := CanonicalServiceName(definition.Metadata.Name)
 		if canonicalName != definition.Metadata.Name {
-			definition.Metadata.Name = canonicalName
+			return Catalog{}, fmt.Errorf(
+				"service definition %q uses non-canonical name %q, must be %q",
+				path, definition.Metadata.Name, canonicalName,
+			)
 		}
 
 		if _, exists := catalog.Services[definition.Metadata.Name]; exists {
