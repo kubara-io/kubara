@@ -56,7 +56,7 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
-	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "generate reads config values and templates the embedded Helm and Terraform files.", command.Description)
 
 	// Check that flags are added
@@ -466,7 +466,7 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 				Value: "",
 			},
 			&cli.BoolFlag{
-				Name:  "overwrite",
+				Name:  "catalog-overwrite",
 				Usage: "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
 				Value: false,
 			},
