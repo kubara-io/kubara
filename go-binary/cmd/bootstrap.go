@@ -234,8 +234,8 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
-			Name:        "force",
-			Aliases:     []string{"overwrite"},
+			Name:        "overwrite",
+			Aliases:     []string{"force"},
 			Value:       flags.CatalogOverwrite,
 			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
 			Destination: &flags.CatalogOverwrite,

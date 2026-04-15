@@ -7,7 +7,7 @@ import (
 
 	"kubara/assets/catalog"
 
-	goYaml "go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
@@ -214,7 +214,7 @@ func cloneMap(in map[string]any) map[string]any {
 	return out
 }
 
-func (s *ServiceInstance) UnmarshalYAML(value *goYaml.Node) error {
+func (s *ServiceInstance) UnmarshalYAML(value *yaml.Node) error {
 	var raw map[string]any
 	if err := value.Decode(&raw); err != nil {
 		return err

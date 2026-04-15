@@ -10,7 +10,7 @@ import (
 	"sort"
 	"strings"
 
-	goYaml "go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v3"
 )
 
 const servicesDirectory = "services"
@@ -37,7 +37,7 @@ func Load(options LoadOptions) (Catalog, error) {
 		return builtIn, nil
 	}
 
-	externalRoot, err := resolveExternalServicesPath(options.DistributionPath)
+	externalRoot, err := resolveServicesPath(options.DistributionPath)
 	if err != nil {
 		return Catalog{}, err
 	}
@@ -58,27 +58,30 @@ func Load(options LoadOptions) (Catalog, error) {
 	return merged, nil
 }
 
-func resolveExternalServicesPath(distributionPath string) (string, error) {
+func resolveServicesPath(distributionPath string) (string, error) {
 	cleaned := filepath.Clean(distributionPath)
+
+	rootInfo, err := os.Stat(cleaned)
+	if err != nil {
+		return "", fmt.Errorf("catalog directory %q does not exist: %w", cleaned, err)
+	}
+	if !rootInfo.IsDir() {
+		return "", fmt.Errorf("catalog path %q is not a directory", cleaned)
+	}
 
 	servicesDir := filepath.Join(cleaned, servicesDirectory)
 	servicesInfo, err := os.Stat(servicesDir)
 	if err == nil {
 		if !servicesInfo.IsDir() {
-			return "", fmt.Errorf("distribution services path %q is not a directory", servicesDir)
+			return "", fmt.Errorf("catalog services path %q is not a directory", servicesDir)
 		}
 		return servicesDir, nil
 	}
+	if errors.Is(err, os.ErrNotExist) {
+		return cleaned, nil
+	}
 	if !errors.Is(err, os.ErrNotExist) {
-		return "", fmt.Errorf("stat distribution services path %q: %w", servicesDir, err)
-	}
-
-	rootInfo, err := os.Stat(cleaned)
-	if err != nil {
-		return "", fmt.Errorf("stat distribution path %q: %w", cleaned, err)
-	}
-	if !rootInfo.IsDir() {
-		return "", fmt.Errorf("distribution path %q is not a directory", cleaned)
+		return "", fmt.Errorf("failed to stat catalog services path %q: %w", servicesDir, err)
 	}
 
 	return cleaned, nil
@@ -95,25 +98,26 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 		if d.IsDir() {
 			return nil
 		}
-		if !strings.HasSuffix(strings.ToLower(path), ".yaml") {
+		lowerPath := strings.ToLower(path)
+		if !strings.HasSuffix(lowerPath, ".yaml") && !strings.HasSuffix(lowerPath, ".yml") {
 			return nil
 		}
 		files = append(files, path)
 		return nil
 	}); err != nil {
-		return Catalog{}, fmt.Errorf("walk service definitions: %w", err)
+		return Catalog{}, fmt.Errorf("failed to walk service definitions: %w", err)
 	}
 
 	sort.Strings(files)
 	for _, path := range files {
 		content, err := fs.ReadFile(fsys, path)
 		if err != nil {
-			return Catalog{}, fmt.Errorf("read %q: %w", path, err)
+			return Catalog{}, fmt.Errorf("failed to read %q: %w", path, err)
 		}
 
 		var definition ServiceDefinition
-		if err := goYaml.Unmarshal(content, &definition); err != nil {
-			return Catalog{}, fmt.Errorf("unmarshal %q: %w", path, err)
+		if err := yaml.Unmarshal(content, &definition); err != nil {
+			return Catalog{}, fmt.Errorf("failed to unmarshal %q: %w", path, err)
 		}
 		if err := definition.Validate(); err != nil {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
