@@ -234,17 +234,5 @@ func decodeServiceInstance(source any) (ServiceInstance, error) {
 		out.Config = cfg
 	}
 
-	legacyInline := map[string]any{}
-	for key, val := range raw {
-		if key == "status" || key == "config" {
-			continue
-		}
-		legacyInline[key] = val
-	}
-	if len(legacyInline) > 0 {
-		// Explicit "config" key should win over legacy inline keys when both exist.
-		out.Config = mergeConfigDefaults(legacyInline, out.Config)
-	}
-
 	return out, nil
 }
