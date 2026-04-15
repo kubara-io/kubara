@@ -1,3 +1,4 @@
+---
 apiVersion: v2
 name: metrics-server
 description: Umbrella Chart for metrics-server

@@ -1,5 +1,5 @@
-namespace:  {}
-
+---
+namespace: {}
 longhorn:
   ingress:
     enabled: false
