@@ -25,7 +25,7 @@ policy-reporter:
   ui:
     enabled: true
     ingress:
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       enabled: true
       {{- end }}
 {{- with .cluster.ingressClassName }}

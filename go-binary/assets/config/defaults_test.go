@@ -3,6 +3,8 @@ package config
 import (
 	"testing"
 
+	"kubara/assets/catalog"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -111,17 +113,19 @@ func TestApplyDefaults_EmbeddedServiceStatusDefaults(t *testing.T) {
 		Clusters: []Cluster{
 			{
 				Services: Services{
-					Argocd:      GenericService{},
-					CertManager: CertManagerService{},
+					"argo-cd":      {},
+					"cert-manager": {},
 				},
 			},
 		},
 	}
 
 	applyDefaults(cfg)
+	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
+	assert.NoError(t, err)
 
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services.Argocd.Status, "empty service status should default to disabled")
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services.CertManager.Status, "empty cert-manager status should default to disabled")
+	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["argo-cd"].Status, "empty service status should default to disabled")
+	assert.Equal(t, StatusEnabled, cfg.Clusters[0].Services["cert-manager"].Status, "empty cert-manager status should default to built-in default")
 }
 
 func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
@@ -129,11 +133,11 @@ func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
 		Clusters: []Cluster{
 			{
 				Services: Services{
-					CertManager: CertManagerService{
-						ClusterIssuer: ClusterIssuer{
-							Email: "cert@example.com",
-							// Should get defaults for:
-							// Name and Server
+					"cert-manager": {
+						Config: map[string]any{
+							"clusterIssuer": map[string]any{
+								"email": "cert@example.com",
+							},
 						},
 					},
 				},
@@ -142,10 +146,12 @@ func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
 	}
 
 	applyDefaults(cfg)
+	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
+	assert.NoError(t, err)
 
-	issuer := cfg.Clusters[0].Services.CertManager.ClusterIssuer
-	assert.Equal(t, "letsencrypt-staging", issuer.Name, "ClusterIssuer Name should default to letsencrypt-staging")
-	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer.Server, "ClusterIssuer Server should default to ACME staging URL")
+	issuer, _ := cfg.Clusters[0].Services["cert-manager"].Config["clusterIssuer"].(map[string]any)
+	assert.Equal(t, "letsencrypt-staging", issuer["name"], "ClusterIssuer Name should default to letsencrypt-staging")
+	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer["server"], "ClusterIssuer Server should default to ACME staging URL")
 }
 
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {

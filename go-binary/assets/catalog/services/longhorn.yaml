@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: longhorn
+spec:
+  chartPath: longhorn
+  default: disabled
+  clusterTypes:
+    - controlplane

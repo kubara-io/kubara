@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: homer-dashboard
+spec:
+  chartPath: homer-dashboard
+  default: enabled
+  clusterTypes:
+    - controlplane

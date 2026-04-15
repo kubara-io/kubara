@@ -19,6 +19,8 @@ func TestNewSchemaFlags(t *testing.T) {
 	flags := cmd.NewSchemaFlags()
 
 	assert.Equal(t, "config.schema.json", flags.OutputFlag)
+	assert.Equal(t, "", flags.CatalogPath)
+	assert.False(t, flags.CatalogOverride)
 }
 
 func TestNewSchemaCmd(t *testing.T) {
@@ -28,8 +30,9 @@ func TestNewSchemaCmd(t *testing.T) {
 
 	assert.Equal(t, "schema", command.Name)
 	assert.Equal(t, "Generate JSON schema file for config structure", command.Usage)
+	assert.Equal(t, "schema [--output] [--catalog <path> [--force|--overwrite]]", command.UsageText)
 
-	require.Len(t, command.Flags, 1)
+	require.Len(t, command.Flags, 3)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -37,6 +40,8 @@ func TestNewSchemaCmd(t *testing.T) {
 	}
 
 	assert.True(t, flagNames["output"])
+	assert.True(t, flagNames["catalog"])
+	assert.True(t, flagNames["force"])
 }
 
 func TestSchemaCmd(t *testing.T) {
@@ -45,6 +50,7 @@ func TestSchemaCmd(t *testing.T) {
 		flags       []string
 		wantErr     bool
 		errContains string
+		setup       func(t *testing.T, tempDir string)
 		validate    func(t *testing.T, tempDir string)
 	}{
 		{
@@ -121,6 +127,52 @@ func TestSchemaCmd(t *testing.T) {
 				assert.Contains(t, content, "  ")
 			},
 		},
+		{
+			name: "catalog collision fails without force",
+			flags: []string{
+				"--catalog", "distribution",
+			},
+			setup: func(t *testing.T, tempDir string) {
+				servicesDir := filepath.Join(tempDir, "distribution", "services")
+				require.NoError(t, os.MkdirAll(servicesDir, 0750))
+				require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: argo-cd
+spec:
+  chartPath: custom-argo-cd
+  default: enabled
+`), 0644))
+			},
+			wantErr:     true,
+			errContains: "already exists in built-in catalog",
+		},
+		{
+			name: "catalog collision succeeds with force",
+			flags: []string{
+				"--catalog", "distribution",
+				"--force",
+			},
+			setup: func(t *testing.T, tempDir string) {
+				servicesDir := filepath.Join(tempDir, "distribution", "services")
+				require.NoError(t, os.MkdirAll(servicesDir, 0750))
+				require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: argo-cd
+spec:
+  chartPath: custom-argo-cd
+  default: enabled
+`), 0644))
+			},
+			wantErr: false,
+			validate: func(t *testing.T, tempDir string) {
+				schemaPath := filepath.Join(tempDir, "config.schema.json")
+				assert.FileExists(t, schemaPath)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -132,6 +184,10 @@ func TestSchemaCmd(t *testing.T) {
 				"--work-dir", tempDir,
 			}
 			tt.flags = append(globalFlags, tt.flags...)
+
+			if tt.setup != nil {
+				tt.setup(t, tempDir)
+			}
 
 			app := createTestApp(cmd.NewSchemaCmd())
 

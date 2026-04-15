@@ -1,0 +1,9 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: kyverno-policy-reporter
+spec:
+  chartPath: kyverno-policy-reporter
+  default: enabled
+  clusterTypes:
+    - controlplane

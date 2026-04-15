@@ -39,51 +39,11 @@ bootstrapValues:
         path: "{{ .cluster.argocd.repo.https.customer.path | default "customer-service-catalog/helm" }}"
         targetRevision: "{{ .cluster.argocd.repo.https.customer.targetRevision }}"
       apps:
-        argocd:
-          name: argocd
-          path: argo-cd
-        kyverno:
-          name: kyverno
-          path: kyverno
-        kyverno-policies:
-          name: kyverno-policies
-          path: kyverno-policies
-        external-secrets:
-          name: external-secrets
-          path: external-secrets
-        cert-manager:
-          name: cert-manager
-          path: cert-manager
-        metallb:
-          name: metallb
-          path: metallb
-        external-dns:
-          name: external-dns
-          path: external-dns
-        oauth2-proxy:
-          name: oauth2-proxy
-          path: oauth2-proxy
-        longhorn:
-          name: longhorn
-          path: longhorn
-        kube-prometheus-stack:
-          name: kube-prometheus-stack
-          path: kube-prometheus-stack
-        loki:
-          name: loki
-          path: loki
-        kyverno-policy-reporter:
-          name: kyverno-policy-reporter
-          path: kyverno-policy-reporter
-        homer-dashboard:
-          name: homer-dashboard
-          path: homer-dashboard
-        metrics-server:
-          name: metrics-server
-          path: metrics-server
-        traefik:
-          name: traefik
-          path: traefik
+{{- range $serviceName := keys .cluster.services | sortAlpha }}
+        {{ $serviceName }}:
+          name: {{ $serviceName }}
+          path: {{ $serviceName }}
+{{- end }}
 
 
 namespace:
@@ -94,22 +54,10 @@ inClusterName: {{ .cluster.name }}
 inClusterSecretLabels:
 {{- if (eq .cluster.type "controlplane") }}
 ##Controlplane labels
-  argocd: "{{ .cluster.services.argocd.status | default "enabled" }}"
-  cert-manager: "{{ .cluster.services.certManager.status | default "enabled" }}"
-  external-dns: "{{ .cluster.services.externalDns.status | default "enabled" }}"
-  external-secrets: "{{ .cluster.services.externalSecrets.status | default "enabled" }}"
-  kube-prometheus-stack: "{{ .cluster.services.kubePrometheusStack.status | default "enabled" }}"
-  traefik: "{{ .cluster.services.traefik.status | default "enabled" }}"
-  kyverno: "{{ .cluster.services.kyverno.status | default "enabled" }}"
-  kyverno-policies: "{{ .cluster.services.kyvernoPolicies.status | default "enabled" }}"
-  kyverno-policy-reporter: "{{ .cluster.services.kyvernoPolicyReport.status | default "enabled" }}"
-  loki: "{{ .cluster.services.loki.status | default "enabled" }}"
-  homer-dashboard: "{{ .cluster.services.homerDashboard.status | default "enabled" }}"
-  oauth2-proxy: "{{ .cluster.services.oauth2Proxy.status | default "enabled" }}"
-  metrics-server: "{{ .cluster.services.metricsServer.status | default "disabled" }}"
-  metallb: "{{ .cluster.services.metalLb.status | default "disabled" }}"
-  longhorn: "{{ .cluster.services.longhorn.status | default "disabled" }}"
-{{ end }}
+{{- range $serviceName := keys .cluster.services | sortAlpha }}
+  {{ $serviceName }}: "{{ index $.cluster.services $serviceName "status" | default "disabled" }}"
+{{- end }}
+{{- end }}
 
 externalSecrets:
   secretStoreRef:
@@ -121,7 +69,7 @@ externalSecrets:
       kind: ClusterSecretStore
       name: {{ .cluster.name }}-{{ .cluster.stage }}
 
-{{ if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
   secrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
@@ -157,7 +105,7 @@ argo-cd:
       annotations:
         {{ toYaml $argocdIngressGrpcAnnotations | nindent 8 }}
     ingress:
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
       enabled: true
       {{- end }}
       path: "/argocd"
@@ -168,7 +116,7 @@ argo-cd:
       annotations:
         {{ toYaml $argocdIngressAnnotations | nindent 8 }}
   configs:
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     cm:
       url: https://{{ .cluster.dnsName }}/argocd
       dex.config: |
@@ -201,7 +149,7 @@ argo-cd:
       rules:
         enabled: false
       serviceMonitor:
-        {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
         enabled: true
         {{- end }}
         additionalLabels:

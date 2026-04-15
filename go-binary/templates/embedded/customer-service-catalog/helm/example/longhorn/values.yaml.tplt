@@ -12,7 +12,7 @@ longhorn:
     registrySecret: image-pull-secret
   metrics:
     serviceMonitor:
-      {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
+      {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
       enabled: true
       {{- end }}
       additionalLabels:
@@ -23,7 +23,7 @@ longhorn:
     defaultClass: true
     defaultClassReplicaCount: 1
   ingress:
-    {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     enabled: true
     {{- end }}
 {{- with .cluster.ingressClassName }}

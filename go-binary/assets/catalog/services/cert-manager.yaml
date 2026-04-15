@@ -1,0 +1,35 @@
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: cert-manager
+  annotations:
+    kubara.io/category: security
+spec:
+  chartPath: cert-manager
+  default: enabled
+  clusterTypes:
+    - controlplane
+  configSchema:
+    type: object
+    required:
+      - clusterIssuer
+    properties:
+      clusterIssuer:
+        type: object
+        required:
+          - name
+          - email
+          - server
+        properties:
+          name:
+            type: string
+            default: letsencrypt-staging
+            minLength: 1
+          email:
+            type: string
+            format: email
+            default: yourname@your-domain.de
+          server:
+            type: string
+            format: uri
+            default: https://acme-staging-v02.api.letsencrypt.org/directory
