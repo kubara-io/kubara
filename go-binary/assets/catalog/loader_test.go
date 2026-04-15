@@ -56,6 +56,25 @@ spec:
 	assert.Equal(t, "custom-argo-cd", cat.Services["argo-cd"].Spec.ChartPath)
 }
 
+func TestLoad_InvalidAPIVersion(t *testing.T) {
+	tempDir := t.TempDir()
+	servicesDir := filepath.Join(tempDir, "services")
+	require.NoError(t, os.MkdirAll(servicesDir, 0750))
+	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "custom-service.yaml"), []byte(`
+apiVersion: kubara.io/v2
+kind: ServiceDefinition
+metadata:
+  name: custom-service
+spec:
+  chartPath: custom-service
+  default: enabled
+`), 0644))
+
+	_, err := Load(LoadOptions{DistributionPath: tempDir})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `apiVersion must be "kubara.io/v1alpha1"`)
+}
+
 func TestCanonicalServiceName(t *testing.T) {
 	assert.Equal(t, "cert-manager", CanonicalServiceName("certManager"))
 	assert.Equal(t, "metallb", CanonicalServiceName("metalLb"))

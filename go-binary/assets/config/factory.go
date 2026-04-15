@@ -7,12 +7,17 @@ import (
 
 // NewClusterFromEnv creates a new Cluster configuration populated with default
 // values and information from an EnvMap.
-func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
+func NewClusterFromEnv(e *envmap.EnvMap) (Cluster, error) {
 	return NewClusterFromEnvWithCatalog(e, catalog.LoadOptions{})
 }
 
-func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadOptions) Cluster {
+func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	services, err := newDefaultServicesFromCatalogWithOptions(catalogOptions, "")
+	if err != nil {
+		return Cluster{}, err
+	}
+
 	argoCD := ArgoCD{
 		Repo: RepoProto{
 			HTTPS: &RepoType{
@@ -53,6 +58,6 @@ func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadO
 			},
 		},
 		ArgoCD:   argoCD,
-		Services: newDefaultServicesFromCatalogWithOptions(catalogOptions),
-	}
+		Services: services,
+	}, nil
 }
