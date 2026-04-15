@@ -91,7 +91,7 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 		&cli.StringFlag{
 			Name:        "catalog",
 			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog/distribution directory.",
+			Usage:       "Path to external ServiceDefinition catalog directory.",
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
@@ -109,8 +109,8 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 func (o *SchemaOptions) Run() error {
 	// Generate schema
 	schemaDoc, err := config.GenerateSchemaWithCatalog(catalog.LoadOptions{
-		DistributionPath: o.catalogPath,
-		Overwrite:        o.catalogOverride,
+		CatalogPath: o.catalogPath,
+		Overwrite:   o.catalogOverride,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to generate schema: %w", err)

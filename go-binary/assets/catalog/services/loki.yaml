@@ -3,8 +3,10 @@ apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
   name: loki
+  annotations:
+    kubara.io/category: observability
 spec:
   chartPath: loki
-  default: enabled
+  status: enabled
   clusterTypes:
     - controlplane

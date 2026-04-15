@@ -3,20 +3,31 @@ package config
 import (
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"sort"
 
 	"kubara/assets/catalog"
 
+	"github.com/go-viper/mapstructure/v2"
 	"go.yaml.in/yaml/v3"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
-func newDefaultServicesFromCatalogWithOptions(options catalog.LoadOptions, clusterType string) (Services, error) {
+func createServicesFromCatalogWithOptions(options catalog.LoadOptions, clusterType string) (Services, error) {
 	cat, err := catalog.Load(options)
 	if err != nil {
 		return nil, err
 	}
 	return serviceDefaultsFromCatalog(cat, clusterType), nil
+}
+
+func decodeServiceHook() mapstructure.DecodeHookFuncType {
+	return func(_ reflect.Type, to reflect.Type, source any) (any, error) {
+		if to != reflect.TypeFor[ServiceInstance]() {
+			return source, nil
+		}
+		return decodeServiceInstance(source)
+	}
 }
 
 func applyServiceCatalogDefaults(cfg *Config, options catalog.LoadOptions) error {
@@ -114,7 +125,7 @@ func cloneServiceInstance(in ServiceInstance) ServiceInstance {
 func serviceDefaultsFromCatalog(cat catalog.Catalog, clusterType string) Services {
 	out := make(Services, len(cat.Services))
 	for name, def := range cat.Services {
-		status := def.Spec.EffectiveDefaultStatus()
+		status := def.Spec.Status
 		if !serviceAppliesToClusterType(def, clusterType) {
 			status = catalog.StatusDisabled
 		}
@@ -284,46 +295,4 @@ func decodeServiceInstance(source any) (ServiceInstance, error) {
 	}
 
 	return out, nil
-}
-
-func toStringMap(v any) (map[string]any, error) {
-	switch typed := v.(type) {
-	case map[string]any:
-		out := make(map[string]any, len(typed))
-		for key, val := range typed {
-			out[key] = normalizeValue(val)
-		}
-		return out, nil
-	case map[any]any:
-		out := make(map[string]any, len(typed))
-		for k, val := range typed {
-			key, ok := k.(string)
-			if !ok {
-				return nil, fmt.Errorf("non-string map key %T", k)
-			}
-			out[key] = normalizeValue(val)
-		}
-		return out, nil
-	default:
-		return nil, fmt.Errorf("expected object, got %T", v)
-	}
-}
-
-func normalizeValue(v any) any {
-	switch typed := v.(type) {
-	case map[string]any, map[any]any:
-		m, err := toStringMap(typed)
-		if err != nil {
-			return v
-		}
-		return m
-	case []any:
-		out := make([]any, len(typed))
-		for i := range typed {
-			out[i] = normalizeValue(typed[i])
-		}
-		return out
-	default:
-		return v
-	}
 }
