@@ -45,6 +45,7 @@ spec:
         conversionStrategy: Default
         decodingStrategy: None
         metadataPolicy: None
+        nullBytePolicy: Fail
     {{- end }}
   {{- else if $item.dataFrom }}
   dataFrom:
@@ -60,6 +61,7 @@ spec:
         conversionStrategy: Default
         decodingStrategy: None
         metadataPolicy: None
+        nullBytePolicy: Fail
     {{- end }}
   {{- end }}
 ---

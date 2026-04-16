@@ -44,5 +44,6 @@ spec:
         conversionStrategy: Default
         decodingStrategy: None
         metadataPolicy: None
+        nullBytePolicy: Fail
 ---
 {{- end }}
