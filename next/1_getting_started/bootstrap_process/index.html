@@ -2409,7 +2409,6 @@ You can set a custom output file:</p>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;controlplane or worker&gt;</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cp.demo-42.stackit.run&gt;</span>
-<span class="w">    </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
 <span class="w">    </span><span class="nt">privateLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">publicLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span>
@@ -2424,6 +2423,9 @@ You can set a custom output file:</p>
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 <span class="nn">...</span>
 </code></pre></div>
+<p><code>ingressClassName</code> defaults to <code>traefik</code>. Set it explicitly when using a different ingress controller.
+Each service also accepts an optional <code>ingress.annotations</code> map under <code>services.&lt;service&gt;.ingress.annotations</code> that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
+User-provided annotations are merged on top using <code>mergeOverwrite</code>: equal keys are overwritten, while kubara default keys that are not present in the override remain.</p>
 <p>kubara generates resources in two stages:</p>
 <ul>
 <li><strong>Terraform modules and overlays</strong> to provision infrastructure and the Kubernetes cluster</li>

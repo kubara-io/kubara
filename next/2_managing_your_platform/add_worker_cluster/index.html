@@ -606,6 +606,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Add worker cluster to config.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-ingress-annotation-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: Ingress annotation overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -1917,6 +1934,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1. Add worker cluster to config.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#optional-ingress-annotation-overrides" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Optional: Ingress annotation overrides
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
         <li class="md-nav__item">
@@ -2020,7 +2054,6 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">worker</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0.dev.example.com</span>
-<span class="w">    </span><span class="nt">ingressClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-org</span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-team</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
@@ -2055,6 +2088,7 @@ You're not viewing the latest stable version.
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">kubePrometheusStack</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
 <span class="w">      </span><span class="nt">traefik</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">kyverno</span><span class="p">:</span>
@@ -2065,6 +2099,7 @@ You're not viewing the latest stable version.
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">loki</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
 <span class="w">      </span><span class="nt">homerDashboard</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">oauth2Proxy</span><span class="p">:</span>
@@ -2076,6 +2111,18 @@ You're not viewing the latest stable version.
 <span class="w">      </span><span class="nt">longhorn</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
 </code></pre></div>
+<h3 id="optional-ingress-annotation-overrides">Optional: Ingress annotation overrides</h3>
+<p>Each service supports an optional <code>ingress.annotations</code> map that is merged with kubara's default annotations when rendering the service values files.
+This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.</p>
+<div class="highlight"><pre><span></span><code><span class="nt">services</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">kubePrometheusStack</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">    </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">nginx.ingress.kubernetes.io/auth-url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://$host/oauth2/auth&quot;</span>
+<span class="w">        </span><span class="nt">nginx.ingress.kubernetes.io/auth-signin</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://$host/oauth2/start?rd=$escaped_request_uri&quot;</span>
+</code></pre></div>
+<p>User-provided annotations are merged on top of kubara defaults using <code>mergeOverwrite</code>: values for the same key are overwritten, but kubara defaults that are not present in the override map are preserved.</p>
 <h2 id="2-regenerate-terraform-and-helm-templates">2. Regenerate Terraform and Helm templates</h2>
 <div class="highlight"><pre><span></span><code><span class="c1"># kubara generate creates both helm and terraform files by default</span>
 kubara<span class="w"> </span>generate

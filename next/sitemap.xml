@@ -2,118 +2,118 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.kubara.io/next/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/bootstrap_process/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/installation/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/overview_core_concept/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/prerequisites/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_app_project/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_app_repository/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_application/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_appset/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_sso/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_sso_examples/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_managing_your_platform/add_worker_cluster/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/add_or_replace_components/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/components_overview/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/network_external_dns/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/observability_alerts/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/observability_dashboards/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/observability_logs/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/observability_metrics/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_components/security_certificates/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/4_architecture/architecture_overview/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_community/maintainers/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_community/support/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_reference/faq/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_reference/release_cycle_and_updates/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/7_decisions/ADR-0001-replace-deprecated-nginx-ingress/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/7_decisions/ADR-index/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/7_decisions/ADR-template/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/7_decisions/ADR/</loc>
-         <lastmod>2026-04-14</lastmod>
+         <lastmod>2026-04-16</lastmod>
     </url>
 </urlset>
