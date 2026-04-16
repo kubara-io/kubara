@@ -1,0 +1,15 @@
+kube-prometheus-stack:
+  prometheus:
+    ingress:
+      ingressClassName: gce
+    prometheusSpec:
+      storageSpec:
+        volumeClaimTemplate:
+          spec:
+            storageClassName: standard-rwo
+  alertmanager:
+    ingress:
+      ingressClassName: gce
+  grafana:
+    ingress:
+      ingressClassName: gce

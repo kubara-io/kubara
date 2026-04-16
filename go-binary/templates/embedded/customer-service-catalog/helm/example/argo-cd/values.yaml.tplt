@@ -109,7 +109,7 @@ inClusterSecretLabels:
   metrics-server: "{{ .cluster.services.metricsServer.status | default "disabled" }}"
   metallb: "{{ .cluster.services.metalLb.status | default "disabled" }}"
   longhorn: "{{ .cluster.services.longhorn.status | default "disabled" }}"
-{{- end }}
+{{ end }}
 
 externalSecrets:
   secretStoreRef:
@@ -127,35 +127,46 @@ externalSecrets:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: argo_oauth2_credentials
-{{- end }}
+{{ end }}
+
+{{- $argocdUserIngressAnnotations := dig "cluster" "services" "argocd" "ingress" "annotations" (dict) . -}}
+{{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $argocdIngressGrpcAnnotations = mergeOverwrite $argocdIngressGrpcAnnotations $argocdUserIngressAnnotations -}}
+
+{{- $argocdIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- $_ := set $argocdIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- $argocdIngressAnnotations = mergeOverwrite $argocdIngressAnnotations $argocdUserIngressAnnotations -}}
 
 argo-cd:
   server:
     ingressGrpc:
       enabled: true
       path: "/argocd"
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+      {{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+      {{- end }}
       tls: true
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
-        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-        {{- end }}
+        {{ toYaml $argocdIngressGrpcAnnotations | nindent 8 }}
     ingress:
       {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
       enabled: true
       {{- end }}
       path: "/argocd"
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+      {{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+      {{- end }}
       tls: true
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-        traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
-        {{- end }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
-        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-        {{- end }}
+        {{ toYaml $argocdIngressAnnotations | nindent 8 }}
   configs:
     {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
     cm:

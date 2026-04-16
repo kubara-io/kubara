@@ -2,7 +2,9 @@ clusterIssuer:
   name: {{ .cluster.services.certManager.clusterIssuer.name }}
   email: {{ .cluster.services.certManager.clusterIssuer.email }}
   server: {{ .cluster.services.certManager.clusterIssuer.server | default "https://acme-v02.api.letsencrypt.org/directory" }}
-  ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+  ingressClassName: {{ . }}
+{{- end }}
 
 
 cert-manager:

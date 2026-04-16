@@ -323,6 +323,12 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Checkout CI overlay profiles
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            .github/helm-profiles
+
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
         with:
@@ -412,6 +418,23 @@ jobs:
               fi
               echo "📄 Rendering chart with overlay values"
               helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
+
+              PROFILE_DIR=".github/helm-profiles/$CHART"
+              if [[ -d "$PROFILE_DIR" ]]; then
+                for PROFILE_FILE in "$PROFILE_DIR"/*.yaml; do
+                  [[ -e "$PROFILE_FILE" ]] || continue
+                  PROFILE_NAME="$(basename "$PROFILE_FILE" .yaml)"
+                  echo "🧪 Running helm lint with profile: $PROFILE_NAME"
+                  if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" \
+                    | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint-${PROFILE_NAME}.log"; then
+                    echo "::error file=$PROFILE_FILE::helm lint failed for $CHART with profile $PROFILE_NAME"
+                    FAILED_CHARTS+=("$CHART:$PROFILE_NAME")
+                  fi
+
+                  echo "📄 Rendering chart with overlay profile: $PROFILE_NAME"
+                  helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART-$PROFILE_NAME" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" > "$OUT_DIR/render-${PROFILE_NAME}.yaml"
+                done
+              fi
             else
               if ! helm lint --quiet "$MANAGED_CHART_PATH" \
                 | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
@@ -421,20 +444,24 @@ jobs:
               echo "📄 Rendering chart with default values"
               helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
             fi
-            # CRD status is server-populated and may contain null placeholders in chart output.
-            # Remove it before schema validation to avoid false negatives in kubeconform.
-            yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$OUT_DIR/render.yaml"
-            echo "🔎 Validating rendered manifests with kubeconform"
-            if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
-                -schema-location default \
-                -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json \
-                -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
-                -schema-location https://json.schemastore.org/{{.ResourceKind}}.json  \
-                "$OUT_DIR/render.yaml" \
-                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-kubeconform.log"; then
-              echo "::error file=$OUT_DIR/render.yaml::kubeconform failed for $CHART"
-              FAILED_CHARTS+=("$CHART")
-            fi
+            for RENDER_FILE in "$OUT_DIR"/render*.yaml; do
+              [[ -e "$RENDER_FILE" ]] || continue
+              RENDER_NAME="$(basename "$RENDER_FILE" .yaml)"
+              # CRD status is server-populated and may contain null placeholders in chart output.
+              # Remove it before schema validation to avoid false negatives in kubeconform.
+              yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$RENDER_FILE"
+              echo "🔎 Validating rendered manifests with kubeconform: $RENDER_NAME"
+              if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
+                  -schema-location default \
+                  -schema-location https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json \
+                  -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
+                  -schema-location https://json.schemastore.org/{{.ResourceKind}}.json  \
+                  "$RENDER_FILE" \
+                  | tee "${{ env.REPORT_DIR }}/helm/${CHART}-${RENDER_NAME}-kubeconform.log"; then
+                echo "::error file=$RENDER_FILE::kubeconform failed for $CHART ($RENDER_NAME)"
+                FAILED_CHARTS+=("$CHART:$RENDER_NAME")
+              fi
+            done
             echo "✅ Finished processing: $CHART"
             echo "::endgroup::"
           done

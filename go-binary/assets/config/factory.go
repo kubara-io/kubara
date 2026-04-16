@@ -47,7 +47,7 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 		},
 		ArgoCD: argoCD,
 		Services: Services{
-			Argocd: GenericService{ServiceStatus{Status: StatusDisabled}},
+			Argocd: GenericService{ServiceStatus: ServiceStatus{Status: StatusDisabled}},
 			CertManager: CertManagerService{
 				ServiceStatus: ServiceStatus{
 					Status: StatusEnabled,
@@ -68,9 +68,11 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 					Status: StatusEnabled,
 				},
 			},
-			KubePrometheusStack: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
+			KubePrometheusStack: PersistentService{
+				GenericService: GenericService{
+					ServiceStatus: ServiceStatus{
+						Status: StatusEnabled,
+					},
 				},
 			},
 			Traefik: GenericService{
@@ -93,9 +95,11 @@ func NewClusterFromEnv(e *envmap.EnvMap) Cluster {
 					Status: StatusEnabled,
 				},
 			},
-			Loki: GenericService{
-				ServiceStatus: ServiceStatus{
-					Status: StatusEnabled,
+			Loki: PersistentService{
+				GenericService: GenericService{
+					ServiceStatus: ServiceStatus{
+						Status: StatusEnabled,
+					},
 				},
 			},
 			HomerDashboard: GenericService{

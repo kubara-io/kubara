@@ -103,7 +103,6 @@ clusters:
     stage: project-stage-something-like-dev
     type: <controlplane or worker>
     dnsName: <cp.demo-42.stackit.run>
-    ingressClassName: traefik
     privateLoadBalancerIP: 0.0.0.0
     publicLoadBalancerIP: 0.0.0.0
     ssoOrg: <oidc-org>
@@ -118,6 +117,10 @@ clusters:
         email: <email>
 ...
 ```
+
+`ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
+Each service also accepts an optional `ingress.annotations` map under `services.<service>.ingress.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
+User-provided annotations are merged on top using `mergeOverwrite`: equal keys are overwritten, while kubara default keys that are not present in the override remain.
 
 kubara generates resources in two stages:
 

@@ -1,3 +1,12 @@
+{{- $kubePromIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
+{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $_ := set $kubePromIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- end -}}
+{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- $_ := set $kubePromIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- end -}}
+{{- $kubePromIngressAnnotations = mergeOverwrite $kubePromIngressAnnotations (dig "cluster" "services" "kubePrometheusStack" "ingress" "annotations" (dict) .) -}}
+
 kube-prometheus-stack:
   global:
     imagePullSecrets:
@@ -16,16 +25,14 @@ kube-prometheus-stack:
       additionalLabels:
         monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
     ingress:
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+{{- end }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
-        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-        {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-        traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
+{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
       enabled: true
-      {{- end }}
+{{- end }}
       paths:
         - /prometheus
       pathType: ImplementationSpecific
@@ -47,6 +54,9 @@ kube-prometheus-stack:
           spec:
             accessModes:
               - ReadWriteOnce
+{{- with .cluster.services.kubePrometheusStack.storageClassName }}
+            storageClassName: {{ . }}
+{{- end }}
             resources:
               requests:
                 storage: 10Gi
@@ -61,16 +71,14 @@ kube-prometheus-stack:
       additionalLabels:
         monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
     ingress:
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+{{- end }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
-        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-        {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-        traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
+{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
       enabled: true
-      {{- end }}
+{{- end }}
       paths:
         - /alertmanager
       pathType: ImplementationSpecific
@@ -172,16 +180,14 @@ kube-prometheus-stack:
       labels:
         monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
     ingress:
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+{{- end }}
       annotations:
-        cert-manager.io/cluster-issuer: {{ .cluster.services.certManager.clusterIssuer.name }}
-        {{- if (eq .cluster.services.metalLb.status "enabled") }}
-        external-dns.alpha.kubernetes.io/target: "{{ .cluster.publicLoadbalancerIP }}"
-        {{- end }}
-      {{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
-        traefik.ingress.kubernetes.io/router.middlewares: oauth2-proxy-oauth-auth@kubernetescrd
+{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
       enabled: true
-      {{- end }}
+{{- end }}
       path: /grafana
       pathType: ImplementationSpecific
       hosts:

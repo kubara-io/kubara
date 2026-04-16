@@ -12,6 +12,9 @@ loki:
     persistence:
       enabled: true
       size: 5Gi
+{{- with .cluster.services.loki.storageClassName }}
+      storageClass: {{ . }}
+{{- end }}
   monitoring:
     serviceMonitor:
       {{ if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
@@ -46,7 +49,9 @@ loki:
       enable_api: true
     ingress:
       enabled: false
-      ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
+{{- with .cluster.ingressClassName }}
+      ingressClassName: {{ . }}
+{{- end }}
   minio:
     enabled: false
   # Zero out replica counts of other deployment modes

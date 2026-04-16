@@ -149,6 +149,9 @@ func TestGetEmbeddedTemplatesList(t *testing.T) {
 				for _, p := range list {
 					assert.Contains(t, p, "helm")
 					assert.False(t, strings.Contains(p, "terraform"), "Helm list should not include Terraform paths: %s", p)
+					if strings.HasPrefix(p, "customer-service-catalog/helm/") {
+						assert.False(t, strings.Contains(p, "/ci/"), "Customer Helm list should not include CI-only profile files: %s", p)
+					}
 				}
 			},
 		},
@@ -398,6 +401,20 @@ func TestTemplateFiles(t *testing.T) {
 						},
 					},
 				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+						},
+					},
+				},
 			},
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
@@ -469,6 +486,20 @@ func TestTemplateFiles(t *testing.T) {
 						},
 					},
 				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+						},
+					},
+				},
 			},
 			wantErr: false,
 			validate: func(t *testing.T, results []TemplateResult) {
@@ -488,6 +519,182 @@ func TestTemplateFiles(t *testing.T) {
 				_, hasSourceRepos := project["sourceRepos"]
 				assert.False(t, hasSourceRepos)
 				assert.NotContains(t, results[0].Content, "<no value>")
+			},
+		},
+		{
+			name:     "Success: Omits optional ingress and storage class settings when they are not configured",
+			fileList: []string{"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "disabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"kubePrometheusStack": map[string]any{
+							"cert-manager.io/cluster-issuer": "letsencrypt-prod",
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+				assert.NotContains(t, results[0].Content, "ingressClassName:")
+				assert.NotContains(t, results[0].Content, "storageClassName:")
+
+				var rendered map[string]interface{}
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+			},
+		},
+		{
+			name:     "Success: Merges service ingress annotations with defaults",
+			fileList: []string{"customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "enabled",
+						},
+						"traefik": map[string]any{
+							"status": "enabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+						"homerDashboard": map[string]any{
+							"status": "enabled",
+							"ingress": map[string]any{
+								"annotations": map[string]any{
+									"cert-manager.io/cluster-issuer":             "letsencrypt-custom",
+									"nginx.ingress.kubernetes.io/rewrite-target": "/",
+								},
+							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"homerDashboard": map[string]any{
+							"cert-manager.io/cluster-issuer":                   "letsencrypt-custom",
+							"traefik.ingress.kubernetes.io/router.middlewares": "oauth2-proxy-oauth-auth@kubernetescrd",
+							"nginx.ingress.kubernetes.io/rewrite-target":       "/",
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+
+				var rendered map[string]any
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				ingress, ok := rendered["ingress"].(map[string]any)
+				require.True(t, ok)
+				annotations, ok := ingress["annotations"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, "letsencrypt-custom", annotations["cert-manager.io/cluster-issuer"])
+				assert.Equal(t, "oauth2-proxy-oauth-auth@kubernetescrd", annotations["traefik.ingress.kubernetes.io/router.middlewares"])
+				assert.Equal(t, "/", annotations["nginx.ingress.kubernetes.io/rewrite-target"])
+			},
+		},
+		{
+			name:     "Success: Skips traefik middleware annotation when traefik is disabled",
+			fileList: []string{"customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt"},
+			context: map[string]any{
+				"cluster": map[string]any{
+					"name":    "test-cluster",
+					"stage":   "dev",
+					"dnsName": "test.example.com",
+					"services": map[string]any{
+						"certManager": map[string]any{
+							"status": "enabled",
+							"clusterIssuer": map[string]any{
+								"name": "letsencrypt-prod",
+							},
+						},
+						"oauth2Proxy": map[string]any{
+							"status": "enabled",
+						},
+						"traefik": map[string]any{
+							"status": "disabled",
+						},
+						"metalLb": map[string]any{
+							"status": "disabled",
+						},
+						"kubePrometheusStack": map[string]any{
+							"status": "enabled",
+						},
+						"homerDashboard": map[string]any{
+							"status": "enabled",
+							"ingress": map[string]any{
+								"annotations": map[string]any{
+									"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
+								},
+							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"homerDashboard": map[string]any{
+							"cert-manager.io/cluster-issuer":       "letsencrypt-prod",
+							"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
+						},
+					},
+				},
+			},
+			wantErr: false,
+			validate: func(t *testing.T, results []TemplateResult) {
+				require.Len(t, results, 1)
+				assert.NoError(t, results[0].Error)
+				assert.NotContains(t, results[0].Content, "<no value>")
+
+				var rendered map[string]any
+				require.NoError(t, yaml.Unmarshal([]byte(results[0].Content), &rendered))
+
+				ingress, ok := rendered["ingress"].(map[string]any)
+				require.True(t, ok)
+				annotations, ok := ingress["annotations"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, "letsencrypt-prod", annotations["cert-manager.io/cluster-issuer"])
+				assert.NotContains(t, annotations, "traefik.ingress.kubernetes.io/router.middlewares")
+				assert.Equal(t, "http://oauth2-proxy/oauth2/auth", annotations["nginx.ingress.kubernetes.io/auth-url"])
 			},
 		},
 		{
@@ -578,6 +785,20 @@ func TestTemplateFiles(t *testing.T) {
 									"path":           "customer-service-catalog/helm",
 									"targetRevision": "main",
 								},
+							},
+						},
+					},
+				},
+				"computed": map[string]any{
+					"ingressAnnotations": map[string]any{
+						"argocd": map[string]any{
+							"ingress": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
+							},
+							"grpc": map[string]any{
+								"cert-manager.io/cluster-issuer":          "letsencrypt-prod",
+								"external-dns.alpha.kubernetes.io/target": "1.2.3.4",
 							},
 						},
 					},

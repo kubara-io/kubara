@@ -1,0 +1,7 @@
+loki:
+  singleBinary:
+    persistence:
+      storageClass: standard
+  loki:
+    ingress:
+      ingressClassName: nginx
