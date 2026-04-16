@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.19.1] - 2026-04-16
+### Changed
+- Updated chart dependency version: kube-prometheus-stack 83.4.0 → 83.4.3
+
 ## [1.19.0] - 2026-04-13
 ### Changed
 - Updated chart dependency version: kube-prometheus-stack 82.18.0 → 83.4.0
