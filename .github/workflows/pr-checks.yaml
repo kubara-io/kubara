@@ -384,6 +384,10 @@ jobs:
           CUSTOMER_BASE="customer-service-catalog/helm/kubara"
           echo "🔍 Scanning managed Helm charts..."
           FAILED_CHARTS=()
+          RENDER_TARGETS=()
+          SCHEMA_POOL_DIR="${{ env.RENDER_DIR }}/schema-pool"
+          rm -rf "$SCHEMA_POOL_DIR"
+          mkdir -p "$SCHEMA_POOL_DIR"
           for CHART in $(find "$MANAGED_BASE" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort); do
             echo ""
             echo "::group::Processing chart: $CHART"
@@ -444,43 +448,42 @@ jobs:
               echo "📄 Rendering chart with default values"
               helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
             fi
-            SCHEMA_DIR="$OUT_DIR/schemas"
-            rm -rf "$SCHEMA_DIR"
-            mkdir -p "$SCHEMA_DIR"
             echo "🧬 Extracting CRD schemas from rendered manifests"
             for RENDER_FILE in "$OUT_DIR"/render*.yaml; do
               [[ -e "$RENDER_FILE" ]] || continue
+              RENDER_NAME="$(basename "$RENDER_FILE" .yaml)"
+              RENDER_TARGETS+=("${CHART}|${RENDER_NAME}|${RENDER_FILE}")
               while IFS=$'\t' read -r CRD_GROUP CRD_KIND CRD_VERSION CRD_SCHEMA_B64; do
                 [[ -n "$CRD_GROUP" ]] || continue
                 [[ -n "$CRD_KIND" ]] || continue
                 [[ -n "$CRD_VERSION" ]] || continue
                 [[ -n "$CRD_SCHEMA_B64" ]] || continue
-                mkdir -p "$SCHEMA_DIR/$CRD_GROUP"
-                printf '%s' "$CRD_SCHEMA_B64" | base64 --decode > "$SCHEMA_DIR/$CRD_GROUP/${CRD_KIND}_${CRD_VERSION}.json"
+                mkdir -p "$SCHEMA_POOL_DIR/$CRD_GROUP"
+                printf '%s' "$CRD_SCHEMA_B64" | base64 --decode > "$SCHEMA_POOL_DIR/$CRD_GROUP/${CRD_KIND}_${CRD_VERSION}.json"
               done < <(
                 yq -r 'select(.kind == "CustomResourceDefinition") | .spec as $spec | $spec.group as $group | $spec.names.kind as $kind | $spec.versions[] | select(.schema.openAPIV3Schema != null) | [$group, $kind, .name, (.schema.openAPIV3Schema | tojson | @base64)] | @tsv' "$RENDER_FILE"
               )
             done
-            for RENDER_FILE in "$OUT_DIR"/render*.yaml; do
-              [[ -e "$RENDER_FILE" ]] || continue
-              RENDER_NAME="$(basename "$RENDER_FILE" .yaml)"
-              # CRD status is server-populated and may contain null placeholders in chart output.
-              # Remove it before schema validation to avoid false negatives in kubeconform.
-              yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$RENDER_FILE"
-              echo "🔎 Validating rendered manifests with kubeconform: $RENDER_NAME"
-              if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
-                  -schema-location "$SCHEMA_DIR/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
-                  -schema-location default \
-                  -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
-                  -schema-location https://json.schemastore.org/{{.ResourceKind}}.json  \
-                  "$RENDER_FILE" \
-                  | tee "${{ env.REPORT_DIR }}/helm/${CHART}-${RENDER_NAME}-kubeconform.log"; then
-                echo "::error file=$RENDER_FILE::kubeconform failed for $CHART ($RENDER_NAME)"
-                FAILED_CHARTS+=("$CHART:$RENDER_NAME")
-              fi
-            done
             echo "✅ Finished processing: $CHART"
             echo "::endgroup::"
+          done
+          echo ""
+          echo "🔎 Validating rendered manifests with global CRD schema pool"
+          for RENDER_TARGET in "${RENDER_TARGETS[@]}"; do
+            IFS='|' read -r RENDER_CHART RENDER_NAME RENDER_FILE <<< "$RENDER_TARGET"
+            # CRD status is server-populated and may contain null placeholders in chart output.
+            # Remove it before schema validation to avoid false negatives in kubeconform.
+            yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$RENDER_FILE"
+            if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
+                -schema-location "$SCHEMA_POOL_DIR/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
+                -schema-location default \
+                -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
+                -schema-location https://json.schemastore.org/{{.ResourceKind}}.json  \
+                "$RENDER_FILE" \
+                | tee "${{ env.REPORT_DIR }}/helm/${RENDER_CHART}-${RENDER_NAME}-kubeconform.log"; then
+              echo "::error file=$RENDER_FILE::kubeconform failed for $RENDER_CHART ($RENDER_NAME)"
+              FAILED_CHARTS+=("$RENDER_CHART:$RENDER_NAME")
+            fi
           done
           echo ""
           echo "────────────────────────────────────"
