@@ -474,13 +474,11 @@ jobs:
             # CRD status is server-populated and may contain null placeholders in chart output.
             # Remove it before schema validation to avoid false negatives in kubeconform.
             yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$RENDER_FILE"
-            VALIDATION_FILE="${RENDER_FILE%.yaml}.validation.yaml"
-            # CRD manifests are sourced from upstream charts; validate rendered workloads against the extracted schema pool.
-            yq eval 'select(.kind != "CustomResourceDefinition")' "$RENDER_FILE" > "$VALIDATION_FILE"
             if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
                 -schema-location "$SCHEMA_POOL_DIR/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
                 -schema-location default \
-                "$VALIDATION_FILE" \
+                -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
+                "$RENDER_FILE" \
                 | tee "${{ env.REPORT_DIR }}/helm/${RENDER_CHART}-${RENDER_NAME}-kubeconform.log"; then
               echo "::error file=$RENDER_FILE::kubeconform failed for $RENDER_CHART ($RENDER_NAME)"
               FAILED_CHARTS+=("$RENDER_CHART:$RENDER_NAME")
