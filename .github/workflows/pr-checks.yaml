@@ -5,11 +5,17 @@ on:
       - 'main'
     paths:
       - 'go-binary/**'
+      - '.github/workflows/pr-checks.yaml'
+      - '.scripts/**'
+      - '.github/helm-profiles/**'
   pull_request:
     branches:
       - 'main'
     paths:
       - 'go-binary/**'
+      - '.github/workflows/pr-checks.yaml'
+      - '.scripts/**'
+      - '.github/helm-profiles/**'
   workflow_dispatch:
 
 env:
@@ -328,6 +334,7 @@ jobs:
         with:
           sparse-checkout: |
             .github/helm-profiles
+            .scripts
 
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
@@ -367,146 +374,7 @@ jobs:
           kubeconform -v
 
       - name: Lint, render and validate Helm charts
-        run: |
-          set -uo pipefail
-          export PATH="$HOME/.local/bin:$PATH"
-          KUBE_VERSION=$(yq -r '.clusters[] | select(.name == "kubara") | .terraform.kubernetesVersion' config.yaml)
-          KUBE_PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name == "kubara") | .services.kubePrometheusStack.status // "disabled"' config.yaml)
-          HELM_TEMPLATE_API_ARGS=()
-          if [[ "$KUBE_PROMETHEUS_STATUS" == "enabled" ]]; then
-            HELM_TEMPLATE_API_ARGS+=(--api-versions "monitoring.coreos.com/v1")
-            echo "ℹ️ kubePrometheusStack is enabled; adding Helm API version: monitoring.coreos.com/v1"
-          else
-            echo "ℹ️ kubePrometheusStack is not enabled; rendering without monitoring.coreos.com/v1 API override"
-          fi
-          mkdir -p "${{ env.REPORT_DIR }}/helm" "${{ env.RENDER_DIR }}"
-          MANAGED_BASE="managed-service-catalog/helm"
-          CUSTOMER_BASE="customer-service-catalog/helm/kubara"
-          echo "🔍 Scanning managed Helm charts..."
-          FAILED_CHARTS=()
-          RENDER_TARGETS=()
-          SCHEMA_POOL_DIR="${{ env.RENDER_DIR }}/schema-pool"
-          rm -rf "$SCHEMA_POOL_DIR"
-          mkdir -p "$SCHEMA_POOL_DIR"
-          for CHART in $(find "$MANAGED_BASE" -mindepth 1 -maxdepth 1 -type d -printf '%f\n' | sort); do
-            echo ""
-            echo "::group::Processing chart: $CHART"
-            MANAGED_CHART_PATH="$MANAGED_BASE/$CHART"
-            CUSTOMER_VALUES_FILE="$CUSTOMER_BASE/$CHART/values.yaml"
-            OUT_DIR="${{ env.RENDER_DIR }}/$CHART"
-            mkdir -p "$OUT_DIR"
-            if [[ ! -f "$MANAGED_CHART_PATH/Chart.yaml" ]]; then
-              echo "::warning::Missing Chart.yaml for $CHART - skipping"
-              echo "::endgroup::"
-              continue
-            fi
-            CHART_TYPE=$(yq '.type // "application"' "$MANAGED_CHART_PATH/Chart.yaml")
-            if [[ "$CHART_TYPE" == "library" ]]; then
-              echo "::notice::Skipping library chart '$CHART'"
-              echo "::endgroup::"
-              continue
-            fi
-            echo "📦 Running 'helm dependency update'..."
-            if ! helm dependency update "$MANAGED_CHART_PATH"; then
-              echo "::error file=$MANAGED_CHART_PATH/Chart.yaml::helm dependency update failed for $CHART"
-              FAILED_CHARTS+=("$CHART")
-              echo "::endgroup::"
-              continue
-            fi
-            echo "🧪 Running helm lint..."
-            if [[ -f "$CUSTOMER_VALUES_FILE" ]]; then
-              if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" \
-                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
-                echo "::error file=$CUSTOMER_VALUES_FILE::helm lint failed for $CHART"
-                FAILED_CHARTS+=("$CHART")
-              fi
-              echo "📄 Rendering chart with overlay values"
-              helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" > "$OUT_DIR/render.yaml"
-
-              PROFILE_DIR=".github/helm-profiles/$CHART"
-              if [[ -d "$PROFILE_DIR" ]]; then
-                for PROFILE_FILE in "$PROFILE_DIR"/*.yaml; do
-                  [[ -e "$PROFILE_FILE" ]] || continue
-                  PROFILE_NAME="$(basename "$PROFILE_FILE" .yaml)"
-                  echo "🧪 Running helm lint with profile: $PROFILE_NAME"
-                  if ! helm lint --quiet "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" \
-                    | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint-${PROFILE_NAME}.log"; then
-                    echo "::error file=$PROFILE_FILE::helm lint failed for $CHART with profile $PROFILE_NAME"
-                    FAILED_CHARTS+=("$CHART:$PROFILE_NAME")
-                  fi
-
-                  echo "📄 Rendering chart with overlay profile: $PROFILE_NAME"
-                  helm template --kube-version "$KUBE_VERSION" "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART-$PROFILE_NAME" "$MANAGED_CHART_PATH" -f "$CUSTOMER_VALUES_FILE" -f "$PROFILE_FILE" > "$OUT_DIR/render-${PROFILE_NAME}.yaml"
-                done
-              fi
-            else
-              if ! helm lint --quiet "$MANAGED_CHART_PATH" \
-                | tee "${{ env.REPORT_DIR }}/helm/${CHART}-lint.log"; then
-                echo "::error file=$MANAGED_CHART_PATH/Chart.yaml::helm lint failed for $CHART"
-                FAILED_CHARTS+=("$CHART")
-              fi
-              echo "📄 Rendering chart with default values"
-              helm template "${HELM_TEMPLATE_API_ARGS[@]}" --include-crds "$CHART" "$MANAGED_CHART_PATH" > "$OUT_DIR/render.yaml"
-            fi
-            echo "🧬 Extracting CRD schemas from rendered manifests"
-            for RENDER_FILE in "$OUT_DIR"/render*.yaml; do
-              [[ -e "$RENDER_FILE" ]] || continue
-              RENDER_NAME="$(basename "$RENDER_FILE" .yaml)"
-              RENDER_TARGETS+=("${CHART}|${RENDER_NAME}|${RENDER_FILE}")
-              while IFS=$'\t' read -r CRD_GROUP CRD_KIND CRD_VERSION CRD_SCHEMA_B64; do
-                [[ -n "$CRD_GROUP" ]] || continue
-                [[ -n "$CRD_KIND" ]] || continue
-                [[ -n "$CRD_VERSION" ]] || continue
-                [[ -n "$CRD_SCHEMA_B64" ]] || continue
-                SCHEMA_DIR="$SCHEMA_POOL_DIR/$CRD_GROUP"
-                SCHEMA_FILE="$SCHEMA_DIR/${CRD_KIND}_${CRD_VERSION}.json"
-                TMP_SCHEMA_FILE="$(mktemp)"
-                mkdir -p "$SCHEMA_DIR"
-                echo "$CRD_SCHEMA_B64" | base64 -d > "$TMP_SCHEMA_FILE"
-                if [[ -f "$SCHEMA_FILE" ]]; then
-                  if ! cmp -s "$SCHEMA_FILE" "$TMP_SCHEMA_FILE"; then
-                    echo "::error file=$RENDER_FILE::CRD schema collision for ${CRD_GROUP}/${CRD_KIND}/${CRD_VERSION}: definitions differ across rendered charts"
-                    FAILED_CHARTS+=("$CHART:schema-collision-${CRD_GROUP}-${CRD_KIND}-${CRD_VERSION}")
-                  fi
-                  rm -f "$TMP_SCHEMA_FILE"
-                else
-                  mv "$TMP_SCHEMA_FILE" "$SCHEMA_FILE"
-                fi
-              done < <(
-                yq -r 'select(.kind == "CustomResourceDefinition") | .spec as $spec | $spec.group as $group | $spec.names.kind as $kind | $spec.versions[] | select(.schema.openAPIV3Schema != null) | [$group, $kind, .name, (.schema.openAPIV3Schema | tojson | @base64)] | @tsv' "$RENDER_FILE"
-              )
-            done
-            echo "✅ Finished processing: $CHART"
-            echo "::endgroup::"
-          done
-          echo ""
-          echo "🔎 Validating rendered manifests with global CRD schema pool"
-          for RENDER_TARGET in "${RENDER_TARGETS[@]}"; do
-            IFS='|' read -r RENDER_CHART RENDER_NAME RENDER_FILE <<< "$RENDER_TARGET"
-            # CRD status is server-populated and may contain null placeholders in chart output.
-            # Remove it before schema validation to avoid false negatives in kubeconform.
-            yq eval -i 'select(.kind == "CustomResourceDefinition") |= del(.status)' "$RENDER_FILE"
-            if ! kubeconform -output pretty -strict -kubernetes-version="$KUBE_VERSION" \
-                -schema-location "$SCHEMA_POOL_DIR/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
-                -schema-location default \
-                -schema-location https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json \
-                "$RENDER_FILE" \
-                | tee "${{ env.REPORT_DIR }}/helm/${RENDER_CHART}-${RENDER_NAME}-kubeconform.log"; then
-              echo "::error file=$RENDER_FILE::kubeconform failed for $RENDER_CHART ($RENDER_NAME)"
-              FAILED_CHARTS+=("$RENDER_CHART:$RENDER_NAME")
-            fi
-          done
-          echo ""
-          echo "────────────────────────────────────"
-          if [[ "${#FAILED_CHARTS[@]}" -gt 0 ]]; then
-            echo "::error::❌ The following Helm charts failed:"
-            for FAIL in "${FAILED_CHARTS[@]}"; do
-              echo "::error::   - $FAIL"
-            done
-            exit 1
-          else
-            echo "✅ All Helm charts passed validation."
-          fi
+        run: .scripts/helm-checks.sh
 
       - name: Upload Helm validation results
         uses: actions/upload-artifact@v7
@@ -525,6 +393,12 @@ jobs:
       run:
         shell: bash
     steps:
+      - name: Checkout CI scripts
+        uses: actions/checkout@v6
+        with:
+          sparse-checkout: |
+            .scripts
+
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
         with:
@@ -541,64 +415,7 @@ jobs:
           tflint_version: ${{ env.TFLINT_VERSION }}
 
       - name: Validate Terraform modules and environments
-        run: |
-          set -eo pipefail
-          mkdir -p "${{ env.REPORT_DIR }}/terraform"
-          echo ""
-          echo "📦 Starting Terraform static analysis"
-          echo "──────────────────────────────────────────────"
-          FAILED_DIRS=()
-          TARGET_DIRS=(
-            "managed-service-catalog/terraform/modules"
-            "customer-service-catalog/terraform/kubara"
-          )
-          for BASE_DIR in "${TARGET_DIRS[@]}"; do
-            [[ -d "$BASE_DIR" ]] || continue
-            for DIR in "$BASE_DIR"/*; do
-              [[ -d "$DIR" ]] || continue
-              NAME="$(basename "$(dirname "$DIR")")-$(basename "$DIR")"
-              LOG="${{ env.REPORT_DIR }}/terraform/${NAME}.log"
-              echo "────────────────────────────────────────────"
-              echo "🔍 Checking: $DIR"
-              echo "📝 Report: $LOG"
-              echo "────────────────────────────────────────────"
-              echo "::group::Terraform check: $NAME"
-              echo "📂 Directory: $DIR" | tee "$LOG"
-              echo "📐 terraform fmt -check -diff" | tee -a "$LOG"
-              if ! terraform fmt -check -diff "$DIR" | tee -a "$LOG"; then
-                echo "::error file=$DIR::terraform fmt failed"
-                FAILED_DIRS+=("$DIR")
-              fi
-              echo "📋 terraform init (backend=false)" | tee -a "$LOG"
-              if ! terraform -chdir="$DIR" init -backend=false -input=false >> "$LOG" 2>&1; then
-                echo "::error file=$DIR::terraform init failed"
-                FAILED_DIRS+=("$DIR")
-              fi
-              echo "🧪 terraform validate" | tee -a "$LOG"
-              if ! terraform -chdir="$DIR" validate | tee -a "$LOG"; then
-                echo "::error file=$DIR::terraform validate failed"
-                FAILED_DIRS+=("$DIR")
-              fi
-              echo "🔎 tflint" | tee -a "$LOG"
-              if ! tflint --chdir "$DIR" | tee -a "$LOG"; then
-                echo "::error file=$DIR::tflint failed"
-                FAILED_DIRS+=("$DIR")
-              fi
-              echo "✅ Done: $DIR" | tee -a "$LOG"
-              echo "::endgroup::"
-            done
-          done
-          echo ""
-          echo "──────────────────────────────────────────────"
-          if [[ "${#FAILED_DIRS[@]}" -gt 0 ]]; then
-            echo "::error::❌ The following Terraform directories failed:"
-            for FAIL in "${FAILED_DIRS[@]}"; do
-              echo "::error::$FAIL"
-            done
-            exit 1
-          else
-            echo "✅ All Terraform checks passed."
-          fi
+        run: .scripts/terraform-checks.sh
 
       - name: Upload Terraform validation results
         uses: actions/upload-artifact@v7
