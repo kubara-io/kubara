@@ -190,6 +190,9 @@ export AWS_SECRET_ACCESS_KEY="<from terraform output>"
 ```
 
 ### 2.2 Provisioning Infrastructure
+!!! warning
+    If you do not intend to use OAuth2 Proxy you can ignore some of the steps in the guide below pertaining to it, but might encounter some issues later.
+    For more infos please look at our [FAQ](../6_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
 
 Then proceed to:
 
@@ -256,6 +259,8 @@ terraform apply
 
 !!! warning
      You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.
+
+
 
 To clean up:
 

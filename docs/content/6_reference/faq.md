@@ -133,3 +133,10 @@ Each serves a different purpose and can coexist in the same Argo CD setup.
 - `ApplicationSets` for scalable, templated application rollout
 
 ---
+
+## What happens when OAuth2 Proxy is disabled?
+
+If you choose to disable OAuth2 Proxy during setup, you skip the OAuth2 Proxy configuration step (part of [step 2.2](../1_getting_started/bootstrap_process.md#22-provisioning-infrastructure) in the bootstrap guide).
+
+Since OAuth2 Proxy provides authentication for ingress routes, no traefik routes are deployed.
+Without them none of your apps will be publicly reachable until you configure an alternative authentication mechanism and deploy the routes.
