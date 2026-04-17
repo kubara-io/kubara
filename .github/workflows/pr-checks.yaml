@@ -23,8 +23,6 @@ env:
   GOSEC_VERSION: "v2.25.0"
   # renovate: datasource=github-releases depName=yannh/kubeconform
   KUBECONFORM_VERSION: "v0.7.0"
-  # renovate: datasource=github-releases depName=mikefarah/yq
-  YQ_VERSION: "v4.48.1"
   # renovate: datasource=github-releases depName=terraform-linters/tflint
   TFLINT_VERSION: "v0.61.0"
   ARTIFACT_RETENTION_DAYS: "15"
@@ -340,28 +338,6 @@ jobs:
         run: |
           set -euo pipefail
           helm version --short
-
-      - name: Install yq (pinned)
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.local/bin
-
-          YQ_BASE_URL="https://github.com/mikefarah/yq/releases/download/${{ env.YQ_VERSION }}"
-          YQ_BINARY="yq_linux_amd64"
-          YQ_SHA256="$(curl -fsSL "$YQ_BASE_URL/checksums" | awk '$2 == "yq_linux_amd64" {print $1}')"
-          TMP_BINARY="$(mktemp)"
-
-          if [[ -z "$YQ_SHA256" ]]; then
-            echo "::error::Could not resolve checksum for $YQ_BINARY"
-            exit 1
-          fi
-
-          curl -fsSL "$YQ_BASE_URL/$YQ_BINARY" -o "$TMP_BINARY"
-          echo "$YQ_SHA256  $TMP_BINARY" | sha256sum -c -
-          install -m 0755 "$TMP_BINARY" "$HOME/.local/bin/yq"
-          rm -f "$TMP_BINARY"
-
-          yq --version
 
       - name: Cache kubeconform
         id: cache-kubeconform
