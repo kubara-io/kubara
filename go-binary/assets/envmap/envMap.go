@@ -34,8 +34,6 @@ type EnvMap struct {
 	ProjectName                 string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                string   `default:"<...>" koanf:"PROJECT_STAGE"`
 	_                           struct{} `doc:"\n### Docker related values"`
-	_                           struct{} `doc:"# see https://docs.docker.com/reference/cli/docker/login/"`
-	_                           struct{} `doc:"# after successful login you can look inside envMap.json in your docker directory (~/.docker/envMap.json) on Linux/Mac"`
 	_                           struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
 	DockerconfigBase64          string   `default:"<...>" koanf:"DOCKERCONFIG_BASE64"`
 	_                           struct{} `doc:"\n### Argo CD related values"`
