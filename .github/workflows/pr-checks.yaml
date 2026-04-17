@@ -462,7 +462,7 @@ jobs:
                 SCHEMA_FILE="$SCHEMA_DIR/${CRD_KIND}_${CRD_VERSION}.json"
                 TMP_SCHEMA_FILE="$(mktemp)"
                 mkdir -p "$SCHEMA_DIR"
-                printf '%s' "$CRD_SCHEMA_B64" | base64 --decode > "$TMP_SCHEMA_FILE"
+                echo "$CRD_SCHEMA_B64" | base64 -d > "$TMP_SCHEMA_FILE"
                 if [[ -f "$SCHEMA_FILE" ]]; then
                   if ! cmp -s "$SCHEMA_FILE" "$TMP_SCHEMA_FILE"; then
                     echo "::error file=$RENDER_FILE::CRD schema collision for ${CRD_GROUP}/${CRD_KIND}/${CRD_VERSION}: definitions differ across rendered charts"
