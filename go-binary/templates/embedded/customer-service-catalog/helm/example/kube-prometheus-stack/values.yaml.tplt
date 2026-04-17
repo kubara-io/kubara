@@ -196,8 +196,10 @@ kube-prometheus-stack:
         - secretName: tls-grafana
           hosts:
             - {{ .cluster.dnsName }}
+{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
     envFromSecrets:
       - name: oauth2-credentials
+{{- end }}
     grafana.ini:
       server:
         root_url: https://{{ .cluster.dnsName }}/grafana/
