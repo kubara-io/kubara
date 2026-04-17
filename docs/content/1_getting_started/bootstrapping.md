@@ -1,6 +1,4 @@
-# kubara: Bootstrapping Guide - ControlPlane Setup
-
-
+# Bootstrap Your Own Platform
 
 ## Introduction
 
@@ -10,7 +8,11 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 
 ## 1. Getting Started
 
-Whether you're running on STACKIT Cloud or STACKIT Edge, we recommend using the Terraform modules introduced in [Step 2](#2-terraform-provisioning-kubernetes-and-infrastructure-optional-recommended). If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
+Whether you're running on STACKIT Cloud or STACKIT Edge or other Cloud providers, we recommend you to use Terraform.
+
+For STACKIT we provide dedicated modules and configurations and have a guide on how to use them [on this page.](providers/stackit.md). 
+
+If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
 
 ### 1.1 Environment Configuration
 
@@ -91,7 +93,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ### 1.5 Update and Prepare Templates
 
 !!! info
-    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
+    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](/4_architecture/architecture_overview.md#hubnspoke)
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
@@ -129,158 +131,21 @@ kubara generates resources in two stages:
 
 If you are not using Terraform, you can skip directly to Step 3.
 
----
-## 2. Terraform: Provisioning Kubernetes and Infrastructure *(Optional, Recommended)*
+## 2. Infrastructure Provisioning
 
-!!! warning
-    In kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
+Kubara is mainly focused on the Platform Experience and Operations on top of Kubernetes for certain Cloud infrastructure 
+services we have built dedicated terraform provider modules and testing support.
 
-Generate Terraform modules:
+Visit one of the following pages to learn more about how to use kubara for setting up the underlying infrastructure as
+well:
 
-```bash
-kubara generate --terraform
-```
+- [STACKIT](providers/stackit.md)
+- More provider support is in the works
 
-Commit and push the generated files to your Git repository.
-
-!!! info 
-    You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
-    Make sure your created Service Account has Project Owner permissions.
-
-### 2.1 Terraform Bootstrap
-
-Before the first `terraform init`, prepare and load your environment variables:
-
-```bash
-cd customer-service-catalog/terraform/<cluster-name>
-cp set-env-changeme.sh set-env.sh
-source set-env.sh
-# or for PowerShell
-# cp set-env-changeme.ps1 set-env.ps1
-# . .\set-env.ps1
-```
-
-Set at least `STACKIT_SERVICE_ACCOUNT_KEY_PATH` in `set-env.sh` / `set-env.ps1` before sourcing.
-
-Then navigate to:
-
-```bash
-cd bootstrap-tfstate-backend
-```
-
-Run:
-
-```bash
-terraform init
-terraform plan
-terraform apply
-```
-
-Use the output to configure Terraform backend credentials:
-
-```bash
-terraform output debug
-```
-
-You can set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `set-env.sh` / `set-env.ps1` and source the file again, or export them directly:
-
-```bash
-export AWS_ACCESS_KEY_ID="<from terraform output>"
-export AWS_SECRET_ACCESS_KEY="<from terraform output>"
-```
-
-### 2.2 Provisioning Infrastructure
-
-Then proceed to:
-
-```bash
-cd ../infrastructure
-```
-
-Run:
-
-```bash
-terraform init
-terraform plan
-```
-Check the values generated in `env.auto.tfvars`, which is [automatically applied in your Terraform deployment.](https://developer.hashicorp.com/terraform/language/values/variables#assign-values-to-variables)
-
-```bash
-terraform apply
-```
-
-This creates the Kubernetes cluster and all required infrastructure.
-
-Export your kubeconfig:
-
-```bash
-# change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
-terraform output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
-```
-
-Keep this `kubara.yaml` local and do not commit it to Git.
-
-Review Terraform outputs:
-
-```bash
-terraform output
-```
-
-Use Terraform outputs to update values in `config.yaml` where needed (for example, on Edge: `privateLoadBalancerIP` and `publicLoadBalancerIP`).
-Do **not** export Secrets Manager credentials into `.env`; these provider-specific `.env` variables were removed.
-
-Sensitive output example:
-
-```bash
-terraform output vault_user_ro_password_b64
-```
-
-If you use OAuth2, create a GitHub application as shown [here](../2_managing_your_platform/add_sso.md).
-
-If you want Terraform to create OAuth2-related Vault entries:
-
-* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `customer-service-catalog/terraform/<cluster-name>/`
-* `TF_Var_image_pull_secret` will already be set by kubara with what is present in the .env
-* In `customer-service-catalog/terraform/<cluster-name>/infrastructure`, copy `secrets.tf-example` to `secrets-2.tf` and adjust values if needed
-
-Load the variables and apply:
-
-```bash
-cp secrets.tf-example secrets-2.tf
-source ../set-env.sh
-# or for PowerShell
-# Copy-Item secrets.tf-example secrets-2.tf
-. ..\set-env.ps1
-terraform apply
-```
-
-!!! warning
-     You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.
-
-To clean up:
-
-```bash
-terraform state rm \
-  vault_kv_secret_v2.image_pull_secret \
-  vault_kv_secret_v2.oauth2_creds \
-  vault_kv_secret_v2.argo_oauth2_creds \
-  vault_kv_secret_v2.grafana_oauth2_creds \
-  random_password.oauth2_cookie_secret
-```
-
-### 2.3 STACKIT Edge-Specific Notes
-
-The provisioning steps remain the same. The only difference lies in the Terraform output:
-
-* You'll retrieve additional values like `privateLoadBalancerIP` and `publicLoadBalancerIP`
-* These need to be added to `config.yaml`
-
-You must manually create the Kubernetes cluster via the cloud portal. This will be automated in the future.
-
-Now continue with Step 3.
+If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please
+continue with the next section.
 
 ---
-
 ## 3. Helm
 
 This step extends the service catalog:
@@ -484,9 +349,9 @@ Finally, bootstrap your additional ControlPlane:
 
 After bootstrapping your platform, you can:
 
-* [Add Argo CD projects](../2_managing_your_platform/add_app_project.md)
-* [Add Git repositories](../2_managing_your_platform/add_app_repository.md)
-* [Add Argo CD applications](../2_managing_your_platform/add_application.md)
-* [Add Argo CD appset](../2_managing_your_platform/add_appset.md)
-* [Add SSO Configuration](../2_managing_your_platform/add_sso.md)
-* [Add additional worker clusters](../2_managing_your_platform/add_worker_cluster.md)
+* [Add Argo CD projects](/2_managing_your_platform/add_app_project.md)
+* [Add Git repositories](/2_managing_your_platform/add_app_repository.md)
+* [Add Argo CD applications](/2_managing_your_platform/add_application.md)
+* [Add Argo CD appset](/2_managing_your_platform/add_appset.md)
+* [Add SSO Configuration](/2_managing_your_platform/add_sso.md)
+* [Add additional worker clusters](/2_managing_your_platform/add_worker_cluster.md)

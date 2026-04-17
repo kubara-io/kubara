@@ -29,7 +29,7 @@ It contains cluster-specific configurations and your custom values for the kubar
 
 
 ## Architecture
-The Diagramm shows a typical kubara Workflow when following the [manual](bootstrap_process.md)
+The Diagramm shows a typical kubara Workflow when following the [bootstrapping guide](bootstrapping.md)
 
 ``` mermaid
 graph TD
