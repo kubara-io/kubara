@@ -1785,6 +1785,17 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#what-happens-when-oauth2-proxy-is-disabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens when OAuth2 Proxy is disabled?
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2049,6 +2060,17 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#what-happens-when-oauth2-proxy-is-disabled" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What happens when OAuth2 Proxy is disabled?
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2188,6 +2210,10 @@ Each serves a different purpose and can coexist in the same Argo CD setup.</p>
 <li><code>ApplicationSets</code> for scalable, templated application rollout</li>
 </ul>
 <hr />
+<h2 id="what-happens-when-oauth2-proxy-is-disabled">What happens when OAuth2 Proxy is disabled?</h2>
+<p>If you choose to disable OAuth2 Proxy during setup, you skip the OAuth2 Proxy configuration step (part of <a href="../../1_getting_started/bootstrap_process/#22-provisioning-infrastructure">step 2.2</a> in the bootstrap guide).</p>
+<p>Since OAuth2 Proxy provides authentication for ingress routes, no traefik routes are deployed.
+Without them none of your apps will be publicly reachable until you configure an alternative authentication mechanism and deploy the routes.</p>
 
 
 

@@ -1973,15 +1973,19 @@ A Helm registry (e.g. JFrog or Harbor) that serves the (Umbrella-) Helm Charts f
 A Container registry (e.g. JFrog or Harbor) that serves the applications</li>
 <li><strong>Docker Hub Account (optional but recommended)</strong>
 If you are relying on publicly available images (e.g. from dockerhub) you need an user account to pull without rate limits.</li>
-<li><strong>OAuth2 Apps (optional but recommended)</strong>
-    In total we use three OAuth2 Apps:<ul>
+<li>
+<p><strong>OAuth2 Apps (optional but recommended)</strong>
+    In total we use three OAuth2 Apps:</p>
+<ul>
 <li>OAuth2-Proxy App (reverse proxy) that handles authentication for most dashboards</li>
 <li>Argo CD App that handles authentication for Argo CD  UI. Dex is used for handling Argo CD  RBAC once authenticated</li>
 <li>Grafana App that handles authentication for Grafana.</li>
 </ul>
+<p>If you choose not to use OAuth2-Proxy you might run into some issues with your setup.
+For more infos please look at our <a href="../../6_reference/faq/#what-happens-when-oauth2-proxy-is-disabled">FAQ</a>.
+- <strong>Credentials for external-secrets / secret backend (required when not using managed identities)</strong>
+Prepare the provider credentials you will need later during bootstrap to create the Kubernetes secret(s) and configure external-secrets / <code>ClusterSecretStore</code> (see the bootstrap guide).</p>
 </li>
-<li><strong>Credentials for external-secrets / secret backend (required when not using managed identities)</strong>
-Prepare the provider credentials you will need later during bootstrap to create the Kubernetes secret(s) and configure external-secrets / <code>ClusterSecretStore</code> (see the bootstrap guide).</li>
 </ul>
 <hr />
 <p>After setting up these entities (or use existing ones) you need to provide some information to the kubara framework
