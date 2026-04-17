@@ -10,7 +10,7 @@ To do this, you can simply follow the instructions in the chapter: [add appset](
 
 ## Replace components
 
-1. First, you need to disable the corresponding service in config.yaml. See chapter: [Bootstrap Your Platform](../1_getting_started/bootstrap_process.md)
+1. First, you need to disable the corresponding service in config.yaml. See chapter: [Bootstrap Your Platform](../1_getting_started/bootstrapping.md)
 2. Next, you need to re-template your Helm charts with kubara (kubara generate --helm).
    Retemplating will also remove the corresponding entries in your values.yaml files in the customer-service-catalog folder. For example, if you disable Traefik, related ingress directives are removed from generated overlays.
 3. Now you can add the new component (see above, adding components).

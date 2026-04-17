@@ -9,7 +9,9 @@ nav:
       - Core Concept: 1_getting_started/overview_core_concept.md
       - Installation: 1_getting_started/installation.md
       - Prerequisites: 1_getting_started/prerequisites.md
-      - Bootstrap Your Platform: 1_getting_started/bootstrap_process.md
+      - Bootstrapping: 1_getting_started/bootstrapping.md
+      - Providers:
+          - STACKIT: 1_getting_started/providers/stackit.md
   - Managing Your Platform:
       - Add Worker Cluster: 2_managing_your_platform/add_worker_cluster.md
       - Add Project: 2_managing_your_platform/add_app_project.md

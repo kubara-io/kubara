@@ -66,7 +66,7 @@ kubara takes care of:
 
 ## 🚀 Getting Started
 
-Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrap_process.md) to:  
+Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrapping.md) to:  
 
 - Install the CLI
 - Prepare your `.env` and `config.yaml`
