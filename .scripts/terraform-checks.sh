@@ -21,8 +21,10 @@ mkdir -p "${REPORT_DIR}/terraform"
 echo ""
 echo "📦 Starting Terraform static analysis"
 echo "──────────────────────────────────────────────"
-terraform version | head -n 1
-tflint --version | head -n 1
+# Avoid piping to `head` here: with `set -euo pipefail`, an upstream SIGPIPE
+# can abort the script (seen with some tool/version combinations in CI).
+terraform version
+tflint --version
 
 FAILED_DIRS=()
 TARGET_DIRS=(

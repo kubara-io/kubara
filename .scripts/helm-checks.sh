@@ -172,12 +172,16 @@ for chart in $CHARTS; do
         mv "$tmp" "$schema_file"
       fi
     done < <(
+      # Kind is lowercased here because kubeconform lowercases {{.ResourceKind}}
+      # when it expands the -schema-location template. On macOS's case-
+      # insensitive filesystem this does not matter, but on Linux (CI) the
+      # lookup would miss a schema file written with the capitalised kind.
       yq -r '
         select(.kind == "CustomResourceDefinition")
         | .spec as $s
         | $s.versions[]
         | select(.schema.openAPIV3Schema != null)
-        | [$s.group, $s.names.kind, .name, (.schema.openAPIV3Schema | tojson | @base64)]
+        | [$s.group, ($s.names.kind | downcase), .name, (.schema.openAPIV3Schema | tojson | @base64)]
         | @tsv
       ' "$render_file"
     )
