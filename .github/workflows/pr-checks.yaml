@@ -26,6 +26,7 @@ env:
   # renovate: datasource=github-releases depName=terraform-linters/tflint
   TFLINT_VERSION: "v0.61.0"
   ARTIFACT_RETENTION_DAYS: "15"
+  KUBARA_GENERATED_ARTIFACT_NAME: kubara-generated-files-${{ github.run_id }}-${{ github.sha }}
 
 permissions:
   contents: read
@@ -312,7 +313,8 @@ jobs:
       - name: Upload generated helm and terraform files
         uses: actions/upload-artifact@v7
         with:
-          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          name: ${{ env.KUBARA_GENERATED_ARTIFACT_NAME }}
+          overwrite: true
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.OUTPUT_GENERATED_DIR }}
 
@@ -332,7 +334,7 @@ jobs:
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
         with:
-          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          name: ${{ env.KUBARA_GENERATED_ARTIFACT_NAME }}
 
       - name: Verify preinstalled Helm
         run: |
@@ -528,7 +530,7 @@ jobs:
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@v8
         with:
-          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          name: ${{ env.KUBARA_GENERATED_ARTIFACT_NAME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v4
