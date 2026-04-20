@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -449,14 +449,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrap_process/" class="md-nav__link">
+      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Bootstrap Your Platform
+    Bootstrapping
   
 
     
@@ -465,6 +465,91 @@ You're not viewing the latest stable version.
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1687,6 +1772,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../6_reference/known_issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../6_reference/faq/" class="md-nav__link">
         
   
@@ -1902,7 +2015,7 @@ No support can be provided for any components you add yourself.</p>
 <p>To do this, you can simply follow the instructions in the chapter: <a href="../../2_managing_your_platform/add_appset/">add appset</a></p>
 <h2 id="replace-components">Replace components</h2>
 <ol>
-<li>First, you need to disable the corresponding service in config.yaml. See chapter: <a href="../../1_getting_started/bootstrap_process/">Bootstrap Your Platform</a></li>
+<li>First, you need to disable the corresponding service in config.yaml. See chapter: <a href="../../1_getting_started/bootstrapping/">Bootstrap Your Platform</a></li>
 <li>Next, you need to re-template your Helm charts with kubara (kubara generate --helm).
    Retemplating will also remove the corresponding entries in your values.yaml files in the customer-service-catalog folder. For example, if you disable Traefik, related ingress directives are removed from generated overlays.</li>
 <li>Now you can add the new component (see above, adding components).

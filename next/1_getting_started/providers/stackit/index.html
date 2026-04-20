@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/7_decisions/ADR/">
+        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/providers/stackit/">
       
       
-        <link rel="prev" href="../../4_architecture/architecture_overview/">
+        <link rel="prev" href="../../bootstrapping/">
       
       
-        <link rel="next" href="../ADR-index/">
+        <link rel="next" href="../../../2_managing_your_platform/add_worker_cluster/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>ADR - kubara - Docs</title>
+        <title>STACKIT - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,9 +51,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#architecture-decision-records-adr" class="md-skip">
+        <a href="#stackit-cloud-and-edge-setup" class="md-skip">
           Skip to content
         </a>
       
@@ -93,12 +93,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -110,9 +110,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ADR
+              STACKIT
             
           </span>
         </div>
@@ -257,9 +257,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -286,7 +286,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -310,8 +310,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -322,11 +324,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -347,7 +349,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -365,7 +367,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
+      <a href="../../overview_core_concept/" class="md-nav__link">
         
   
   
@@ -393,7 +395,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -421,7 +423,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../../prerequisites/" class="md-nav__link">
         
   
   
@@ -449,7 +451,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../../bootstrapping/" class="md-nav__link">
         
   
   
@@ -474,6 +476,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -483,11 +487,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" checked>
         
           
           <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
@@ -508,7 +512,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -523,10 +527,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -542,6 +573,59 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-terraform-bootstrap" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Terraform Bootstrap
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-provisioning-infrastructure" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Provisioning Infrastructure
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-stackit-edge-specific-notes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. STACKIT Edge-Specific Notes
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -621,7 +705,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
         
   
   
@@ -649,7 +733,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_app_project/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_app_project/" class="md-nav__link">
         
   
   
@@ -677,7 +761,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_app_repository/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_app_repository/" class="md-nav__link">
         
   
   
@@ -705,7 +789,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_appset/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_appset/" class="md-nav__link">
         
   
   
@@ -733,7 +817,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_application/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_application/" class="md-nav__link">
         
   
   
@@ -761,7 +845,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_sso/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_sso/" class="md-nav__link">
         
   
   
@@ -789,7 +873,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_sso_examples/" class="md-nav__link">
+      <a href="../../../2_managing_your_platform/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -876,7 +960,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/components_overview/" class="md-nav__link">
+      <a href="../../../3_components/components_overview/" class="md-nav__link">
         
   
   
@@ -904,7 +988,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/add_or_replace_components/" class="md-nav__link">
+      <a href="../../../3_components/add_or_replace_components/" class="md-nav__link">
         
   
   
@@ -981,7 +1065,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/network_external_dns/" class="md-nav__link">
+      <a href="../../../3_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1066,7 +1150,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/security_certificates/" class="md-nav__link">
+      <a href="../../../3_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1151,7 +1235,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_dashboards/" class="md-nav__link">
+      <a href="../../../3_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1179,7 +1263,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_metrics/" class="md-nav__link">
+      <a href="../../../3_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1207,7 +1291,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_alerts/" class="md-nav__link">
+      <a href="../../../3_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1235,7 +1319,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_logs/" class="md-nav__link">
+      <a href="../../../3_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -1275,8 +1359,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -1289,11 +1371,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -1314,7 +1396,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1332,7 +1414,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../4_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -1357,8 +1439,6 @@ You're not viewing the latest stable version.
                 
   
   
-    
-  
   
   
     
@@ -1368,11 +1448,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_2" >
         
           
           <label class="md-nav__link" for="__nav_5_2" id="__nav_5_2_label" tabindex="0">
@@ -1393,7 +1473,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1408,37 +1488,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    ADR
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../7_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -1454,192 +1507,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#what-is-an-adr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        What is an ADR?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#when-do-we-write-an-adr" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When do we write an ADR?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#where-do-we-store-adrs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Where do we store ADRs?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-numbering-naming" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR numbering &amp; naming
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ADR numbering &amp; naming">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#file-naming-convention" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File naming convention
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-template" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR template
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-we-use-adrs-in-kubara" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How we use ADRs in kubara
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How we use ADRs in kubara">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#process-validated" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Process (validated)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adrs-and-pull-requests-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADRs and Pull Requests / Issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-overview-adr-index" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR overview (ADR Index)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#status-lifecycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Status lifecycle
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-checklist-author" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick checklist (author)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        See also
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1652,7 +1519,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../ADR-index/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -1775,7 +1642,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/maintainers/" class="md-nav__link">
+      <a href="../../../5_community/maintainers/" class="md-nav__link">
         
   
   
@@ -1803,7 +1670,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/support/" class="md-nav__link">
+      <a href="../../../5_community/support/" class="md-nav__link">
         
   
   
@@ -1890,7 +1757,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../6_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -1918,7 +1785,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/known_issues/" class="md-nav__link">
+      <a href="../../../6_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -1946,7 +1813,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/faq/" class="md-nav__link">
+      <a href="../../../6_reference/faq/" class="md-nav__link">
         
   
   
@@ -2113,10 +1980,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#what-is-an-adr" class="md-nav__link">
+  <a href="#1-terraform-bootstrap" class="md-nav__link">
     <span class="md-ellipsis">
       
-        What is an ADR?
+        1. Terraform Bootstrap
       
     </span>
   </a>
@@ -2124,10 +1991,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#when-do-we-write-an-adr" class="md-nav__link">
+  <a href="#2-provisioning-infrastructure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When do we write an ADR?
+        2. Provisioning Infrastructure
       
     </span>
   </a>
@@ -2135,143 +2002,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#where-do-we-store-adrs" class="md-nav__link">
+  <a href="#3-stackit-edge-specific-notes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Where do we store ADRs?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-numbering-naming" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR numbering &amp; naming
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ADR numbering &amp; naming">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#rules" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rules
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#file-naming-convention" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        File naming convention
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-template" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR template
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#how-we-use-adrs-in-kubara" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        How we use ADRs in kubara
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="How we use ADRs in kubara">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#process-validated" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Process (validated)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adrs-and-pull-requests-issues" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADRs and Pull Requests / Issues
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#adr-overview-adr-index" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        ADR overview (ADR Index)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#status-lifecycle" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Status lifecycle
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#quick-checklist-author" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Quick checklist (author)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#see-also" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        See also
+        3. STACKIT Edge-Specific Notes
       
     </span>
   </a>
@@ -2298,115 +2032,218 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="architecture-decision-records-adr">Architecture Decision Records (ADR)</h1>
-<h2 id="what-is-an-adr">What is an ADR?</h2>
-<p>An <strong>Architecture Decision Record (ADR)</strong> documents a <strong>significant technical/architectural decision</strong> in a lightweight and structured way — including context, the decision itself, and its consequences.</p>
-<p>An Architectural Decision (AD) is a justified software design choice that addresses a functional or non-functional requirement of architectural significance.<br />
-(see:  <a href="https://adr.github.io/madr/" target="_blank" rel="noopener">Markdown Architectural Decision Records</a> ) </p>
-<p><strong>Goal:</strong> Improve <strong>traceability</strong>, avoid repeating discussions, and make decisions understandable long after they were made.</p>
-<hr />
-<h2 id="when-do-we-write-an-adr">When do we write an ADR?</h2>
-<p>Write an ADR when a decision:</p>
-<ul>
-<li>has <strong>long-term impact</strong> on the platform or architecture</li>
-<li>affects <strong>core components / shared standards / interfaces</strong></li>
-<li>has <strong>multiple valid alternatives</strong> that need comparison</li>
-<li>impacts <strong>security, scalability, reliability, maintainability</strong></li>
-<li>introduces or replaces a <strong>major technology/tooling choice</strong></li>
-<li>intentionally <strong>deviates from an existing guideline/pattern</strong></li>
-</ul>
-<p>ADRs are <strong>not required</strong> for small refactorings, minor implementation details, or purely operational changes with no architectural impact.</p>
-<hr />
-<h2 id="where-do-we-store-adrs">Where do we store ADRs?</h2>
-<p>ADRs are stored as <strong>Markdown files in the repository</strong> (versioned like code).</p>
-<p><strong>Location:</strong> <code>docs/content/7_decisions/</code></p>
-<p>This ensures ADRs are:
-- reviewable via PR
-- searchable in the codebase
-- permanently available alongside the implementation</p>
-<hr />
-<h2 id="adr-numbering-naming">ADR numbering &amp; naming</h2>
-<p>Each ADR receives a <strong>unique sequential number</strong> to ensure stable references.</p>
-<h3 id="rules">Rules</h3>
-<ul>
-<li>Numbering starts at <code>ADR-0001</code></li>
-<li>Numbers are <strong>never reused</strong></li>
-<li>The number is assigned <strong>when the ADR is created</strong> (proposal stage)</li>
-<li>Even <strong>superseded / deprecated</strong> ADRs keep their original number</li>
-</ul>
-<h3 id="file-naming-convention">File naming convention</h3>
-<div class="highlight"><pre><span></span><code>ADR-&lt;number&gt;-&lt;short-decision-title&gt;.md
+<h1 id="stackit-cloud-and-edge-setup">STACKIT Cloud and Edge setup</h1>
+<p>We recommend using Terraform to provisioning your Kubernetes and additional infrastructure like a Secret Manager instance.
+For this purposes we provide the necessary terraform configuration and modules.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
+</div>
+<p>Generate Terraform modules:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>
-<p>Example:
-<div class="highlight"><pre><span></span><code>ADR-0001-replace-deprecated-nginx-ingress.md
+<p>Commit and push the generated files to your Git repository.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener">Terraform provider documentation</a> &amp; <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener">STACKIT Docs</a>.
+Make sure your created Service Account has Project Owner permissions.</p>
+</div>
+<h2 id="1-terraform-bootstrap">1. Terraform Bootstrap</h2>
+<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
+<p><div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
+cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
+</code></pre></div>
+Set at least <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing.
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
+<span class="c1"># . .\set-env.ps1</span>
 </code></pre></div></p>
-<p><strong>Title guidelines:</strong>
-- lowercase
-- hyphen-separated
-- short and descriptive</p>
-<hr />
-<h2 id="adr-template">ADR template</h2>
-<p>To create a new ADR:  </p>
-<ol>
-<li>Copy <code>ADR-template.md</code> <a href="../ADR-template/">ADR-template</a></li>
-<li>Rename it using the naming convention</li>
-<li>Fill in all sections</li>
-<li>Set the initial status to <code>proposed</code></li>
-</ol>
-<hr />
-<h2 id="how-we-use-adrs-in-kubara">How we use ADRs in kubara</h2>
-<h3 id="process-validated">Process (validated)</h3>
-<p><strong>Create proposal</strong>
-   - Engineer creates an ADR using the template
-   - Status: <code>proposed</code></p>
-<p><strong>Discuss and decide</strong>
-   - ADR is reviewed and discussed in the <strong>maintainer ADR meeting</strong>
-   - Decision is documented inside the ADR<br />
-   - Status becomes: <code>accepted</code> (if approved)</p>
-<p><strong>Implement</strong>
-   - Implementation starts <strong>after acceptance</strong>
-   - Changes are delivered via Pull Requests<br />
-   - Optional status during implementation: <code>active</code></p>
-<p><strong>Merge and persist</strong>
-   - ADR is merged into the repository (usually via PR)
-   - ADR becomes part of the official project documentation</p>
-<p>✅ This ensures the ADR captures the decision <strong>before or during implementation</strong>, not only afterwards.</p>
-<hr />
-<h2 id="adrs-and-pull-requests-issues">ADRs and Pull Requests / Issues</h2>
+<p>Then navigate to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
+</code></pre></div>
+<p>Run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>plan
+terraform<span class="w"> </span>apply
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>plan
+tofu<span class="w"> </span>apply
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Use the output to configure Terraform backend credentials:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>You can set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again, or export them directly:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;&lt;credential_access_key from terraform output&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;credential_secret_access_key from terraform output&gt;&quot;</span>
+</code></pre></div>
+<h2 id="2-provisioning-infrastructure">2. Provisioning Infrastructure</h2>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If you do not intend to use OAuth2 Proxy you can ignore some of the steps in the guide below pertaining to it, but might encounter some issues later.
+For more infos please look at our <a href="../../../6_reference/faq/#what-happens-when-oauth2-proxy-is-disabled">FAQ</a>.</p>
+</div>
+<p>Then proceed to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../infrastructure
+</code></pre></div>
+<p>Run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Terraform</label><label for="__tabbed_3_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>plan
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>plan
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Check the values generated in <code>env.auto.tfvars</code>, which is <a href="https://developer.hashicorp.com/terraform/language/values/variables#assign-values-to-variables" target="_blank" rel="noopener">automatically applied in your Terraform deployment.</a></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Terraform</label><label for="__tabbed_4_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>apply
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>apply
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>This creates the Kubernetes cluster and all required infrastructure.</p>
+<p>Export your kubeconfig:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Terraform</label><label for="__tabbed_5_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files</span>
+terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>kubeconfig_raw<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/.kube/kubara.yaml
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="c1"># change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files</span>
+tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>kubeconfig_raw<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/.kube/kubara.yaml
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Keep this <code>kubara.yaml</code> local and do not commit it to Git.</p>
+<p>Review Terraform outputs:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Terraform</label><label for="__tabbed_6_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Use Terraform outputs to update values in <code>config.yaml</code> where needed (for example, on Edge: <code>privateLoadBalancerIP</code> and <code>publicLoadBalancerIP</code>).
+Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code>; these provider-specific <code>.env</code> variables were removed.</p>
+<p>Sensitive output example:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Terraform</label><label for="__tabbed_7_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>vault_user_ro_password_b64
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>vault_user_ro_password_b64
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>If you use OAuth2, create a GitHub application as shown <a href="/2_managing_your_platform/add_sso.md">here</a>.</p>
+<p>If you want Terraform to create OAuth2-related Vault entries:</p>
 <ul>
-<li>ADRs <strong>can be created and reviewed via PR</strong> (recommended)</li>
-<li>An Issue (bug/feature request) is <strong>optional</strong>, but useful for linking background context</li>
-<li>Best practice: link related PRs/issues in the ADR for traceability</li>
+<li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code></li>
+<li><code>TF_Var_image_pull_secret</code> will already be set by kubara with what is present in the .env</li>
+<li>In <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/infrastructure</code>, copy <code>secrets.tf-example</code> to <code>oauth2-secrets.tf</code> and adjust values if needed</li>
 </ul>
-<hr />
-<h2 id="adr-overview-adr-index">ADR overview (ADR Index)</h2>
-<p>To keep ADRs discoverable, we maintain an <strong>ADR index page</strong> with a quick overview of 
-ADR number with link to the document, title and status. </p>
-<p><strong>Index page location:</strong> <a href="../ADR-index/">ADR-index</a> -&gt; <code>docs/content/7_decisions/ADR-index.md</code> </p>
-<p>The index can be maintained:
-- <strong>manually</strong> (simple table, best for a small number of ADRs), or
-- <strong>automatically</strong> via a small script in CI (recommended once the list grows)</p>
-<hr />
-<h2 id="status-lifecycle">Status lifecycle</h2>
-<p>We use the following ADR status values:</p>
+<p>Load the variables and apply:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Terraform</label><label for="__tabbed_8_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-example<span class="w"> </span>oauth2-secrets.tf
+<span class="nb">source</span><span class="w"> </span>../set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># Copy-Item secrets.tf-example oauth2-secrets.tf</span>
+.<span class="w"> </span>..<span class="se">\s</span>et-env.ps1
+terraform<span class="w"> </span>apply
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-example<span class="w"> </span>oauth2-secrets.tf
+<span class="nb">source</span><span class="w"> </span>../set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># Copy-Item secrets.tf-example oauth2-secrets.tf</span>
+.<span class="w"> </span>..<span class="se">\s</span>et-env.ps1
+tofu<span class="w"> </span>apply
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.</p>
+</div>
+<p>To clean up:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">Terraform</label><label for="__tabbed_9_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>state<span class="w"> </span>rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.image_pull_secret<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.argo_oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.grafana_oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>random_password.oauth2_cookie_secret
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>state<span class="w"> </span>rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.image_pull_secret<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.argo_oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>vault_kv_secret_v2.grafana_oauth2_creds<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>random_password.oauth2_cookie_secret
+</code></pre></div>
+</div>
+</div>
+</div>
+<h2 id="3-stackit-edge-specific-notes">3. STACKIT Edge-Specific Notes</h2>
+<p>The provisioning steps remain the same. The only difference lies in the Terraform output:</p>
 <ul>
-<li><code>proposed</code> – under discussion</li>
-<li><code>accepted</code> – approved decision</li>
-<li><code>active</code> – currently being implemented (optional)</li>
-<li><code>superseded</code> – replaced by a newer ADR</li>
-<li><code>deprecated</code> – no longer valid but kept for traceability</li>
+<li>You'll retrieve additional values like <code>privateLoadBalancerIP</code> and <code>publicLoadBalancerIP</code></li>
+<li>These need to be added to <code>config.yaml</code></li>
 </ul>
+<p>You must manually create the Kubernetes cluster via the cloud portal. This will be automated in the future.</p>
+<p>Now continue with the generic guide on the <a href="../../bootstrapping/">Bootstrap Your Own Platform</a> page.</p>
 <hr />
-<h2 id="quick-checklist-author">Quick checklist (author)</h2>
-<p>Before opening the PR, ensure:
-- [ ] file name follows <code>ADR-000X-...</code>
-- [ ] status is set to <code>proposed</code>
-- [ ] decision context is clear
-- [ ] alternatives are documented
-- [ ] consequences are explicitly stated
-- [ ] references/links are included (optional but recommended)</p>
-<h2 id="see-also">See also</h2>
-<p>For creating proposals for new tools see <a href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue" target="_blank" rel="noopener">here</a>.</p>
 
 
 
@@ -2456,10 +2293,10 @@ ADR number with link to the document, title and status. </p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

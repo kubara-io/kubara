@@ -11,7 +11,7 @@
         <link rel="canonical" href="https://docs.kubara.io/next/6_reference/faq/">
       
       
-        <link rel="prev" href="../release_cycle_and_updates/">
+        <link rel="prev" href="../known_issues/">
       
       
       
@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="../../images/favicon.ico">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.5">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
@@ -447,14 +447,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrap_process/" class="md-nav__link">
+      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Bootstrap Your Platform
+    Bootstrapping
   
 
     
@@ -463,6 +463,91 @@ You're not viewing the latest stable version.
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Providers
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Providers
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -1613,6 +1698,34 @@ You're not viewing the latest stable version.
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../known_issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -2211,9 +2324,8 @@ Each serves a different purpose and can coexist in the same Argo CD setup.</p>
 </ul>
 <hr />
 <h2 id="what-happens-when-oauth2-proxy-is-disabled">What happens when OAuth2 Proxy is disabled?</h2>
-<p>If you choose to disable OAuth2 Proxy during setup, you skip the OAuth2 Proxy configuration step (part of <a href="../../1_getting_started/bootstrap_process/#22-provisioning-infrastructure">step 2.2</a> in the bootstrap guide).</p>
-<p>Since OAuth2 Proxy provides authentication for ingress routes, no traefik routes are deployed.
-Without them none of your apps will be publicly reachable until you configure an alternative authentication mechanism and deploy the routes.</p>
+<p>If you choose to disable OAuth2 Proxy during setup, you skip the OAuth2 Proxy configuration steps as part of the bootstrapping guide.</p>
+<p>Since OAuth2 Proxy provides authentication for ingress routes, as a security measure no traefik routes will be deployed. Without them none of your apps will be publicly reachable until you configure an alternative authentication mechanism and deploy the routes yourself.</p>
 
 
 
