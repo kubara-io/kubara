@@ -179,17 +179,17 @@ If you want Terraform to create OAuth2-related Vault entries:
 
 * Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `customer-service-catalog/terraform/<cluster-name>/`
 * `TF_Var_image_pull_secret` will already be set by kubara with what is present in the .env
-* In `customer-service-catalog/terraform/<cluster-name>/infrastructure`, copy `secrets.tf-example` to `secrets-2.tf` and adjust values if needed
+* In `customer-service-catalog/terraform/<cluster-name>/infrastructure`, copy `secrets.tf-example` to `oauth2-secrets.tf` and adjust values if needed
 
 Load the variables and apply:
 
 === "Terraform"
 
     ```bash
-    cp secrets.tf-example secrets-2.tf
+    cp secrets.tf-example oauth2-secrets.tf
     source ../set-env.sh
     # or for PowerShell
-    # Copy-Item secrets.tf-example secrets-2.tf
+    # Copy-Item secrets.tf-example oauth2-secrets.tf
     . ..\set-env.ps1
     terraform apply
     ```
@@ -197,10 +197,10 @@ Load the variables and apply:
 === "Tofu"
 
     ```bash
-    cp secrets.tf-example secrets-2.tf
+    cp secrets.tf-example oauth2-secrets.tf
     source ../set-env.sh
     # or for PowerShell
-    # Copy-Item secrets.tf-example secrets-2.tf
+    # Copy-Item secrets.tf-example oauth2-secrets.tf
     . ..\set-env.ps1
     tofu apply
     ```
