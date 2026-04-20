@@ -93,7 +93,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ### 1.5 Update and Prepare Templates
 
 !!! info
-    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](/4_architecture/architecture_overview.md#hubnspoke)
+    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
@@ -349,9 +349,9 @@ Finally, bootstrap your additional ControlPlane:
 
 After bootstrapping your platform, you can:
 
-* [Add Argo CD projects](/2_managing_your_platform/add_app_project.md)
-* [Add Git repositories](/2_managing_your_platform/add_app_repository.md)
-* [Add Argo CD applications](/2_managing_your_platform/add_application.md)
-* [Add Argo CD appset](/2_managing_your_platform/add_appset.md)
-* [Add SSO Configuration](/2_managing_your_platform/add_sso.md)
-* [Add additional worker clusters](/2_managing_your_platform/add_worker_cluster.md)
+* [Add Argo CD projects](../2_managing_your_platform/add_app_project.md)
+* [Add Git repositories](../2_managing_your_platform/add_app_repository.md)
+* [Add Argo CD applications](../2_managing_your_platform/add_application.md)
+* [Add Argo CD appset](../2_managing_your_platform/add_appset.md)
+* [Add SSO Configuration](../2_managing_your_platform/add_sso.md)
+* [Add additional worker clusters](../2_managing_your_platform/add_worker_cluster.md)

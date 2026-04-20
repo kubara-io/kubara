@@ -43,6 +43,7 @@ nav:
       - Support: 5_community/support.md
   - Reference:
       - Release Cycle & Updates: 6_reference/release_cycle_and_updates.md
+      - Known Issues: 6_reference/known_issues.md
       - FAQ: 6_reference/faq.md
       - Code of Conduct: https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md
       - Security: https://github.com/kubara-io/kubara/blob/main/SECURITY.md
