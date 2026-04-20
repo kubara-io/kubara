@@ -176,8 +176,11 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 			if err := helm.AddRepository(ctx, repo); err != nil {
 				return fmt.Errorf("adding helm repository %s: %w", repo.Name, err)
 			}
-			log.Info().Msgf("Added helm repository: %s", repo.Name)
 
+			if err := helm.UpdateRepository(ctx, repo); err != nil {
+				return fmt.Errorf("updating helm repository %s: %w", repo.Name, err)
+			}
+			log.Info().Msgf("Added helm repository: %s", repo.Name)
 		}
 	}
 
