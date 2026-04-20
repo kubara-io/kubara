@@ -2,21 +2,25 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"kubara/assets/app"
 	"kubara/assets/config"
 	"kubara/assets/envmap"
+	"kubara/internal/tui"
 	"kubara/utils"
 	"os"
 	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/term"
 )
 
 type InitOptions struct {
 	copyPrepFolder bool
 	force          bool
+	nonInteractive bool
 	cwd            string
 	configFilePath string
 	dotEnvFilePath string
@@ -24,18 +28,20 @@ type InitOptions struct {
 }
 
 type InitFlags struct {
-	PrepFlag      bool
-	ForceFlag     bool
-	EnvFileFlag   string
-	EnvPrefixFlag string
+	PrepFlag       bool
+	ForceFlag      bool
+	NonInteractive bool
+	EnvFileFlag    string
+	EnvPrefixFlag  string
 }
 
 func NewInitFlags() *InitFlags {
 	return &InitFlags{
-		PrepFlag:      false,
-		ForceFlag:     false,
-		EnvFileFlag:   ".env",
-		EnvPrefixFlag: "KUBARA_",
+		PrepFlag:       false,
+		ForceFlag:      false,
+		NonInteractive: false,
+		EnvFileFlag:    ".env",
+		EnvPrefixFlag:  "KUBARA_",
 	}
 }
 
@@ -72,6 +78,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	o := &InitOptions{
 		copyPrepFolder: flags.PrepFlag,
 		force:          flags.ForceFlag,
+		nonInteractive: flags.NonInteractive,
 		cwd:            cwd,
 		configFilePath: configFilePath,
 		dotEnvFilePath: dotEnvFilePath,
@@ -93,6 +100,12 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Value:       flags.ForceFlag,
 			Usage:       "Overwrite config if exists",
 			Destination: &flags.ForceFlag,
+		},
+		&cli.BoolFlag{
+			Name:        "non-interactive",
+			Value:       flags.NonInteractive,
+			Usage:       "Disable interactive TUI mode and use env-only init",
+			Destination: &flags.NonInteractive,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",
@@ -181,6 +194,32 @@ func (o *InitOptions) Run() error {
 	} else if err != nil {
 		return err
 	} else {
+		if o.shouldUseInteractiveMode() {
+			answers, errUI := tui.RunInitialConfigWizard(tui.AnswersFromEnvMap(em.GetConfig()))
+			if errUI != nil {
+				if errors.Is(errUI, tui.ErrUserCancelled) {
+					log.Info().Msg("Initialization cancelled by user")
+					return nil
+				}
+				return errUI
+			}
+
+			answers.ApplyToEnvMap(em.GetConfig())
+			if errValidate := em.Validate(); errValidate != nil {
+				return fmt.Errorf("error validating env: %w", errValidate)
+			}
+
+			newCluster := config.NewClusterFromEnv(em.GetConfig())
+			applyServiceSelection(&newCluster.Services, answers.Services)
+			cm.GetConfig().Clusters = []config.Cluster{newCluster}
+			errSave := cm.SaveToFile()
+			if errSave != nil {
+				return errSave
+			}
+			log.Info().Msgf("Generated config in path: %v", cm.GetFilepath())
+			return nil
+		}
+
 		if EnvValidateErr != nil {
 			log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
 			return fmt.Errorf("error validating env: %w", EnvValidateErr)
@@ -200,4 +239,68 @@ func (o *InitOptions) Run() error {
 
 	return nil
 
+}
+
+func (o *InitOptions) shouldUseInteractiveMode() bool {
+	if o.nonInteractive {
+		return false
+	}
+	return term.IsTerminal(int(os.Stdin.Fd())) && term.IsTerminal(int(os.Stdout.Fd()))
+}
+
+func setGenericService(enabled bool, svc *config.GenericService) {
+	if enabled {
+		svc.Status = config.StatusEnabled
+		return
+	}
+	svc.Status = config.StatusDisabled
+}
+
+func applyServiceSelection(services *config.Services, selected map[string]bool) {
+	for key, enabled := range selected {
+		switch key {
+		case "argocd":
+			setGenericService(enabled, &services.Argocd)
+		case "cert-manager":
+			if enabled {
+				services.CertManager.Status = config.StatusEnabled
+			} else {
+				services.CertManager.Status = config.StatusDisabled
+			}
+		case "external-dns":
+			setGenericService(enabled, &services.ExternalDns)
+		case "external-secrets":
+			setGenericService(enabled, &services.ExternalSecrets)
+		case "kube-prometheus-stack":
+			if enabled {
+				services.KubePrometheusStack.Status = config.StatusEnabled
+			} else {
+				services.KubePrometheusStack.Status = config.StatusDisabled
+			}
+		case "traefik":
+			setGenericService(enabled, &services.Traefik)
+		case "kyverno":
+			setGenericService(enabled, &services.Kyverno)
+		case "kyverno-policies":
+			setGenericService(enabled, &services.KyvernoPolicies)
+		case "kyverno-policy-reporter":
+			setGenericService(enabled, &services.KyvernoPolicyReport)
+		case "loki":
+			if enabled {
+				services.Loki.Status = config.StatusEnabled
+			} else {
+				services.Loki.Status = config.StatusDisabled
+			}
+		case "homer-dashboard":
+			setGenericService(enabled, &services.HomerDashboard)
+		case "oauth2-proxy":
+			setGenericService(enabled, &services.Oauth2Proxy)
+		case "metrics-server":
+			setGenericService(enabled, &services.MetricsServer)
+		case "metallb":
+			setGenericService(enabled, &services.MetalLb)
+		case "longhorn":
+			setGenericService(enabled, &services.Longhorn)
+		}
+	}
 }
