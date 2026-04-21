@@ -10,3 +10,9 @@ spec:
   status: enabled
   clusterTypes:
     - controlplane
+  configSchema:
+    type: object
+    properties:
+      storageClassName:
+        type: string
+        description: "Optional storageClassName to override the clusters default"

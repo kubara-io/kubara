@@ -1,12 +1,15 @@
-{{- $kyvernoPolicyReporterIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
+{{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
+{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
+{{- $kyvernoPolicyReporterIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" .) -}}
+{{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd,\nkyverno-policy-reporter-strip-kyverno-prefix@kubernetescrd" -}}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "traefik.ingress.kubernetes.io/app-root" "/kyverno/#/" -}}
 {{- end -}}
-{{- $kyvernoPolicyReporterIngressAnnotations = mergeOverwrite $kyvernoPolicyReporterIngressAnnotations (dig "cluster" "services" "kyvernoPolicyReport" "ingress" "annotations" (dict) .) -}}
+{{- $kyvernoPolicyReporterIngressAnnotations = mergeOverwrite $kyvernoPolicyReporterIngressAnnotations (dig "cluster" "services" "kyverno-policy-reporter" "ingress" "annotations" (dict) .) -}}
 
 namespace:
   labels:
@@ -25,7 +28,7 @@ policy-reporter:
   ui:
     enabled: true
     ingress:
-      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+      {{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
       {{- end }}
 {{- with .cluster.ingressClassName }}
@@ -42,7 +45,7 @@ policy-reporter:
         - secretName: tls-kyverno-ui
           hosts:
             - {{ .cluster.dnsName }}
-{{ if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) }}
+{{ if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) }}
 middleware:
   name: strip-kyverno-prefix
   namespace: kyverno-policy-reporter

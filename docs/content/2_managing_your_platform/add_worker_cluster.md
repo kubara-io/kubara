@@ -54,7 +54,8 @@ clusters:
         status: enabled
       kube-prometheus-stack:
         status: enabled
-        storageClassName: standard-rwo # optional
+        config:
+            storageClassName: standard-rwo # optional
       traefik:
         status: enabled
       kyverno:
@@ -65,7 +66,8 @@ clusters:
         status: enabled
       loki:
         status: enabled
-        storageClassName: standard-rwo # optional
+        config:
+            storageClassName: standard-rwo # optional
       homer-dashboard:
         status: enabled
       oauth2-proxy:

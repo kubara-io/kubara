@@ -1,11 +1,15 @@
-{{- $kubePromIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" . -}}
+{{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
+{{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
+{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
+{{- $kubePromIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
+{{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $kubePromIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $kubePromIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
-{{- $kubePromIngressAnnotations = mergeOverwrite $kubePromIngressAnnotations (dig "cluster" "services" "kubePrometheusStack" "ingress" "annotations" (dict) .) -}}
+{{- $kubePromIngressAnnotations = mergeOverwrite $kubePromIngressAnnotations (dig "cluster" "services" "kube-prometheus-stack" "ingress" "annotations" (dict) .) -}}
 
 kube-prometheus-stack:
   global:
@@ -30,7 +34,7 @@ kube-prometheus-stack:
 {{- end }}
       annotations:
 {{ toYaml $kubePromIngressAnnotations | nindent 8 }}
-{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}
       paths:
@@ -54,7 +58,7 @@ kube-prometheus-stack:
           spec:
             accessModes:
               - ReadWriteOnce
-{{- with .cluster.services.kubePrometheusStack.storageClassName }}
+{{- with (dig "cluster" "services" "kube-prometheus-stack" "storageClassName" nil .) }}
             storageClassName: {{ . }}
 {{- end }}
             resources:
@@ -76,7 +80,7 @@ kube-prometheus-stack:
 {{- end }}
       annotations:
 {{ toYaml $kubePromIngressAnnotations | nindent 8 }}
-{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}
       paths:
@@ -185,7 +189,7 @@ kube-prometheus-stack:
 {{- end }}
       annotations:
 {{ toYaml $kubePromIngressAnnotations | nindent 8 }}
-{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}
       path: /grafana
@@ -196,7 +200,7 @@ kube-prometheus-stack:
         - secretName: tls-grafana
           hosts:
             - {{ .cluster.dnsName }}
-{{- if (eq .cluster.services.oauth2Proxy.status "enabled") }}
+{{- if (eq $oauth2ProxyStatus "enabled") }}
     envFromSecrets:
       - name: oauth2-credentials
 {{- end }}
@@ -204,7 +208,7 @@ kube-prometheus-stack:
       server:
         root_url: https://{{ .cluster.dnsName }}/grafana/
         serve_from_sub_path: true
-      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+      {{- if (eq $oauth2ProxyStatus "enabled") }}
       auth.github:
         name: "Github"
         enabled: true
