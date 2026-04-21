@@ -54,29 +54,20 @@ func AddRepository(ctx context.Context, opts RepoOptions) error {
 	return nil
 }
 
-// UpdateRepository updates a helm repository
-func UpdateRepository(name string, timeout time.Duration) error {
-	args := []string{"repo", "update"}
-	if name != "" {
-		args = append(args, name)
-	}
+// UpdateRepository fetches updates for a helm repository
+func UpdateRepository(ctx context.Context, opts RepoOptions) error {
+	args := []string{"repo", "update", opts.Name}
 
-	cmd := exec.Command("helm", args...)
-	var stderr bytes.Buffer
+	var stdout, stderr bytes.Buffer
+	cmd := exec.CommandContext(ctx, "helm", args...)
+	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-
-	if timeout > 0 {
-		ctx, cancel := context.WithTimeout(context.Background(), timeout)
-		defer cancel()
-		cmd = exec.CommandContext(ctx, "helm", args...)
-		cmd.Stderr = &stderr
-	}
 
 	err := cmd.Run()
 	if err != nil {
 		return &HelmRepoError{
 			Operation: "update",
-			RepoName:  name,
+			RepoName:  opts.Name,
 			Err:       err,
 			Stderr:    stderr.String(),
 		}
