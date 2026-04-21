@@ -1,14 +1,21 @@
-{{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" .cluster.services.certManager.clusterIssuer.name -}}
-{{- if (and (eq .cluster.services.oauth2Proxy.status "enabled") (eq .cluster.services.traefik.status "enabled")) -}}
+{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" . -}}
+{{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
+{{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
+{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
+{{- $kubePrometheusStatus := dig "cluster" "services" "kube-prometheus-stack" "status" "disabled" . -}}
+{{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
+{{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
+{{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
+{{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
-{{- if (eq .cluster.services.metalLb.status "enabled") -}}
+{{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homerDashboard" "ingress" "annotations" (dict) .) -}}
+{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homer-dashboard" "ingress" "annotations" (dict) .) -}}
 
 ingress:
-  {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+  {{- if (eq $oauth2ProxyStatus "enabled") }}
   enabled: true
   {{- end }}
   host: {{ .cluster.dnsName }}
@@ -25,7 +32,7 @@ namespace:
 imagePullSecrets:
   - name: image-pull-secret
 serviceMonitor:
-  {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+  {{- if (eq $kubePrometheusStatus "enabled") }}
   enabled: true
   {{- end }}
   additionalLabels:
@@ -108,7 +115,7 @@ dashboardConfig:
           url: "/argocd/"
           subtitle: "GitOps Deployment Dashboard"
           target: "_blank"
-        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+        {{- if (eq $kubePrometheusStatus "enabled") }}
         - name: "grafana"
           logo: "/assets/tools/grafana.png"
           url: "/grafana/"
@@ -125,21 +132,21 @@ dashboardConfig:
           subtitle: "Alertmanager Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if (eq (index .cluster.services "longhorn" "status") "enabled") }}
+        {{- if (eq $longhornStatus "enabled") }}
         - name: "longhorn"
           logo: "/assets/tools/longhorn.png"
           url: "/longhorn/"
           subtitle: "Storage Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if (eq (index .cluster.services "kyverno" "status") "enabled") }}
+        {{- if (eq $kyvernoStatus "enabled") }}
         - name: "kyverno"
           logo: "/assets/tools/kyverno.png"
           url: "/kyverno/"
           subtitle: "Policy Reporter Dashboard"
           target: "_blank"
         {{- end }}
-        {{- if and (eq (index .cluster.services "traefik" "status") "enabled") (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+        {{- if and (eq $traefikStatus "enabled") (eq $oauth2ProxyStatus "enabled") }}
         - name: "traefik"
           logo: "/assets/tools/traefik.png"
           url: "https://{{ .cluster.dnsName }}/traefik/dashboard/"

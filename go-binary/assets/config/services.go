@@ -152,6 +152,9 @@ func mergeConfigDefaults(defaults, provided map[string]any) map[string]any {
 	}
 
 	out := cloneMap(defaults)
+	if out == nil {
+		out = make(map[string]any, len(provided))
+	}
 	for k, v := range provided {
 		existing, hasExisting := out[k]
 		defaultMap, defaultIsMap := existing.(map[string]any)
