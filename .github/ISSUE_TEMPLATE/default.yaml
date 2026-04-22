@@ -5,15 +5,6 @@ title: "[Issue]: "
 labels: ["triage"]
 assignees: []
 body:
-  - type: markdown
-    validations:
-      required: true
-    attributes:
-      value: |
-        ## 📝 Summary / Description
-        <!-- Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
-        Briefly describe the issue or request. What is the problem, question, or improvement you're raising? -->
-
   - type: dropdown
     id: type-of-issue
     attributes:
@@ -26,17 +17,22 @@ body:
     validations:
       required: true
 
-  - type: input
-    id: related
+  - type: textarea
+    id: summary
     attributes:
-      label: 🔗 Related Issues / References
-      placeholder: "# 42, # 123"
+      label: "📝 Description"
+      description: |
+        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
+      placeholder: |
+        Briefly describe the issue or request. What is the problem, question, or improvement you're raising?
+    validations:
+      required: true
 
   - type: textarea
     id: additional
     attributes:
       label: 📎 Additional Context / Logs
-      description: Paste logs, screenshots, or links to related docs here.
+      description: Paste logs, screenshots, or links to related docs or issues here.
 
   - type: textarea
     id: steps
