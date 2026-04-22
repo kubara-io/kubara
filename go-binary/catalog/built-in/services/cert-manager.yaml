@@ -17,6 +17,8 @@ spec:
     properties:
       clusterIssuer:
         type: object
+        # empty default is required to respect the default values of the nested properties
+        # if the parent object doesn't have a default block, the default values of the nested properties are ignored
         default: {}
         required:
           - name
