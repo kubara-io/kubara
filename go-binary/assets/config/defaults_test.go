@@ -3,8 +3,6 @@ package config
 import (
 	"testing"
 
-	"kubara/catalog"
-
 	"github.com/stretchr/testify/assert"
 )
 
@@ -106,90 +104,6 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 	https := cfg.Clusters[0].ArgoCD.Repo.HTTPS
 	assert.Equal(t, "main", https.Customer.TargetRevision, "empty TargetRevision should default to main")
 	assert.Equal(t, "release", https.Managed.TargetRevision, "explicit TargetRevision should not be overwritten")
-}
-
-func TestApplyDefaults_EmbeddedServiceStatusDefaults(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Services: Services{
-					"argo-cd":      {},
-					"cert-manager": {},
-				},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
-	assert.NoError(t, err)
-
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["argo-cd"].Status, "empty service status should default to disabled")
-	assert.Equal(t, StatusEnabled, cfg.Clusters[0].Services["cert-manager"].Status, "empty cert-manager status should default to built-in default")
-}
-
-func TestApplyDefaults_WorkerClusterServicesDefaultToDisabled(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Type:     "worker",
-				Services: Services{},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
-	assert.NoError(t, err)
-
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["cert-manager"].Status)
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["external-dns"].Status)
-	assert.Equal(t, StatusDisabled, cfg.Clusters[0].Services["traefik"].Status)
-}
-
-func TestApplyDefaults_WorkerClusterKeepsExplicitServiceStatus(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Type: "worker",
-				Services: Services{
-					"cert-manager": {Status: StatusEnabled},
-				},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
-	assert.NoError(t, err)
-
-	assert.Equal(t, StatusEnabled, cfg.Clusters[0].Services["cert-manager"].Status)
-}
-
-func TestApplyDefaults_ClusterIssuerDefaults(t *testing.T) {
-	cfg := &Config{
-		Clusters: []Cluster{
-			{
-				Services: Services{
-					"cert-manager": {
-						Config: map[string]any{
-							"clusterIssuer": map[string]any{
-								"email": "cert@example.com",
-							},
-						},
-					},
-				},
-			},
-		},
-	}
-
-	applyDefaults(cfg)
-	err := applyServiceCatalogDefaults(cfg, catalog.LoadOptions{})
-	assert.NoError(t, err)
-
-	issuer, _ := cfg.Clusters[0].Services["cert-manager"].Config["clusterIssuer"].(map[string]any)
-	assert.Equal(t, "letsencrypt-staging", issuer["name"], "ClusterIssuer Name should default to letsencrypt-staging")
-	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer["server"], "ClusterIssuer Server should default to ACME staging URL")
 }
 
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {

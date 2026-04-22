@@ -608,7 +608,7 @@ func TestTemplateFiles(t *testing.T) {
 						},
 						"homer-dashboard": map[string]any{
 							"status": "enabled",
-							"ingress": map[string]any{
+							"networking": map[string]any{
 								"annotations": map[string]any{
 									"cert-manager.io/cluster-issuer":             "letsencrypt-custom",
 									"nginx.ingress.kubernetes.io/rewrite-target": "/",
@@ -673,7 +673,7 @@ func TestTemplateFiles(t *testing.T) {
 						},
 						"homer-dashboard": map[string]any{
 							"status": "enabled",
-							"ingress": map[string]any{
+							"networking": map[string]any{
 								"annotations": map[string]any{
 									"nginx.ingress.kubernetes.io/auth-url": "http://oauth2-proxy/oauth2/auth",
 								},
