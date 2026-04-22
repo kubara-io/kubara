@@ -12,7 +12,7 @@ loki:
     persistence:
       enabled: true
       size: 5Gi
-{{- with (dig "cluster" "services" "loki" "config" "storageClassName" .) }}
+{{- with (dig "cluster" "services" "loki" "storage" "className" nil .) }}
       storageClass: {{ . }}
 {{- end }}
   monitoring:

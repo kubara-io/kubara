@@ -12,7 +12,7 @@
 {{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homer-dashboard" "ingress" "annotations" (dict) .) -}}
+{{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homer-dashboard" "networking" "annotations" (dict) .) -}}
 
 ingress:
   {{- if (eq $oauth2ProxyStatus "enabled") }}

@@ -81,7 +81,7 @@ externalSecrets:
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
 {{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
 {{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" . -}}
-{{- $argocdUserIngressAnnotations := dig "cluster" "services" "argo-cd" "ingress" "annotations" (dict) . -}}
+{{- $argocdUserIngressAnnotations := dig "cluster" "services" "argo-cd" "networking" "annotations" (dict) . -}}
 {{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}

@@ -9,7 +9,7 @@
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $kubePromIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
-{{- $kubePromIngressAnnotations = mergeOverwrite $kubePromIngressAnnotations (dig "cluster" "services" "kube-prometheus-stack" "ingress" "annotations" (dict) .) -}}
+{{- $kubePromIngressAnnotations = mergeOverwrite $kubePromIngressAnnotations (dig "cluster" "services" "kube-prometheus-stack" "networking" "annotations" (dict) .) -}}
 
 kube-prometheus-stack:
   global:
@@ -58,7 +58,7 @@ kube-prometheus-stack:
           spec:
             accessModes:
               - ReadWriteOnce
-{{- with (dig "cluster" "services" "kube-prometheus-stack" "storageClassName" nil .) }}
+{{- with (dig "cluster" "services" "kube-prometheus-stack" "storage" "className" nil .) }}
             storageClassName: {{ . }}
 {{- end }}
             resources:

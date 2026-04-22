@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 
+	"kubara/assets/service"
 	"kubara/catalog"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -49,17 +50,12 @@ func (cm *Manager) Load() error {
 	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return fmt.Errorf("failed to parse yaml config: %w", err)
 	}
-	migrated, err := migrateRawConfig(raw)
-	if err != nil {
-		return err
-	}
 
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
 		Result:           cm.config,
 		Squash:           true,
-		DecodeHook:       mapstructure.ComposeDecodeHookFunc(decodeServiceHook()),
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
 	if err != nil {
@@ -72,11 +68,6 @@ func (cm *Manager) Load() error {
 	applyDefaults(cm.config)
 	if err := applyServiceCatalogDefaults(cm.config, cm.catalogOptions); err != nil {
 		return err
-	}
-	if migrated {
-		if err := cm.SaveToFile(); err != nil {
-			return fmt.Errorf("failed to persist migrated config: %w", err)
-		}
 	}
 
 	return nil
@@ -112,6 +103,7 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 	if err := json.Unmarshal(b, &schemaDoc); err != nil {
 		return nil, fmt.Errorf("unmarshal schema: %w", err)
 	}
+	ensureServiceConfigDefinition(schemaDoc)
 
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
@@ -122,6 +114,22 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 	}
 
 	return schemaDoc, nil
+}
+
+func ensureServiceConfigDefinition(schemaDoc map[string]any) {
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	if !ok {
+		return
+	}
+	if _, exists := defs["Config"]; exists {
+		return
+	}
+	defs["Config"] = map[string]any{
+		"type":                 "object",
+		"title":                "Service Config",
+		"description":          "Service-specific configuration",
+		"additionalProperties": true,
+	}
 }
 
 func (cm *Manager) Validate() error {
@@ -253,17 +261,20 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 			"type":        "string",
 			"title":       "Service Status",
 			"description": "The desired status of the service.",
-			"enum":        []any{string(StatusEnabled), string(StatusDisabled)},
+			"enum":        []any{string(service.StatusEnabled), string(service.StatusDisabled)},
 		},
 	}
 
 	if definition.Spec.ConfigSchema != nil {
-		configSchema, err := catalog.ToMap(definition.Spec.ConfigSchema)
+		configSchema, err := toMap(definition.Spec.ConfigSchema)
 		if err != nil {
 			return nil, err
 		}
 		properties["config"] = configSchema
 	}
+
+	properties["storage"] = buildServiceStorageSchema()
+	properties["networking"] = buildServiceNetworkingSchema()
 
 	return map[string]any{
 		"type":                 "object",
@@ -271,4 +282,93 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 		"properties":           properties,
 		"required":             []any{"status"},
 	}, nil
+}
+
+func buildServiceStorageSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"properties": map[string]any{
+			"className": map[string]any{
+				"type":        "string",
+				"title":       "Storage Class Name",
+				"description": "Optional storage class name override for persistent volumes.",
+				"minLength":   1,
+			},
+		},
+	}
+}
+
+func buildServiceNetworkingSchema() map[string]any {
+	return map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"properties": map[string]any{
+			"annotations": map[string]any{
+				"type":                 "object",
+				"title":                "Ingress Annotations",
+				"description":          "Optional ingress annotation overrides for this service.",
+				"additionalProperties": map[string]any{"type": "string"},
+			},
+		},
+	}
+}
+
+func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOptions) error {
+	cat, err := catalog.Load(catalogOptions)
+	if err != nil {
+		return fmt.Errorf("failed loading catalog: %w", err)
+	}
+
+	for i, cluster := range config.Clusters {
+		if cluster.Services == nil {
+			cluster.Services = make(service.Services, len(cat.Services))
+		}
+
+		for name, def := range cat.Services {
+			existing, exists := cluster.Services[name]
+			if !exists {
+				cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, map[string]any{})
+				if err != nil {
+					return fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+				}
+
+				cluster.Services[name] = service.Service{
+					Status: def.Spec.Status,
+					Config: cfg,
+				}
+				continue
+			}
+
+			statusUpdated := false
+			if existing.Status == "" {
+				existing.Status = def.Spec.Status
+				statusUpdated = true
+			}
+
+			if def.Spec.ConfigSchema == nil {
+				if statusUpdated {
+					cluster.Services[name] = existing
+				}
+				continue
+			}
+
+			base := map[string]any{}
+			for k, v := range existing.Config {
+				base[k] = service.CloneValue(v)
+			}
+
+			cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, base)
+			if err != nil {
+				return fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+			}
+
+			existing.Config = cfg
+			cluster.Services[name] = existing
+		}
+
+		config.Clusters[i] = cluster
+	}
+
+	return nil
 }

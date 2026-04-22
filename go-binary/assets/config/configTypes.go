@@ -1,5 +1,7 @@
 package config
 
+import "kubara/assets/service"
+
 // Config is the root of the configuration structure.
 type Config struct {
 	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
@@ -23,9 +25,9 @@ type Cluster struct {
 	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
 	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
 
-	Terraform *Terraform `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
-	ArgoCD    ArgoCD     `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
-	Services  Services   `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
+	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
+	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
+	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }
 
 type Terraform struct {
@@ -65,21 +67,3 @@ type Repository struct {
 type HelmRepository struct {
 	URL string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Helm repository URL or OCI registry URL (without oci:// prefix),minLength=1"`
 }
-
-type ServiceStatus struct {
-	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
-}
-
-type Status string
-
-const (
-	StatusEnabled  Status = "enabled"
-	StatusDisabled Status = "disabled"
-)
-
-type ServiceInstance struct {
-	Status Status         `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
-	Config map[string]any `json:"config,omitempty" yaml:"config,omitempty" jsonschema:"title=Service Config,description=Service-specific configuration"`
-}
-
-type Services map[string]ServiceInstance

@@ -1,8 +1,9 @@
 package config
 
 import (
-	"kubara/catalog"
 	"kubara/assets/envmap"
+	"kubara/catalog"
+	"kubara/assets/service"
 	"path/filepath"
 	"testing"
 
@@ -73,22 +74,31 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 		// The service defaults are catalog-driven; mirror expected built-in values.
-		Services: Services{
-			"argo-cd":                 {Status: StatusDisabled},
-			"cert-manager":            {Status: StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "yourname@your-domain.de", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-			"external-dns":            {Status: StatusEnabled},
-			"external-secrets":        {Status: StatusEnabled},
-			"kube-prometheus-stack":   {Status: StatusEnabled},
-			"traefik":                 {Status: StatusEnabled},
-			"kyverno":                 {Status: StatusEnabled},
-			"kyverno-policies":        {Status: StatusEnabled},
-			"kyverno-policy-reporter": {Status: StatusEnabled},
-			"loki":                    {Status: StatusEnabled},
-			"homer-dashboard":         {Status: StatusEnabled},
-			"oauth2-proxy":            {Status: StatusEnabled},
-			"metrics-server":          {Status: StatusDisabled},
-			"metallb":                 {Status: StatusDisabled},
-			"longhorn":                {Status: StatusDisabled},
+		Services: service.Services{
+			"argo-cd": {Status: service.StatusDisabled},
+			"cert-manager": {
+				Status: service.StatusEnabled,
+				Config: service.Config{
+					"clusterIssuer": map[string]any{
+						"name":   "letsencrypt-staging",
+						"email":  "yourname@your-domain.de",
+						"server": "https://acme-staging-v02.api.letsencrypt.org/directory",
+					},
+				},
+			},
+			"external-dns":            {Status: service.StatusEnabled},
+			"external-secrets":        {Status: service.StatusEnabled},
+			"kube-prometheus-stack":   {Status: service.StatusEnabled},
+			"traefik":                 {Status: service.StatusEnabled},
+			"kyverno":                 {Status: service.StatusEnabled},
+			"kyverno-policies":        {Status: service.StatusEnabled},
+			"kyverno-policy-reporter": {Status: service.StatusEnabled},
+			"loki":                    {Status: service.StatusEnabled},
+			"homer-dashboard":         {Status: service.StatusEnabled},
+			"oauth2-proxy":            {Status: service.StatusEnabled},
+			"metrics-server":          {Status: service.StatusDisabled},
+			"metallb":                 {Status: service.StatusDisabled},
+			"longhorn":                {Status: service.StatusDisabled},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster

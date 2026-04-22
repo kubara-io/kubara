@@ -9,6 +9,7 @@ import (
 	"kubara/assets/config"
 	"kubara/assets/envmap"
 	"kubara/cmd"
+	"kubara/assets/service"
 	"kubara/templates"
 
 	"github.com/stretchr/testify/assert"
@@ -17,23 +18,23 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-func createTestServices() config.Services {
-	return config.Services{
-		"argo-cd":                 {Status: config.StatusEnabled},
-		"cert-manager":            {Status: config.StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            {Status: config.StatusEnabled},
-		"external-secrets":        {Status: config.StatusEnabled},
-		"kube-prometheus-stack":   {Status: config.StatusEnabled, Config: map[string]any{"storageClassName": "standard-rwo"}},
-		"traefik":                 {Status: config.StatusEnabled},
-		"kyverno":                 {Status: config.StatusEnabled},
-		"kyverno-policies":        {Status: config.StatusEnabled},
-		"kyverno-policy-reporter": {Status: config.StatusEnabled},
-		"loki":                    {Status: config.StatusEnabled, Config: map[string]any{"storageClassName": "standard-rwo"}},
-		"homer-dashboard":         {Status: config.StatusEnabled},
-		"oauth2-proxy":            {Status: config.StatusEnabled},
-		"metrics-server":          {Status: config.StatusEnabled},
-		"metallb":                 {Status: config.StatusEnabled},
-		"longhorn":                {Status: config.StatusEnabled},
+func createTestServices() service.Services {
+	return service.Services{
+		"argo-cd":                 {Status: service.StatusEnabled},
+		"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
+		"external-dns":            {Status: service.StatusEnabled},
+		"external-secrets":        {Status: service.StatusEnabled},
+		"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+		"traefik":                 {Status: service.StatusEnabled},
+		"kyverno":                 {Status: service.StatusEnabled},
+		"kyverno-policies":        {Status: service.StatusEnabled},
+		"kyverno-policy-reporter": {Status: service.StatusEnabled},
+		"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+		"homer-dashboard":         {Status: service.StatusEnabled},
+		"oauth2-proxy":            {Status: service.StatusEnabled},
+		"metrics-server":          {Status: service.StatusEnabled},
+		"metallb":                 {Status: service.StatusEnabled},
+		"longhorn":                {Status: service.StatusEnabled},
 	}
 }
 

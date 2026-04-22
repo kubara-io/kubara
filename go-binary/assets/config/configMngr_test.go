@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 	"testing"
 
+	"kubara/assets/service"
+
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -48,22 +50,22 @@ func newValidTestConfig() *Config {
 						},
 					},
 				},
-				Services: Services{
-					"argo-cd":                 {Status: StatusEnabled},
-					"cert-manager":            {Status: StatusEnabled, Config: map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
-					"external-dns":            {Status: StatusEnabled},
-					"external-secrets":        {Status: StatusEnabled},
-					"kube-prometheus-stack":   {Status: StatusEnabled, Config: map[string]any{"storageClassName": "standard-rwo"}},
-					"traefik":                 {Status: StatusEnabled},
-					"kyverno":                 {Status: StatusEnabled},
-					"kyverno-policies":        {Status: StatusEnabled},
-					"kyverno-policy-reporter": {Status: StatusEnabled},
-					"loki":                    {Status: StatusEnabled, Config: map[string]any{"storageClassName": "standard-rwo"}},
-					"homer-dashboard":         {Status: StatusEnabled},
-					"oauth2-proxy":            {Status: StatusEnabled},
-					"metrics-server":          {Status: StatusEnabled},
-					"metallb":                 {Status: StatusEnabled},
-					"longhorn":                {Status: StatusEnabled},
+				Services: service.Services{
+					"argo-cd":                 {Status: service.StatusEnabled},
+					"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
+					"external-dns":            {Status: service.StatusEnabled},
+					"external-secrets":        {Status: service.StatusEnabled},
+					"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+					"traefik":                 {Status: service.StatusEnabled},
+					"kyverno":                 {Status: service.StatusEnabled},
+					"kyverno-policies":        {Status: service.StatusEnabled},
+					"kyverno-policy-reporter": {Status: service.StatusEnabled},
+					"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
+					"homer-dashboard":         {Status: service.StatusEnabled},
+					"oauth2-proxy":            {Status: service.StatusEnabled},
+					"metrics-server":          {Status: service.StatusEnabled},
+					"metallb":                 {Status: service.StatusEnabled},
+					"longhorn":                {Status: service.StatusEnabled},
 				},
 			},
 		},
@@ -306,7 +308,7 @@ func TestManager_SaveToFile(t *testing.T) {
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
 				ArgoCD:   ArgoCD{},
-				Services: Services{},
+				Services: service.Services{},
 			},
 		},
 	}
@@ -497,108 +499,6 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	assert.Contains(t, properties, "cert-manager")
 	assert.Contains(t, properties, "argo-cd")
 	assert.Contains(t, properties, "metallb")
-}
-
-func TestManager_Load_NormalizesLegacyServiceConfig(t *testing.T) {
-	legacyYAML := `
-clusters:
-  - name: legacy-cluster
-    dnsName: legacy.example.com
-    argocd:
-      repo:
-        https:
-          customer:
-            url: "https://github.com/customer/repo.git"
-          managed:
-            url: "https://github.com/managed/repo.git"
-    services:
-      certManager:
-        clusterIssuer:
-          email: legacy@example.com
-      externalDns: {}
-`
-
-	tempDir := t.TempDir()
-	configPath := filepath.Join(tempDir, "legacy-config.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
-
-	cm := NewConfigManager(configPath)
-	require.NoError(t, cm.Load())
-	assert.Equal(t, ConfigVersionV1Alpha1, cm.GetConfig().Version)
-
-	services := cm.GetConfig().Clusters[0].Services
-
-	certManager, ok := services["cert-manager"]
-	require.True(t, ok)
-	assert.Equal(t, StatusEnabled, certManager.Status)
-
-	issuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "legacy@example.com", issuer["email"])
-	assert.Equal(t, "letsencrypt-staging", issuer["name"])
-	assert.Equal(t, "https://acme-staging-v02.api.letsencrypt.org/directory", issuer["server"])
-
-	externalDNS, ok := services["external-dns"]
-	require.True(t, ok)
-	assert.Equal(t, StatusEnabled, externalDNS.Status)
-
-	_, hasLegacyKey := services["certManager"]
-	assert.False(t, hasLegacyKey, "legacy service key should be normalized to kebab-case")
-
-	rewrittenRaw, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-	assert.Contains(t, string(rewrittenRaw), "version: v1alpha1")
-	assert.Contains(t, string(rewrittenRaw), "cert-manager:")
-	assert.NotContains(t, string(rewrittenRaw), "certManager:")
-}
-
-func TestManager_Load_V1Alpha1ConfigSkipsMigration(t *testing.T) {
-	// A v1alpha1 config with inline keys is an invalid/inconsistent state.
-	// The migration must NOT run for already-versioned configs. Inline keys
-	// are ignored by the decoder; catalog defaults fill missing config values.
-	inlineKeysYAML := `
-version: v1alpha1
-clusters:
-  - name: migrated-cluster
-    dnsName: migrated.example.com
-    argocd:
-      repo:
-        https:
-          customer:
-            url: "https://github.com/customer/repo.git"
-          managed:
-            url: "https://github.com/managed/repo.git"
-    services:
-      cert-manager:
-        status: enabled
-        clusterIssuer:
-          email: migrated@example.com
-      external-dns:
-        status: enabled
-`
-
-	tempDir := t.TempDir()
-	configPath := filepath.Join(tempDir, "v1alpha1-with-inline.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(inlineKeysYAML), 0644))
-
-	cm := NewConfigManager(configPath)
-	require.NoError(t, cm.Load())
-
-	services := cm.GetConfig().Clusters[0].Services
-	certManager, ok := services["cert-manager"]
-	require.True(t, ok)
-	assert.Equal(t, StatusEnabled, certManager.Status)
-
-	// Inline keys are not migrated for v1alpha1 configs. The decoder ignores
-	// them and catalog defaults are applied instead.
-	issuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "yourname@your-domain.de", issuer["email"], "catalog default should be used, not the ignored inline value")
-
-	// The config file should NOT have been rewritten (no migration occurred).
-	rewrittenRaw, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-	assert.Contains(t, string(rewrittenRaw), "clusterIssuer:", "original file should be unchanged")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {

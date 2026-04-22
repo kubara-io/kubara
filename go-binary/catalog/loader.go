@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"go.yaml.in/yaml/v3"
+	"sigs.k8s.io/yaml"
 )
 
 const servicesDirectory = "services"
@@ -114,16 +114,6 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 		}
 		if err := definition.Validate(); err != nil {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
-		}
-
-		// Reject non-canonical names. ServiceDefinitions are a new format
-		// and must use canonical kebab-case names from the start.
-		canonicalName := CanonicalServiceName(definition.Metadata.Name)
-		if canonicalName != definition.Metadata.Name {
-			return Catalog{}, fmt.Errorf(
-				"service definition %q uses non-canonical name %q, must be %q",
-				path, definition.Metadata.Name, canonicalName,
-			)
 		}
 
 		if _, exists := catalog.Services[definition.Metadata.Name]; exists {

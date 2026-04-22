@@ -17,6 +17,7 @@ spec:
     properties:
       clusterIssuer:
         type: object
+        default: {}
         required:
           - name
           - email

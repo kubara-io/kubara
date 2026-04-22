@@ -1,8 +1,11 @@
 package config
 
 import (
-	"kubara/catalog"
+	"fmt"
+
 	"kubara/assets/envmap"
+	"kubara/catalog"
+	"kubara/assets/service"
 )
 
 // NewClusterFromEnv creates a new Cluster configuration populated with default
@@ -60,4 +63,39 @@ func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadO
 		ArgoCD:   argoCD,
 		Services: services,
 	}, nil
+}
+
+func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, clusterType string) (service.Services, error) {
+	cat, err := catalog.Load(catalogOptions)
+	if err != nil {
+		return nil, fmt.Errorf("failed to load catalog: %w", err)
+	}
+
+	services := make(service.Services, len(cat.Services))
+	for name, def := range cat.Services {
+		if clusterType != "" && len(def.Spec.ClusterTypes) > 0 {
+			include := false
+			for _, allowed := range def.Spec.ClusterTypes {
+				if allowed == clusterType {
+					include = true
+					break
+				}
+			}
+			if !include {
+				continue
+			}
+		}
+
+		cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, map[string]any{})
+		if err != nil {
+			return nil, fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+		}
+
+		services[name] = service.Service{
+			Status: def.Spec.Status,
+			Config: cfg,
+		}
+	}
+
+	return services, nil
 }

@@ -2,7 +2,7 @@
 {{- if (eq (index .cluster.services "metallb" "status") "enabled") -}}
 {{- $_ := set $oauth2ProxyIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- $oauth2ProxyIngressAnnotations = mergeOverwrite $oauth2ProxyIngressAnnotations (dig "cluster" "services" "oauth2-proxy" "ingress" "annotations" (dict) .) -}}
+{{- $oauth2ProxyIngressAnnotations = mergeOverwrite $oauth2ProxyIngressAnnotations (dig "cluster" "services" "oauth2-proxy" "networking" "annotations" (dict) .) -}}
 
 namespace:
   labels:

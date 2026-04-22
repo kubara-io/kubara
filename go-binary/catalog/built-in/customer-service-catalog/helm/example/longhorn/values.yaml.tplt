@@ -5,7 +5,7 @@
 {{- if (eq (index .cluster.services "metallb" "status") "enabled") -}}
 {{- $_ := set $longhornIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}
-{{- $longhornIngressAnnotations = mergeOverwrite $longhornIngressAnnotations (dig "cluster" "services" "longhorn" "ingress" "annotations" (dict) .) -}}
+{{- $longhornIngressAnnotations = mergeOverwrite $longhornIngressAnnotations (dig "cluster" "services" "longhorn" "networking" "annotations" (dict) .) -}}
 
 longhorn:
   privateRegistry:
