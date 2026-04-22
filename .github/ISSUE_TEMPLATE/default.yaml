@@ -6,19 +6,13 @@ labels: ["triage"]
 assignees: []
 body:
   - type: markdown
-    attributes:
-      value: |
-        ## 📝 Summary
-        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
-        Briefly describe the issue or request. What is the problem, question, or improvement you're raising?
-
-  - type: textarea
-    id: summary
-    attributes:
-      label: Summary
-      placeholder: "Kubara does not install correctly when using custom CRDs..."
     validations:
       required: true
+    attributes:
+      value: |
+        ## 📝 Summary / Description
+        <!-- Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
+        Briefly describe the issue or request. What is the problem, question, or improvement you're raising? -->
 
   - type: dropdown
     id: type-of-issue
@@ -32,16 +26,17 @@ body:
     validations:
       required: true
 
-  - type: textarea
-    id: description
+  - type: input
+    id: related
     attributes:
-      label: 🔍 Description
-      description: Describe the issue in detail. What did you expect, and what happened instead?
-      placeholder: |
-        - Expected: Kubara installs platform components successfully.
-        - Actual: Helm deployment hangs indefinitely.
-    validations:
-      required: true
+      label: 🔗 Related Issues / References
+      placeholder: "# 42, # 123"
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context / Logs
+      description: Paste logs, screenshots, or links to related docs here.
 
   - type: textarea
     id: steps
@@ -56,7 +51,7 @@ body:
   - type: textarea
     id: environment
     attributes:
-      label: 💻 Environment
+      label: 💻 Environment (for bugs)
       description: Provide relevant environment details.
       placeholder: |
         - Kubara version: v1.4.2
@@ -75,15 +70,3 @@ body:
         - label: I am using the latest version of Kubara
         - label: The issue is reproducible
         - label: This is not a duplicate
-
-  - type: input
-    id: related
-    attributes:
-      label: 🔗 Related Issues / References
-      placeholder: "# 42, # 123"
-
-  - type: textarea
-    id: additional
-    attributes:
-      label: 📎 Additional Context / Logs
-      description: Paste logs, screenshots, or links to related docs here.
