@@ -1,43 +1,53 @@
+---
 name: Release
 description: Next release ticket (to be used by maintainers only)
 title: "[Release]: next"
 labels: ["release"]
-body: |
-  # Release Plan
-  
-  ## Pre-release
-  
-  ### Step 1: Get an overview of open PRs
-  - [ ] Are there any open PRs relevant for the release? 
-  - [ ] Check with Team if there are any questions regarding the PRs
-  
-  ### Step 2: Merge PRs
-  - [ ] Helm & Terraform Updates
-  - [ ] Check Pull requests (renovate)
-  - [ ] Take a look at everything (check Changelog) - Are there any Breaking changes?
-        Merge accordingly or create a new task for complex changes.
-  - [ ] Test changes
-  
-  ## Release Day
-  
-  ### Step 1: Manual regression checks
-  
-  - [ ] Check [Docs](https://docs.kubara.io/next/) consistency and bootstrapping guide
-  - [ ] Does the build work?
-  - [ ] Does the bootstrapping workflow and deploy of a new test cluster work?
-  - [ ] ArgoCD, everything ok?
-  - [ ] OAuth2 endpoints, login works?
-  - [ ] Pods running, everything ok?
-  - [ ] Ingresses, everything reachable?
-  - [ ] Does the upgrade path work from the previous version work?
-  - [ ] Cleanup: Test environment
-  
-  ### Step 2: Ready for release
-  
-  Trigger release by setting a new tag and push to main.
-  
-  Check the [release pipeline](https://github.com/kubara-io/kubara/actions/workflows/release.yaml)
-  - [ ] Does the goreleaser built all platforms successfully?
-  - [ ] Have all artifacts been published (binaries, sbom, licenses, container)?
-  - [ ] Has the docs `latest-dev` version been promoted to `latest-stable`
-  - [ ] (Internal): Trigger [release notification](https://github.com/kubara-io/kubara/actions/workflows/release-announce-google-chat.yaml)
+assignees: []
+body:
+  - type: textarea
+    id: plan
+    attributes:
+      label: "Release plan"
+      description: DO NOT EDIT THE CONTENTS
+      value: |
+        ---
+
+        ### Pre-release
+
+        #### Step 1: Get an overview of open PRs
+        - [ ] Are there any open PRs relevant for the release? 
+        - [ ] Check with Team if there are any questions regarding the PRs
+
+        #### Step 2: Merge PRs
+        - [ ] Helm & Terraform Updates
+        - [ ] Check Pull requests (renovate)
+        - [ ] Take a look at everything (check Changelog) - Are there any Breaking changes?
+              Merge accordingly or create a new task for complex changes.
+        - [ ] Test changes
+
+        ### Release Day
+
+        #### Step 1: Manual regression checks
+
+        - [ ] Check [Docs](https://docs.kubara.io/next/) consistency and bootstrapping guide
+        - [ ] Does the build work?
+        - [ ] Does the bootstrapping workflow and deploy of a new test cluster work?
+        - [ ] ArgoCD, everything ok?
+        - [ ] OAuth2 endpoints, login works?
+        - [ ] Pods running, everything ok?
+        - [ ] Ingresses, everything reachable?
+        - [ ] Does the upgrade path work from the previous version work?
+        - [ ] Cleanup: Test environment
+
+        #### Step 2: Ready for release
+
+        Trigger release by setting a new tag and push to main.
+
+        Check the [release pipeline](https://github.com/kubara-io/kubara/actions/workflows/release.yaml)
+        - [ ] Does the goreleaser built all platforms successfully?
+        - [ ] Have all artifacts been published (binaries, sbom, licenses, container)?
+        - [ ] Has the docs `latest-dev` version been promoted to `latest-stable`
+        - [ ] (Internal): Trigger [release notification](https://github.com/kubara-io/kubara/actions/workflows/release-announce-google-chat.yaml)
+    validations:
+      required: true
