@@ -10,4 +10,3 @@ spec:
   status: enabled
   clusterTypes:
     - controlplane
-  storage: {}

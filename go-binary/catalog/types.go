@@ -43,10 +43,6 @@ type ServiceSpec struct {
 	Status service.Status `json:"status"`
 	// ClusterTypes limits the service to specific cluster types.
 	ClusterTypes []string `json:"clusterTypes,omitempty"`
-	// Storage describes storage primitives at service instance level.
-	Storage service.Storage `json:"storage,omitempty"`
-	// Networking describes networking primitives at service instance level.
-	Networking service.Networking `json:"networking,omitempty"`
 	// ConfigSchema describes config values using OpenAPI v3 schema props.
 	ConfigSchema *apiextensionsv1.JSONSchemaProps `json:"configSchema,omitempty"`
 }

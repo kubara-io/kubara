@@ -263,6 +263,8 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 			"description": "The desired status of the service.",
 			"enum":        []any{string(service.StatusEnabled), string(service.StatusDisabled)},
 		},
+		"storage":    buildServiceStorageSchema(),
+		"networking": buildServiceNetworkingSchema(),
 	}
 
 	if definition.Spec.ConfigSchema != nil {
@@ -272,9 +274,6 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 		}
 		properties["config"] = configSchema
 	}
-
-	properties["storage"] = buildServiceStorageSchema()
-	properties["networking"] = buildServiceNetworkingSchema()
 
 	return map[string]any{
 		"type":                 "object",
