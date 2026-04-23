@@ -35,7 +35,7 @@ policy-reporter:
       className: {{ . }}
 {{- end }}
       annotations:
-{{ toYaml $kyvernoPolicyReporterIngressAnnotations | nindent 8 }}
+        {{- toYaml $kyvernoPolicyReporterIngressAnnotations | nindent 8 }}
       hosts:
         - host: {{ .cluster.dnsName }}
           paths:
