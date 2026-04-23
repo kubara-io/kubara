@@ -133,10 +133,6 @@ func ensureServiceConfigDefinition(schemaDoc map[string]any) {
 }
 
 func (cm *Manager) Validate() error {
-	if err := applyServiceCatalogDefaults(cm.config, cm.catalogOptions); err != nil {
-		return err
-	}
-
 	schemaDoc, err := GenerateSchemaWithCatalog(cm.catalogOptions)
 	if err != nil {
 		return err
