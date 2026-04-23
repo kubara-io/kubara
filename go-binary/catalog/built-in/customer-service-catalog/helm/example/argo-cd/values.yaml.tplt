@@ -107,7 +107,7 @@ argo-cd:
       {{- end }}
       tls: true
       annotations:
-        {{ toYaml $argocdIngressGrpcAnnotations | nindent 8 }}
+        {{- toYaml $argocdIngressGrpcAnnotations | nindent 8 }}
     ingress:
       {{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
@@ -118,7 +118,7 @@ argo-cd:
       {{- end }}
       tls: true
       annotations:
-        {{ toYaml $argocdIngressAnnotations | nindent 8 }}
+        {{- toYaml $argocdIngressAnnotations | nindent 8 }}
   configs:
     {{- if (eq $oauth2ProxyStatus "enabled") }}
     cm:

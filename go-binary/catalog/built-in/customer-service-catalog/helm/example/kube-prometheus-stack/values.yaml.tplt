@@ -33,7 +33,7 @@ kube-prometheus-stack:
       ingressClassName: {{ . }}
 {{- end }}
       annotations:
-{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+        {{- toYaml $kubePromIngressAnnotations | nindent 8 }}
 {{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}
@@ -79,7 +79,7 @@ kube-prometheus-stack:
       ingressClassName: {{ . }}
 {{- end }}
       annotations:
-{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+        {{- toYaml $kubePromIngressAnnotations | nindent 8 }}
 {{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}
@@ -188,7 +188,7 @@ kube-prometheus-stack:
       ingressClassName: {{ . }}
 {{- end }}
       annotations:
-{{ toYaml $kubePromIngressAnnotations | nindent 8 }}
+        {{- toYaml $kubePromIngressAnnotations | nindent 8 }}
 {{- if (eq $oauth2ProxyStatus "enabled") }}
       enabled: true
 {{- end }}

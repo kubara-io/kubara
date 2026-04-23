@@ -47,7 +47,7 @@ oauth2-proxy:
     className: {{ . }}
 {{- end }}
     annotations:
-{{ toYaml $oauth2ProxyIngressAnnotations | nindent 6 }}
+      {{- toYaml $oauth2ProxyIngressAnnotations | nindent 6 }}
     enabled: true
     path: /oauth2
     pathType: Prefix

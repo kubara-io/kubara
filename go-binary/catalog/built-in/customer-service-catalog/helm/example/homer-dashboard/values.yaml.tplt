@@ -24,7 +24,7 @@ ingress:
   ingressClassName: {{ . }}
 {{- end }}
   annotations:
-{{ toYaml $homerIngressAnnotations | nindent 4 }}
+    {{- toYaml $homerIngressAnnotations | nindent 4 }}
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"
