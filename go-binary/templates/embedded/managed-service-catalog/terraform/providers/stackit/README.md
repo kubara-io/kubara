@@ -206,19 +206,153 @@ Then:
 ```bash
 terraform init
 terraform plan
+```
+
+Before `terraform apply`, decide whether this cluster is SKE or Edge.
+
+### SKE path
+
+```bash
 terraform apply
 ```
 
-🎉 This provisions everything:
+This provisions the Kubernetes cluster and the shared infrastructure.
 
-- Kubernetes (Edge or Public)
+### Edge path
+
+Edge follows an ordered flow and usually requires multiple applies:
+
+Set all Edge module toggles in:
+
+- `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`
+
+In many setups, you can skip `edge_image` and reuse an existing image ID via `edge_hosts.image_id`.
+
+1. Configure `edge_instance` in `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars` (create or reuse).
+2. Keep `edge_image.create = false` for the first apply.
+3. Keep `edge_hosts.create = false` for the first apply unless `edge_hosts.image_id` is already set and you want direct host provisioning.
+4. Run first apply:
+
+```bash
+terraform apply
+```
+
+5. Check whether a suitable STACKIT project image already exists. If yes, set `edge_hosts.image_id`, keep `edge_image.create = false`, then continue with step 9.
+6. If no suitable image exists, create an `EdgeImage` via `kubectl`, wait for `Ready`, and download the artifact.
+   If you plan to run Longhorn, include `siderolabs/iscsi-tools` and `siderolabs/util-linux-tools` in the `EdgeImage` system extensions.
+7. Set `edge_image.create = true` and set `edge_image.local_file_path` in `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars` to the downloaded artifact.
+8. Run apply and read `edge_uploaded_image_id` from output (for example `terraform output edge_uploaded_image_id`).
+9. Set `edge_hosts.image_id` to that ID (or keep your existing image ID), set `edge_hosts.create = true`, and configure `edge_hosts.nodes`.
+10. Run second apply (if configured, `edge_hosts` creates VM/network-based hosts):
+
+```bash
+terraform apply
+```
+
+11. Wait until hosts register as `EdgeHost`, then create `EdgeCluster` via `kubectl`.
+
+If your hosts are provisioned externally (for example bare metal, mixed environments, or multi-cloud), skip `edge_hosts` and use only the API-based `EdgeImage`/`EdgeCluster` workflow.
+
+How to read image information:
+
+- List existing `EdgeImage` resources (STEC side):
+
+```bash
+kubectl get edgeimages.edge.stackit.cloud
+kubectl get edgeimage <name> -o yaml
+```
+
+- List available `image-factory` Talos versions (STEC side):
+
+```bash
+INSTANCE_REGION="eu01"
+curl https://image-factory.edge.$INSTANCE_REGION.stackit.cloud/versions
+```
+
+  These versions are not directly usable as `edge_hosts.image_id`.
+
+- For Terraform host provisioning, you need a STACKIT project image ID for `edge_hosts.image_id`:
+  - copy an existing ID from your STACKIT project image list (UI), or
+  - use the Terraform upload module once and read:
+
+```bash
+terraform output edge_uploaded_image_id
+```
+
+If you use an existing image for Longhorn and know the related `EdgeImage`, verify that these extensions are present in that image configuration:
+
+```bash
+kubectl get edgeimage <name> -o yaml
+# check spec.schematic -> customization.systemExtensions.officialExtensions
+# expected: siderolabs/iscsi-tools and siderolabs/util-linux-tools
+```
+
+🎉 In summary, Terraform provisions your selected infrastructure:
+
+- Kubernetes (SKE)
 - DNS zone
 - IAM roles
 - Vault (Secrets Manager)
 - Secrets in Vault
 - Buckets
-- Image uploads (optional)
+- Edge Cloud instance (optional)
+- Edge image upload (optional)
+- Edge host VM/network provisioning (optional)
 - And more...
+
+---
+
+## 🧭 Edge-Specific Notes
+
+Edge Cloud setups are usually individual. Depending on your environment, you might:
+
+- provision nodes as STACKIT VMs,
+- run bare metal only,
+- run a mixed model (VM + bare metal),
+- or run hosts across multiple clouds.
+
+kubara shows one example path and the Edge Terraform modules are optional:
+
+- `edge_instance` is optional (`create` toggles the module; use `create = false` + `instance_id` to reuse an existing instance)
+- `edge_image` is optional (`create` toggles the module; upload runs only if `local_file_path` is set)
+- `edge_hosts` is optional (`create` toggles the module; host provisioning runs only if `nodes` is not empty)
+- for `edge_hosts`, set `edge_hosts.image_id` explicitly (existing image or `edge_uploaded_image_id` from a prior upload apply)
+
+You can also skip Edge Terraform entirely and use only the kubara Helm/GitOps stack.
+
+`EdgeImage` and `EdgeCluster` are managed via Kubernetes API (`kubectl`) and are intentionally outside Terraform state in this setup.
+
+Important distinction:
+
+- `EdgeImage` and `image-factory` versions describe STEC boot artifacts and profiles.
+- `edge_hosts.image_id` must be a STACKIT project image ID (Compute/IaaS image), not an `image-factory` version string.
+
+STEC (STACKIT Edge Cloud) can be managed through UI, CLI, or API:
+
+- UI is often the fastest manual path for image and cluster creation.
+- CLI/API with manifests is better for reproducibility and audit trail (for example in Git).
+
+kubara examples use manifest-based workflows for traceability, but the operating model is your choice.
+
+When Longhorn is enabled on Talos-based Edge clusters, include these extensions in your `EdgeImage` manifest:
+
+```yaml
+systemExtensions:
+  officialExtensions:
+    - siderolabs/iscsi-tools
+    - siderolabs/util-linux-tools
+```
+
+If your existing STACKIT project image was built from an `EdgeImage` profile that already includes these extensions, no extra rebuild is required.
+
+Official references:
+
+- [Edge Cloud overview](https://docs.stackit.cloud/products/runtime/edge-cloud/)
+- [Using the API](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-the-api/)
+- [Creating images](https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/creating-images/)
+- [Using extensions](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-extensions/)
+- [Creating clusters](https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/creating-clusters/)
+- [Longhorn Talos Linux support](https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/)
 
 ---
 
@@ -228,7 +362,7 @@ terraform apply
 
 ![STACKIT Edge](images/edge-0.png)
 
-In the picture above you can see what happening behind the scenes and which resources are created. The difference to the following public cloud architecture is that the Edge Cloud uses MetalLB for load balancing and does not require a public IP address. Also you create a server over terraform which be used to deploy the kubernetes cluster through providing or referencing a talos image.
+In the picture above you can see what happening behind the scenes and which resources are created. For Edge, the actual cluster lifecycle (`EdgeImage` / `EdgeCluster`) is managed via Kubernetes API, while Terraform handles only the selected infrastructure parts (instance/image upload/hosts).
 
 ### Public Cloud (SKE) Architecture
 
@@ -240,7 +374,7 @@ In the picture above you can see what happening behind the scenes and which reso
 
 ## 🔑 Step 6 – Export Kubeconfig
 
-Extract and save the kubeconfig:
+Extract and save the kubeconfig (SKE):
 
 ```bash
 terraform output -json kubeconfig_raw | jq -r > ~/.kube/<CLUSTERNAME>.yaml
@@ -251,6 +385,8 @@ Then use it:
 ```bash
 KUBECONFIG=~/.kube/<CLUSTERNAME>.yaml kubectl get nodes
 ```
+
+For Edge, Terraform outputs infrastructure metadata only (for example `edge_instance_id`, `edge_frontend_url`, `edge_status`, `edge_host_metadata`).
 
 ---
 

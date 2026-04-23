@@ -46,18 +46,38 @@ output "kubeconfig_raw" {
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
 ### Edge Cloud Instance
-output "server_id" {
-  description = "ID of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.server_id
+output "edge_instance_id" {
+  description = "ID of the Edge Cloud instance"
+  value       = length(module.edge_instance) > 0 ? module.edge_instance[0].instance_id : null
 }
 
-output "public_ip" {
-  description = "Public IP of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.public_ip
+output "edge_frontend_url" {
+  description = "Frontend URL of the Edge Cloud instance (null when reusing an existing instance)"
+  value       = length(module.edge_instance) > 0 ? module.edge_instance[0].frontend_url : null
 }
 
-output "private_ip" {
-  description = "Private IP of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.private_ip
+output "edge_status" {
+  description = "Status of the Edge Cloud instance (null when reusing an existing instance)"
+  value       = length(module.edge_instance) > 0 ? module.edge_instance[0].status : null
+}
+
+output "edge_uploaded_image_id" {
+  description = "ID of the image uploaded by edge_image module. Null when edge_image module is skipped."
+  value       = length(module.edge_image) > 0 ? module.edge_image[0].image_id : null
+}
+
+output "edge_host_metadata" {
+  description = "Per-node metadata (IDs and IPs). Empty map until edge hosts are provisioned."
+  value       = length(module.edge_hosts) > 0 ? module.edge_hosts[0].host_metadata : {}
+}
+
+output "edge_network_id" {
+  description = "ID of the shared edge host network. Null until edge hosts are provisioned."
+  value       = length(module.edge_hosts) > 0 ? module.edge_hosts[0].network_id : null
+}
+
+output "edge_security_group_id" {
+  description = "ID of the shared edge host security group. Null until edge hosts are provisioned."
+  value       = length(module.edge_hosts) > 0 ? module.edge_hosts[0].security_group_id : null
 }
 {{ end }}

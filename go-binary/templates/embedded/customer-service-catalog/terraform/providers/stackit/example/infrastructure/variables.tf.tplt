@@ -23,12 +23,12 @@ variable "acls" {
 }
 
 variable "users" {
-  description = <<EOF
+  description = <<EOF_USERS
 List of users to create.
 Each element must be an object with:
-- description (string): human‐readable ID for the user
+- description (string): human-readable ID for the user
 - write_enabled (bool): whether this user has write access
-EOF
+EOF_USERS
   type = list(object({
     description   = string
     write_enabled = bool
@@ -87,7 +87,7 @@ variable "kubernetes_version_min" {
 }
 
 variable "node_pools" {
-  description = <<EOF
+  description = <<EOF_NODE_POOLS
 List of node pools. Each element must be an object with:
 - name               = string
 - machine_type       = string
@@ -101,7 +101,7 @@ List of node pools. Each element must be an object with:
     value  = string
     effect = string
   }))
-EOF
+EOF_NODE_POOLS
   type = list(object({
     name               = string
     machine_type       = string
@@ -145,31 +145,91 @@ variable "expiration" {
 
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
-### Edgecloud variables
-variable "ipv4_prefix" {
-  description = "IPv4 prefix for the edgecloud .cluster"
-  type        = string
-}
-
-variable "controlplane" {
-  description = "Config for control plane nodes"
+### Edge instance variables
+variable "edge_instance" {
+  description = "Edge instance behavior. You can create a new instance or reuse an existing instance_id."
   type = object({
-    flavor                   = string
-    volume_size              = number
-    volume_performance_class = string
+    create       = optional(bool, true)
+    instance_id  = optional(string, "")
+    plan         = optional(string, "preview")
+    display_name = optional(string, "edge")
+    region       = optional(string, "")
+    description  = optional(string, "")
   })
-  default = {
-    flavor                   = "c1.4"
-    volume_size              = 30
-    volume_performance_class = "storage_premium_perf1"
+  default = {}
+
+  validation {
+    condition     = !try(var.edge_instance.create, true) || trimspace(try(var.edge_instance.display_name, "")) != ""
+    error_message = "edge_instance.display_name must be set when edge_instance.create is true."
+  }
+
+  validation {
+    condition     = trimspace(try(var.edge_instance.display_name, "")) == "" || can(regex("^[a-z0-9][a-z0-9-]{2,6}[a-z0-9]$", trimspace(try(var.edge_instance.display_name, ""))))
+    error_message = "edge_instance.display_name must be empty or a valid hostname label with 4 to 8 characters."
   }
 }
 
+### Edge image variables
+variable "edge_image" {
+  description = "Edge image upload settings. Set create=true to enable upload."
+  type = object({
+    create                   = optional(bool, false)
+    local_file_path          = optional(string, "")
+    name                     = optional(string, "")
+    disk_format              = optional(string, "raw")
+    min_disk_size            = optional(number, 30)
+    operating_system         = optional(string, "linux")
+    operating_system_distro  = optional(string, "talos")
+    operating_system_version = optional(string, "v1.9.5")
+  })
+  default = {}
 
-variable "edgecloud_image_id" {
-  description = "Edgecloud image ID"
-  type        = string
-  default     = "7b670c7f-9c8e-47a6-8463-e6943c8b44bb"
+  validation {
+    condition     = !try(var.edge_image.create, false) || trimspace(try(var.edge_image.local_file_path, "")) != ""
+    error_message = "edge_image.local_file_path must be set when edge_image.create is true."
+  }
+}
+
+### Edge host variables
+variable "edge_hosts" {
+  description = "Edge host infrastructure definitions. Set create=true to enable host provisioning. edge_hosts.image_id must be set for host provisioning."
+  type = object({
+    create              = optional(bool, false)
+    image_id            = optional(string, "")
+    name_prefix         = optional(string, "")
+    network_name        = optional(string, "")
+    security_group_name = optional(string, "")
+    ipv4_prefix         = optional(string, "10.0.50.0")
+    ipv4_prefix_length  = optional(number, 24)
+    ipv4_nameservers    = optional(list(string), ["1.1.1.1", "1.0.0.1", "8.8.8.8"])
+    ingress_tcp_ports   = optional(list(number), [80, 443])
+    common_labels       = optional(map(string), {})
+    nodes = optional(list(object({
+      name                     = string
+      role                     = string
+      flavor                   = string
+      volume_size              = number
+      volume_performance_class = string
+      availability_zone        = string
+      assign_public_ip         = optional(bool, true)
+      labels                   = optional(map(string), {})
+    })), [])
+  })
+  default = {}
+
+  validation {
+    condition     = !try(var.edge_hosts.create, false) || length(try(var.edge_hosts.nodes, [])) == 0 || trimspace(try(var.edge_hosts.image_id, "")) != ""
+    error_message = "edge_hosts.image_id must be set when edge_hosts.create is true and edge_hosts.nodes are configured."
+  }
+
+  validation {
+    condition = !try(var.edge_hosts.create, false) || length(try(var.edge_hosts.nodes, [])) == 0 || (
+      trimspace(try(var.edge_hosts.name_prefix, "")) != "" &&
+      trimspace(try(var.edge_hosts.network_name, "")) != "" &&
+      trimspace(try(var.edge_hosts.security_group_name, "")) != ""
+    )
+    error_message = "edge_hosts.name_prefix, edge_hosts.network_name and edge_hosts.security_group_name must be set when edge_hosts.nodes are configured."
+  }
 }
 {{- end }}
 

@@ -50,23 +50,56 @@ module "ske_cluster" {
 
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
-module "edgecloud_cluster_controlplane" {
-  source = "../../../../managed-service-catalog/terraform/modules/edge-cluster"
+module "edge_instance" {
+  count = try(var.edge_instance.create, true) || trimspace(try(var.edge_instance.instance_id, "")) != "" ? 1 : 0
 
-  name               = "controlplane-${var.name}-${var.stage}"
-  project_id         = var.project_id
-  ipv4_prefix        = var.ipv4_prefix
-  edgecloud_image_id = var.edgecloud_image_id
-  controlplane       = var.controlplane
+  source = "../../../../managed-service-catalog/terraform/modules/edge-instance"
+
+  project_id = var.project_id
+
+  create       = var.edge_instance.create
+  instance_id  = var.edge_instance.instance_id
+  plan_name    = var.edge_instance.plan
+  display_name = trimspace(try(var.edge_instance.display_name, ""))
+  region       = trimspace(try(var.edge_instance.region, "")) != "" ? trimspace(try(var.edge_instance.region, "")) : var.region
+  description  = var.edge_instance.description
+}
+
+module "edge_image" {
+  count = try(var.edge_image.create, false) && trimspace(try(var.edge_image.local_file_path, "")) != "" ? 1 : 0
+
+  source = "../../../../managed-service-catalog/terraform/modules/edge-image"
+
+  project_id      = var.project_id
+  name            = trimspace(try(var.edge_image.name, "")) != "" ? trimspace(try(var.edge_image.name, "")) : "talos-${var.name}-${var.stage}"
+  local_file_path = var.edge_image.local_file_path
+  disk_format     = var.edge_image.disk_format
+  min_disk_size   = var.edge_image.min_disk_size
+
+  operating_system         = var.edge_image.operating_system
+  operating_system_distro  = var.edge_image.operating_system_distro
+  operating_system_version = var.edge_image.operating_system_version
 
 }
 
+module "edge_hosts" {
+  count = try(var.edge_hosts.create, false) && length(try(var.edge_hosts.nodes, [])) > 0 ? 1 : 0
 
-# module "image_upload" {
-#   source = "../../../../managed-service-catalog/terraform/modules/image_upload"
+  source = "../../../../managed-service-catalog/terraform/modules/edge-hosts"
 
-#   project_id      = var.project_id
-#   name            = "talos-v1.9.5-stackit-edgecloud.v0.15.0" #"image-upload-${var.name}-${var.stage}"
-#   local_file_path = "openstack-amd64.raw"
-# }
+  name                = trimspace(try(var.edge_hosts.name_prefix, ""))
+  project_id          = var.project_id
+  image_id            = trimspace(try(var.edge_hosts.image_id, ""))
+  network_name        = trimspace(try(var.edge_hosts.network_name, ""))
+  security_group_name = trimspace(try(var.edge_hosts.security_group_name, ""))
+
+  ipv4_prefix        = var.edge_hosts.ipv4_prefix
+  ipv4_prefix_length = var.edge_hosts.ipv4_prefix_length
+  ipv4_nameservers   = var.edge_hosts.ipv4_nameservers
+  ingress_tcp_ports  = var.edge_hosts.ingress_tcp_ports
+  common_labels      = var.edge_hosts.common_labels
+
+  nodes = var.edge_hosts.nodes
+
+}
 {{ end }}

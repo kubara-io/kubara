@@ -434,6 +434,104 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	assert.Contains(t, err.Error(), "supported providers: stackit")
 }
 
+func TestGenerateCmd_EdgeTerraformArtifacts(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "edge-cluster",
+		Stage:   "dev",
+		Type:    "controlplane",
+		DNSName: "edge.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "stackit",
+			ProjectID:         "00000000-0000-0000-0000-000000000000",
+			KubernetesType:    "edge",
+			KubernetesVersion: "1.34.0",
+			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: config.Services{
+			Argocd:              config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			CertManager:         config.CertManagerService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}, ClusterIssuer: config.ClusterIssuer{Name: "letsencrypt-staging", Email: "admin@example.com", Server: "https://acme-staging-v02.api.letsencrypt.org/directory"}},
+			ExternalDns:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			ExternalSecrets:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KubePrometheusStack: config.PersistentService{GenericService: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}}},
+			Traefik:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Kyverno:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicies:     config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			KyvernoPolicyReport: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Loki:                config.PersistentService{GenericService: config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}}},
+			HomerDashboard:      config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Oauth2Proxy:         config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetricsServer:       config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			MetalLb:             config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+			Longhorn:            config.GenericService{ServiceStatus: config.ServiceStatus{Status: config.StatusEnabled}},
+		},
+	})
+
+	envPath := createTestEnv(t, tempDir, envmap.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
+
+	app := createTestApp(cmd.NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "--env-file", envPath, "generate", "--terraform"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	infrastructureDir := filepath.Join(tempDir, "customer-service-catalog", "terraform", "edge-cluster", "infrastructure")
+
+	envTfvars, err := os.ReadFile(filepath.Join(infrastructureDir, "env.auto.tfvars"))
+	require.NoError(t, err)
+	assert.Contains(t, string(envTfvars), "edge_instance = {")
+	assert.Contains(t, string(envTfvars), "edge_image = {")
+	assert.Contains(t, string(envTfvars), "edge_hosts = {")
+	assert.Contains(t, string(envTfvars), "create       = true")
+	assert.Contains(t, string(envTfvars), "create                   = false")
+	assert.Contains(t, string(envTfvars), "create              = false")
+	assert.Contains(t, string(envTfvars), "local_file_path          = \"/path/to/edge-artifacts/openstack-amd64.raw\"")
+	assert.Contains(t, string(envTfvars), "image_id            = \"\"")
+	assert.Contains(t, string(envTfvars), "nodes = [")
+	assert.Contains(t, string(envTfvars), "flavor                   = \"c1.4\"")
+	assert.NotContains(t, string(envTfvars), "edge_instance.enabled")
+	assert.NotContains(t, string(envTfvars), "edge_image.enabled")
+	assert.NotContains(t, string(envTfvars), "edge_hosts.enabled")
+
+	mainTF, err := os.ReadFile(filepath.Join(infrastructureDir, "main.tf"))
+	require.NoError(t, err)
+	assert.Contains(t, string(mainTF), "module \"edge_instance\"")
+	assert.Contains(t, string(mainTF), "module \"edge_image\"")
+	assert.Contains(t, string(mainTF), "module \"edge_hosts\"")
+	assert.Contains(t, string(mainTF), "count = try(var.edge_image.create, false) && trimspace(try(var.edge_image.local_file_path, \"\")) != \"\" ? 1 : 0")
+	assert.Contains(t, string(mainTF), "count = try(var.edge_hosts.create, false) && length(try(var.edge_hosts.nodes, [])) > 0 ? 1 : 0")
+	assert.Contains(t, string(mainTF), "image_id            = trimspace(try(var.edge_hosts.image_id, \"\"))")
+	assert.NotContains(t, string(mainTF), "module.edge_image[0].image_id")
+	assert.NotContains(t, string(mainTF), "check \"edge_hosts_image_id\"")
+	assert.NotContains(t, string(mainTF), "_fallback")
+	assert.NotContains(t, string(mainTF), "locals {")
+
+	outputsTF, err := os.ReadFile(filepath.Join(infrastructureDir, "outputs.tf"))
+	require.NoError(t, err)
+	assert.Contains(t, string(outputsTF), "output \"edge_host_metadata\"")
+	assert.Contains(t, string(outputsTF), "output \"edge_uploaded_image_id\"")
+}
+
 // Helper function
 
 func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {

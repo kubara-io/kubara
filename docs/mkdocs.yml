@@ -11,7 +11,11 @@ nav:
       - Prerequisites: 1_getting_started/prerequisites.md
       - Bootstrapping: 1_getting_started/bootstrapping.md
       - Providers:
-          - STACKIT: 1_getting_started/providers/stackit.md
+          - STACKIT:
+              - Terraform Bootstrap: 1_getting_started/providers/stackit_terraform_bootstrap.md
+              - Provisioning Infrastructure:
+                  - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
+                  - Edge Cloud: 1_getting_started/providers/stackit_provisioning_edgecloud.md
   - Managing Your Platform:
       - Add Worker Cluster: 2_managing_your_platform/add_worker_cluster.md
       - Add Project: 2_managing_your_platform/add_app_project.md
