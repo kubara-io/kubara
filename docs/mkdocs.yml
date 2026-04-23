@@ -34,9 +34,8 @@ nav:
           - Logs: 3_components/observability_logs.md
   - Architecture:
       - Architecture overview: 4_architecture/architecture_overview.md
-      - Decisions:
-          - ADR: 7_decisions/ADR.md
-          - ADR-Index: 7_decisions/ADR-index.md
+      - ADR: 7_decisions/ADR.md
+      - ADR-Index: 7_decisions/ADR-index.md
   - Community:
       - Contributing: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
       - Maintainers: 5_community/maintainers.md
