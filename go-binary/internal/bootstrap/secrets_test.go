@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"testing"
 
-	"kubara/internal/assets/envmap"
+	"kubara/internal/envmap"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

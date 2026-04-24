@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/internal/assets/service"
+	"kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"

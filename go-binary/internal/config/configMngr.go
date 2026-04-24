@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"kubara/internal/assets/service"
+	"kubara/internal/service"
 	"kubara/internal/catalog"
 
 	"github.com/go-viper/mapstructure/v2"

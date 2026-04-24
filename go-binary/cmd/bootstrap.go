@@ -10,8 +10,8 @@ import (
 	"syscall"
 	"time"
 
-	"kubara/internal/assets/config"
-	"kubara/internal/assets/envmap"
+	"kubara/internal/config"
+	"kubara/internal/envmap"
 	"kubara/internal/bootstrap"
 	"kubara/internal/utils"
 

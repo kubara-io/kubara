@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"time"
 
-	"kubara/internal/assets/config"
-	"kubara/internal/assets/envmap"
+	"kubara/internal/config"
+	"kubara/internal/envmap"
 	"kubara/internal/helm"
 	"kubara/internal/k8s"
 

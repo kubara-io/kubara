@@ -8,8 +8,8 @@ import (
 	"os"
 	"text/template"
 
-	"kubara/internal/assets/config"
-	"kubara/internal/assets/envmap"
+	"kubara/internal/config"
+	"kubara/internal/envmap"
 	"kubara/internal/k8s"
 	"kubara/internal/utils"
 

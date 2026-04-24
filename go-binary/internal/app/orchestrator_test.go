@@ -5,8 +5,8 @@ import (
 	"testing"
 
 	"kubara/internal/catalog"
-	"kubara/internal/assets/config"
-	"kubara/internal/assets/envmap"
+	"kubara/internal/config"
+	"kubara/internal/envmap"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
