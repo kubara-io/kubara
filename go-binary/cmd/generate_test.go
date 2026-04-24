@@ -1,4 +1,4 @@
-package cmd_test
+package cmd
 
 import (
 	"context"
@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kubara-io/kubara/cmd"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
@@ -41,7 +40,7 @@ func createTestServices() service.Services {
 func TestNewGenerateFlags(t *testing.T) {
 	t.Parallel()
 
-	flags := cmd.NewGenerateFlags()
+	flags := NewGenerateFlags()
 
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
@@ -53,7 +52,7 @@ func TestNewGenerateFlags(t *testing.T) {
 func TestNewGenerateCmd(t *testing.T) {
 	t.Parallel()
 
-	command := cmd.NewGenerateCmd()
+	command := NewGenerateCmd()
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
@@ -275,7 +274,7 @@ func TestGenerateCmd(t *testing.T) {
 			}
 
 			// Create app with generate command and global flags
-			app := createTestApp(cmd.NewGenerateCmd())
+			app := createTestApp(NewGenerateCmd())
 
 			// Run: kubara generate [flags]
 			args := append([]string{"kubara", "generate"}, tt.flags...)
@@ -340,7 +339,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 		DomainName:                  "example.com",
 	})
 
-	app := createTestApp(cmd.NewGenerateCmd())
+	app := createTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
@@ -383,7 +382,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 		Services: createTestServices(),
 	})
 
-	app := createTestApp(cmd.NewGenerateCmd())
+	app := createTestApp(NewGenerateCmd())
 
 	//dummy values
 	createTestEnv(t, tempDir, envconfig.EnvMap{
@@ -445,32 +444,6 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 	return &cli.Command{
 		Name:     "kubara",
 		Commands: commands,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "config-file",
-				Usage: "Path to the configuration file",
-				Value: "config.yaml",
-			},
-			&cli.StringFlag{
-				Name:  "work-dir",
-				Usage: "Working directory",
-				Value: ".",
-			},
-			&cli.StringFlag{
-				Name:  "env-file",
-				Usage: "Path to the .env file",
-				Value: ".env",
-			},
-			&cli.StringFlag{
-				Name:  "catalog",
-				Usage: "Path to external ServiceDefinition catalog directory.",
-				Value: "",
-			},
-			&cli.BoolFlag{
-				Name:  "catalog-overwrite",
-				Usage: "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-				Value: false,
-			},
-		},
+		Flags:    globalFlags(),
 	}
 }
