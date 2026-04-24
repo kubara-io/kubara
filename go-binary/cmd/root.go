@@ -5,10 +5,10 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
-	"strings"
+	"time"
 
+	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/updatecheck"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
@@ -33,30 +33,29 @@ func InitLogger() {
 }
 
 func testConnection(kubeconfig string) {
-	kc := kubeconfig
-	if kc == "" {
+	if kubeconfig == "" {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			log.Fatal().Err(err).Msg("home dir")
 		}
-		kc = filepath.Join(home, ".kube", "config")
+		kubeconfig = filepath.Join(home, ".kube", "config")
 	}
-	log.Info().Msg("listing namespaces via kubectl…")
-	execOrFatal(
-		"kubectl",
-		"--kubeconfig", kc,
-		"get", "namespaces",
-	)
-}
 
-func execOrFatal(name string, args ...string) {
-	cmd := exec.Command(name, args...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	log.Debug().Str("cmd", fmt.Sprintf("%s %s", name, strings.Join(args, " "))).Msg("executing")
-	if err := cmd.Run(); err != nil {
-		log.Fatal().Err(err).Msgf("%s failed", name)
+	log.Info().Msgf("Testing connection to your cluster using: %s", kubeconfig)
+	client, err := k8s.NewClient(k8s.Config{
+		KubeconfigPath: kubeconfig,
+		Timeout:        30 * time.Second,
+		UserAgent:      "kubara/1.0",
+	})
+	if err != nil {
+		log.Fatal().Err(err).Msgf("Failed to setup k8s client using: %s", kubeconfig)
 	}
+
+	if _, err := client.ListNamespaces(context.Background()); err != nil {
+		log.Fatal().Err(err).Msgf("Failed to test k8s connection using")
+	}
+
+	log.Info().Msgf("Successful connection to: %s", client.RESTConfig.Host)
 }
 
 func newAppAction(cmd *cli.Command) error {
