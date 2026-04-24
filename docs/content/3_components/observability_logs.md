@@ -1,12 +1,12 @@
 
 # Logs
 
-Centralized log processing in our Kubernetes observability stack is handled by **Loki** and **Promtail**, with **Grafana** as the frontend for analysis. This stack provides a lightweight and scalable logging solution tailored for Kubernetes - similar to what Prometheus offers for metrics.
+Centralized log processing in our Kubernetes observability stack is handled by **Loki** and **Alloy**, with **Grafana** as the frontend for analysis. This stack provides a lightweight and scalable logging solution tailored for Kubernetes - similar to what Prometheus offers for metrics.
 
 ## Component Overview
 
 - **Loki** is a log aggregation system that indexes logs by labels (e.g., pod, namespace, container). Unlike traditional logging systems (e.g., Elasticsearch), Loki does not index log content, which results in lower resource usage.
-- **Promtail** runs as a DaemonSet on each node and collects logs directly from container log files. These logs are then pushed to Loki.
+- **Alloy** runs as a DaemonSet on each node and collects logs directly from container log files. These logs are then pushed to Loki.
 - **Grafana** acts as the user interface for exploring and analyzing logs with filters, queries, and correlations to metrics.
 
 ## Access & Integration
@@ -19,7 +19,7 @@ You can find more about Grafana in the [Dashboards](../3_components/observabilit
 
 ## kubara Standardization
 
-In kubara, **Promtail is enabled by default**. It is configured to automatically collect logs and enrich them with Kubernetes metadata such as namespace, pod name, container, and user-defined labels.
+In kubara, **Alloy is enabled by default**. It is configured to automatically collect logs and enrich them with Kubernetes metadata such as namespace, pod name, container, and user-defined labels.
 
 This ensures that logs from all applications are captured consistently and are immediately available for centralized analysis without per-project setup.
 
