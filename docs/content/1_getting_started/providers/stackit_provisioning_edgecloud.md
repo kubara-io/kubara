@@ -24,6 +24,7 @@ Terraform modules for Edge are optional and can be combined as needed:
 * `edge_image` is optional. `edge_image.create` toggles image upload; upload runs only when `local_file_path` is set.
   In many setups, you can skip `edge_image` and reuse an existing image ID via `edge_hosts.image_id`.
 * `edge_hosts` is optional. `edge_hosts.create` toggles host provisioning; host provisioning requires `edge_hosts.image_id` and at least one entry in `nodes`.
+  The generated tfvars starts with a single-node bootstrap example (`controlplane` with public IP).
 * `edge_hosts` does not auto-link to `edge_image`. Set `edge_hosts.image_id` explicitly:
   * use an existing image ID, or
   * upload via `edge_image` first, then copy `edge_uploaded_image_id` output into `edge_hosts.image_id`.
@@ -42,6 +43,35 @@ Important distinction:
 Set the module toggles in the generated cluster tfvars file:
 
 - `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`
+
+## Single-node bootstrap and network planning
+
+The generated `edge_hosts.nodes` defaults to one control plane node as a bootstrap example.
+This is intentionally simple for initial rollout and troubleshooting.
+
+For production and multi-node topologies, design networking explicitly for your environment:
+
+* where hosts run (VMs, bare metal, mixed, multi-cloud)
+* ingress entry strategy (single public node, MetalLB VIP, external NLB, etc.)
+* node-to-node traffic and return paths
+
+There is no one-size-fits-all edge network design.
+
+## Public IP and IP fields
+
+In this example, Terraform allocates public IPs for hosts when `edge_hosts.nodes[*].assign_public_ip = true`.
+You do not need to pre-enter a public IP for that path.
+
+Read assigned host public IPs after apply via:
+
+```bash
+terraform output edge_host_metadata
+```
+
+Use the selected host public IP for DNS `A` records (for example your ingress hostname).
+
+If you enable MetalLB, the generated MetalLB customer values use `clusters[].privateLoadBalancerIP` from your `config.yaml` as pool address (`/32`).
+`publicLoadBalancerIP` is currently not wired into the generated MetalLB chart values.
 
 ## Step-by-step sequence
 
@@ -207,14 +237,14 @@ spec:
     - edgeHost: <edge-host-id-1>
       installDisk: /dev/vda
       role: controlplane
-    - edgeHost: <edge-host-id-2>
-      installDisk: /dev/vda
-      role: worker
   talos:
     version: v1.12.5-stackit.v1.7.1
     kubernetes:
       version: v1.30.2
 ```
+
+This minimal example reflects the single-node bootstrap path.
+For production, add more control plane and worker nodes based on your network design.
 
 ## Validate API schema on your instance
 

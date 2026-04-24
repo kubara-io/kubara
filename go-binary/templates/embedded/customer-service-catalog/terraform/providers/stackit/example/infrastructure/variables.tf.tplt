@@ -180,7 +180,7 @@ variable "edge_image" {
     min_disk_size            = optional(number, 30)
     operating_system         = optional(string, "linux")
     operating_system_distro  = optional(string, "talos")
-    operating_system_version = optional(string, "v1.9.5")
+    operating_system_version = optional(string, "v1.12.5-stackit.v1.7.1")
   })
   default = {}
 

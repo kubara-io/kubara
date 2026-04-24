@@ -27,7 +27,7 @@ module "edge_hosts" {
     {
       name                     = "edge-demo-cp-1"
       role                     = "controlplane"
-      flavor                   = "c1.4"
+      flavor                   = "g2i.8"
       volume_size              = 30
       volume_performance_class = "storage_premium_perf1"
       availability_zone        = "eu01-1"

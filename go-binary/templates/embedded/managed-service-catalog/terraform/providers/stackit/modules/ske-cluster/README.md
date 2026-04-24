@@ -16,7 +16,7 @@ module "ske_cluster" {
   node_pools = [
     {
       name               = "np-frontend"
-      machine_type       = "c1.2"
+      machine_type       = "c2i.8"
       minimum            = 2
       maximum            = 4
       availability_zones = ["eu01-1", "eu01-2"]
@@ -27,7 +27,7 @@ module "ske_cluster" {
     },
     {
       name               = "np-backend"
-      machine_type       = "c1.2"
+      machine_type       = "c2i.8"
       minimum            = 2
       maximum            = 5
       availability_zones = ["eu01-1", "eu01-2", "eu01-3"]

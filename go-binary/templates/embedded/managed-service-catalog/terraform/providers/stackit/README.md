@@ -144,7 +144,7 @@ kubernetes_version_min = "1.32.5"
 node_pools = [
         {
             availability_zones = ["eu01-2"]
-            machine_type       = "c1.5"
+            machine_type       = "c2i.8"
             maximum            = 4
             minimum            = 2
             name               = "pool-infra"
@@ -227,6 +227,7 @@ Set all Edge module toggles in:
 - `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`
 
 In many setups, you can skip `edge_image` and reuse an existing image ID via `edge_hosts.image_id`.
+The generated `edge_hosts.nodes` defaults to a single-node bootstrap example (`controlplane` with public IP).
 
 1. Configure `edge_instance` in `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars` (create or reuse).
 2. Keep `edge_image.create = false` for the first apply.
@@ -278,6 +279,19 @@ curl https://image-factory.edge.$INSTANCE_REGION.stackit.cloud/versions
 ```bash
 terraform output edge_uploaded_image_id
 ```
+
+Public IP handling in this example:
+
+- Terraform allocates host public IPs when `edge_hosts.nodes[*].assign_public_ip = true`.
+- Read assigned host IPs from:
+
+```bash
+terraform output edge_host_metadata
+```
+
+- Use the selected host public IP for DNS `A` records (for example your ingress hostname).
+- If MetalLB is enabled, generated customer values currently use `clusters[].privateLoadBalancerIP` (`/32`) as pool address.
+- `publicLoadBalancerIP` is currently not wired into generated MetalLB values.
 
 If you use an existing image for Longhorn and know the related `EdgeImage`, verify that these extensions are present in that image configuration:
 

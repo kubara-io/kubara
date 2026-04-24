@@ -15,7 +15,7 @@ module "edge_image" {
 
   operating_system         = "linux"
   operating_system_distro  = "talos"
-  operating_system_version = "v1.9.5"
+  operating_system_version = "v1.12.5-stackit.v1.7.1"
 }
 ```
 
