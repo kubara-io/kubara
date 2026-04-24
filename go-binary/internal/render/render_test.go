@@ -1,4 +1,4 @@
-package templates
+package render
 
 import (
 	"io/fs"
@@ -6,7 +6,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"kubara/catalog"
+	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

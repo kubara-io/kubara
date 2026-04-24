@@ -1,4 +1,4 @@
-package envmap
+package envconfig
 
 import (
 	"errors"
