@@ -9,7 +9,7 @@ import (
 	"text/template"
 
 	"kubara/internal/config"
-	"kubara/internal/envmap"
+	"kubara/internal/envconfig"
 	"kubara/internal/k8s"
 	"kubara/internal/utils"
 
@@ -87,7 +87,7 @@ func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Optio
 }
 
 // createGitRepositorySecret creates the ArgoCD git repository secret
-func (sm *SecretManager) createGitRepositorySecret(em *envmap.EnvMap) *corev1.Secret {
+func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -118,7 +118,7 @@ func (sm *SecretManager) createGitRepositorySecret(em *envmap.EnvMap) *corev1.Se
 }
 
 // createImagePullSecret creates the docker registry pull secret
-func (sm *SecretManager) createImagePullSecret(em *envmap.EnvMap, namespace string) *corev1.Secret {
+func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace string) *corev1.Secret {
 	secretString, _ := utils.DecodeB64(em.DockerconfigBase64)
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
@@ -137,11 +137,11 @@ func (sm *SecretManager) createImagePullSecret(em *envmap.EnvMap, namespace stri
 }
 
 // createHelmRepositorySecret creates the Helm repository secret
-func (sm *SecretManager) createHelmRepositorySecret(em *envmap.EnvMap) *corev1.Secret {
-	if !envmap.IsConfiguredEnvValue(em.ArgocdHelmRepoUrl) {
+func (sm *SecretManager) createHelmRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
+	if !envconfig.IsConfiguredEnvValue(em.ArgocdHelmRepoUrl) {
 		return nil
 	}
-	helmRepoURL := envmap.NormalizeHelmRepoURL(em.ArgocdHelmRepoUrl)
+	helmRepoURL := envconfig.NormalizeHelmRepoURL(em.ArgocdHelmRepoUrl)
 	stringData := map[string]string{
 		"url":      helmRepoURL,
 		"name":     "helm-chart-repository",
@@ -150,7 +150,7 @@ func (sm *SecretManager) createHelmRepositorySecret(em *envmap.EnvMap) *corev1.S
 		"type":     "helm",
 		"username": em.ArgocdHelmRepoUsername,
 	}
-	if envmap.IsOCIHelmRepoURL(em.ArgocdHelmRepoUrl) {
+	if envconfig.IsOCIHelmRepoURL(em.ArgocdHelmRepoUrl) {
 		stringData["enableOCI"] = "true"
 	}
 

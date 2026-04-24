@@ -3,18 +3,18 @@ package config
 import (
 	"fmt"
 
-	"kubara/internal/envmap"
 	"kubara/internal/catalog"
+	"kubara/internal/envconfig"
 	"kubara/internal/service"
 )
 
 // NewClusterFromEnv creates a new Cluster configuration populated with default
 // values and information from an EnvMap.
-func NewClusterFromEnv(e *envmap.EnvMap) (Cluster, error) {
+func NewClusterFromEnv(e *envconfig.EnvMap) (Cluster, error) {
 	return NewClusterFromEnvWithCatalog(e, catalog.LoadOptions{})
 }
 
-func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
+func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
@@ -35,8 +35,8 @@ func NewClusterFromEnvWithCatalog(e *envmap.EnvMap, catalogOptions catalog.LoadO
 			},
 		},
 	}
-	if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
-		helmRepoURL := envmap.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
+	if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+		helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 		argoCD.HelmRepo = &HelmRepository{
 			URL: helmRepoURL,
 		}

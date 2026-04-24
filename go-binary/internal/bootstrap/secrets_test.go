@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"testing"
 
-	"kubara/internal/envmap"
+	"kubara/internal/envconfig"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -13,7 +13,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	sm := &SecretManager{}
 
 	t.Run("returns nil when helm repo URL is missing", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envmap.EnvMap{
+		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
 			ProjectName:       "test",
 			ProjectStage:      "dev",
 			ArgocdHelmRepoUrl: "",
@@ -22,7 +22,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	})
 
 	t.Run("returns nil when helm repo URL is legacy placeholder", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envmap.EnvMap{
+		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
 			ProjectName:       "test",
 			ProjectStage:      "dev",
 			ArgocdHelmRepoUrl: "<...>",
@@ -31,7 +31,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	})
 
 	t.Run("creates secret for classic https helm repo", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envmap.EnvMap{
+		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
 			ProjectName:            "test",
 			ProjectStage:           "dev",
 			ArgocdHelmRepoUrl:      "https://charts.example.com",
@@ -48,7 +48,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	})
 
 	t.Run("creates secret for OCI helm registry and strips oci scheme", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envmap.EnvMap{
+		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
 			ProjectName:       "test",
 			ProjectStage:      "dev",
 			ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",

@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/internal/config"
-	"kubara/internal/envmap"
 	"kubara/cmd"
+	"kubara/internal/config"
+	"kubara/internal/envconfig"
+	"kubara/internal/render"
 	"kubara/internal/service"
-	"kubara/internal/templates"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -46,8 +46,8 @@ func TestNewGenerateFlags(t *testing.T) {
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
 	assert.False(t, flags.DryRun)
-	assert.Equal(t, templates.DefaultManagedCatalogPath, flags.ManagedCatalogPath)
-	assert.Equal(t, templates.DefaultOverlayValuesPath, flags.OverlayValuesPath)
+	assert.Equal(t, render.DefaultManagedCatalogPath, flags.ManagedCatalogPath)
+	assert.Equal(t, render.DefaultOverlayValuesPath, flags.OverlayValuesPath)
 }
 
 func TestNewGenerateCmd(t *testing.T) {
@@ -247,7 +247,7 @@ func TestGenerateCmd(t *testing.T) {
 				})
 
 				//dummy values
-				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
+				envPath := createTestEnv(t, tempDir, envconfig.EnvMap{
 					ProjectName:                 "project-name",
 					ProjectStage:                "project-stage",
 					DockerconfigBase64:          "DockerConfig",
@@ -326,7 +326,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 	})
 
 	//dummy values
-	createTestEnv(t, tempDir, envmap.EnvMap{
+	createTestEnv(t, tempDir, envconfig.EnvMap{
 		ProjectName:                 "project-name",
 		ProjectStage:                "project-stage",
 		DockerconfigBase64:          "DockerConfig",
@@ -386,7 +386,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	app := createTestApp(cmd.NewGenerateCmd())
 
 	//dummy values
-	createTestEnv(t, tempDir, envmap.EnvMap{
+	createTestEnv(t, tempDir, envconfig.EnvMap{
 		ProjectName:                 "project-name",
 		ProjectStage:                "project-stage",
 		DockerconfigBase64:          "DockerConfig",
@@ -429,12 +429,12 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 // createTestEnv writes an envMap to the file system
 // It returns the file path
 // Takes a directory and an EnvMap and validates the envMap before writing it
-func createTestEnv(t *testing.T, dir string, env envmap.EnvMap) string {
+func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	envPath := filepath.Join(dir, ".env")
 
-	manager := envmap.NewEnvMapManager(envPath, ".", "")
-	manager.SetEnvMap(env)
-	err := manager.ValidateAndSaveToFile(envPath)
+	es := envconfig.NewEnvStore(envPath, ".", "")
+	es.SetEnvMap(env)
+	err := es.ValidateAndSaveToFile(envPath)
 
 	require.NoError(t, err)
 

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"kubara/internal/config"
-	"kubara/internal/envmap"
+	"kubara/internal/envconfig"
 	"kubara/internal/helm"
 	"kubara/internal/k8s"
 
@@ -29,7 +29,7 @@ type Options struct {
 	WithES         bool
 	WithProm       bool
 	WithESCSSPath  string
-	EnvMap         *envmap.EnvMap
+	EnvMap         *envconfig.EnvMap
 	ClusterConfig  *config.Cluster
 	DryRun         bool
 	Timeout        time.Duration

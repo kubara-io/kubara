@@ -1,8 +1,8 @@
 package config
 
 import (
-	"kubara/internal/envmap"
 	"kubara/internal/catalog"
+	"kubara/internal/envconfig"
 	"kubara/internal/service"
 	"path/filepath"
 	"testing"
@@ -14,20 +14,20 @@ import (
 func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Data Setup ---
 	// 1. Create a sample environment map that will be the input to the function.
-	sampleEnvMap := &envmap.EnvMap{
+	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
-	sampleEnvMapWithoutHelmRepo := &envmap.EnvMap{
+	sampleEnvMapWithoutHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
-	sampleEnvMapWithOCIHelmRepo := &envmap.EnvMap{
+	sampleEnvMapWithOCIHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -110,7 +110,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 
 	// --- Test Cases Definition ---
 	type args struct {
-		e *envmap.EnvMap
+		e *envconfig.EnvMap
 	}
 	tests := []struct {
 		name string
@@ -151,7 +151,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 }
 
 func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
-	sampleEnvMap := &envmap.EnvMap{
+	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",

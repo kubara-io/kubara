@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/internal/app"
-	"kubara/internal/config"
-	"kubara/internal/envmap"
 	"kubara/internal/catalog"
+	"kubara/internal/config"
+	"kubara/internal/envconfig"
 	"kubara/internal/utils"
+	"kubara/internal/workflow"
 	"os"
 	"path/filepath"
 
@@ -113,14 +113,14 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 }
 
 func (o *InitOptions) Run() error {
-	em := envmap.NewEnvMapManager(o.dotEnvFilePath, ".", o.envVarPrefix)
-	cm := config.NewConfigManagerWithCatalog(o.configFilePath, o.catalogLoadOptions())
+	es := envconfig.NewEnvStore(o.dotEnvFilePath, ".", o.envVarPrefix)
+	cs := config.NewConfigStoreWithCatalog(o.configFilePath, o.catalogLoadOptions())
 
-	EnvLoadErr := em.Load()
-	CnfLoadErr := cm.Load()
-	EnvValidateErr := em.Validate()
+	EnvLoadErr := es.Load()
+	CnfLoadErr := cs.Load()
+	EnvValidateErr := es.Validate()
 
-	em.SetDefaults()
+	es.SetDefaults()
 
 	if EnvLoadErr != nil {
 		log.Error().Msgf("Reading Env failed. %s", EnvLoadErr)
@@ -137,16 +137,16 @@ func (o *InitOptions) Run() error {
 
 		_, dotenvStatError := os.Stat(o.dotEnvFilePath)
 		if dotenvStatError == nil {
-			log.Info().Msgf("Skipping dotenv creation. File exist: %v", em.GetFilepath())
+			log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
 		} else if os.IsNotExist(dotenvStatError) {
-			exampleEnvMap, err := em.GenerateEnvExample()
+			exampleEnvMap, err := es.GenerateEnvExample()
 			if err != nil {
 				return err
 			}
 			if errWrite := os.WriteFile(o.dotEnvFilePath, exampleEnvMap, 0600); errWrite != nil {
 				return errWrite
 			}
-			log.Info().Msgf("Generated dotenv in path: %v", em.GetFilepath())
+			log.Info().Msgf("Generated dotenv in path: %v", es.GetFilepath())
 		} else {
 			return dotenvStatError
 		}
@@ -159,31 +159,31 @@ func (o *InitOptions) Run() error {
 			return fmt.Errorf("error validating env: %w", EnvValidateErr)
 		}
 
-		if fileExist, _ := utils.FileExist(cm.GetFilepath()); fileExist {
-			if err := app.CreateOrUpdateClusterFromEnvWithCatalog(cm.GetConfig(), em.GetConfig(), o.catalogLoadOptions()); err != nil {
+		if fileExist, _ := utils.FileExist(cs.GetFilepath()); fileExist {
+			if err := workflow.CreateOrUpdateClusterFromEnvWithCatalog(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
 				return fmt.Errorf("error creating/updating cluster from env: %w", err)
 			}
 		} else {
 			return fmt.Errorf("error loading config file. %s", CnfLoadErr)
 		}
 
-		errValidate := cm.Validate()
+		errValidate := cs.Validate()
 		if errValidate != nil {
 			return fmt.Errorf("error validating config file. %s", errValidate)
 		}
-		errSave := cm.SaveToFile()
+		errSave := cs.SaveToFile()
 		if errSave != nil {
 			return fmt.Errorf("error writing config file. %s", errSave)
 		}
-		log.Info().Msgf("overwritten config file: %s", cm.GetFilepath())
+		log.Info().Msgf("overwritten config file: %s", cs.GetFilepath())
 		log.Info().Msg("Initialized successfully")
 		return nil
 	}
 
 	// normal mode
-	if fileExist, err := utils.FileExist(cm.GetFilepath()); fileExist {
+	if fileExist, err := utils.FileExist(cs.GetFilepath()); fileExist {
 		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
-		errV := cm.Validate()
+		errV := cs.Validate()
 		if errV != nil {
 			return errV
 		}
@@ -194,16 +194,16 @@ func (o *InitOptions) Run() error {
 			log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
 			return fmt.Errorf("error validating env: %w", EnvValidateErr)
 		}
-		newCluster, err := config.NewClusterFromEnvWithCatalog(em.GetConfig(), o.catalogLoadOptions())
+		newCluster, err := config.NewClusterFromEnvWithCatalog(es.GetConfig(), o.catalogLoadOptions())
 		if err != nil {
 			return fmt.Errorf("error creating cluster from env: %w", err)
 		}
-		cm.GetConfig().Clusters = []config.Cluster{newCluster}
-		errSave := cm.SaveToFile()
+		cs.GetConfig().Clusters = []config.Cluster{newCluster}
+		errSave := cs.SaveToFile()
 		if errSave != nil {
 			return errSave
 		}
-		log.Info().Msgf("Generated config in path: %v", cm.GetFilepath())
+		log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
 		// return here to not log as successful as no validation was run on config
 		return nil
 	}

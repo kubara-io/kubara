@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"kubara/internal/service"
 	"kubara/internal/catalog"
+	"kubara/internal/service"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/invopop/jsonschema"
@@ -20,19 +20,19 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
-// Manager handles reading and writing configuration
-type Manager struct {
+// ConfigStore handles reading and writing configuration
+type ConfigStore struct {
 	filepath       string
 	config         *Config
 	catalogOptions catalog.LoadOptions
 }
 
-func NewConfigManager(filePath string) *Manager {
-	return NewConfigManagerWithCatalog(filePath, catalog.LoadOptions{})
+func NewConfigStore(filePath string) *ConfigStore {
+	return NewConfigStoreWithCatalog(filePath, catalog.LoadOptions{})
 }
 
-func NewConfigManagerWithCatalog(filePath string, catalogOptions catalog.LoadOptions) *Manager {
-	return &Manager{
+func NewConfigStoreWithCatalog(filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
+	return &ConfigStore{
 		filepath:       filePath,
 		config:         &Config{},
 		catalogOptions: catalogOptions,
@@ -40,8 +40,8 @@ func NewConfigManagerWithCatalog(filePath string, catalogOptions catalog.LoadOpt
 }
 
 // Load loads configuration
-func (cm *Manager) Load() error {
-	data, err := os.ReadFile(cm.filepath)
+func (cs *ConfigStore) Load() error {
+	data, err := os.ReadFile(cs.filepath)
 	if err != nil {
 		return fmt.Errorf("failed to read config file: %w", err)
 	}
@@ -54,7 +54,7 @@ func (cm *Manager) Load() error {
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
-		Result:           cm.config,
+		Result:           cs.config,
 		Squash:           true,
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
@@ -65,8 +65,8 @@ func (cm *Manager) Load() error {
 		return fmt.Errorf("failed to decode config: %w", err)
 	}
 
-	applyDefaults(cm.config)
-	if err := applyServiceCatalogDefaults(cm.config, cm.catalogOptions); err != nil {
+	applyDefaults(cs.config)
+	if err := applyServiceCatalogDefaults(cs.config, cs.catalogOptions); err != nil {
 		return err
 	}
 
@@ -134,8 +134,8 @@ func ensureServiceConfigDefinition(schemaDoc map[string]any) {
 	}
 }
 
-func (cm *Manager) Validate() error {
-	schemaDoc, err := GenerateSchemaWithCatalog(cm.catalogOptions)
+func (cs *ConfigStore) Validate() error {
+	schemaDoc, err := GenerateSchemaWithCatalog(cs.catalogOptions)
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (cm *Manager) Validate() error {
 
 	// Validate instance by value
 	var instance any
-	data, err := json.Marshal(cm.config)
+	data, err := json.Marshal(cs.config)
 	if err != nil {
 		return fmt.Errorf("marshal config: %w", err)
 	}
@@ -172,23 +172,23 @@ func (cm *Manager) Validate() error {
 }
 
 // GetConfig returns the current configuration struct.
-func (cm *Manager) GetConfig() *Config {
-	return cm.config
+func (cs *ConfigStore) GetConfig() *Config {
+	return cs.config
 }
 
 // GetFilepath returns the filepath for the config.
-func (cm *Manager) GetFilepath() string {
-	return cm.filepath
+func (cs *ConfigStore) GetFilepath() string {
+	return cs.filepath
 }
 
 // SaveToFile saves the configuration to a YAML file
-func (cm *Manager) SaveToFile() error {
-	if strings.TrimSpace(cm.config.Version) == "" {
-		cm.config.Version = ConfigVersionV1Alpha1
+func (cs *ConfigStore) SaveToFile() error {
+	if strings.TrimSpace(cs.config.Version) == "" {
+		cs.config.Version = ConfigVersionV1Alpha1
 	}
 
 	// Ensure directory exists
-	filePath := cm.filepath
+	filePath := cs.filepath
 	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
@@ -197,7 +197,7 @@ func (cm *Manager) SaveToFile() error {
 	var b bytes.Buffer
 	encoder := yaml.NewEncoder(&b)
 	encoder.SetIndent(2)
-	err := encoder.Encode(cm.config)
+	err := encoder.Encode(cs.config)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config to YAML: %w", err)
 	}

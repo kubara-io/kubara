@@ -1,4 +1,4 @@
-package app
+package workflow
 
 import (
 	"path/filepath"
@@ -6,7 +6,7 @@ import (
 
 	"kubara/internal/catalog"
 	"kubara/internal/config"
-	"kubara/internal/envmap"
+	"kubara/internal/envconfig"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,7 +41,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 			},
 		},
 	}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -65,7 +65,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 
 func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T) {
 	cfg := &config.Config{}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -116,7 +116,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 			},
 		},
 	}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -134,7 +134,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 
 func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
 	cfg := &config.Config{}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -151,7 +151,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 
 func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 	cfg := &config.Config{}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",
@@ -170,7 +170,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 
 func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
 	cfg := &config.Config{}
-	e := &envmap.EnvMap{
+	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
 		DomainName:        "example.com",

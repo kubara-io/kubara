@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"kubara/internal/config"
-	"kubara/internal/envmap"
 	"kubara/internal/catalog"
-	"kubara/internal/templates"
+	"kubara/internal/config"
+	"kubara/internal/envconfig"
+	"kubara/internal/render"
 	"kubara/internal/utils"
 	"os"
 	"path/filepath"
@@ -21,7 +21,7 @@ import (
 )
 
 type GenerateOptions struct {
-	TemplateType       templates.TemplateType
+	TemplateType       render.TemplateType
 	DryRun             bool
 	CWD                string
 	ConfigFilePath     string
@@ -45,8 +45,8 @@ func NewGenerateFlags() *GenerateFlags {
 		Terraform:          false,
 		Helm:               false,
 		DryRun:             false,
-		ManagedCatalogPath: templates.DefaultManagedCatalogPath,
-		OverlayValuesPath:  templates.DefaultOverlayValuesPath,
+		ManagedCatalogPath: render.DefaultManagedCatalogPath,
+		OverlayValuesPath:  render.DefaultOverlayValuesPath,
 	}
 }
 
@@ -100,7 +100,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 	}
 
 	o := &GenerateOptions{
-		TemplateType:       templates.All,
+		TemplateType:       render.All,
 		DryRun:             flags.DryRun,
 		CWD:                cwd,
 		ConfigFilePath:     configFilePath,
@@ -112,9 +112,9 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error
 	}
 
 	if flags.Helm && !flags.Terraform {
-		o.TemplateType = templates.Helm
+		o.TemplateType = render.Helm
 	} else if flags.Terraform && !flags.Helm {
-		o.TemplateType = templates.Terraform
+		o.TemplateType = render.Terraform
 	}
 
 	return o, nil
@@ -143,13 +143,13 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 		&cli.StringFlag{
 			Name:        "managed-catalog",
 			Usage:       "Path to the managed catalog directory.",
-			Value:       templates.DefaultManagedCatalogPath,
+			Value:       render.DefaultManagedCatalogPath,
 			Destination: &flags.ManagedCatalogPath,
 		},
 		&cli.StringFlag{
 			Name:        "overlay-values",
 			Usage:       "Path to overlay values directory.",
-			Value:       templates.DefaultOverlayValuesPath,
+			Value:       render.DefaultOverlayValuesPath,
 			Destination: &flags.OverlayValuesPath,
 		},
 	}
@@ -159,7 +159,7 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 
 // buildTemplateContext creates a map from a config.Cluster struct.
 // It converts the struct to a map using JSON tag names for template variables.
-func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[string]any, error) {
+func buildTemplateContext(clusterBlock config.Cluster, em envconfig.EnvMap) (map[string]any, error) {
 	// Convert struct to JSON using JSON tags (camelCase)
 	clusterJSON, err := json.Marshal(clusterBlock)
 	if err != nil {
@@ -178,21 +178,21 @@ func buildTemplateContext(clusterBlock config.Cluster, em envmap.EnvMap) (map[st
 	}, nil
 }
 
-func (o *GenerateOptions) resolveOutputPath(result templates.TemplateResult, clusterName string) string {
-	trimmedPath := templates.StripProviderPath(result.Path)
+func (o *GenerateOptions) resolveOutputPath(result render.TemplateResult, clusterName string) string {
+	trimmedPath := render.StripProviderPath(result.Path)
 	// 1. Rename 'example' directory to cluster name
 	trimmedPath = strings.ReplaceAll(trimmedPath, "example", clusterName)
 	// 2. Remove the template extension
 	trimmedPath = strings.TrimSuffix(trimmedPath, ".tplt")
 	// 3. Replace default catalog paths with configured paths
-	trimmedPath = strings.ReplaceAll(trimmedPath, templates.DefaultManagedCatalogPath, o.ManagedCatalogPath)
-	trimmedPath = strings.ReplaceAll(trimmedPath, templates.DefaultOverlayValuesPath, o.OverlayValuesPath)
+	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultManagedCatalogPath, o.ManagedCatalogPath)
+	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultOverlayValuesPath, o.OverlayValuesPath)
 	return trimmedPath
 }
 
 func supportedProviderList() string {
-	providers := make([]string, 0, len(templates.SupportedProviders))
-	for provider := range templates.SupportedProviders {
+	providers := make([]string, 0, len(render.SupportedProviders))
+	for provider := range render.SupportedProviders {
 		providers = append(providers, provider)
 	}
 	sort.Strings(providers)
@@ -215,7 +215,7 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 			supportedProviderList(),
 		)
 	}
-	if !templates.SupportedProviders[provider] {
+	if !render.SupportedProviders[provider] {
 		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %s", provider, clusterBlock.Name, supportedProviderList())
 	}
 	return provider, nil
@@ -226,14 +226,14 @@ func (o *GenerateOptions) cleanupOldFiles() error {
 		return nil
 	}
 
-	if o.TemplateType == templates.All || o.TemplateType == templates.Terraform {
-		deletePath := filepath.Join(o.ManagedCatalogPath, templates.Terraform.String())
+	if o.TemplateType == render.All || o.TemplateType == render.Terraform {
+		deletePath := filepath.Join(o.ManagedCatalogPath, render.Terraform.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %s: %v", deletePath, err)
 		}
 	}
-	if o.TemplateType == templates.All || o.TemplateType == templates.Helm {
-		deletePath := filepath.Join(o.ManagedCatalogPath, templates.Helm.String())
+	if o.TemplateType == render.All || o.TemplateType == render.Helm {
+		deletePath := filepath.Join(o.ManagedCatalogPath, render.Helm.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %s: %v", deletePath, err)
 		}
@@ -241,7 +241,7 @@ func (o *GenerateOptions) cleanupOldFiles() error {
 	return nil
 }
 
-func (o *GenerateOptions) writeTemplateResults(results []templates.TemplateResult) error {
+func (o *GenerateOptions) writeTemplateResults(results []render.TemplateResult) error {
 	for _, t := range results {
 		if o.DryRun {
 			fmt.Println("DRY-RUN: " + t.Path)
@@ -264,23 +264,23 @@ func (o *GenerateOptions) writeTemplateResults(results []templates.TemplateResul
 }
 
 // processClusters loads config, validates, and generates template results for all clusters.
-func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) {
-	cm := config.NewConfigManagerWithCatalog(o.ConfigFilePath, catalog.LoadOptions{
+func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
+	cs := config.NewConfigStoreWithCatalog(o.ConfigFilePath, catalog.LoadOptions{
 		CatalogPath: o.CatalogPath,
 		Overwrite:   o.CatalogOverwrite,
 	})
-	if CnfLoadErr := cm.Load(); CnfLoadErr != nil {
+	if CnfLoadErr := cs.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
 	}
 
-	if err := cm.Validate(); err != nil {
+	if err := cs.Validate(); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
 	}
 
-	cnf := cm.GetConfig()
-	var allResults []templates.TemplateResult
+	cnf := cs.GetConfig()
+	var allResults []render.TemplateResult
 
-	dotEnvMap, err := envmap.GetCurrentDotEnv(o.EnvPath)
+	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to load env from envPath:%w", err)
 	}
@@ -292,14 +292,14 @@ func (o *GenerateOptions) processClusters() ([]templates.TemplateResult, error) 
 		}
 
 		provider := ""
-		if o.TemplateType != templates.Helm {
+		if o.TemplateType != render.Helm {
 			provider, err = resolveProvider(clusterBlock)
 			if err != nil {
 				return nil, err
 			}
 		}
 
-		clusterTplResults, err := templates.TemplateAllFilesForProvider(
+		clusterTplResults, err := render.TemplateAllFilesForProvider(
 			o.TemplateType,
 			tmplContext,
 			provider,
