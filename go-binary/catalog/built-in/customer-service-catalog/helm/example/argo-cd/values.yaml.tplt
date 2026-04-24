@@ -80,7 +80,7 @@ externalSecrets:
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
 {{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
-{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" . -}}
+{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . -}}
 {{- $argocdUserIngressAnnotations := dig "cluster" "services" "argo-cd" "networking" "annotations" (dict) . -}}
 {{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (eq $metallbStatus "enabled") -}}

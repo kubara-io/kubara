@@ -1,4 +1,4 @@
-{{- $oauth2ProxyIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" .) -}}
+{{- $oauth2ProxyIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) -}}
 {{- if (eq (index .cluster.services "metallb" "status") "enabled") -}}
 {{- $_ := set $oauth2ProxyIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}

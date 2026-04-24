@@ -116,6 +116,8 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 	return schemaDoc, nil
 }
 
+// ensureServiceConfigDefinition ensures that for every service the
+// config schema document object is properly generated even
 func ensureServiceConfigDefinition(schemaDoc map[string]any) {
 	defs, ok := schemaDoc["$defs"].(map[string]any)
 	if !ok {
