@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/catalog"
-	"kubara/assets/config"
-	"kubara/assets/envmap"
+	"kubara/internal/catalog"
+	"kubara/internal/assets/config"
+	"kubara/internal/assets/envmap"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

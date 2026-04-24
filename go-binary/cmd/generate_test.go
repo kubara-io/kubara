@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/assets/config"
-	"kubara/assets/envmap"
+	"kubara/internal/assets/config"
+	"kubara/internal/assets/envmap"
 	"kubara/cmd"
-	"kubara/assets/service"
-	"kubara/templates"
+	"kubara/internal/assets/service"
+	"kubara/internal/templates"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

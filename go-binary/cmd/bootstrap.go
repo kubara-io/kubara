@@ -3,17 +3,17 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/templates"
+	"kubara/internal/templates"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 	"time"
 
-	"kubara/assets/config"
-	"kubara/assets/envmap"
+	"kubara/internal/assets/config"
+	"kubara/internal/assets/envmap"
 	"kubara/internal/bootstrap"
-	"kubara/utils"
+	"kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )

@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/assets/app"
-	"kubara/assets/config"
-	"kubara/assets/envmap"
-	"kubara/catalog"
-	"kubara/utils"
+	"kubara/internal/assets/app"
+	"kubara/internal/assets/config"
+	"kubara/internal/assets/envmap"
+	"kubara/internal/catalog"
+	"kubara/internal/utils"
 	"os"
 	"path/filepath"
 

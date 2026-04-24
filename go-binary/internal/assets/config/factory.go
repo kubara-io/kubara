@@ -3,9 +3,9 @@ package config
 import (
 	"fmt"
 
-	"kubara/assets/envmap"
-	"kubara/catalog"
-	"kubara/assets/service"
+	"kubara/internal/assets/envmap"
+	"kubara/internal/catalog"
+	"kubara/internal/assets/service"
 )
 
 // NewClusterFromEnv creates a new Cluster configuration populated with default

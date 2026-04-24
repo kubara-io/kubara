@@ -1,9 +1,9 @@
 package config
 
 import (
-	"kubara/assets/envmap"
-	"kubara/catalog"
-	"kubara/assets/service"
+	"kubara/internal/assets/envmap"
+	"kubara/internal/catalog"
+	"kubara/internal/assets/service"
 	"path/filepath"
 	"testing"
 

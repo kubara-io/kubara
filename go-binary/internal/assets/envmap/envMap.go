@@ -3,7 +3,7 @@ package envmap
 import (
 	"errors"
 	"fmt"
-	"kubara/utils"
+	"kubara/internal/utils"
 	"reflect"
 	"strings"
 )

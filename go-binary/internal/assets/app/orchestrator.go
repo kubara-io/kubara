@@ -2,9 +2,9 @@ package app
 
 import (
 	"fmt"
-	"kubara/catalog"
-	"kubara/assets/config"
-	"kubara/assets/envmap"
+	"kubara/internal/catalog"
+	"kubara/internal/assets/config"
+	"kubara/internal/assets/envmap"
 )
 
 // CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
