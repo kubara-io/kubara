@@ -17,7 +17,7 @@ kyverno-policies:
             kinds:
               - Pod
             names:
-              - loki-promtail-*
+              - loki-alloy-*
             namespaces:
               - loki
         - resources:
@@ -208,7 +208,7 @@ kyverno-policies:
             kinds:
               - Pod
             names:
-              - loki-promtail-*
+              - loki-alloy-*
             namespaces:
               - loki
         - resources:
@@ -228,16 +228,16 @@ kyverno-policies:
             kinds:
               - Pod
             names:
-              - loki-promtail-*
+              - longhorn-driver-deployer-*
             namespaces:
-              - loki
+              - longhorn
         - resources:
             kinds:
               - Pod
             names:
-              - longhorn-driver-deployer-*
+              - loki-alloy-*
             namespaces:
-              - longhorn
+              - loki
     require-run-as-nonroot:
       any:
         - resources:
@@ -250,16 +250,16 @@ kyverno-policies:
             kinds:
               - Pod
             names:
-              - loki-promtail-*
+              - metallb-speaker-*
             namespaces:
-              - loki
+              - metallb
         - resources:
             kinds:
               - Pod
             names:
-              - metallb-speaker-*
+              - loki-alloy-*
             namespaces:
-              - metallb
+              - loki
     restrict-seccomp-strict:
       any:
         - resources:

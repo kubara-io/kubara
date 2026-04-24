@@ -1,7 +1,37 @@
-promtail:
-  config:
-    clients:
-      - url: http://loki:3100/loki/api/v1/push
+alloy:
+  alloy:
+    configMap:
+      content: |-
+        local.file_match "pods" {
+          path_targets = [{"__path__" = "/var/log/pods/*/*/*.log"}]
+        }
+        loki.source.file "pods" {
+          targets    = local.file_match.pods.targets
+          forward_to = [loki.process.labels.receiver]
+        }
+        loki.process "labels" {
+          stage.regex {
+            expression = "/var/log/pods/(?P<namespace>[^_]+)_(?P<pod>[^_]+)_[^/]+/(?P<container>[^/]+)/"
+            source     = "filename"
+          }
+          stage.labels {
+            values = {
+              namespace = "",
+              pod       = "",
+              container = "",
+            }
+          }
+          forward_to = [loki.write.default.receiver]
+        }
+        loki.write "default" {
+          endpoint {
+            url = "http://loki:3100/loki/api/v1/push"
+          }
+        }
+    mounts:
+      varlog: true
+  controller:
+    type: daemonset
   resources:
     requests:
       cpu: 30m

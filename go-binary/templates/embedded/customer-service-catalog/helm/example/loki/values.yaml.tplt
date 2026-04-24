@@ -79,15 +79,14 @@ loki:
     replicas: 0
   bloomGateway:
     replicas: 0
-promtail:
-  global:
-    imagePullSecrets:
-      - name: image-pull-secret
+alloy:
+  imagePullSecrets:
+    - name: image-pull-secret
   serviceMonitor:
     {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
     enabled: true
     {{- end }}
-    labels:
+    additionalLabels:
       monitoring.instance: {{ .cluster.name }}-{{ .cluster.stage }}
     prometheusRule:
       enabled: false
