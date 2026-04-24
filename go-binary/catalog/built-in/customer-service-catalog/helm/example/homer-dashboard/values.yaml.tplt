@@ -1,4 +1,4 @@
-{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" . -}}
+{{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . -}}
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
 {{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}

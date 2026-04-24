@@ -1,7 +1,7 @@
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
 {{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
-{{- $kyvernoPolicyReporterIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" .) -}}
+{{- $kyvernoPolicyReporterIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) -}}
 {{- if (eq $metallbStatus "enabled") -}}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
 {{- end -}}

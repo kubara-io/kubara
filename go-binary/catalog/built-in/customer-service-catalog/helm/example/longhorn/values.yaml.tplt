@@ -1,4 +1,4 @@
-{{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "" .) -}}
+{{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) -}}
 {{- if (and (eq (index .cluster.services "oauth2-proxy" "status") "enabled") (eq (index .cluster.services "traefik" "status") "enabled")) -}}
 {{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}

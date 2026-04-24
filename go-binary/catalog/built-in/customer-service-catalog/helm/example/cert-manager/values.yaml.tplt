@@ -1,7 +1,7 @@
 clusterIssuer:
   name: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "name") }}
   email: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "email") }}
-  server: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "server") | default "https://acme-v02.api.letsencrypt.org/directory" }}
+  server: {{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "server") }}
   ingressClassName: {{ .cluster.ingressClassName | default "traefik" }}
 
 

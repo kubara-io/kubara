@@ -67,8 +67,7 @@ func resolveServicesPath(catalogPath string) (string, error) {
 	}
 
 	servicesDir := filepath.Join(cleaned, servicesDirectory)
-	servicesInfo, err := os.Stat(servicesDir)
-	if err == nil {
+	if servicesInfo, err := os.Stat(servicesDir); err == nil {
 		if !servicesInfo.IsDir() {
 			return "", fmt.Errorf("catalog services path %q is not a directory", servicesDir)
 		}
