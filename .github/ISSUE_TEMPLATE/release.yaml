@@ -1,5 +1,5 @@
 ---
-name: Release
+name: 🚀 Release
 description: Next release ticket (to be used by maintainers only)
 title: "[Release]: next"
 labels: ["release"]
