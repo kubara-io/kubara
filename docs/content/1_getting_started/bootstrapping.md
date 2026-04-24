@@ -168,7 +168,7 @@ admin: change-me
 Edit the generated files in:
 `customer-service-catalog/helm/<cluster>/<chart>/values.yaml`
 
-Source templates are embedded in the binary under `go-binary/catalog/built-in/...`, but you should only edit generated files in your repository.
+Source templates are embedded in the binary under `go-binary/internal/catalog/built-in/...`, but you should only edit generated files in your repository.
 
 The chart directories where values usually need review are:
 

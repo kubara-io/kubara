@@ -49,7 +49,7 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Main module is `go-binary/`.
 - Keep compatibility with the Go toolchain declared in `go-binary/go.mod`.
 - Prefer table-driven tests when extending test coverage.
-- Reuse existing structure under `go-binary/assets/`, `go-binary/cmd/`, `go-binary/templates/`, and `go-binary/utils/`.
+- Reuse existing structure under `go-binary/cmd/` and `go-binary/internal/`.
 
 ## Documentation
 - Docs live under `docs/content/`.

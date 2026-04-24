@@ -3,7 +3,7 @@ version: 2
 project_name: kubara
 before:
   hooks:
-    - sh -c 'go-licenses report . --ignore kubara > licenses.csv'
+    - sh -c 'go-licenses report . --ignore github.com/kubara-io/kubara > licenses.csv'
 release:
   github:
     owner: kubara-io
