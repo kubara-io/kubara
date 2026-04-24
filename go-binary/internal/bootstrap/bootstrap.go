@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
-	"kubara/internal/helm"
-	"kubara/internal/k8s"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/helm"
+	"github.com/kubara-io/kubara/internal/k8s"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"

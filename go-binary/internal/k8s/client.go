@@ -145,7 +145,7 @@ func applyClientConfig(config *rest.Config, cfg Config) {
 	if cfg.UserAgent != "" {
 		config.UserAgent = cfg.UserAgent
 	} else {
-		config.UserAgent = "kubara/1.0.0"
+		config.UserAgent = "github.com/kubara-io/kubara/1.0.0"
 	}
 
 	// Set rate limiting

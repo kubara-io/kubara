@@ -1,4 +1,4 @@
-module kubara
+module github.com/kubara-io/kubara
 
 go 1.26.2
 

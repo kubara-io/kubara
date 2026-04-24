@@ -3,11 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/internal/catalog"
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
-	"kubara/internal/utils"
-	"kubara/internal/workflow"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/workflow"
 	"os"
 	"path/filepath"
 

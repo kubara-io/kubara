@@ -9,11 +9,11 @@ import (
 	"syscall"
 	"time"
 
-	"kubara/internal/bootstrap"
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
-	"kubara/internal/render"
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/bootstrap"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/render"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )

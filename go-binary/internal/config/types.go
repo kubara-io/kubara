@@ -1,6 +1,6 @@
 package config
 
-import "kubara/internal/service"
+import "github.com/kubara-io/kubara/internal/service"
 
 const ConfigVersionV1Alpha1 = "v1alpha1"
 

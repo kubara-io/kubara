@@ -6,7 +6,7 @@ import (
 	"testing"
 	"testing/fstest"
 
-	"kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

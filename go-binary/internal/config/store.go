@@ -11,8 +11,8 @@ import (
 	"sort"
 	"strings"
 
-	"kubara/internal/catalog"
-	"kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/go-viper/mapstructure/v2"
 	"github.com/invopop/jsonschema"

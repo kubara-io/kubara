@@ -5,8 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"kubara/internal/catalog"
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )

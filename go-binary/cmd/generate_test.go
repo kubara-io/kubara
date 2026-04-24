@@ -6,11 +6,11 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/cmd"
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
-	"kubara/internal/render"
-	"kubara/internal/service"
+	"github.com/kubara-io/kubara/cmd"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/render"
+	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

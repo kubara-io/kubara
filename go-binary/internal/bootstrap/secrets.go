@@ -8,10 +8,10 @@ import (
 	"os"
 	"text/template"
 
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
-	"kubara/internal/k8s"
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/k8s"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/Masterminds/sprig/v3"
 	corev1 "k8s.io/api/core/v1"

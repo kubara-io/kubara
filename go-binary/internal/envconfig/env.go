@@ -3,7 +3,7 @@ package envconfig
 import (
 	"errors"
 	"fmt"
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/utils"
 	"reflect"
 	"strings"
 )

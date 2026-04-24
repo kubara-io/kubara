@@ -8,8 +8,8 @@ import (
 	"sync"
 	"time"
 
-	"kubara/internal/helm"
-	"kubara/internal/k8s"
+	"github.com/kubara-io/kubara/internal/helm"
+	"github.com/kubara-io/kubara/internal/k8s"
 
 	"github.com/rs/zerolog/log"
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"

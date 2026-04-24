@@ -9,7 +9,7 @@ import (
 	schemadefaulting "k8s.io/apiextensions-apiserver/pkg/apiserver/schema/defaulting"
 	"k8s.io/apimachinery/pkg/runtime"
 
-	"kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/service"
 )
 
 func toMap(schema *apiextensionsv1.JSONSchemaProps) (map[string]any, error) {

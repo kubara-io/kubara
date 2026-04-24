@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"testing"
 
-	"kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/envconfig"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

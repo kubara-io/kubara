@@ -1,9 +1,9 @@
 package config
 
 import (
-	"kubara/internal/catalog"
-	"kubara/internal/envconfig"
-	"kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/service"
 	"path/filepath"
 	"testing"
 

@@ -253,7 +253,7 @@ func fetchLatestVersion(ctx context.Context, currentVersion string, client *http
 		return "", err
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
-	req.Header.Set("User-Agent", "kubara/"+currentVersion)
+	req.Header.Set("User-Agent", "github.com/kubara-io/kubara/"+currentVersion)
 
 	resp, err := client.Do(req)
 	if err != nil {

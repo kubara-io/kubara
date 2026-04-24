@@ -5,7 +5,7 @@ import (
 	"maps"
 	"strings"
 
-	"kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/service"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )

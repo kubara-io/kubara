@@ -4,9 +4,9 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/internal/catalog"
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

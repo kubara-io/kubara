@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"kubara/internal/catalog"
-	"kubara/internal/config"
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/utils"
 	"os"
 	"path/filepath"
 

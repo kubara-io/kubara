@@ -2,9 +2,9 @@ package workflow
 
 import (
 	"fmt"
-	"kubara/internal/catalog"
-	"kubara/internal/config"
-	"kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
 // CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,

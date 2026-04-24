@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"strings"
 
-	"kubara/internal/utils"
+	"github.com/kubara-io/kubara/internal/utils"
 )
 
 // applyDefaults walks the config struct tree via reflection and sets zero-value
