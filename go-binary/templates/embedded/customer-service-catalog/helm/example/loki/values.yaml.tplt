@@ -80,8 +80,9 @@ loki:
   bloomGateway:
     replicas: 0
 alloy:
-  imagePullSecrets:
-    - name: image-pull-secret
+  image:
+    pullSecrets:
+      - name: image-pull-secret
   serviceMonitor:
     {{- if (eq .cluster.services.kubePrometheusStack.status "enabled") }}
     enabled: true

@@ -30,25 +30,40 @@ alloy:
         }
     mounts:
       varlog: true
+      extra:
+        - name: tmp
+          mountPath: /tmp
+    resources:
+      requests:
+        cpu: 30m
+        memory: 100Mi
+      limits:
+        memory: 100Mi
+    securityContext:
+      runAsUser: 0
+      runAsGroup: 0
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
   controller:
     type: daemonset
-  resources:
-    requests:
-      cpu: 30m
-      memory: 100Mi
-    limits:
-      memory: 100Mi
-  podSecurityContext:
-    runAsUser: 0
-    runAsGroup: 0
-    seccompProfile:
-      type: RuntimeDefault
-  containerSecurityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    capabilities:
-      drop:
-        - ALL
+    volumes:
+      extra:
+        - name: tmp
+          emptyDir: {}
+  configReloader:
+    securityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+          - ALL
+      seccompProfile:
+        type: RuntimeDefault
 loki:
   # the loki.storage.bucketNames.chunks value is only added because of a templating bug in loki; actual value should be set as loki.loki.storage.bucketNames.chunks
   monitoring:
