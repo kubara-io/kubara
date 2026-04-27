@@ -2,14 +2,14 @@ apiVersion: v2
 name: loki
 description: Umbrella Chart for loki
 type: application
-version: 0.8.0
+version: 0.9.0
 dependencies:
   - name: template-library
     repository: file://../template-library
     version: 0.0.7
   - name: loki
     repository: https://grafana.github.io/helm-charts
-    version: 6.55.0
+    version: 7.0.0
   - name: promtail
     repository: https://grafana.github.io/helm-charts
     version: 6.17.1
