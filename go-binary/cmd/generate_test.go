@@ -1,4 +1,4 @@
-package cmd_test
+package cmd
 
 import (
 	"context"
@@ -6,11 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/assets/config"
-	"kubara/assets/envmap"
-	"kubara/cmd"
-	"kubara/assets/service"
-	"kubara/templates"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/render"
+	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -41,19 +40,19 @@ func createTestServices() service.Services {
 func TestNewGenerateFlags(t *testing.T) {
 	t.Parallel()
 
-	flags := cmd.NewGenerateFlags()
+	flags := NewGenerateFlags()
 
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
 	assert.False(t, flags.DryRun)
-	assert.Equal(t, templates.DefaultManagedCatalogPath, flags.ManagedCatalogPath)
-	assert.Equal(t, templates.DefaultOverlayValuesPath, flags.OverlayValuesPath)
+	assert.Equal(t, render.DefaultManagedCatalogPath, flags.ManagedCatalogPath)
+	assert.Equal(t, render.DefaultOverlayValuesPath, flags.OverlayValuesPath)
 }
 
 func TestNewGenerateCmd(t *testing.T) {
 	t.Parallel()
 
-	command := cmd.NewGenerateCmd()
+	command := NewGenerateCmd()
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
@@ -247,7 +246,7 @@ func TestGenerateCmd(t *testing.T) {
 				})
 
 				//dummy values
-				envPath := createTestEnv(t, tempDir, envmap.EnvMap{
+				envPath := createTestEnv(t, tempDir, envconfig.EnvMap{
 					ProjectName:                 "project-name",
 					ProjectStage:                "project-stage",
 					DockerconfigBase64:          "DockerConfig",
@@ -275,7 +274,7 @@ func TestGenerateCmd(t *testing.T) {
 			}
 
 			// Create app with generate command and global flags
-			app := createTestApp(cmd.NewGenerateCmd())
+			app := createTestApp(NewGenerateCmd())
 
 			// Run: kubara generate [flags]
 			args := append([]string{"kubara", "generate"}, tt.flags...)
@@ -326,7 +325,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 	})
 
 	//dummy values
-	createTestEnv(t, tempDir, envmap.EnvMap{
+	createTestEnv(t, tempDir, envconfig.EnvMap{
 		ProjectName:                 "project-name",
 		ProjectStage:                "project-stage",
 		DockerconfigBase64:          "DockerConfig",
@@ -340,7 +339,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 		DomainName:                  "example.com",
 	})
 
-	app := createTestApp(cmd.NewGenerateCmd())
+	app := createTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
@@ -383,10 +382,10 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 		Services: createTestServices(),
 	})
 
-	app := createTestApp(cmd.NewGenerateCmd())
+	app := createTestApp(NewGenerateCmd())
 
 	//dummy values
-	createTestEnv(t, tempDir, envmap.EnvMap{
+	createTestEnv(t, tempDir, envconfig.EnvMap{
 		ProjectName:                 "project-name",
 		ProjectStage:                "project-stage",
 		DockerconfigBase64:          "DockerConfig",
@@ -429,12 +428,12 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 // createTestEnv writes an envMap to the file system
 // It returns the file path
 // Takes a directory and an EnvMap and validates the envMap before writing it
-func createTestEnv(t *testing.T, dir string, env envmap.EnvMap) string {
+func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	envPath := filepath.Join(dir, ".env")
 
-	manager := envmap.NewEnvMapManager(envPath, ".", "")
-	manager.SetEnvMap(env)
-	err := manager.ValidateAndSaveToFile(envPath)
+	es := envconfig.NewEnvStore(envPath, ".", "")
+	es.SetEnvMap(env)
+	err := es.ValidateAndSaveToFile(envPath)
 
 	require.NoError(t, err)
 
@@ -445,32 +444,6 @@ func createTestApp(commands ...*cli.Command) *cli.Command {
 	return &cli.Command{
 		Name:     "kubara",
 		Commands: commands,
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:  "config-file",
-				Usage: "Path to the configuration file",
-				Value: "config.yaml",
-			},
-			&cli.StringFlag{
-				Name:  "work-dir",
-				Usage: "Working directory",
-				Value: ".",
-			},
-			&cli.StringFlag{
-				Name:  "env-file",
-				Usage: "Path to the .env file",
-				Value: ".env",
-			},
-			&cli.StringFlag{
-				Name:  "catalog",
-				Usage: "Path to external ServiceDefinition catalog directory.",
-				Value: "",
-			},
-			&cli.BoolFlag{
-				Name:  "catalog-overwrite",
-				Usage: "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-				Value: false,
-			},
-		},
+		Flags:    globalFlags(),
 	}
 }

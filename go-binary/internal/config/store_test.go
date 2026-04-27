@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/assets/service"
+	"github.com/kubara-io/kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
@@ -80,16 +80,16 @@ func deepCopyConfig(c *Config) *Config {
 	return &newConfig
 }
 
-func TestNewConfigManager(t *testing.T) {
+func TestNewConfigStore(t *testing.T) {
 	tests := []struct {
 		name     string
 		filePath string
-		want     *Manager
+		want     *ConfigStore
 	}{
 		{
-			name:     "Create a new config manager",
+			name:     "Create a new config store",
 			filePath: "/tmp/config.yaml",
-			want: &Manager{
+			want: &ConfigStore{
 				filepath: "/tmp/config.yaml",
 				config:   &Config{},
 			},
@@ -97,13 +97,13 @@ func TestNewConfigManager(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewConfigManager(tt.filePath)
+			got := NewConfigStore(tt.filePath)
 			assert.Equal(t, tt.want, got)
 		})
 	}
 }
 
-func TestManager_Load(t *testing.T) {
+func TestConfigStore_Load(t *testing.T) {
 	tempDir := t.TempDir()
 
 	expectedConfig := newValidTestConfig()
@@ -166,20 +166,20 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cm := NewConfigManager(tt.filepath)
-			err := cm.Load()
+			cs := NewConfigStore(tt.filepath)
+			err := cs.Load()
 
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
-				assert.Equal(t, tt.wantConfig, cm.GetConfig())
+				assert.Equal(t, tt.wantConfig, cs.GetConfig())
 			}
 		})
 	}
 }
 
-func TestManager_Validate(t *testing.T) {
+func TestConfigStore_Validate(t *testing.T) {
 	validConfig := newValidTestConfig()
 
 	// Test required field validation
@@ -282,10 +282,10 @@ func TestManager_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cm := &Manager{
+			cs := &ConfigStore{
 				config: tt.config,
 			}
-			err := cm.Validate()
+			err := cs.Validate()
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -295,7 +295,7 @@ func TestManager_Validate(t *testing.T) {
 	}
 }
 
-func TestManager_SaveToFile(t *testing.T) {
+func TestConfigStore_SaveToFile(t *testing.T) {
 	testConfig := &Config{
 		Clusters: []Cluster{
 			{
@@ -368,12 +368,12 @@ func TestManager_SaveToFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cm := &Manager{
+			cs := &ConfigStore{
 				filepath: tt.fields.filepath,
 				config:   tt.fields.config,
 			}
 
-			err := cm.SaveToFile()
+			err := cs.SaveToFile()
 			tt.wantErr(t, err, fmt.Sprintf("SaveToFile() with filepath %s", tt.fields.filepath))
 
 			if tt.postCheck != nil {
@@ -383,7 +383,7 @@ func TestManager_SaveToFile(t *testing.T) {
 	}
 }
 
-func TestManager_GetFilepath(t *testing.T) {
+func TestConfigStore_GetFilepath(t *testing.T) {
 	type fields struct {
 		filepath string
 		config   *Config
@@ -404,11 +404,11 @@ func TestManager_GetFilepath(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cm := &Manager{
+			cs := &ConfigStore{
 				filepath: tt.fields.filepath,
 				config:   tt.fields.config,
 			}
-			assert.Equalf(t, tt.want, cm.GetFilepath(), "GetFilepath()")
+			assert.Equalf(t, tt.want, cs.GetFilepath(), "GetFilepath()")
 		})
 	}
 }
@@ -540,14 +540,13 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cm := NewConfigManager(configPath)
+	cs := NewConfigStore(configPath)
+	require.NoError(t, cs.Load(), "Load should succeed")
 
-	require.NoError(t, cm.Load(), "Load should succeed")
-
-	c := cm.GetConfig().Clusters[0]
+	c := cs.GetConfig().Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should be defaulted")
 	assert.Equal(t, "controlplane", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 
-	assert.NoError(t, cm.Validate(), "Validate should pass after defaults are applied")
+	assert.NoError(t, cs.Validate(), "Validate should pass after defaults are applied")
 }

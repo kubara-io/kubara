@@ -1,19 +1,19 @@
-package app
+package workflow
 
 import (
 	"fmt"
-	"kubara/catalog"
-	"kubara/assets/config"
-	"kubara/assets/envmap"
+	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
 // CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
 // or creates it if it doesn't exist.
-func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envmap.EnvMap) error {
+func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envconfig.EnvMap) error {
 	return CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 }
 
-func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMap, catalogOptions catalog.LoadOptions) error {
+func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 
@@ -28,8 +28,8 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envmap.EnvMa
 			cfg.Clusters[i].Terraform.DNS.Name = dnsName
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
-			if envmap.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
-				helmRepoURL := envmap.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
+			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
+				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{
 					URL: helmRepoURL,
 				}

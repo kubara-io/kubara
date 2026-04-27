@@ -1,4 +1,4 @@
-package envmap
+package envconfig
 
 import (
 	"fmt"
@@ -12,16 +12,16 @@ import (
 	"github.com/knadh/koanf/v2"
 )
 
-// Manager handles reading and writing configuration
-type Manager struct {
+// EnvStore handles reading and writing configuration
+type EnvStore struct {
 	K         *koanf.Koanf
 	filepath  string
 	envMap    *EnvMap
 	envPrefix string
 }
 
-func NewEnvMapManager(filePath, delim, envPrfx string) *Manager {
-	return &Manager{
+func NewEnvStore(filePath, delim, envPrfx string) *EnvStore {
+	return &EnvStore{
 		K:         koanf.New(delim),
 		filepath:  filePath,
 		envMap:    &EnvMap{},
@@ -31,25 +31,25 @@ func NewEnvMapManager(filePath, delim, envPrfx string) *Manager {
 
 // SetEnvMap receives an EnvMap and sets it to the manager
 // Returns newly set map
-func (em *Manager) SetEnvMap(envMap EnvMap) EnvMap {
+func (em *EnvStore) SetEnvMap(envMap EnvMap) EnvMap {
 	em.envMap = &envMap
 	return *em.envMap
 }
 
-func (em *Manager) SetDefaults() {
+func (em *EnvStore) SetDefaults() {
 	em.envMap.setDefaults()
 }
 
-func (em *Manager) GetConfig() *EnvMap {
+func (em *EnvStore) GetConfig() *EnvMap {
 	return em.envMap
 }
 
-func (em *Manager) GetFilepath() string {
+func (em *EnvStore) GetFilepath() string {
 	return em.filepath
 }
 
 // Load loads variables from file and environment
-func (em *Manager) Load() error {
+func (em *EnvStore) Load() error {
 	// Load from file first (if it exists)
 	if _, err := os.Stat(em.filepath); err == nil {
 		if err := em.K.Load(file.Provider(em.filepath), dotenv.Parser()); err != nil {
@@ -80,7 +80,7 @@ func (em *Manager) Load() error {
 	return nil
 }
 
-func (em *Manager) Validate() error {
+func (em *EnvStore) Validate() error {
 	err := em.envMap.Validate()
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func (em *Manager) Validate() error {
 	return nil
 }
 
-func (em *Manager) ValidateAll() error {
+func (em *EnvStore) ValidateAll() error {
 	err := em.envMap.Validate()
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func (em *Manager) ValidateAll() error {
 	return nil
 }
 
-func (em *Manager) ValidateAndSaveToFile(path string) error {
+func (em *EnvStore) ValidateAndSaveToFile(path string) error {
 	err := em.Validate()
 	if err != nil {
 		return err
@@ -104,7 +104,7 @@ func (em *Manager) ValidateAndSaveToFile(path string) error {
 	return em.SaveToFile(path)
 }
 
-func (em *Manager) SaveToFile(path string) error {
+func (em *EnvStore) SaveToFile(path string) error {
 	var b strings.Builder
 	v := reflect.ValueOf(em.envMap).Elem()
 	t := v.Type()
@@ -122,7 +122,7 @@ func (em *Manager) SaveToFile(path string) error {
 	return os.WriteFile(path, []byte(b.String()), 0600)
 }
 
-func (em *Manager) GenerateEnvExample() ([]byte, error) {
+func (em *EnvStore) GenerateEnvExample() ([]byte, error) {
 	var b strings.Builder
 
 	envMap := em.GetConfig() // Use the existing config for default values
@@ -153,9 +153,9 @@ func (em *Manager) GenerateEnvExample() ([]byte, error) {
 
 // GetCurrentDotEnv returns a new EnvMap for a filepath
 // The function looks at the file loads and validates the EnvMap
-// Encapsulates loading and validation with EnvMapManager
+// Encapsulates loading and validation with EnvMapEnvStore
 func GetCurrentDotEnv(filePath string) (EnvMap, error) {
-	manager := NewEnvMapManager(filePath, ".", "")
+	manager := NewEnvStore(filePath, ".", "")
 	if err := manager.Load(); err != nil {
 		return EnvMap{}, fmt.Errorf("could not load env file: %w", err)
 	}

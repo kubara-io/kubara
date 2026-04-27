@@ -1,9 +1,9 @@
-package envmap
+package envconfig
 
 import (
 	"errors"
 	"fmt"
-	"kubara/utils"
+	"github.com/kubara-io/kubara/internal/utils"
 	"reflect"
 	"strings"
 )

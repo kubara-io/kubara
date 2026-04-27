@@ -3,17 +3,17 @@ package cmd
 import (
 	"context"
 	"fmt"
-	"kubara/templates"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
 	"time"
 
-	"kubara/assets/config"
-	"kubara/assets/envmap"
-	"kubara/internal/bootstrap"
-	"kubara/utils"
+	"github.com/kubara-io/kubara/internal/bootstrap"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/render"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )
@@ -109,15 +109,15 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	// Load environment
-	em := envmap.NewEnvMapManager(envFilePath, ".", flags.EnvPrefixFlag)
-	if err := em.Load(); err != nil {
+	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
+	if err := es.Load(); err != nil {
 		return nil, fmt.Errorf("reading Env failed: %w", err)
 	}
-	if err := em.ValidateAll(); err != nil {
+	if err := es.ValidateAll(); err != nil {
 		return nil, fmt.Errorf("validating env: %w", err)
 	}
 
-	envMap := em.GetConfig()
+	envMap := es.GetConfig()
 
 	// Load config file and find cluster by name
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
@@ -125,20 +125,20 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("getting config file path: %w", err)
 	}
 
-	cm := config.NewConfigManagerWithCatalog(configFilePath, catalogOptions)
-	if err := cm.Load(); err != nil {
+	cs := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
+	if err := cs.Load(); err != nil {
 		return nil, fmt.Errorf("loading config from %s: %w", configFilePath, err)
 	}
-	if err := cm.Validate(); err != nil {
+	if err := cs.Validate(); err != nil {
 		return nil, fmt.Errorf("validating config: %w", err)
 	}
 
 	// Find the cluster by name from the argument
 	clusterName := cmd.StringArg("cluster-name")
 	var clusterConfig *config.Cluster
-	for i := range cm.GetConfig().Clusters {
-		if cm.GetConfig().Clusters[i].Name == clusterName {
-			clusterConfig = &cm.GetConfig().Clusters[i]
+	for i := range cs.GetConfig().Clusters {
+		if cs.GetConfig().Clusters[i].Name == clusterName {
+			clusterConfig = &cs.GetConfig().Clusters[i]
 			break
 		}
 	}
@@ -206,13 +206,13 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 		},
 		&cli.StringFlag{
 			Name:        "managed-catalog",
-			Value:       templates.DefaultManagedCatalogPath,
+			Value:       render.DefaultManagedCatalogPath,
 			Usage:       "Path to the managed catalog directory",
 			Destination: &flags.ManagedCatalogPath,
 		},
 		&cli.StringFlag{
 			Name:        "overlay-values",
-			Value:       templates.DefaultOverlayValuesPath,
+			Value:       render.DefaultOverlayValuesPath,
 			Usage:       "Path to overlay values directory",
 			Destination: &flags.OverlayValuesPath,
 		},

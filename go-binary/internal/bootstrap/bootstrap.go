@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"time"
 
-	"kubara/assets/config"
-	"kubara/assets/envmap"
-	"kubara/internal/helm"
-	"kubara/internal/k8s"
+	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/helm"
+	"github.com/kubara-io/kubara/internal/k8s"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
@@ -29,7 +29,7 @@ type Options struct {
 	WithES         bool
 	WithProm       bool
 	WithESCSSPath  string
-	EnvMap         *envmap.EnvMap
+	EnvMap         *envconfig.EnvMap
 	ClusterConfig  *config.Cluster
 	DryRun         bool
 	Timeout        time.Duration

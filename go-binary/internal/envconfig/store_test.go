@@ -1,4 +1,4 @@
-package envmap
+package envconfig
 
 import (
 	"os"
@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewEnvMapManager(t *testing.T) {
+func TestNewEnvStore(t *testing.T) {
 	tests := []struct {
 		name      string
 		filePath  string
@@ -33,7 +33,7 @@ func TestNewEnvMapManager(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := NewEnvMapManager(tt.filePath, tt.delim, tt.envPrefix)
+			got := NewEnvStore(tt.filePath, tt.delim, tt.envPrefix)
 			assert.NotNil(t, got)
 			assert.NotNil(t, got.K)
 			assert.Equal(t, tt.filePath, got.filepath)
@@ -43,7 +43,7 @@ func TestNewEnvMapManager(t *testing.T) {
 	}
 }
 
-func TestManager_GetFilepath(t *testing.T) {
+func TestEnvStore_GetFilepath(t *testing.T) {
 	tests := []struct {
 		name     string
 		filepath string
@@ -63,7 +63,7 @@ func TestManager_GetFilepath(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				filepath: tt.filepath,
 				envMap:   &EnvMap{},
 			}
@@ -72,13 +72,13 @@ func TestManager_GetFilepath(t *testing.T) {
 	}
 }
 
-func TestManager_GetConfig(t *testing.T) {
+func TestEnvStore_GetConfig(t *testing.T) {
 	t.Run("Returns the envMap config", func(t *testing.T) {
 		expectedConfig := &EnvMap{
 			ProjectName:  "test-project",
 			ProjectStage: "dev",
 		}
-		m := &Manager{
+		m := &EnvStore{
 			envMap: expectedConfig,
 		}
 		got := m.GetConfig()
@@ -86,19 +86,19 @@ func TestManager_GetConfig(t *testing.T) {
 	})
 }
 
-func TestManager_SetDefaults(t *testing.T) {
+func TestEnvStore_SetDefaults(t *testing.T) {
 	t.Run("Sets defaults on the envMap", func(t *testing.T) {
-		m := NewEnvMapManager("/tmp/test.env", ".", "")
-		m.SetDefaults()
+		es := NewEnvStore("/tmp/test.env", ".", "")
+		es.SetDefaults()
 
 		// Verify that defaults were set
-		assert.Equal(t, "<...>", m.envMap.ProjectName)
-		assert.Equal(t, "<...>", m.envMap.ProjectStage)
-		assert.Equal(t, "<...>", m.envMap.DomainName)
+		assert.Equal(t, "<...>", es.envMap.ProjectName)
+		assert.Equal(t, "<...>", es.envMap.ProjectStage)
+		assert.Equal(t, "<...>", es.envMap.DomainName)
 	})
 }
 
-func TestManager_Load(t *testing.T) {
+func TestEnvStore_Load(t *testing.T) {
 	tempDir := t.TempDir()
 
 	// Valid env file content
@@ -168,22 +168,22 @@ PROJECT_STAGE='dev'`
 				t.Setenv(k, v)
 			}
 
-			m := NewEnvMapManager(tt.filepath, ".", "")
-			err := m.Load()
+			es := NewEnvStore(tt.filepath, ".", "")
+			err := es.Load()
 
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 				if tt.checkFunc != nil {
-					tt.checkFunc(t, m.GetConfig())
+					tt.checkFunc(t, es.GetConfig())
 				}
 			}
 		})
 	}
 }
 
-func TestManager_Load_EnvironmentOverride(t *testing.T) {
+func TestEnvStore_Load_EnvironmentOverride(t *testing.T) {
 	t.Run("Environment variables override file values", func(t *testing.T) {
 		tempDir := t.TempDir()
 
@@ -197,18 +197,18 @@ DOMAIN_NAME='file-domain.com'`
 		// Set environment variable that should override
 		t.Setenv("PROJECT_NAME", "env-project")
 
-		m := NewEnvMapManager(filepath, ".", "")
-		err := m.Load()
+		es := NewEnvStore(filepath, ".", "")
+		err := es.Load()
 		require.NoError(t, err)
 
 		// Environment variable should override file value
-		assert.Equal(t, "env-project", m.GetConfig().ProjectName)
+		assert.Equal(t, "env-project", es.GetConfig().ProjectName)
 		// File value should be used for non-overridden values
-		assert.Equal(t, "dev", m.GetConfig().ProjectStage)
+		assert.Equal(t, "dev", es.GetConfig().ProjectStage)
 	})
 }
 
-func TestManager_Load_WithPrefix(t *testing.T) {
+func TestEnvStore_Load_WithPrefix(t *testing.T) {
 	t.Run("Loads environment variables with prefix", func(t *testing.T) {
 		tempDir := t.TempDir()
 		filepath := filepath.Join(tempDir, "test.env")
@@ -217,16 +217,16 @@ func TestManager_Load_WithPrefix(t *testing.T) {
 		t.Setenv("KUBARA_PROJECT_NAME", "prefixed-project")
 		t.Setenv("KUBARA_PROJECT_STAGE", "staging")
 
-		m := NewEnvMapManager(filepath, ".", "KUBARA_")
-		err := m.Load()
+		es := NewEnvStore(filepath, ".", "KUBARA_")
+		err := es.Load()
 		require.NoError(t, err)
 
-		assert.Equal(t, "prefixed-project", m.GetConfig().ProjectName)
-		assert.Equal(t, "staging", m.GetConfig().ProjectStage)
+		assert.Equal(t, "prefixed-project", es.GetConfig().ProjectName)
+		assert.Equal(t, "staging", es.GetConfig().ProjectStage)
 	})
 }
 
-func TestManager_Validate(t *testing.T) {
+func TestEnvStore_Validate(t *testing.T) {
 	tests := []struct {
 		name    string
 		envMap  *EnvMap
@@ -260,7 +260,7 @@ func TestManager_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				envMap: tt.envMap,
 			}
 			err := m.Validate()
@@ -273,7 +273,7 @@ func TestManager_Validate(t *testing.T) {
 	}
 }
 
-func TestManager_ValidateAll(t *testing.T) {
+func TestEnvStore_ValidateAll(t *testing.T) {
 	tests := []struct {
 		name    string
 		envMap  *EnvMap
@@ -307,7 +307,7 @@ func TestManager_ValidateAll(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				envMap: tt.envMap,
 			}
 			err := m.ValidateAll()
@@ -320,7 +320,7 @@ func TestManager_ValidateAll(t *testing.T) {
 	}
 }
 
-func TestManager_SaveToFile(t *testing.T) {
+func TestEnvStore_SaveToFile(t *testing.T) {
 	tempDir := t.TempDir()
 
 	testEnvMap := &EnvMap{
@@ -387,7 +387,7 @@ func TestManager_SaveToFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				filepath: tt.filepath,
 				envMap:   tt.envMap,
 			}
@@ -402,7 +402,7 @@ func TestManager_SaveToFile(t *testing.T) {
 	}
 }
 
-func TestManager_ValidateAndSaveToFile(t *testing.T) {
+func TestEnvStore_ValidateAndSaveToFile(t *testing.T) {
 	tempDir := t.TempDir()
 
 	validEnvMap := &EnvMap{
@@ -452,7 +452,7 @@ func TestManager_ValidateAndSaveToFile(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				filepath: tt.filepath,
 				envMap:   tt.envMap,
 			}
@@ -471,7 +471,7 @@ func TestManager_ValidateAndSaveToFile(t *testing.T) {
 	}
 }
 
-func TestManager_GenerateEnvExample(t *testing.T) {
+func TestEnvStore_GenerateEnvExample(t *testing.T) {
 	tests := []struct {
 		name      string
 		envMap    *EnvMap
@@ -516,7 +516,7 @@ func TestManager_GenerateEnvExample(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Manager{
+			m := &EnvStore{
 				envMap: tt.envMap,
 			}
 
@@ -531,11 +531,11 @@ func TestManager_GenerateEnvExample(t *testing.T) {
 	}
 }
 
-func TestManager_GenerateEnvExample_Format(t *testing.T) {
+func TestEnvStore_GenerateEnvExample_Format(t *testing.T) {
 	t.Run("Generated env example has proper format", func(t *testing.T) {
-		m := NewEnvMapManager("/tmp/test.env", ".", "")
+		es := NewEnvStore("/tmp/test.env", ".", "")
 
-		output, err := m.GenerateEnvExample()
+		output, err := es.GenerateEnvExample()
 		require.NoError(t, err)
 
 		lines := strings.Split(string(output), "\n")
@@ -564,12 +564,12 @@ func TestManager_GenerateEnvExample_Format(t *testing.T) {
 	})
 }
 
-func TestManager_SaveToFile_DoesNotIncludeDocFields(t *testing.T) {
+func TestEnvStore_SaveToFile_DoesNotIncludeDocFields(t *testing.T) {
 	t.Run("SaveToFile only saves fields with koanf tags", func(t *testing.T) {
 		tempDir := t.TempDir()
 		filepath := filepath.Join(tempDir, "output.env")
 
-		m := &Manager{
+		es := &EnvStore{
 			filepath: filepath,
 			envMap: &EnvMap{
 				ProjectName:  "test",
@@ -577,7 +577,7 @@ func TestManager_SaveToFile_DoesNotIncludeDocFields(t *testing.T) {
 			},
 		}
 
-		err := m.SaveToFile(filepath)
+		err := es.SaveToFile(filepath)
 		require.NoError(t, err)
 
 		content, err := os.ReadFile(filepath)

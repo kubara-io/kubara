@@ -1,4 +1,4 @@
-package cmd_test
+package cmd
 
 import (
 	"context"
@@ -7,8 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"kubara/cmd"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +14,7 @@ import (
 func TestNewSchemaFlags(t *testing.T) {
 	t.Parallel()
 
-	flags := cmd.NewSchemaFlags()
+	flags := NewSchemaFlags()
 
 	assert.Equal(t, "config.schema.json", flags.OutputFlag)
 }
@@ -24,7 +22,7 @@ func TestNewSchemaFlags(t *testing.T) {
 func TestNewSchemaCmd(t *testing.T) {
 	t.Parallel()
 
-	command := cmd.NewSchemaCmd()
+	command := NewSchemaCmd()
 
 	assert.Equal(t, "schema", command.Name)
 	assert.Equal(t, "Generate JSON schema file for config structure", command.Usage)
@@ -185,7 +183,7 @@ spec:
 				tt.setup(t, tempDir)
 			}
 
-			app := createTestApp(cmd.NewSchemaCmd())
+			app := createTestApp(NewSchemaCmd())
 
 			// Run: kubara schema [flags]
 			args := append([]string{"kubara", "schema"}, tt.flags...)
