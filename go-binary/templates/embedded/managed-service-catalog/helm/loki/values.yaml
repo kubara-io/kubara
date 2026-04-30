@@ -35,10 +35,10 @@ alloy:
           mountPath: /tmp
     resources:
       requests:
-        cpu: 30m
+        cpu: 300m
         memory: 100Mi
       limits:
-        memory: 100Mi
+        memory: 500Mi
     securityContext:
       runAsUser: 0
       runAsGroup: 0
@@ -56,6 +56,12 @@ alloy:
         - name: tmp
           emptyDir: {}
   configReloader:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 50Mi
+      limits:
+        memory: 50Mi
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
