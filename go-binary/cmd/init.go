@@ -43,6 +43,7 @@ func NewInitFlags() *InitFlags {
 
 func NewInitCmd() *cli.Command {
 	flags := NewInitFlags()
+
 	cmd := &cli.Command{
 		Name:  "init",
 		Usage: "Initialize a new kubara directory",
@@ -60,19 +61,19 @@ func NewInitCmd() *cli.Command {
 func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 	dotEnvFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get env file path: %w", err)
 	}
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
 	o := &InitOptions{
@@ -116,104 +117,113 @@ func (o *InitOptions) Run() error {
 	es := envconfig.NewEnvStore(o.dotEnvFilePath, ".", o.envVarPrefix)
 	cs := config.NewConfigStoreWithCatalog(o.configFilePath, o.catalogLoadOptions())
 
-	EnvLoadErr := es.Load()
-	CnfLoadErr := cs.Load()
-	EnvValidateErr := es.Validate()
+	envLoadErr := es.Load()
+	configLoadErr := cs.Load()
+	envValidateErr := es.Validate()
 
 	es.SetDefaults()
 
-	if EnvLoadErr != nil {
-		log.Error().Msgf("Reading Env failed. %s", EnvLoadErr)
-		return EnvLoadErr
+	if envLoadErr != nil {
+		log.Error().Msgf("Reading Env failed. %s", envLoadErr)
+		return envLoadErr
 	}
 
-	// prep mode
 	if o.copyPrepFolder {
-		// add or merge .gitignore
-		errPrep := utils.AddGitignore(o.cwd)
-		if errPrep != nil {
-			return errPrep
-		}
-
-		_, dotenvStatError := os.Stat(o.dotEnvFilePath)
-		if dotenvStatError == nil {
-			log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
-		} else if os.IsNotExist(dotenvStatError) {
-			exampleEnvMap, err := es.GenerateEnvExample()
-			if err != nil {
-				return err
-			}
-			if errWrite := os.WriteFile(o.dotEnvFilePath, exampleEnvMap, 0600); errWrite != nil {
-				return errWrite
-			}
-			log.Info().Msgf("Generated dotenv in path: %v", es.GetFilepath())
-		} else {
-			return dotenvStatError
-		}
-		return nil
+		return o.runPrepMode(es)
 	}
 
-	// force mode
 	if o.force {
-		if EnvValidateErr != nil {
-			return fmt.Errorf("error validating env: %w", EnvValidateErr)
-		}
-
-		if fileExist, _ := utils.FileExist(cs.GetFilepath()); fileExist {
-			if err := workflow.CreateOrUpdateClusterFromEnvWithCatalog(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
-				return fmt.Errorf("error creating/updating cluster from env: %w", err)
-			}
-		} else {
-			return fmt.Errorf("error loading config file. %s", CnfLoadErr)
-		}
-
-		errValidate := cs.Validate()
-		if errValidate != nil {
-			return fmt.Errorf("error validating config file. %s", errValidate)
-		}
-		errSave := cs.SaveToFile()
-		if errSave != nil {
-			return fmt.Errorf("error writing config file. %s", errSave)
-		}
-		log.Info().Msgf("overwritten config file: %s", cs.GetFilepath())
-		log.Info().Msg("Initialized successfully")
-		return nil
+		return o.runForceMode(es, cs, envValidateErr, configLoadErr)
 	}
 
-	// normal mode
-	if fileExist, err := utils.FileExist(cs.GetFilepath()); fileExist {
-		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
-		errV := cs.Validate()
-		if errV != nil {
-			return errV
-		}
-	} else if err != nil {
-		return err
-	} else {
-		if EnvValidateErr != nil {
-			log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
-			return fmt.Errorf("error validating env: %w", EnvValidateErr)
-		}
-		newCluster, err := config.NewClusterFromEnvWithCatalog(es.GetConfig(), o.catalogLoadOptions())
-		if err != nil {
-			return fmt.Errorf("error creating cluster from env: %w", err)
-		}
-		cs.GetConfig().Clusters = []config.Cluster{newCluster}
-		errSave := cs.SaveToFile()
-		if errSave != nil {
-			return errSave
-		}
-		log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
-		// return here to not log as successful as no validation was run on config
-		return nil
-	}
-
-	log.Info().Msg("Initialized successfully")
-
-	return nil
-
+	return o.runNormalMode(es, cs, envValidateErr)
 }
 
 func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
 	return o.catalogOptions
+}
+
+func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
+	if err := utils.AddGitignore(o.cwd); err != nil {
+		return err
+	}
+
+	_, err := os.Stat(o.dotEnvFilePath)
+	if err == nil {
+		log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+
+	exampleEnvMap, err := es.GenerateEnvExample()
+	if err != nil {
+		return err
+	}
+	if err := os.WriteFile(o.dotEnvFilePath, exampleEnvMap, 0600); err != nil {
+		return err
+	}
+
+	log.Info().Msgf("Generated dotenv in path: %v", es.GetFilepath())
+	return nil
+}
+
+func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStore, envValidateErr, configLoadErr error) error {
+	if envValidateErr != nil {
+		return fmt.Errorf("validate env: %w", envValidateErr)
+	}
+
+	fileExists, _ := utils.FileExist(cs.GetFilepath())
+	if !fileExists {
+		return fmt.Errorf("load config file: %w", configLoadErr)
+	}
+
+	if err := workflow.CreateOrUpdateClusterFromEnvWithCatalog(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
+		return fmt.Errorf("create or update cluster from env: %w", err)
+	}
+	if err := cs.Validate(); err != nil {
+		return fmt.Errorf("validate config file: %w", err)
+	}
+	if err := cs.SaveToFile(); err != nil {
+		return fmt.Errorf("write config file: %w", err)
+	}
+
+	log.Info().Msgf("overwritten config file: %s", cs.GetFilepath())
+	log.Info().Msg("Initialized successfully")
+	return nil
+}
+
+func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigStore, envValidateErr error) error {
+	fileExists, err := utils.FileExist(cs.GetFilepath())
+	if err != nil {
+		return err
+	}
+
+	if fileExists {
+		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
+		if err := cs.Validate(); err != nil {
+			return err
+		}
+		log.Info().Msg("Initialized successfully")
+		return nil
+	}
+
+	if envValidateErr != nil {
+		log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
+		return fmt.Errorf("validate env: %w", envValidateErr)
+	}
+
+	newCluster, err := config.NewClusterFromEnvWithCatalog(es.GetConfig(), o.catalogLoadOptions())
+	if err != nil {
+		return fmt.Errorf("create cluster from env: %w", err)
+	}
+
+	cs.GetConfig().Clusters = []config.Cluster{newCluster}
+	if err := cs.SaveToFile(); err != nil {
+		return err
+	}
+
+	log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
+	return nil
 }

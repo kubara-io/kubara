@@ -10,7 +10,6 @@ import (
 
 	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/updatecheck"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 )
@@ -22,14 +21,124 @@ var Authors = []any{
 
 var version string
 
-func InitLogger() {
-	zerolog.TimeFieldFormat = "2006-01-02 15:04:05"
-	log.Logger = log.Output(
-		zerolog.ConsoleWriter{
-			Out:        os.Stdout,
-			TimeFormat: zerolog.TimeFieldFormat,
+type rootActionDeps struct {
+	checkUpdate    func(string) error
+	testConnection func(string)
+}
+
+var defaultRootActionDeps = rootActionDeps{
+	checkUpdate: func(ver string) error {
+		if err := updatecheck.PrintLiveCheck(ver, os.Stdout); err != nil {
+			return cli.Exit(fmt.Sprintf("Error: update check failed: %v", err), 1)
+		}
+		return nil
+	},
+	testConnection: testConnection,
+}
+
+// NewRootCmd builds and returns the root CLI command. ver is injected from
+// main via ldflags.
+func NewRootCmd(ver string) *cli.Command {
+	version = ver
+	globalFlags := NewGlobalFlags()
+
+	return &cli.Command{
+		Name:        AppName,
+		Version:     ver,
+		Authors:     Authors,
+		Copyright:   "",
+		Usage:       "Opinionated CLI for Kubernetes platform engineering",
+		Description: "kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with GitOps-first workflows.",
+		Flags:       globalFlags.CLIFlags(),
+		Commands: []*cli.Command{
+			NewInitCmd(),
+			NewGenerateCmd(),
+			NewBootstrapCmd(),
+			NewSchemaCmd(),
 		},
-	)
+		Action: func(_ context.Context, cmd *cli.Command) error {
+			return newAppAction(cmd, globalFlags.ToRootOptions(), defaultRootActionDeps)
+		},
+	}
+}
+
+
+func newAppAction(cmd *cli.Command, options RootOptions, deps rootActionDeps) error {
+	if options.Base64Mode {
+		return runBase64Mode(options.Base64)
+	}
+
+	if cmd.NumFlags() == 0 {
+		cli.ShowAppHelpAndExit(cmd, 0)
+	}
+
+	if err := executeRootAction(options, deps); err != nil {
+		return err
+	}
+
+	if !options.TestK8sConnection && !options.CheckUpdateFlag {
+		cli.ShowAppHelpAndExit(cmd, 0)
+	}
+
+	return nil
+}
+
+
+
+
+
+
+
+
+func executeRootAction(options RootOptions, deps rootActionDeps) error {
+	switch {
+	case options.TestK8sConnection:
+		deps.testConnection(options.KubeconfigFilePath)
+	case options.CheckUpdateFlag:
+		return deps.checkUpdate(version)
+	}
+
+	return nil
+}
+
+func runBase64Mode(options Base64Options) error {
+	if (options.Encode && options.Decode) || (!options.Encode && !options.Decode) {
+		return cli.Exit("Error: specify either --encode or --decode", 1)
+	}
+
+	if (options.InputString != "" && options.InputFile != "") || (options.InputString == "" && options.InputFile == "") {
+		return cli.Exit("Error: specify exactly one of --string or --file", 1)
+	}
+
+	var data []byte
+	var err error
+	if options.InputFile != "" {
+		data, err = os.ReadFile(options.InputFile)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Cannot read file: %s", options.InputFile)
+			return cli.Exit("Error: reading file", 1)
+		}
+	} else {
+		data = []byte(options.InputString)
+	}
+
+	if options.Encode {
+		fmt.Print(base64.StdEncoding.EncodeToString(data))
+		return nil
+	}
+
+	decoded, err := base64.StdEncoding.DecodeString(string(data))
+	if err != nil {
+		log.Fatal().Err(err).Msg("Invalid base64 input")
+		return cli.Exit("Error: invalid base64 input", 1)
+	}
+
+	_, err = os.Stdout.Write(decoded)
+	if err != nil {
+		return cli.Exit("Error: writing decoded base64 input", 1)
+	}
+
+	return nil
 }
 
 func testConnection(kubeconfig string) {
@@ -56,87 +165,4 @@ func testConnection(kubeconfig string) {
 	}
 
 	log.Info().Msgf("Successful connection to: %s", client.RESTConfig.Host)
-}
-
-func newAppAction(cmd *cli.Command) error {
-	if kubeconfigFilePath == "~/.kube/config" {
-		if envKC := os.Getenv("KUBECONFIG"); envKC != "" {
-			kubeconfigFilePath = envKC
-		}
-	}
-	// If base64 utility mode is enabled, handle it here and exit
-	if base64Mode {
-		if (encodeFlag && decodeFlag) || (!encodeFlag && !decodeFlag) {
-			return cli.Exit("Error: specify either --encode or --decode", 1)
-		}
-		if (inputString != "" && inputFile != "") || (inputString == "" && inputFile == "") {
-			return cli.Exit("Error: specify exactly one of --string or --file", 1)
-		}
-		var data []byte
-		var err error
-		if inputFile != "" {
-			data, err = os.ReadFile(inputFile)
-			if err != nil {
-				log.Fatal().Err(err).Msgf("Cannot read file: %s", inputFile)
-				return cli.Exit("Error: reading file", 1)
-			}
-		} else {
-			data = []byte(inputString)
-		}
-		if encodeFlag {
-			fmt.Print(base64.StdEncoding.EncodeToString(data))
-		} else {
-			decoded, err := base64.StdEncoding.DecodeString(string(data))
-			if err != nil {
-				log.Fatal().Err(err).Msg("Invalid base64 input")
-				return cli.Exit("Error: invalid base64 input", 1)
-			}
-			_, err = os.Stdout.Write(decoded)
-			if err != nil {
-				return cli.Exit("Error: writing decoded base64 input", 1)
-			}
-		}
-		return nil
-	}
-
-	if cmd.NumFlags() == 0 {
-		cli.ShowAppHelpAndExit(cmd, 0)
-	}
-
-	switch {
-	case testK8sConnection:
-		testConnection(kubeconfigFilePath)
-	case checkUpdateFlag:
-		if err := updatecheck.PrintLiveCheck(version, os.Stdout); err != nil {
-			return cli.Exit(fmt.Sprintf("Error: update check failed: %v", err), 1)
-		}
-	default:
-		cli.ShowAppHelpAndExit(cmd, 0)
-	}
-	return nil
-}
-
-// NewRootCmd builds and returns the root CLI command. ver is injected from
-// main via ldflags.
-func NewRootCmd(ver string) *cli.Command {
-	version = ver
-
-	return &cli.Command{
-		Name:        AppName,
-		Version:     ver,
-		Authors:     Authors,
-		Copyright:   "",
-		Usage:       "Opinionated CLI for Kubernetes platform engineering",
-		Description: "kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with GitOps-first workflows.",
-		Flags:       globalFlags(),
-		Commands: []*cli.Command{
-			NewInitCmd(),
-			NewGenerateCmd(),
-			NewBootstrapCmd(),
-			NewSchemaCmd(),
-		},
-		Action: func(_ context.Context, cmd *cli.Command) error {
-			return newAppAction(cmd)
-		},
-	}
 }

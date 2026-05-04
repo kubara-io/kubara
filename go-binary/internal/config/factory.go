@@ -18,7 +18,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
-		return Cluster{}, err
+		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
 	}
 
 	argoCD := ArgoCD{
@@ -68,7 +68,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, clusterType string) (service.Services, error) {
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load catalog: %w", err)
+		return nil, fmt.Errorf("load catalog: %w", err)
 	}
 
 	services := make(service.Services, len(cat.Services))
@@ -88,7 +88,7 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 
 		cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, map[string]any{})
 		if err != nil {
-			return nil, fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+			return nil, fmt.Errorf("apply defaults for service %q: %w", name, err)
 		}
 
 		services[name] = service.Service{

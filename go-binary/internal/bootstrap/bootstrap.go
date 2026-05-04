@@ -63,7 +63,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		UserAgent:      "kubara-bootstrap",
 	})
 	if err != nil {
-		return fmt.Errorf("creating kubernetes client: %w", err)
+		return fmt.Errorf("create kubernetes client: %w", err)
 	}
 
 	// Construct bootstrapCharts structs
@@ -109,22 +109,22 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 
 	// Step 1: Ensure namespaces exist
 	if err := ensureNamespaces(ctx, client, opts, bootstrapCharts); err != nil {
-		return fmt.Errorf("ensuring namespaces: %w", err)
+		return fmt.Errorf("ensure namespaces: %w", err)
 	}
 
 	// Step 2: Add helm repositories
 	if err := addHelmRepositories(ctx, bootstrapCharts); err != nil {
-		return fmt.Errorf("adding helm repositories: %w", err)
+		return fmt.Errorf("add helm repositories: %w", err)
 	}
 
 	// Step 3: Update helm repositories
 	if err := updateHelmDependencies(ctx, opts, bootstrapCharts); err != nil {
-		return fmt.Errorf("updating helm repositories: %w", err)
+		return fmt.Errorf("update helm repositories: %w", err)
 	}
 
 	// Step 4: Apply CRDs
 	if err := applyCRDs(ctx, client, opts, bootstrapCharts); err != nil {
-		return fmt.Errorf("applying CRDs: %w", err)
+		return fmt.Errorf("apply CRDs: %w", err)
 	}
 	// Refresh discovery/REST mapper so CRDs installed above are visible for
 	// subsequent server-side apply calls in the same bootstrap run.
@@ -132,17 +132,17 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 
 	// Step 5: Apply secrets before ArgoCD
 	if err := applySecrets(ctx, client, opts); err != nil {
-		return fmt.Errorf("applying secrets: %w", err)
+		return fmt.Errorf("apply secrets: %w", err)
 	}
 
 	// Step 6: Bootstrap ArgoCD
 	if err := bootstrapArgoCD(ctx, client, opts, argoChart); err != nil {
-		return fmt.Errorf("bootstrapping ArgoCD: %w", err)
+		return fmt.Errorf("bootstrap ArgoCD: %w", err)
 	}
 
 	// Step 7: Wait for ArgoCD to be ready
 	if err := waitForArgoCD(ctx, client, opts, argoChart); err != nil {
-		return fmt.Errorf("waiting for ArgoCD readiness: %w", err)
+		return fmt.Errorf("wait for ArgoCD readiness: %w", err)
 	}
 
 	// Step 8: Print completion message
@@ -158,7 +158,7 @@ func ensureNamespaces(ctx context.Context, client *k8s.Client, opts *Options, ch
 	for _, chart := range charts {
 		if chart.EnsureNamespace {
 			if err := client.EnsureNamespace(ctx, chart.Namespace, opts.DryRun); err != nil {
-				return fmt.Errorf("ensuring %s namespace: %w", chart.Name, err)
+				return fmt.Errorf("ensure %q namespace: %w", chart.Name, err)
 			}
 		}
 	}
@@ -174,13 +174,13 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 		if chart.EnsureCRD {
 			repo := helm.RepoOptions{Name: chart.Name, URL: chart.RepoURL}
 			if err := helm.AddRepository(ctx, repo); err != nil {
-				return fmt.Errorf("adding helm repository %s: %w", repo.Name, err)
+				return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
 			}
 
 			if err := helm.UpdateRepository(ctx, repo); err != nil {
-				return fmt.Errorf("updating helm repository %s: %w", repo.Name, err)
+				return fmt.Errorf("update helm repository %q: %w", repo.Name, err)
 			}
-			log.Info().Msgf("Added helm repository: %s", repo.Name)
+			log.Info().Msgf("Added helm repository: %q", repo.Name)
 		}
 	}
 
@@ -195,9 +195,9 @@ func updateHelmDependencies(ctx context.Context, opts *Options, charts []Bootstr
 		if chart.EnsureCRD {
 			dep := helm.DependencyOptions{ChartPath: chart.Path, Timeout: opts.Timeout}
 			if err := helm.UpdateDependencies(ctx, dep); err != nil {
-				return fmt.Errorf("updating helm chart dependencies failed in %s: %w", chart.Name, err)
+				return fmt.Errorf("update helm chart dependencies for %q: %w", chart.Name, err)
 			}
-			log.Info().Msgf("Updated helm dependencies for chart: %s", chart.Name)
+			log.Info().Msgf("Updated helm dependencies for chart: %q", chart.Name)
 
 		}
 	}
@@ -218,27 +218,27 @@ func applyCRDs(ctx context.Context, client *k8s.Client, opts *Options, charts []
 		if err := crdManager.ApplyChartCRDs(ctx, chart.Path, opts.DryRun, []string{
 			prometheusAPIVersion, // For prometheus-operator CRDs
 		}); err != nil {
-			return fmt.Errorf("applying CRDs for %s: %w", chart.Name, err)
+			return fmt.Errorf("applying CRDs for %q: %w", chart.Name, err)
 		}
 
 		// Get CRD names and wait for them to be established
 		crdNames, err := crdManager.GetChartCRDNames(ctx, chart.Path)
 		if err != nil {
-			log.Warn().Err(err).Msgf("Could not get CRD names for %s, skipping wait", chart.Name)
+			log.Warn().Err(err).Msgf("Could not get CRD names for %q, skipping wait", chart.Name)
 			continue
 		}
 
 		// Skip waiting if we are in dry-run mode
 		if opts.DryRun {
-			log.Info().Msgf("[DRY-RUN] Skipping wait for CRDs: %s", chart.Name)
+			log.Info().Msgf("[DRY-RUN] Skipping wait for CRDs: %q", chart.Name)
 			continue
 		}
 
 		if len(crdNames) > 0 {
 			if err := crdManager.WaitForCRDs(ctx, crdNames); err != nil {
-				return fmt.Errorf("waiting for CRDs from %s: %w", chart.Name, err)
+				return fmt.Errorf("waiting for CRDs from %q: %w", chart.Name, err)
 			}
-			log.Info().Msgf("CRDs applied and established for: %s", chart.Name)
+			log.Info().Msgf("CRDs applied and established for: %q", chart.Name)
 		}
 	}
 
@@ -252,7 +252,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	// Hash the password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(opts.EnvMap.ArgocdWizardAccountPassword), 12)
 	if err != nil {
-		return fmt.Errorf("hashing password: %w", err)
+		return fmt.Errorf("hash password: %w", err)
 	}
 
 	// Template ArgoCD with hashed password
@@ -267,7 +267,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 		},
 	})
 	if err != nil {
-		return fmt.Errorf("templating ArgoCD: %w", err)
+		return fmt.Errorf("template ArgoCD: %w", err)
 	}
 
 	// Apply ArgoCD manifest
@@ -282,7 +282,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	}
 
 	if err := client.ApplyManifest(ctx, manifest, applyOpts); err != nil {
-		return fmt.Errorf("applying ArgoCD manifest: %w", err)
+		return fmt.Errorf("apply ArgoCD manifest: %w", err)
 	}
 
 	log.Info().Msg("ArgoCD manifest applied successfully")
@@ -299,17 +299,17 @@ func waitForArgoCD(ctx context.Context, client *k8s.Client, opts *Options, argoC
 
 	// Wait for ArgoCD server pod
 	if err := client.WaitForPod(ctx, argoChart.Namespace, "app.kubernetes.io/name=argocd-server"); err != nil {
-		return fmt.Errorf("waiting for ArgoCD server: %w", err)
+		return fmt.Errorf("wait for ArgoCD server: %w", err)
 	}
 
 	// Wait for ArgoCD repo server pod
 	if err := client.WaitForPod(ctx, argoChart.Namespace, "app.kubernetes.io/name=argocd-repo-server"); err != nil {
-		return fmt.Errorf("waiting for ArgoCD repo server: %w", err)
+		return fmt.Errorf("wait for ArgoCD repo server: %w", err)
 	}
 
 	// Wait for ArgoCD deployment to be ready
 	if err := client.WaitForDeployment(ctx, argoChart.Namespace, "argocd-server"); err != nil {
-		return fmt.Errorf("waiting for ArgoCD deployment: %w", err)
+		return fmt.Errorf("wait for ArgoCD deployment: %w", err)
 	}
 
 	log.Info().Msg("ArgoCD components are ready")
@@ -324,7 +324,7 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 
 	// Apply control plane secrets
 	if err := secretManager.CreateControlPlaneSecrets(ctx, opts); err != nil {
-		return fmt.Errorf("applying control plane secrets: %w", err)
+		return fmt.Errorf("apply control plane secrets: %w", err)
 	}
 
 	log.Info().Msg("Secrets applied successfully")

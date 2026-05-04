@@ -42,7 +42,7 @@ func NewClient(cfg Config) (*Client, error) {
 	// Build config from kubeconfig
 	restConfig, err := buildRESTConfig(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("building REST config: %w", err)
+		return nil, fmt.Errorf("build REST config: %w", err)
 	}
 
 	// Apply client configuration
@@ -50,23 +50,23 @@ func NewClient(cfg Config) (*Client, error) {
 
 	// Create clients with proper scheme initialization
 	if err := initScheme(); err != nil {
-		return nil, fmt.Errorf("initializing scheme: %w", err)
+		return nil, fmt.Errorf("initialize scheme: %w", err)
 	}
 
 	clientset, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
-		return nil, fmt.Errorf("creating clientset: %w", err)
+		return nil, fmt.Errorf("create clientset: %w", err)
 	}
 
 	dynamicClient, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
-		return nil, fmt.Errorf("creating dynamic client: %w", err)
+		return nil, fmt.Errorf("create dynamic client: %w", err)
 	}
 
 	// Create discovery client with caching
 	discoveryClient, err := discovery.NewDiscoveryClientForConfig(restConfig)
 	if err != nil {
-		return nil, fmt.Errorf("creating discovery client: %w", err)
+		return nil, fmt.Errorf("create discovery client: %w", err)
 	}
 	cachedDiscovery := memory.NewMemCacheClient(discoveryClient)
 
@@ -123,7 +123,7 @@ func buildRESTConfig(cfg Config) (*rest.Config, error) {
 			// Default to ~/.kube/config
 			home, err := os.UserHomeDir()
 			if err != nil {
-				return nil, fmt.Errorf("getting home directory: %w", err)
+				return nil, fmt.Errorf("get home directory: %w", err)
 			}
 			kubeconfigPath = filepath.Join(home, ".kube", "config")
 		}
@@ -145,7 +145,7 @@ func applyClientConfig(config *rest.Config, cfg Config) {
 	if cfg.UserAgent != "" {
 		config.UserAgent = cfg.UserAgent
 	} else {
-		config.UserAgent = "github.com/kubara-io/kubara/1.0.0"
+		config.UserAgent = "kubara/1.0.0"
 	}
 
 	// Set rate limiting

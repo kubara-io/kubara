@@ -19,7 +19,7 @@ import (
 func DecodeB64(from string) (string, error) {
 	dec, err := base64.StdEncoding.DecodeString(from)
 	if err != nil {
-		return "", fmt.Errorf("decoding string %s failed: %w", from, err)
+		return "", fmt.Errorf("decode string %q: %w", from, err)
 	}
 	return string(dec), nil
 }
@@ -31,7 +31,7 @@ func DecodeB64(from string) (string, error) {
 func FileExist(path string) (bool, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("resolve absolute path for %q: %w", path, err)
 	}
 
 	file, err := os.Stat(absPath)
@@ -39,7 +39,7 @@ func FileExist(path string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return false, err
+		return false, fmt.Errorf("stat path %q: %w", absPath, err)
 	}
 	if file.IsDir() {
 		return false, nil
@@ -55,7 +55,7 @@ func GetFullPath(path, workDir string) (string, error) {
 	if path == "~" || strings.HasPrefix(path, "~/") {
 		home, err := os.UserHomeDir()
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("resolve user home directory: %w", err)
 		}
 		if path == "~" {
 			return home, nil
@@ -118,7 +118,7 @@ func AddGitignore(cwd string) error {
 	// Ensure the directory exists
 	dir := filepath.Dir(filename)
 	if err := os.MkdirAll(dir, 0755); err != nil {
-		return fmt.Errorf("failed to create directory %s: %w", dir, err)
+		return fmt.Errorf("create directory %q: %w", dir, err)
 	}
 
 	if _, err := os.Stat(filename); err != nil {
@@ -168,7 +168,7 @@ func mergeGitignoreFiles(filePaths []string, outputPath string, basePath string)
 	for _, filePath := range filePaths {
 		lines, err := readGitignoreLines(filePath)
 		if err != nil {
-			return fmt.Errorf("error reading %s: %w", filePath, err)
+			return fmt.Errorf("read gitignore file %q: %w", filePath, err)
 		}
 
 		// Add unique lines
@@ -192,7 +192,7 @@ func readGitignoreLines(filePath string) ([]string, error) {
 
 	file, err := os.Open(absPath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("open file %q: %w", absPath, err)
 	}
 	defer func() {
 		if closeErr := file.Close(); closeErr != nil {
@@ -246,17 +246,17 @@ func writeGitignoreFile(outputPath string, lines []string, basePath string) erro
 	// Get absolute base path and resolve symlinks
 	absBasePath, err := filepath.Abs(basePath)
 	if err != nil {
-		return fmt.Errorf("failed to get absolute base path: %w", err)
+		return fmt.Errorf("get absolute base path: %w", err)
 	}
 
 	// Ensure base directory exists
 	if err := os.MkdirAll(absBasePath, 0755); err != nil {
-		return fmt.Errorf("failed to create base directory: %w", err)
+		return fmt.Errorf("create base directory: %w", err)
 	}
 
 	resolvedBasePath, err := filepath.EvalSymlinks(absBasePath)
 	if err != nil {
-		return fmt.Errorf("failed to resolve base path: %w", err)
+		return fmt.Errorf("resolve base path: %w", err)
 	}
 
 	// Resolve symlinks in the target directory
@@ -266,11 +266,11 @@ func writeGitignoreFile(outputPath string, lines []string, basePath string) erro
 		// If directory doesn't exist, create it first
 		if errors.Is(err, os.ErrNotExist) {
 			if mkdirErr := os.MkdirAll(targetDir, 0755); mkdirErr != nil {
-				return fmt.Errorf("failed to create directory: %w", mkdirErr)
+				return fmt.Errorf("create directory: %w", mkdirErr)
 			}
 			resolvedDir = targetDir
 		} else {
-			return fmt.Errorf("failed to resolve directory path: %w", err)
+			return fmt.Errorf("resolve directory path: %w", err)
 		}
 	}
 	resolvedPath := filepath.Join(resolvedDir, filepath.Base(absPath))
@@ -295,12 +295,12 @@ func writeGitignoreFile(outputPath string, lines []string, basePath string) erro
 	// Write lines directly
 	for _, line := range lines {
 		if _, err := fmt.Fprintln(writer, line); err != nil {
-			return fmt.Errorf("failed to write line to file: %w", err)
+			return fmt.Errorf("write line to file: %w", err)
 		}
 	}
 
 	if err := writer.Flush(); err != nil {
-		return fmt.Errorf("failed to flush writer: %w", err)
+		return fmt.Errorf("flush writer: %w", err)
 	}
 
 	return nil

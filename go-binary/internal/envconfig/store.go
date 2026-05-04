@@ -53,7 +53,7 @@ func (em *EnvStore) Load() error {
 	// Load from file first (if it exists)
 	if _, err := os.Stat(em.filepath); err == nil {
 		if err := em.K.Load(file.Provider(em.filepath), dotenv.Parser()); err != nil {
-			return fmt.Errorf("error loading file: %w", err)
+			return fmt.Errorf("load env file: %w", err)
 		}
 	}
 
@@ -66,13 +66,13 @@ func (em *EnvStore) Load() error {
 		},
 		EnvironFunc: nil,
 	}), nil); err != nil {
-		return fmt.Errorf("error loading environment variables: %w", err)
+		return fmt.Errorf("load environment variables: %w", err)
 	}
 
 	// Unmarshal into struct
 	var config EnvMap
 	if err := em.K.Unmarshal("", &config); err != nil {
-		return fmt.Errorf("error unmarshaling envMap: %w", err)
+		return fmt.Errorf("unmarshal env map: %w", err)
 	}
 
 	em.envMap = &config
@@ -157,11 +157,11 @@ func (em *EnvStore) GenerateEnvExample() ([]byte, error) {
 func GetCurrentDotEnv(filePath string) (EnvMap, error) {
 	manager := NewEnvStore(filePath, ".", "")
 	if err := manager.Load(); err != nil {
-		return EnvMap{}, fmt.Errorf("could not load env file: %w", err)
+		return EnvMap{}, fmt.Errorf("load env file: %w", err)
 	}
 	envMap := *manager.GetConfig()
 	if err := envMap.Validate(); err != nil {
-		return EnvMap{}, fmt.Errorf("getCurrentDotEnv could not validate the envmap: %w", err)
+		return EnvMap{}, fmt.Errorf("validate env map: %w", err)
 	}
 
 	return envMap, nil

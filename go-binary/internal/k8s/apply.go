@@ -55,7 +55,7 @@ func (c *Client) ApplyManifest(ctx context.Context, manifest []byte, opts ApplyO
 		}
 
 		if err := c.applyObject(ctx, obj, opts); err != nil {
-			return fmt.Errorf("applying %s %s/%s: %w",
+			return fmt.Errorf("applying %q \"%s/%s\": %w",
 				obj.GetKind(), obj.GetNamespace(), obj.GetName(), err)
 		}
 	}
@@ -71,7 +71,7 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 	// Find the REST mapping for this GVK
 	gvr, scope, err := c.getGVR(gvk)
 	if err != nil {
-		return fmt.Errorf("getting GVR for %s: %w", gvk.String(), err)
+		return fmt.Errorf("get GVR for %q: %w", gvk.String(), err)
 	}
 
 	// Get the appropriate resource interface
@@ -98,7 +98,7 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 	// Server-side apply
 	_, err = dr.Apply(ctx, obj.GetName(), obj, applyOpts)
 	if err != nil {
-		return fmt.Errorf("server-side apply failed: %w", err)
+		return fmt.Errorf("server-side apply: %w", err)
 	}
 
 	return nil
@@ -109,7 +109,7 @@ func (c *Client) getGVR(gvk schema.GroupVersionKind) (schema.GroupVersionResourc
 	// Use the REST mapper to find the GVR
 	mapping, err := c.RESTMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
 	if err != nil {
-		return schema.GroupVersionResource{}, nil, fmt.Errorf("REST mapping for %s: %w", gvk.String(), err)
+		return schema.GroupVersionResource{}, nil, fmt.Errorf("resolve REST mapping for %q: %w", gvk.String(), err)
 	}
 
 	return mapping.Resource, mapping.Scope, nil

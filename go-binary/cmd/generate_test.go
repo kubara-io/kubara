@@ -114,7 +114,7 @@ func TestGenerateCmd(t *testing.T) {
 				"--dry-run",
 			},
 			wantErr:     true,
-			errContains: "failed to load config",
+			errContains: "load config",
 		},
 		{
 			name: "error with non-existent env file",
@@ -211,7 +211,7 @@ func TestGenerateCmd(t *testing.T) {
 			tempDir := t.TempDir()
 
 			// Create config file if not testing error case
-			if !tt.wantErr || tt.errContains != "failed to load config" {
+			if !tt.wantErr || tt.errContains != "load config" {
 				configPath := createTestConfig(t, tempDir, config.Cluster{
 					Name:             "test-cluster",
 					Stage:            "dev",
@@ -403,7 +403,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "placeholder provider")
-	assert.Contains(t, err.Error(), "supported providers: stackit")
+	assert.Contains(t, err.Error(), "supported providers: \"stackit\"")
 }
 
 // Helper function
@@ -441,9 +441,11 @@ func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 }
 
 func createTestApp(commands ...*cli.Command) *cli.Command {
+	globalFlags := NewGlobalFlags()
+
 	return &cli.Command{
 		Name:     "kubara",
 		Commands: commands,
-		Flags:    globalFlags(),
+		Flags:    globalFlags.CLIFlags(),
 	}
 }

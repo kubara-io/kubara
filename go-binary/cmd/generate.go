@@ -54,6 +54,7 @@ func NewGenerateFlags() *GenerateFlags {
 // TODO implement deep-merge and/or --reset flag
 func NewGenerateCmd() *cli.Command {
 	flags := NewGenerateFlags()
+
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "generates files from embedded templates and the config file; by default for both Helm and Terraform",
@@ -62,7 +63,7 @@ func NewGenerateCmd() *cli.Command {
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
-				return fmt.Errorf("couldn't convert flags to options: %w", err)
+				return fmt.Errorf("convert flags to options: %w", err)
 			}
 			return o.Run()
 		},
@@ -76,27 +77,27 @@ func NewGenerateCmd() *cli.Command {
 func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*GenerateOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, fmt.Errorf("failed to get working directory: %w", err)
+		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get configFilePath: %w", err)
+		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 	managedCatalogPath, err := utils.GetFullPath(cmd.String("managed-catalog"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get managed catalog path: %w", err)
+		return nil, fmt.Errorf("get managed catalog path: %w", err)
 	}
 	overlayValuesPath, err := utils.GetFullPath(cmd.String("overlay-values"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get overlay values path: %w", err)
+		return nil, fmt.Errorf("get overlay values path: %w", err)
 	}
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("failed to get full envPath: %w", err)
+		return nil, fmt.Errorf("get env path: %w", err)
 	}
 
 	o := &GenerateOptions{
@@ -163,13 +164,13 @@ func buildTemplateContext(clusterBlock config.Cluster, em envconfig.EnvMap) (map
 	// Convert struct to JSON using JSON tags (camelCase)
 	clusterJSON, err := json.Marshal(clusterBlock)
 	if err != nil {
-		return nil, fmt.Errorf("failed to marshal cluster to JSON: %w", err)
+		return nil, fmt.Errorf("marshal cluster to JSON: %w", err)
 	}
 
 	// Convert JSON back to map with camelCase keys
 	var clusterMap map[string]any
 	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
-		return nil, fmt.Errorf("failed to unmarshal clusterJSON to map: %w", err)
+		return nil, fmt.Errorf("unmarshal cluster JSON to map: %w", err)
 	}
 
 	return map[string]any{
@@ -209,14 +210,14 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 	}
 	if provider == "<provider>" {
 		return "", fmt.Errorf(
-			"cluster %q still uses placeholder provider %q; supported providers: %s",
+			"cluster %q still uses placeholder provider %q; supported providers: %q",
 			clusterBlock.Name,
 			clusterBlock.Terraform.Provider,
 			supportedProviderList(),
 		)
 	}
 	if !render.SupportedProviders[provider] {
-		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %s", provider, clusterBlock.Name, supportedProviderList())
+		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
 	}
 	return provider, nil
 }
@@ -229,13 +230,13 @@ func (o *GenerateOptions) cleanupOldFiles() error {
 	if o.TemplateType == render.All || o.TemplateType == render.Terraform {
 		deletePath := filepath.Join(o.ManagedCatalogPath, render.Terraform.String())
 		if err := os.RemoveAll(deletePath); err != nil {
-			return fmt.Errorf("removing directory %s: %v", deletePath, err)
+			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
 	}
 	if o.TemplateType == render.All || o.TemplateType == render.Helm {
 		deletePath := filepath.Join(o.ManagedCatalogPath, render.Helm.String())
 		if err := os.RemoveAll(deletePath); err != nil {
-			return fmt.Errorf("removing directory %s: %v", deletePath, err)
+			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
 	}
 	return nil
@@ -251,13 +252,13 @@ func (o *GenerateOptions) writeTemplateResults(results []render.TemplateResult) 
 		// Create directory for each template path
 		err := os.MkdirAll(filepath.Dir(t.Path), 0750)
 		if err != nil && !errors.Is(err, os.ErrExist) {
-			return fmt.Errorf("could not create template directory: %w", err)
+			return fmt.Errorf("create template directory: %w", err)
 		}
 
 		// write out template
 		err = os.WriteFile(t.Path, []byte(t.Content), 0644)
 		if err != nil {
-			return fmt.Errorf("could not write template file: %w", err)
+			return fmt.Errorf("write template file: %w", err)
 		}
 	}
 	return nil
@@ -270,11 +271,11 @@ func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
 		Overwrite:   o.CatalogOverwrite,
 	})
 	if CnfLoadErr := cs.Load(); CnfLoadErr != nil {
-		return nil, fmt.Errorf("failed to load config from %s: %w", o.ConfigFilePath, CnfLoadErr)
+		return nil, fmt.Errorf("load config: %w", CnfLoadErr)
 	}
 
 	if err := cs.Validate(); err != nil {
-		return nil, fmt.Errorf("config validation failed: %w", err)
+		return nil, fmt.Errorf("validate config: %w", err)
 	}
 
 	cnf := cs.GetConfig()
@@ -282,20 +283,20 @@ func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
 
 	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to load env from envPath:%w", err)
+		return nil, fmt.Errorf("load env: %w", err)
 	}
 
 	for _, clusterBlock := range cnf.Clusters {
 		tmplContext, err := buildTemplateContext(clusterBlock, dotEnvMap)
 		if err != nil {
-			return nil, fmt.Errorf("failed to build template context for cluster %s: %w", clusterBlock.Name, err)
+			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
 		}
 
 		provider := ""
 		if o.TemplateType != render.Helm {
 			provider, err = resolveProvider(clusterBlock)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)
 			}
 		}
 
@@ -305,12 +306,12 @@ func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
 			provider,
 		)
 		if err != nil {
-			return nil, fmt.Errorf("could not template files: %w", err)
+			return nil, fmt.Errorf("template files: %w", err)
 		}
 
 		for i, result := range clusterTplResults {
 			if result.Error != nil {
-				return nil, fmt.Errorf("error in template: %w", result.Error)
+				return nil, fmt.Errorf("template error: %w", result.Error)
 			}
 			trimmedPath := o.resolveOutputPath(result, clusterBlock.Name)
 
@@ -336,7 +337,7 @@ func (o *GenerateOptions) Run() error {
 
 	// Create all templates
 	if errWriteTpls := o.writeTemplateResults(allResults); errWriteTpls != nil {
-		return fmt.Errorf("generating files failed: %w", errWriteTpls)
+		return fmt.Errorf("generate files: %w", errWriteTpls)
 	}
 
 	// TODO improve output
