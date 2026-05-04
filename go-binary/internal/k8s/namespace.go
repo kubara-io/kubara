@@ -29,7 +29,7 @@ func (c *Client) EnsureNamespace(ctx context.Context, name string, dryRun bool) 
 
 	_, err = c.Clientset.CoreV1().Namespaces().Create(ctx, namespace, opts)
 	if err != nil {
-		return fmt.Errorf("creating namespace %s: %w", name, err)
+		return fmt.Errorf("create namespace %q: %w", name, err)
 	}
 
 	return nil
@@ -39,7 +39,7 @@ func (c *Client) EnsureNamespace(ctx context.Context, name string, dryRun bool) 
 func (c *Client) ListNamespaces(ctx context.Context) ([]corev1.Namespace, error) {
 	namespaces, err := c.Clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("listing namespaces: %w", err)
+		return nil, fmt.Errorf("list namespaces: %w", err)
 	}
 
 	return namespaces.Items, nil

@@ -3,6 +3,7 @@ package render
 import (
 	"bytes"
 	"errors"
+	"fmt"
 	"io/fs"
 	"path/filepath"
 	"sort"
@@ -49,7 +50,7 @@ func templateFuncMap() template.FuncMap {
 	funcs["toYaml"] = func(v any) (string, error) {
 		out, err := yaml.Marshal(v)
 		if err != nil {
-			return "", err
+			return "", fmt.Errorf("marshal value to YAML: %w", err)
 		}
 		return strings.TrimSuffix(string(out), "\n"), nil
 	}
@@ -106,7 +107,11 @@ func GetEmbeddedTemplatesList(tplType TemplateType) ([]string, error) {
 		err = errors.Join(errWalkCS, errWalkMS)
 	}
 
-	return out, err
+	if err != nil {
+		return nil, fmt.Errorf("walk embedded templates for type %q: %w", tplType.String(), err)
+	}
+
+	return out, nil
 }
 
 func normalizeProviderName(provider string) string {
@@ -155,7 +160,7 @@ func StripProviderPath(relPath string) string {
 func GetEmbeddedTemplatesListForProvider(tplType TemplateType, provider string) ([]string, error) {
 	files, err := GetEmbeddedTemplatesList(tplType)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get embedded templates for %q: %w", tplType.String(), err)
 	}
 
 	return selectTemplatesForProvider(files, provider), nil
@@ -270,7 +275,7 @@ func TemplateAllFiles(tplType TemplateType, data any) ([]TemplateResult, error) 
 func TemplateAllFilesForProvider(tplType TemplateType, data any, provider string) ([]TemplateResult, error) {
 	fileList, err := GetEmbeddedTemplatesListForProvider(tplType, provider)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get embedded template file list for provider %q: %w", provider, err)
 	}
 
 	return TemplateFiles(fileList, data)

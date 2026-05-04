@@ -52,16 +52,16 @@ func NewSchemaCmd() *cli.Command {
 func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 	outputFilePath, err := utils.GetFullPath(flags.OutputFlag, cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get output file path: %w", err)
 	}
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
 	o := &SchemaOptions{
@@ -89,23 +89,23 @@ func (o *SchemaOptions) Run() error {
 	// Generate schema
 	schemaDoc, err := config.GenerateSchemaWithCatalog(o.catalogOptions)
 	if err != nil {
-		return fmt.Errorf("failed to generate schema: %w", err)
+		return fmt.Errorf("generate schema: %w", err)
 	}
 
 	// Ensure directory exists
 	if err := os.MkdirAll(filepath.Dir(o.outputFilePath), 0750); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
+		return fmt.Errorf("create directory: %w", err)
 	}
 
 	// Marshal to JSON
 	schemaJSON, err := json.MarshalIndent(schemaDoc, "", "  ")
 	if err != nil {
-		return fmt.Errorf("failed to marshal schema to JSON: %w", err)
+		return fmt.Errorf("marshal schema to JSON: %w", err)
 	}
 
 	// Write to file
 	if err := os.WriteFile(o.outputFilePath, schemaJSON, 0600); err != nil {
-		return fmt.Errorf("failed to write schema file: %w", err)
+		return fmt.Errorf("write schema file: %w", err)
 	}
 
 	log.Info().Msgf("Generated schema file: %s", o.outputFilePath)

@@ -42,6 +42,7 @@ func NewBootstrapFlags() *BootstrapFlags {
 
 func NewBootstrapCmd() *cli.Command {
 	flags := NewBootstrapFlags()
+
 	cmd := &cli.Command{
 		Name:      "bootstrap",
 		Usage:     "Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD",
@@ -55,10 +56,10 @@ func NewBootstrapCmd() *cli.Command {
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
-				return fmt.Errorf("couldn't convert flags to options: %w", err)
+				return fmt.Errorf("convert flags to options: %w", err)
 			}
 			if cmd.StringArg("cluster-name") == "" {
-				return fmt.Errorf("missing argument %s", "cluster-name")
+				return fmt.Errorf("missing argument %q", "cluster-name")
 			}
 			o.ClusterName = cmd.StringArg("cluster-name")
 			return Run(c, o)
@@ -72,17 +73,17 @@ func NewBootstrapCmd() *cli.Command {
 func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 
 	envFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get env file path: %w", err)
 	}
 
 	kubeconf, err := utils.GetFullPath(cmd.String("kubeconfig"), cwd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
 
 	managedAbsPath := flags.ManagedCatalogPath
@@ -90,7 +91,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		managedAbsPath = filepath.Join(cwd, managedAbsPath)
 		managedAbsPath, err = filepath.Abs(managedAbsPath)
 		if err != nil {
-			return nil, fmt.Errorf("getting absoulte Path failed: %w", err)
+			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
 	}
 
@@ -99,22 +100,22 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		customerAbsPath = filepath.Join(cwd, customerAbsPath)
 		customerAbsPath, err = filepath.Abs(customerAbsPath)
 		if err != nil {
-			return nil, fmt.Errorf("getting absoulte Path failed: %w", err)
+			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
 	}
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
 	// Load environment
 	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
 	if err := es.Load(); err != nil {
-		return nil, fmt.Errorf("reading Env failed: %w", err)
+		return nil, fmt.Errorf("load env: %w", err)
 	}
 	if err := es.ValidateAll(); err != nil {
-		return nil, fmt.Errorf("validating env: %w", err)
+		return nil, fmt.Errorf("validate env: %w", err)
 	}
 
 	envMap := es.GetConfig()
@@ -122,15 +123,15 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	// Load config file and find cluster by name
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
-		return nil, fmt.Errorf("getting config file path: %w", err)
+		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 
 	cs := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
 	if err := cs.Load(); err != nil {
-		return nil, fmt.Errorf("loading config from %s: %w", configFilePath, err)
+		return nil, fmt.Errorf("load config: %w", err)
 	}
 	if err := cs.Validate(); err != nil {
-		return nil, fmt.Errorf("validating config: %w", err)
+		return nil, fmt.Errorf("validate config: %w", err)
 	}
 
 	// Find the cluster by name from the argument
@@ -143,7 +144,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 	if clusterConfig == nil {
-		return nil, fmt.Errorf("cluster '%s' not found in config file %s", clusterName, configFilePath)
+		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
 	}
 
 	// Validate and normalize ClusterSecretStore path if provided
@@ -161,7 +162,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 
 		// Verify file exists
 		if _, err := os.Stat(cssAbsPath); err != nil {
-			return nil, fmt.Errorf("ClusterSecretStore file not found: %w", err)
+			return nil, fmt.Errorf("cluster secret store file not found: %w", err)
 		}
 	}
 

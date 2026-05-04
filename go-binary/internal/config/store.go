@@ -43,12 +43,12 @@ func NewConfigStoreWithCatalog(filePath string, catalogOptions catalog.LoadOptio
 func (cs *ConfigStore) Load() error {
 	data, err := os.ReadFile(cs.filepath)
 	if err != nil {
-		return fmt.Errorf("failed to read config file: %w", err)
+		return fmt.Errorf("read config file: %w", err)
 	}
 
 	var raw map[string]any
 	if err := yaml.Unmarshal(data, &raw); err != nil {
-		return fmt.Errorf("failed to parse yaml config: %w", err)
+		return fmt.Errorf("parse YAML config: %w", err)
 	}
 
 	dc := &mapstructure.DecoderConfig{
@@ -59,10 +59,10 @@ func (cs *ConfigStore) Load() error {
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
 	if err != nil {
-		return fmt.Errorf("failed to initialize config decoder: %w", err)
+		return fmt.Errorf("initialize config decoder: %w", err)
 	}
 	if err := decoder.Decode(raw); err != nil {
-		return fmt.Errorf("failed to decode config: %w", err)
+		return fmt.Errorf("decode config: %w", err)
 	}
 
 	applyDefaults(cs.config)
@@ -107,10 +107,10 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
-		return nil, fmt.Errorf("failed loading catalog: %w", err)
+		return nil, fmt.Errorf("load catalog: %w", err)
 	}
 	if err := composeServiceSchema(schemaDoc, cat); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("compose service schema: %w", err)
 	}
 
 	return schemaDoc, nil
@@ -144,11 +144,11 @@ func (cs *ConfigStore) Validate() error {
 	c := schemaValidator.NewCompiler()
 	c.AssertFormat()
 	if err := c.AddResource(schemaURL, schemaDoc); err != nil {
-		return fmt.Errorf("failed to add schema resource: %w", err)
+		return fmt.Errorf("add schema resource: %w", err)
 	}
 	compiled, err := c.Compile(schemaURL)
 	if err != nil {
-		return fmt.Errorf("failed to compile schema: %w", err)
+		return fmt.Errorf("compile schema: %w", err)
 	}
 
 	// Validate instance by value
@@ -163,9 +163,9 @@ func (cs *ConfigStore) Validate() error {
 
 	if err := compiled.Validate(instance); err != nil {
 		if verr, ok := errors.AsType[*schemaValidator.ValidationError](err); ok {
-			return fmt.Errorf("config validation errors: %v", verr.Causes)
+			return fmt.Errorf("validate config: %w", verr)
 		}
-		return fmt.Errorf("config not valid: %w", err)
+		return fmt.Errorf("validate config: %w", err)
 	}
 	return nil
 
@@ -190,7 +190,7 @@ func (cs *ConfigStore) SaveToFile() error {
 	// Ensure directory exists
 	filePath := cs.filepath
 	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
-		return fmt.Errorf("failed to create directory: %w", err)
+		return fmt.Errorf("create directory: %w", err)
 	}
 
 	// Marshal to YAML
@@ -199,12 +199,12 @@ func (cs *ConfigStore) SaveToFile() error {
 	encoder.SetIndent(2)
 	err := encoder.Encode(cs.config)
 	if err != nil {
-		return fmt.Errorf("failed to marshal config to YAML: %w", err)
+		return fmt.Errorf("marshal config to YAML: %w", err)
 	}
 
 	// Write to file
 	if err := os.WriteFile(filePath, b.Bytes(), 0600); err != nil {
-		return fmt.Errorf("failed to write config file: %w", err)
+		return fmt.Errorf("write config file: %w", err)
 	}
 
 	return nil
@@ -237,7 +237,7 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 		definition := cat.Services[serviceName]
 		instanceSchema, err := buildServiceInstanceSchema(definition)
 		if err != nil {
-			return nil, fmt.Errorf("failed to build schema for service %q: %w", serviceName, err)
+			return nil, fmt.Errorf("build schema for service %q: %w", serviceName, err)
 		}
 		serviceProperties[serviceName] = instanceSchema
 		required = append(required, serviceName)
@@ -268,7 +268,7 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 	if definition.Spec.ConfigSchema != nil {
 		configSchema, err := toMap(definition.Spec.ConfigSchema)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("convert service config schema to map: %w", err)
 		}
 		properties["config"] = configSchema
 	}
@@ -314,7 +314,7 @@ func buildServiceNetworkingSchema() map[string]any {
 func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOptions) error {
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
-		return fmt.Errorf("failed loading catalog: %w", err)
+		return fmt.Errorf("load catalog: %w", err)
 	}
 
 	for i, cluster := range config.Clusters {
@@ -327,7 +327,7 @@ func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOpti
 			if !exists {
 				cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, map[string]any{})
 				if err != nil {
-					return fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+					return fmt.Errorf("apply defaults for service %q: %w", name, err)
 				}
 
 				cluster.Services[name] = service.Service{
@@ -357,7 +357,7 @@ func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOpti
 
 			cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, base)
 			if err != nil {
-				return fmt.Errorf("failed to apply defaults for service %q: %w", name, err)
+				return fmt.Errorf("apply defaults for service %q: %w", name, err)
 			}
 
 			existing.Config = cfg

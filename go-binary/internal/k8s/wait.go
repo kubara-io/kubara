@@ -20,7 +20,7 @@ func (c *Client) WaitForPod(ctx context.Context, namespace, labelSelector string
 			LabelSelector: labelSelector,
 		})
 		if err != nil {
-			return false, err
+			return false, fmt.Errorf("list pods in namespace %q with selector %q: %w", namespace, labelSelector, err)
 		}
 
 		for i := range podList.Items {
@@ -52,9 +52,9 @@ func (c *Client) WaitForPod(ctx context.Context, namespace, labelSelector string
 			}
 		case <-ctx.Done():
 			if lastErr != nil {
-				return fmt.Errorf("timeout waiting for pod with selector %s to be ready (last list error: %v): %w", labelSelector, lastErr, ctx.Err())
+				return fmt.Errorf("timeout waiting for pod with selector %q to be ready after last list error %v: %w", labelSelector, lastErr, ctx.Err())
 			}
-			return fmt.Errorf("timeout waiting for pod with selector %s to be ready: %w", labelSelector, ctx.Err())
+			return fmt.Errorf("timeout waiting for pod with selector %q to be ready: %w", labelSelector, ctx.Err())
 		}
 	}
 }
@@ -67,7 +67,7 @@ func (c *Client) WaitForDeployment(ctx context.Context, namespace, name string) 
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for deployment %s/%s: %w", namespace, name, ctx.Err())
+			return fmt.Errorf("timeout waiting for deployment \"%s/%s\": %w", namespace, name, ctx.Err())
 
 		case <-ticker.C:
 			deployment, err := c.Clientset.AppsV1().Deployments(namespace).Get(ctx, name, metav1.GetOptions{})

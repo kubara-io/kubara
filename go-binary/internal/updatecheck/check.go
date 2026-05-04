@@ -136,7 +136,7 @@ func runCheck(ctx context.Context, currentVersion string, useCache bool, respect
 		if useCache && cached != nil {
 			return compareVersions(current, currentDisplay, cached.LatestVersion), nil
 		}
-		return nil, err
+		return nil, fmt.Errorf("fetch latest release version: %w", err)
 	}
 
 	if useCache && strings.TrimSpace(deps.cacheFilePath) != "" {
@@ -169,7 +169,7 @@ func shouldSkipUpdateCheck() bool {
 func defaultCacheFilePath() (string, error) {
 	cacheDir, err := os.UserCacheDir()
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("get user cache directory: %w", err)
 	}
 	return filepath.Join(cacheDir, "kubara", "update-check.json"), nil
 }
@@ -200,7 +200,7 @@ func writeCache(cachePath string, cached cacheEntry) error {
 		return nil
 	}
 	if err := os.MkdirAll(filepath.Dir(cachePath), 0o755); err != nil {
-		return err
+		return fmt.Errorf("create update check cache directory: %w", err)
 	}
 	data, err := json.Marshal(cached)
 	if err != nil {
@@ -250,14 +250,14 @@ func parseVersion(raw string) (*semver.Version, string, bool) {
 func fetchLatestVersion(ctx context.Context, currentVersion string, client *http.Client) (string, error) {
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, githubLatestReleaseAPI, nil)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("create github release request: %w", err)
 	}
 	req.Header.Set("Accept", "application/vnd.github+json")
 	req.Header.Set("User-Agent", "github.com/kubara-io/kubara/"+currentVersion)
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return "", err
+		return "", fmt.Errorf("perform github release request: %w", err)
 	}
 	defer func() {
 		_ = resp.Body.Close()
@@ -265,14 +265,14 @@ func fetchLatestVersion(ctx context.Context, currentVersion string, client *http
 
 	if resp.StatusCode != http.StatusOK {
 		_, _ = io.Copy(io.Discard, resp.Body)
-		return "", fmt.Errorf("github release check failed with status %s", resp.Status)
+		return "", fmt.Errorf("github release check returned status %q", resp.Status)
 	}
 
 	var payload struct {
 		TagName string `json:"tag_name"`
 	}
 	if err := json.NewDecoder(io.LimitReader(resp.Body, 1<<20)).Decode(&payload); err != nil {
-		return "", err
+		return "", fmt.Errorf("decode github release response: %w", err)
 	}
 	if strings.TrimSpace(payload.TagName) == "" {
 		return "", fmt.Errorf("github release response did not contain tag_name")

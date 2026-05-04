@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -11,98 +12,152 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-var (
-	kubeconfigFilePath string
-	testK8sConnection  bool
-	checkUpdateFlag    bool
-	catalogPath        string
-	catalogOverwrite   bool
-	base64Mode         bool
-	encodeFlag         bool
-	decodeFlag         bool
-	inputFile          string
-	inputString        string
-)
+const defaultKubeconfigPath = "~/.kube/config"
+
+type GlobalFlags struct {
+	KubeconfigFilePath string
+	WorkDir            string
+	ConfigFilePath     string
+	EnvFilePath        string
+	CatalogPath        string
+	CatalogOverwrite   bool
+	TestK8sConnection  bool
+	Base64Mode         bool
+	EncodeFlag         bool
+	DecodeFlag         bool
+	InputFile          string
+	InputString        string
+	CheckUpdateFlag    bool
+}
+
+type Base64Options struct {
+	Encode      bool
+	Decode      bool
+	InputFile   string
+	InputString string
+}
+
+type RootOptions struct {
+	KubeconfigFilePath string
+	TestK8sConnection  bool
+	CheckUpdateFlag    bool
+	Base64Mode         bool
+	Base64             Base64Options
+}
+
+func NewGlobalFlags() *GlobalFlags {
+	return &GlobalFlags{
+		KubeconfigFilePath: defaultKubeconfigPath,
+		WorkDir:            ".",
+		ConfigFilePath:     "config.yaml",
+		EnvFilePath:        ".env",
+	}
+	}
+
+func (flags *GlobalFlags) ToRootOptions() RootOptions {
+	kubeconfigFilePath := flags.KubeconfigFilePath
+	if kubeconfigFilePath == defaultKubeconfigPath {
+		if envKC := os.Getenv("KUBECONFIG"); envKC != "" {
+			kubeconfigFilePath = envKC
+		}
+	}
+
+	return RootOptions{
+		KubeconfigFilePath: kubeconfigFilePath,
+		TestK8sConnection:  flags.TestK8sConnection,
+		CheckUpdateFlag:    flags.CheckUpdateFlag,
+		Base64Mode:         flags.Base64Mode,
+		Base64: Base64Options{
+			Encode:      flags.EncodeFlag,
+			Decode:      flags.DecodeFlag,
+			InputFile:   flags.InputFile,
+			InputString: flags.InputString,
+		},
+	}
+}
 
 // globalFlags returns the top-level flags shared by the root command and tests.
-func globalFlags() []cli.Flag {
+func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 	return []cli.Flag{
 		&cli.StringFlag{
 			Name:        "kubeconfig",
-			Value:       "~/.kube/config",
+			Value:       flags.KubeconfigFilePath,
 			Usage:       "Path to kubeconfig file",
-			Destination: &kubeconfigFilePath,
+			Destination: &flags.KubeconfigFilePath,
 		},
 		&cli.StringFlag{
 			Name:    "work-dir",
 			Aliases: []string{"w"},
-			Value:   ".",
+			Value:   flags.WorkDir,
 			Usage:   "Working directory",
+			Destination: &flags.WorkDir,
 		},
 		&cli.StringFlag{
 			Name:    "config-file",
 			Aliases: []string{"c"},
-			Value:   "config.yaml",
+			Value:   flags.ConfigFilePath,
 			Usage:   "Path to the configuration file",
+			Destination: &flags.ConfigFilePath,
 		},
 		&cli.StringFlag{
 			Name:  "env-file",
-			Value: ".env",
+			Value: flags.EnvFilePath,
 			Usage: "Path to the .env file",
+			Destination: &flags.EnvFilePath,
 		},
 		&cli.StringFlag{
 			Name:        "catalog",
-			Value:       "",
+			Value:       flags.CatalogPath,
 			Usage:       "Path to external ServiceDefinition catalog directory.",
-			Destination: &catalogPath,
+			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
 			Name:        "catalog-overwrite",
-			Value:       false,
+			Value:       flags.CatalogOverwrite,
 			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
-			Destination: &catalogOverwrite,
+			Destination: &flags.CatalogOverwrite,
 		},
 		&cli.BoolFlag{
 			Name:        "test-connection",
-			Value:       false,
+			Value:       flags.TestK8sConnection,
 			Usage:       "Check if Kubernetes cluster can be reached. List namespaces and exit",
-			Destination: &testK8sConnection,
+			Destination: &flags.TestK8sConnection,
 		},
 		&cli.BoolFlag{
 			Name:        "base64",
-			Value:       false,
+			Value:       flags.Base64Mode,
 			Usage:       "Enable base64 encode/decode mode",
-			Destination: &base64Mode,
+			Destination: &flags.Base64Mode,
 		},
 		&cli.BoolFlag{
 			Name:        "encode",
-			Value:       false,
+			Value:       flags.EncodeFlag,
 			Usage:       "Base64 encode input",
-			Destination: &encodeFlag,
+			Destination: &flags.EncodeFlag,
 		},
 		&cli.BoolFlag{
 			Name:        "decode",
-			Value:       false,
+			Value:       flags.DecodeFlag,
 			Usage:       "Base64 decode input",
-			Destination: &decodeFlag,
+			Destination: &flags.DecodeFlag,
 		},
 		&cli.StringFlag{
 			Name:        "string",
-			Value:       "",
+			Value:       flags.InputString,
 			Usage:       "Input string for base64 operation",
-			Destination: &inputString,
+			Destination: &flags.InputString,
 		},
 		&cli.StringFlag{
 			Name:        "file",
-			Value:       "",
+			Value:       flags.InputFile,
 			Usage:       "Input file path for base64 operation",
-			Destination: &inputFile,
+			Destination: &flags.InputFile,
 		},
 		&cli.BoolFlag{
 			Name:        "check-update",
-			Value:       false,
+			Value:       flags.CheckUpdateFlag,
 			Usage:       "Check online for a newer kubara release",
-			Destination: &checkUpdateFlag,
+			Destination: &flags.CheckUpdateFlag,
 		},
 	}
 }
@@ -110,7 +165,7 @@ func globalFlags() []cli.Flag {
 func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
-		return catalog.LoadOptions{}, fmt.Errorf("failed to get working directory: %w", err)
+		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
 	rawCatalogPath := strings.TrimSpace(cmd.String("catalog"))
@@ -123,7 +178,7 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 
 	absoluteCatalogPath, err := utils.GetFullPath(rawCatalogPath, cwd)
 	if err != nil {
-		return catalog.LoadOptions{}, fmt.Errorf("failed to get catalog path: %w", err)
+		return catalog.LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
 	}
 
 	return catalog.LoadOptions{

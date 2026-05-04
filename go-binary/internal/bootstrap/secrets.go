@@ -52,7 +52,7 @@ func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Optio
 
 		yamlData, err := yaml.Marshal(secret)
 		if err != nil {
-			return fmt.Errorf("marshaling secret: %w", err)
+			return fmt.Errorf("marshal secret: %w", err)
 		}
 
 		manifest = append(manifest, yamlData...)
@@ -62,12 +62,12 @@ func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Optio
 	// Handle clusterSecretStore separately since it is its own type
 	clusterSecStore, err := sm.createClusterSecretStore(o)
 	if err != nil {
-		return fmt.Errorf("creating ClusterSecretStore: %w", err)
+		return fmt.Errorf("create ClusterSecretStore: %w", err)
 	}
 	if clusterSecStore != nil {
 		yamlData, err := yaml.Marshal(clusterSecStore)
 		if err != nil {
-			return fmt.Errorf("marshaling ClusterSecretStore: %w", err)
+			return fmt.Errorf("marshal ClusterSecretStore: %w", err)
 		}
 		manifest = append(manifest, yamlData...)
 	}
@@ -180,20 +180,20 @@ func loadAndValidateClusterSecretStore(filePath string, cluster *config.Cluster)
 	// Read file content
 	content, err := os.ReadFile(filePath)
 	if err != nil {
-		return nil, fmt.Errorf("reading ClusterSecretStore file: %w", err)
+		return nil, fmt.Errorf("read ClusterSecretStore file: %w", err)
 	}
 
 	// Build template context following the same pattern as buildTemplateContext in generate.go
 	// Convert struct to JSON to get lowercase/camelCase keys from json tags
 	clusterJSON, err := json.Marshal(cluster)
 	if err != nil {
-		return nil, fmt.Errorf("marshaling cluster to JSON: %w", err)
+		return nil, fmt.Errorf("marshal cluster to JSON: %w", err)
 	}
 
 	// Unmarshal back to map with lowercase keys
 	var clusterMap map[string]interface{}
 	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
-		return nil, fmt.Errorf("unmarshaling cluster JSON to map: %w", err)
+		return nil, fmt.Errorf("unmarshal cluster JSON to map: %w", err)
 	}
 
 	// Wrap in map with "cluster" key for template access
@@ -205,23 +205,23 @@ func loadAndValidateClusterSecretStore(filePath string, cluster *config.Cluster)
 	// Cluster fields are accessible as {{ .cluster.name }}, {{ .cluster.stage }}, {{ .cluster.dnsName }}, etc.
 	tmpl, err := template.New("clustersecretstore").Funcs(sprig.FuncMap()).Parse(string(content))
 	if err != nil {
-		return nil, fmt.Errorf("parsing template: %w", err)
+		return nil, fmt.Errorf("parse template: %w", err)
 	}
 
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, templateData); err != nil {
-		return nil, fmt.Errorf("executing template: %w", err)
+		return nil, fmt.Errorf("execute template: %w", err)
 	}
 
 	// Unmarshal into ClusterSecretStore struct
 	var css externalsecretsv1.ClusterSecretStore
 	if err := yaml.Unmarshal(buf.Bytes(), &css); err != nil {
-		return nil, fmt.Errorf("unmarshaling ClusterSecretStore: %w", err)
+		return nil, fmt.Errorf("unmarshal ClusterSecretStore: %w", err)
 	}
 
 	// Validate Kind
 	if css.Kind != "ClusterSecretStore" {
-		return nil, fmt.Errorf("invalid Kind: expected ClusterSecretStore, got %s", css.Kind)
+		return nil, fmt.Errorf("invalid kind: expected ClusterSecretStore, got %q", css.Kind)
 	}
 
 	return &css, nil
@@ -240,7 +240,7 @@ func (sm *SecretManager) createClusterSecretStore(o *Options) (*externalsecretsv
 
 	css, err := loadAndValidateClusterSecretStore(o.WithESCSSPath, o.ClusterConfig)
 	if err != nil {
-		return nil, fmt.Errorf("loading ClusterSecretStore from %s: %w", o.WithESCSSPath, err)
+		return nil, fmt.Errorf("load ClusterSecretStore: %w", err)
 	}
 
 	// Validate that the name follows the expected pattern: <cluster-name>-<cluster-stage>

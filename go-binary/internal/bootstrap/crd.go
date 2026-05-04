@@ -49,7 +49,7 @@ func (cm *CRDManager) ApplyChartCRDs(ctx context.Context, chartPath string, dryR
 		APIVersions: apiVersions,
 	})
 	if err != nil {
-		return fmt.Errorf("templating chart for CRDs: %w", err)
+		return fmt.Errorf("template chart for CRDs: %w", err)
 	}
 
 	// Filter for CRDs only
@@ -102,7 +102,7 @@ func (cm *CRDManager) WaitForCRDs(ctx context.Context, crdNames []string) error 
 			defer func() { <-semaphore }() // Release
 
 			if err := cm.waitForCRD(ctx, name); err != nil {
-				errChan <- fmt.Errorf("waiting for CRD %s: %w", name, err)
+				errChan <- fmt.Errorf("waiting for CRD %q: %w", name, err)
 			}
 		}(crdName)
 	}
@@ -132,7 +132,7 @@ func (cm *CRDManager) waitForCRD(ctx context.Context, crdName string) error {
 	for {
 		select {
 		case <-ctx.Done():
-			return fmt.Errorf("timeout waiting for CRD %s to be established", crdName)
+			return fmt.Errorf("timeout waiting for CRD %q to be established", crdName)
 		case <-ticker.C:
 			// Check if CRD exists and is established
 			crd, err := cm.extClient.ApiextensionsV1().CustomResourceDefinitions().Get(ctx, crdName, v1.GetOptions{})
@@ -163,7 +163,7 @@ func (cm *CRDManager) GetChartCRDNames(ctx context.Context, chartPath string) ([
 		IncludeCRDs: true,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("templating chart for CRD discovery: %w", err)
+		return nil, fmt.Errorf("template chart for CRD discovery: %w", err)
 	}
 
 	crdManifest, err := k8s.FilterCRDs(manifest)

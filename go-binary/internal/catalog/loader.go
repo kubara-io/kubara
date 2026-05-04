@@ -27,7 +27,7 @@ func LoadBuiltIn() (Catalog, error) {
 func Load(options LoadOptions) (Catalog, error) {
 	builtIn, err := LoadBuiltIn()
 	if err != nil {
-		return Catalog{}, err
+		return Catalog{}, fmt.Errorf("load built-in catalog: %w", err)
 	}
 
 	if strings.TrimSpace(options.CatalogPath) == "" {
@@ -36,12 +36,12 @@ func Load(options LoadOptions) (Catalog, error) {
 
 	externalRoot, err := resolveServicesPath(options.CatalogPath)
 	if err != nil {
-		return Catalog{}, err
+		return Catalog{}, fmt.Errorf("resolve catalog services path: %w", err)
 	}
 
 	external, err := loadFromFS(os.DirFS(externalRoot), ".")
 	if err != nil {
-		return Catalog{}, err
+		return Catalog{}, fmt.Errorf("load external catalog from %q: %w", externalRoot, err)
 	}
 
 	merged := builtIn.Clone()
@@ -76,7 +76,7 @@ func resolveServicesPath(catalogPath string) (string, error) {
 	if errors.Is(err, os.ErrNotExist) {
 		return cleaned, nil
 	}
-	return "", fmt.Errorf("failed to stat catalog services path %q: %w", servicesDir, err)
+	return "", fmt.Errorf("stat catalog services path %q: %w", servicesDir, err)
 }
 
 func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
@@ -97,19 +97,19 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 		files = append(files, path)
 		return nil
 	}); err != nil {
-		return Catalog{}, fmt.Errorf("failed to walk service definitions: %w", err)
+		return Catalog{}, fmt.Errorf("walk service definitions: %w", err)
 	}
 
 	sort.Strings(files)
 	for _, path := range files {
 		content, err := fs.ReadFile(fsys, path)
 		if err != nil {
-			return Catalog{}, fmt.Errorf("failed to read %q: %w", path, err)
+			return Catalog{}, fmt.Errorf("read %q: %w", path, err)
 		}
 
 		var definition ServiceDefinition
 		if err := yaml.Unmarshal(content, &definition); err != nil {
-			return Catalog{}, fmt.Errorf("failed to unmarshal %q: %w", path, err)
+			return Catalog{}, fmt.Errorf("unmarshal %q: %w", path, err)
 		}
 		if err := definition.Validate(); err != nil {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
