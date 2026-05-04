@@ -3,7 +3,7 @@ module kubara
 go 1.26.2
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/external-secrets/external-secrets/apis v0.0.0-20260430113853-5c0c0e19acfa
 	github.com/fatih/color v1.19.0
