@@ -18,7 +18,7 @@ func applyDefaults(v any) {
 func applyDefaultsValue(v reflect.Value) {
 	// Deference pointers to get to the underlying value
 	// If we encounter a nil pointer, we can't set defaults on it, so we just return.
-	for v.Kind() == reflect.Ptr {
+	for v.Kind() == reflect.Pointer {
 		if v.IsNil() {
 			return
 		}
@@ -68,7 +68,7 @@ func applyDefaultsStruct(v reflect.Value) {
 // comma-separated jsonschema tag. It splits on the first `=` so that values
 // containing `=` (e.g. URLs) are preserved correctly.
 func parseDefaultFromTag(tag string) (string, bool) {
-	for _, part := range strings.Split(tag, ",") {
+	for part := range strings.SplitSeq(tag, ",") {
 		if strings.HasPrefix(part, "default=") {
 			return part[len("default="):], true
 		}
