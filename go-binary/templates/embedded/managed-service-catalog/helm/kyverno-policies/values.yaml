@@ -306,6 +306,7 @@ kyverno-policies:
             names:
               - kyverno-background-controller-*
               - kyverno-reports-controller-*
+              - kyverno-migrate-resources-*
             namespaces:
               - kyverno
 global:
