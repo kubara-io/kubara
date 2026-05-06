@@ -22,7 +22,11 @@ body:
         #### Step 2: Merge PRs
         - [ ] Helm & Terraform Updates
         - [ ] Check Pull requests (renovate)
+        - [ ] Are there any Breaking changes?
+              Ensure that conventional commits are properly used for breaking changes
+              https://www.conventionalcommits.org/en/v1.0.0/#commit-message-with--to-draw-attention-to-breaking-change
         - [ ] Take a look at everything (check Changelog) - Are there any Breaking changes?
+              e.g.: https://github.com/kubara-io/kubara/compare/v0.7.0...main
               Merge accordingly or create a new task for complex changes.
         - [ ] Test changes
 
