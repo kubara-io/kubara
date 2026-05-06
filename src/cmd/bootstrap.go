@@ -130,9 +130,6 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	if err := cs.Load(); err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
-	if err := cs.Validate(); err != nil {
-		return nil, fmt.Errorf("validate config: %w", err)
-	}
 
 	// Find the cluster by name from the argument
 	clusterName := cmd.StringArg("cluster-name")
