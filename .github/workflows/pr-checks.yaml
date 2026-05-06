@@ -4,7 +4,7 @@ on:
     branches:
       - 'main'
     paths:
-      - 'go-binary/**'
+      - 'src/**'
       - '.github/workflows/pr-checks.yaml'
       - '.scripts/**'
       - '.github/helm-profiles/**'
@@ -12,14 +12,14 @@ on:
     branches:
       - 'main'
     paths:
-      - 'go-binary/**'
+      - 'src/**'
       - '.github/workflows/pr-checks.yaml'
       - '.scripts/**'
       - '.github/helm-profiles/**'
   workflow_dispatch:
 
 env:
-  CODE_PATH: ${{ github.workspace }}/go-binary
+  CODE_PATH: ${{ github.workspace }}/src
   REPORT_DIR: ${{ github.workspace }}/reports
   RENDER_DIR: ${{ github.workspace }}/rendered
   OUTPUT_GENERATED_DIR: ${{ github.workspace }}/output-generated
@@ -50,14 +50,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          sparse-checkout: go-binary
+          sparse-checkout: src
 
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go-binary/go.mod
+          go-version-file: src/go.mod
           cache: true
-          cache-dependency-path: go-binary/go.sum
+          cache-dependency-path: src/go.sum
 
       - name: Verify Go environment
         run: |
@@ -200,14 +200,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          sparse-checkout: go-binary
+          sparse-checkout: src
 
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go-binary/go.mod
+          go-version-file: src/go.mod
           cache: true
-          cache-dependency-path: go-binary/go.sum
+          cache-dependency-path: src/go.sum
 
       - name: Create report directory
         run: mkdir -p "${{ env.REPORT_DIR }}"
@@ -250,7 +250,7 @@ jobs:
     outputs:
       success: ${{ steps.commit.outputs.success }}
     env:
-      # .env updates (must match go-binary/assets/envmap/EnvMap)
+      # .env updates (must match src/internal/envconfig/env)
       KUBARA_PROJECT_NAME: "kubara"
       KUBARA_PROJECT_STAGE: "tst"
       KUBARA_DOCKERCONFIG_BASE64: "000000"
@@ -279,9 +279,9 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version-file: go-binary/go.mod
+          go-version-file: src/go.mod
           cache: true
-          cache-dependency-path: go-binary/go.sum
+          cache-dependency-path: src/go.sum
 
       - name: Create output directory
         run: |
@@ -291,7 +291,7 @@ jobs:
       - name: kubara init --prep
         run: |
           set -euo pipefail
-          cd go-binary
+          cd src
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
 
       - name: Update .env (strict template mode)
@@ -302,7 +302,7 @@ jobs:
       - name: kubara init
         run: |
           set -euo pipefail
-          cd go-binary
+          cd src
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
 
       - name: Update config.yaml (strict mode)
@@ -312,7 +312,7 @@ jobs:
 
       - name: Generate kubara artifacts
         run: |
-          cd go-binary
+          cd src
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
 
       - name: Upload generated helm and terraform files

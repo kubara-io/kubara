@@ -51,7 +51,7 @@ repos:
         name: Terraform Docs
         entry: .pre-commit-config/terraform-docs/terraform-docs.sh
         verbose: true
-        files: go-binary/templates/embedded/managed-service-catalog/terraform/modules/.*/
+        files: src/internal/catalog/built-in/managed-service-catalog/terraform/modules/.*/
         language: script
         require_serial: true
         types: [file]
