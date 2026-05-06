@@ -1,6 +1,6 @@
 # Third-Party Helm Dependencies
 
-kubara includes umbrella Helm charts under `go-binary/templates/embedded/managed-service-catalog/helm`.
+kubara includes umbrella Helm charts under `src/internal/catalog/built-in/managed-service-catalog/helm`.
 When kubara is used, Helm resolves these third-party chart dependencies from the configured upstream repositories
 (`helm dependency update`) and they may be rendered or deployed into the target cluster.
 

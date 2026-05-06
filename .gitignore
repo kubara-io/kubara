@@ -11,4 +11,4 @@
 kubara_*amd64*
 kubara_*arm64*
 kubara
-go-binary/kubara-*
+src/kubara-*

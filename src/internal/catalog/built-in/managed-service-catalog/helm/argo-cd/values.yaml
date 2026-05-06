@@ -111,7 +111,6 @@ argo-cd:
         p, wizard, accounts, update, *, allow
         p, wizard, gpgkeys, *, *, deny
         p, wizard, exec, create, */*, allow
-
   repoServer:
     pdb:
       enabled: false
@@ -122,7 +121,6 @@ argo-cd:
         memory: 1000Mi
       limits:
         memory: 1000Mi
-
   controller:
     resources:
       requests:

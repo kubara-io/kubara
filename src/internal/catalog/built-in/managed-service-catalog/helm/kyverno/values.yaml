@@ -3,11 +3,11 @@ namespace: {}
 kyverno:
   crds:
     migration:
-      podResources: null
+      podResources:
   test:
     resources:
       limits:
-        cpu: null
+        cpu:
         memory: 256Mi
       requests:
         cpu: 10m
@@ -15,7 +15,7 @@ kyverno:
   webhooksCleanup:
     resources:
       limits:
-        cpu: null
+        cpu:
         memory: 256Mi
       requests:
         cpu: 10m
@@ -27,7 +27,7 @@ kyverno:
           cpu: 10m
           memory: 256Mi
         limits:
-          cpu: null
+          cpu:
           memory: 256Mi
     container:
       resources:

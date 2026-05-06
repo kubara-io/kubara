@@ -6,14 +6,14 @@ all: build-binary docs-build
 
 # Clean all projects
 clean:
-	@echo "Cleaning go-binary..."
-	@$(MAKE) -C go-binary clean
+	@echo "Cleaning go build artifacts..."
+	@$(MAKE) -C src clean
 	@echo "Cleaning docs..."
 	@$(MAKE) -C docs clean
 
 # Run all tests
 test:
-	@$(MAKE) -C go-binary test
+	@$(MAKE) -C src test
 
 # Documentation targets
 docs-serve:
@@ -33,17 +33,17 @@ docs-validate:
 
 # Binary targets
 build-binary:
-	@$(MAKE) -C go-binary build
+	@$(MAKE) -C src build
 
 build-all:
-	@$(MAKE) -C go-binary build-all
+	@$(MAKE) -C src build-all
 
 run-binary:
-	@$(MAKE) -C go-binary run
+	@$(MAKE) -C src run
 
 # Install dependencies for all projects
 install-deps:
-	@$(MAKE) -C go-binary modtidy
+	@$(MAKE) -C src modtidy
 	@$(MAKE) -C docs install-deps
 
 # Help target

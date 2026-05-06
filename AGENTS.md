@@ -12,7 +12,7 @@ These instructions apply to the entire repository unless a deeper `AGENTS.md` ov
 
 ## Truth Hierarchy
 - Stable intent and guardrails: this `AGENTS.md`.
-- Actual runtime behavior: implementation + tests in `go-binary/`.
+- Actual runtime behavior: implementation + tests in `src/`.
 - Usage and process guidance: docs in `docs/content/` and `CONTRIBUTING.md`.
 
 If docs and code diverge, treat code/tests as current behavior and update the nearest relevant docs in the same change.
@@ -22,12 +22,12 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Runtime prerequisites: `docs/content/1_getting_started/prerequisites.md`
 - Architecture context: `docs/content/4_architecture/architecture_overview.md`
 - Contributor and PR workflow: `CONTRIBUTING.md`
-- Config schema and template keys: `go-binary/assets/config/configTypes.go` (use `kubara schema` when needed)
+- Config schema and template keys: `src/internal/config/types.go` (use `kubara schema` when needed)
 
 ## Project Layout
-- `go-binary/`: Go CLI implementation, tests, embedded templates, release Makefile
+- `src/`: Go CLI implementation, tests, embedded templates, release Makefile
 - `docs/`: MkDocs site managed with `uv`
-- Root `Makefile`: monorepo entry point delegating to `go-binary/` and `docs/`
+- Root `Makefile`: monorepo entry point delegating to `src/` and `docs/`
 
 ## Working Style
 - Keep changes focused; avoid mixing unrelated fixes.
@@ -39,17 +39,17 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Use the PR and issue templates; fill required sections and do not remove template structure.
 
 ## Validation (Smallest Relevant First)
-- Go tests: `make test` or `cd go-binary && make test`
-- Go build: `make build-binary` or `cd go-binary && make build`
+- Go tests: `make test` or `cd src && make test`
+- Go build: `make build-binary` or `cd src && make build`
 - Docs build: `make docs-build` or `cd docs && make build`
 - Docs validation: `make docs-validate`
 - Dependency setup: `make install-deps`
 
 ## Go Code
-- Main module is `go-binary/`.
-- Keep compatibility with the Go toolchain declared in `go-binary/go.mod`.
+- Main module is `src/`.
+- Keep compatibility with the Go toolchain declared in `src/go.mod`.
 - Prefer table-driven tests when extending test coverage.
-- Reuse existing structure under `go-binary/cmd/` and `go-binary/internal/`.
+- Reuse existing structure under `src/cmd/` and `src/internal/`.
 
 ## Documentation
 - Docs live under `docs/content/`.
