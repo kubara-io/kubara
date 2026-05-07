@@ -38,9 +38,9 @@ nav:
           - ADR: 7_decisions/ADR.md
           - ADR-Index: 7_decisions/ADR-index.md
   - Community:
+      - "Community & Support": 5_community/community-n-support.md
       - Contributing: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
       - Maintainers: 5_community/maintainers.md
-      - Support: 5_community/support.md
   - Reference:
       - Release Cycle & Updates: 6_reference/release_cycle_and_updates.md
       - Known Issues: 6_reference/known_issues.md

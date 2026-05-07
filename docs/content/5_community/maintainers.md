@@ -1,4 +1,4 @@
-# kubara Maintainers
+# Maintainers
 
 More details about our governance and how maintainers are selected can be found below.
 
@@ -7,8 +7,9 @@ More details about our governance and how maintainers are selected can be found 
 | Maintainer       | E-Mail                                | Affiliation              |
 |------------------|---------------------------------------|--------------------------|
 | Artem Lajko      | artem.lajko@iits-consulting.de        | iits-consulting          |
-| Matthias Huether | matthias.huether@iits-consulting.de   | iits-consulting          |
 | Fabian Schmitt   | fabian-patrice.schmitt@digits.schwarz | STACKIT / Schwarz Digits |
+| Jan Larwig       | jan.larwig@digits.schwarz             | STACKIT / Schwarz Digits |
+| Matthias Huether | matthias.huether@iits-consulting.de   | iits-consulting          |
 
 ## Governance
 
@@ -45,7 +46,6 @@ this vote, the member in question is not eligible to vote and does not count
 towards the quorum. Any removal vote can cover only one single person.
 
 
-
 ## Maintainers
 
 kubara maintainers have write access to the kubara Repository.
@@ -62,6 +62,7 @@ follow through to fix issues (in code or tests).
 
 A maintainer is a contributor to the project's success and a citizen helping
 the project succeed.
+
 
 ## Becoming a Maintainer
 
@@ -81,6 +82,7 @@ private mailing list (kubara-team@TBD). A 2/3 majority of team members
 must vote to approve a new maintainer. After the new maintainer is approved, they will
 be added to the private team member mailing list.
 
+
 ## Voting
 
 While most business in kubara is conducted by "lazy consensus", periodically
@@ -92,6 +94,7 @@ community. Any Maintainer may demand a vote be taken.
 Most votes require a simple majority of all Maintainers to succeed. Maintainers
 can be removed by a 2/3 majority vote of all Maintainers, and changes to this
 Governance require a 2/3 vote of all Maintainers.
+
 
 ## Commit Signing for Maintainers
 
