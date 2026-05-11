@@ -2,7 +2,7 @@ module "iam" {
   source = "../../../../managed-service-catalog/terraform/modules/iam"
 
   project_id = var.project_id
-  name       = "sa-${substr(var.name, 0, 8)}-${substr(var.stage, 0, 8)}" #the name just only allow 20 characters
+  name       = "sa-${substr(var.name, 0, 8)}-${substr(var.stage, 0, 8)}" # iam only allows for 20 characters
 
   sa_key_ttl_days                 = var.sa_key_ttl_days
   sa_key_ttl_rotation_buffer_days = var.sa_key_ttl_rotation_buffer_days
@@ -14,7 +14,7 @@ module "dns_zone" {
   source = "../../../../managed-service-catalog/terraform/modules/dns-zone"
 
   project_id    = var.project_id
-  name          = "dns-zone-${var.name}-${var.stage}"
+  name          = "${var.name}-${var.stage}"
   dns_name      = var.dns_name
   contact_email = var.contact_email
 }
@@ -24,7 +24,7 @@ module "secretsmanager" {
   source = "../../../../managed-service-catalog/terraform/modules/secretsmanager"
 
   project_id = var.project_id
-  name       = "secmgr-${var.name}-${var.stage}"
+  name       = "${var.name}-${var.stage}"
   acls       = var.acls
 
   users = var.users
@@ -35,7 +35,7 @@ module "ske_cluster" {
   source = "../../../../managed-service-catalog/terraform/modules/ske-cluster"
 
   project_id             = var.project_id
-  name                   = "ske-${substr(var.name, 0, 3)}-${substr(var.stage, 0, 3)}" #the name just only allow 11 characters
+  name                   = "${local.ske_name_prefix}-${random_string.ske_name_suffix.result}"
   region                 = var.region
   kubernetes_version_min = var.kubernetes_version_min
 
@@ -46,6 +46,18 @@ module "ske_cluster" {
   ### kubeconfig
   expiration = var.expiration
 }
+
+locals {
+  ske_name_prefix        = substr(var.name, 0, 5)
+  ske_name_suffix_length = 10 - length(local.ske_name_prefix)
+}
+
+resource "random_string" "ske_name_suffix" {
+  length  = local.ske_name_suffix_length # ske only allows for 11 characters
+  lower   = true
+  upper   = false
+  special = false
+}
 {{ end }}
 
 
@@ -53,7 +65,7 @@ module "ske_cluster" {
 module "edgecloud_cluster_controlplane" {
   source = "../../../../managed-service-catalog/terraform/modules/edge-cluster"
 
-  name               = "controlplane-${var.name}-${var.stage}"
+  name               = "${var.name}-${var.stage}"
   project_id         = var.project_id
   ipv4_prefix        = var.ipv4_prefix
   edgecloud_image_id = var.edgecloud_image_id

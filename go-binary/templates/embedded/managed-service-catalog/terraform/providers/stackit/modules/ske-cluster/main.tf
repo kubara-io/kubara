@@ -6,6 +6,18 @@ resource "stackit_ske_cluster" "this" {
 
   node_pools  = var.node_pools
   maintenance = var.ske_maintenance
+
+  # The SKE API uses the name as the Cluster ID therefore any
+  # change to the naming scheme or cluster name causes a full
+  # disruptive recreate of the SKE cluster. Which will cause
+  # data loss. Therefore we enforce that name changes in the
+  # kubara config or naming scheme logic is not propagated to
+  # existing clusters to ensure a stable platform.
+  lifecycle {
+    ignore_changes = [
+      name
+    ]
+  }
 }
 
 resource "stackit_ske_kubeconfig" "this" {
@@ -14,7 +26,6 @@ resource "stackit_ske_kubeconfig" "this" {
   refresh      = var.refresh
   expiration   = var.expiration
 }
-
 
 resource "local_file" "kubeconfig" {
   count           = var.create_kubeconfig_local ? 1 : 0
