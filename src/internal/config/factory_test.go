@@ -75,7 +75,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		},
 		// The service defaults are catalog-driven; mirror expected built-in values.
 		Services: service.Services{
-			"argo-cd": {Status: service.StatusDisabled},
+			"argocd": {Status: service.StatusDisabled},
 			"cert-manager": {
 				Status: service.StatusEnabled,
 				Config: service.Config{

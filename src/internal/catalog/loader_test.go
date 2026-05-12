@@ -15,7 +15,7 @@ func TestLoadBuiltIn(t *testing.T) {
 
 	assert.NotEmpty(t, cat.Services)
 	assert.Contains(t, cat.Services, "cert-manager")
-	assert.Contains(t, cat.Services, "argo-cd")
+	assert.Contains(t, cat.Services, "argocd")
 }
 
 func TestLoad_ExternalCollisionWithoutOverwrite(t *testing.T) {
@@ -26,7 +26,7 @@ func TestLoad_ExternalCollisionWithoutOverwrite(t *testing.T) {
 apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
-  name: argo-cd
+  name: argocd
 spec:
   chartPath: argo-cd
   status: enabled
@@ -45,7 +45,7 @@ func TestLoad_ExternalCollisionWithOverwrite(t *testing.T) {
 apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
-  name: argo-cd
+  name: argocd
 spec:
   chartPath: custom-argo-cd
   status: enabled
@@ -53,7 +53,7 @@ spec:
 
 	cat, err := Load(LoadOptions{CatalogPath: tempDir, Overwrite: true})
 	require.NoError(t, err)
-	assert.Equal(t, "custom-argo-cd", cat.Services["argo-cd"].Spec.ChartPath)
+	assert.Equal(t, "custom-argo-cd", cat.Services["argocd"].Spec.ChartPath)
 }
 
 func TestLoad_InvalidAPIVersion(t *testing.T) {

@@ -35,13 +35,11 @@ type Metadata struct {
 
 // ServiceSpec contains the desired behavior and schema of a service.
 type ServiceSpec struct {
-	// ChartPath points to the Helm chart path under managed catalog.
+	// ChartPath points to the immutable Helm chart path under managed catalog.
 	ChartPath string `json:"chartPath"`
-	// AppName optionally overrides the default Argo CD application name.
-	AppName string `json:"appName,omitempty"`
-	// Status defines the default status for the service.
+	// Status defines the default status for the service and may be overridden per cluster.
 	Status service.Status `json:"status"`
-	// ClusterTypes limits the service to specific cluster types.
+	// ClusterTypes limits the service to specific cluster types as catalog metadata.
 	ClusterTypes []string `json:"clusterTypes,omitempty"`
 	// ConfigSchema describes config values using OpenAPI v3 schema props.
 	ConfigSchema *apiextensionsv1.JSONSchemaProps `json:"configSchema,omitempty"`

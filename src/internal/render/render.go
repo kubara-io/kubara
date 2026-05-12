@@ -87,6 +87,13 @@ func makeWalkDirFunc(tmplRoot string, out *[]string) fs.WalkDirFunc {
 			return err
 		}
 
+		if strings.HasPrefix(rel, "services") {
+			// TODO: Consider a cleaner separation of "template files" vs "catalog data"
+			// and avoid relying on path-based filtering. For now, we can simply
+			// ignore files under "services" as they are not templates but catalog data.
+			return nil
+		}
+
 		*out = append(*out, filepath.ToSlash(rel))
 		return nil
 	}

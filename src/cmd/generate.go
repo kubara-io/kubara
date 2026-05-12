@@ -5,15 +5,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"sort"
+	"strings"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
-	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
@@ -158,24 +159,17 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 	cmd.Flags = append(cmd.Flags, generateFlags...)
 }
 
-// buildTemplateContext creates a map from a config.Cluster struct.
-// It converts the struct to a map using JSON tag names for template variables.
-func buildTemplateContext(clusterBlock config.Cluster, em envconfig.EnvMap) (map[string]any, error) {
-	// Convert struct to JSON using JSON tags (camelCase)
-	clusterJSON, err := json.Marshal(clusterBlock)
+// buildTemplateContext creates a map for rendering templates with cluster config, catalog services, and env vars.
+func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envconfig.EnvMap) (map[string]any, error) {
+	clusterMap, err := toJSONMap(cluster)
 	if err != nil {
-		return nil, fmt.Errorf("marshal cluster to JSON: %w", err)
-	}
-
-	// Convert JSON back to map with camelCase keys
-	var clusterMap map[string]any
-	if err := json.Unmarshal(clusterJSON, &clusterMap); err != nil {
-		return nil, fmt.Errorf("unmarshal cluster JSON to map: %w", err)
+		return nil, fmt.Errorf("convert cluster config to map: %w", err)
 	}
 
 	return map[string]any{
-		"cluster": clusterMap,
 		"env":     em,
+		"cluster": clusterMap,
+		"catalog": resolveCatalog(cat),
 	}, nil
 }
 
@@ -222,6 +216,41 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 	return provider, nil
 }
 
+func resolveCatalog(cat catalog.Catalog) map[string]any {
+	if cat.Services == nil {
+		return map[string]any{
+			"services": map[string]any{},
+		}
+	}
+
+	services := make(map[string]any, len(cat.Services))
+	for serviceName, service := range cat.Services {
+		services[serviceName] = map[string]any{
+			"status":       service.Spec.Status,
+			"chartPath":    service.Spec.ChartPath,
+			"clusterTypes": service.Spec.ClusterTypes,
+		}
+	}
+
+	return map[string]any{
+		"services": services,
+	}
+}
+
+func toJSONMap(value any) (map[string]any, error) {
+	rawJSON, err := json.Marshal(value)
+	if err != nil {
+		return nil, err
+	}
+
+	var out map[string]any
+	if err := json.Unmarshal(rawJSON, &out); err != nil {
+		return nil, err
+	}
+
+	return out, nil
+}
+
 func (o *GenerateOptions) cleanupOldFiles() error {
 	if o.DryRun {
 		return nil
@@ -266,10 +295,12 @@ func (o *GenerateOptions) writeTemplateResults(results []render.TemplateResult) 
 
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
-	cs := config.NewConfigStoreWithCatalog(o.ConfigFilePath, catalog.LoadOptions{
+	catalogOptions := catalog.LoadOptions{
 		CatalogPath: o.CatalogPath,
 		Overwrite:   o.CatalogOverwrite,
-	})
+	}
+
+	cs := config.NewConfigStoreWithCatalog(o.ConfigFilePath, catalogOptions)
 	if CnfLoadErr := cs.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("load config: %w", CnfLoadErr)
 	}
@@ -281,13 +312,18 @@ func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
 	cnf := cs.GetConfig()
 	var allResults []render.TemplateResult
 
+	cat, err := cs.GetCatalog()
+	if err != nil {
+		return nil, fmt.Errorf("load catalog: %w", err)
+	}
+
 	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
 		return nil, fmt.Errorf("load env: %w", err)
 	}
 
 	for _, clusterBlock := range cnf.Clusters {
-		tmplContext, err := buildTemplateContext(clusterBlock, dotEnvMap)
+		tmplContext, err := buildTemplateContext(clusterBlock, cat, dotEnvMap)
 		if err != nil {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
 		}
@@ -324,7 +360,6 @@ func (o *GenerateOptions) processClusters() ([]render.TemplateResult, error) {
 }
 
 func (o *GenerateOptions) Run() error {
-
 	allResults, errProcess := o.processClusters()
 	if errProcess != nil {
 		return errProcess

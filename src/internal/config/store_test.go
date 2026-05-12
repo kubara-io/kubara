@@ -51,7 +51,7 @@ func newValidTestConfig() *Config {
 					},
 				},
 				Services: service.Services{
-					"argo-cd":                 {Status: service.StatusEnabled},
+					"argocd":                  {Status: service.StatusEnabled},
 					"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
 					"external-dns":            {Status: service.StatusEnabled},
 					"external-secrets":        {Status: service.StatusEnabled},
@@ -497,7 +497,7 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	require.True(t, ok)
 
 	assert.Contains(t, properties, "cert-manager")
-	assert.Contains(t, properties, "argo-cd")
+	assert.Contains(t, properties, "argocd")
 	assert.Contains(t, properties, "metallb")
 }
 
@@ -516,7 +516,7 @@ clusters:
           managed:
             url: "https://github.com/managed/repo.git"
     services:
-      argo-cd: {}
+      argocd: {}
       cert-manager:
         config:
           clusterIssuer:

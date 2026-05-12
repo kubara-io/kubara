@@ -28,7 +28,7 @@ func setupTestFS(_ *testing.T) func() {
 
 func fullServiceContext() map[string]any {
 	return map[string]any{
-		"argo-cd":                 map[string]any{"status": "enabled"},
+		"argocd":                  map[string]any{"status": "enabled"},
 		"cert-manager":            map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 		"external-dns":            map[string]any{"status": "enabled"},
 		"external-secrets":        map[string]any{"status": "enabled"},
@@ -43,6 +43,28 @@ func fullServiceContext() map[string]any {
 		"metrics-server":          map[string]any{"status": "disabled"},
 		"metallb":                 map[string]any{"status": "disabled"},
 		"longhorn":                map[string]any{"status": "disabled"},
+	}
+}
+
+func fullCatalogContext() map[string]any {
+	return map[string]any{
+		"services": map[string]any{
+		"argocd":                  map[string]any{"chartPath": "argo-cd"},
+		"cert-manager":            map[string]any{"chartPath": "cert-manager"},
+		"external-dns":            map[string]any{"chartPath": "external-dns"},
+		"external-secrets":        map[string]any{"chartPath": "external-secrets"},
+		"kube-prometheus-stack":   map[string]any{"chartPath": "kube-prometheus-stack"},
+		"traefik":                 map[string]any{"chartPath": "traefik"},
+		"kyverno":                 map[string]any{"chartPath": "kyverno"},
+		"kyverno-policies":        map[string]any{"chartPath": "kyverno-policies"},
+		"kyverno-policy-reporter": map[string]any{"chartPath": "kyverno-policy-reporter"},
+		"loki":                    map[string]any{"chartPath": "loki"},
+		"homer-dashboard":         map[string]any{"chartPath": "homer-dashboard"},
+		"oauth2-proxy":            map[string]any{"chartPath": "oauth2-proxy"},
+		"metrics-server":          map[string]any{"chartPath": "metrics-server"},
+		"metallb":                 map[string]any{"chartPath": "metallb"},
+		"longhorn":                map[string]any{"chartPath": "longhorn"},
+		},
 	}
 }
 
@@ -377,6 +399,16 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Successfully template helm files",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
+				"catalog": map[string]any{
+					"services": map[string]any{
+						"cert-manager":          map[string]any{"chartPath": "cert-manager"},
+						"kube-prometheus-stack": map[string]any{"chartPath": "kube-prometheus-stack"},
+						"kyverno":               map[string]any{"chartPath": "kyverno"},
+						"longhorn":              map[string]any{"chartPath": "longhorn"},
+						"metallb":               map[string]any{"chartPath": "metallb"},
+						"oauth2-proxy":          map[string]any{"chartPath": "oauth2-proxy"},
+					},
+				},
 				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
@@ -459,6 +491,16 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Omits sourceRepos when optional helm repo is missing",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
+				"catalog": map[string]any{
+					"services": map[string]any{
+						"cert-manager":          map[string]any{"chartPath": "cert-manager"},
+						"kube-prometheus-stack": map[string]any{"chartPath": "kube-prometheus-stack"},
+						"kyverno":               map[string]any{"chartPath": "kyverno"},
+						"longhorn":              map[string]any{"chartPath": "longhorn"},
+						"metallb":               map[string]any{"chartPath": "metallb"},
+						"oauth2-proxy":          map[string]any{"chartPath": "oauth2-proxy"},
+					},
+				},
 				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
@@ -756,6 +798,17 @@ func TestTemplateFiles(t *testing.T) {
 			name:     "Success: Keep ArgoCD rbac and params under configs when oauth2 is disabled",
 			fileList: []string{"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"},
 			context: map[string]any{
+				"catalog": map[string]any{
+					"services": map[string]any{
+						"argocd":                map[string]any{"chartPath": "argo-cd"},
+						"cert-manager":          map[string]any{"chartPath": "cert-manager"},
+						"kube-prometheus-stack": map[string]any{"chartPath": "kube-prometheus-stack"},
+						"kyverno":               map[string]any{"chartPath": "kyverno"},
+						"longhorn":              map[string]any{"chartPath": "longhorn"},
+						"metallb":               map[string]any{"chartPath": "metallb"},
+						"oauth2-proxy":          map[string]any{"chartPath": "oauth2-proxy"},
+					},
+				},
 				"cluster": map[string]any{
 					"type":    "controlplane",
 					"name":    "test-cluster",
@@ -764,6 +817,9 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoOrg":  "myorg",
 					"ssoTeam": "myteam",
 					"services": map[string]any{
+						"argocd": map[string]any{
+							"status": "enabled",
+						},
 						"oauth2-proxy": map[string]any{
 							"status": "disabled",
 						},
@@ -835,6 +891,18 @@ func TestTemplateFiles(t *testing.T) {
 				assert.False(t, hasServerRbac)
 				_, hasServerParams := server["params"]
 				assert.False(t, hasServerParams)
+
+				bootstrapValues, ok := rendered["bootstrapValues"].(map[string]any)
+				require.True(t, ok)
+				applicationSets, ok := bootstrapValues["applicationSets"].(map[string]any)
+				require.True(t, ok)
+				appSet, ok := applicationSets["test-cluster-dev"].(map[string]any)
+				require.True(t, ok)
+				apps, ok := appSet["apps"].(map[string]any)
+				require.True(t, ok)
+				argocdApp, ok := apps["argocd"].(map[string]any)
+				require.True(t, ok)
+				assert.Equal(t, "argo-cd", argocdApp["path"])
 			},
 		},
 		{
@@ -1021,6 +1089,7 @@ func TestTemplateAllFiles(t *testing.T) {
 					},
 					"services": fullServiceContext(),
 				},
+				"catalog": fullCatalogContext(),
 			},
 			wantErr: false, // No errors expected with valid context
 			validate: func(t *testing.T, results []TemplateResult) {
@@ -1129,6 +1198,7 @@ func TestTemplateAllFiles(t *testing.T) {
 					},
 					"services": fullServiceContext(),
 				},
+				"catalog": fullCatalogContext(),
 			},
 			wantErr: false, // Changed to false with proper context
 			validate: func(t *testing.T, results []TemplateResult) {

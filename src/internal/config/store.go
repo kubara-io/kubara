@@ -24,6 +24,7 @@ import (
 type ConfigStore struct {
 	filepath       string
 	config         *Config
+	catalog        *catalog.Catalog
 	catalogOptions catalog.LoadOptions
 }
 
@@ -66,8 +67,8 @@ func (cs *ConfigStore) Load() error {
 	}
 
 	applyDefaults(cs.config)
-	if err := applyServiceCatalogDefaults(cs.config, cs.catalogOptions); err != nil {
-		return err
+	if err := cs.applyServiceCatalogDefaults(); err != nil {
+		return fmt.Errorf("apply service catalog defaults: %w", err)
 	}
 
 	return nil
@@ -81,6 +82,15 @@ func GenerateSchema() (map[string]any, error) {
 // GenerateSchemaWithCatalog generates a JSON schema from the Config struct
 // with optional external service definitions merged into the built-in catalog.
 func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]any, error) {
+	cat, err := catalog.Load(catalogOptions)
+	if err != nil {
+		return nil, fmt.Errorf("load catalog: %w", err)
+	}
+
+	return generateSchemaWithCatalog(cat)
+}
+
+func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
 	r := jsonschema.Reflector{
 		RequiredFromJSONSchemaTags: true,
 		ExpandedStruct:             true,
@@ -104,11 +114,6 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 		return nil, fmt.Errorf("unmarshal schema: %w", err)
 	}
 	ensureServiceConfigDefinition(schemaDoc)
-
-	cat, err := catalog.Load(catalogOptions)
-	if err != nil {
-		return nil, fmt.Errorf("load catalog: %w", err)
-	}
 	if err := composeServiceSchema(schemaDoc, cat); err != nil {
 		return nil, fmt.Errorf("compose service schema: %w", err)
 	}
@@ -135,9 +140,14 @@ func ensureServiceConfigDefinition(schemaDoc map[string]any) {
 }
 
 func (cs *ConfigStore) Validate() error {
-	schemaDoc, err := GenerateSchemaWithCatalog(cs.catalogOptions)
+	cat, err := cs.GetCatalog()
 	if err != nil {
-		return err
+		return fmt.Errorf("load catalog: %w", err)
+	}
+
+	schemaDoc, err := generateSchemaWithCatalog(cat)
+	if err != nil {
+		return fmt.Errorf("generate schema: %w", err)
 	}
 
 	const schemaURL = "mem://config.schema.json"
@@ -174,6 +184,21 @@ func (cs *ConfigStore) Validate() error {
 // GetConfig returns the current configuration struct.
 func (cs *ConfigStore) GetConfig() *Config {
 	return cs.config
+}
+
+// GetCatalog returns the catalog for this config store, loading it on first use.
+func (cs *ConfigStore) GetCatalog() (catalog.Catalog, error) {
+	if cs.catalog != nil {
+		return *cs.catalog, nil
+	}
+
+	cat, err := catalog.Load(cs.catalogOptions)
+	if err != nil {
+		return catalog.Catalog{}, fmt.Errorf("load catalog: %w", err)
+	}
+
+	cs.catalog = &cat
+	return *cs.catalog, nil
 }
 
 // GetFilepath returns the filepath for the config.
@@ -311,13 +336,13 @@ func buildServiceNetworkingSchema() map[string]any {
 	}
 }
 
-func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOptions) error {
-	cat, err := catalog.Load(catalogOptions)
+func (cs *ConfigStore) applyServiceCatalogDefaults() error {
+	cat, err := cs.GetCatalog()
 	if err != nil {
-		return fmt.Errorf("load catalog: %w", err)
+		return err
 	}
 
-	for i, cluster := range config.Clusters {
+	for i, cluster := range cs.config.Clusters {
 		if cluster.Services == nil {
 			cluster.Services = make(service.Services, len(cat.Services))
 		}
@@ -364,7 +389,7 @@ func applyServiceCatalogDefaults(config *Config, catalogOptions catalog.LoadOpti
 			cluster.Services[name] = existing
 		}
 
-		config.Clusters[i] = cluster
+		cs.config.Clusters[i] = cluster
 	}
 
 	return nil
