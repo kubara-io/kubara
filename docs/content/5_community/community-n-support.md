@@ -2,7 +2,7 @@
 We are here to help you get the most out of kubara and connect with other members of the community.  
 Whether you have questions, need troubleshooting assistance, or just want to share ideas - join us and get involved!
 
-Join the #kubara [Slack channel](https://app.slack.com/client/T09NY5SBT/C0B2X0DLPR6) to chat with other users of kubara or reach out to the maintainers directly. Use the [public invite link](http://slack.k8s.io/) (http://slack.k8s.io/) to get an invite for the official Kubernetes Slack space.
+Join the #kubara [Slack channel](https://kubernetes.slack.com/archives/C0B2X0DLPR6) to chat with other users of kubara or reach out to the maintainers directly. Use the [public invite link](http://slack.k8s.io/) (http://slack.k8s.io/) to get an invite for the official Kubernetes Slack space.
 
 - Questions and bug reports: [GitHub Issues](https://github.com/kubara-io/kubara/issues)
 - Discussions and Q&A: [GitHub Discussions](https://github.com/kubara-io/kubara/discussions)
