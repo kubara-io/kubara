@@ -166,6 +166,11 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
+	catalog, err := cs.GetCatalog()
+	if err != nil {
+		return nil, fmt.Errorf("load catalog: %w", err)
+	}
+
 	return &bootstrap.Options{
 		Kubeconfig:     kubeconf,
 		ManagedCatalog: managedAbsPath,
@@ -174,6 +179,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		WithProm:       flags.WithProm,
 		WithESCSSPath:  cssAbsPath,
 		EnvMap:         envMap,
+		Catalog:        catalog,
 		ClusterConfig:  clusterConfig,
 		DryRun:         flags.DryRun,
 		Timeout:        flags.Timeout,

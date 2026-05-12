@@ -133,7 +133,7 @@ func TestSchemaCmd(t *testing.T) {
 apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
-  name: argo-cd
+  name: argocd
 spec:
   chartPath: custom-argo-cd
   status: enabled
@@ -155,7 +155,7 @@ spec:
 apiVersion: kubara.io/v1alpha1
 kind: ServiceDefinition
 metadata:
-  name: argo-cd
+  name: argocd
 spec:
   chartPath: custom-argo-cd
   status: enabled

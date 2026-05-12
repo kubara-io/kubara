@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
@@ -30,6 +31,7 @@ type Options struct {
 	WithProm       bool
 	WithESCSSPath  string
 	EnvMap         *envconfig.EnvMap
+	Catalog        catalog.Catalog
 	ClusterConfig  *config.Cluster
 	DryRun         bool
 	Timeout        time.Duration
@@ -66,13 +68,26 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("create kubernetes client: %w", err)
 	}
 
+	argocdChartPath, err := chartPathForService(opts.Catalog, "argocd")
+	if err != nil {
+		return err
+	}
+	externalSecretsChartPath, err := chartPathForService(opts.Catalog, "external-secrets")
+	if err != nil {
+		return err
+	}
+	prometheusChartPath, err := chartPathForService(opts.Catalog, "kube-prometheus-stack")
+	if err != nil {
+		return err
+	}
+
 	// Construct bootstrapCharts structs
 	bootstrapCharts := []BootstrapChart{
 		{
-			Name:            "argo-cd",
+			Name:            "argocd",
 			Namespace:       argocdNamespace,
-			Path:            filepath.Join(opts.ManagedCatalog, "helm", "argo-cd"),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "argo-cd", "values.yaml")},
+			Path:            filepath.Join(opts.ManagedCatalog, "helm", argocdChartPath),
+			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, argocdChartPath, "values.yaml")},
 			RepoURL:         "https://argoproj.github.io/argo-helm",
 			EnsureNamespace: true,
 			EnsureCRD:       true,
@@ -80,16 +95,16 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		{
 			Name:            "external-secrets",
 			Namespace:       externalSecretsNamespace,
-			Path:            filepath.Join(opts.ManagedCatalog, "helm", "external-secrets"),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "external-secrets", "values.yaml")},
+			Path:            filepath.Join(opts.ManagedCatalog, "helm", externalSecretsChartPath),
+			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, externalSecretsChartPath, "values.yaml")},
 			RepoURL:         "https://charts.external-secrets.io",
 			EnsureNamespace: opts.WithES,
 			EnsureCRD:       opts.WithES,
 		},
 		{
 			Name:            "kube-prometheus-stack",
-			Path:            filepath.Join(opts.ManagedCatalog, "helm", "kube-prometheus-stack"),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "kube-prometheus-stack", "values.yaml")},
+			Path:            filepath.Join(opts.ManagedCatalog, "helm", prometheusChartPath),
+			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, prometheusChartPath, "values.yaml")},
 			RepoURL:         "https://prometheus-community.github.io/helm-charts",
 			EnsureNamespace: false,
 			EnsureCRD:       opts.WithProm,
@@ -99,7 +114,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 	// Locate ArgoChart for later use
 	var argoChart BootstrapChart
 	for _, c := range bootstrapCharts {
-		if c.Name == "argo-cd" {
+		if c.Name == "argocd" {
 			argoChart = c
 			break
 		}
@@ -149,6 +164,15 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 	printCompletionMessage(opts)
 	log.Info().Msg("ArgoCD bootstrap completed successfully")
 	return nil
+}
+
+func chartPathForService(cat catalog.Catalog, serviceName string) (string, error) {
+	definition, exists := cat.Services[serviceName]
+	if !exists {
+		return "", fmt.Errorf("bootstrap service %q is missing from catalog", serviceName)
+	}
+
+	return definition.Spec.ChartPath, nil
 }
 
 // ensureNamespaces ensures required namespaces exist

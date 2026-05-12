@@ -4,7 +4,7 @@ import "strings"
 
 var legacyToCanonicalServiceName = map[string]string{
 	// canonical keys
-	"argo-cd":                 "argo-cd",
+	"argocd":                  "argocd",
 	"cert-manager":            "cert-manager",
 	"external-dns":            "external-dns",
 	"external-secrets":        "external-secrets",
@@ -21,7 +21,6 @@ var legacyToCanonicalServiceName = map[string]string{
 	"longhorn":                "longhorn",
 
 	// legacy camelCase keys
-	"argocd":              "argo-cd",
 	"certmanager":         "cert-manager",
 	"externaldns":         "external-dns",
 	"externalsecrets":     "external-secrets",
@@ -39,7 +38,7 @@ var legacyToCanonicalServiceName = map[string]string{
 }
 
 var canonicalToLegacyServiceName = map[string]string{
-	"argo-cd":                 "argocd",
+	"argocd":                  "argocd",
 	"cert-manager":            "certManager",
 	"external-dns":            "externalDns",
 	"external-secrets":        "externalSecrets",
