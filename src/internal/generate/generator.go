@@ -171,10 +171,6 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		return nil, fmt.Errorf("load config: %w", CnfLoadErr)
 	}
 
-	if err := cs.Validate(); err != nil {
-		return nil, fmt.Errorf("validate config: %w", err)
-	}
-
 	cnf := cs.GetConfig()
 	var allResults []render.TemplateResult
 

@@ -179,6 +179,166 @@ clusters:
 	}
 }
 
+func TestConfigStore_LoadMigratesLegacyConfig(t *testing.T) {
+	legacyYAML := `
+clusters:
+  - name: legacy-cluster
+    dnsName: legacy.example.com
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+    services:
+      argocd:
+        status: enabled
+      certManager:
+        status: enabled
+        clusterIssuer:
+          name: letsencrypt-staging
+          email: cert@example.com
+          server: https://acme-staging-v02.api.letsencrypt.org/directory
+      kubePrometheusStack:
+        status: enabled
+        storageClassName: metrics-rwo
+      loki:
+        status: enabled
+        storageClassName: logs-rwo
+      oauth2Proxy:
+        status: enabled
+        ingress:
+          annotations:
+            foo: bar
+`
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "legacy-config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
+
+	cs := NewConfigStore(configPath)
+	require.NoError(t, cs.Load())
+
+	loaded := cs.GetConfig()
+	require.Equal(t, ConfigVersionV1Alpha1, loaded.Version)
+	require.Len(t, loaded.Clusters, 1)
+
+	cluster := loaded.Clusters[0]
+	assert.Contains(t, cluster.Services, "argocd")
+
+	certManager := cluster.Services["cert-manager"]
+	clusterIssuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "letsencrypt-staging", clusterIssuer["name"])
+	assert.Equal(t, "cert@example.com", clusterIssuer["email"])
+
+	require.NotNil(t, cluster.Services["kube-prometheus-stack"].Storage)
+	assert.Equal(t, "metrics-rwo", cluster.Services["kube-prometheus-stack"].Storage.ClassName)
+
+	require.NotNil(t, cluster.Services["loki"].Storage)
+	assert.Equal(t, "logs-rwo", cluster.Services["loki"].Storage.ClassName)
+
+	require.NotNil(t, cluster.Services["oauth2-proxy"].Networking)
+	assert.Equal(t, "bar", cluster.Services["oauth2-proxy"].Networking.Annotations["foo"])
+
+	savedBytes, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	savedContent := string(savedBytes)
+	assert.Contains(t, savedContent, "version: v1alpha1")
+	assert.Contains(t, savedContent, "cert-manager:")
+	assert.Contains(t, savedContent, "argocd:")
+	assert.NotContains(t, savedContent, "certManager:")
+	assert.NotContains(t, savedContent, "storageClassName:")
+	assert.NotContains(t, savedContent, "ingress:")
+	assert.Contains(t, savedContent, "className: metrics-rwo")
+	assert.Contains(t, savedContent, "className: logs-rwo")
+	assert.Contains(t, savedContent, "networking:")
+	assert.Contains(t, savedContent, "clusterIssuer:")
+}
+
+func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
+	tests := []struct {
+		name        string
+		servicesYML string
+		wantErr     string
+	}{
+		{
+			name: "duplicate canonical service names",
+			servicesYML: `
+      certManager:
+        status: enabled
+      cert-manager:
+        status: enabled
+`,
+			wantErr: `conflicting keys "certManager" and "cert-manager"`,
+		},
+		{
+			name: "cert-manager clusterIssuer conflict",
+			servicesYML: `
+      certManager:
+        status: enabled
+        clusterIssuer:
+          name: letsencrypt-staging
+        config:
+          clusterIssuer:
+            name: letsencrypt-prod
+`,
+			wantErr: "both legacy clusterIssuer and config.clusterIssuer",
+		},
+		{
+			name: "storage class conflict",
+			servicesYML: `
+      loki:
+        status: enabled
+        storageClassName: logs-rwo
+        storage:
+          className: already-set
+`,
+			wantErr: "both legacy storageClassName and storage.className",
+		},
+		{
+			name: "ingress annotations conflict",
+			servicesYML: `
+      oauth2Proxy:
+        status: enabled
+        ingress:
+          annotations:
+            foo: bar
+        networking:
+          annotations:
+            custom: value
+`,
+			wantErr: "both legacy ingress.annotations and networking.annotations",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			legacyYAML := fmt.Sprintf(`
+clusters:
+  - name: legacy-cluster
+    dnsName: legacy.example.com
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+    services:%s`, tt.servicesYML)
+
+			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
+			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
+
+			cs := NewConfigStore(configPath)
+			err := cs.Load()
+			require.Error(t, err)
+			assert.ErrorContains(t, err, tt.wantErr)
+		})
+	}
+}
+
 func TestConfigStore_Validate(t *testing.T) {
 	validConfig := newValidTestConfig()
 
@@ -285,7 +445,7 @@ func TestConfigStore_Validate(t *testing.T) {
 			cs := &ConfigStore{
 				config: tt.config,
 			}
-			err := cs.Validate()
+			err := cs.validate()
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -548,5 +708,5 @@ clusters:
 	assert.Equal(t, "controlplane", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 
-	assert.NoError(t, cs.Validate(), "Validate should pass after defaults are applied")
+	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
 }
