@@ -173,7 +173,7 @@ Sensitive output example:
     tofu output vault_user_ro_password_b64
     ```
 
-If you use OAuth2, create a GitHub application as shown [here](/2_managing_your_platform/add_sso.md).
+If you use OAuth2, create a GitHub application as shown [here](../../2_managing_your_platform/add_sso.md).
 
 If you want Terraform to create OAuth2-related Vault entries:
 

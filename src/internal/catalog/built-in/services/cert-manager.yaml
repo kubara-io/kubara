@@ -9,7 +9,8 @@ spec:
   chartPath: cert-manager
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke
   configSchema:
     type: object
     required:

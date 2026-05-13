@@ -9,4 +9,5 @@ spec:
   chartPath: metallb
   status: disabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

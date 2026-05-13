@@ -30,7 +30,7 @@ kubara provides you with a reusable, extensible structure to build and operate y
 
 - ⚙️ **Full Platform Bootstrap** - From infrastructure to observability, GitOps, and secrets
 - 🧱 **Modular by Design** - Helm and Terraform based components, easily extendable
-- 🔁 **Multi-cluster Support** - ControlPlane + N worker clusters, with app targeting
+- 🔁 **Multi-cluster Support** - Hub + N Spoke clusters, with app targeting
 - 🚀 **Fast Setup** - Ready to go in under 30 minutes
 - ☁️ **Cloud & Edge Ready** - Use it across cloud, hybrid, or bare-metal environments
 - 🔐 **Built-in Best Practices** - Production-grade setup used by real-world platforms
@@ -59,9 +59,9 @@ kubara takes care of:
 1. 📄 Initial configuration via `.env` and `config.yaml`
 2. 🧩 Rendering and deploying Terraform and Helm modules
 3. 🧪 Validating schemas and environment settings
-4. 🚀 Bootstrapping the ControlPlane and Argo CD
+4. 🚀 Bootstrapping the Hub cluster and Argo CD
 5. 📦 Managing secrets (incl. External Secrets Operator)
-6. 🧱 Adding additional worker clusters and workloads
+6. 🧱 Adding additional spoke clusters and workloads
 
 
 ## 🚀 Getting Started

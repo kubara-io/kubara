@@ -93,7 +93,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ### 1.5 Update and Prepare Templates
 
 !!! info
-    What is "type:" in `config.yaml`: `controlplane` is your hub cluster, `worker` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
+    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
@@ -103,7 +103,7 @@ Example:
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
-    type: <controlplane or worker>
+    type: <hub or spoke>
     dnsName: <cp.demo-42.stackit.run>
     privateLoadBalancerIP: 0.0.0.0
     publicLoadBalancerIP: 0.0.0.0
@@ -211,7 +211,7 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 ## 4. Deploying Argo CD
 
-### 4.1 Bootstrap the Control Plane
+### 4.1 Bootstrap the Hub cluster
 
 !!! warning
     This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
@@ -309,40 +309,40 @@ Enjoy your new platform!
 This section will be extended in the future to describe not just technical changes,
 but also other supported possibilities when bootstrapping.
 
-### Bootstrapping Multiple ControlPlanes
+### Bootstrapping Multiple Hub Cluster
 
-You can bootstrap multiple ControlPlanes.
-We recommend **not** to reuse the same `config.yaml` file for multiple ControlPlanes.
+You can bootstrap multiple Hub clusters.
+Do **not** reuse the same `config.yaml` file for multiple Hub clusters.
 
 **Why?**
 During the bootstrap process, the `.env` file is used to provide credentials.
-If you reuse the same `.env` file, you would have to constantly adjust it for each ControlPlane — which is error-prone.
+If you reuse the same `.env` file, you would have to constantly adjust it for each Hub - which is error-prone.
 
 Since version `0.2.0`, this is much easier. You can simply provide a different env file:
 
 ```bash
-./kubara init --prep --env-file .env2
+kubara init --prep --env-file .another-env
 ```
-Fill out `.env2` with the required values. Generate a new config file from it:
+Fill out `.another-env` with the required values. Generate a new config file from it:
 
 ```bash
-./kubara --config-file config2.yaml --env-file .env2 init
+kubara --config-file another-config.yaml --env-file .another-env init
 ```
 
-This will use the values from `.env2` to generate `config2.yaml`.
+This will use the values from `.another-env` to generate `another-config.yaml`.
 
-Render Terraform modules and Helm charts for the new ControlPlane:
+Render Terraform modules and Helm charts for the new Hub cluster:
 
 ```bash
 # default: generates both Helm and Terraform
 # use --helm or --terraform to generate only one type
-./kubara --config-file config2.yaml generate
+./kubara --config-file another-config.yaml generate
 ```
 
-Finally, bootstrap your additional ControlPlane:
+Finally, bootstrap your additional Hub cluster:
 
 ```bash
-./kubara --env-file .env2 bootstrap <cluster-name-from-config2-yaml> --with-es-crds --with-prometheus-crds
+kubara bootstrap --config-file another-config.yaml --env-file .another-env <cluster name from another-config.yaml> --with-es-crds --with-prometheus-crds
 ```
 
 ## What's Next?
@@ -354,4 +354,4 @@ After bootstrapping your platform, you can:
 * [Add Argo CD applications](../2_managing_your_platform/add_application.md)
 * [Add Argo CD appset](../2_managing_your_platform/add_appset.md)
 * [Add SSO Configuration](../2_managing_your_platform/add_sso.md)
-* [Add additional worker clusters](../2_managing_your_platform/add_worker_cluster.md)
+* [Add additional spoke clusters](../2_managing_your_platform/add_spoke_cluster.md)

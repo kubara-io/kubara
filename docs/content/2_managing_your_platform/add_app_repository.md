@@ -20,7 +20,7 @@ Add the following to your `argo-cd/values.yaml`.
 ```yaml
 repositories:
     - name: user-repo-mock
-      projectScope: k8s-worker-0
+      projectScope: k8s-spoke-0
       # # This points to the secret in vault
       remoteRef:
         remoteKey: repo_pat
@@ -28,7 +28,7 @@ repositories:
       repoType: git
       secretStoreRef:
         kind: ClusterSecretStore
-        name: controlplane-0-production
+        name: hub-0-production
       url: <the repo url you want to add>
       username: <the username for connection. also needed for PAT>
 ```

@@ -32,10 +32,10 @@ func NewSecretManager(client *k8s.Client) *SecretManager {
 	return &SecretManager{client: client}
 }
 
-// CreateControlPlaneSecrets creates all control plane secrets
-func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Options) error {
+// CreateHubSecrets creates all hub cluster secrets
+func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error {
 	k8sOpts := k8s.DefaultApplyOptions()
-	k8sOpts.FieldManager = "kubara-controlplane-secrets"
+	k8sOpts.FieldManager = "kubara-hub-secrets"
 	k8sOpts.DryRun = o.DryRun
 
 	var manifest []byte
@@ -79,10 +79,10 @@ func (sm *SecretManager) CreateControlPlaneSecrets(ctx context.Context, o *Optio
 
 	// Apply all secrets in one API call
 	if err := sm.client.ApplyManifest(ctx, manifest, k8sOpts); err != nil {
-		return fmt.Errorf("applying control plane secrets: %w", err)
+		return fmt.Errorf("applying hub secrets: %w", err)
 	}
 
-	log.Info().Msg("Created control plane secrets successfully")
+	log.Info().Msg("Created hub secrets successfully")
 	return nil
 }
 

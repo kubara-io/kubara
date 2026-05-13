@@ -13,7 +13,7 @@ nav:
       - Providers:
           - STACKIT: 1_getting_started/providers/stackit.md
   - Managing Your Platform:
-      - Add Worker Cluster: 2_managing_your_platform/add_worker_cluster.md
+      - Add Spoke Cluster: 2_managing_your_platform/add_spoke_cluster.md
       - Add Project: 2_managing_your_platform/add_app_project.md
       - Add Repository: 2_managing_your_platform/add_app_repository.md
       - Add AppSet: 2_managing_your_platform/add_appset.md

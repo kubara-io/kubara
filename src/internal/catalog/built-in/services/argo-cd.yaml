@@ -9,4 +9,4 @@ spec:
   chartPath: argo-cd
   status: disabled
   clusterTypes:
-    - controlplane
+    - hub

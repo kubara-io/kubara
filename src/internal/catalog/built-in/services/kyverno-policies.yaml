@@ -9,4 +9,5 @@ spec:
   chartPath: kyverno-policies
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

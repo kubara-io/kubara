@@ -45,7 +45,7 @@ graph TD
 1. Platform Engineer must set parameters in config files (⚠️Caution: Environment variables have priority over config values)
 2. "kubara generate" templates and creates Terraform & Umbrella Helm-Charts.   
 Now you should commit and push your templates to your git and optionally apply Terraform
-3. `kubara bootstrap <cluster-name>` rolls out Argo CD and required CRDs to your control plane cluster.
+3. `kubara bootstrap <cluster-name>` rolls out Argo CD and required CRDs to your hub cluster.
 4. Secrets are synced via External Secrets based on your configured SecretStore/ClusterSecretStore.
 Argo CD manages itself and rolls out all [generated Helm Charts](../3_components/components_overview.md).
 

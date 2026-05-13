@@ -45,7 +45,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 	return Cluster{
 		Name:             e.ProjectName,
 		Stage:            e.ProjectStage,
-		Type:             "<controlplane or worker>",
+		Type:             "<hub or spoke>",
 		DNSName:          dnsName,
 		SSOOrg:           "<my-org>",
 		SSOTeam:          "<my-team>",

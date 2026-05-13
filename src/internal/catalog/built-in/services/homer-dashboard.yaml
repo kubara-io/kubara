@@ -9,4 +9,4 @@ spec:
   chartPath: homer-dashboard
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub

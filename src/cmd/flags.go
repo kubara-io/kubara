@@ -52,7 +52,7 @@ func NewGlobalFlags() *GlobalFlags {
 		ConfigFilePath:     "config.yaml",
 		EnvFilePath:        ".env",
 	}
-	}
+}
 
 func (flags *GlobalFlags) ToRootOptions() RootOptions {
 	kubeconfigFilePath := flags.KubeconfigFilePath
@@ -86,23 +86,23 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Destination: &flags.KubeconfigFilePath,
 		},
 		&cli.StringFlag{
-			Name:    "work-dir",
-			Aliases: []string{"w"},
-			Value:   flags.WorkDir,
-			Usage:   "Working directory",
+			Name:        "work-dir",
+			Aliases:     []string{"w"},
+			Value:       flags.WorkDir,
+			Usage:       "Working directory",
 			Destination: &flags.WorkDir,
 		},
 		&cli.StringFlag{
-			Name:    "config-file",
-			Aliases: []string{"c"},
-			Value:   flags.ConfigFilePath,
-			Usage:   "Path to the configuration file",
+			Name:        "config-file",
+			Aliases:     []string{"c"},
+			Value:       flags.ConfigFilePath,
+			Usage:       "Path to the configuration file",
 			Destination: &flags.ConfigFilePath,
 		},
 		&cli.StringFlag{
-			Name:  "env-file",
-			Value: flags.EnvFilePath,
-			Usage: "Path to the .env file",
+			Name:        "env-file",
+			Value:       flags.EnvFilePath,
+			Usage:       "Path to the .env file",
 			Destination: &flags.EnvFilePath,
 		},
 		&cli.StringFlag{

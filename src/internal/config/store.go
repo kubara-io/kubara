@@ -115,7 +115,7 @@ func migrateLegacyConfig(raw map[string]any) (map[string]any, error) {
 		}
 
 		if err := migrateLegacyCluster(cluster, i); err != nil {
-			return nil, err
+			return nil, fmt.Errorf("cannot migrate cluster number %d: %w", i, err)
 		}
 
 		clusters[i] = cluster
@@ -126,6 +126,21 @@ func migrateLegacyConfig(raw map[string]any) (map[string]any, error) {
 }
 
 func migrateLegacyCluster(cluster map[string]any, clusterIndex int) error {
+	clusterTypeRaw, _ := cluster["type"]
+	if clusterTypeRaw != nil {
+		clusterType, ok := clusterTypeRaw.(string)
+		if !ok {
+			return fmt.Errorf("cluster.type must be a string")
+		}
+
+		switch clusterType {
+		case "worker":
+			cluster["type"] = "spoke"
+		default:
+			cluster["type"] = "hub"
+		}
+	}
+
 	servicesRaw, ok := cluster["services"]
 	if !ok {
 		return nil

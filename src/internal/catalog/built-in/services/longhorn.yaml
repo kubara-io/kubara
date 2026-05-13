@@ -9,4 +9,5 @@ spec:
   chartPath: longhorn
   status: disabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

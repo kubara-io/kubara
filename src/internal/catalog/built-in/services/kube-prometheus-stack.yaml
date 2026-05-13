@@ -9,4 +9,5 @@ spec:
   chartPath: kube-prometheus-stack
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

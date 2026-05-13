@@ -9,4 +9,5 @@ spec:
   chartPath: traefik
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

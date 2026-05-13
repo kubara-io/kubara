@@ -17,20 +17,20 @@ https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application
 https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern
 
 ## **Modify Argo CD overlays**
-This is an example on how to add a simple application to a worker-cluster.
+This is an example on how to add a simple application to a spoke-cluster.
 Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
 bootstrapValues:
     applications:
         - destination:
-            serverName: k8s-worker-0
+            serverName: k8s-spoke-0
           info:
             - name: greeting
               value: "Hello World"
           name: app-node-red
           namespace: argocd
-          projectName: k8s-worker-0
+          projectName: k8s-spoke-0
           repoPath: node-red # the path inside the repository
           repoUrl: <the developer repository where the app code can be found>
 ```
@@ -46,5 +46,5 @@ If you let Argo CD manage itself, it will add the configured application to the 
 ## **Run kubara bootstrap again (if Argo CD is not managing itself )**
 If Argo CD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering Argo CD values will have no effect until you run the following again:
 ```bash
-kubara bootstrap <controlplane-cluster-name-from-config-yaml>
+kubara bootstrap <hub-cluster-name-from-config-yaml>
 ```
