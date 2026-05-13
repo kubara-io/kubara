@@ -182,9 +182,6 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 	if err := workflow.CreateOrUpdateClusterFromEnvWithCatalog(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
 		return fmt.Errorf("create or update cluster from env: %w", err)
 	}
-	if err := cs.Validate(); err != nil {
-		return fmt.Errorf("validate config file: %w", err)
-	}
 	if err := cs.SaveToFile(); err != nil {
 		return fmt.Errorf("write config file: %w", err)
 	}
@@ -202,9 +199,6 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 
 	if fileExists {
 		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
-		if err := cs.Validate(); err != nil {
-			return err
-		}
 		log.Info().Msg("Initialized successfully")
 		return nil
 	}
