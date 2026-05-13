@@ -32,12 +32,12 @@ apply_yaml_if_set() {
 
 log "Updating config.yaml (strict mode): $CFG"
 
-# Always set type (default controlplane), but require the path to exist.
+# Always set type (default hub), but require the path to exist.
 TYPE_PATH=".clusters[0].type"
 type_current="$(yq eval "${TYPE_PATH} // \"__MISSING__\"" "$CFG")"
 [[ "$type_current" == "__MISSING__" ]] && die "YAML path missing in config.yaml: ${TYPE_PATH}"
 
-CLUSTER_TYPE="${KUBARA_CLUSTER_TYPE:-controlplane}"
+CLUSTER_TYPE="${KUBARA_CLUSTER_TYPE:-hub}"
 yq eval "${TYPE_PATH} = \"${CLUSTER_TYPE}\"" -i "$CFG"
 
 apply_yaml_if_set KUBARA_SSO_ORG             ".clusters[0].ssoOrg"

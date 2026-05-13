@@ -238,7 +238,7 @@ func TestTemplateFiles(t *testing.T) {
 					"stage":      "dev",
 				},
 				"cluster": map[string]any{
-					"type":             "controlplane",
+					"type":             "hub",
 					"name":             "test-cluster",
 					"stage":            "dev",
 					"dnsName":          "test.example.com",
@@ -353,7 +353,7 @@ func TestTemplateFiles(t *testing.T) {
 			tplType: Helm,
 			context: map[string]any{
 				"cluster": map[string]any{
-					"type":             "controlplane",
+					"type":             "hub",
 					"name":             "helm-cluster",
 					"stage":            "production",
 					"dnsName":          "helm.example.com",

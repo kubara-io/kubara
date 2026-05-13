@@ -22,7 +22,7 @@ func TestApplyDefaults_ClusterLevelDefaults(t *testing.T) {
 
 	c := cfg.Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should default to dev")
-	assert.Equal(t, "controlplane", c.Type, "Type should default to controlplane")
+	assert.Equal(t, "hub", c.Type, "Type should default to hub")
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should default to traefik")
 }
 
@@ -32,7 +32,7 @@ func TestApplyDefaults_DoesNotOverwriteExplicitValues(t *testing.T) {
 			{
 				Name:             "test",
 				Stage:            "production",
-				Type:             "worker",
+				Type:             "spoke",
 				IngressClassName: "nginx",
 				DNSName:          "test.example.com",
 			},
@@ -43,7 +43,7 @@ func TestApplyDefaults_DoesNotOverwriteExplicitValues(t *testing.T) {
 
 	c := cfg.Clusters[0]
 	assert.Equal(t, "production", c.Stage)
-	assert.Equal(t, "worker", c.Type)
+	assert.Equal(t, "spoke", c.Type)
 	assert.Equal(t, "nginx", c.IngressClassName)
 }
 
@@ -118,8 +118,8 @@ func TestApplyDefaults_MultipleSliceElements(t *testing.T) {
 
 	assert.Equal(t, "dev", cfg.Clusters[0].Stage, "first cluster Stage should be defaulted")
 	assert.Equal(t, "prod", cfg.Clusters[1].Stage, "second cluster Stage should keep explicit value")
-	assert.Equal(t, "controlplane", cfg.Clusters[0].Type)
-	assert.Equal(t, "controlplane", cfg.Clusters[1].Type)
+	assert.Equal(t, "hub", cfg.Clusters[0].Type)
+	assert.Equal(t, "hub", cfg.Clusters[1].Type)
 }
 
 func TestParseDefaultFromTag(t *testing.T) {

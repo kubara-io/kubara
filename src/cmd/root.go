@@ -62,7 +62,6 @@ func NewRootCmd(ver string) *cli.Command {
 	}
 }
 
-
 func newAppAction(cmd *cli.Command, options RootOptions, deps rootActionDeps) error {
 	if options.Base64Mode {
 		return runBase64Mode(options.Base64)
@@ -82,13 +81,6 @@ func newAppAction(cmd *cli.Command, options RootOptions, deps rootActionDeps) er
 
 	return nil
 }
-
-
-
-
-
-
-
 
 func executeRootAction(options RootOptions, deps rootActionDeps) error {
 	switch {

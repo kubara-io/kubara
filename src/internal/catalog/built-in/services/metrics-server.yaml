@@ -9,4 +9,5 @@ spec:
   chartPath: metrics-server
   status: disabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

@@ -346,9 +346,9 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 
 	secretManager := NewSecretManager(client)
 
-	// Apply control plane secrets
-	if err := secretManager.CreateControlPlaneSecrets(ctx, opts); err != nil {
-		return fmt.Errorf("apply control plane secrets: %w", err)
+	// Apply hub cluster secrets
+	if err := secretManager.CreateHubSecrets(ctx, opts); err != nil {
+		return fmt.Errorf("apply hub cluster secrets: %w", err)
 	}
 
 	log.Info().Msg("Secrets applied successfully")

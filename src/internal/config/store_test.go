@@ -24,7 +24,7 @@ func newValidTestConfig() *Config {
 				Name:             "test-cluster",
 				Stage:            "dev",
 				IngressClassName: "traefik",
-				Type:             "controlplane",
+				Type:             "hub",
 				DNSName:          "test-cluster.example.com",
 				Terraform: &Terraform{
 					Provider:          "stackit",
@@ -124,7 +124,7 @@ func TestConfigStore_Load(t *testing.T) {
 clusters:
   - name: 12345
     stage: dev
-    type: controlplane
+    type: hub
     dnsName: test-cluster.example.com
     ingressClassName: traefik
     terraform:
@@ -184,6 +184,7 @@ func TestConfigStore_LoadMigratesLegacyConfig(t *testing.T) {
 clusters:
   - name: legacy-cluster
     dnsName: legacy.example.com
+    type: hub
     argocd:
       repo:
         https:
@@ -225,6 +226,7 @@ clusters:
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
+	assert.Equal(t, cluster.Type, "hub")
 	assert.Contains(t, cluster.Services, "argocd")
 
 	certManager := cluster.Services["cert-manager"]
@@ -462,7 +464,7 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 				Name:             "prod-cluster",
 				Stage:            "production",
 				IngressClassName: "traefik",
-				Type:             "controlplane",
+				Type:             "hub",
 				DNSName:          "prod.example.com",
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
@@ -705,7 +707,7 @@ clusters:
 
 	c := cs.GetConfig().Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should be defaulted")
-	assert.Equal(t, "controlplane", c.Type, "Type should be defaulted")
+	assert.Equal(t, "hub", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 
 	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")

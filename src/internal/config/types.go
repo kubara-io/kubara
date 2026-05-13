@@ -14,7 +14,7 @@ type Config struct {
 type Cluster struct {
 	Name    string `json:"name" yaml:"name" jsonschema:"required,title=Cluster Name,description=The unique name for the cluster.,minLength=1,example=my-prod-cluster"`
 	Stage   string `json:"stage" yaml:"stage" jsonschema:"title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
-	Type    string `json:"type" yaml:"type" jsonschema:"title=Cluster Type,description=The type of the cluster,enum=controlplane,enum=worker,default=controlplane"`
+	Type    string `json:"type" yaml:"type" jsonschema:"title=Cluster Type,description=The type of the cluster,enum=hub,enum=spoke,default=hub"`
 	DNSName string `json:"dnsName" yaml:"dnsName" jsonschema:"required,title=Primary DNS Name,description=The fully qualified domain name for the cluster.,format=hostname,example=my-prod-cluster.example.com"`
 
 	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`

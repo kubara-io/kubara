@@ -9,4 +9,5 @@ spec:
   chartPath: external-dns
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

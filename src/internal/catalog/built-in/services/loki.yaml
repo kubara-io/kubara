@@ -9,4 +9,5 @@ spec:
   chartPath: loki
   status: enabled
   clusterTypes:
-    - controlplane
+    - hub
+    - spoke

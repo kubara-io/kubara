@@ -216,7 +216,7 @@ func TestGenerateCmd(t *testing.T) {
 					Name:             "test-cluster",
 					Stage:            "dev",
 					IngressClassName: "traefik",
-					Type:             "controlplane",
+					Type:             "hub",
 					DNSName:          "test.example.com",
 					Terraform: &config.Terraform{
 						Provider:          "stackit",
@@ -304,7 +304,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 	configPath := createTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
-		Type:    "controlplane",
+		Type:    "hub",
 		DNSName: "test.example.com",
 		Terraform: &config.Terraform{
 			Provider:          "",
@@ -362,7 +362,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	configPath := createTestConfig(t, tempDir, config.Cluster{
 		Name:    "placeholder-provider-cluster",
 		Stage:   "dev",
-		Type:    "controlplane",
+		Type:    "hub",
 		DNSName: "test.example.com",
 		Terraform: &config.Terraform{
 			Provider:          "<provider>",

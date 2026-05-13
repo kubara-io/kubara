@@ -1,4 +1,4 @@
-{{- if (eq .cluster.type "controlplane") -}}
+{{- if (eq .cluster.type "hub") -}}
 bootstrapValues:
   dockerPullSecrets:
     image-pull-secret:
@@ -52,8 +52,8 @@ namespace:
     stage: "{{ .cluster.stage }}"
 inClusterName: {{ .cluster.name }}
 inClusterSecretLabels:
-{{- if (eq .cluster.type "controlplane") }}
-##Controlplane labels
+{{- if (eq .cluster.type "hub") }}
+## Hub labels
 {{- range $serviceName := keys .cluster.services | sortAlpha }}
   {{ $serviceName }}: "{{ index $.cluster.services $serviceName "status" | default "disabled" }}"
 {{- end }}

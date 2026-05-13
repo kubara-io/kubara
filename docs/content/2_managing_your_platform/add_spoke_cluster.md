@@ -1,6 +1,6 @@
-# Add Worker Cluster
+# Add Spoke Cluster
 
-After your control plane is running, you can add more Kubernetes worker clusters and manage them through Argo CD.
+After your hub cluster is running, you can add more Kubernetes spoke clusters and manage them through Argo CD.
 
 You can onboard:
 
@@ -9,7 +9,7 @@ You can onboard:
 
 The Argo CD integration flow is the same in both cases.
 
-## 1. Add worker cluster to `config.yaml`
+## 1. Add spoke cluster to `config.yaml`
 
 Add a new cluster entry:
 
@@ -17,7 +17,7 @@ Add a new cluster entry:
 clusters:
   - name: workload-0
     stage: dev
-    type: worker
+    type: spoke
     dnsName: workload-0.dev.example.com
     ssoOrg: my-org
     ssoTeam: my-team
@@ -104,28 +104,28 @@ User-provided annotations are merged on top of kubara defaults using `mergeOverw
 kubara generate
 ```
 
-This creates/updates the worker cluster overlays in:
+This creates/updates the spoke cluster overlays in:
 
-* `customer-service-catalog/terraform/<worker-cluster-name>/...`
-* `customer-service-catalog/helm/<worker-cluster-name>/...`
+* `customer-service-catalog/terraform/<spoke-cluster-name>/...`
+* `customer-service-catalog/helm/<spoke-cluster-name>/...`
 
-## 3. Prepare the worker cluster
+## 3. Prepare the spoke cluster
 
-If this is a new cluster, apply Terraform for the worker entry.
+If this is a new cluster, apply Terraform for the spoke entry.
 If the cluster already exists, skip Terraform and continue.
 
-You need the worker cluster kubeconfig for registration in Argo CD.
+You need the spoke cluster kubeconfig for registration in Argo CD.
 Store it in your secret backend (Vault/Secret Manager), for example:
 
 ```json
 {
   "my_clusters": {
-    "k8s-worker-0": "<worker kubeconfig yaml>"
+    "k8s-spoke-0": "<spoke kubeconfig yaml>"
   }
 }
 ```
 
-## 4. Prepare external-secrets credentials on the worker cluster
+## 4. Prepare external-secrets credentials on the spoke cluster
 
 Create provider credentials as Kubernetes secret(s), for example:
 
@@ -140,8 +140,8 @@ kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
   --from-literal=password="<PASSWORD>"
 ```
 
-Then configure the worker ClusterSecretStore in:
-`customer-service-catalog/helm/<worker-cluster-name>/external-secrets/additional-values.yaml`
+Then configure the spoke ClusterSecretStore in:
+`customer-service-catalog/helm/<spoke-cluster-name>/external-secrets/additional-values.yaml`
 
 Example:
 
@@ -165,22 +165,22 @@ clusterSecretStores:
         version: v2
 ```
 
-## 5. Register worker cluster in Argo CD
+## 5. Register spoke cluster in Argo CD
 
-Update the control plane overlay:
-`customer-service-catalog/helm/<controlplane-cluster-name>/argo-cd/values.yaml`
+Update the hub cluster overlay:
+`customer-service-catalog/helm/<hub-cluster-name>/argo-cd/values.yaml`
 
 ```yaml
 bootstrapValues:
   cluster:
-    - name: my-new-worker0
-      project: controlplane-production
+    - name: my-new-spoke-0
+      project: hub-production
       remoteRef:
         remoteKey: my_clusters
-        remoteKeyProperty: k8s-worker-0
+        remoteKeyProperty: k8s-spoke-0
       secretStoreRef:
         kind: ClusterSecretStore
-        name: <controlplane-cluster-name>-<stage>
+        name: <hub-cluster-name>-<stage>
       additionalLabels:
         cert-manager: enabled
         external-dns: enabled
@@ -194,7 +194,7 @@ bootstrapValues:
         oauth2-proxy: enabled
 ```
 
-The `remoteRef` points to the worker kubeconfig secret in your secret backend.
+The `remoteRef` points to the spoke kubeconfig secret in your secret backend.
 
 ![Add Workload Cluster](../images/add-workload-cluster.png)
 
@@ -203,13 +203,13 @@ The `remoteRef` points to the worker kubeconfig secret in your secret backend.
 Commit and push all updated files.
 
 If Argo CD manages itself, it will reconcile automatically.
-If not, run bootstrap again for your control plane cluster:
+If not, run bootstrap again for your hub cluster:
 
 ```bash
-kubara bootstrap <controlplane-cluster-name-from-config-yaml>
+kubara bootstrap <hub-cluster-name-from-config-yaml>
 ```
 
 ## Additional notes
 
-* If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the worker cluster.
+* If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.
 * `additional-values.yaml` is optional but recommended for provider-specific overrides, because generated `values.yaml` can be re-rendered by kubara.

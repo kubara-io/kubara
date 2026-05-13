@@ -1,6 +1,6 @@
 # Add Argo CD  Project
 
-After you deployed your controlplane you will have an Argo CD set-up. It is the central application for your application
+After you deployed your hub cluster you will have an Argo CD set-up. It is the central application for your application
 management and handles the Continuous Deployment of other applications (including Argo CD itself).
 
 An Argo CD App Project is a logical concept to control:
@@ -12,8 +12,8 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
 projects:
-  - description: k8s-ske-worker-0 project
-    name: k8s-worker-0
+  - description: k8s-ske-spoke-0 project
+    name: k8s-spoke-0
     namespace: argocd
     # You can add as many allowed Repos in here as you like
     # Must be added to Argo CD before
