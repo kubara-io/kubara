@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -45,6 +46,27 @@ var templateName = map[TemplateType]string{
 	All:       "all",
 }
 
+func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
+	fileList, err := getTemplateFiles(options)
+	if err != nil {
+		return nil, fmt.Errorf("get template files for provider %q: %w", options.Provider, err)
+	}
+
+	selected, err := selectTemplateFilesForProvider(fileList, options.Provider, options.Overwrite)
+	if err != nil {
+		return nil, fmt.Errorf("select templates for provider %q: %w", options.Provider, err)
+	}
+
+	return templateResultsFromFiles(selected, options.Data)
+}
+
+func validateTemplateType(tplType TemplateType) error {
+	if _, ok := templateName[tplType]; !ok {
+		return fmt.Errorf("invalid template type %d", tplType)
+	}
+	return nil
+}
+
 func templateFuncMap() template.FuncMap {
 	funcs := sprig.FuncMap()
 	funcs["toYaml"] = func(v any) (string, error) {
@@ -64,9 +86,31 @@ type TemplateResult struct {
 	Error   error  // Any error that occurred during templating
 }
 
+type TemplateOptions struct {
+	Type        TemplateType
+	Provider    string
+	CatalogPath string
+	Overwrite   bool
+	Data        any
+}
+
 type selectedTemplate struct {
 	sourcePath       string
 	providerSpecific bool
+}
+
+type templateSource struct {
+	name     string
+	fsys     fs.FS
+	baseRoot string
+	external bool
+}
+
+type templateFile struct {
+	sourcePath string
+	readPath   string
+	fsys       fs.FS
+	external   bool
 }
 
 func (tt TemplateType) String() string {
@@ -99,23 +143,131 @@ func makeWalkDirFunc(tmplRoot string, out *[]string) fs.WalkDirFunc {
 	}
 }
 
-func GetEmbeddedTemplatesList(tplType TemplateType) ([]string, error) {
-	var out []string
-	var err error
-	walkDirFunc := makeWalkDirFunc(tmplRoot, &out)
-	embeddedCS := tmplRoot + "/" + DefaultOverlayValuesPath + "/" + tplType.String()
-	embeddedMS := tmplRoot + "/" + DefaultManagedCatalogPath + "/" + tplType.String()
-	switch tplType {
-	case All:
-		err = fs.WalkDir(templatesFSNew, tmplRoot, walkDirFunc)
-	default:
-		errWalkCS := fs.WalkDir(templatesFSNew, embeddedCS, walkDirFunc)
-		errWalkMS := fs.WalkDir(templatesFSNew, embeddedMS, walkDirFunc)
-		err = errors.Join(errWalkCS, errWalkMS)
+func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
+	sources := []templateSource{{
+		name:     "built-in",
+		fsys:     templatesFSNew,
+		baseRoot: tmplRoot,
+	}}
+
+	if strings.TrimSpace(options.CatalogPath) == "" {
+		return sources, nil
 	}
 
+	external := templateSource{
+		name:     "external",
+		fsys:     os.DirFS(options.CatalogPath),
+		baseRoot: ".",
+		external: true,
+	}
+
+	hasTemplates, err := sourceHasTemplateRoots(external)
 	if err != nil {
-		return nil, fmt.Errorf("walk embedded templates for type %q: %w", tplType.String(), err)
+		return nil, err
+	}
+	if !hasTemplates {
+		return sources, nil
+	}
+
+	return append(sources, external), nil
+}
+
+func sourceHasTemplateRoots(source templateSource) (bool, error) {
+	roots := []string{DefaultOverlayValuesPath, DefaultManagedCatalogPath}
+	for _, root := range roots {
+		info, err := fs.Stat(source.fsys, root)
+		if err != nil {
+			if errors.Is(err, fs.ErrNotExist) {
+				continue
+			}
+			return false, fmt.Errorf("stat %s template root %q: %w", source.name, root, err)
+		}
+		if !info.IsDir() {
+			return false, fmt.Errorf("%s template root %q is not a directory", source.name, root)
+		}
+		return true, nil
+	}
+
+	return false, nil
+}
+
+func joinTemplateRoot(baseRoot string, elems ...string) string {
+	if baseRoot == "." || baseRoot == "" {
+		if len(elems) == 0 {
+			return "."
+		}
+		return filepath.Join(elems...)
+	}
+
+	parts := append([]string{baseRoot}, elems...)
+	return filepath.Join(parts...)
+}
+
+func makeTemplateFileWalkDirFunc(source templateSource, out *[]templateFile) fs.WalkDirFunc {
+	return func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			return nil
+		}
+
+		rel, err := filepath.Rel(source.baseRoot, path)
+		if err != nil {
+			return err
+		}
+
+		normalized := filepath.ToSlash(rel)
+		if strings.HasPrefix(normalized, "services") {
+			return nil
+		}
+
+		*out = append(*out, templateFile{
+			sourcePath: normalized,
+			readPath:   filepath.ToSlash(path),
+			fsys:       source.fsys,
+			external:   source.external,
+		})
+		return nil
+	}
+}
+
+func getTemplateFiles(options TemplateOptions) ([]templateFile, error) {
+	if err := validateTemplateType(options.Type); err != nil {
+		return nil, err
+	}
+
+	sources, err := loadTemplateSources(options)
+	if err != nil {
+		return nil, fmt.Errorf("load template sources: %w", err)
+	}
+
+	out := make([]templateFile, 0)
+	for _, source := range sources {
+		walkDirFunc := makeTemplateFileWalkDirFunc(source, &out)
+		var walkErr error
+
+		switch options.Type {
+		case All:
+			walkErr = fs.WalkDir(source.fsys, source.baseRoot, walkDirFunc)
+		default:
+			roots := []string{
+				joinTemplateRoot(source.baseRoot, DefaultOverlayValuesPath, options.Type.String()),
+				joinTemplateRoot(source.baseRoot, DefaultManagedCatalogPath, options.Type.String()),
+			}
+			for _, root := range roots {
+				if err := fs.WalkDir(source.fsys, root, walkDirFunc); err != nil {
+					if source.external && errors.Is(err, fs.ErrNotExist) {
+						continue
+					}
+					walkErr = errors.Join(walkErr, err)
+				}
+			}
+		}
+
+		if walkErr != nil {
+			return nil, fmt.Errorf("walk %s templates for type %q: %w", source.name, options.Type.String(), walkErr)
+		}
 	}
 
 	return out, nil
@@ -161,18 +313,6 @@ func StripProviderPath(relPath string) string {
 	return stripped
 }
 
-// GetEmbeddedTemplatesListForProvider returns template paths for one provider.
-// Files under ".../providers/<provider>/..." are included only for that provider.
-// Provider-specific files override common files with the same stripped path.
-func GetEmbeddedTemplatesListForProvider(tplType TemplateType, provider string) ([]string, error) {
-	files, err := GetEmbeddedTemplatesList(tplType)
-	if err != nil {
-		return nil, fmt.Errorf("get embedded templates for %q: %w", tplType.String(), err)
-	}
-
-	return selectTemplatesForProvider(files, provider), nil
-}
-
 func selectTemplatesForProvider(files []string, provider string) []string {
 	selectedProvider := normalizeProviderName(provider)
 	sortedFiles := append([]string(nil), files...)
@@ -215,19 +355,77 @@ func selectTemplatesForProvider(files []string, provider string) []string {
 	return out
 }
 
-// TemplateFiles processes all the specified template files using html/template
-// fileList should be obtained from GetEmbeddedTemplatesList
-// data contains the variables to be used in templating
-func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
+func shouldPreferTemplateFile(current templateFile, next templateFile, currentProviderSpecific bool, nextProviderSpecific bool, overwrite bool, strippedPath string) (bool, error) {
+	if current.external != next.external {
+		if !overwrite {
+			return false, fmt.Errorf("template %q already exists in built-in catalog", strippedPath)
+		}
+		return next.external, nil
+	}
+
+	if currentProviderSpecific != nextProviderSpecific {
+		return nextProviderSpecific, nil
+	}
+
+	return false, nil
+}
+
+func selectTemplateFilesForProvider(files []templateFile, provider string, overwrite bool) ([]templateFile, error) {
+	selectedProvider := normalizeProviderName(provider)
+	sortedFiles := append([]templateFile(nil), files...)
+	sort.Slice(sortedFiles, func(i, j int) bool {
+		if sortedFiles[i].sourcePath == sortedFiles[j].sourcePath {
+			if sortedFiles[i].external == sortedFiles[j].external {
+				return sortedFiles[i].readPath < sortedFiles[j].readPath
+			}
+			return !sortedFiles[i].external && sortedFiles[j].external
+		}
+		return sortedFiles[i].sourcePath < sortedFiles[j].sourcePath
+	})
+
+	selected := make(map[string]templateFile, len(sortedFiles))
+	keys := make([]string, 0, len(sortedFiles))
+
+	for _, file := range sortedFiles {
+		strippedPath, sourceProvider, isProviderSpecific := splitProviderPath(file.sourcePath)
+		if isProviderSpecific && sourceProvider != selectedProvider {
+			continue
+		}
+
+		current, exists := selected[strippedPath]
+		if !exists {
+			selected[strippedPath] = file
+			keys = append(keys, strippedPath)
+			continue
+		}
+
+		_, _, currentProviderSpecific := splitProviderPath(current.sourcePath)
+		replaceCurrent, err := shouldPreferTemplateFile(current, file, currentProviderSpecific, isProviderSpecific, overwrite, strippedPath)
+		if err != nil {
+			return nil, err
+		}
+		if replaceCurrent {
+			selected[strippedPath] = file
+		}
+	}
+
+	sort.Strings(keys)
+	out := make([]templateFile, 0, len(keys))
+	for _, key := range keys {
+		out = append(out, selected[key])
+	}
+
+	return out, nil
+}
+
+func templateResultsFromFiles(fileList []templateFile, data any) ([]TemplateResult, error) {
 	results := make([]TemplateResult, 0, len(fileList))
 	var allErrors []error
 
-	for _, relPath := range fileList {
-		result := TemplateResult{Path: relPath}
+	for _, file := range fileList {
+		result := TemplateResult{Path: file.sourcePath}
 
-		// Read the file content from embedded filesystem
-		fullPath := filepath.Join(tmplRoot, relPath)
-		content, err := fs.ReadFile(templatesFSNew, fullPath)
+		content, err := fs.ReadFile(file.fsys, file.readPath)
 		if err != nil {
 			result.Error = err
 			results = append(results, result)
@@ -235,11 +433,8 @@ func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
 			continue
 		}
 
-		if strings.HasSuffix(fullPath, ".tplt") {
-			// Parse the template
-			// Using relPath as name to aid debugging
-			//tmpl, err := template.New(relPath).Funcs(templateFuncMap()).Option("missingkey=error").Parse(string(content))
-			tmpl, err := template.New(relPath).Funcs(templateFuncMap()).Parse(string(content))
+		if strings.HasSuffix(file.readPath, ".tplt") {
+			tmpl, err := template.New(file.sourcePath).Funcs(templateFuncMap()).Parse(string(content))
 			if err != nil {
 				result.Error = err
 				results = append(results, result)
@@ -247,7 +442,6 @@ func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
 				continue
 			}
 
-			// Execute the template with the provided data
 			var buf bytes.Buffer
 			if err := tmpl.Execute(&buf, data); err != nil {
 				result.Error = err
@@ -270,20 +464,4 @@ func TemplateFiles(fileList []string, data any) ([]TemplateResult, error) {
 	}
 
 	return results, combinedError
-}
-
-// TemplateAllFiles is a convenience function that gets the file list and templates them
-func TemplateAllFiles(tplType TemplateType, data any) ([]TemplateResult, error) {
-	return TemplateAllFilesForProvider(tplType, data, "")
-}
-
-// TemplateAllFilesForProvider is a convenience function that gets the
-// provider-filtered file list and templates it.
-func TemplateAllFilesForProvider(tplType TemplateType, data any, provider string) ([]TemplateResult, error) {
-	fileList, err := GetEmbeddedTemplatesListForProvider(tplType, provider)
-	if err != nil {
-		return nil, fmt.Errorf("get embedded template file list for provider %q: %w", provider, err)
-	}
-
-	return TemplateFiles(fileList, data)
 }
