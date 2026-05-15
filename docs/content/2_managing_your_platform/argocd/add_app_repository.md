@@ -1,4 +1,4 @@
-# Add Repository to Argo CD
+# How to add a repository to Argo CD
 To deploy applications with Argo CD we need to connect Repositories. This is also useful if you want to give developers
 a way to deploy their applications onto your platform without much intervention on your side.
 
@@ -35,7 +35,7 @@ repositories:
 
 That whats happening behind the scenes:
 
-![Add Repository](../images/add-repository.png)
+![Add Repository](../../images/add-repository.png)
 
 
 ## **Push your changes to git**
