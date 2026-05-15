@@ -1,35 +1,64 @@
-# Core Concept
+# Overview of Core Concepts
 
-`kubara` is a framework and bootstraping tool for building and operating a production-grade Kubernetes platform. 
-It is built to be a modular and opinionated foundation.  
+`kubara` is an opinionated, GitOps-first framework and bootstrap tool for building and operating a production-grade Kubernetes platform.
 
-It provides a comprehensive, ready-to-extend framework that bundles
-everything needed to design, deploy and scale internal platform capabilities
-- from infrastructure automation to developer self-service.
-This framework is not a one-size-fits-all solution. Instead, it establishes
-standardized `building blocks`, `patterns` and `principles` to accelerate and
-unify platform development across teams and environments.
-
+It is designed as a reusable platform foundation: kubara ships a default built-in catalog of platform components, generates reproducible Terraform and Helm artifacts, and expects ongoing operations to happen through Git instead of manual cluster changes.
 
 <p align="center">
   <img src="../../images/architecture-overview.jpg" alt="kubara Architecture Overview" width="700"/>
 </p>
 
-## Directory Structure
+## The main ideas behind kubara
+
+### 1. GitOps is the operational model
+
+kubara turns cluster and platform configuration into generated artifacts that are committed to Git and then reconciled by Argo CD.
+
+That gives you:
+
+- declarative desired state
+- reviewable platform changes
+- repeatable generation instead of hand-maintained manifests
+
+### 2. kubara ships a default built-in catalog
+
+kubara comes with a built-in catalog of services and templates for common platform capabilities such as ingress, certificates, policies, observability, storage, and authentication.
+
+The **Components** section documents that default built-in catalog:
+
+- [Components Overview](../3_components/components_overview.md)
+- [Best Practices](../3_components/best_practices.md)
+
+If you want to understand how catalogs work internally or create your own external catalog, see [Catalogs](catalogs.md).
+
+### 3. Generated output is separated from cluster-specific customization
+
+kubara keeps reusable generated artifacts separate from cluster-specific overlays so the platform stays maintainable across multiple clusters.
+
+### 4. Bootstrap is only the beginning
+
+`kubara bootstrap` installs Argo CD and required CRDs, but the long-term operating model is still GitOps: Argo CD manages itself and then rolls out the generated platform charts.
+
+## Directory structure
 
 kubara generates a specific directory structure in your Git repository to separate concerns:
 
 - **`managed-service-catalog/`**
-This directory contains the reusable components (Terraform modules and Helm charts) provided and maintained by kubara. 
-You should generally not modify files in this directory, as they may be updated with new kubara releases.
-
+  This directory contains the reusable generated components such as Terraform modules and Helm charts. In normal usage, this is generated output, not hand-maintained source.
 
 - **`customer-service-catalog/`**
-It contains cluster-specific configurations and your custom values for the kubara setup.
+  It contains cluster-specific overlays and values for the kubara setup.
 
+The naming can be a little confusing at first:
 
-## Architecture
-The Diagramm shows a typical kubara Workflow when following the [bootstrapping guide](bootstrapping.md)
+- these directories are the **generated result**
+- the **catalog concept** describes the input model kubara uses before generation
+
+See [Catalogs](catalogs.md) for the detailed explanation.
+
+## Conceptual flow
+
+The diagram below shows the typical kubara workflow when following the [bootstrapping guide](bootstrapping.md):
 
 ``` mermaid
 graph TD
@@ -42,41 +71,39 @@ graph TD
     I --> F[Enjoy your kubara Deployment 🎉];
 ```
 
-1. Platform Engineer must set parameters in config files (⚠️Caution: Environment variables have priority over config values)
-2. "kubara generate" templates and creates Terraform & Umbrella Helm-Charts.   
-Now you should commit and push your templates to your git and optionally apply Terraform
-3. `kubara bootstrap <cluster-name>` rolls out Argo CD and required CRDs to your hub cluster.
-4. Secrets are synced via External Secrets based on your configured SecretStore/ClusterSecretStore.
-Argo CD manages itself and rolls out all [generated Helm Charts](../3_components/components_overview.md).
+1. Platform Engineer defines intent in `.env` and `config.yaml`.
+2. Run `kubara generate` to render Terraform and Helm output.
+3. Commit and push the generated result to Git.
+4. Apply infrastructure where needed 
+5. Bootstrap Argo CD using `kubara bootstrap <cluster-name>`
+6. Let Argo CD continuously reconcile the generated platform state.
 
+Secrets are typically synced via External Secrets based on your configured SecretStore or ClusterSecretStore.
 
-
-
-## What's included
+## What kubara includes
 
 - **Helm Charts**
-  Predefined, customizable modules for core components like ingress,
-  observability, identity, policies, CI/CD, and app lifecycles.
+  Predefined platform charts for core capabilities such as ingress,
+  observability, identity, policy enforcement, and application delivery.
 
 - **Architecture Models**
-  Reference topologies for single-cluster, multi-cluster (hub & spoke)
-  and hybrid cloud setups.
+  Reference topologies for single-cluster, multi-cluster (hub & spoke),
+  and hybrid-cloud setups.
 
 - **Templates & Reusable Patterns**
-  YAML templates, GitOps folder structures, RBAC models and security
-  best practices.
+  Reusable templates, GitOps folder structures, RBAC patterns,
+  and security best practices.
 
 - **Operational Playbooks**
-  Step-by-step guides for provisioning, upgrades, disaster recovery,
-  secrets management and policy enforcement.
+  Step-by-step guidance for provisioning, upgrades, disaster recovery,
+  secrets management, and policy enforcement.
 
 - **Documentation & Decision Records**
-  Well-documented reasoning behind design choices (ADR format), technical
-  constraints, and usage guidelines.
+  Usage documentation, technical guidance, and ADRs for architectural decisions.
 
 - **Extension Guidelines**
-  Conventions and interfaces to integrate custom workloads, controllers or
-  cluster add-ons in a maintainable way.
+  Conventions and interfaces for integrating custom workloads,
+  controllers, and cluster add-ons in a maintainable way.
 
 ## Core Goals
 
@@ -85,5 +112,9 @@ Argo CD manages itself and rolls out all [generated Helm Charts](../3_components
 - Ensure security, compliance and observability
 - Empower teams through self-service and GitOps
 
-## Adding new tools 
-If the current toolset doesn't meet your needs or is missing key features, you can propose new tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue).
+## Where to go next
+
+- To understand catalog structure and create your own: [Catalogs](catalogs.md)
+- To see the default built-in services kubara ships: [Components Overview](../3_components/components_overview.md)
+- To continue the setup flow: [Bootstrapping](bootstrapping.md)
+- To understand the platform topology: [Architecture overview](../4_architecture/architecture_overview.md)

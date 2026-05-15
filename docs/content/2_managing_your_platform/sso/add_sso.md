@@ -1,4 +1,4 @@
-# Add SSO Configuration (GitHub)
+# How to add SSO Configuration for GitHub
 
 How to Setup your GitHub for SSO with kubara
 

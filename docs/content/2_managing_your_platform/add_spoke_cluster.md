@@ -1,4 +1,4 @@
-# Add Spoke Cluster
+# How to add a Spoke Cluster
 
 After your hub cluster is running, you can add more Kubernetes spoke clusters and manage them through Argo CD.
 
