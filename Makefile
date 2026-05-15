@@ -23,6 +23,7 @@ docs-serve-dev:
 	@$(MAKE) -C docs serve-dev
 
 docs-build:
+	@$(MAKE) -C src docs
 	@$(MAKE) -C docs build
 
 docs-deploy:

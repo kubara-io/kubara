@@ -22,6 +22,7 @@ type GlobalFlags struct {
 	CatalogPath        string
 	CatalogOverwrite   bool
 	TestK8sConnection  bool
+	DocsOutputPath     string
 	Base64Mode         bool
 	EncodeFlag         bool
 	DecodeFlag         bool
@@ -41,6 +42,7 @@ type RootOptions struct {
 	KubeconfigFilePath string
 	TestK8sConnection  bool
 	CheckUpdateFlag    bool
+	DocsOutputPath     string
 	Base64Mode         bool
 	Base64             Base64Options
 }
@@ -66,6 +68,7 @@ func (flags *GlobalFlags) ToRootOptions() RootOptions {
 		KubeconfigFilePath: kubeconfigFilePath,
 		TestK8sConnection:  flags.TestK8sConnection,
 		CheckUpdateFlag:    flags.CheckUpdateFlag,
+		DocsOutputPath:     flags.DocsOutputPath,
 		Base64Mode:         flags.Base64Mode,
 		Base64: Base64Options{
 			Encode:      flags.EncodeFlag,
@@ -122,6 +125,13 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.TestK8sConnection,
 			Usage:       "Check if Kubernetes cluster can be reached. List namespaces and exit",
 			Destination: &flags.TestK8sConnection,
+		},
+		&cli.StringFlag{
+			Name:        "docs",
+			Value:       flags.DocsOutputPath,
+			Usage:       "Output file path for generated command docs",
+			Destination: &flags.DocsOutputPath,
+			Hidden:      true,
 		},
 		&cli.BoolFlag{
 			Name:        "base64",

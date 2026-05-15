@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"os"
-	"slices"
 
 	"github.com/kubara-io/kubara/cmd"
-	"github.com/kubara-io/kubara/internal/updatecheck"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -24,11 +22,9 @@ func init() {
 }
 
 func main() {
-	if !slices.Contains(os.Args[1:], "--check-update") {
-		updatecheck.NotifyIfNewReleaseAvailable(version, os.Stderr)
-	}
+	app := cmd.NewRootCmd(version)
 
-	if err := cmd.NewRootCmd(version).Run(context.Background(), os.Args); err != nil {
+	if err := app.Run(context.Background(), os.Args); err != nil {
 		log.Fatal().Err(err).Msg("Error running program")
 	}
 }
