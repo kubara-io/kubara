@@ -3,11 +3,18 @@ package catalog
 import (
 	"fmt"
 	"maps"
+	"regexp"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/service"
 
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
+)
+
+// Adheres to RFC 1123 and kubernetes conventions
+// https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
+var rfc1123Label = regexp.MustCompile(
+	`^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$`,
 )
 
 // ServiceDefinitionAPIVersion is the supported ServiceDefinition apiVersion.
@@ -70,6 +77,9 @@ func (d ServiceDefinition) Validate() error {
 	}
 	if strings.TrimSpace(d.Metadata.Name) == "" {
 		return fmt.Errorf("missing metadata.name")
+	}
+	if !rfc1123Label.MatchString(d.Metadata.Name) {
+		return fmt.Errorf("metadata.name must adhere to rfc 1123: must be 1-63 characters, start with a lowercase letter, contain only lowercase letters, digits, or '-', and end with a letter or digit")
 	}
 	if strings.TrimSpace(d.Spec.ChartPath) == "" {
 		return fmt.Errorf("missing spec.chartPath")
