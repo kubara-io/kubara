@@ -65,6 +65,11 @@ format:
 	@echo "Formatting Go code..."
 	@go fmt ./...
 
+# Update command docs
+docs:
+	@echo "Updating command docs..."
+	@go run main.go --docs ../docs/content/1_getting_started/commands.md
+
 # Lint code (requires golangci-lint)
 lint:
 	@echo "Linting Go code..."

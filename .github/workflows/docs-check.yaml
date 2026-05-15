@@ -26,6 +26,13 @@ jobs:
       - name: Checkout kubara repo
         uses: actions/checkout@v6
 
+      - name: Setup Go
+        uses: actions/setup-go@v6
+        with:
+          go-version-file: src/go.mod
+          cache: true
+          cache-dependency-path: src/go.sum
+
       - name: Install and setup uv
         uses: astral-sh/setup-uv@v8.1.0
         with:
@@ -40,4 +47,12 @@ jobs:
         run: uv sync --frozen
 
       - name: Validate docs build (strict)
-        run: uv run mkdocs build --strict
+        run: make docs-build
+
+      - name: Check command docs is up to date
+        run: |
+          if ! git diff-index --quiet HEAD -- docs; then
+            echo "::error::Commands document isn't up to date:"
+            echo "::error::Please run 'make docs-build' locally to fix it."
+            exit 1
+          fi
