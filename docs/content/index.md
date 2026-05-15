@@ -76,18 +76,6 @@ Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrapping.md) t
 You're done 🎉
 
 
-
-## 🛣️ Roadmap
-
-We're continuously improving kubara. Upcoming features:
-
-- Extend Pipelines
-- Add flavors: security, high availability, etc.
-- Support more cloud providers
-
-
-
-
 ## 🎥/📝/🎙️ Multimedia
 
 

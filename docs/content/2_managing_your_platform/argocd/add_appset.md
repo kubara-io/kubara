@@ -1,4 +1,4 @@
-# Add AppSet to Argo CD
+# How to add an AppSet to Argo CD
 Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
 Project.
 

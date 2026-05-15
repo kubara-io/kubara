@@ -349,9 +349,9 @@ kubara bootstrap --config-file another-config.yaml --env-file .another-env <clus
 
 After bootstrapping your platform, you can:
 
-* [Add Argo CD projects](../2_managing_your_platform/add_app_project.md)
-* [Add Git repositories](../2_managing_your_platform/add_app_repository.md)
-* [Add Argo CD applications](../2_managing_your_platform/add_application.md)
-* [Add Argo CD appset](../2_managing_your_platform/add_appset.md)
-* [Add SSO Configuration](../2_managing_your_platform/add_sso.md)
-* [Add additional spoke clusters](../2_managing_your_platform/add_spoke_cluster.md)
+* [How to add Argo CD projects](../2_managing_your_platform/argocd/add_app_project.md)
+* [How to add Git repositories](../2_managing_your_platform/argocd/add_app_repository.md)
+* [How to add Argo CD applications](../2_managing_your_platform/argocd/add_application.md)
+* [How to add Argo CD appset](../2_managing_your_platform/argocd/add_appset.md)
+* [How to add SSO Configuration](../2_managing_your_platform/sso/add_sso.md)
+* [How to add spoke clusters](../2_managing_your_platform/add_spoke_cluster.md)

@@ -6,23 +6,28 @@ docs_dir: 'content'
 nav:
   - Home: index.md
   - Getting Started:
-      - Core Concept: 1_getting_started/overview_core_concept.md
+      - Concepts:
+          - Overview: 1_getting_started/overview_core_concept.md
+          - Catalogs: 1_getting_started/catalogs.md
       - Installation: 1_getting_started/installation.md
       - Prerequisites: 1_getting_started/prerequisites.md
       - Bootstrapping: 1_getting_started/bootstrapping.md
       - Providers:
           - STACKIT: 1_getting_started/providers/stackit.md
   - Managing Your Platform:
-      - Add Spoke Cluster: 2_managing_your_platform/add_spoke_cluster.md
-      - Add Project: 2_managing_your_platform/add_app_project.md
-      - Add Repository: 2_managing_your_platform/add_app_repository.md
-      - Add AppSet: 2_managing_your_platform/add_appset.md
-      - Add Application: 2_managing_your_platform/add_application.md
-      - Add SSO: 2_managing_your_platform/add_sso.md
-      - SSO Examples: 2_managing_your_platform/add_sso_examples.md
-  - Components:
+      - How to add a Spoke Cluster: 2_managing_your_platform/add_spoke_cluster.md
+      - How to create a Catalog: 2_managing_your_platform/create_catalog.md
+      - Argo CD:
+          - How to add a Project: 2_managing_your_platform/argocd/add_app_project.md
+          - How to add a Repository: 2_managing_your_platform/argocd/add_app_repository.md
+          - How to add an AppSet: 2_managing_your_platform/argocd/add_appset.md
+          - How to add an Application: 2_managing_your_platform/argocd/add_application.md
+      - SSO:
+          - How to add SSO: 2_managing_your_platform/sso/add_sso.md
+          - SSO Examples: 2_managing_your_platform/sso/add_sso_examples.md
+  - Components (Built-in):
       - Overview: 3_components/components_overview.md
-      - Add or Replace Components: 3_components/add_or_replace_components.md
+      - Best Practices: 3_components/best_practices.md
       - Network:
           - ExternalDNS: 3_components/network_external_dns.md
       - Security:

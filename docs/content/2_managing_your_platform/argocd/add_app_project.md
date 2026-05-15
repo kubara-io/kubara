@@ -1,4 +1,4 @@
-# Add Argo CD  Project
+# How to add a project to Argo CD
 
 After you deployed your hub cluster you will have an Argo CD set-up. It is the central application for your application
 management and handles the Continuous Deployment of other applications (including Argo CD itself).
@@ -23,7 +23,7 @@ projects:
 
 That whats happening behind the scenes:
 
-![Add Proejct](../images/add-project.png)
+![Add Proejct](../../images/add-project.png)
 
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that is connected to your Argo CD instance.
