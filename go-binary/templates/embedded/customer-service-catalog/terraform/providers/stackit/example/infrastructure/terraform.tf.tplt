@@ -18,7 +18,7 @@ terraform {
     }
     stackit = {
       source  = "stackitcloud/stackit"
-      version = "0.94.0"
+      version = "0.96.0"
     }
     aws = {
       source  = "hashicorp/aws"
@@ -26,7 +26,7 @@ terraform {
     }
     random = {
       source  = "hashicorp/random"
-      version = "3.8.1"
+      version = "3.9.0"
     }
     vault = {
       source  = "hashicorp/vault"
