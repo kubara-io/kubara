@@ -30,7 +30,7 @@ env:
   # renovate: datasource=github-releases depName=yannh/kubeconform
   KUBECONFORM_VERSION: "v0.7.0"
   # renovate: datasource=github-releases depName=terraform-linters/tflint
-  TFLINT_VERSION: "v0.62.0"
+  TFLINT_VERSION: "v0.62.1"
   ARTIFACT_RETENTION_DAYS: "15"
 
 permissions:
