@@ -5,6 +5,18 @@
   "terraform": {
     "fileMatch": ["\\.tf(\\.tplt)?$"]
   },
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update Docker image tags in Helm values templates",
+      "managerFilePatterns": ["/(^|/)values\\.ya?ml\\.tplt$/"],
+      "matchStrings": [
+        "repository:\\s*[\"']?(?<depName>[^\"'\\s]+)[\"']?\\s*\\n\\s*tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
+  ],
   "packageRules": [
     {
       "matchFiles": ["**/Chart.{yaml,yml}"],
