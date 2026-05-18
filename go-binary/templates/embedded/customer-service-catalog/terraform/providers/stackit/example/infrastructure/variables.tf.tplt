@@ -92,6 +92,7 @@ List of node pools. Each element must be an object with:
 - name               = string
 - machine_type       = string
 - os_version_min     = optional(string)
+- volume_size        = optional(number, 30)
 - minimum            = number
 - maximum            = number
 - availability_zones = list(string)
@@ -106,6 +107,7 @@ EOF
     name               = string
     machine_type       = string
     os_version_min     = optional(string)
+    volume_size        = optional(number, 30)
     minimum            = number
     maximum            = number
     availability_zones = list(string)
