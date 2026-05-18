@@ -2,7 +2,7 @@ apiVersion: v2
 name: external-dns
 description: Umbrella Chart for external-dns
 type: application
-version: 0.2.0
+version: 0.2.1
 dependencies:
   - name: template-library
     repository: file://../template-library
