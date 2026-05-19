@@ -75,10 +75,10 @@ alloy:
           mountPath: /tmp
     resources:
       requests:
-        cpu: 300m
-        memory: 100Mi
+        cpu: 100m
+        memory: 300Mi
       limits:
-        memory: 500Mi
+        memory: 300Mi
     securityContext:
       runAsUser: 0
       runAsGroup: 0
@@ -99,9 +99,9 @@ alloy:
     resources:
       requests:
         cpu: 10m
-        memory: 50Mi
+        memory: 100Mi
       limits:
-        memory: 50Mi
+        memory: 100Mi
     securityContext:
       readOnlyRootFilesystem: true
       allowPrivilegeEscalation: false
@@ -208,10 +208,10 @@ loki:
   singleBinary:
     resources:
       requests:
-        cpu: 10m
-        memory: 300Mi
+        cpu: 50m
+        memory: 500Mi
       limits:
-        memory: 300Mi
+        memory: 500Mi
   lokiCanary:
     resources:
       requests:
@@ -223,7 +223,7 @@ loki:
     resources:
       requests:
         cpu: 10m
-        memory: 150Mi
+        memory: 100Mi
       limits:
-        memory: 150Mi
+        memory: 100Mi
 namespace: {}
