@@ -476,6 +476,17 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#shell-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Completion
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -626,6 +637,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -692,14 +731,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -1988,6 +2027,17 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#shell-completion" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Shell Completion
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -2096,6 +2146,20 @@ Run these checksum commands in your terminal on Linux/macOS:</p>
 </code></pre></div>
 <p>On macOS you can also use:</p>
 <div class="highlight"><pre><span></span><code>shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">256</span><span class="w"> </span>kubara_&lt;version&gt;_&lt;os&gt;_&lt;arch&gt;.&lt;ext&gt;
+</code></pre></div>
+<h2 id="shell-completion">Shell Completion</h2>
+<p>kubara supports shell completion for bash, zsh, fish and powershell.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># add the following line to your .bashrc</span>
+$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubara<span class="w"> </span>completion<span class="w"> </span>bash<span class="o">)</span>
+<span class="c1"># or for zsh</span>
+$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubara<span class="w"> </span>completion<span class="w"> </span>zsh<span class="o">)</span>
+<span class="c1"># after loading your rc file or opening a new terminal you will have tab completion for kubara</span>
+$<span class="w"> </span>kubara<span class="w"> </span>&lt;tab&gt;
+bootstrap<span class="w">  </span>--<span class="w"> </span>Bootstrap<span class="w"> </span>ArgoCD<span class="w"> </span>onto<span class="w"> </span>the<span class="w"> </span>specified<span class="w"> </span>cluster<span class="w"> </span>with<span class="w"> </span>optional<span class="w"> </span>external-secrets<span class="w"> </span>and<span class="w"> </span>prometheus<span class="w"> </span>CRD
+generate<span class="w">   </span>--<span class="w"> </span>generates<span class="w"> </span>files<span class="w"> </span>from<span class="w"> </span>embedded<span class="w"> </span>templates<span class="w"> </span>and<span class="w"> </span>the<span class="w"> </span>config<span class="w"> </span>file<span class="p">;</span><span class="w"> </span>by<span class="w"> </span>default<span class="w"> </span><span class="k">for</span><span class="w"> </span>both<span class="w"> </span>Helm<span class="w"> </span>and<span class="w"> </span>Terraform
+<span class="nb">help</span><span class="w">       </span>--<span class="w"> </span>Shows<span class="w"> </span>a<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>or<span class="w"> </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>one<span class="w"> </span><span class="nb">command</span>
+init<span class="w">       </span>--<span class="w"> </span>Initialize<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>kubara<span class="w"> </span>directory
+schema<span class="w">     </span>--<span class="w"> </span>Generate<span class="w"> </span>JSON<span class="w"> </span>schema<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>config<span class="w"> </span>structure
 </code></pre></div>
 
 

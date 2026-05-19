@@ -555,6 +555,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -621,14 +649,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -2152,7 +2180,7 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 <li>
 <p><strong>Enable cert-manager</strong>  </p>
 </li>
-<li>In <code>config.yaml</code> you enable the service <code>certManager</code>.  </li>
+<li>In <code>config.yaml</code> you enable the service <code>cert-manager</code>.  </li>
 <li>Then you must <strong>rerun kubara</strong> (<code>kubara generate --helm</code> or <code>kubara generate</code>) so that Helm values are re-rendered with the new settings.  </li>
 <li>
 <p>Then <strong>git commit &amp; push</strong> the Helm chart changes so that Argo CD deploys cert-manager to the cluster.</p>
@@ -2188,17 +2216,18 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">example.com</span>
 
 <span class="w">    </span><span class="nt">services</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">certManager</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cert-manager</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">        </span><span class="nt">config</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin@example.com&quot;</span><span class="w">    </span><span class="c1"># Email for ACME</span>
-<span class="w">          </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme-v02.api.letsencrypt.org/directory&quot;</span><span class="w">   </span><span class="c1"># ACME URL (e.g. Let&#39;s Encrypt)</span>
+<span class="w">          </span><span class="nt">clusterIssuer</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;admin@example.com&quot;</span><span class="w">    </span><span class="c1"># Email for ACME</span>
+<span class="w">            </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://acme-v02.api.letsencrypt.org/directory&quot;</span><span class="w">   </span><span class="c1"># ACME URL (e.g. Let&#39;s Encrypt)</span>
 </code></pre></div>
 <h3 id="explanation">Explanation</h3>
 <ul>
-<li><strong><code>services.certManager.status</code></strong> → when set to <code>enabled</code>, cert-manager is templated into the Helm charts for deployment via Argo CD</li>
-<li><strong><code>services.certManager.config.email</code></strong> → email address registered with the ACME provider (required)  </li>
-<li><strong><code>services.certManager.config.server</code></strong> → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  </li>
+<li><strong><code>services.cert-manager.status</code></strong> → when set to <code>enabled</code>, cert-manager is templated into the Helm charts for deployment via Argo CD</li>
+<li><strong><code>services.cert-manager.config.clusterIssuer.email</code></strong> → email address registered with the ACME provider (required)  </li>
+<li><strong><code>services.cert-manager.config.clusterIssuer.server</code></strong> → endpoint of the ACME provider (e.g. Let's Encrypt staging/production or another ACME provider)  </li>
 </ul>
 <hr />
 <h2 id="certificate-issuance-flow">Certificate issuance flow</h2>

@@ -555,6 +555,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -623,14 +651,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_worker_cluster/" class="md-nav__link">
+      <a href="../add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -2046,19 +2074,19 @@ For more information and possible configuration check:
 https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
 https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern</p>
 <h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>This is an example on how to add a simple application to a worker-cluster.
+<p>This is an example on how to add a simple application to a spoke-cluster.
 Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your <code>argo-cd/values.yaml</code>.
 <div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">applications</span><span class="p">:</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-worker-0</span>
+<span class="w">            </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
 <span class="w">          </span><span class="nt">info</span><span class="p">:</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">greeting</span>
 <span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Hello</span><span class="nv"> </span><span class="s">World&quot;</span>
 <span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-node-red</span>
 <span class="w">          </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
-<span class="w">          </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-worker-0</span>
+<span class="w">          </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
 <span class="w">          </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-red</span><span class="w"> </span><span class="c1"># the path inside the repository</span>
 <span class="w">          </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the developer repository where the app code can be found&gt;</span>
 </code></pre></div></p>
@@ -2069,7 +2097,7 @@ Add the following to your <code>argo-cd/values.yaml</code>.
 If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
 <h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
 <p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;controlplane-cluster-name-from-config-yaml&gt;
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
 </code></pre></div></p>
 
 

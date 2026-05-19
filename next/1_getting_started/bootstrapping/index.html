@@ -645,10 +645,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#41-bootstrap-the-control-plane" class="md-nav__link">
+  <a href="#41-bootstrap-the-hub-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.1 Bootstrap the Control Plane
+        4.1 Bootstrap the Hub cluster
       
     </span>
   </a>
@@ -684,10 +684,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bootstrapping-multiple-controlplanes" class="md-nav__link">
+  <a href="#bootstrapping-multiple-hub-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bootstrapping Multiple ControlPlanes
+        Bootstrapping Multiple Hub Cluster
       
     </span>
   </a>
@@ -804,6 +804,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -870,14 +898,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -2279,10 +2307,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#41-bootstrap-the-control-plane" class="md-nav__link">
+  <a href="#41-bootstrap-the-hub-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4.1 Bootstrap the Control Plane
+        4.1 Bootstrap the Hub cluster
       
     </span>
   </a>
@@ -2318,10 +2346,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bootstrapping-multiple-controlplanes" class="md-nav__link">
+  <a href="#bootstrapping-multiple-hub-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bootstrapping Multiple ControlPlanes
+        Bootstrapping Multiple Hub Cluster
       
     </span>
   </a>
@@ -2434,7 +2462,7 @@ You can set a custom output file:</p>
 <h3 id="15-update-and-prepare-templates">1.5 Update and Prepare Templates</h3>
 <div class="admonition info">
 <p class="admonition-title">Info</p>
-<p>What is "type:" in <code>config.yaml</code>: <code>controlplane</code> is your hub cluster, <code>worker</code> is your spoke cluster <a href="../../4_architecture/architecture_overview/#hubnspoke">Hub and Spoke Cluster</a></p>
+<p>What is "type:" in <code>config.yaml</code>: <code>hub</code> is your hub cluster, <code>spoke</code> is your spoke cluster <a href="../../4_architecture/architecture_overview/#hubnspoke">Hub and Spoke Cluster</a></p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
@@ -2444,7 +2472,7 @@ You can set a custom output file:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-name-from-env-file</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;controlplane or worker&gt;</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub or spoke&gt;</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cp.demo-42.stackit.run&gt;</span>
 <span class="w">    </span><span class="nt">privateLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">publicLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
@@ -2497,7 +2525,7 @@ Example:
 </code></pre></div>
 Edit the generated files in:
 <code>customer-service-catalog/helm/&lt;cluster&gt;/&lt;chart&gt;/values.yaml</code></p>
-<p>Source templates are embedded in the binary under <code>go-binary/templates/embedded/...</code>, but you should only edit generated files in your repository.</p>
+<p>Source templates are embedded in the binary under <code>src/internal/catalog/built-in/...</code>, but you should only edit generated files in your repository.</p>
 <p>The chart directories where values usually need review are:</p>
 <ul>
 <li>argo-cd</li>
@@ -2534,7 +2562,7 @@ Edit the generated files in:
 </div>
 <hr />
 <h2 id="4-deploying-argo-cd">4. Deploying Argo CD</h2>
-<h3 id="41-bootstrap-the-control-plane">4.1 Bootstrap the Control Plane</h3>
+<h3 id="41-bootstrap-the-hub-cluster">4.1 Bootstrap the Hub cluster</h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>This command requires access to a Kubernetes cluster and, by default, uses <code>~/.kube/config</code>.
@@ -2612,26 +2640,26 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <h2 id="whats-also-possible">What's also possible?</h2>
 <p>This section will be extended in the future to describe not just technical changes,
 but also other supported possibilities when bootstrapping.</p>
-<h3 id="bootstrapping-multiple-controlplanes">Bootstrapping Multiple ControlPlanes</h3>
-<p>You can bootstrap multiple ControlPlanes.
-We recommend <strong>not</strong> to reuse the same <code>config.yaml</code> file for multiple ControlPlanes.</p>
+<h3 id="bootstrapping-multiple-hub-cluster">Bootstrapping Multiple Hub Cluster</h3>
+<p>You can bootstrap multiple Hub clusters.
+Do <strong>not</strong> reuse the same <code>config.yaml</code> file for multiple Hub clusters.</p>
 <p><strong>Why?</strong>
 During the bootstrap process, the <code>.env</code> file is used to provide credentials.
-If you reuse the same <code>.env</code> file, you would have to constantly adjust it for each ControlPlane — which is error-prone.</p>
+If you reuse the same <code>.env</code> file, you would have to constantly adjust it for each Hub - which is error-prone.</p>
 <p>Since version <code>0.2.0</code>, this is much easier. You can simply provide a different env file:</p>
-<p><div class="highlight"><pre><span></span><code>./kubara<span class="w"> </span>init<span class="w"> </span>--prep<span class="w"> </span>--env-file<span class="w"> </span>.env2
+<p><div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span>--prep<span class="w"> </span>--env-file<span class="w"> </span>.another-env
 </code></pre></div>
-Fill out <code>.env2</code> with the required values. Generate a new config file from it:</p>
-<div class="highlight"><pre><span></span><code>./kubara<span class="w"> </span>--config-file<span class="w"> </span>config2.yaml<span class="w"> </span>--env-file<span class="w"> </span>.env2<span class="w"> </span>init
+Fill out <code>.another-env</code> with the required values. Generate a new config file from it:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>--env-file<span class="w"> </span>.another-env<span class="w"> </span>init
 </code></pre></div>
-<p>This will use the values from <code>.env2</code> to generate <code>config2.yaml</code>.</p>
-<p>Render Terraform modules and Helm charts for the new ControlPlane:</p>
+<p>This will use the values from <code>.another-env</code> to generate <code>another-config.yaml</code>.</p>
+<p>Render Terraform modules and Helm charts for the new Hub cluster:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># default: generates both Helm and Terraform</span>
 <span class="c1"># use --helm or --terraform to generate only one type</span>
-./kubara<span class="w"> </span>--config-file<span class="w"> </span>config2.yaml<span class="w"> </span>generate
+./kubara<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>generate
 </code></pre></div>
-<p>Finally, bootstrap your additional ControlPlane:</p>
-<div class="highlight"><pre><span></span><code>./kubara<span class="w"> </span>--env-file<span class="w"> </span>.env2<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config2-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
+<p>Finally, bootstrap your additional Hub cluster:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>--env-file<span class="w"> </span>.another-env<span class="w"> </span>&lt;cluster<span class="w"> </span>name<span class="w"> </span>from<span class="w"> </span>another-config.yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
 <h2 id="whats-next">What's Next?</h2>
 <p>After bootstrapping your platform, you can:</p>
@@ -2641,7 +2669,7 @@ Fill out <code>.env2</code> with the required values. Generate a new config file
 <li><a href="../../2_managing_your_platform/add_application/">Add Argo CD applications</a></li>
 <li><a href="../../2_managing_your_platform/add_appset/">Add Argo CD appset</a></li>
 <li><a href="../../2_managing_your_platform/add_sso/">Add SSO Configuration</a></li>
-<li><a href="../../2_managing_your_platform/add_worker_cluster/">Add additional worker clusters</a></li>
+<li><a href="../../2_managing_your_platform/add_spoke_cluster/">Add additional spoke clusters</a></li>
 </ul>
 
 

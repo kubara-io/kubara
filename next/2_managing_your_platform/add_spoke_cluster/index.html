@@ -8,10 +8,10 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/add_worker_cluster/">
+        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/add_spoke_cluster/">
       
       
-        <link rel="prev" href="../../1_getting_started/providers/stackit/">
+        <link rel="prev" href="../../1_getting_started/commands/">
       
       
         <link rel="next" href="../add_app_project/">
@@ -25,7 +25,7 @@
     
     
       
-        <title>Add Worker Cluster - kubara - Docs</title>
+        <title>Add Spoke Cluster - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#add-worker-cluster" class="md-skip">
+        <a href="#add-spoke-cluster" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Worker Cluster
+              Add Spoke Cluster
             
           </span>
         </div>
@@ -555,6 +555,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -639,7 +667,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -657,7 +685,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -683,15 +711,15 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-add-worker-cluster-to-configyaml" class="md-nav__link">
+  <a href="#1-add-spoke-cluster-to-configyaml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Add worker cluster to config.yaml
+        1. Add spoke cluster to config.yaml
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="1. Add worker cluster to config.yaml">
+    <nav class="md-nav" aria-label="1. Add spoke cluster to config.yaml">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -722,10 +750,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-prepare-the-worker-cluster" class="md-nav__link">
+  <a href="#3-prepare-the-spoke-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Prepare the worker cluster
+        3. Prepare the spoke cluster
       
     </span>
   </a>
@@ -733,10 +761,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-prepare-external-secrets-credentials-on-the-worker-cluster" class="md-nav__link">
+  <a href="#4-prepare-external-secrets-credentials-on-the-spoke-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Prepare external-secrets credentials on the worker cluster
+        4. Prepare external-secrets credentials on the spoke cluster
       
     </span>
   </a>
@@ -744,10 +772,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-register-worker-cluster-in-argo-cd" class="md-nav__link">
+  <a href="#5-register-spoke-cluster-in-argo-cd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Register worker cluster in Argo CD
+        5. Register spoke cluster in Argo CD
       
     </span>
   </a>
@@ -2039,15 +2067,15 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-add-worker-cluster-to-configyaml" class="md-nav__link">
+  <a href="#1-add-spoke-cluster-to-configyaml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Add worker cluster to config.yaml
+        1. Add spoke cluster to config.yaml
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="1. Add worker cluster to config.yaml">
+    <nav class="md-nav" aria-label="1. Add spoke cluster to config.yaml">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
@@ -2078,10 +2106,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-prepare-the-worker-cluster" class="md-nav__link">
+  <a href="#3-prepare-the-spoke-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Prepare the worker cluster
+        3. Prepare the spoke cluster
       
     </span>
   </a>
@@ -2089,10 +2117,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-prepare-external-secrets-credentials-on-the-worker-cluster" class="md-nav__link">
+  <a href="#4-prepare-external-secrets-credentials-on-the-spoke-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Prepare external-secrets credentials on the worker cluster
+        4. Prepare external-secrets credentials on the spoke cluster
       
     </span>
   </a>
@@ -2100,10 +2128,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-register-worker-cluster-in-argo-cd" class="md-nav__link">
+  <a href="#5-register-spoke-cluster-in-argo-cd" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Register worker cluster in Argo CD
+        5. Register spoke cluster in Argo CD
       
     </span>
   </a>
@@ -2152,20 +2180,20 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="add-worker-cluster">Add Worker Cluster</h1>
-<p>After your control plane is running, you can add more Kubernetes worker clusters and manage them through Argo CD.</p>
+<h1 id="add-spoke-cluster">Add Spoke Cluster</h1>
+<p>After your hub cluster is running, you can add more Kubernetes spoke clusters and manage them through Argo CD.</p>
 <p>You can onboard:</p>
 <ul>
 <li>a new cluster provisioned with kubara Terraform templates, or</li>
 <li>an existing cluster you already operate.</li>
 </ul>
 <p>The Argo CD integration flow is the same in both cases.</p>
-<h2 id="1-add-worker-cluster-to-configyaml">1. Add worker cluster to <code>config.yaml</code></h2>
+<h2 id="1-add-spoke-cluster-to-configyaml">1. Add spoke cluster to <code>config.yaml</code></h2>
 <p>Add a new cluster entry:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">dev</span>
-<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">worker</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spoke</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0.dev.example.com</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-org</span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-team</span>
@@ -2187,39 +2215,42 @@ You're not viewing the latest stable version.
 <span class="w">            </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://git.example.com/platform/repo.git</span>
 <span class="w">            </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
 <span class="w">    </span><span class="nt">services</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">argocd</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">argo-cd</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">certManager</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">cert-manager</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">        </span><span class="nt">clusterIssuer</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">letsencrypt-staging</span>
-<span class="w">          </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform@example.com</span>
-<span class="w">          </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://acme-staging-v02.api.letsencrypt.org/directory</span>
-<span class="w">      </span><span class="nt">externalDns</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">clusterIssuer</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">letsencrypt-staging</span>
+<span class="w">            </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform@example.com</span>
+<span class="w">            </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://acme-staging-v02.api.letsencrypt.org/directory</span>
+<span class="w">      </span><span class="nt">external-dns</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">externalSecrets</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">external-secrets</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">kubePrometheusStack</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kube-prometheus-stack</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
 <span class="w">      </span><span class="nt">traefik</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">kyverno</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">kyvernoPolicies</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kyverno-policies</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">kyvernoPolicyReport</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kyverno-policy-reporter</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">      </span><span class="nt">loki</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">        </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
-<span class="w">      </span><span class="nt">homerDashboard</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">standard-rwo</span><span class="w"> </span><span class="c1"># optional</span>
+<span class="w">      </span><span class="nt">homer-dashboard</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">oauth2Proxy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">oauth2-proxy</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-<span class="w">      </span><span class="nt">metricsServer</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">metrics-server</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
-<span class="w">      </span><span class="nt">metalLb</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">metallb</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
 <span class="w">      </span><span class="nt">longhorn</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
@@ -2240,23 +2271,23 @@ This is useful when you use an ingress controller other than Traefik that requir
 <div class="highlight"><pre><span></span><code><span class="c1"># kubara generate creates both helm and terraform files by default</span>
 kubara<span class="w"> </span>generate
 </code></pre></div>
-<p>This creates/updates the worker cluster overlays in:</p>
+<p>This creates/updates the spoke cluster overlays in:</p>
 <ul>
-<li><code>customer-service-catalog/terraform/&lt;worker-cluster-name&gt;/...</code></li>
-<li><code>customer-service-catalog/helm/&lt;worker-cluster-name&gt;/...</code></li>
+<li><code>customer-service-catalog/terraform/&lt;spoke-cluster-name&gt;/...</code></li>
+<li><code>customer-service-catalog/helm/&lt;spoke-cluster-name&gt;/...</code></li>
 </ul>
-<h2 id="3-prepare-the-worker-cluster">3. Prepare the worker cluster</h2>
-<p>If this is a new cluster, apply Terraform for the worker entry.
+<h2 id="3-prepare-the-spoke-cluster">3. Prepare the spoke cluster</h2>
+<p>If this is a new cluster, apply Terraform for the spoke entry.
 If the cluster already exists, skip Terraform and continue.</p>
-<p>You need the worker cluster kubeconfig for registration in Argo CD.
+<p>You need the spoke cluster kubeconfig for registration in Argo CD.
 Store it in your secret backend (Vault/Secret Manager), for example:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;my_clusters&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;k8s-worker-0&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;worker kubeconfig yaml&gt;&quot;</span>
+<span class="w">    </span><span class="nt">&quot;k8s-spoke-0&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;spoke kubeconfig yaml&gt;&quot;</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
 </code></pre></div>
-<h2 id="4-prepare-external-secrets-credentials-on-the-worker-cluster">4. Prepare external-secrets credentials on the worker cluster</h2>
+<h2 id="4-prepare-external-secrets-credentials-on-the-spoke-cluster">4. Prepare external-secrets credentials on the spoke cluster</h2>
 <p>Create provider credentials as Kubernetes secret(s), for example:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Bitwarden</span>
 kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>bitwarden-access-token<span class="w"> </span><span class="se">\</span>
@@ -2267,8 +2298,8 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span><span class="s2">&quot;&lt;USERNAME&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span><span class="s2">&quot;&lt;PASSWORD&gt;&quot;</span>
 </code></pre></div>
-<p>Then configure the worker ClusterSecretStore in:
-<code>customer-service-catalog/helm/&lt;worker-cluster-name&gt;/external-secrets/additional-values.yaml</code></p>
+<p>Then configure the spoke ClusterSecretStore in:
+<code>customer-service-catalog/helm/&lt;spoke-cluster-name&gt;/external-secrets/additional-values.yaml</code></p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusterSecretStores</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0-dev</span>
@@ -2288,19 +2319,19 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">        </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://vault.example.com&quot;</span>
 <span class="w">        </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
 </code></pre></div>
-<h2 id="5-register-worker-cluster-in-argo-cd">5. Register worker cluster in Argo CD</h2>
-<p>Update the control plane overlay:
-<code>customer-service-catalog/helm/&lt;controlplane-cluster-name&gt;/argo-cd/values.yaml</code></p>
+<h2 id="5-register-spoke-cluster-in-argo-cd">5. Register spoke cluster in Argo CD</h2>
+<p>Update the hub cluster overlay:
+<code>customer-service-catalog/helm/&lt;hub-cluster-name&gt;/argo-cd/values.yaml</code></p>
 <div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">cluster</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-worker0</span>
-<span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">controlplane-production</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-spoke-0</span>
+<span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-production</span>
 <span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_clusters</span>
-<span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-worker-0</span>
+<span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
 <span class="w">      </span><span class="nt">secretStoreRef</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;controlplane-cluster-name&gt;-&lt;stage&gt;</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub-cluster-name&gt;-&lt;stage&gt;</span>
 <span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">cert-manager</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">        </span><span class="nt">external-dns</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
@@ -2313,17 +2344,17 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">        </span><span class="nt">loki</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 <span class="w">        </span><span class="nt">oauth2-proxy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 </code></pre></div>
-<p>The <code>remoteRef</code> points to the worker kubeconfig secret in your secret backend.</p>
+<p>The <code>remoteRef</code> points to the spoke kubeconfig secret in your secret backend.</p>
 <p><img alt="Add Workload Cluster" src="../../images/add-workload-cluster.png" /></p>
 <h2 id="6-commit-and-roll-out">6. Commit and roll out</h2>
 <p>Commit and push all updated files.</p>
 <p>If Argo CD manages itself, it will reconcile automatically.
-If not, run bootstrap again for your control plane cluster:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;controlplane-cluster-name-from-config-yaml&gt;
+If not, run bootstrap again for your hub cluster:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
 </code></pre></div>
 <h2 id="additional-notes">Additional notes</h2>
 <ul>
-<li>If you enable <code>oauth2-proxy</code>, provide valid OAuth credentials in the secret backend used by external-secrets on the worker cluster.</li>
+<li>If you enable <code>oauth2-proxy</code>, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.</li>
 <li><code>additional-values.yaml</code> is optional but recommended for provider-specific overrides, because generated <code>values.yaml</code> can be re-rendered by kubara.</li>
 </ul>
 

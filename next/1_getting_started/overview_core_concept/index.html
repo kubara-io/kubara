@@ -659,6 +659,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -725,14 +753,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -2114,7 +2142,7 @@ It contains cluster-specific configurations and your custom values for the kubar
 <li>Platform Engineer must set parameters in config files (⚠️Caution: Environment variables have priority over config values)</li>
 <li>"kubara generate" templates and creates Terraform &amp; Umbrella Helm-Charts. <br />
 Now you should commit and push your templates to your git and optionally apply Terraform</li>
-<li><code>kubara bootstrap &lt;cluster-name&gt;</code> rolls out Argo CD and required CRDs to your control plane cluster.</li>
+<li><code>kubara bootstrap &lt;cluster-name&gt;</code> rolls out Argo CD and required CRDs to your hub cluster.</li>
 <li>Secrets are synced via External Secrets based on your configured SecretStore/ClusterSecretStore.
 Argo CD manages itself and rolls out all <a href="../../3_components/components_overview/">generated Helm Charts</a>.</li>
 </ol>

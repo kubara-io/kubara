@@ -555,6 +555,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -621,14 +649,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_worker_cluster/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Worker Cluster
+    Add Spoke Cluster
   
 
     
@@ -2131,7 +2159,7 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <li>
 <p><strong>Enable ExternalDNS</strong>  </p>
 </li>
-<li>In <code>config.yaml</code> you enable the service <code>externalDns</code>.  </li>
+<li>In <code>config.yaml</code> you enable the service <code>external-dns</code>.  </li>
 <li>Then you must <strong>rerun kubara</strong> (<code>kubara generate</code>) so that Terraform files and Helm values are re-rendered with the new settings.  </li>
 <li>Configure provider-specific values in:<ul>
 <li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/external-dns/values.yaml</code></li>
@@ -2169,14 +2197,14 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;hostmaster@example.com&quot;</span>
 
 <span class="w">    </span><span class="nt">services</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">externalDns</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">external-dns</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span><span class="w">        </span><span class="c1"># &lt;--- enable here</span>
 </code></pre></div>
 <h3 id="explanation">Explanation</h3>
 <ul>
 <li><strong><code>dnsName</code></strong> → base domain for the cluster  </li>
 <li><strong><code>terraform.dns</code></strong> → defines the zone for which kubara generates Terraform code (name and contact email).</li>
-<li><strong><code>services.externalDns.status</code></strong> → when set to <code>enabled</code>, ExternalDNS is templated into the Helm charts for deployment via Argo CD.</li>
+<li><strong><code>services.external-dns.status</code></strong> → when set to <code>enabled</code>, ExternalDNS is templated into the Helm charts for deployment via Argo CD.</li>
 <li><strong>provider-specific settings</strong> → configure them in the chart overlay values (<code>values.yaml</code> / <code>additional-values.yaml</code>).</li>
 </ul>
 <hr />
