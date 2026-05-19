@@ -62,7 +62,7 @@ external-dns:
     webhook:
       image:
         repository: ghcr.io/stackitcloud/external-dns-stackit-webhook
-        tag: v0.3.2
+        tag: v0.3.8
       extraVolumeMounts:
         - name: stackit-sa-authentication
           mountPath: /var/run/secrets/stackit

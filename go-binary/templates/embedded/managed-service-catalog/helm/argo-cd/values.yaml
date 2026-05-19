@@ -33,9 +33,9 @@ argo-cd:
     resources:
       requests:
         cpu: 50m
-        memory: 150Mi
+        memory: 256Mi
       limits:
-        memory: 200Mi
+        memory: 256Mi
     livenessProbe:
       enabled: true
     readinessProbe:
@@ -46,7 +46,7 @@ argo-cd:
         cpu: 100m
         memory: 256Mi
       limits:
-        memory: 512Mi
+        memory: 256Mi
     livenessProbe:
       enabled: true
     readinessProbe:
@@ -60,10 +60,10 @@ argo-cd:
       enabled: false
     resources:
       requests:
-        cpu: 256m
-        memory: 500Mi
+        cpu: 100m
+        memory: 512Mi
       limits:
-        memory: 1000Mi
+        memory: 512Mi
     livenessProbe:
       enabled: true
     readinessProbe:
@@ -81,10 +81,10 @@ argo-cd:
       automountServiceAccountToken: true
     resources:
       requests:
-        cpu: 500m
+        cpu: 100m
         memory: 512Mi
       limits:
-        memory: 1000Mi
+        memory: 512Mi
   configs:
     cm:
       exec.enabled: false
@@ -116,18 +116,18 @@ argo-cd:
       minAvailable: 1
     resources:
       requests:
-        cpu: 1500m
-        memory: 2000Mi
+        cpu: 250m
+        memory: 1000Mi
       limits:
-        memory: 2500Mi
+        memory: 1000Mi
 
   controller:
     resources:
       requests:
-        cpu: 2000m
+        cpu: 250m
         memory: 2000Mi
       limits:
-        memory: 2500Mi
+        memory: 2000Mi
     metrics:
       enabled: false
       serviceMonitor:
