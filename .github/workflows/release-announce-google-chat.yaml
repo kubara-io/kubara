@@ -57,12 +57,14 @@ jobs:
           fi
 
           NOTES_RAW=$(echo "$BODY_JSON" | jq -r '.body // ""')
+          CLEAN_NOTES=$(echo "$NOTES_RAW" | sed 's/^## Changelog/*Changelog*/' | sed 's/^\* [0-9a-f]\{7,40\} /* /')
+
           URL=$(echo "$BODY_JSON" | jq -r '.html_url // ""')
 
           PAYLOAD=$(jq -n \
             --arg tag "$TAG" \
             --arg url "$URL" \
-            --arg notes "$NOTES_RAW" \
+            --arg notes "$CLEAN_NOTES" \
             '{
               text:
                 ("*Kubara " + $tag + " is released now!*" + "\n\n" +
