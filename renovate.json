@@ -49,15 +49,15 @@
       "groupSlug": "k8s-io-go-modules"
     },
     {
-      "description": "Group sigs.k8s.io go modules except controller-runtime (minor and patch)",
+      "description": "Group sigs.k8s.io go modules (minor and patch)",
       "matchManagers": ["gomod"],
-      "matchPackageNames": ["sigs.k8s.io/**", "!sigs.k8s.io/controller-runtime"],
+      "matchPackagePrefixes": ["sigs.k8s.io/"],
       "matchUpdateTypes": ["minor", "patch"],
       "groupName": "sigs.k8s.io go modules",
       "groupSlug": "sigs-k8s-io-go-modules"
     },
     {
-      "description": "Group controller-runtime with k8s.io go modules",
+      "description": "Override: group controller-runtime with k8s.io modules because it follows the k8s.io/client-go minor",
       "matchManagers": ["gomod"],
       "matchPackageNames": ["sigs.k8s.io/controller-runtime"],
       "matchUpdateTypes": ["minor", "patch"],
