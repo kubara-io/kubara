@@ -6,9 +6,9 @@ external-secrets:
     resources:
       requests:
         cpu: 10m
-        memory: 100Mi
+        memory: 150Mi
       limits:
-        memory: 100Mi
+        memory: 150Mi
   webhook:
     replicaCount: 1
     resources:

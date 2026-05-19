@@ -80,10 +80,10 @@ kube-prometheus-stack:
     prometheusSpec:
       resources:
         requests:
-          cpu: 57m
-          memory: 700Mi
+          cpu: 50m
+          memory: 1024Mi
         limits:
-          memory: 700Mi
+          memory: 1024Mi
       securityContext:
         runAsGroup: 2000
         runAsNonRoot: true
@@ -128,9 +128,9 @@ kube-prometheus-stack:
     resources:
       requests:
         cpu: 10m
-        memory: 200Mi
+        memory: 768Mi
       limits:
-        memory: 200Mi
+        memory: 768Mi
     securityContext:
       runAsUser: 472
       runAsGroup: 472
@@ -168,9 +168,9 @@ kube-prometheus-stack:
       resources:
         requests:
           cpu: 10m
-          memory: 150Mi
+          memory: 100Mi
         limits:
-          memory: 150Mi
+          memory: 100Mi
       securityContext:
         runAsNonRoot: true
         runAsUser: 472
