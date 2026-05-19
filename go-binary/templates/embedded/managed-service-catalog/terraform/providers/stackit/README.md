@@ -145,6 +145,7 @@ node_pools = [
         {
             availability_zones = ["eu01-2"]
             machine_type       = "c1.5"
+            volume_size        = 30
             maximum            = 4
             minimum            = 2
             name               = "pool-infra"
