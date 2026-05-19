@@ -9,7 +9,7 @@
     {
       "customType": "regex",
       "description": "Update Docker image tags in Helm values templates",
-      "managerFilePatterns": ["/(^|/)values\\.ya?ml\\.tplt$/"],
+      "managerFilePatterns": ["/values\\.ya?ml\\.tplt$/"],
       "matchStrings": [
         "repository:\\s*[\"']?(?<depName>[^\"'\\s]+)[\"']?\\s*\\n\\s*tag:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
