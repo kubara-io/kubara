@@ -51,7 +51,7 @@ external-dns:
           drop: [ "ALL" ]
       livenessProbe:
         httpGet:
-          port: 8888
+          port: http-webhook
       readinessProbe:
         httpGet:
-          port: 8888
+          port: http-webhook
