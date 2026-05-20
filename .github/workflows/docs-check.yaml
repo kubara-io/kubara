@@ -6,6 +6,7 @@ on:
       - 'main'
     paths:
       - 'docs/**'
+      - '.github/workflows/docs-check.yaml'
   workflow_dispatch:
 
 permissions:
@@ -51,7 +52,7 @@ jobs:
 
       - name: Check command docs is up to date
         run: |
-          if ! git diff-index --quiet HEAD -- docs; then
+          if ! git diff --exit-code -- docs; then
             echo "::error::Commands document isn't up to date:"
             echo "::error::Please run 'make docs-build' locally to fix it."
             exit 1
