@@ -7,8 +7,8 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](./LICENSE)
 [![Docs License](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f.svg)](./NOTICE.md#documentation-license)
 [![Docs](https://img.shields.io/badge/docs-docs.kubara.io-1f6feb)](https://docs.kubara.io)
-[![Slack](https://img.shields.io/badge/slack-Kubernetes_%23kubara-red?logo=slack)](https://kubernetes.slack.com/archives/C0B2X0DLPR6)
-[![Codeberg Mirror](https://img.shields.io/badge/codeberg-kubara--io%2Fkubara-blue)](https://codeberg.org/kubara-io/kubara)
+[![Slack](https://img.shields.io/badge/slack-Kubernetes_%23kubara-blue?logo=slack)](https://kubernetes.slack.com/archives/C0B2X0DLPR6)
+[![Codeberg Mirror](https://img.shields.io/badge/codeberg-kubara--io%2Fkubara-brightblue)](https://codeberg.org/kubara-io/kubara)
 [![FOSSA License Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara?ref=badge_shield)
 [![FOSSA Security Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara.svg?type=shield&issueType=security)](https://app.fossa.com/projects/git%2Bgithub.com%2Fkubara-io%2Fkubara?ref=badge_shield&issueType=security)
 
