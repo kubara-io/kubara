@@ -2,21 +2,30 @@
 
 This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog manually.
 
-For the list of services kubara ships out of the box, see the [Components Overview](../3_components/components_overview.md). That section documents the **default built-in catalog**, while this page explains the underlying catalog mechanism and how to extend it.
+For the list of services kubara ships out of the box, see the [Components Overview](../3_components/components_overview.md). That section documents the **built-in catalog**, while this page explains the underlying catalog mechanism and how to extend it.
 
 ## What is a catalog?
 
-In kubara, a **catalog** is the source of truth for the platform services kubara knows about.
+In kubara, a **catalog** is a higher-level collection built from Helm charts and Terraform modules.
 
-A catalog has two responsibilities:
+It lets Platform Engineers describe a set of services and how they fit together, instead of managing raw Helm `values.yaml` files and Terraform variables for each cluster.
 
-1. It defines **service metadata** via `ServiceDefinition` files.
-2. It can provide the **template files** kubara renders into your repository.
+You can think of it like this:
+
+- Helm charts are a templating layer over Kubernetes manifests.
+- Kubara catalogs are a templating layer over Helm charts and Terraform modules.
+
+The goal is to define service integrations once, then generate the concrete deployment manifests and infrastructure configuration from that definition. Instead of customizing Helm values and Terraform inputs separately for every cluster, you maintain a single Kubernetes cluster entry in your `config.yaml`. Kubara uses that config together with the catalog to generate the final output.
+
+A catalog has two main responsibilities:
+
+1. Define **service metadata** through `ServiceDefinition` files.
+2. Provide the **templates** that kubara renders into your repository.
 
 That is different from the generated directories in your repo:
 
-- **`managed-service-catalog/`** is generated output containing reusable Helm/Terraform artifacts.
-- **`customer-service-catalog/`** is generated output containing cluster-specific overlays and values.
+- `managed-service-catalog/` contains generated, reusable Helm and Terraform artifacts.
+- `customer-service-catalog/` contains generated, cluster-specific values and overlays.
 
 Those generated directories are the result of `kubara generate`. The **catalog** is the input kubara loads before it generates anything.
 
