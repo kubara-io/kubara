@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/add_app_project/">
+        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/argocd/add_application/">
       
       
-        <link rel="prev" href="../add_spoke_cluster/">
+        <link rel="prev" href="../add_appset/">
       
       
-        <link rel="next" href="../add_app_repository/">
+        <link rel="next" href="../../sso/add_sso/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Add Project - kubara - Docs</title>
+        <title>How to add an Application - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,9 +51,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#add-argo-cd-project" class="md-skip">
+        <a href="#how-to-add-an-application-to-argo-cd" class="md-skip">
           Skip to content
         </a>
       
@@ -93,12 +93,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -110,9 +110,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Project
+              How to add an Application
             
           </span>
         </div>
@@ -257,9 +257,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -286,7 +286,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -364,15 +364,64 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
+      <a href="../../../1_getting_started/overview_core_concept/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Core Concept
+    Overview
   
 
     
@@ -393,7 +442,43 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../../../1_getting_started/catalogs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../1_getting_started/installation/" class="md-nav__link">
         
   
   
@@ -421,7 +506,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../../../1_getting_started/prerequisites/" class="md-nav__link">
         
   
   
@@ -449,7 +534,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
@@ -526,7 +611,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+      <a href="../../../1_getting_started/providers/stackit/" class="md-nav__link">
         
   
   
@@ -562,7 +647,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../../../1_getting_started/commands/" class="md-nav__link">
         
   
   
@@ -651,14 +736,177 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_spoke_cluster/" class="md-nav__link">
+      <a href="../../add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Spoke Cluster
+    How to add a Spoke Cluster
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../create_catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to create a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_app_project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_app_repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_appset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an AppSet
   
 
     
@@ -695,7 +943,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Project
+    How to add an Application
   
 
     
@@ -713,7 +961,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Project
+    How to add an Application
   
 
     
@@ -760,9 +1008,28 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -775,15 +1042,64 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../add_app_repository/" class="md-nav__link">
+      <a href="../../sso/add_sso/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Repository
+    How to add SSO
   
 
     
@@ -804,91 +1120,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_appset/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Add AppSet
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../add_application/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Add Application
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../add_sso/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Add SSO
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../add_sso_examples/" class="md-nav__link">
+      <a href="../../sso/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -904,6 +1136,14 @@ You're not viewing the latest stable version.
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -946,7 +1186,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components
+    Components (Built-in)
   
 
     
@@ -962,7 +1202,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components
+    Components (Built-in)
   
 
           </label>
@@ -975,7 +1215,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/components_overview/" class="md-nav__link">
+      <a href="../../../3_components/components_overview/" class="md-nav__link">
         
   
   
@@ -1003,14 +1243,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/add_or_replace_components/" class="md-nav__link">
+      <a href="../../../3_components/best_practices/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add or Replace Components
+    Best Practices
   
 
     
@@ -1080,7 +1320,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/network_external_dns/" class="md-nav__link">
+      <a href="../../../3_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1165,7 +1405,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/security_certificates/" class="md-nav__link">
+      <a href="../../../3_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1250,7 +1490,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_dashboards/" class="md-nav__link">
+      <a href="../../../3_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1278,7 +1518,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_metrics/" class="md-nav__link">
+      <a href="../../../3_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1306,7 +1546,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_alerts/" class="md-nav__link">
+      <a href="../../../3_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1334,7 +1574,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_logs/" class="md-nav__link">
+      <a href="../../../3_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -1429,7 +1669,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../4_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -1457,7 +1697,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -1485,7 +1725,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR-index/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -1572,7 +1812,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/community-n-support/" class="md-nav__link">
+      <a href="../../../5_community/community-n-support/" class="md-nav__link">
         
   
   
@@ -1628,7 +1868,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/maintainers/" class="md-nav__link">
+      <a href="../../../5_community/maintainers/" class="md-nav__link">
         
   
   
@@ -1715,7 +1955,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../6_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -1743,7 +1983,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/known_issues/" class="md-nav__link">
+      <a href="../../../6_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -1771,7 +2011,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/faq/" class="md-nav__link">
+      <a href="../../../6_reference/faq/" class="md-nav__link">
         
   
   
@@ -1959,6 +2199,17 @@ You're not viewing the latest stable version.
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -1979,29 +2230,47 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="add-argo-cd-project">Add Argo CD  Project</h1>
-<p>After you deployed your hub cluster you will have an Argo CD set-up. It is the central application for your application
-management and handles the Continuous Deployment of other applications (including Argo CD itself).</p>
-<p>An Argo CD App Project is a logical concept to control:
-<code>Who is allowed to do what and whereto.</code>
-For more information check:
-https://argo-cd.readthedocs.io/en/stable/user-guide/projects/</p>
+<h1 id="how-to-add-an-application-to-argo-cd">How to add an application to Argo CD</h1>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This page describes adding additional apps to your platform.
+Most likely this will be app-of-apps constructs to enable a self-service
+approach for developer teams.
+If you want to add applications to your base-stack use the
+app-sets in conjunction with cluster labels instead.</p>
+</div>
+<p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
+Project.</p>
+<p>An Argo CD App is the logical concept to encapsulate manifests needed to deploy an application onto kubernetes.
+For more information and possible configuration check:
+https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
+https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern</p>
 <h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>Add the following to your <code>argo-cd/values.yaml</code>.
-<div class="highlight"><pre><span></span><code><span class="nt">projects</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-ske-spoke-0 project</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
-<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
-<span class="w">    </span><span class="c1"># You can add as many allowed Repos in here as you like</span>
-<span class="w">    </span><span class="c1"># Must be added to Argo CD before</span>
-<span class="w">    </span><span class="nt">sourceRepos</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">registry.onstackit.cloud/stackit-edge-cloud-blueprint</span>
+<p>This is an example on how to add a simple application to a spoke-cluster.
+Usually you want to add a repository that serves an app-of-apps pattern.
+Add the following to your <code>argo-cd/values.yaml</code>.
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">applications</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">          </span><span class="nt">info</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">greeting</span>
+<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Hello</span><span class="nv"> </span><span class="s">World&quot;</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-node-red</span>
+<span class="w">          </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+<span class="w">          </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">          </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-red</span><span class="w"> </span><span class="c1"># the path inside the repository</span>
+<span class="w">          </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the developer repository where the app code can be found&gt;</span>
 </code></pre></div></p>
 <p>That whats happening behind the scenes:</p>
-<p><img alt="Add Proejct" src="../../images/add-project.png" /></p>
+<p><img alt="Add Application" src="../../../images/add-application.png" /></p>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that is connected to your Argo CD instance.
-If you let Argo CD manage itself, it will rollout the configured apps to your cluster</p>
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
+<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
+<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
+</code></pre></div></p>
 
 
 
@@ -2051,10 +2320,10 @@ If you let Argo CD manage itself, it will rollout the configured apps to your cl
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

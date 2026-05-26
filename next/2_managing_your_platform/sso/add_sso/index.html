@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/add_sso_examples/">
+        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/sso/add_sso/">
       
       
-        <link rel="prev" href="../add_sso/">
+        <link rel="prev" href="../../argocd/add_application/">
       
       
-        <link rel="next" href="../../3_components/components_overview/">
+        <link rel="next" href="../add_sso_examples/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>SSO Examples - kubara - Docs</title>
+        <title>How to add SSO - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,9 +51,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#sso-examples" class="md-skip">
+        <a href="#how-to-add-sso-configuration-for-github" class="md-skip">
           Skip to content
         </a>
       
@@ -93,12 +93,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -110,9 +110,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              SSO Examples
+              How to add SSO
             
           </span>
         </div>
@@ -257,9 +257,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -286,7 +286,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -364,15 +364,64 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
+      <a href="../../../1_getting_started/overview_core_concept/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Core Concept
+    Overview
   
 
     
@@ -393,7 +442,43 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../../../1_getting_started/catalogs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../1_getting_started/installation/" class="md-nav__link">
         
   
   
@@ -421,7 +506,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../../../1_getting_started/prerequisites/" class="md-nav__link">
         
   
   
@@ -449,7 +534,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
@@ -526,7 +611,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+      <a href="../../../1_getting_started/providers/stackit/" class="md-nav__link">
         
   
   
@@ -562,7 +647,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../../../1_getting_started/commands/" class="md-nav__link">
         
   
   
@@ -651,14 +736,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_spoke_cluster/" class="md-nav__link">
+      <a href="../../add_spoke_cluster/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Spoke Cluster
+    How to add a Spoke Cluster
   
 
     
@@ -679,14 +764,91 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_project/" class="md-nav__link">
+      <a href="../../create_catalog/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Project
+    How to create a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../argocd/add_app_project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Project
   
 
     
@@ -707,14 +869,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_repository/" class="md-nav__link">
+      <a href="../../argocd/add_app_repository/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Repository
+    How to add a Repository
   
 
     
@@ -735,14 +897,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_appset/" class="md-nav__link">
+      <a href="../../argocd/add_appset/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add AppSet
+    How to add an AppSet
   
 
     
@@ -763,14 +925,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_application/" class="md-nav__link">
+      <a href="../../argocd/add_application/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Application
+    How to add an Application
   
 
     
@@ -784,21 +946,44 @@ You're not viewing the latest stable version.
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
               
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../add_sso/" class="md-nav__link">
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
     
   
-    Add SSO
+    SSO
   
 
     
@@ -806,11 +991,19 @@ You're not viewing the latest stable version.
   
   
 
-      </a>
-    </li>
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSO
   
 
-              
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
             
               
                 
@@ -835,7 +1028,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    SSO Examples
+    How to add SSO
   
 
     
@@ -853,7 +1046,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    SSO Examples
+    How to add SSO
   
 
     
@@ -879,71 +1072,32 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#forgejo" class="md-nav__link">
+  <a href="#1-argo-cd-sso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Forgejo
+        1. Argo CD SSO
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Forgejo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-oauth2-proxy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for oauth2-proxy:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-grafana" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for Grafana:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secrets
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-argo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for Argo:
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#other" class="md-nav__link">
+  <a href="#2-grafana-sso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Other
+        2. Grafana SSO
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-oauth2-proxy-sso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. OAuth2 Proxy SSO
       
     </span>
   </a>
@@ -953,6 +1107,42 @@ You're not viewing the latest stable version.
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_sso_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -996,7 +1186,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components
+    Components (Built-in)
   
 
     
@@ -1012,7 +1202,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components
+    Components (Built-in)
   
 
           </label>
@@ -1025,7 +1215,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/components_overview/" class="md-nav__link">
+      <a href="../../../3_components/components_overview/" class="md-nav__link">
         
   
   
@@ -1053,14 +1243,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/add_or_replace_components/" class="md-nav__link">
+      <a href="../../../3_components/best_practices/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add or Replace Components
+    Best Practices
   
 
     
@@ -1130,7 +1320,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/network_external_dns/" class="md-nav__link">
+      <a href="../../../3_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1215,7 +1405,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/security_certificates/" class="md-nav__link">
+      <a href="../../../3_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1300,7 +1490,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_dashboards/" class="md-nav__link">
+      <a href="../../../3_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1328,7 +1518,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_metrics/" class="md-nav__link">
+      <a href="../../../3_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1356,7 +1546,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_alerts/" class="md-nav__link">
+      <a href="../../../3_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1384,7 +1574,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_logs/" class="md-nav__link">
+      <a href="../../../3_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -1479,7 +1669,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../4_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -1507,7 +1697,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -1535,7 +1725,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR-index/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -1622,7 +1812,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/community-n-support/" class="md-nav__link">
+      <a href="../../../5_community/community-n-support/" class="md-nav__link">
         
   
   
@@ -1678,7 +1868,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/maintainers/" class="md-nav__link">
+      <a href="../../../5_community/maintainers/" class="md-nav__link">
         
   
   
@@ -1765,7 +1955,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../6_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -1793,7 +1983,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/known_issues/" class="md-nav__link">
+      <a href="../../../6_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -1821,7 +2011,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/faq/" class="md-nav__link">
+      <a href="../../../6_reference/faq/" class="md-nav__link">
         
   
   
@@ -1988,71 +2178,32 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#forgejo" class="md-nav__link">
+  <a href="#1-argo-cd-sso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Forgejo
+        1. Argo CD SSO
       
     </span>
   </a>
-  
-    <nav class="md-nav" aria-label="Forgejo">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-oauth2-proxy" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for oauth2-proxy:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-grafana" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for Grafana:
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Secrets
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forgejo-sso-config-for-argo" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Forgejo SSO config for Argo:
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#other" class="md-nav__link">
+  <a href="#2-grafana-sso" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Other
+        2. Grafana SSO
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-oauth2-proxy-sso" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. OAuth2 Proxy SSO
       
     </span>
   </a>
@@ -2079,142 +2230,42 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="sso-examples">SSO Examples:</h1>
-<h2 id="forgejo">Forgejo</h2>
-<p><strong>The following documentation provides configuration examples for SSO-Configuration <br />
-with STACKIT GIT (Forgejo based).</strong>  </p>
-<p>These configurations are to enable kubara &amp; Forgejo Users to quick-start with SSO.  </p>
-<div class="admonition warning">
-<p class="admonition-title">Prerequisites</p>
-<p>Create Application in Forgejo for Grafana, OAuth2 Proxy &amp; Argo CD
-<a href="https://forgejo.org/docs/next/user/oauth2-provider/#examples" target="_blank" rel="noopener">Forgejo Docs</a>    </p>
-<p>Same Callback URLs like GitHub<br />
-<a href="../add_sso/">kubara Docs: Add SSO GitHub</a></p>
+<h1 id="how-to-add-sso-configuration-for-github">How to add SSO Configuration for GitHub</h1>
+<p>How to Setup your GitHub for SSO with kubara</p>
+<p>To enable full Single Sign-On experience, you’ll need:</p>
+<ol>
+<li>A GitHub <strong>Organization</strong> and at least one <strong>Team</strong></li>
+<li>Create <strong>three GitHub OAuth Apps</strong> under your org's Developer Settings → OAuth Apps:</li>
+</ol>
+<h3 id="1-argo-cd-sso">1. Argo CD SSO</h3>
+<ul>
+<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/argocd</code></li>
+<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/argocd/api/dex/callback</code></li>
+</ul>
+<h3 id="2-grafana-sso">2. Grafana SSO</h3>
+<ul>
+<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/grafana</code></li>
+<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/grafana/login/github</code></li>
+</ul>
+<h3 id="3-oauth2-proxy-sso">3. OAuth2 Proxy SSO</h3>
+<ul>
+<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run</code></li>
+<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/oauth2/callback</code></li>
+</ul>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Save the <strong>Client ID</strong> and generate a <strong>Client Secret</strong> for each app – you'll need them later.</p>
 </div>
-<p>With that being said, we can not provide Support for any SSO issues as you  might want to configure some parameters <br />
-differently and the stable configuration might also be subject to change in the different Software-Projects.  </p>
-<p>It's worth mentioning that Forgejo is a Fork of Gitea which aims to be compatible with GitHub.<br />
-Sometimes you use Gitea Providers and sometimes its GitHub - <strong>Keep that in mind when Updating and using this configuration in Production.</strong></p>
-<p>Below are working examples when these Docs are released.</p>
-<p><strong>They are based on:</strong><br />
-- <a href="https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/" target="_blank" rel="noopener">Grafana</a><br />
-- <a href="https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea" target="_blank" rel="noopener">OAuth2 Proxy</a><br />
-- <a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex" target="_blank" rel="noopener">Argo</a> &amp; <a href="https://dexidp.io/docs/connectors/gitea/" target="_blank" rel="noopener">Dex</a>  </p>
-<p>We recommend to take a look at them to make sure everything is configured as intended before<br />
-you finally apply your SSO config.</p>
-<h3 id="forgejo-sso-config-for-oauth2-proxy">Forgejo SSO config for oauth2-proxy:</h3>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/oauth2-proxy/values.yaml"</strong>
-<div class="highlight"><pre><span></span><code><span class="nt">oauth2-proxy</span><span class="p">:</span>
-
-<span class="w">    </span><span class="nt">configFile</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
-<span class="w">      </span><span class="no">reverse_proxy = true</span>
-<span class="w">      </span><span class="no">redirect_url = &quot;https://your-domain/oauth2/callback&quot;</span>
-<span class="w">      </span><span class="no">email_domains = [ &quot;*&quot; ]</span>
-<span class="w">      </span><span class="no">cookie_secure = true</span>
-<span class="w">      </span><span class="no">upstreams = [ &quot;file:///dev/null&quot; ]</span>
-<span class="w">      </span><span class="no">github_org = &quot;YOUR-ORGANIZATION&quot;</span>
-<span class="w">      </span><span class="no">github_team = &quot;Your-Team&quot;</span>
-<span class="w">      </span><span class="no">provider = &quot;github&quot;</span>
-<span class="w">      </span><span class="no">scope = &quot;read:user user:email read:org&quot;</span>
-<span class="w">      </span><span class="no">login_url=&quot;https://your-forgejo.domain/login/oauth/authorize&quot;</span>
-<span class="w">      </span><span class="no">redeem_url = &quot;https://your-forgejo.domain/login/oauth/access_token&quot;</span>
-<span class="w">      </span><span class="no">validate_url=&quot;https://your-forgejo.domain/api/v1/user/emails&quot;</span>
-<span class="w">      </span><span class="no">provider_display_name=&quot;Your Forgejo&quot;</span>
-</code></pre></div></p>
-<p>Replace the values of the following config variables accordingly to your setup:</p>
-<p>Replace "your-domain" in "redirect_url" with the value of "dnsName" set in kubara config.yaml and keep the trailing "/oauth2/callback".  </p>
-<p>Replace values of  </p>
+<p>For other providers, consult their documentation to find the correct URLs and settings.
+Here are some frequently used ones:</p>
 <ul>
-<li>"login_url", "redeem_url" &amp; "validate_url" with your according forgejo domain.</li>
-<li>"github_org" &amp; "github_team" with your according org and team-names.</li>
-<li>"provider_display_name" with your desired name to be displayed on the SSO-Login-Button</li>
+<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app" target="_blank" rel="noopener">Microsoft Entra ID</a></li>
+<li><a href="https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app" target="_blank" rel="noopener">GitHub</a></li>
+<li><a href="https://auth0.com/docs/quickstart/webapp/nextjs/01-login" target="_blank" rel="noopener">Auth0</a></li>
+<li><a href="https://developers.google.com/identity/protocols/oauth2/native-app" target="_blank" rel="noopener">Google Cloud Identity</a></li>
+<li><a href="https://developer.okta.com/docs/guides/build-sso-integration/openidconnect/main/" target="_blank" rel="noopener">Okta</a></li>
+<li><a href="https://docs.gitea.com/development/oauth2-provider" target="_blank" rel="noopener">Forgejo (Gitea)</a></li>
 </ul>
-<hr />
-<h3 id="forgejo-sso-config-for-grafana">Forgejo SSO config for Grafana:</h3>
-<p>(As part of Kube-Prometheus-Stack Helm-Chart)</p>
-<h3 id="secrets"><strong>Secrets</strong></h3>
-<p>The "grafana.ini" Parts get rendered into a Grafana-Config File and it's better to include your <br />
-Secret  into your Container as an Environment-Variable. Env-Variables won't be touched in the rendering process 
-which otherwise could lead to escaping-issues with special Characters, like backslashes, Dollarsign, Asterisk, Quotes, etc.</p>
-<p>The below example includes the YAML identation-levels ("kube-prometheus-stack: grafana:") for reference.  </p>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/kube-prometheus-stack/values.yaml"</strong></p>
-<p><div class="highlight"><pre><span></span><code><span class="nt">kube-prometheus-stack</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">grafana</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">envFromSecrets</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span>
-<span class="w">    </span><span class="nt">envValueFrom</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">GF_AUTH_GENERIC_OAUTH_CLIENT_ID</span><span class="p">:</span><span class="w">      </span><span class="c1"># desired name in pod env</span>
-<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span><span class="w">          </span><span class="c1"># secret name</span>
-<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client-id</span>
-<span class="w">      </span><span class="nt">GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET</span><span class="p">:</span><span class="w">  </span><span class="c1"># desired name in pod env</span>
-<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span><span class="w">          </span><span class="c1"># secret name</span>
-<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client-secret</span>
-<span class="w">    </span><span class="nt">grafana.ini</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">auth.github</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Forgejo&quot;</span>
-<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${client-id}</span>
-<span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${client-secret}</span>
-<span class="w">        </span><span class="nt">allow_sign_up</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">        </span><span class="nt">auto_login</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
-<span class="w">        </span><span class="nt">scopes</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user:email,read:org&quot;</span>
-<span class="w">        </span><span class="c1"># Grafana doesn&#39;t support &quot;allowed organizations&quot; with Forgejo because of API-incompatibilites</span>
-<span class="w">        </span><span class="c1"># neither with github-provider nor with the generic-oauth</span>
-<span class="w">        </span><span class="c1"># allowed_organizations: &quot;test-orga&quot;</span>
-<span class="w">        </span><span class="c1"># role_attribute_path: contains(groups[*], &#39;@test-orga/Owners&#39;) &amp;&amp; &#39;Admin&#39; || &#39;Viewer&#39;</span>
-<span class="w">        </span><span class="nt">auth_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/login/oauth/authorize</span>
-<span class="w">        </span><span class="nt">token_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/login/oauth/access_token</span>
-<span class="w">        </span><span class="nt">api_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/api/v1/user</span>
-</code></pre></div>
-<strong>Replace the values of the following config variables accordingly to your setup:</strong></p>
-<p>Replace "your-forgejo.domain" in the following variables and keep the trailing paths: (like /login/...)</p>
-<ul>
-<li>auth_url</li>
-<li>token_url </li>
-<li>api_url</li>
-</ul>
-<hr />
-<h3 id="forgejo-sso-config-for-argo">Forgejo SSO config for Argo:</h3>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/argo-cd/values.yaml"</strong></p>
-<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">configs</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">cm</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">dex.config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">        </span><span class="no">connectors:</span>
-<span class="w">          </span><span class="no">- type: gitea</span>
-<span class="w">            </span><span class="no">id: gitea</span>
-<span class="w">            </span><span class="no">name: Your Forgejo</span>
-<span class="w">            </span><span class="no">config:</span>
-<span class="w">              </span><span class="no">clientID: $oauth2-credentials:client-id</span>
-<span class="w">              </span><span class="no">clientSecret: $oauth2-credentials:client-secret</span>
-<span class="w">              </span><span class="no">baseURL: https://yourproject.git.onstackit.cloud</span>
-<span class="w">              </span><span class="no">orgs:</span>
-<span class="w">                </span><span class="no">- name: test-orga</span>
-<span class="w">                  </span><span class="no">teams:</span>
-<span class="w">                  </span><span class="no">- Owners        </span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-domain/argocd</span>
-<span class="w">    </span><span class="nt">params</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">server.basehref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/argocd</span>
-<span class="w">      </span><span class="nt">server.insecure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">server.rootpath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/argocd</span>
-<span class="w">    </span><span class="nt">rbac</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">policy.csv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">        </span><span class="no">g, test-orga:Owners, role:admin        </span>
-<span class="w">      </span><span class="nt">policy.default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">role:readonly</span>
-</code></pre></div>
-<strong>Replace the values of the following config variables accordingly to your setup:</strong></p>
-<ul>
-<li>Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml </li>
-<li>Replace value of "name:" and "teams:" in "orgs.name:"</li>
-<li>Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).</li>
-</ul>
-<p>And also replace "test-orga:Owners" according to your Organization Name and Team:</p>
-<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">policy.csv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
-<span class="w">        </span><span class="no">g, test-orga:Owners, role:admin  </span>
-</code></pre></div>
-<h2 id="other">Other</h2>
-<p><strong>Feel free to contribute further configurations that are verified as working.</strong></p>
 
 
 
@@ -2264,10 +2315,10 @@ which otherwise could lead to escaping-issues with special Characters, like back
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>

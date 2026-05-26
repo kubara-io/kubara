@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/3_components/add_or_replace_components/">
+        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/catalogs/">
       
       
-        <link rel="prev" href="../components_overview/">
+        <link rel="prev" href="../overview_core_concept/">
       
       
-        <link rel="next" href="../network_external_dns/">
+        <link rel="next" href="../installation/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Add or Replace Components - kubara - Docs</title>
+        <title>Catalogs - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#add-or-replace-components" class="md-skip">
+        <a href="#catalogs" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add or Replace Components
+              Catalogs
             
           </span>
         </div>
@@ -310,8 +310,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -322,11 +324,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -347,7 +349,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -362,17 +364,68 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
+      <a href="../overview_core_concept/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Core Concept
+    Overview
   
 
     
@@ -390,10 +443,248 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-is-a-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What is a catalog?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#built-in-vs-external-catalogs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in vs external catalogs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-catalog-loading-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How catalog loading works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-servicedefinition-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a ServiceDefinition controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What a ServiceDefinition controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-kubara-does-with-those-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What kubara does with those fields
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What kubara does with those fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadataname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata.name
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specclustertypes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.clusterTypes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specconfigschema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.configSchema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specchartpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.chartPath
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-template-loading-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How template loading works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-your-own-catalog-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating your own catalog manually
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../installation/" class="md-nav__link">
         
   
   
@@ -421,7 +712,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../prerequisites/" class="md-nav__link">
         
   
   
@@ -449,7 +740,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../bootstrapping/" class="md-nav__link">
         
   
   
@@ -526,7 +817,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+      <a href="../providers/stackit/" class="md-nav__link">
         
   
   
@@ -562,7 +853,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../commands/" class="md-nav__link">
         
   
   
@@ -656,7 +947,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Spoke Cluster
+    How to add a Spoke Cluster
   
 
     
@@ -677,14 +968,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_app_project/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/create_catalog/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Project
+    How to create a Catalog
   
 
     
@@ -704,15 +995,64 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_app_repository/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/argocd/add_app_project/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Repository
+    How to add a Project
   
 
     
@@ -733,14 +1073,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_appset/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/argocd/add_app_repository/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add AppSet
+    How to add a Repository
   
 
     
@@ -761,14 +1101,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_application/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/argocd/add_appset/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Application
+    How to add an AppSet
   
 
     
@@ -789,14 +1129,99 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_sso/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/argocd/add_application/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add SSO
+    How to add an Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_managing_your_platform/sso/add_sso/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add SSO
   
 
     
@@ -817,7 +1242,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_sso_examples/" class="md-nav__link">
+      <a href="../../2_managing_your_platform/sso/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -844,12 +1269,18 @@ You're not viewing the latest stable version.
     </li>
   
 
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
     
       
       
   
-  
-    
   
   
   
@@ -863,11 +1294,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
@@ -877,7 +1308,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components
+    Components (Built-in)
   
 
     
@@ -888,12 +1319,12 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4">
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components
+    Components (Built-in)
   
 
           </label>
@@ -906,7 +1337,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../components_overview/" class="md-nav__link">
+      <a href="../../3_components/components_overview/" class="md-nav__link">
         
   
   
@@ -931,44 +1362,17 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Add or Replace Components
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../3_components/best_practices/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add or Replace Components
+    Best Practices
   
 
     
@@ -977,48 +1381,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#add-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add components
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#replace-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Replace components
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1080,7 +1442,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../network_external_dns/" class="md-nav__link">
+      <a href="../../3_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1165,7 +1527,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../security_certificates/" class="md-nav__link">
+      <a href="../../3_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1250,7 +1612,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_dashboards/" class="md-nav__link">
+      <a href="../../3_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1278,7 +1640,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_metrics/" class="md-nav__link">
+      <a href="../../3_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1306,7 +1668,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_alerts/" class="md-nav__link">
+      <a href="../../3_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1334,7 +1696,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_logs/" class="md-nav__link">
+      <a href="../../3_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -1938,10 +2300,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#add-components" class="md-nav__link">
+  <a href="#what-is-a-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add components
+        What is a catalog?
       
     </span>
   </a>
@@ -1949,10 +2311,143 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#replace-components" class="md-nav__link">
+  <a href="#built-in-vs-external-catalogs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Replace components
+        Built-in vs external catalogs
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-catalog-loading-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How catalog loading works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-a-servicedefinition-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What a ServiceDefinition controls
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What a ServiceDefinition controls">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#what-kubara-does-with-those-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What kubara does with those fields
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="What kubara does with those fields">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#metadataname" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        metadata.name
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specstatus" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.status
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specclustertypes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.clusterTypes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specconfigschema" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.configSchema
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#specchartpath" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        spec.chartPath
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how-template-loading-works" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How template loading works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-your-own-catalog-manually" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating your own catalog manually
       
     </span>
   </a>
@@ -1979,21 +2474,134 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="add-or-replace-components">Add or replace components</h1>
-<p>With kubara, you can add new components or replace existing ones. Of course, only the default components included in kubara are supported and tested. 
-No support can be provided for any components you add yourself.</p>
-<h2 id="add-components">Add components</h2>
-<p>To do this, you can simply follow the instructions in the chapter: <a href="../../2_managing_your_platform/add_appset/">add appset</a></p>
-<h2 id="replace-components">Replace components</h2>
+<h1 id="catalogs">Catalogs</h1>
+<p>This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog manually.</p>
+<p>For the list of services kubara ships out of the box, see the <a href="../../3_components/components_overview/">Components Overview</a>. That section documents the <strong>built-in catalog</strong>, while this page explains the underlying catalog mechanism and how to extend it.</p>
+<h2 id="what-is-a-catalog">What is a catalog?</h2>
+<p>In kubara, a <strong>catalog</strong> is a higher-level collection built from Helm charts and Terraform modules.</p>
+<p>It lets Platform Engineers describe a set of services and how they fit together, instead of managing raw Helm <code>values.yaml</code> files and Terraform variables for each cluster.</p>
+<p>You can think of it like this:</p>
+<ul>
+<li>Helm charts are a templating layer over Kubernetes manifests.</li>
+<li>Kubara catalogs are a templating layer over Helm charts and Terraform modules.</li>
+</ul>
+<p>The goal is to define service integrations once, then generate the concrete deployment manifests and infrastructure configuration from that definition. Instead of customizing Helm values and Terraform inputs separately for every cluster, you maintain a single Kubernetes cluster entry in your <code>config.yaml</code>. Kubara uses that config together with the catalog to generate the final output.</p>
+<p>A catalog has two main responsibilities:</p>
 <ol>
-<li>First, you need to disable the corresponding service in config.yaml. See chapter: <a href="../../1_getting_started/bootstrapping/">Bootstrap Your Platform</a></li>
-<li>Next, you need to re-template your Helm charts with kubara (kubara generate --helm).
-   Retemplating will also remove the corresponding entries in your values.yaml files in the customer-service-catalog folder. For example, if you disable Traefik, related ingress directives are removed from generated overlays.</li>
-<li>Now you can add the new component (see above, adding components).
-   Because the corresponding directives of the old component have now been removed from the values.yaml files, you must/can now set your own directives for your new component in the values.yaml files.
-   For example, if you replace Traefik with another ingress controller, you need to set the new ingress directives yourself in your values files.</li>
-<li>Then you need to commit and push all changes to your Git.</li>
+<li>Define <strong>service metadata</strong> through <code>ServiceDefinition</code> files.</li>
+<li>Provide the <strong>templates</strong> that kubara renders into your repository.</li>
 </ol>
+<p>That is different from the generated directories in your repo:</p>
+<ul>
+<li><code>managed-service-catalog/</code> contains generated, reusable Helm and Terraform artifacts.</li>
+<li><code>customer-service-catalog/</code> contains generated, cluster-specific values and overlays.</li>
+</ul>
+<p>Those generated directories are the result of <code>kubara generate</code>. The <strong>catalog</strong> is the input kubara loads before it generates anything.</p>
+<h2 id="built-in-vs-external-catalogs">Built-in vs external catalogs</h2>
+<p>kubara always ships with a <strong>built-in catalog</strong> embedded in the binary.</p>
+<p>That built-in catalog includes:</p>
+<ul>
+<li>service definitions under <code>src/internal/catalog/built-in/services/</code></li>
+<li>template content under <code>src/internal/catalog/built-in/managed-service-catalog/</code></li>
+</ul>
+<p>The docs section <a href="../../3_components/components_overview/">Components (Built-in Catalog)</a> describes the services from that shipped default catalog.</p>
+<p>You can extend or override that catalog by passing an <strong>external catalog</strong> with <code>--catalog</code>.</p>
+<h2 id="how-catalog-loading-works">How catalog loading works</h2>
+<p>When kubara loads a catalog, it does the following:</p>
+<ol>
+<li>Loads the built-in service definitions.</li>
+<li>If <code>--catalog</code> is set, loads additional service definitions from your external catalog.</li>
+<li>Merges both sets by <code>metadata.name</code>.</li>
+<li>Rejects name collisions unless <code>--catalog-overwrite</code> is set.</li>
+</ol>
+<p>An external catalog can be structured in either of these ways for service definitions:</p>
+<ul>
+<li><code>&lt;catalog-root&gt;/services/*.yaml</code></li>
+<li><code>&lt;catalog-root&gt;/*.yaml</code></li>
+</ul>
+<p>However, if your catalog also contains custom templates, <strong>pass the catalog root to <code>--catalog</code>, not just the <code>services/</code> directory</strong>. Otherwise kubara can load the <code>ServiceDefinition</code> files, but it will not find your <code>managed-service-catalog/</code> or <code>customer-service-catalog/</code> template roots.</p>
+<h2 id="what-a-servicedefinition-controls">What a <code>ServiceDefinition</code> controls</h2>
+<p>Each service in a catalog is defined by a YAML document with:</p>
+<ul>
+<li><code>apiVersion: kubara.io/v1alpha1</code></li>
+<li><code>kind: ServiceDefinition</code></li>
+<li><code>metadata.name</code>: canonical service name</li>
+<li><code>spec.chartPath</code>: chart directory used by generated templates</li>
+<li><code>spec.status</code>: default service status (<code>enabled</code> or <code>disabled</code>)</li>
+<li>optional <code>spec.clusterTypes</code>: limit the service to <code>hub</code> and/or <code>spoke</code></li>
+<li>optional <code>spec.configSchema</code>: OpenAPI schema for service-specific config</li>
+</ul>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceDefinition</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">widget-dashboard</span>
+<span class="w">  </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">kubara.io/category</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">application-management</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">chartPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">widget-dashboard</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">  </span><span class="nt">clusterTypes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spoke</span>
+<span class="w">  </span><span class="nt">configSchema</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">object</span>
+<span class="w">    </span><span class="nt">properties</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">hostname</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">string</span>
+<span class="w">        </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">widget.example.com</span>
+<span class="w">      </span><span class="nt">replicas</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">integer</span>
+<span class="w">        </span><span class="nt">default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">2</span>
+<span class="w">        </span><span class="nt">minimum</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1</span>
+</code></pre></div>
+<h2 id="what-kubara-does-with-those-fields">What kubara does with those fields</h2>
+<h3 id="metadataname"><code>metadata.name</code></h3>
+<p>This is the canonical service key used in:</p>
+<ul>
+<li><code>config.yaml</code></li>
+<li>generated schema output</li>
+<li>catalog merge/overwrite logic</li>
+</ul>
+<p>Use <strong>kebab-case canonical names</strong> for new services.</p>
+<h3 id="specstatus"><code>spec.status</code></h3>
+<p>This is the <strong>default</strong> state kubara uses when creating service entries for a cluster. Users can still override it in <code>config.yaml</code>.</p>
+<h3 id="specclustertypes"><code>spec.clusterTypes</code></h3>
+<p>If this field is set, kubara only includes the service by default for matching cluster types:</p>
+<ul>
+<li><code>hub</code></li>
+<li><code>spoke</code></li>
+</ul>
+<h3 id="specconfigschema"><code>spec.configSchema</code></h3>
+<p>This schema is used for service-specific configuration handling.</p>
+<p>In practice, it affects:</p>
+<ul>
+<li>generated config schema output</li>
+<li>default values applied to <code>config.yaml</code></li>
+<li>validation of nested <code>services.&lt;name&gt;.config</code> fields</li>
+</ul>
+<p>For understanding available field types and the OpenAPI v3.0 structure used for <code>configSchema</code>. Please read the <a href="https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definitions/#specifying-a-structural-schema" target="_blank" rel="noopener">Kubernetes docs</a> on how to specify a structural schema. kubara uses the upstream <a href="https://github.com/kubernetes/apiextensions-apiserver/blob/master/pkg/apis/apiextensions/types.go" target="_blank" rel="noopener">kubernetes/apiextensions-apiserver</a> implementation for this feature and therefore fully supports all fields used for creating <code>CustomResourceDefinitions</code> as part of Kubernetes Operators.</p>
+<h3 id="specchartpath"><code>spec.chartPath</code></h3>
+<p>This is the directory name kubara exposes to templates as the service's chart path.</p>
+<p>For a Helm-based service, <code>chartPath: widget-dashboard</code> usually means the chart lives at:</p>
+<div class="highlight"><pre><span></span><code>managed-service-catalog/helm/widget-dashboard/
+</code></pre></div>
+<h2 id="how-template-loading-works">How template loading works</h2>
+<p>If your external catalog contains template roots, kubara loads them in addition to the built-in templates.</p>
+<p>Supported external roots are:</p>
+<ul>
+<li><code>managed-service-catalog/</code></li>
+<li><code>customer-service-catalog/</code></li>
+</ul>
+<p>The <code>services/</code> directory is only for service definitions. It is <strong>not</strong> part of the rendered output.</p>
+<p>During <code>kubara generate</code>, kubara renders templates and writes them into your repository, replacing:</p>
+<ul>
+<li><code>managed-service-catalog/</code> with the configured managed catalog output path</li>
+<li><code>customer-service-catalog/</code> with the configured customer overlay output path</li>
+<li><code>example</code> path segments with the current cluster name</li>
+</ul>
+<h2 id="creating-your-own-catalog-manually">Creating your own catalog manually</h2>
+<p>If you want to understand how to create a custom catalog for your multi cluster platform have a look at <a href="../../2_managing_your_platform/create_catalog/">How to create your own catalog</a></p>
 
 
 

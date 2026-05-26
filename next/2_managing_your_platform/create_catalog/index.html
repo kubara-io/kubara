@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/add_app_repository/">
+        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/create_catalog/">
       
       
-        <link rel="prev" href="../add_app_project/">
+        <link rel="prev" href="../add_spoke_cluster/">
       
       
-        <link rel="next" href="../add_appset/">
+        <link rel="next" href="../argocd/add_app_project/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Add Repository - kubara - Docs</title>
+        <title>How to create a Catalog - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#add-repository-to-argo-cd" class="md-skip">
+        <a href="#how-to-create-a-catalog" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Add Repository
+              How to create a Catalog
             
           </span>
         </div>
@@ -364,6 +364,55 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_1">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../../1_getting_started/overview_core_concept/" class="md-nav__link">
         
@@ -372,7 +421,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Core Concept
+    Overview
   
 
     
@@ -381,6 +430,42 @@ You're not viewing the latest stable version.
   
 
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/catalogs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -658,35 +743,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Spoke Cluster
-  
-
-    
-  </span>
-  
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../add_app_project/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Add Project
+    How to add a Spoke Cluster
   
 
     
@@ -723,7 +780,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Repository
+    How to create a Catalog
   
 
     
@@ -741,7 +798,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Add Repository
+    How to create a Catalog
   
 
     
@@ -767,10 +824,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#add-credentials-to-vault" class="md-nav__link">
+  <a href="#when-you-need-a-custom-catalog-at-all" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add credentials to vault
+        When you need a custom catalog at all
       
     </span>
   </a>
@@ -778,10 +835,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify Argo CD overlays
+        Structure
       
     </span>
   </a>
@@ -789,10 +846,54 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#push-your-changes-to-git" class="md-nav__link">
+  <a href="#minimal-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Push your changes to git
+        Minimal steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-completely-new-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a completely new service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overriding-a-built-in-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overriding a built-in service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical guidance
       
     </span>
   </a>
@@ -814,15 +915,64 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Argo CD
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
-      <a href="../add_appset/" class="md-nav__link">
+      <a href="../argocd/add_app_project/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add AppSet
+    How to add a Project
   
 
     
@@ -843,14 +993,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_application/" class="md-nav__link">
+      <a href="../argocd/add_app_repository/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add Application
+    How to add a Repository
   
 
     
@@ -871,14 +1021,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_sso/" class="md-nav__link">
+      <a href="../argocd/add_appset/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add SSO
+    How to add an AppSet
   
 
     
@@ -899,7 +1049,120 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_sso_examples/" class="md-nav__link">
+      <a href="../argocd/add_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_3_4" id="__nav_3_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sso/add_sso/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../sso/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -915,6 +1178,14 @@ You're not viewing the latest stable version.
   
 
       </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -957,7 +1228,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components
+    Components (Built-in)
   
 
     
@@ -973,7 +1244,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components
+    Components (Built-in)
   
 
           </label>
@@ -1014,14 +1285,14 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/add_or_replace_components/" class="md-nav__link">
+      <a href="../../3_components/best_practices/" class="md-nav__link">
         
   
   
   <span class="md-ellipsis">
     
   
-    Add or Replace Components
+    Best Practices
   
 
     
@@ -1949,10 +2220,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#add-credentials-to-vault" class="md-nav__link">
+  <a href="#when-you-need-a-custom-catalog-at-all" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add credentials to vault
+        When you need a custom catalog at all
       
     </span>
   </a>
@@ -1960,10 +2231,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+  <a href="#structure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify Argo CD overlays
+        Structure
       
     </span>
   </a>
@@ -1971,10 +2242,54 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#push-your-changes-to-git" class="md-nav__link">
+  <a href="#minimal-steps" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Push your changes to git
+        Minimal steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#example-commands" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example commands
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-a-completely-new-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Adding a completely new service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#overriding-a-built-in-service" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Overriding a built-in service
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-guidance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical guidance
       
     </span>
   </a>
@@ -2001,41 +2316,73 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="add-repository-to-argo-cd">Add Repository to Argo CD</h1>
-<p>To deploy applications with Argo CD we need to connect Repositories. This is also useful if you want to give developers
-a way to deploy their applications onto your platform without much intervention on your side.</p>
-<p>An Argo CD  App Repository is a logical concept to control where applications may be deployed from.
-For more information check:
-https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
-<h2 id="add-credentials-to-vault"><strong>Add credentials to vault</strong></h2>
-<p>Add the repository credentials to your vault. This can be a <code>password</code> or a <code>PAT</code>.
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;repo_pat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">&quot;pat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;the kubeconfig&gt;&quot;</span>
-<span class="w">  </span><span class="p">}</span>
-<span class="p">}</span>
-</code></pre></div></p>
-<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>Add the following to your <code>argo-cd/values.yaml</code>.
-<div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-mock</span>
-<span class="w">      </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
-<span class="w">      </span><span class="c1"># # This points to the secret in vault</span>
-<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repo_pat</span>
-<span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pat</span>
-<span class="w">      </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
-<span class="w">      </span><span class="nt">secretStoreRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-0-production</span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the repo url you want to add&gt;</span>
-<span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the username for connection. also needed for PAT&gt;</span>
-</code></pre></div></p>
-<p>That whats happening behind the scenes:</p>
-<p><img alt="Add Repository" src="../../images/add-repository.png" /></p>
-<h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
-If you let Argo CD manage itself, it will add the configured repository to your cluster.</p>
+<h1 id="how-to-create-a-catalog">How to create a Catalog</h1>
+<p>This page explains how to create a custom catalog for your multi cluster platform.</p>
+<p>If you want to understand the concepts behind catalogs and how they work in detail, please check the <a href="../../1_getting_started/catalogs/">Catalog concepts page</a>.</p>
+<h2 id="when-you-need-a-custom-catalog-at-all">When you need a custom catalog at all</h2>
+<p>You usually need a custom catalog when you want to:</p>
+<ul>
+<li>add a service in need on multiple clusters which kubara does not ship</li>
+<li>replace a built-in chart with an internal one</li>
+<li>change service defaults across all generated clusters</li>
+<li>ship reusable platform templates outside the kubara source tree</li>
+</ul>
+<p>If you only want to customize values for a generated cluster, editing files in <code>customer-service-catalog/</code> is usually enough. A custom catalog is the right tool when you want to change the <strong>service model</strong> or the <strong>templates kubara renders</strong>.</p>
+<h2 id="structure">Structure</h2>
+<p>The layout for a custom catalog is:</p>
+<div class="highlight"><pre><span></span><code>my-catalog/
+├── services/
+│   └── widget-dashboard.yaml
+├── managed-service-catalog/
+│   └── helm/
+│       └── widget-dashboard/
+│           ├── Chart.yaml
+│           ├── values.yaml
+│           └── templates/
+│               └── ...
+└── customer-service-catalog/
+    └── helm/
+        └── example/
+            └── widget-dashboard/
+                └── values.yaml.tplt
+</code></pre></div>
+<h2 id="minimal-steps">Minimal steps</h2>
+<ol>
+<li>Create a <code>ServiceDefinition</code> in <code>services/</code>.</li>
+<li>Add the matching chart or templates under <code>managed-service-catalog/</code>.</li>
+<li>Optionally add cluster overlay templates under <code>customer-service-catalog/</code>.</li>
+<li>Run kubara commands with <code>--catalog /path/to/my-catalog</code>.</li>
+</ol>
+<h2 id="example-commands">Example commands</h2>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>schema<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
+kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
+kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
+</code></pre></div>
+<h2 id="adding-a-completely-new-service">Adding a completely new service</h2>
+<p>For a <strong>new</strong> service that does not exist in the built-in catalog, you normally need both:</p>
+<ul>
+<li>a <code>ServiceDefinition</code></li>
+<li>matching template content under <code>managed-service-catalog/</code> and/or <code>customer-service-catalog/</code></li>
+</ul>
+<p>If you only add the <code>ServiceDefinition</code>, kubara can understand the service metadata, but it still needs actual templates to render useful output for that service.</p>
+<h2 id="overriding-a-built-in-service">Overriding a built-in service</h2>
+<p>You can also override built-in services by reusing the same <code>metadata.name</code>.</p>
+<p>Typical reasons:</p>
+<ul>
+<li>change the default <code>status</code></li>
+<li>change the <code>chartPath</code></li>
+<li>provide a different <code>configSchema</code></li>
+<li>replace the built-in chart/templates with your own</li>
+</ul>
+<p>Without <code>--catalog-overwrite</code>, kubara rejects the collision. With <code>--catalog-overwrite</code>, your external definition replaces the built-in one for that service name.</p>
+<h2 id="practical-guidance">Practical guidance</h2>
+<ul>
+<li>Point <code>--catalog</code> at the <strong>catalog root</strong>.</li>
+<li>Keep <code>metadata.name</code> stable and canonical.</li>
+<li>Keep <code>chartPath</code> aligned with the chart directory name under <code>managed-service-catalog/helm/</code>.</li>
+<li>Use <code>configSchema</code> for defaults and validation instead of documenting required values only in prose.</li>
+<li>Treat generated files in your repo as output; treat the external catalog as the maintainable source.</li>
+</ul>
 
 
 

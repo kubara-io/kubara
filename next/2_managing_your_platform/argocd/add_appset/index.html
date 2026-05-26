@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/prerequisites/">
+        <link rel="canonical" href="https://docs.kubara.io/next/2_managing_your_platform/argocd/add_appset/">
       
       
-        <link rel="prev" href="../installation/">
+        <link rel="prev" href="../add_app_repository/">
       
       
-        <link rel="next" href="../bootstrapping/">
+        <link rel="next" href="../add_application/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Prerequisites - kubara - Docs</title>
+        <title>How to add an AppSet - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -51,9 +51,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#prerequisites" class="md-skip">
+        <a href="#how-to-add-an-appset-to-argo-cd" class="md-skip">
           Skip to content
         </a>
       
@@ -93,12 +93,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -110,9 +110,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Prerequisites
+              How to add an AppSet
             
           </span>
         </div>
@@ -257,9 +257,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -286,7 +286,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -310,8 +310,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -324,11 +322,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -349,7 +347,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -416,7 +414,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../overview_core_concept/" class="md-nav__link">
+      <a href="../../../1_getting_started/overview_core_concept/" class="md-nav__link">
         
   
   
@@ -444,7 +442,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../catalogs/" class="md-nav__link">
+      <a href="../../../1_getting_started/catalogs/" class="md-nav__link">
         
   
   
@@ -480,7 +478,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../installation/" class="md-nav__link">
+      <a href="../../../1_getting_started/installation/" class="md-nav__link">
         
   
   
@@ -505,37 +503,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Prerequisites
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../1_getting_started/prerequisites/" class="md-nav__link">
         
   
   
@@ -551,65 +522,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Required Tools
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#external-entities" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        External Entities
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="External Entities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure-as-code-iac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Infrastructure as Code (IaC)
-      
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -622,7 +534,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../bootstrapping/" class="md-nav__link">
+      <a href="../../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
@@ -699,7 +611,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../providers/stackit/" class="md-nav__link">
+      <a href="../../../1_getting_started/providers/stackit/" class="md-nav__link">
         
   
   
@@ -735,7 +647,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../commands/" class="md-nav__link">
+      <a href="../../../1_getting_started/commands/" class="md-nav__link">
         
   
   
@@ -767,8 +679,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -779,11 +693,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
@@ -804,7 +718,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -822,7 +736,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/add_spoke_cluster/" class="md-nav__link">
+      <a href="../../add_spoke_cluster/" class="md-nav__link">
         
   
   
@@ -850,7 +764,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/create_catalog/" class="md-nav__link">
+      <a href="../../create_catalog/" class="md-nav__link">
         
   
   
@@ -875,6 +789,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -884,11 +800,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3_3" checked>
         
           
           <label class="md-nav__link" for="__nav_3_3" id="__nav_3_3_label" tabindex="0">
@@ -909,7 +825,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_3_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_3_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -927,7 +843,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/argocd/add_app_project/" class="md-nav__link">
+      <a href="../add_app_project/" class="md-nav__link">
         
   
   
@@ -955,7 +871,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/argocd/add_app_repository/" class="md-nav__link">
+      <a href="../add_app_repository/" class="md-nav__link">
         
   
   
@@ -980,10 +896,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/argocd/add_appset/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an AppSet
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -999,6 +942,103 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#add-chart-to-your-managed-service-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Chart to your managed-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Templates to your new Chart (optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-override-values-to-your-customer-service-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Override Values to your customer-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Argo CD overlays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#push-your-changes-to-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push your changes to git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-app-from-another-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add App from another repository
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1011,7 +1051,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/argocd/add_application/" class="md-nav__link">
+      <a href="../add_application/" class="md-nav__link">
         
   
   
@@ -1096,7 +1136,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/sso/add_sso/" class="md-nav__link">
+      <a href="../../sso/add_sso/" class="md-nav__link">
         
   
   
@@ -1124,7 +1164,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_managing_your_platform/sso/add_sso_examples/" class="md-nav__link">
+      <a href="../../sso/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -1219,7 +1259,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/components_overview/" class="md-nav__link">
+      <a href="../../../3_components/components_overview/" class="md-nav__link">
         
   
   
@@ -1247,7 +1287,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/best_practices/" class="md-nav__link">
+      <a href="../../../3_components/best_practices/" class="md-nav__link">
         
   
   
@@ -1324,7 +1364,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/network_external_dns/" class="md-nav__link">
+      <a href="../../../3_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1409,7 +1449,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/security_certificates/" class="md-nav__link">
+      <a href="../../../3_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1494,7 +1534,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_dashboards/" class="md-nav__link">
+      <a href="../../../3_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1522,7 +1562,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_metrics/" class="md-nav__link">
+      <a href="../../../3_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1550,7 +1590,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_alerts/" class="md-nav__link">
+      <a href="../../../3_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1578,7 +1618,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_components/observability_logs/" class="md-nav__link">
+      <a href="../../../3_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -1673,7 +1713,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../4_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -1701,7 +1741,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -1729,7 +1769,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_decisions/ADR-index/" class="md-nav__link">
+      <a href="../../../7_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -1816,7 +1856,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/community-n-support/" class="md-nav__link">
+      <a href="../../../5_community/community-n-support/" class="md-nav__link">
         
   
   
@@ -1872,7 +1912,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_community/maintainers/" class="md-nav__link">
+      <a href="../../../5_community/maintainers/" class="md-nav__link">
         
   
   
@@ -1959,7 +1999,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../6_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -1987,7 +2027,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/known_issues/" class="md-nav__link">
+      <a href="../../../6_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -2015,7 +2055,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_reference/faq/" class="md-nav__link">
+      <a href="../../../6_reference/faq/" class="md-nav__link">
         
   
   
@@ -2182,10 +2222,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#required-tools" class="md-nav__link">
+  <a href="#add-chart-to-your-managed-service-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Required Tools
+        Add Chart to your managed-service-catalog
       
     </span>
   </a>
@@ -2193,30 +2233,68 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#external-entities" class="md-nav__link">
+  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        External Entities
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="External Entities">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#infrastructure-as-code-iac" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Infrastructure as Code (IaC)
+        Add Templates to your new Chart (optional)
       
     </span>
   </a>
   
 </li>
-        
-      </ul>
-    </nav>
+      
+        <li class="md-nav__item">
+  <a href="#add-override-values-to-your-customer-service-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Override Values to your customer-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Argo CD overlays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#push-your-changes-to-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push your changes to git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-app-from-another-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add App from another repository
+      
+    </span>
+  </a>
   
 </li>
       
@@ -2240,70 +2318,84 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="prerequisites">Prerequisites</h1>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This will take you some time to setup, but it is worth it!
-With this initial time invest you will save A LOT of time later.
-To ease management of all the required external entities an IaC tool
-like terraform is recommended.</p>
-</div>
-<p>To setup and use the kubara framework these are tools and external entities you need to prepare. Information from the external
-entities can be added to .env to smoothen bootstrap process.</p>
-<h3 id="required-tools">Required Tools</h3>
+<h1 id="how-to-add-an-appset-to-argo-cd">How to add an AppSet to Argo CD</h1>
+<p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
+Project.</p>
+<p>An Argo CD AppSet is a logical concept to create many Argo CD applications with just one manifest.<br>
+This allows Users to spawn one service with different configurations on many namespaces and clusters.
+For more information and possible configuration check:<br></p>
 <ul>
-<li><code>kubectl</code></li>
-<li><code>helm</code></li>
-<li><code>git</code></li>
-<li><code>terraform</code> (optional, but recommended)</li>
-<li><code>kubara</code> for your OS (Windows, Linux, or macOS) - follow the <a href="https://github.com/kubara-io/kubara/blob/main/INSTALLATION.md" target="_blank" rel="noopener">installation guide</a></li>
+<li>https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml</li>
+<li>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</li>
 </ul>
-<div class="admonition warning">
-<p class="admonition-title">Internet access required</p>
-<p>You will also need access to the internet to download the necessary Helm charts and CRDs.
-Make sure you are not blocked by a firewall or proxy.</p>
-</div>
-<h3 id="external-entities">External Entities</h3>
-<p>(included*): kubara can generate templates for some entities from scratch. Provider examples below are not mandatory; use equivalents for your environment.</p>
-<ul>
-<li><strong>Git repository (or multiple repositories)</strong><br />
-  Used to store the code generated by the kubara framework.<br />
-  It is also used to configure and maintain your platform.<br />
-<em>Recommendation:</em> Create one repository per hub cluster. Each repository should contain both the hub cluster configuration and all related spoke clusters.</li>
-<li><strong>Kubernetes Cluster (included*)</strong>
-A running Kubernetes Cluster (e.g. SKE or StackitEdge k3s with CNI) that can be used for running platform applications</li>
-<li><strong>Key Vault + Secrets (included*)</strong>
-A place to securely store credentials (e.g. STACKIT Secrets Manager, HashiCorp Vault, Azure Key Vault, AWS Secrets Manager).
-See below which secrets should be inside vault</li>
-<li><strong>DNS Zone (included*)</strong>
-A DNS Zone you can manage. ExternalDns will use this zone to request sub-domains for ingresses running on your cluster
-enabling (public) access to your cluster</li>
-<li><strong>Helm Registry (optional)</strong>
-A Helm registry (e.g. JFrog or Harbor) that serves the (Umbrella-) Helm Charts for your platform</li>
-<li><strong>Container Registry (optional)</strong>
-A Container registry (e.g. JFrog or Harbor) that serves the applications</li>
-<li><strong>Docker Hub Account (optional but recommended)</strong>
-If you are relying on publicly available images (e.g. from dockerhub) you need an user account to pull without rate limits.</li>
-<li>
-<p><strong>OAuth2 Apps (optional but recommended)</strong>
-    In total we use three OAuth2 Apps:</p>
-<ul>
-<li>OAuth2-Proxy App (reverse proxy) that handles authentication for most dashboards</li>
-<li>Argo CD App that handles authentication for Argo CD  UI. Dex is used for handling Argo CD  RBAC once authenticated</li>
-<li>Grafana App that handles authentication for Grafana.</li>
-</ul>
-<p>If you choose not to use OAuth2-Proxy you might run into some issues with your setup.
-For more infos please look at our <a href="../../6_reference/faq/#what-happens-when-oauth2-proxy-is-disabled">FAQ</a>.
-- <strong>Credentials for external-secrets / secret backend (required when not using managed identities)</strong>
-Prepare the provider credentials you will need later during bootstrap to create the Kubernetes secret(s) and configure external-secrets / <code>ClusterSecretStore</code> (see the bootstrap guide).</p>
-</li>
-</ul>
-<hr />
-<p>After setting up these entities (or use existing ones) you need to provide some information to the kubara framework
-(and store it in .env)</p>
-<h4 id="infrastructure-as-code-iac">Infrastructure as Code (IaC)</h4>
-<p>We recommend provisioning key resources such as Kubernetes clusters, DNS zones, Vault keys and secrets, and OAuth2 provider configurations using Infrastructure as Code (IaC) - preferably with Terraform.</p>
-<p>This ensures your platform setup is consistent, secure, and easily reproducible across environments.</p>
+<h2 id="add-chart-to-your-managed-service-catalog"><strong>Add Chart to your managed-service-catalog</strong></h2>
+<p>Add the Chart you want to add to your <code>managed-service-catalog</code>:<br>
+managed-service-catalog/helm/my-new-servie-in-a-long-dir-name/</p>
+<h2 id="add-templates-to-your-new-chart-optional"><strong>Add Templates to your new Chart (optional)</strong></h2>
+<p>To use pre-configured processes (e.g. get secrets from vault) you can leverage the Chart <code>template-library</code> inside 
+<code>managed-service-catalog</code>.<br>
+Take a look at other chart to find out how to use these templates.<br>
+The general steps are:
+1. Add template-library as a dependency to your Chart.yaml
+2. add a template to your new Chart's "templates/" directory and include the templates you need from <code>template-libary</code> Chart
+   (check other Chart templates to find out how)
+3. update the new Chart's values and/or override values according to the templates you included</p>
+<h2 id="add-override-values-to-your-customer-service-catalog"><strong>Add Override Values to your customer-service-catalog</strong></h2>
+<p>Add Override Values to your <code>customer-service-catalog</code>:<br>
+customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml</p>
+<p>Optional: Add <code>additional-values.yaml</code> in the same chart folder for cluster-specific overrides.
+The generated ApplicationSet already references both <code>values.yaml</code> and <code>additional-values.yaml</code>.</p>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
+<p>This is an example on how to add an AppSet to the hub cluster.
+Add the following to your <code>argo-cd/values.yaml</code>.
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span><span class="w">  </span><span class="c1"># usually your existing hub cluster key (for example &quot;&lt;cluster&gt;-&lt;stage&gt;&quot;)</span>
+<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-hub-dev</span>
+<span class="w">      </span><span class="nt">managedServices</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/managed.git</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">managed-service-catalog/helm</span>
+<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">customerServices</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/customer.git</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">customer-service-catalog/helm</span>
+<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-new-service</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-service</span><span class="w"> </span><span class="c1"># This will determine the generated AppName</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-servie-in-a-long-dir-name</span><span class="w"> </span><span class="c1"># This points to the directory you created for the chart inside managed-service-catalog</span>
+<span class="nt">inClusterSecretLabels</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-new-service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+</code></pre></div></p>
+<p>This is meant to be added to the same directive where all pre-configured appSets are defined.
+It will deploy the app to all Argo CD clusters that have the label <code>my-new-service: enabled</code> set </p>
+<h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
+<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
+<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
+</code></pre></div></p>
+<h2 id="add-app-from-another-repository"><strong>Add App from another repository</strong></h2>
+<p>If you want to add an application that is stored in another repository you can use the <code>sources:</code> directive. It supports all the fields Argo CD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">akv2k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
+<span class="w">          </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://your-repo.de/with-overlay-values&quot;</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
+<span class="w">              </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valuesRepo</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://charts.spvapi.no</span>
+<span class="w">              </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2.7.3&quot;</span>
+<span class="w">              </span><span class="nt">helm</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">valueFiles</span><span class="p">:</span>
+<span class="w">                  </span><span class="c1"># Keep `{{name}}`: the AppSet controller injects the cluster name</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;$valuesRepo/customer-service-catalog/helm/{{name}}/akv2k8s/values.yaml&quot;</span>
+</code></pre></div></p>
 
 
 
@@ -2353,10 +2445,10 @@ Prepare the provider credentials you will need later during bootstrap to create 
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
