@@ -1,0 +1,52 @@
+---
+name: ☂️ Request for Change
+description: Propose an major architectural improvement or refactor to existing Kubara behavior
+title: "[RFC]: "
+labels: ["architecture", "triage"]
+assignees: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "📝 Summary"
+      description: Briefly describe the change you are proposing. What is the problem or limitation with the current behavior?
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: 🎯 Motivation
+      description: Describe the motivation behind this change. Why is it needed? What benefits does it provide to users or maintainers?
+      value: |
+        ** The Problem **
+        Describe the current behavior and its limitations. What issues or pain points does it cause?
+
+        ** Goals **
+        Describe the goals of this change. What are you trying to achieve with this improvement or ref
+
+        ** Out of Scope **
+        Describe any related problems or features that are out of scope for this change.
+
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 💡 Proposal
+      description: Describe your proposed solution or improvement. How would you implement this change? What are the key design decisions or trade-offs?
+      value: |
+        ** Design **
+        Describe the high-level design of your proposed change. What components or modules would be affected? How would they interact?
+
+        ** Alternatives Considered **
+        Describe any alternative solutions you considered and why you rejected them.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I have searched existing issues
+          required: true
+        - label: This is not a duplicate

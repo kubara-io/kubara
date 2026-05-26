@@ -1,0 +1,52 @@
+traefik:
+  deployment:
+    imagePullSecrets:
+      - name: image-pull-secret
+  api:
+    dashboard: true
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+    basePath: /traefik
+    {{- end }}
+  ingressRoute:
+    dashboard:
+      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+      enabled: true
+      entryPoints:
+        - websecure
+      matchRule: Host(`{{ .cluster.dnsName }}`) && PathPrefix(`/traefik`)
+      middlewares:
+        - name: oauth-auth
+          namespace: traefik
+      tls: {}
+      {{- else }}
+      enabled: false
+      {{- end }}
+  {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+  extraObjects:
+    - apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: oauth-auth
+        namespace: traefik
+      spec:
+        forwardAuth:
+          address: http://oauth2-proxy.oauth2-proxy.svc.cluster.local/oauth2/
+          trustForwardHeader: true
+          authResponseHeaders:
+            - X-Auth-Request-User
+            - X-Auth-Request-Email
+            - Authorization
+  {{- end }}
+  metrics:
+    prometheus:
+      serviceMonitor:
+        {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+        enabled: true
+        {{- end }}
+        additionalLabels:
+          monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"

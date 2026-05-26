@@ -1,6 +1,6 @@
 # Third-Party Helm Dependencies
 
-kubara includes umbrella Helm charts under `go-binary/templates/embedded/managed-service-catalog/helm`.
+kubara includes umbrella Helm charts under `src/internal/catalog/built-in/managed-service-catalog/helm`.
 When kubara is used, Helm resolves these third-party chart dependencies from the configured upstream repositories
 (`helm dependency update`) and they may be rendered or deployed into the target cluster.
 
@@ -21,7 +21,7 @@ Each dependency remains licensed by its upstream project.
 | `kyverno-policies` | [kyverno/kyverno](https://github.com/kyverno/kyverno) | `Apache-2.0` |
 | `policy-reporter` | [kyverno/policy-reporter](https://github.com/kyverno/policy-reporter) | `MIT` |
 | `loki` | [grafana/helm-charts](https://github.com/grafana/helm-charts) | `Apache-2.0` |
-| `promtail` | [grafana/helm-charts](https://github.com/grafana/helm-charts) | `Apache-2.0` |
+| `alloy` | [grafana/helm-charts](https://github.com/grafana/helm-charts) | `Apache-2.0` |
 | `longhorn` | [longhorn/longhorn](https://github.com/longhorn/longhorn) | `Apache-2.0` |
 | `metallb` | [metallb/metallb](https://github.com/metallb/metallb) | `Apache-2.0` |
 | `metrics-server` | [kubernetes-sigs/metrics-server](https://github.com/kubernetes-sigs/metrics-server) | `Apache-2.0` |

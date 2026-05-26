@@ -1,0 +1,38 @@
+---
+name: ❓ Question or Support
+description: Ask a question or request clarification about Kubara
+title: "[Question]: "
+labels: ["question", "help wanted", "triage"]
+assignees: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "📝 Question"
+      description: |
+        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
+      placeholder: What would you like to know or clarify?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: 💡 What Have You Tried?
+      description: Describe what you've already attempted or read before asking.
+      placeholder: I checked the docs at... and tried...
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context / Logs
+      description: Paste logs, screenshots, or links to related docs or issues here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I have searched existing issues
+          required: true
+        - label: I have checked the documentation

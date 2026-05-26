@@ -1,0 +1,59 @@
+---
+name: 🐛 Bug Report
+description: Report a bug in Kubara
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "📝 Description"
+      description: |
+        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
+      placeholder: Briefly describe the bug. What is the problem you encountered?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 🧪 Steps to Reproduce
+      description: List clear steps to reproduce the issue.
+      placeholder: |
+        1. Run `kubara init`
+        2. Apply config X
+        3. Observe error Y
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: 💻 Environment
+      description: Provide relevant environment details.
+      placeholder: |
+        - Kubara version: v1.4.2
+        - Kubernetes version: 1.28 (EKS)
+        - Helm version: 3.13
+        - Platform: kind
+        - OS/Arch: Ubuntu 22.04 / amd64
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context / Logs
+      description: Paste logs, screenshots, or links to related docs or issues here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I have searched existing issues
+          required: true
+        - label: I am using the latest version of Kubara
+        - label: The issue is reproducible
+        - label: This is not a duplicate

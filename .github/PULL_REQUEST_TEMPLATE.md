@@ -1,6 +1,6 @@
-Please read first: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
-  
 ## 📝 Summary
+<!-- Please read first: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md -->
+  
 <!-- What does this PR do? e.g. "Adds Terraform module for SKE setup" -->
 
 ## 🧩 Type of change

@@ -6,6 +6,7 @@ on:
       - 'main'
     paths:
       - 'docs/**'
+      - '.github/workflows/docs-check.yaml'
   workflow_dispatch:
 
 permissions:
@@ -18,26 +19,41 @@ concurrency:
 jobs:
   validate-docs:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: ./docs
     steps:
       - name: Checkout kubara repo
         uses: actions/checkout@v6
 
-      - name: Install and setup uv
-        uses: astral-sh/setup-uv@v7
+      - name: Setup Go
+        uses: actions/setup-go@v6
         with:
-          version: '0.11.7'
+          go-version-file: src/go.mod
+          cache: true
+          cache-dependency-path: src/go.sum
+
+      - name: Install and setup uv
+        uses: astral-sh/setup-uv@v8.1.0
+        with:
+          version: '0.11.15'
           enable-cache: true
           cache-dependency-glob: 'docs/uv.lock'
 
       - name: Set up Python
-        run: uv python install 3.14.3
+        run: |
+          cd docs
+          uv python install 3.14.3
 
       - name: Install dependencies
-        run: uv sync --frozen
+        run: |
+          cd docs
+          uv sync --frozen
 
       - name: Validate docs build (strict)
-        run: uv run mkdocs build --strict
+        run: make docs-build
+
+      - name: Check command docs is up to date
+        run: |
+          if ! git diff --exit-code -- docs; then
+            echo "::error::Commands document isn't up to date:"
+            echo "::error::Please run 'make docs-build' locally to fix it."
+            exit 1
+          fi

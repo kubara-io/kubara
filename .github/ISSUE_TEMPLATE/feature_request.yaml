@@ -1,0 +1,40 @@
+---
+name: ✨ Feature Request
+description: Suggest a new feature for Kubara
+title: "[Feature]: "
+labels: ["feature request", "triage"]
+assignees: []
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: "📝 Description"
+      description: |
+        Please read first <a target="_blank" href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md">how to contribute to Kubara</a>.
+      placeholder: Briefly describe the feature you'd like to see. What problem does it solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: use_case
+    attributes:
+      label: 🎯 Use Case
+      description: Describe the scenario or workflow this feature would enable or improve.
+      placeholder: As a user, I want to...
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 📎 Additional Context
+      description: Paste screenshots, links to related docs, issues, or prior art here.
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: ✅ Checklist
+      options:
+        - label: I have searched existing issues
+          required: true
+        - label: This is not a duplicate

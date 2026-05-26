@@ -71,7 +71,7 @@ mkdir -p "$SCHEMA_POOL"
 [[ -d $MANAGED ]]    || { echo "::error::Missing $MANAGED — run 'kubara generate' first"; exit 1; }
 
 KUBE_VERSION=$(yq -r '.clusters[] | select(.name=="kubara") | .terraform.kubernetesVersion' config.yaml)
-PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name=="kubara") | .services.kubePrometheusStack.status // "disabled"' config.yaml)
+PROMETHEUS_STATUS=$(yq -r '.clusters[] | select(.name=="kubara") | .services."kube-prometheus-stack".status // "disabled"' config.yaml)
 
 # helm template flags. We add the monitoring API version only if
 # kube-prometheus-stack is enabled, since some charts only render

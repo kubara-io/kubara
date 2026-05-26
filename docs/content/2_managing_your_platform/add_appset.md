@@ -31,13 +31,13 @@ Optional: Add `additional-values.yaml` in the same chart folder for cluster-spec
 The generated ApplicationSet already references both `values.yaml` and `additional-values.yaml`.
 
 ## **Modify Argo CD overlays**
-This is an example on how to add an AppSet to the controlplane.
+This is an example on how to add an AppSet to the hub cluster.
 Add the following to your `argo-cd/values.yaml`.
 ```yaml
 bootstrapValues:
-  applicationSets:  # usually your existing controlplane key (for example "<cluster>-<stage>")
-    my-controlplane-dev:
-      projectName: my-controlplane-dev
+  applicationSets:  # usually your existing hub cluster key (for example "<cluster>-<stage>")
+    my-hub-dev:
+      projectName: my-hub-dev
       managedServices:
         repoURL: https://your-repo.example/managed.git
         path: managed-service-catalog/helm
@@ -65,7 +65,7 @@ If you let Argo CD manage itself, it will add the configured application to the 
 ## **Run kubara bootstrap again (if Argo CD is not managing itself )**
 If Argo CD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering Argo CD values will have no effect until you run the following again:
 ```bash
-kubara bootstrap <controlplane-cluster-name-from-config-yaml>
+kubara bootstrap <hub-cluster-name-from-config-yaml>
 ```
 
 ## **Add App from another repository**
@@ -73,7 +73,7 @@ If you want to add an application that is stored in another repository you can u
 ```yaml
 bootstrapValues:
   applicationSets:
-    my-controlplane-dev:
+    my-hub-dev:
       apps:
         akv2k8s:
           name: akv2k8s

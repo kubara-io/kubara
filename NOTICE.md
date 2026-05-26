@@ -19,7 +19,7 @@ SPDX identifier: `CC-BY-4.0`
 Third-party components:
 
 - Used Go module dependencies are listed in:
-  - `go-binary/go.mod`
-  - `go-binary/go.sum`
+  - `src/go.mod`
+  - `src/go.sum`
 - Helm chart dependencies are resolved at runtime from upstream repositories and may be deployed to target clusters.
   See THIRD_PARTY_HELM_DEPENDENCIES.md for the current dependency list and source repositories.

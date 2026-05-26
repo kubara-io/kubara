@@ -12,12 +12,14 @@ nav:
       - Bootstrapping: 1_getting_started/bootstrapping.md
       - Providers:
           - STACKIT:
+              - Overview: 1_getting_started/providers/stackit.md
               - Terraform Bootstrap: 1_getting_started/providers/stackit_terraform_bootstrap.md
               - Provisioning Infrastructure:
                   - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
                   - Edge Cloud: 1_getting_started/providers/stackit_provisioning_edgecloud.md
+      - Commands: 1_getting_started/commands.md
   - Managing Your Platform:
-      - Add Worker Cluster: 2_managing_your_platform/add_worker_cluster.md
+      - Add Spoke Cluster: 2_managing_your_platform/add_spoke_cluster.md
       - Add Project: 2_managing_your_platform/add_app_project.md
       - Add Repository: 2_managing_your_platform/add_app_repository.md
       - Add AppSet: 2_managing_your_platform/add_appset.md
@@ -38,13 +40,12 @@ nav:
           - Logs: 3_components/observability_logs.md
   - Architecture:
       - Architecture overview: 4_architecture/architecture_overview.md
-      - Decisions:
-          - ADR: 7_decisions/ADR.md
-          - ADR-Index: 7_decisions/ADR-index.md
+      - ADR: 7_decisions/ADR.md
+      - ADR-Index: 7_decisions/ADR-index.md
   - Community:
+      - "Community & Support": 5_community/community-n-support.md
       - Contributing: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
       - Maintainers: 5_community/maintainers.md
-      - Support: 5_community/support.md
   - Reference:
       - Release Cycle & Updates: 6_reference/release_cycle_and_updates.md
       - Known Issues: 6_reference/known_issues.md
