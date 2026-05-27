@@ -30,17 +30,12 @@ variable "security_group_name" {
 
 variable "ipv4_prefix" {
   type        = string
-  description = "IPv4 network prefix (without mask) used for the host network."
-}
-
-variable "ipv4_prefix_length" {
-  type        = number
-  description = "IPv4 prefix length used for the host network."
-  default     = 24
+  description = "IPv4 network prefix in CIDR notation used for the host network."
+  default     = "10.0.50.0/24"
 
   validation {
-    condition     = var.ipv4_prefix_length >= 8 && var.ipv4_prefix_length <= 30
-    error_message = "ipv4_prefix_length must be between 8 and 30."
+    condition     = can(cidrhost(var.ipv4_prefix, 0))
+    error_message = "ipv4_prefix must be valid CIDR notation, for example 10.0.50.0/24."
   }
 }
 

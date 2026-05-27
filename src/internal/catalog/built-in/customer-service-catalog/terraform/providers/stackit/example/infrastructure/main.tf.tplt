@@ -63,27 +63,20 @@ resource "random_string" "ske_name_suffix" {
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
 module "edge_instance" {
-  count = try(var.edge_instance.create, true) || trimspace(try(var.edge_instance.instance_id, "")) != "" ? 1 : 0
-
   source = "../../../../managed-service-catalog/terraform/modules/edge-instance"
 
-  project_id = var.project_id
-
-  create       = var.edge_instance.create
-  instance_id  = var.edge_instance.instance_id
-  plan_name    = var.edge_instance.plan
-  display_name = trimspace(try(var.edge_instance.display_name, ""))
-  region       = trimspace(try(var.edge_instance.region, "")) != "" ? trimspace(try(var.edge_instance.region, "")) : var.region
+  project_id   = var.project_id
+  display_name = var.edge_instance.display_name
+  region       = var.region
   description  = var.edge_instance.description
+  expiration   = var.edge_instance.expiration
 }
 
 module "edge_image" {
-  count = try(var.edge_image.create, false) && trimspace(try(var.edge_image.local_file_path, "")) != "" ? 1 : 0
-
   source = "../../../../managed-service-catalog/terraform/modules/edge-image"
 
   project_id      = var.project_id
-  name            = trimspace(try(var.edge_image.name, "")) != "" ? trimspace(try(var.edge_image.name, "")) : "talos-${var.name}-${var.stage}"
+  name            = var.edge_image.name
   local_file_path = var.edge_image.local_file_path
   disk_format     = var.edge_image.disk_format
   min_disk_size   = var.edge_image.min_disk_size
@@ -95,21 +88,18 @@ module "edge_image" {
 }
 
 module "edge_hosts" {
-  count = try(var.edge_hosts.create, false) && length(try(var.edge_hosts.nodes, [])) > 0 ? 1 : 0
-
   source = "../../../../managed-service-catalog/terraform/modules/edge-hosts"
 
-  name                = trimspace(try(var.edge_hosts.name_prefix, ""))
+  name                = var.edge_hosts.name_prefix
   project_id          = var.project_id
-  image_id            = trimspace(try(var.edge_hosts.image_id, ""))
-  network_name        = trimspace(try(var.edge_hosts.network_name, ""))
-  security_group_name = trimspace(try(var.edge_hosts.security_group_name, ""))
+  image_id            = module.edge_image.image_id
+  network_name        = var.edge_hosts.network_name
+  security_group_name = var.edge_hosts.security_group_name
 
-  ipv4_prefix        = var.edge_hosts.ipv4_prefix
-  ipv4_prefix_length = var.edge_hosts.ipv4_prefix_length
-  ipv4_nameservers   = var.edge_hosts.ipv4_nameservers
-  ingress_tcp_ports  = var.edge_hosts.ingress_tcp_ports
-  common_labels      = var.edge_hosts.common_labels
+  ipv4_prefix       = var.edge_hosts.ipv4_prefix
+  ipv4_nameservers  = var.edge_hosts.ipv4_nameservers
+  ingress_tcp_ports = var.edge_hosts.ingress_tcp_ports
+  common_labels     = var.edge_hosts.common_labels
 
   nodes = var.edge_hosts.nodes
 

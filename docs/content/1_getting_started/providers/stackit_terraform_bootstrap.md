@@ -85,7 +85,9 @@ export AWS_SECRET_ACCESS_KEY="<credential_secret_access_key from terraform outpu
 
 ## 3. Continue With Provisioning
 
-Next steps:
+Next, choose exactly one provisioning path based on your configured cluster type:
 
-- [Provisioning Infrastructure (SKE)](stackit_provisioning_ske.md)
-- [Provisioning Infrastructure (Edge Cloud)](stackit_provisioning_edgecloud.md)
+- [Provisioning Infrastructure (SKE)](stackit_provisioning_ske.md) for `terraform.kubernetesType: ske`
+- [Provisioning Infrastructure (Edge Cloud)](stackit_provisioning_edgecloud.md) for `terraform.kubernetesType: edge`
+
+Do not run both paths for the same cluster. They describe alternative infrastructure flows.

@@ -15,13 +15,10 @@ module "edge_hosts" {
 
   name                = "edge-demo"
   project_id          = var.project_id
-  # Use an existing image ID, e.g. from STACKIT project image list.
-  # You can also use `terraform output edge_uploaded_image_id`
-  # after running the optional edge_image upload module.
-  image_id            = "11111111-2222-3333-4444-555555555555"
+  image_id            = module.edge_image.image_id
   network_name        = "edge-demo-network"
   security_group_name = "edge-demo-sg"
-  ipv4_prefix         = "10.0.50.0"
+  ipv4_prefix         = "10.0.50.0/24"
 
   nodes = [
     {

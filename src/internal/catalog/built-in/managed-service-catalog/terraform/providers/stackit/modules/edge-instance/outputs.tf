@@ -1,14 +1,20 @@
 output "instance_id" {
-  description = "ID of the Edge Cloud instance (created or reused)."
-  value       = var.create ? stackit_edgecloud_instance.this[0].instance_id : var.instance_id
+  description = "ID of the Edge Cloud instance."
+  value       = stackit_edgecloud_instance.this.instance_id
 }
 
 output "frontend_url" {
-  description = "Frontend URL of the created Edge Cloud instance. Null when reusing an existing instance."
-  value       = var.create ? stackit_edgecloud_instance.this[0].frontend_url : null
+  description = "Frontend URL of the created Edge Cloud instance."
+  value       = stackit_edgecloud_instance.this.frontend_url
 }
 
 output "status" {
-  description = "Current status of the created Edge Cloud instance. Null when reusing an existing instance."
-  value       = var.create ? stackit_edgecloud_instance.this[0].status : null
+  description = "Current status of the created Edge Cloud instance."
+  value       = stackit_edgecloud_instance.this.status
+}
+
+output "kubeconfig_raw" {
+  description = "Raw Edge Cloud kubeconfig (short-lived, sensitive)."
+  value       = stackit_edgecloud_kubeconfig.this.kubeconfig
+  sensitive   = true
 }
