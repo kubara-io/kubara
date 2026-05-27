@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/kubara-io/kubara/internal/generate"
+	"github.com/kubara-io/kubara/internal/cmd/generate"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
 

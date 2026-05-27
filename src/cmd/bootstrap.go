@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kubara-io/kubara/internal/bootstrap"
+	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
