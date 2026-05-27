@@ -55,9 +55,9 @@ func TestNewGenerateCmd(t *testing.T) {
 	command := NewGenerateCmd()
 
 	assert.Equal(t, "generate", command.Name)
-	assert.Equal(t, "generates files from embedded templates and the config file; by default for both Helm and Terraform", command.Usage)
-	assert.Equal(t, "generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]", command.UsageText)
-	assert.Equal(t, "generate reads config values and templates the embedded Helm and Terraform files.", command.Description)
+	assert.Equal(t, "Generate files from catalog templates", command.Usage)
+	assert.Equal(t, "kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
 	require.Len(t, command.Flags, 5)

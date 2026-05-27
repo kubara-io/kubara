@@ -1,6 +1,6 @@
 # Catalogs
 
-This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog manually.
+This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog with the `kubara catalog` commands.
 
 For the list of services kubara ships out of the box, see the [Components Overview](../3_components/components_overview.md). That section documents the **built-in catalog**, while this page explains the underlying catalog mechanism and how to extend it.
 
@@ -29,6 +29,29 @@ That is different from the generated directories in your repo:
 
 Those generated directories are the result of `kubara generate`. The **catalog** is the input kubara loads before it generates anything.
 
+## Managing catalogs with the CLI
+
+kubara ships a dedicated `catalog` command group for custom catalogs:
+
+```bash
+kubara catalog create my-catalog
+cd my-catalog
+kubara catalog add widget-dashboard
+```
+
+`kubara catalog create` scaffolds a catalog root with:
+
+- `Catalog.yaml`
+- `services/`
+- `managed-service-catalog/helm/`
+- `managed-service-catalog/terraform/`
+- `customer-service-catalog/helm/example/`
+- `customer-service-catalog/terraform/example/`
+
+`kubara catalog add SERVICE_NAME` must be run from that catalog root and creates `services/SERVICE_NAME.yaml`.
+
+Both catalog names and service names must follow RFC 1123 naming rules: lowercase letters, digits, and `-`, starting with a letter and ending with a letter or digit.
+
 ## Built-in vs external catalogs
 
 kubara always ships with a **built-in catalog** embedded in the binary.
@@ -41,6 +64,17 @@ That built-in catalog includes:
 The docs section [Components (Built-in Catalog)](../3_components/components_overview.md) describes the services from that shipped default catalog.
 
 You can extend or override that catalog by passing an **external catalog** with `--catalog`.
+
+Catalog roots created with `kubara catalog create` include a `Catalog.yaml` file:
+
+```yaml
+apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: my-catalog
+```
+
+This is the marker file used by `kubara catalog add` to verify that you are inside a catalog root.
 
 ## How catalog loading works
 
@@ -159,6 +193,6 @@ During `kubara generate`, kubara renders templates and writes them into your rep
 - `customer-service-catalog/` with the configured customer overlay output path
 - `example` path segments with the current cluster name
 
-## Creating your own catalog manually
+## Creating your own catalog
 
 If you want to understand how to create a custom catalog for your multi cluster platform have a look at [How to create your own catalog](../2_managing_your_platform/create_catalog.md)

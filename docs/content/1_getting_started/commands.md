@@ -33,7 +33,7 @@ kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with 
 **Usage**:
 
 ```
-kubara [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
+kubara [command]
 ```
 
 # GLOBAL OPTIONS
@@ -73,7 +73,9 @@ kubara [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
 
 ## init
 
-Initialize a new kubara directory
+Initialize kubara config for your GitOps repository
+
+>kubara init
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
@@ -89,9 +91,9 @@ Shows a list of commands or help for one command
 
 ## generate
 
-generates files from embedded templates and the config file; by default for both Helm and Terraform
+Generate files from catalog templates
 
->generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]
+>kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]
 
 **--dry-run**: Preview generation without creating files
 
@@ -111,7 +113,9 @@ Shows a list of commands or help for one command
 
 ## bootstrap
 
-Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD
+Bootstrap Argo CD onto a cluster
+
+>kubara bootstrap CLUSTER_NAME
 
 **--dry-run**: Run with dry-run
 
@@ -137,13 +141,49 @@ Shows a list of commands or help for one command
 
 ## schema
 
-Generate JSON schema file for config structure
+Generate a JSON schema for the config yaml structure
 
->schema [--output] [--catalog <path> [--catalog-overwrite]]
+>kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]
 
 **--help, -h**: show help
 
 **--output, -o**="": Output file path for the JSON schema (default: "config.schema.json")
+
+### help, h
+
+Shows a list of commands or help for one command
+
+## catalog
+
+Manage custom catalogs and service definitions
+
+>kubara catalog [command]
+
+**--help, -h**: show help
+
+### create
+
+Create a custom catalog directory skeleton
+
+>kubara catalog create CATALOG_NAME
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### add
+
+Add a service definition to the current catalog
+
+>kubara catalog add SERVICE_NAME
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
 
 ### help, h
 
