@@ -1,4 +1,4 @@
-# SSO Examples: 
+# SSO Examples
 ## Forgejo
 
 **The following documentation provides configuration examples for SSO-Configuration   
