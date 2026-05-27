@@ -359,8 +359,8 @@ terraform output edge_host_metadata
 ```
 
 - Use the selected host public IP for DNS `A` records (for example your ingress hostname).
-- If MetalLB is enabled, generated customer values currently use `clusters[].privateLoadBalancerIP` (`/32`) as pool address.
-- `publicLoadBalancerIP` is currently not wired into generated MetalLB values.
+- If MetalLB is enabled, generated customer values use `clusters[].privateLoadBalancerIP` (`/32`) as pool address.
+- Generated ingress annotations for `external-dns` use `clusters[].publicLoadBalancerIP` as DNS target.
 
 If you use a manually prepared image outside this Terraform example and know the related `EdgeImage`, verify that these extensions are present in that image configuration:
 

@@ -66,7 +66,7 @@ terraform output edge_host_metadata
 Use the selected host public IP for DNS `A` records (for example your ingress hostname).
 
 If you enable MetalLB, the generated MetalLB customer values use `clusters[].privateLoadBalancerIP` from your `config.yaml` as pool address (`/32`).
-`publicLoadBalancerIP` is currently not wired into the generated MetalLB chart values.
+The generated ingress annotations for `external-dns` use `clusters[].publicLoadBalancerIP` as DNS target.
 
 ## Step-by-step sequence
 
