@@ -2141,7 +2141,7 @@ You're not viewing the latest stable version.
 <h1 id="description">DESCRIPTION</h1>
 <p>kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with GitOps-first workflows.</p>
 <p><strong>Usage</strong>:</p>
-<div class="highlight"><pre><span></span><code>kubara [GLOBAL OPTIONS] [command [COMMAND OPTIONS]] [ARGUMENTS...]
+<div class="highlight"><pre><span></span><code>kubara [command]
 </code></pre></div>
 <h1 id="global-options">GLOBAL OPTIONS</h1>
 <p><strong>--base64</strong>: Enable base64 encode/decode mode</p>
@@ -2161,7 +2161,10 @@ You're not viewing the latest stable version.
 <p><strong>--work-dir, -w</strong>="": Working directory (default: ".")</p>
 <h1 id="commands">COMMANDS</h1>
 <h2 id="init">init</h2>
-<p>Initialize a new kubara directory</p>
+<p>Initialize kubara config for your GitOps repository</p>
+<blockquote>
+<p>kubara init</p>
+</blockquote>
 <p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
 <p><strong>--help, -h</strong>: show help</p>
 <p><strong>--overwrite</strong>: Overwrite config if exists</p>
@@ -2169,9 +2172,9 @@ You're not viewing the latest stable version.
 <h3 id="help-h">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="generate">generate</h2>
-<p>generates files from embedded templates and the config file; by default for both Helm and Terraform</p>
+<p>Generate files from catalog templates</p>
 <blockquote>
-<p>generate [--terraform|--helm] [--managed-catalog <path> --overlay-values <path>] [--catalog <path> [--catalog-overwrite]] [--dry-run]</p>
+<p>kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]</p>
 </blockquote>
 <p><strong>--dry-run</strong>: Preview generation without creating files</p>
 <p><strong>--helm</strong>: Only generate Helm files</p>
@@ -2182,7 +2185,10 @@ You're not viewing the latest stable version.
 <h3 id="help-h_1">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="bootstrap">bootstrap</h2>
-<p>Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD</p>
+<p>Bootstrap Argo CD onto a cluster</p>
+<blockquote>
+<p>kubara bootstrap CLUSTER_NAME</p>
+</blockquote>
 <p><strong>--dry-run</strong>: Run with dry-run</p>
 <p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
 <p><strong>--help, -h</strong>: show help</p>
@@ -2195,15 +2201,39 @@ You're not viewing the latest stable version.
 <h3 id="help-h_2">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="schema">schema</h2>
-<p>Generate JSON schema file for config structure</p>
+<p>Generate a JSON schema for the config yaml structure</p>
 <blockquote>
-<p>schema [--output] [--catalog <path> [--catalog-overwrite]]</p>
+<p>kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]</p>
 </blockquote>
 <p><strong>--help, -h</strong>: show help</p>
 <p><strong>--output, -o</strong>="": Output file path for the JSON schema (default: "config.schema.json")</p>
 <h3 id="help-h_3">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
-<h2 id="help-h_4">help, h</h2>
+<h2 id="catalog">catalog</h2>
+<p>Manage custom catalogs and service definitions</p>
+<blockquote>
+<p>kubara catalog [command]</p>
+</blockquote>
+<p><strong>--help, -h</strong>: show help</p>
+<h3 id="create">create</h3>
+<p>Create a custom catalog directory skeleton</p>
+<blockquote>
+<p>kubara catalog create CATALOG_NAME</p>
+</blockquote>
+<p><strong>--help, -h</strong>: show help</p>
+<h4 id="help-h_4">help, h</h4>
+<p>Shows a list of commands or help for one command</p>
+<h3 id="add">add</h3>
+<p>Add a service definition to the current catalog</p>
+<blockquote>
+<p>kubara catalog add SERVICE_NAME</p>
+</blockquote>
+<p><strong>--help, -h</strong>: show help</p>
+<h4 id="help-h_5">help, h</h4>
+<p>Shows a list of commands or help for one command</p>
+<h3 id="help-h_6">help, h</h3>
+<p>Shows a list of commands or help for one command</p>
+<h2 id="help-h_7">help, h</h2>
 <p>Shows a list of commands or help for one command</p>
 
 

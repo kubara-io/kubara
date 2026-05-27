@@ -517,6 +517,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#managing-catalogs-with-the-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing catalogs with the CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#built-in-vs-external-catalogs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -650,10 +661,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#creating-your-own-catalog-manually" class="md-nav__link">
+  <a href="#creating-your-own-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Creating your own catalog manually
+        Creating your own catalog
       
     </span>
   </a>
@@ -2311,6 +2322,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#managing-catalogs-with-the-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Managing catalogs with the CLI
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#built-in-vs-external-catalogs" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2444,10 +2466,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#creating-your-own-catalog-manually" class="md-nav__link">
+  <a href="#creating-your-own-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Creating your own catalog manually
+        Creating your own catalog
       
     </span>
   </a>
@@ -2475,7 +2497,7 @@ You're not viewing the latest stable version.
 
 
 <h1 id="catalogs">Catalogs</h1>
-<p>This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog manually.</p>
+<p>This page explains what a catalog is in kubara, how catalog loading works, and how to create your own catalog with the <code>kubara catalog</code> commands.</p>
 <p>For the list of services kubara ships out of the box, see the <a href="../../3_components/components_overview/">Components Overview</a>. That section documents the <strong>built-in catalog</strong>, while this page explains the underlying catalog mechanism and how to extend it.</p>
 <h2 id="what-is-a-catalog">What is a catalog?</h2>
 <p>In kubara, a <strong>catalog</strong> is a higher-level collection built from Helm charts and Terraform modules.</p>
@@ -2497,6 +2519,23 @@ You're not viewing the latest stable version.
 <li><code>customer-service-catalog/</code> contains generated, cluster-specific values and overlays.</li>
 </ul>
 <p>Those generated directories are the result of <code>kubara generate</code>. The <strong>catalog</strong> is the input kubara loads before it generates anything.</p>
+<h2 id="managing-catalogs-with-the-cli">Managing catalogs with the CLI</h2>
+<p>kubara ships a dedicated <code>catalog</code> command group for custom catalogs:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>create<span class="w"> </span>my-catalog
+<span class="nb">cd</span><span class="w"> </span>my-catalog
+kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w"> </span>widget-dashboard
+</code></pre></div>
+<p><code>kubara catalog create</code> scaffolds a catalog root with:</p>
+<ul>
+<li><code>Catalog.yaml</code></li>
+<li><code>services/</code></li>
+<li><code>managed-service-catalog/helm/</code></li>
+<li><code>managed-service-catalog/terraform/</code></li>
+<li><code>customer-service-catalog/helm/example/</code></li>
+<li><code>customer-service-catalog/terraform/example/</code></li>
+</ul>
+<p><code>kubara catalog add SERVICE_NAME</code> must be run from that catalog root and creates <code>services/SERVICE_NAME.yaml</code>.</p>
+<p>Both catalog names and service names must follow RFC 1123 naming rules: lowercase letters, digits, and <code>-</code>, starting with a letter and ending with a letter or digit.</p>
 <h2 id="built-in-vs-external-catalogs">Built-in vs external catalogs</h2>
 <p>kubara always ships with a <strong>built-in catalog</strong> embedded in the binary.</p>
 <p>That built-in catalog includes:</p>
@@ -2506,6 +2545,13 @@ You're not viewing the latest stable version.
 </ul>
 <p>The docs section <a href="../../3_components/components_overview/">Components (Built-in Catalog)</a> describes the services from that shipped default catalog.</p>
 <p>You can extend or override that catalog by passing an <strong>external catalog</strong> with <code>--catalog</code>.</p>
+<p>Catalog roots created with <code>kubara catalog create</code> include a <code>Catalog.yaml</code> file:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Catalog</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-catalog</span>
+</code></pre></div>
+<p>This is the marker file used by <code>kubara catalog add</code> to verify that you are inside a catalog root.</p>
 <h2 id="how-catalog-loading-works">How catalog loading works</h2>
 <p>When kubara loads a catalog, it does the following:</p>
 <ol>
@@ -2600,7 +2646,7 @@ You're not viewing the latest stable version.
 <li><code>customer-service-catalog/</code> with the configured customer overlay output path</li>
 <li><code>example</code> path segments with the current cluster name</li>
 </ul>
-<h2 id="creating-your-own-catalog-manually">Creating your own catalog manually</h2>
+<h2 id="creating-your-own-catalog">Creating your own catalog</h2>
 <p>If you want to understand how to create a custom catalog for your multi cluster platform have a look at <a href="../../2_managing_your_platform/create_catalog/">How to create your own catalog</a></p>
 
 

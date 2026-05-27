@@ -835,10 +835,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#structure" class="md-nav__link">
+  <a href="#create-the-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Structure
+        Create the catalog
       
     </span>
   </a>
@@ -846,10 +846,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#minimal-steps" class="md-nav__link">
+  <a href="#add-a-service" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minimal steps
+        Add a service
       
     </span>
   </a>
@@ -857,10 +857,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-commands" class="md-nav__link">
+  <a href="#continue-with-kubara-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example commands
+        Continue with kubara commands
       
     </span>
   </a>
@@ -868,10 +868,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-a-completely-new-service" class="md-nav__link">
+  <a href="#extending-the-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Adding a completely new service
+        Extending the catalog
       
     </span>
   </a>
@@ -2231,10 +2231,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#structure" class="md-nav__link">
+  <a href="#create-the-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Structure
+        Create the catalog
       
     </span>
   </a>
@@ -2242,10 +2242,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#minimal-steps" class="md-nav__link">
+  <a href="#add-a-service" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Minimal steps
+        Add a service
       
     </span>
   </a>
@@ -2253,10 +2253,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#example-commands" class="md-nav__link">
+  <a href="#continue-with-kubara-commands" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Example commands
+        Continue with kubara commands
       
     </span>
   </a>
@@ -2264,10 +2264,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#adding-a-completely-new-service" class="md-nav__link">
+  <a href="#extending-the-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Adding a completely new service
+        Extending the catalog
       
     </span>
   </a>
@@ -2317,7 +2317,7 @@ You're not viewing the latest stable version.
 
 
 <h1 id="how-to-create-a-catalog">How to create a Catalog</h1>
-<p>This page explains how to create a custom catalog for your multi cluster platform.</p>
+<p>This page explains how to create a custom catalog for your multi cluster platform with the <code>kubara catalog</code> command group.</p>
 <p>If you want to understand the concepts behind catalogs and how they work in detail, please check the <a href="../../1_getting_started/catalogs/">Catalog concepts page</a>.</p>
 <h2 id="when-you-need-a-custom-catalog-at-all">When you need a custom catalog at all</h2>
 <p>You usually need a custom catalog when you want to:</p>
@@ -2328,43 +2328,61 @@ You're not viewing the latest stable version.
 <li>ship reusable platform templates outside the kubara source tree</li>
 </ul>
 <p>If you only want to customize values for a generated cluster, editing files in <code>customer-service-catalog/</code> is usually enough. A custom catalog is the right tool when you want to change the <strong>service model</strong> or the <strong>templates kubara renders</strong>.</p>
-<h2 id="structure">Structure</h2>
-<p>The layout for a custom catalog is:</p>
-<div class="highlight"><pre><span></span><code>my-catalog/
-├── services/
-│   └── widget-dashboard.yaml
-├── managed-service-catalog/
-│   └── helm/
-│       └── widget-dashboard/
-│           ├── Chart.yaml
-│           ├── values.yaml
-│           └── templates/
-│               └── ...
-└── customer-service-catalog/
-    └── helm/
-        └── example/
-            └── widget-dashboard/
-                └── values.yaml.tplt
+<h2 id="create-the-catalog">Create the catalog</h2>
+<p>Start by scaffolding the catalog root:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>create<span class="w"> </span>my-catalog
 </code></pre></div>
-<h2 id="minimal-steps">Minimal steps</h2>
-<ol>
-<li>Create a <code>ServiceDefinition</code> in <code>services/</code>.</li>
-<li>Add the matching chart or templates under <code>managed-service-catalog/</code>.</li>
-<li>Optionally add cluster overlay templates under <code>customer-service-catalog/</code>.</li>
-<li>Run kubara commands with <code>--catalog /path/to/my-catalog</code>.</li>
-</ol>
-<h2 id="example-commands">Example commands</h2>
+<p>This creates a new directory named after the catalog. The name must follow RFC 1123 naming rules: lowercase letters, digits, and <code>-</code>, starting with a letter and ending with a letter or digit.</p>
+<p>The generated layout is:</p>
+<div class="highlight"><pre><span></span><code>my-catalog/
+├── Catalog.yaml
+├── services/
+├── managed-service-catalog/
+│   ├── helm/
+│   └── terraform/
+└── customer-service-catalog/
+    ├── helm/
+    │   └── example/
+    └── terraform/
+        └── example/
+</code></pre></div>
+<p>The created <code>Catalog.yaml</code> looks like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Catalog</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-catalog</span>
+</code></pre></div>
+<h2 id="add-a-service">Add a service</h2>
+<p>Change into the catalog root and add a service definition:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>my-catalog
+kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w"> </span>widget-dashboard
+</code></pre></div>
+<p>This command requires <code>Catalog.yaml</code> to be present in the current directory and creates <code>services/widget-dashboard.yaml</code>.</p>
+<p>The generated service definition looks like this:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceDefinition</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">widget-dashboard</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">chartPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">widget-dashboard</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">disabled</span>
+<span class="w">  </span><span class="nt">clusterTypes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spoke</span>
+</code></pre></div>
+<h2 id="continue-with-kubara-commands">Continue with kubara commands</h2>
+<p>After creating the catalog and its services, use the catalog by passing the catalog root to kubara commands:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>schema<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
 kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
 kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
 </code></pre></div>
-<h2 id="adding-a-completely-new-service">Adding a completely new service</h2>
-<p>For a <strong>new</strong> service that does not exist in the built-in catalog, you normally need both:</p>
+<h2 id="extending-the-catalog">Extending the catalog</h2>
+<p>For a <strong>new</strong> service that does not exist in the built-in catalog, you normally still need both:</p>
 <ul>
 <li>a <code>ServiceDefinition</code></li>
 <li>matching template content under <code>managed-service-catalog/</code> and/or <code>customer-service-catalog/</code></li>
 </ul>
-<p>If you only add the <code>ServiceDefinition</code>, kubara can understand the service metadata, but it still needs actual templates to render useful output for that service.</p>
+<p>If you only create the <code>ServiceDefinition</code>, kubara can understand the service metadata, but it still needs actual templates to render useful output for that service.</p>
 <h2 id="overriding-a-built-in-service">Overriding a built-in service</h2>
 <p>You can also override built-in services by reusing the same <code>metadata.name</code>.</p>
 <p>Typical reasons:</p>
@@ -2378,6 +2396,7 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <h2 id="practical-guidance">Practical guidance</h2>
 <ul>
 <li>Point <code>--catalog</code> at the <strong>catalog root</strong>.</li>
+<li>Use <code>kubara catalog create</code> and <code>kubara catalog add</code> as the entrypoint for catalog work.</li>
 <li>Keep <code>metadata.name</code> stable and canonical.</li>
 <li>Keep <code>chartPath</code> aligned with the chart directory name under <code>managed-service-catalog/helm/</code>.</li>
 <li>Use <code>configSchema</code> for defaults and validation instead of documenting required values only in prose.</li>
