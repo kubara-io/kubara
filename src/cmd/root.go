@@ -56,9 +56,9 @@ func NewRootCmd(ver string) *cli.Command {
 		Version:               ver,
 		Authors:               Authors,
 		Copyright:             "",
-		Usage:                 "Your Kubernetes platform engineering toolkit",
+		Usage:                 "Opinionated CLI for Kubernetes platform engineering",
 		UsageText:             "kubara [command]",
-		Description:           "Provides commands to bootstrap and operate Kubernetes platforms with GitOps-first workflows.",
+		Description:           "kubara is an opinionated CLI to bootstrap and operate Kubernetes platforms with GitOps-first workflows.",
 		Flags:                 globalFlags.CLIFlags(),
 		EnableShellCompletion: true,
 		Commands: []*cli.Command{
