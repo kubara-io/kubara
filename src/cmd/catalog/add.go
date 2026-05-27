@@ -2,16 +2,9 @@ package catalog
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"os"
-	"path"
-
-	catalogTypes "github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/service"
-	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"go.yaml.in/yaml/v4"
+
+	internal "github.com/kubara-io/kubara/internal/cmd/catalog"
 )
 
 func NewCatalogService() *cli.Command {
@@ -34,53 +27,9 @@ func NewCatalogService() *cli.Command {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
 			}
 
-			return createService(serviceName)
+			return internal.CreateService(serviceName)
 		},
 	}
 
 	return cmd
-}
-
-func createService(serviceName string) error {
-	if !catalogTypes.RFC1123Label.MatchString(serviceName) {
-		return fmt.Errorf("service name must adhere to rfc 1123: must be 1-63 characters, start with a lowercase letter, contain only lowercase letters, digits, or '-', and end with a letter or digit")
-	}
-
-	if _, err := os.Stat("Catalog.yaml"); errors.Is(err, os.ErrNotExist) {
-		return fmt.Errorf("this directory is missing a Catalog.yaml")
-	}
-
-	servicePath := path.Join("services", fmt.Sprintf("%s.yaml", serviceName))
-	if _, err := os.Stat(servicePath); err == nil {
-		return fmt.Errorf("a service with name %s already exists", serviceName)
-	}
-
-	service := catalogTypes.ServiceDefinition{
-		APIVersion: "kubara.io/v1alpha1",
-		Kind:       "ServiceDefinition",
-		Metadata: catalogTypes.Metadata{
-			Name: serviceName,
-		},
-		Spec: catalogTypes.ServiceSpec{
-			ChartPath: serviceName,
-			Status:    service.StatusDisabled,
-			ClusterTypes: []string{
-				"hub",
-				"spoke",
-			},
-		},
-	}
-
-	serviceRaw, err := yaml.Marshal(service)
-	if err != nil {
-		return fmt.Errorf("cannot marshal service: %w", err)
-	}
-
-	if err := os.WriteFile(servicePath, serviceRaw, 0o600); err != nil {
-		return fmt.Errorf("cannot create Catalog.yaml: %w", err)
-	}
-
-	log.Info().Msg("Service has been added")
-
-	return nil
 }

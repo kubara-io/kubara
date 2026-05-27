@@ -19,6 +19,7 @@ var RFC1123Label = regexp.MustCompile(
 
 // ServiceDefinitionAPIVersion is the supported ServiceDefinition apiVersion.
 const ServiceDefinitionAPIVersion = "kubara.io/v1alpha1"
+const ServiceDefinitionKind = "ServiceDefinition"
 
 // ServiceDefinition describes a catalog service entry.
 type ServiceDefinition struct {
@@ -72,8 +73,8 @@ func (d ServiceDefinition) Validate() error {
 	if apiVersion != ServiceDefinitionAPIVersion {
 		return fmt.Errorf("apiVersion must be %q", ServiceDefinitionAPIVersion)
 	}
-	if strings.TrimSpace(d.Kind) != "ServiceDefinition" {
-		return fmt.Errorf("kind must be ServiceDefinition")
+	if strings.TrimSpace(d.Kind) != ServiceDefinitionKind {
+		return fmt.Errorf("kind must be %q", ServiceDefinitionKind)
 	}
 	if strings.TrimSpace(d.Metadata.Name) == "" {
 		return fmt.Errorf("missing metadata.name")
@@ -87,5 +88,6 @@ func (d ServiceDefinition) Validate() error {
 	if d.Spec.Status != service.StatusEnabled && d.Spec.Status != service.StatusDisabled {
 		return fmt.Errorf(`spec.status must be either %q or %q`, service.StatusEnabled, service.StatusDisabled)
 	}
+
 	return nil
 }
