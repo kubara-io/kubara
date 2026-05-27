@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/utils"
-	"os"
-	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -32,9 +33,10 @@ func NewSchemaFlags() *SchemaFlags {
 func NewSchemaCmd() *cli.Command {
 	flags := NewSchemaFlags()
 	cmd := &cli.Command{
-		Name:      "schema",
-		Usage:     "Generate JSON schema file for config structure",
-		UsageText: "schema [--output] [--catalog <path> [--catalog-overwrite]]",
+		Name:        "schema",
+		Usage:       "Generate a JSON schema for the config yaml structure",
+		UsageText:   "kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]",
+		Description: "Generates a JSON schema for the config yaml structure and catalog definitions to use for validation and editor autocompletion",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
