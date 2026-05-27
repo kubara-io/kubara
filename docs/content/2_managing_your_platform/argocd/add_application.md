@@ -1,4 +1,4 @@
-# Add Application to Argo CD
+# How to add an application to Argo CD
 
 !!! note
     
@@ -37,7 +37,7 @@ bootstrapValues:
 
 That whats happening behind the scenes:
 
-![Add Application](../images/add-application.png)
+![Add Application](../../images/add-application.png)
 
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that serves your Argo CD application.
