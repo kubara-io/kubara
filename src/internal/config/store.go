@@ -126,7 +126,7 @@ func migrateLegacyConfig(raw map[string]any) (map[string]any, error) {
 }
 
 func migrateLegacyCluster(cluster map[string]any, clusterIndex int) error {
-	clusterTypeRaw, _ := cluster["type"]
+	clusterTypeRaw := cluster["type"]
 	if clusterTypeRaw != nil {
 		clusterType, ok := clusterTypeRaw.(string)
 		if !ok {
