@@ -6,15 +6,17 @@ import (
 	"os"
 	"path"
 
+	catalogTypes "github.com/kubara-io/kubara/internal/catalog"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 )
 
 func NewCatalogCreate() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "create",
-		Usage:       "create NAME",
-		UsageText:   "Creates a new custom catalog directory",
-		Description: "...",
+		Usage:       "Create a custom catalog directory skeleton",
+		UsageText:   "kubara catalog create CATALOG_NAME",
+		Description: "Scaffolds a custom catalog directory with Catalog.yaml plus customer-service-catalog, managed-service-catalog, and services directories.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name: "catalog-name",
@@ -29,14 +31,22 @@ func NewCatalogCreate() *cli.Command {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
 			}
 
-			return creation(catalogName)
+			return createCatalog(catalogName)
 		},
 	}
 
 	return cmd
 }
 
-func creation(catalogName string) error {
+func createCatalog(catalogName string) error {
+	if !catalogTypes.RFC1123Label.MatchString(catalogName) {
+		return fmt.Errorf("catalog name must adhere to rfc 1123: must be 1-63 characters, start with a lowercase letter, contain only lowercase letters, digits, or '-', and end with a letter or digit")
+	}
+
+	if _, err := os.Stat(catalogName); err == nil {
+		return fmt.Errorf("a directory with name %s already exists", catalogName)
+	}
+
 	if err := createDirectories(catalogName); err != nil {
 		return err
 	}
@@ -49,6 +59,8 @@ metadata:
 	if err := os.WriteFile(path.Join(catalogName, "Catalog.yaml"), []byte(catalogYaml), 0o600); err != nil {
 		return fmt.Errorf("cannot create Catalog.yaml: %w", err)
 	}
+
+	log.Info().Msg("Catalog has been created")
 
 	return nil
 }

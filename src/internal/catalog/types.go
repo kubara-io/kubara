@@ -13,7 +13,7 @@ import (
 
 // Adheres to RFC 1123 and kubernetes conventions
 // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
-var rfc1123Label = regexp.MustCompile(
+var RFC1123Label = regexp.MustCompile(
 	`^[a-z](?:[a-z0-9-]{0,61}[a-z0-9])?$`,
 )
 
@@ -78,7 +78,7 @@ func (d ServiceDefinition) Validate() error {
 	if strings.TrimSpace(d.Metadata.Name) == "" {
 		return fmt.Errorf("missing metadata.name")
 	}
-	if !rfc1123Label.MatchString(d.Metadata.Name) {
+	if !RFC1123Label.MatchString(d.Metadata.Name) {
 		return fmt.Errorf("metadata.name must adhere to rfc 1123: must be 1-63 characters, start with a lowercase letter, contain only lowercase letters, digits, or '-', and end with a letter or digit")
 	}
 	if strings.TrimSpace(d.Spec.ChartPath) == "" {
