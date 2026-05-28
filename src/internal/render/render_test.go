@@ -399,6 +399,84 @@ func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing
 	assert.NotContains(t, externalDNSValues, "stackit")
 }
 
+func TestTemplateFiles_StackitProviderOverridesExternalDNSValues(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "stackit",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"services":         fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var externalDNSValues string
+	var externalDNSPath string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/providers/stackit/example/external-dns/values.yaml.tplt" {
+			externalDNSValues = result.Content
+			externalDNSPath = result.Path
+		}
+	}
+
+	require.NotEmpty(t, externalDNSPath)
+	assert.Contains(t, externalDNSValues, "ghcr.io/stackitcloud/external-dns-stackit-webhook")
+	assert.Contains(t, externalDNSValues, "secretName: external-dns-webhook")
+	assert.NotContains(t, externalDNSValues, "opentelekomcloud")
+}
+
+func TestTemplateFiles_CommonExternalDNSValuesAreProviderNeutral(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type: Helm,
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"services":         fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var externalDNSValues string
+	var externalDNSPath string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/example/external-dns/values.yaml.tplt" {
+			externalDNSValues = result.Content
+			externalDNSPath = result.Path
+		}
+	}
+
+	require.NotEmpty(t, externalDNSPath)
+	assert.Contains(t, externalDNSValues, "externalSecrets: {}")
+	assert.NotContains(t, externalDNSValues, "ghcr.io/stackitcloud")
+	assert.NotContains(t, externalDNSValues, "ghcr.io/opentelekomcloud")
+	assert.NotContains(t, externalDNSValues, "stackit")
+}
+
 func TestTemplateFiles_TCloudPublicExternalDNSSkipsExternalSecretWhenDisabled(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
