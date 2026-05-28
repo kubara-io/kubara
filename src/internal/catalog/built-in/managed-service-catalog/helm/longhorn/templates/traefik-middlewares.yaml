@@ -3,6 +3,7 @@
 {{- $prefix := .pathPrefix | default "/longhorn" }}
 # Longhorn UI uses root-relative assets; when exposed below a path prefix,
 # Traefik has to normalize the URL before forwarding to longhorn-frontend.
+# See https://github.com/longhorn/longhorn/issues/1745 for the upstream context.
 ---
 apiVersion: traefik.io/v1alpha1
 kind: Middleware
