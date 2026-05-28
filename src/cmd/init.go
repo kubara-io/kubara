@@ -3,13 +3,14 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/kubara-io/kubara/internal/workflow"
-	"os"
-	"path/filepath"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -45,8 +46,10 @@ func NewInitCmd() *cli.Command {
 	flags := NewInitFlags()
 
 	cmd := &cli.Command{
-		Name:  "init",
-		Usage: "Initialize a new kubara directory",
+		Name:        "init",
+		Usage:       "Initialize kubara config for your GitOps repository",
+		UsageText:   "kubara init",
+		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables and catalog options. By default, it generates a .env file with example variables and a config file if they do not exist. If the --prep flag is set, it only generates the .env file and copies the prep/ folder for manual configuration. If the --overwrite flag is set, it overwrites existing config values with environment variables and regenerates the config file.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, _ := flags.ToOptions(cmd)
 			return o.Run()

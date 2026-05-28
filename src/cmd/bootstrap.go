@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kubara-io/kubara/internal/bootstrap"
+	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
@@ -44,13 +44,15 @@ func NewBootstrapCmd() *cli.Command {
 	flags := NewBootstrapFlags()
 
 	cmd := &cli.Command{
-		Name:      "bootstrap",
-		Usage:     "Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD",
-		ArgsUsage: "(cluster-name)",
+		Name:        "bootstrap",
+		Usage:       "Bootstrap Argo CD onto a cluster",
+		UsageText:   "kubara bootstrap CLUSTER_NAME",
+		ArgsUsage:   "CLUSTER_NAME",
+		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
-				UsageText: "The name of the cluster as set in the config",
+				UsageText: "The cluster name defined in the config",
 			},
 		},
 		Action: func(c context.Context, cmd *cli.Command) error {

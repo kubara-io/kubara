@@ -39,5 +39,9 @@ metallb:
     serviceMonitor:
       enabled: false
       controller:
+  frr-k8s:
+    prometheus:
+      serviceMonitor:
+        enabled: false
 nodeSelectors: {}
 namespace: {}

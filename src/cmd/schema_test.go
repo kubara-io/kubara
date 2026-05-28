@@ -25,8 +25,9 @@ func TestNewSchemaCmd(t *testing.T) {
 	command := NewSchemaCmd()
 
 	assert.Equal(t, "schema", command.Name)
-	assert.Equal(t, "Generate JSON schema file for config structure", command.Usage)
-	assert.Equal(t, "schema [--output] [--catalog <path> [--catalog-overwrite]]", command.UsageText)
+	assert.Equal(t, "Generate a JSON schema for the config yaml structure", command.Usage)
+	assert.Equal(t, "kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]", command.UsageText)
+	assert.Equal(t, "Generates a JSON schema for the config yaml structure and catalog definitions to use for validation and editor autocompletion", command.Description)
 
 	require.Len(t, command.Flags, 1)
 
