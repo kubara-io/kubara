@@ -14,24 +14,45 @@ variable "t_cloud_public_domain_name" {
   description = "T Cloud Public domain name."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = trimspace(var.t_cloud_public_domain_name) != ""
+    error_message = "t_cloud_public_domain_name must not be empty."
+  }
 }
 
 variable "t_cloud_public_tenant_name" {
   description = "T Cloud Public tenant/project name."
   type        = string
   sensitive   = true
+  default     = "{{ .cluster.terraform.projectId }}"
+
+  validation {
+    condition     = trimspace(var.t_cloud_public_tenant_name) != ""
+    error_message = "t_cloud_public_tenant_name must not be empty."
+  }
 }
 
 variable "t_cloud_public_access_key" {
   description = "T Cloud Public access key."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = trimspace(var.t_cloud_public_access_key) != ""
+    error_message = "t_cloud_public_access_key must not be empty."
+  }
 }
 
 variable "t_cloud_public_secret_key" {
   description = "T Cloud Public secret key."
   type        = string
   sensitive   = true
+
+  validation {
+    condition     = trimspace(var.t_cloud_public_secret_key) != ""
+    error_message = "t_cloud_public_secret_key must not be empty."
+  }
 }
 
 ### Global
@@ -182,13 +203,13 @@ variable "vpc_cidr" {
 variable "subnet_cidr" {
   description = "CIDR block for the cluster subnet."
   type        = string
-  default     = "10.0.0.0/16"
+  default     = "10.0.1.0/24"
 }
 
 variable "subnet_gateway_ip" {
   description = "Gateway IP for the cluster subnet."
   type        = string
-  default     = "10.0.0.1"
+  default     = "10.0.1.1"
 }
 
 variable "subnet_dns_list" {

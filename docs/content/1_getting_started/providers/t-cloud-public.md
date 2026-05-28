@@ -19,7 +19,7 @@ terraform:
     email: <email>
 ```
 
-`projectId` is used as the generated default for `t_cloud_public_tenant_name`. You can override it in the generated Terraform variables if your tenant naming differs.
+`projectId` is used as the generated default for `t_cloud_public_tenant_name`. You can override it with `TF_VAR_t_cloud_public_tenant_name` if your tenant naming differs.
 
 Follow this order:
 

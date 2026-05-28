@@ -305,6 +305,59 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	assert.Contains(t, envContent, "velero_bucket_name")
 }
 
+func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var infrastructureEnv string
+	var bootstrapEnv string
+	var infrastructureVariables string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt":
+			infrastructureEnv = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/env.auto.tfvars.tplt":
+			bootstrapEnv = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/variables.tf.tplt":
+			infrastructureVariables = result.Content
+		}
+	}
+
+	require.NotEmpty(t, infrastructureEnv)
+	require.NotEmpty(t, bootstrapEnv)
+	require.NotEmpty(t, infrastructureVariables)
+
+	for _, content := range []string{infrastructureEnv, bootstrapEnv} {
+		assert.NotContains(t, content, "t_cloud_public_region")
+		assert.NotContains(t, content, "t_cloud_public_domain_name")
+		assert.NotContains(t, content, "t_cloud_public_tenant_name")
+		assert.NotContains(t, content, "t_cloud_public_access_key")
+		assert.NotContains(t, content, "t_cloud_public_secret_key")
+	}
+	assert.Contains(t, infrastructureVariables, `default     = "test-tenant"`)
+}
+
 func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
@@ -344,6 +397,45 @@ func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing
 	assert.Contains(t, externalDNSValues, "secretName: tcloudpubliccloudsyaml")
 	assert.Contains(t, externalDNSValues, "key: clouds.yaml")
 	assert.NotContains(t, externalDNSValues, "stackit")
+}
+
+func TestTemplateFiles_TCloudPublicExternalDNSSkipsExternalSecretWhenDisabled(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	services := fullServiceContext()
+	services["external-secrets"] = map[string]any{"status": "disabled"}
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"services":         services,
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var externalDNSValues string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/providers/t-cloud-public/example/external-dns/values.yaml.tplt" {
+			externalDNSValues = result.Content
+		}
+	}
+
+	require.NotEmpty(t, externalDNSValues)
+	assert.Contains(t, externalDNSValues, "externalSecrets: {}")
+	assert.NotContains(t, externalDNSValues, "remoteKey: t-cloud-public-clouds-yaml")
 }
 
 func TestTemplateFiles(t *testing.T) {

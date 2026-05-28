@@ -29,9 +29,6 @@ cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 
 Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 
-- `t_cloud_public_region`
-- `t_cloud_public_domain_name`
-- `t_cloud_public_tenant_name`
 - `create_t_cloud_public_agencies`
 - `create_dns_zone`
 - `dns_zone_name`
@@ -40,9 +37,11 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `evs_kms_agency_name`
 - `vpc_cidr`
 - `subnet_cidr`
-- `cluster_flavor`
-- `availability_zone`
+- `cluster_flavor_id`
+- `node_pools[*].availability_zone`
 - `node_pools`
+
+The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
 ## 2. Initialize Backend
 
@@ -87,7 +86,32 @@ For T Cloud Public, kubara generates provider-specific ExternalDNS values using 
 ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 ```
 
-The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. When `external-secrets` is enabled, kubara renders an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml`.
+The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
+
+When `external-secrets` is enabled, kubara renders an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml` through the cluster `ClusterSecretStore` named `<cluster-name>-<stage>`. Create that `ClusterSecretStore` during bootstrap with `--with-es-css-file`, or add it to `customer-service-catalog/helm/<cluster-name>/external-secrets/additional-values.yaml`.
+
+The referenced secret backend value should contain a `clouds.yaml` entry like:
+
+```yaml
+clouds:
+  openstack:
+    auth:
+      auth_url: https://iam.eu-de.otc.t-systems.com/v3
+      user_domain_name: "<domain-name>"
+      project_name: "<project-name>"
+      username: "<username>"
+      password: "<password>"
+    identity_api_version: 3
+    region_name: "eu-de"
+    interface: "public"
+```
+
+If you do not use `external-secrets`, create the Kubernetes Secret before ExternalDNS is synced:
+
+```bash
+kubectl create namespace external-dns
+kubectl -n external-dns create secret generic tcloudpubliccloudsyaml --from-file=clouds.yaml
+```
 
 The DNS zone itself is created by the Terraform `dns-zone` module when `create_dns_zone` is enabled.
 

@@ -1,3 +1,4 @@
+{{ if (eq (index .cluster.services "external-secrets" "status") "enabled") }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -15,6 +16,9 @@ externalSecrets:
         - remoteKey: t-cloud-public-clouds-yaml
           remoteKeyProperty: clouds.yaml
           secretKey: clouds.yaml
+{{ else }}
+externalSecrets: {}
+{{ end }}
 
 namespace:
   labels:

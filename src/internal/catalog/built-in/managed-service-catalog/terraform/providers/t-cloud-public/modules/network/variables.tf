@@ -12,13 +12,13 @@ variable "vpc_cidr" {
 variable "subnet_cidr" {
   description = "CIDR block for the subnet."
   type        = string
-  default     = "10.0.0.0/16"
+  default     = "10.0.1.0/24"
 }
 
 variable "subnet_gateway_ip" {
   description = "Gateway IP for the subnet."
   type        = string
-  default     = "10.0.0.1"
+  default     = "10.0.1.1"
 }
 
 variable "subnet_dns_list" {
