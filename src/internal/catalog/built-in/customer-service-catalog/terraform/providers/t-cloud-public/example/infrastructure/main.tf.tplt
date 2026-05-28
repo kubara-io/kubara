@@ -8,10 +8,6 @@ module "t_cloud_public_agencies" {
   count  = var.create_t_cloud_public_agencies ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/identity-agencies"
 
-  providers = {
-    opentelekomcloud = opentelekomcloud.agency
-  }
-
   agencies = {
     cce = {
       name                  = var.cce_agency_name

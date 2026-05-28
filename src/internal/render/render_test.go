@@ -261,7 +261,7 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
 }
 
-func TestTemplateFiles_TCloudPublicAgencyProviderIncludesTenantName(t *testing.T) {
+func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
 
@@ -286,24 +286,32 @@ func TestTemplateFiles_TCloudPublicAgencyProviderIncludesTenantName(t *testing.T
 	require.NoError(t, err)
 
 	var bootstrapMain string
+	var infrastructureMain string
 	var infrastructureProviders string
 	for _, result := range results {
 		require.NoError(t, result.Error)
 		switch result.Path {
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt":
 			bootstrapMain = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt":
+			infrastructureMain = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/terraform.tf.tplt":
 			infrastructureProviders = result.Content
 		}
 	}
 
 	require.NotEmpty(t, bootstrapMain)
+	require.NotEmpty(t, infrastructureMain)
 	require.NotEmpty(t, infrastructureProviders)
 
-	for _, content := range []string{bootstrapMain, infrastructureProviders} {
-		assert.Contains(t, content, `alias       = "agency"`)
-		assert.Contains(t, content, "tenant_name = var.t_cloud_public_tenant_name")
+	for _, content := range []string{bootstrapMain, infrastructureMain, infrastructureProviders} {
+		assert.NotContains(t, content, `alias       = "agency"`)
+		assert.NotContains(t, content, "opentelekomcloud.agency")
 	}
+	for _, content := range []string{bootstrapMain, infrastructureMain} {
+		assert.NotContains(t, content, "providers = {")
+	}
+	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
 }
 
 func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *testing.T) {

@@ -17,15 +17,6 @@ provider "opentelekomcloud" {
   secret_key  = var.t_cloud_public_secret_key
 }
 
-provider "opentelekomcloud" {
-  alias       = "agency"
-  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
-  domain_name = var.t_cloud_public_domain_name
-  tenant_name = var.t_cloud_public_tenant_name
-  access_key  = var.t_cloud_public_access_key
-  secret_key  = var.t_cloud_public_secret_key
-}
-
 # The OBS service needs an IAM agency with KMS permissions before it can
 # enable server-side encryption with a customer KMS key on a bucket. Without
 # this agency, the bucket creation fails with a 403 from KMS the moment
@@ -36,10 +27,6 @@ provider "opentelekomcloud" {
 module "obs_kms_agency" {
   count  = var.enable_bucket_server_side_encryption && var.create_obs_kms_agency ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/identity-agencies"
-
-  providers = {
-    opentelekomcloud = opentelekomcloud.agency
-  }
 
   agencies = {
     obs = {
