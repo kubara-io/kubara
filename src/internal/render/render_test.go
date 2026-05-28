@@ -261,6 +261,51 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
 }
 
+func TestTemplateFiles_TCloudPublicAgencyProviderIncludesTenantName(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var bootstrapMain string
+	var infrastructureProviders string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt":
+			bootstrapMain = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/terraform.tf.tplt":
+			infrastructureProviders = result.Content
+		}
+	}
+
+	require.NotEmpty(t, bootstrapMain)
+	require.NotEmpty(t, infrastructureProviders)
+
+	for _, content := range []string{bootstrapMain, infrastructureProviders} {
+		assert.Contains(t, content, `alias       = "agency"`)
+		assert.Contains(t, content, "tenant_name = var.t_cloud_public_tenant_name")
+	}
+}
+
 func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
