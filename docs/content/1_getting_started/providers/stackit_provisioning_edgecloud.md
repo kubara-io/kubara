@@ -17,11 +17,11 @@ Choose the operating model that fits your team. kubara examples use manifest-bas
 
 ## Terraform modules for the kubara Edge example
 
-The generated Edge Terraform example is intentionally create-only:
+The generated Edge Terraform example intentionally creates only the following resources:
 
 * `edge_instance` creates a new Edge Cloud instance.
 * `edge_image` uploads one local image artifact to STACKIT.
-* `edge_hosts` creates the example VM/network-based hosts and uses the uploaded image from `edge_image`.
+* `edge_hosts` creates the example STACKIT VM hosts and the required network resources, using the uploaded image from `edge_image`.
 
 If your Edge platform is already provisioned externally, you can skip Terraform Edge modules completely and continue with kubara Helm/GitOps workflows only.
 For example, this is common when you run bare metal, mixed VM/bare-metal environments, or hosts in another cloud.
@@ -44,10 +44,10 @@ Configure the generated Edge settings in:
 The generated `edge_hosts.nodes` defaults to one control plane node as a bootstrap example.
 This is intentionally simple for initial rollout and troubleshooting.
 
-For production and multi-node topologies, you have to design networking depending on your environment:
+For production and multi-node topologies, design networking based on your environment:
 
 * where hosts run (VMs, bare metal, mixed, multi-cloud)
-* ingress entry strategy (single public node, MetalLB VIP, external NLB, etc.)
+* external reachability strategy (single public node, MetalLB VIP, provider-managed Network Load Balancer in front of the nodes, etc.)
 * node-to-node traffic and return paths
 
 There is no one-size-fits-all edge network design.
@@ -236,7 +236,7 @@ edge_image = {
 ```
 
 6. Configure `edge_hosts.nodes`.
-7. Run full apply. Terraform uploads the image and creates the VM/network-based hosts from that uploaded image:
+7. Run full apply. Terraform uploads the image and creates the configured STACKIT VM hosts and their network resources from that uploaded image:
 
 ===  "Terraform"
 

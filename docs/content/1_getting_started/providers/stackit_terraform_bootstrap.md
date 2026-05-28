@@ -1,7 +1,6 @@
 # STACKIT Terraform Bootstrap
 
-We recommend using Terraform to provision your Kubernetes and additional infrastructure like a Secret Manager instance.
-For this purpose we provide the necessary Terraform configuration and modules.
+For STACKIT-based setups, kubara provides Terraform configuration and modules to provision Kubernetes and additional infrastructure like a Secret Manager instance.
 
 !!! warning
     In kubara version `0.2.0`, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.
