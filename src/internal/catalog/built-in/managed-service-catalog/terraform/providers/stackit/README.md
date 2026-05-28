@@ -359,8 +359,9 @@ terraform output edge_host_metadata
 ```
 
 - Use the selected host public IP for DNS `A` records (for example your ingress hostname).
-- If MetalLB is enabled, generated customer values use `clusters[].privateLoadBalancerIP` (`/32`) as pool address.
-- Generated ingress annotations for `external-dns` use `clusters[].publicLoadBalancerIP` as DNS target.
+- For the STACKIT VM-based single-node example, set `clusters[].publicLoadBalancerIP` to the STACKIT public IP assigned to the VM. Generated ingress annotations use this as `external-dns` target.
+- Set `clusters[].privateLoadBalancerIP` to the private IP of the same VM on the STACKIT network. Generated MetalLB customer values use this as pool address (`/32`).
+- This single-node path relies on the STACKIT public IP being routed/NATed to the selected VM while MetalLB exposes the Kubernetes `LoadBalancer` service on the VM's private network address. For multi-node setups, use a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.
 
 If you use a manually prepared image outside this Terraform example and know the related `EdgeImage`, verify that these extensions are present in that image configuration:
 
