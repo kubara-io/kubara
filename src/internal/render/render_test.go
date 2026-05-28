@@ -288,6 +288,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	var bootstrapMain string
 	var infrastructureMain string
 	var infrastructureProviders string
+	var agencyMain string
+	var agencyVariables string
 	for _, result := range results {
 		require.NoError(t, result.Error)
 		switch result.Path {
@@ -297,12 +299,18 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 			infrastructureMain = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/terraform.tf.tplt":
 			infrastructureProviders = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf":
+			agencyMain = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/variables.tf":
+			agencyVariables = result.Content
 		}
 	}
 
 	require.NotEmpty(t, bootstrapMain)
 	require.NotEmpty(t, infrastructureMain)
 	require.NotEmpty(t, infrastructureProviders)
+	require.NotEmpty(t, agencyMain)
+	require.NotEmpty(t, agencyVariables)
 
 	for _, content := range []string{bootstrapMain, infrastructureMain, infrastructureProviders} {
 		assert.NotContains(t, content, `alias       = "agency"`)
@@ -312,6 +320,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 		assert.NotContains(t, content, "providers = {")
 	}
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
+	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
+	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
+	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")
 }
 
 func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *testing.T) {

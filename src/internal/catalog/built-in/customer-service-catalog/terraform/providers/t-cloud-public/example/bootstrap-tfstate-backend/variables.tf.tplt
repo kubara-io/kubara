@@ -105,4 +105,9 @@ variable "obs_kms_agency_project_roles" {
   description = "Project roles assigned to the OBS KMS agency."
   type        = list(string)
   default     = ["KMS Administrator"]
+
+  validation {
+    condition     = length(var.obs_kms_agency_project_roles) > 0
+    error_message = "obs_kms_agency_project_roles must contain at least one role."
+  }
 }

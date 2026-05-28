@@ -143,6 +143,11 @@ variable "cce_agency_project_roles" {
   description = "Project roles assigned to the CCE authorization agency."
   type        = list(string)
   default     = ["Tenant Administrator"]
+
+  validation {
+    condition     = length(var.cce_agency_project_roles) > 0
+    error_message = "cce_agency_project_roles must contain at least one role."
+  }
 }
 
 variable "evs_kms_agency_name" {
@@ -167,6 +172,11 @@ variable "evs_kms_agency_project_roles" {
   description = "Project roles assigned to the EVS KMS agency."
   type        = list(string)
   default     = ["KMS Administrator"]
+
+  validation {
+    condition     = length(var.evs_kms_agency_project_roles) > 0
+    error_message = "evs_kms_agency_project_roles must contain at least one role."
+  }
 }
 
 ### CCE

@@ -9,6 +9,6 @@ variable "agencies" {
       all_projects = optional(bool)
       roles        = list(string)
     })), [])
-    domain_roles = optional(list(string), [])
+    domain_roles = optional(list(string))
   }))
 }
