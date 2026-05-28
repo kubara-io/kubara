@@ -111,7 +111,7 @@ clusters:
     ssoTeam: <org-team>
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
-      projectId: <project-id>
+      projectId: <project-id-or-tenant-name>
       kubernetesType: <ske, edge or cce>
       kubernetesVersion: 1.34
       dns:
@@ -119,6 +119,8 @@ clusters:
         email: <email>
 ...
 ```
+
+`terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
 `ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `ingress.annotations` map under `services.<service>.ingress.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.

@@ -48,7 +48,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
 			Provider:          "<provider>",
-			ProjectID:         "<project-id>",
+			ProjectID:         "<project-id-or-tenant-name>",
 			KubernetesType:    "<ske, edge or cce>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{

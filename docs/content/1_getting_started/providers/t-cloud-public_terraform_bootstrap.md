@@ -29,6 +29,8 @@ export TF_VAR_t_cloud_public_access_key="<access-key>"
 export TF_VAR_t_cloud_public_secret_key="<secret-key>"
 ```
 
+`TF_VAR_t_cloud_public_tenant_name` must be the T Cloud Public tenant/project name. This is the same value kubara reads from `terraform.projectId` in `config.yaml` for T Cloud Public, and it is not a UUID.
+
 Then load the file:
 
 ```bash

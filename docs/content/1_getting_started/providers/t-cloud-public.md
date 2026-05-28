@@ -20,6 +20,7 @@ terraform:
 ```
 
 `projectId` is used as the generated default for `t_cloud_public_tenant_name`. You can override it with `TF_VAR_t_cloud_public_tenant_name` if your tenant naming differs.
+For T Cloud Public, set `projectId` to the tenant/project name used as `tenant_name`, not to a UUID.
 
 Follow this order:
 
