@@ -422,6 +422,43 @@ func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials
 	assert.Contains(t, infrastructureVariables, `default     = "test-tenant"`)
 }
 
+func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var infrastructureEnv string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt" {
+			infrastructureEnv = result.Content
+		}
+	}
+
+	require.NotEmpty(t, infrastructureEnv)
+	assert.Contains(t, infrastructureEnv, `flavor             = "s3.xlarge.4"`)
+	assert.NotContains(t, infrastructureEnv, `flavor             = "c3.2xl.4"`)
+}
+
 func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
