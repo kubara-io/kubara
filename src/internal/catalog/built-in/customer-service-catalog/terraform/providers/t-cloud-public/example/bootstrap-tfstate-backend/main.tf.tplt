@@ -74,6 +74,7 @@ output "bucket_name" {
 output "credential_access_key" {
   description = "Access key for Terraform S3 backend access."
   value       = module.objectstorage_bucket.credential_access_key
+  sensitive   = true
 }
 
 output "credential_secret_access_key" {

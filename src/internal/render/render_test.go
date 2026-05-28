@@ -422,6 +422,49 @@ func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials
 	assert.Contains(t, infrastructureVariables, `default     = "test-tenant"`)
 }
 
+func TestTemplateFiles_TCloudPublicBootstrapCredentialsAreSensitive(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var bootstrapMain string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt" {
+			bootstrapMain = result.Content
+		}
+	}
+
+	require.NotEmpty(t, bootstrapMain)
+	accessKeyOutputIndex := strings.Index(bootstrapMain, `output "credential_access_key" {`)
+	require.NotEqual(t, -1, accessKeyOutputIndex)
+
+	accessKeyOutput := bootstrapMain[accessKeyOutputIndex:]
+	accessKeyOutputEnd := strings.Index(accessKeyOutput, "\n}")
+	require.NotEqual(t, -1, accessKeyOutputEnd)
+
+	assert.Contains(t, accessKeyOutput[:accessKeyOutputEnd], "sensitive   = true")
+}
+
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
