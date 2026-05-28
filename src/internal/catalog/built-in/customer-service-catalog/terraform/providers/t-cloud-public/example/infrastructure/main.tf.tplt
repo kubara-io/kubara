@@ -1,7 +1,6 @@
 {{ if (eq .cluster.terraform.kubernetesType "cce") }}
 locals {
-  cluster_name         = "${var.name}-${var.stage}"
-  cce_agency_projects = var.cce_agency_projects == null ? distinct(["eu-de", var.t_cloud_public_region]) : var.cce_agency_projects
+  cluster_name = "${var.name}-${var.stage}"
   t_cloud_public_agencies = merge(
     var.create_t_cloud_public_agencies ? {
       cce = {
@@ -9,8 +8,8 @@ locals {
         description           = var.cce_agency_description
         delegated_domain_name = var.cce_agency_delegated_domain_name
         project_roles = [
-          for project in local.cce_agency_projects : {
-            project = project
+          {
+            project = var.t_cloud_public_tenant_name
             roles   = var.cce_agency_project_roles
           }
         ]

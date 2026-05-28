@@ -329,6 +329,10 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	}
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
+	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
+	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
+	assert.NotContains(t, infrastructureVariables, "cce_agency_projects")
+	assert.NotContains(t, infrastructureEnv, "cce_agency_projects")
 	assert.Contains(t, infrastructureMain, "var.create_obs_kms_agency ? {")
 	assert.Contains(t, infrastructureMain, "obs_kms = {")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)

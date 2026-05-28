@@ -34,7 +34,6 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `create_dns_zone`
 - `dns_zone_name`
 - `cce_agency_name`
-- `cce_agency_projects`
 - `evs_kms_agency_name`
 - `create_obs_kms_agency`
 - `vpc_cidr`
