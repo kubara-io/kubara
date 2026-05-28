@@ -1,0 +1,56 @@
+variable "t_cloud_public_region" {
+  description = "T Cloud Public region for the project."
+  type        = string
+  default     = "eu-de"
+
+  validation {
+    condition     = contains(["eu-de", "eu-nl"], var.t_cloud_public_region)
+    error_message = "Allowed values for t_cloud_public_region are \"eu-de\" and \"eu-nl\"."
+  }
+}
+
+variable "t_cloud_public_domain_name" {
+  description = "T Cloud Public domain name."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_tenant_name" {
+  description = "T Cloud Public tenant/project name."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_access_key" {
+  description = "T Cloud Public access key."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_secret_key" {
+  description = "T Cloud Public secret key."
+  type        = string
+  sensitive   = true
+}
+
+variable "bucket_name" {
+  description = "OBS bucket name for Terraform state."
+  type        = string
+}
+
+variable "user_name" {
+  description = "Identity user name for Terraform state OBS access."
+  type        = string
+}
+
+variable "enable_bucket_server_side_encryption" {
+  description = "Enable OBS server-side encryption with KMS for the Terraform state bucket."
+  type        = bool
+  default     = true
+}
+
+variable "bucket_kms_pending_days" {
+  description = "Pending deletion days for the Terraform state bucket KMS key."
+  type        = number
+  default     = 7
+}

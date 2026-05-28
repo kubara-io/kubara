@@ -1,0 +1,76 @@
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secrets:
+    tcloudpubliccloudsyaml:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      data:
+        - remoteKey: t-cloud-public-clouds-yaml
+          remoteKeyProperty: clouds.yaml
+          secretKey: clouds.yaml
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+external-dns:
+  txtOwnerId: {{ .cluster.name}}-{{ .cluster.stage}}
+  domainFilters:
+    - {{ .cluster.dnsName}}
+  extraArgs:
+    source:
+      - traefik-proxy
+    webhook-provider-url: http://localhost:8080
+  rbac:
+    create: true
+    additionalPermissions:
+      - apiGroups: ["traefik.io"]
+        resources:
+          - ingressroutes
+          - ingressroutetcps
+          - ingressrouteudps
+          - tlsoptions
+          - tlsstores
+        verbs: ["get", "watch", "list"]
+      - apiGroups: [""]
+        resources:
+          - "namespaces"
+        verbs: ["get", "watch", "list"]
+  extraVolumes:
+    - name: tcloudpubliccloudsyaml
+      secret:
+        secretName: tcloudpubliccloudsyaml
+        items:
+          - key: clouds.yaml
+            path: clouds.yaml
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+    security:
+      allowInsecureImages: true
+  provider:
+    webhook:
+      image:
+        repository: ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook
+        tag: 1.1.2
+      extraVolumeMounts:
+        - name: tcloudpubliccloudsyaml
+          mountPath: /etc/openstack/
+      env:
+        - name: API_PORT
+          value: "8080"
+        - name: OS_CLOUD
+          value: openstack
+  serviceMonitor:
+    {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
+    enabled: true
+    {{- end }}
+    additionalLabels:
+      monitoring.instance: "{{ .cluster.name }}-{{ .cluster.stage }}"

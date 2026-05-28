@@ -1,0 +1,56 @@
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+### Kubernetes Instance
+output "kubeconfig_raw" {
+  description = "Raw admin kubeconfig."
+  value       = module.cce_cluster.kubeconfig_raw
+  sensitive   = true
+}
+
+output "load_balancer_public_ip" {
+  description = "Public IP address assigned to the optional load balancer."
+  value       = module.network.load_balancer_public_ip
+}
+
+output "vpc_id" {
+  description = "VPC ID used by the CCE cluster."
+  value       = module.network.vpc_id
+}
+
+output "subnet_id" {
+  description = "Subnet ID used by the CCE cluster."
+  value       = module.network.subnet_id
+}
+
+output "dns_zone_id" {
+  description = "DNS zone ID."
+  value       = var.create_dns_zone ? module.dns_zone[0].id : null
+}
+
+output "dns_zone_name" {
+  description = "DNS zone name."
+  value       = var.create_dns_zone ? module.dns_zone[0].name : null
+}
+
+output "dns_zone_masters" {
+  description = "DNS zone master name servers."
+  value       = var.create_dns_zone ? module.dns_zone[0].masters : null
+}
+
+{{ if (eq .cluster.services.velero.status "enabled") }}
+output "velero_bucket_name" {
+  description = "OBS bucket name for Velero backups."
+  value       = module.velero_bucket.bucket_name
+}
+
+output "velero_credential_access_key" {
+  description = "Access key for Velero OBS access."
+  value       = module.velero_bucket.credential_access_key
+}
+
+output "velero_credential_secret_access_key" {
+  description = "Secret key for Velero OBS access."
+  value       = module.velero_bucket.credential_secret_access_key
+  sensitive   = true
+}
+{{ end }}
+{{ end }}

@@ -336,6 +336,12 @@ clusters:
 			cs := NewConfigStore(configPath)
 			err := cs.Load()
 			require.Error(t, err)
+			if tt.name == "duplicate canonical service names" {
+				assert.Contains(t, err.Error(), `conflicting keys`)
+				assert.Contains(t, err.Error(), `"certManager"`)
+				assert.Contains(t, err.Error(), `"cert-manager"`)
+				return
+			}
 			assert.ErrorContains(t, err, tt.wantErr)
 		})
 	}
@@ -453,6 +459,76 @@ func TestConfigStore_Validate(t *testing.T) {
 			} else {
 				assert.NoError(t, err)
 			}
+		})
+	}
+}
+
+func TestValidateProviderKubernetesTypes(t *testing.T) {
+	tests := []struct {
+		name           string
+		provider       string
+		kubernetesType string
+		wantErr        bool
+	}{
+		{
+			name:           "stackit supports ske",
+			provider:       "stackit",
+			kubernetesType: "ske",
+			wantErr:        false,
+		},
+		{
+			name:           "stackit supports edge",
+			provider:       "stackit",
+			kubernetesType: "edge",
+			wantErr:        false,
+		},
+		{
+			name:           "t-cloud-public supports cce",
+			provider:       "t-cloud-public",
+			kubernetesType: "cce",
+			wantErr:        false,
+		},
+		{
+			name:           "stackit rejects cce",
+			provider:       "stackit",
+			kubernetesType: "cce",
+			wantErr:        true,
+		},
+		{
+			name:           "t-cloud-public rejects ske",
+			provider:       "t-cloud-public",
+			kubernetesType: "ske",
+			wantErr:        true,
+		},
+		{
+			name:           "t-cloud-public rejects edge",
+			provider:       "t-cloud-public",
+			kubernetesType: "edge",
+			wantErr:        true,
+		},
+		{
+			name:           "unknown provider is ignored by combination validation",
+			provider:       "<provider>",
+			kubernetesType: "ske",
+			wantErr:        false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := newValidTestConfig()
+			cfg.Clusters[0].Terraform.Provider = tt.provider
+			cfg.Clusters[0].Terraform.KubernetesType = tt.kubernetesType
+
+			err := validateProviderKubernetesTypes(cfg)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "terraform.provider")
+				assert.Contains(t, err.Error(), "terraform.kubernetesType")
+				return
+			}
+
+			assert.NoError(t, err)
 		})
 	}
 }

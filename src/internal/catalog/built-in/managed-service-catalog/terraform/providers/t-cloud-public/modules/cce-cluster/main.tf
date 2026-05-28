@@ -1,0 +1,75 @@
+resource "opentelekomcloud_cce_cluster_v3" "this" {
+  name                   = var.name
+  cluster_type           = var.cluster_type
+  flavor_id              = var.cluster_flavor_id
+  cluster_version        = var.kubernetes_version_min
+  vpc_id                 = var.vpc_id
+  subnet_id              = var.subnet_id
+  container_network_type = var.container_network_type
+  billing_mode           = 0
+  description            = var.description
+
+  timeouts {
+    create = "60m"
+    delete = "60m"
+  }
+
+  lifecycle {
+    prevent_destroy = true
+    ignore_changes = [
+      name,
+    ]
+  }
+}
+
+resource "opentelekomcloud_cce_node_pool_v3" "this" {
+  for_each = {
+    for node_pool in var.node_pools : node_pool.name => node_pool
+  }
+
+  cluster_id         = opentelekomcloud_cce_cluster_v3.this.id
+  name               = each.value.name
+  flavor             = each.value.flavor
+  initial_node_count = each.value.initial_node_count
+  availability_zone  = each.value.availability_zone
+  key_pair           = var.key_pair_name
+  runtime            = each.value.runtime
+  os                 = each.value.os
+  scale_enable       = each.value.scale_enable
+  docker_base_size   = each.value.docker_base_size
+
+  root_volume {
+    size       = each.value.root_volume.size
+    volumetype = each.value.root_volume.volumetype
+    kms_id     = var.node_storage_kms_id
+  }
+
+  dynamic "data_volumes" {
+    for_each = each.value.data_volumes
+    content {
+      size       = data_volumes.value.size
+      volumetype = data_volumes.value.volumetype
+      kms_id     = var.node_storage_kms_id
+    }
+  }
+
+  lifecycle {
+    ignore_changes = [
+      initial_node_count,
+    ]
+  }
+}
+
+data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
+  cluster_id = opentelekomcloud_cce_cluster_v3.this.id
+  duration   = var.kubeconfig_duration
+
+  depends_on = [opentelekomcloud_cce_node_pool_v3.this]
+}
+
+resource "local_file" "kubeconfig" {
+  count           = var.create_kubeconfig_local ? 1 : 0
+  content         = data.opentelekomcloud_cce_cluster_kubeconfig_v3.this.kubeconfig
+  filename        = var.kubeconfig_path
+  file_permission = "0644"
+}

@@ -8,9 +8,9 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 
 ## 1. Getting Started
 
-Whether you're running on STACKIT Cloud or STACKIT Edge or other Cloud providers, we recommend you to use Terraform.
+Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, or other cloud providers, we recommend you to use Terraform.
 
-For STACKIT we provide dedicated modules and configurations and have a guide on how to use them [on this page.](providers/stackit.md). 
+For STACKIT and T Cloud Public we provide dedicated modules and configurations. See the provider guides for [STACKIT](providers/stackit.md) and [T Cloud Public](providers/t-cloud-public.md).
 
 If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
 
@@ -110,9 +110,9 @@ clusters:
     ssoOrg: <oidc-org>
     ssoTeam: <org-team>
     terraform:
-      provider: stackit # currently supported: stackit
+      provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id>
-      kubernetesType: <ske or edge>
+      kubernetesType: <ske, edge or cce>
       kubernetesVersion: 1.34
       dns:
         name: <dns-name>
@@ -140,7 +140,7 @@ Visit one of the following pages to learn more about how to use kubara for setti
 well:
 
 - [STACKIT](providers/stackit.md)
-- More provider support is in the works
+- [T Cloud Public](providers/t-cloud-public.md)
 
 If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please
 continue with the next section.

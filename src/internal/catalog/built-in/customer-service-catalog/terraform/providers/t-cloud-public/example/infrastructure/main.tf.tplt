@@ -1,0 +1,130 @@
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+locals {
+  cluster_name         = "${var.name}-${var.stage}"
+  cce_agency_projects = var.cce_agency_projects == null ? distinct(["eu-de", var.t_cloud_public_region]) : var.cce_agency_projects
+}
+
+module "t_cloud_public_agencies" {
+  count  = var.create_t_cloud_public_agencies ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/identity-agencies"
+
+  providers = {
+    opentelekomcloud = opentelekomcloud.agency
+  }
+
+  agencies = {
+    cce = {
+      name                  = var.cce_agency_name
+      description           = var.cce_agency_description
+      delegated_domain_name = var.cce_agency_delegated_domain_name
+      project_roles = [
+        for project in local.cce_agency_projects : {
+          project = project
+          roles   = var.cce_agency_project_roles
+        }
+      ]
+    }
+    evs = {
+      name                  = var.evs_kms_agency_name
+      description           = var.evs_kms_agency_description
+      delegated_domain_name = var.evs_kms_agency_delegated_domain_name
+      project_roles = [
+        {
+          project = var.t_cloud_public_tenant_name
+          roles   = var.evs_kms_agency_project_roles
+        }
+      ]
+    }
+  }
+}
+
+module "dns_zone" {
+  count  = var.create_dns_zone ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/dns-zone"
+
+  name        = var.dns_zone_name
+  email       = var.dns_zone_email
+  type        = var.dns_zone_type
+  ttl         = var.dns_zone_ttl
+  description = var.dns_zone_description
+  tags        = var.dns_zone_tags
+}
+
+module "network" {
+  source = "../../../../managed-service-catalog/terraform/modules/network"
+
+  name = local.cluster_name
+
+  vpc_cidr          = var.vpc_cidr
+  subnet_cidr       = var.subnet_cidr
+  subnet_gateway_ip = var.subnet_gateway_ip
+  subnet_dns_list   = var.subnet_dns_list
+
+  enable_nat_gateway               = var.enable_nat_gateway
+  nat_gateway_spec                 = var.nat_gateway_spec
+  nat_eip_type                     = var.nat_eip_type
+  nat_eip_bandwidth_size           = var.nat_eip_bandwidth_size
+  enable_load_balancer             = var.enable_load_balancer
+  load_balancer_eip_type           = var.load_balancer_eip_type
+  load_balancer_eip_bandwidth_size = var.load_balancer_eip_bandwidth_size
+}
+
+module "cluster_keypair" {
+  source = "../../../../managed-service-catalog/terraform/modules/keypair"
+
+  name = "${local.cluster_name}-cluster-keypair"
+}
+
+module "node_storage_kms_key" {
+  source = "../../../../managed-service-catalog/terraform/modules/kms-key"
+
+  name         = "${local.cluster_name}-node-pool"
+  description  = "${local.cluster_name} CCE node pool volume encryption key"
+  pending_days = var.node_storage_kms_pending_days
+}
+
+module "cce_cluster" {
+  source = "../../../../managed-service-catalog/terraform/modules/cce-cluster"
+
+  name                   = local.cluster_name
+  kubernetes_version_min = var.kubernetes_version_min
+
+  vpc_id              = module.network.vpc_id
+  subnet_id           = module.network.subnet_id
+  key_pair_name       = module.cluster_keypair.name
+  node_storage_kms_id = module.node_storage_kms_key.id
+
+  cluster_flavor_id = var.cluster_flavor_id
+  cluster_type      = var.cluster_type
+  description       = var.cluster_description
+
+  node_pools = var.node_pools
+
+  create_kubeconfig_local = var.create_kubeconfig_local
+  kubeconfig_path         = var.kubeconfig_path
+  kubeconfig_duration     = var.kubeconfig_duration
+
+  depends_on = [module.t_cloud_public_agencies]
+}
+
+{{ if (eq .cluster.services.velero.status "enabled") }}
+module "velero_bucket_kms_key" {
+  count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/kms-key"
+
+  name         = "${local.cluster_name}-velero-obs"
+  description  = "${local.cluster_name} Velero OBS bucket encryption key"
+  pending_days = var.velero_bucket_kms_pending_days
+}
+
+module "velero_bucket" {
+  source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
+
+  bucket_name                   = var.velero_bucket_name
+  user_name                     = var.velero_bucket_user_name
+  versioning                    = var.velero_bucket_versioning
+  enable_server_side_encryption = var.velero_bucket_enable_server_side_encryption
+  kms_key_id                    = var.velero_bucket_enable_server_side_encryption ? module.velero_bucket_kms_key[0].id : null
+}
+{{ end }}
+{{ end }}

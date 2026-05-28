@@ -157,7 +157,7 @@ func TestSelectTemplatesForProvider_PrefersProviderSpecificFile(t *testing.T) {
 	files := []string{
 		"managed-service-catalog/terraform/modules/iam/main.tf",
 		"managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf",
-		"managed-service-catalog/terraform/providers/otc/modules/iam/main.tf",
+		"managed-service-catalog/terraform/providers/t-cloud-public/modules/iam/main.tf",
 		"managed-service-catalog/terraform/modules/iam/variables.tf",
 	}
 
@@ -165,7 +165,7 @@ func TestSelectTemplatesForProvider_PrefersProviderSpecificFile(t *testing.T) {
 
 	assert.Contains(t, selected, "managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf")
 	assert.NotContains(t, selected, "managed-service-catalog/terraform/modules/iam/main.tf")
-	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/otc/modules/iam/main.tf")
+	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/t-cloud-public/modules/iam/main.tf")
 	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/variables.tf")
 	require.Len(t, selected, 2)
 }
@@ -218,6 +218,132 @@ func TestStripProviderPath(t *testing.T) {
 			assert.Equal(t, tt.want, StripProviderPath(tt.input))
 		})
 	}
+}
+
+func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var paths []string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		paths = append(paths, result.Path)
+	}
+
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/dns-zone/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/keypair/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/kms-key/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/objectstorage-bucket/main.tf")
+	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt")
+	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
+}
+
+func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{
+					"velero": map[string]any{"status": "enabled"},
+				},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var mainContent string
+	var envContent string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt":
+			mainContent = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt":
+			envContent = result.Content
+		}
+	}
+
+	require.NotEmpty(t, mainContent)
+	require.NotEmpty(t, envContent)
+	assert.Contains(t, mainContent, `module "velero_bucket"`)
+	assert.Contains(t, envContent, "velero_bucket_name")
+}
+
+func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"services":         fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var externalDNSValues string
+	var externalDNSPath string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/providers/t-cloud-public/example/external-dns/values.yaml.tplt" {
+			externalDNSValues = result.Content
+			externalDNSPath = result.Path
+		}
+	}
+
+	require.NotEmpty(t, externalDNSPath)
+	assert.Contains(t, externalDNSValues, "ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook")
+	assert.Contains(t, externalDNSValues, "tag: 1.1.2")
+	assert.Contains(t, externalDNSValues, "secretName: tcloudpubliccloudsyaml")
+	assert.Contains(t, externalDNSValues, "key: clouds.yaml")
+	assert.NotContains(t, externalDNSValues, "stackit")
 }
 
 func TestTemplateFiles(t *testing.T) {

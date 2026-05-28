@@ -403,7 +403,63 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "placeholder provider")
-	assert.Contains(t, err.Error(), "supported providers: \"stackit\"")
+	assert.Contains(t, err.Error(), "supported providers: \"stackit, t-cloud-public\"")
+}
+
+func TestGenerateCmd_TCloudPublicHelmUsesProviderExternalDNSValues(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "tcp-cluster",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "test.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "t-cloud-public",
+			ProjectID:         "test-tenant",
+			KubernetesType:    "cce",
+			KubernetesVersion: "1.29.0",
+			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: createTestServices(),
+	})
+
+	envPath := createTestEnv(t, tempDir, envconfig.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
+
+	app := createTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "--env-file", envPath, "generate", "--helm"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	valuesPath := filepath.Join(tempDir, "customer-service-catalog", "helm", "tcp-cluster", "external-dns", "values.yaml")
+	values, err := os.ReadFile(valuesPath)
+	require.NoError(t, err)
+
+	valuesContent := string(values)
+	assert.Contains(t, valuesContent, "ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook")
+	assert.Contains(t, valuesContent, "secretName: tcloudpubliccloudsyaml")
+	assert.Contains(t, valuesContent, "OS_CLOUD")
+	assert.NotContains(t, valuesContent, "stackit")
 }
 
 // Helper function

@@ -1,0 +1,39 @@
+terraform {
+  required_version = ">= 1.9.3"
+
+  backend "s3" {
+    bucket = "bucket-tf-{{ .cluster.name }}-{{ .cluster.stage }}"
+    key    = "tf-state-{{ .cluster.name }}-{{ .cluster.stage }}"
+    endpoints = {
+      s3 = "https://obs.eu-de.otc.t-systems.com"
+    }
+    region                      = "eu-de"
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    skip_requesting_account_id  = true
+  }
+
+  required_providers {
+    opentelekomcloud = {
+      source  = "opentelekomcloud/opentelekomcloud"
+      version = ">= 1.36.64, < 2.0.0"
+    }
+  }
+}
+
+provider "opentelekomcloud" {
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_tenant_name
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+provider "opentelekomcloud" {
+  alias       = "agency"
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}

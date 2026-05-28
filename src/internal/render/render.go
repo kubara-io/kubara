@@ -37,7 +37,8 @@ var templatesFSNew fs.FS = catalog.BuiltInFS()
 // SupportedProviders lists every provider that has embedded templates.
 // Add new entries here when introducing provider-specific template directories.
 var SupportedProviders = map[string]bool{
-	"stackit": true,
+	"stackit":        true,
+	"t-cloud-public": true,
 }
 
 var templateName = map[TemplateType]string{

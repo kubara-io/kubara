@@ -84,6 +84,17 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 	return provider, nil
 }
 
+func resolveProviderIfConfigured(clusterBlock config.Cluster) string {
+	if clusterBlock.Terraform == nil {
+		return ""
+	}
+	provider := strings.ToLower(strings.TrimSpace(clusterBlock.Terraform.Provider))
+	if provider == "" || provider == "<provider>" || !render.SupportedProviders[provider] {
+		return ""
+	}
+	return provider
+}
+
 func resolveCatalog(cat catalog.Catalog) map[string]any {
 	if cat.Services == nil {
 		return map[string]any{
@@ -190,8 +201,10 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
 		}
 
-		provider := ""
-		if o.TemplateType != render.Helm {
+		var provider string
+		if o.TemplateType == render.Helm {
+			provider = resolveProviderIfConfigured(clusterBlock)
+		} else {
 			provider, err = resolveProvider(clusterBlock)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)

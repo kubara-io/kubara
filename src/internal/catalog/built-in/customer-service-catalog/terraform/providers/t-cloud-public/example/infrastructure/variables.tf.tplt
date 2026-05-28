@@ -1,0 +1,325 @@
+### T Cloud Public access
+variable "t_cloud_public_region" {
+  description = "T Cloud Public region for the project."
+  type        = string
+  default     = "eu-de"
+
+  validation {
+    condition     = contains(["eu-de", "eu-nl"], var.t_cloud_public_region)
+    error_message = "Allowed values for t_cloud_public_region are \"eu-de\" and \"eu-nl\"."
+  }
+}
+
+variable "t_cloud_public_domain_name" {
+  description = "T Cloud Public domain name."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_tenant_name" {
+  description = "T Cloud Public tenant/project name."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_access_key" {
+  description = "T Cloud Public access key."
+  type        = string
+  sensitive   = true
+}
+
+variable "t_cloud_public_secret_key" {
+  description = "T Cloud Public secret key."
+  type        = string
+  sensitive   = true
+}
+
+### Global
+variable "name" {
+  description = "Project context for resource naming."
+  type        = string
+}
+
+variable "stage" {
+  description = "Project stage for resource naming."
+  type        = string
+}
+
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+### DNS
+variable "create_dns_zone" {
+  description = "Create the T Cloud Public DNS zone."
+  type        = bool
+  default     = true
+}
+
+variable "dns_zone_name" {
+  description = "DNS zone name."
+  type        = string
+}
+
+variable "dns_zone_email" {
+  description = "Administrative email contact for the DNS zone."
+  type        = string
+}
+
+variable "dns_zone_type" {
+  description = "DNS zone type."
+  type        = string
+  default     = "public"
+}
+
+variable "dns_zone_ttl" {
+  description = "Default DNS zone TTL in seconds."
+  type        = number
+  default     = 300
+}
+
+variable "dns_zone_description" {
+  description = "DNS zone description."
+  type        = string
+  default     = "kubara managed DNS zone"
+}
+
+variable "dns_zone_tags" {
+  description = "Tags assigned to the DNS zone."
+  type        = map(string)
+  default     = {}
+}
+
+### Agencies
+variable "create_t_cloud_public_agencies" {
+  description = "Create tenant-level IAM agencies for required T Cloud Public service authorizations."
+  type        = bool
+  default     = true
+}
+
+variable "cce_agency_name" {
+  description = "IAM agency name for CCE authorization."
+  type        = string
+  default     = "cce_admin_trust"
+}
+
+variable "cce_agency_description" {
+  description = "IAM agency description for CCE authorization."
+  type        = string
+  default     = "Created by kubara Terraform for CCE authorization"
+}
+
+variable "cce_agency_delegated_domain_name" {
+  description = "Delegated domain name for CCE authorization."
+  type        = string
+  default     = "op_svc_cce"
+}
+
+variable "cce_agency_projects" {
+  description = "Projects where the CCE authorization agency receives project roles. If null, eu-de and t_cloud_public_region are used."
+  type        = list(string)
+  default     = null
+}
+
+variable "cce_agency_project_roles" {
+  description = "Project roles assigned to the CCE authorization agency."
+  type        = list(string)
+  default     = ["Tenant Administrator"]
+}
+
+variable "evs_kms_agency_name" {
+  description = "IAM agency name for EVS access to KMS-encrypted volumes."
+  type        = string
+  default     = "EVSAccessKMS"
+}
+
+variable "evs_kms_agency_description" {
+  description = "IAM agency description for EVS access to KMS-encrypted volumes."
+  type        = string
+  default     = "Created by kubara Terraform to enable EVS encryption"
+}
+
+variable "evs_kms_agency_delegated_domain_name" {
+  description = "Delegated domain name for EVS access to KMS-encrypted volumes."
+  type        = string
+  default     = "op_svc_evs"
+}
+
+variable "evs_kms_agency_project_roles" {
+  description = "Project roles assigned to the EVS KMS agency."
+  type        = list(string)
+  default     = ["KMS Administrator"]
+}
+
+### CCE
+variable "kubernetes_version_min" {
+  description = "Kubernetes cluster version, for example v1.29. If null, the provider uses the current default."
+  type        = string
+  default     = null
+}
+
+variable "cluster_flavor_id" {
+  description = "CCE cluster flavor."
+  type        = string
+  default     = "cce.s1.small"
+}
+
+variable "cluster_type" {
+  description = "CCE cluster type."
+  type        = string
+  default     = "VirtualMachine"
+}
+
+variable "cluster_description" {
+  description = "CCE cluster description."
+  type        = string
+  default     = "kubara managed CCE cluster"
+}
+
+variable "vpc_cidr" {
+  description = "CIDR block for the cluster VPC."
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "subnet_cidr" {
+  description = "CIDR block for the cluster subnet."
+  type        = string
+  default     = "10.0.0.0/16"
+}
+
+variable "subnet_gateway_ip" {
+  description = "Gateway IP for the cluster subnet."
+  type        = string
+  default     = "10.0.0.1"
+}
+
+variable "subnet_dns_list" {
+  description = "DNS servers for the cluster subnet."
+  type        = list(string)
+  default     = ["100.125.4.25", "100.125.129.199"]
+}
+
+variable "enable_nat_gateway" {
+  description = "Create a NAT gateway and SNAT rule for node egress."
+  type        = bool
+  default     = true
+}
+
+variable "nat_gateway_spec" {
+  description = "NAT gateway spec."
+  type        = string
+  default     = "0"
+}
+
+variable "nat_eip_type" {
+  description = "EIP type for the NAT gateway."
+  type        = string
+  default     = "5_mailbgp"
+}
+
+variable "nat_eip_bandwidth_size" {
+  description = "NAT gateway EIP bandwidth in Mbit/s."
+  type        = number
+  default     = 300
+}
+
+variable "enable_load_balancer" {
+  description = "Create an external load balancer with an associated EIP."
+  type        = bool
+  default     = true
+}
+
+variable "load_balancer_eip_type" {
+  description = "EIP type for the external load balancer."
+  type        = string
+  default     = "5_bgp"
+}
+
+variable "load_balancer_eip_bandwidth_size" {
+  description = "Load balancer EIP bandwidth in Mbit/s."
+  type        = number
+  default     = 300
+}
+
+variable "node_storage_kms_pending_days" {
+  description = "Pending deletion days for the CCE node storage KMS key."
+  type        = number
+  default     = 7
+}
+
+variable "node_pools" {
+  description = "CCE node pools."
+  type = list(object({
+    name               = string
+    flavor             = string
+    initial_node_count = number
+    availability_zone  = string
+    runtime            = optional(string, "containerd")
+    os                 = optional(string, "EulerOS 2.9")
+    scale_enable       = optional(bool, false)
+    docker_base_size   = optional(number, 20)
+    root_volume = optional(object({
+      size       = number
+      volumetype = string
+    }), {
+      size       = 50
+      volumetype = "SSD"
+    })
+    data_volumes = optional(list(object({
+      size       = number
+      volumetype = string
+    })), [{
+      size       = 100
+      volumetype = "SSD"
+    }])
+  }))
+  default = []
+}
+
+variable "create_kubeconfig_local" {
+  type        = bool
+  default     = false
+  description = "If true, write the kubeconfig to a local file."
+}
+
+variable "kubeconfig_path" {
+  type        = string
+  default     = "~/.kube/config"
+  description = "Filesystem path where the kubeconfig will be written if create_kubeconfig_local is true."
+}
+
+variable "kubeconfig_duration" {
+  description = "Kubeconfig certificate validity in days. Use -1 for the provider maximum."
+  type        = number
+  default     = -1
+}
+
+{{ if (eq .cluster.services.velero.status "enabled") }}
+### Velero
+variable "velero_bucket_name" {
+  description = "OBS bucket name for Velero backups."
+  type        = string
+}
+
+variable "velero_bucket_user_name" {
+  description = "Identity user name for Velero OBS access."
+  type        = string
+}
+
+variable "velero_bucket_versioning" {
+  description = "Enable OBS bucket versioning for Velero backups."
+  type        = bool
+  default     = true
+}
+
+variable "velero_bucket_enable_server_side_encryption" {
+  description = "Enable OBS server-side encryption with KMS for the Velero backup bucket."
+  type        = bool
+  default     = true
+}
+
+variable "velero_bucket_kms_pending_days" {
+  description = "Pending deletion days for the Velero bucket KMS key."
+  type        = number
+  default     = 7
+}
+{{ end }}
+{{ end }}
