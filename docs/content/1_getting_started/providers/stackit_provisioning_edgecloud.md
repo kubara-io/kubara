@@ -44,7 +44,7 @@ Configure the generated Edge settings in:
 The generated `edge_hosts.nodes` defaults to one control plane node as a bootstrap example.
 This is intentionally simple for initial rollout and troubleshooting.
 
-For production and multi-node topologies, design networking explicitly for your environment:
+For production and multi-node topologies, you have to design networking depending on your environment:
 
 * where hosts run (VMs, bare metal, mixed, multi-cloud)
 * ingress entry strategy (single public node, MetalLB VIP, external NLB, etc.)
