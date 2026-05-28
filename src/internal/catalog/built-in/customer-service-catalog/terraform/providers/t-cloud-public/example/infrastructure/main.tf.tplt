@@ -2,36 +2,52 @@
 locals {
   cluster_name         = "${var.name}-${var.stage}"
   cce_agency_projects = var.cce_agency_projects == null ? distinct(["eu-de", var.t_cloud_public_region]) : var.cce_agency_projects
+  t_cloud_public_agencies = merge(
+    var.create_t_cloud_public_agencies ? {
+      cce = {
+        name                  = var.cce_agency_name
+        description           = var.cce_agency_description
+        delegated_domain_name = var.cce_agency_delegated_domain_name
+        project_roles = [
+          for project in local.cce_agency_projects : {
+            project = project
+            roles   = var.cce_agency_project_roles
+          }
+        ]
+      }
+      evs = {
+        name                  = var.evs_kms_agency_name
+        description           = var.evs_kms_agency_description
+        delegated_domain_name = var.evs_kms_agency_delegated_domain_name
+        project_roles = [
+          {
+            project = var.t_cloud_public_tenant_name
+            roles   = var.evs_kms_agency_project_roles
+          }
+        ]
+      }
+    } : {},
+    var.create_obs_kms_agency ? {
+      obs_kms = {
+        name                  = var.obs_kms_agency_name
+        description           = var.obs_kms_agency_description
+        delegated_domain_name = var.obs_kms_agency_delegated_domain_name
+        project_roles = [
+          {
+            project = var.t_cloud_public_tenant_name
+            roles   = var.obs_kms_agency_project_roles
+          }
+        ]
+      }
+    } : {},
+  )
 }
 
 module "t_cloud_public_agencies" {
-  count  = var.create_t_cloud_public_agencies ? 1 : 0
+  count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/identity-agencies"
 
-  agencies = {
-    cce = {
-      name                  = var.cce_agency_name
-      description           = var.cce_agency_description
-      delegated_domain_name = var.cce_agency_delegated_domain_name
-      project_roles = [
-        for project in local.cce_agency_projects : {
-          project = project
-          roles   = var.cce_agency_project_roles
-        }
-      ]
-    }
-    evs = {
-      name                  = var.evs_kms_agency_name
-      description           = var.evs_kms_agency_description
-      delegated_domain_name = var.evs_kms_agency_delegated_domain_name
-      project_roles = [
-        {
-          project = var.t_cloud_public_tenant_name
-          roles   = var.evs_kms_agency_project_roles
-        }
-      ]
-    }
-  }
+  agencies = local.t_cloud_public_agencies
 }
 
 module "dns_zone" {
@@ -121,6 +137,8 @@ module "velero_bucket" {
   versioning                    = var.velero_bucket_versioning
   enable_server_side_encryption = var.velero_bucket_enable_server_side_encryption
   kms_key_id                    = var.velero_bucket_enable_server_side_encryption ? module.velero_bucket_kms_key[0].id : null
+
+  depends_on = [module.t_cloud_public_agencies]
 }
 {{ end }}
 {{ end }}

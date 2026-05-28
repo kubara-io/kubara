@@ -288,6 +288,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	var bootstrapMain string
 	var infrastructureMain string
 	var infrastructureProviders string
+	var infrastructureVariables string
+	var infrastructureEnv string
 	var agencyMain string
 	var agencyVariables string
 	for _, result := range results {
@@ -299,6 +301,10 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 			infrastructureMain = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/terraform.tf.tplt":
 			infrastructureProviders = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/variables.tf.tplt":
+			infrastructureVariables = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt":
+			infrastructureEnv = result.Content
 		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf":
 			agencyMain = result.Content
 		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/variables.tf":
@@ -309,6 +315,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	require.NotEmpty(t, bootstrapMain)
 	require.NotEmpty(t, infrastructureMain)
 	require.NotEmpty(t, infrastructureProviders)
+	require.NotEmpty(t, infrastructureVariables)
+	require.NotEmpty(t, infrastructureEnv)
 	require.NotEmpty(t, agencyMain)
 	require.NotEmpty(t, agencyVariables)
 
@@ -320,6 +328,12 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 		assert.NotContains(t, content, "providers = {")
 	}
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
+	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
+	assert.Contains(t, infrastructureMain, "var.create_obs_kms_agency ? {")
+	assert.Contains(t, infrastructureMain, "obs_kms = {")
+	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
+	assert.Contains(t, infrastructureEnv, "create_obs_kms_agency")
+	assert.Contains(t, infrastructureEnv, "= false")
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
 	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
 	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")
@@ -366,6 +380,7 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	require.NotEmpty(t, mainContent)
 	require.NotEmpty(t, envContent)
 	assert.Contains(t, mainContent, `module "velero_bucket"`)
+	assert.Contains(t, mainContent, "depends_on = [module.t_cloud_public_agencies]")
 	assert.Contains(t, envContent, "velero_bucket_name")
 }
 
