@@ -46,6 +46,26 @@ Then navigate to:
 cd bootstrap-tfstate-backend
 ```
 
+### OBS-to-KMS Agency
+
+The bootstrap stack creates an IAM agency named `OBSAccessKMS` (delegated to the `op_svc_obs` service principal) so that OBS can use the generated KMS key for server-side bucket encryption. Without this agency, the bucket creation fails with `Status=403 Forbidden, Code=AccessDenied` the moment `server_side_encryption` is set.
+
+The agency is tenant-scoped and only needs to exist once per T Cloud Public tenant. If your tenant already has it (for example created out-of-band or from a previous bootstrap of another cluster), disable the in-stack creation:
+
+```hcl
+create_obs_kms_agency = false
+```
+
+If you do not need server-side encryption at all for the state bucket, set:
+
+```hcl
+enable_bucket_server_side_encryption = false
+```
+
+The agency module is then skipped entirely.
+
+### Apply
+
 Run:
 
 === "Terraform"

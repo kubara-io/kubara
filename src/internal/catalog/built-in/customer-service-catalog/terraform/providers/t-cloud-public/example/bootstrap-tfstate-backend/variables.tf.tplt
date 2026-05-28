@@ -75,3 +75,34 @@ variable "bucket_kms_pending_days" {
   type        = number
   default     = 7
 }
+
+### OBS-to-KMS agency
+variable "create_obs_kms_agency" {
+  description = "Create the IAM agency that allows OBS to use customer KMS keys for server-side encryption. Set to false if the tenant already has an equivalent agency."
+  type        = bool
+  default     = true
+}
+
+variable "obs_kms_agency_name" {
+  description = "IAM agency name granting OBS access to KMS for server-side encryption."
+  type        = string
+  default     = "OBSAccessKMS"
+}
+
+variable "obs_kms_agency_description" {
+  description = "IAM agency description for OBS access to KMS-encrypted buckets."
+  type        = string
+  default     = "Created by kubara Terraform to allow OBS to use customer KMS keys"
+}
+
+variable "obs_kms_agency_delegated_domain_name" {
+  description = "Delegated domain name (service principal) for OBS access to KMS."
+  type        = string
+  default     = "op_svc_obs"
+}
+
+variable "obs_kms_agency_project_roles" {
+  description = "Project roles assigned to the OBS KMS agency."
+  type        = list(string)
+  default     = ["KMS Administrator"]
+}
