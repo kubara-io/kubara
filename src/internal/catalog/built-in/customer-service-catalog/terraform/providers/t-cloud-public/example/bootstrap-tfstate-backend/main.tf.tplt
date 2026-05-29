@@ -56,6 +56,10 @@ module "bucket_kms_key" {
   count  = var.enable_bucket_server_side_encryption ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/kms-key"
 
+  providers = {
+    opentelekomcloud = opentelekomcloud.global-region
+  }
+
   name         = "${var.bucket_name}-obs"
   description  = "KMS key for ${var.bucket_name} OBS bucket encryption"
   pending_days = var.bucket_kms_pending_days

@@ -17,8 +17,4 @@ resource "opentelekomcloud_dns_zone_v2" "this" {
       router_region = router.value.router_region
     }
   }
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }

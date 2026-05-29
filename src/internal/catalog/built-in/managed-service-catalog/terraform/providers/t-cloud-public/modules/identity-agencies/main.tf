@@ -16,7 +16,6 @@ resource "opentelekomcloud_identity_agency_v3" "this" {
   }
 
   lifecycle {
-    prevent_destroy = true
     # The T Cloud Public IAM API can normalize project_role data after creation.
     ignore_changes = [
       project_role,

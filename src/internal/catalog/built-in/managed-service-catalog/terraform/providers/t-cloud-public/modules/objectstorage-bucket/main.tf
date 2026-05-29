@@ -2,37 +2,21 @@ resource "opentelekomcloud_identity_user_v3" "this" {
   name        = var.user_name
   pwd_reset   = false
   description = "Created by kubara Terraform for OBS bucket access"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_identity_credential_v3" "this" {
   user_id     = opentelekomcloud_identity_user_v3.this.id
   description = "Created by kubara Terraform for OBS bucket access"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_identity_group_v3" "obs_only" {
   name        = "${var.user_name}-obs-only"
   description = "Base group for ${var.bucket_name} OBS bucket user"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_identity_user_group_membership_v3" "obs_only" {
   user   = opentelekomcloud_identity_user_v3.this.id
   groups = [opentelekomcloud_identity_group_v3.obs_only.id]
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 data "opentelekomcloud_identity_project_v3" "region_project" {
@@ -44,10 +28,6 @@ resource "opentelekomcloud_identity_group_v3" "kms_access" {
 
   name        = "${var.user_name}-obs-kms-rw"
   description = "KMS access for ${var.bucket_name} OBS bucket user"
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_identity_role_v3" "kms_access" {
@@ -85,10 +65,6 @@ resource "opentelekomcloud_identity_role_v3" "kms_access" {
     ]
     resource = ["kms:*:*:KeyId:${var.kms_key_id}"]
   }
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_identity_role_assignment_v3" "kms_access" {
@@ -104,10 +80,6 @@ resource "opentelekomcloud_identity_user_group_membership_v3" "kms_access" {
 
   user   = opentelekomcloud_identity_user_v3.this.id
   groups = [opentelekomcloud_identity_group_v3.kms_access[0].id]
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }
 
 resource "opentelekomcloud_obs_bucket" "this" {
@@ -172,8 +144,4 @@ resource "opentelekomcloud_obs_bucket_policy" "this" {
   ]
 }
 POLICY
-
-  lifecycle {
-    prevent_destroy = true
-  }
 }

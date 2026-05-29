@@ -15,7 +15,6 @@ resource "opentelekomcloud_cce_cluster_v3" "this" {
   }
 
   lifecycle {
-    prevent_destroy = true
     ignore_changes = [
       name,
     ]

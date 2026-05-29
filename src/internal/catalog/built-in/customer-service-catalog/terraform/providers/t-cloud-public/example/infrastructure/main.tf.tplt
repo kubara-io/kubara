@@ -123,6 +123,10 @@ module "velero_bucket_kms_key" {
   count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/kms-key"
 
+  providers = {
+    opentelekomcloud = opentelekomcloud.global-region
+  }
+
   name         = "${local.cluster_name}-velero-obs"
   description  = "${local.cluster_name} Velero OBS bucket encryption key"
   pending_days = var.velero_bucket_kms_pending_days

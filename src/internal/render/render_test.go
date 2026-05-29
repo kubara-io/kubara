@@ -329,6 +329,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_region")
 	assert.Contains(t, bootstrapMain, `alias       = "global-region"`)
 	assert.Contains(t, bootstrapMain, "tenant_name = var.t_cloud_public_region")
+	assert.Contains(t, bootstrapMain, `module "bucket_kms_key"`)
+	assert.Contains(t, bootstrapMain, "opentelekomcloud = opentelekomcloud.global-region")
 	assert.Contains(t, bootstrapMain, "opentelekomcloud.global-region = opentelekomcloud.global-region")
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
@@ -388,6 +390,8 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	require.NotEmpty(t, mainContent)
 	require.NotEmpty(t, envContent)
 	assert.Contains(t, mainContent, `module "velero_bucket"`)
+	assert.Contains(t, mainContent, `module "velero_bucket_kms_key"`)
+	assert.Contains(t, mainContent, "opentelekomcloud = opentelekomcloud.global-region")
 	assert.Contains(t, mainContent, "opentelekomcloud.global-region = opentelekomcloud.global-region")
 	assert.Contains(t, mainContent, "depends_on = [module.t_cloud_public_agencies]")
 	assert.Contains(t, envContent, "velero_bucket_name")
@@ -530,6 +534,38 @@ func TestTemplateFiles_TCloudPublicOBSBucketCanBeDestroyed(t *testing.T) {
 	require.NotEqual(t, -1, bucketPolicyIndex)
 
 	assert.NotContains(t, bucketResource[:bucketPolicyIndex], "prevent_destroy = true")
+}
+
+func TestTemplateFiles_TCloudPublicManagedModulesDoNotPreventDestroy(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if strings.HasPrefix(result.Path, "managed-service-catalog/terraform/providers/t-cloud-public/modules/") {
+			assert.NotContains(t, result.Content, "prevent_destroy", result.Path)
+		}
+	}
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
