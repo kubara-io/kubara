@@ -9,7 +9,7 @@ Running `kubara generate --terraform` creates:
 - `objectstorage-bucket`: OBS bucket plus dedicated S3-compatible credentials for Terraform state or backup buckets
 - `identity-agencies`: IAM agencies for tenant-level service authorizations
 - `dns-zone`: DNS zone for the configured cluster domain
-- `network`: VPC, subnet, optional NAT gateway, optional external load balancer and EIP
+- `network`: VPC, subnet, optional NAT gateway, optional shared or dedicated external load balancer and EIP
 - `keypair`: SSH keypair for CCE node pools
 - `kms-key`: KMS key for encrypted node volumes
 - `cce-cluster`: CCE cluster, configurable node pools, optional CCE addons, and optional local kubeconfig output
@@ -38,10 +38,16 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `create_obs_kms_agency`
 - `vpc_cidr`
 - `subnet_cidr`
+- `load_balancer_type`
+- `dedicated_load_balancer_availability_zones`
+- `dedicated_load_balancer_l4_flavor_name`
+- `dedicated_load_balancer_l7_flavor_name`
 - `cluster_flavor_id`
 - `node_pools[*].availability_zone`
 - `node_pools`
 - `cce_addons`
+
+The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
 The generated `cce_addons` map enables `metrics-server`, `coredns`, and `everest` by default. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 

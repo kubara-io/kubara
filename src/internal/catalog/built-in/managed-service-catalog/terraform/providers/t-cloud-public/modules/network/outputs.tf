@@ -20,10 +20,10 @@ output "nat_gateway_id" {
 
 output "load_balancer_id" {
   description = "Load balancer ID, if created."
-  value       = try(opentelekomcloud_lb_loadbalancer_v2.this[0].id, "")
+  value       = try(opentelekomcloud_lb_loadbalancer_v2.this[0].id, try(opentelekomcloud_lb_loadbalancer_v3.dedicated[0].id, ""))
 }
 
 output "load_balancer_public_ip" {
   description = "Public IP address assigned to the optional load balancer."
-  value       = try(opentelekomcloud_vpc_eip_v1.load_balancer[0].publicip[0].ip_address, "")
+  value       = try(opentelekomcloud_vpc_eip_v1.load_balancer[0].publicip[0].ip_address, try(opentelekomcloud_vpc_eip_v1.dedicated_load_balancer[0].publicip[0].ip_address, ""))
 }

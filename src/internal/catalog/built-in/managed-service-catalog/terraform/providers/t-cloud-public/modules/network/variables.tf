@@ -57,6 +57,17 @@ variable "enable_load_balancer" {
   default     = true
 }
 
+variable "load_balancer_type" {
+  description = "External load balancer type. Use shared for ELB v2 or dedicated for ELB v3."
+  type        = string
+  default     = "shared"
+
+  validation {
+    condition     = contains(["shared", "dedicated"], var.load_balancer_type)
+    error_message = "Allowed values for load_balancer_type are \"shared\" and \"dedicated\"."
+  }
+}
+
 variable "load_balancer_eip_type" {
   description = "EIP type for the external load balancer."
   type        = string
@@ -67,4 +78,27 @@ variable "load_balancer_eip_bandwidth_size" {
   description = "Load balancer EIP bandwidth in Mbit/s."
   type        = number
   default     = 300
+}
+
+variable "dedicated_load_balancer_availability_zones" {
+  description = "Availability zones for the dedicated external load balancer."
+  type        = list(string)
+  default     = ["eu-de-01"]
+
+  validation {
+    condition     = length(var.dedicated_load_balancer_availability_zones) > 0
+    error_message = "dedicated_load_balancer_availability_zones must contain at least one availability zone."
+  }
+}
+
+variable "dedicated_load_balancer_l4_flavor_name" {
+  description = "Layer-4 flavor name for the dedicated external load balancer. Set to an empty string to skip L4."
+  type        = string
+  default     = "L4_flavor.elb.s1.small"
+}
+
+variable "dedicated_load_balancer_l7_flavor_name" {
+  description = "Layer-7 flavor name for the dedicated external load balancer. Set to an empty string to skip L7."
+  type        = string
+  default     = "L7_flavor.elb.s1.small"
 }

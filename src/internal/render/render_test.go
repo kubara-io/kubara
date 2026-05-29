@@ -335,6 +335,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
 	assert.Contains(t, infrastructureMain, "addons     = var.cce_addons")
+	assert.Contains(t, infrastructureMain, "load_balancer_type               = var.load_balancer_type")
+	assert.Contains(t, infrastructureMain, "dedicated_load_balancer_availability_zones = var.dedicated_load_balancer_availability_zones")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
 	assert.NotContains(t, infrastructureVariables, "cce_agency_projects")
 	assert.NotContains(t, infrastructureEnv, "cce_agency_projects")
@@ -343,9 +345,15 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
 	assert.Contains(t, infrastructureVariables, `variable "cce_addons"`)
+	assert.Contains(t, infrastructureVariables, `variable "load_balancer_type"`)
+	assert.Contains(t, infrastructureVariables, `variable "dedicated_load_balancer_availability_zones"`)
 	assert.NotContains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
 	assert.Contains(t, infrastructureEnv, "create_obs_kms_agency")
 	assert.Contains(t, infrastructureEnv, "= false")
+	assert.Contains(t, infrastructureEnv, `load_balancer_type                           = "shared"`)
+	assert.Contains(t, infrastructureEnv, `dedicated_load_balancer_availability_zones   = ["eu-de-01"]`)
+	assert.Contains(t, infrastructureEnv, `dedicated_load_balancer_l4_flavor_name       = "L4_flavor.elb.s1.small"`)
+	assert.Contains(t, infrastructureEnv, `dedicated_load_balancer_l7_flavor_name       = "L7_flavor.elb.s1.small"`)
 	assert.Contains(t, infrastructureEnv, "cce_addons = {")
 	assert.Contains(t, infrastructureEnv, "metrics-server = {")
 	assert.Contains(t, infrastructureEnv, `version = "1.3.104"`)
@@ -627,6 +635,63 @@ func TestTemplateFiles_TCloudPublicCCEClusterRendersAddons(t *testing.T) {
 	assert.Contains(t, cceMain, "swr_addr = local.addon_image_endpoint")
 	assert.Contains(t, cceVariables, `variable "addons"`)
 	assert.Contains(t, cceOutputs, `output "addons"`)
+}
+
+func TestTemplateFiles_TCloudPublicNetworkSupportsDedicatedLoadBalancer(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var networkMain string
+	var networkVariables string
+	var networkOutputs string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/main.tf":
+			networkMain = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/variables.tf":
+			networkVariables = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/outputs.tf":
+			networkOutputs = result.Content
+		}
+	}
+
+	require.NotEmpty(t, networkMain)
+	require.NotEmpty(t, networkVariables)
+	require.NotEmpty(t, networkOutputs)
+	assert.Contains(t, networkMain, `create_shared_load_balancer    = var.enable_load_balancer && var.load_balancer_type == "shared"`)
+	assert.Contains(t, networkMain, `create_dedicated_load_balancer = var.enable_load_balancer && var.load_balancer_type == "dedicated"`)
+	assert.Contains(t, networkMain, `resource "opentelekomcloud_lb_loadbalancer_v2" "this"`)
+	assert.Contains(t, networkMain, `resource "opentelekomcloud_lb_loadbalancer_v3" "dedicated"`)
+	assert.Contains(t, networkMain, `availability_zones = var.dedicated_load_balancer_availability_zones`)
+	assert.Contains(t, networkMain, `l4_flavor          = var.dedicated_load_balancer_l4_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l4[0].id : null`)
+	assert.Contains(t, networkMain, `l7_flavor          = var.dedicated_load_balancer_l7_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l7[0].id : null`)
+	assert.Contains(t, networkVariables, `default     = "shared"`)
+	assert.Contains(t, networkVariables, `default     = ["eu-de-01"]`)
+	assert.Contains(t, networkVariables, `default     = "L4_flavor.elb.s1.small"`)
+	assert.Contains(t, networkVariables, `default     = "L7_flavor.elb.s1.small"`)
+	assert.Contains(t, networkOutputs, `opentelekomcloud_lb_loadbalancer_v3.dedicated[0].id`)
+	assert.Contains(t, networkOutputs, `opentelekomcloud_vpc_eip_v1.dedicated_load_balancer[0].publicip[0].ip_address`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {

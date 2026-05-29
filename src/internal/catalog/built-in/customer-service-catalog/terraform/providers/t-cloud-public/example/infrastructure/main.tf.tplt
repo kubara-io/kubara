@@ -76,8 +76,13 @@ module "network" {
   nat_eip_type                     = var.nat_eip_type
   nat_eip_bandwidth_size           = var.nat_eip_bandwidth_size
   enable_load_balancer             = var.enable_load_balancer
+  load_balancer_type               = var.load_balancer_type
   load_balancer_eip_type           = var.load_balancer_eip_type
   load_balancer_eip_bandwidth_size = var.load_balancer_eip_bandwidth_size
+
+  dedicated_load_balancer_availability_zones = var.dedicated_load_balancer_availability_zones
+  dedicated_load_balancer_l4_flavor_name     = var.dedicated_load_balancer_l4_flavor_name
+  dedicated_load_balancer_l7_flavor_name     = var.dedicated_load_balancer_l7_flavor_name
 }
 
 module "cluster_keypair" {
