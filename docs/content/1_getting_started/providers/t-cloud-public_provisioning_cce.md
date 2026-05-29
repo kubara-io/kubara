@@ -49,7 +49,7 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 
 The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
-The generated `cce_addons` map enables `metrics-server`, `coredns`, and `everest` by default. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
+The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
