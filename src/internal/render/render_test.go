@@ -324,14 +324,12 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 		assert.NotContains(t, content, `alias       = "agency"`)
 		assert.NotContains(t, content, "opentelekomcloud.agency")
 	}
-	for _, content := range []string{bootstrapMain, infrastructureMain} {
-		assert.NotContains(t, content, "providers = {")
-	}
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
-	assert.Contains(t, infrastructureProviders, `source  = "hashicorp/time"`)
-	assert.Contains(t, bootstrapMain, `source  = "hashicorp/time"`)
-	assert.Contains(t, bootstrapMain, `resource "time_sleep" "obs_kms_agency_propagation"`)
-	assert.Contains(t, bootstrapMain, "create_duration = var.obs_kms_agency_propagation_delay")
+	assert.Contains(t, infrastructureProviders, `alias       = "global-region"`)
+	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_region")
+	assert.Contains(t, bootstrapMain, `alias       = "global-region"`)
+	assert.Contains(t, bootstrapMain, "tenant_name = var.t_cloud_public_region")
+	assert.Contains(t, bootstrapMain, "opentelekomcloud.global-region = opentelekomcloud.global-region")
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
@@ -339,10 +337,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.NotContains(t, infrastructureEnv, "cce_agency_projects")
 	assert.Contains(t, infrastructureMain, "var.create_obs_kms_agency ? {")
 	assert.Contains(t, infrastructureMain, "obs_kms = {")
-	assert.Contains(t, infrastructureMain, `resource "time_sleep" "obs_kms_agency_propagation"`)
-	assert.Contains(t, infrastructureMain, "create_duration = var.obs_kms_agency_propagation_delay")
+	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
-	assert.Contains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
+	assert.NotContains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
 	assert.Contains(t, infrastructureEnv, "create_obs_kms_agency")
 	assert.Contains(t, infrastructureEnv, "= false")
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
@@ -391,7 +388,8 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	require.NotEmpty(t, mainContent)
 	require.NotEmpty(t, envContent)
 	assert.Contains(t, mainContent, `module "velero_bucket"`)
-	assert.Contains(t, mainContent, "depends_on = [time_sleep.obs_kms_agency_propagation]")
+	assert.Contains(t, mainContent, "opentelekomcloud.global-region = opentelekomcloud.global-region")
+	assert.Contains(t, mainContent, "depends_on = [module.t_cloud_public_agencies]")
 	assert.Contains(t, envContent, "velero_bucket_name")
 }
 

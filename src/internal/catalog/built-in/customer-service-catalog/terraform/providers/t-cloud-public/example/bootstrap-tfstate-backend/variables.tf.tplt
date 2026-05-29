@@ -111,9 +111,3 @@ variable "obs_kms_agency_project_roles" {
     error_message = "obs_kms_agency_project_roles must contain at least one role."
   }
 }
-
-variable "obs_kms_agency_propagation_delay" {
-  description = "Delay after creating the OBS KMS agency before enabling OBS bucket encryption."
-  type        = string
-  default     = "60s"
-}

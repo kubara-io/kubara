@@ -33,7 +33,7 @@ locals {
         delegated_domain_name = var.obs_kms_agency_delegated_domain_name
         project_roles = [
           {
-            project = var.t_cloud_public_tenant_name
+            project = var.t_cloud_public_region
             roles   = var.obs_kms_agency_project_roles
           }
         ]
@@ -47,14 +47,6 @@ module "t_cloud_public_agencies" {
   source = "../../../../managed-service-catalog/terraform/modules/identity-agencies"
 
   agencies = local.t_cloud_public_agencies
-}
-
-resource "time_sleep" "obs_kms_agency_propagation" {
-  count = var.create_obs_kms_agency ? 1 : 0
-
-  create_duration = var.obs_kms_agency_propagation_delay
-
-  depends_on = [module.t_cloud_public_agencies]
 }
 
 module "dns_zone" {
@@ -139,13 +131,18 @@ module "velero_bucket_kms_key" {
 module "velero_bucket" {
   source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
 
+  providers = {
+    opentelekomcloud               = opentelekomcloud
+    opentelekomcloud.global-region = opentelekomcloud.global-region
+  }
+
   bucket_name                   = var.velero_bucket_name
   user_name                     = var.velero_bucket_user_name
   versioning                    = var.velero_bucket_versioning
   enable_server_side_encryption = var.velero_bucket_enable_server_side_encryption
   kms_key_id                    = var.velero_bucket_enable_server_side_encryption ? module.velero_bucket_kms_key[0].id : null
 
-  depends_on = [time_sleep.obs_kms_agency_propagation]
+  depends_on = [module.t_cloud_public_agencies]
 }
 {{ end }}
 {{ end }}

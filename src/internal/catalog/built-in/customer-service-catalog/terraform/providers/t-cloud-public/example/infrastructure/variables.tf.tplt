@@ -208,12 +208,6 @@ variable "obs_kms_agency_project_roles" {
   }
 }
 
-variable "obs_kms_agency_propagation_delay" {
-  description = "Delay after creating the OBS KMS agency before enabling OBS bucket encryption."
-  type        = string
-  default     = "60s"
-}
-
 ### CCE
 variable "kubernetes_version_min" {
   description = "Kubernetes cluster version, for example v1.29. If null, the provider uses the current default."

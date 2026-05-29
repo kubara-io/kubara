@@ -35,7 +35,9 @@ resource "opentelekomcloud_identity_user_group_membership_v3" "obs_only" {
   }
 }
 
-data "opentelekomcloud_identity_project_v3" "current" {}
+data "opentelekomcloud_identity_project_v3" "region_project" {
+  provider = opentelekomcloud.global-region
+}
 
 resource "opentelekomcloud_identity_group_v3" "kms_access" {
   count = var.enable_server_side_encryption ? 1 : 0
@@ -93,7 +95,7 @@ resource "opentelekomcloud_identity_role_assignment_v3" "kms_access" {
   count = var.enable_server_side_encryption ? 1 : 0
 
   group_id   = opentelekomcloud_identity_group_v3.kms_access[0].id
-  project_id = data.opentelekomcloud_identity_project_v3.current.id
+  project_id = data.opentelekomcloud_identity_project_v3.region_project.id
   role_id    = opentelekomcloud_identity_role_v3.kms_access[0].id
 }
 

@@ -5,6 +5,9 @@ terraform {
     opentelekomcloud = {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
+      configuration_aliases = [
+        opentelekomcloud.global-region,
+      ]
     }
   }
 }

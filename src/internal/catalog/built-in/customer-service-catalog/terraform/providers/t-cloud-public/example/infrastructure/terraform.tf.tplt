@@ -19,10 +19,6 @@ terraform {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
     }
-    time = {
-      source  = "hashicorp/time"
-      version = ">= 0.12.1, < 1.0.0"
-    }
   }
 }
 
@@ -30,6 +26,15 @@ provider "opentelekomcloud" {
   auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
   domain_name = var.t_cloud_public_domain_name
   tenant_name = var.t_cloud_public_tenant_name
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+provider "opentelekomcloud" {
+  alias       = "global-region"
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_region
   access_key  = var.t_cloud_public_access_key
   secret_key  = var.t_cloud_public_secret_key
 }
