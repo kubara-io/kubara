@@ -59,11 +59,39 @@ resource "opentelekomcloud_cce_node_pool_v3" "this" {
   }
 }
 
+data "opentelekomcloud_identity_project_v3" "current" {}
+
+locals {
+  addon_image_endpoint = data.opentelekomcloud_identity_project_v3.current.region == "eu-de" ? "100.125.7.25:20202" : "swr.eu-nl.otc.t-systems.com"
+  enabled_addons = {
+    for name, addon in var.addons : name => addon
+    if addon.enabled
+  }
+}
+
+resource "opentelekomcloud_cce_addon_v3" "this" {
+  for_each = local.enabled_addons
+
+  template_name    = each.key
+  template_version = each.value.version
+  cluster_id       = opentelekomcloud_cce_cluster_v3.this.id
+
+  values {
+    basic = merge({
+      swr_addr = local.addon_image_endpoint
+      swr_user = "cce-addons"
+    }, each.value.basic)
+    custom = each.value.custom
+  }
+
+  depends_on = [opentelekomcloud_cce_node_pool_v3.this]
+}
+
 data "opentelekomcloud_cce_cluster_kubeconfig_v3" "this" {
   cluster_id = opentelekomcloud_cce_cluster_v3.this.id
   duration   = var.kubeconfig_duration
 
-  depends_on = [opentelekomcloud_cce_node_pool_v3.this]
+  depends_on = [opentelekomcloud_cce_addon_v3.this]
 }
 
 resource "local_file" "kubeconfig" {

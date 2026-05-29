@@ -110,6 +110,7 @@ module "cce_cluster" {
   description       = var.cluster_description
 
   node_pools = var.node_pools
+  addons     = var.cce_addons
 
   create_kubeconfig_local = var.create_kubeconfig_local
   kubeconfig_path         = var.kubeconfig_path

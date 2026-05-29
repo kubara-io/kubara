@@ -8,6 +8,11 @@ output "node_pools" {
   value       = opentelekomcloud_cce_node_pool_v3.this
 }
 
+output "addons" {
+  description = "CCE addons managed for the cluster."
+  value       = opentelekomcloud_cce_addon_v3.this
+}
+
 output "kubeconfig_raw" {
   description = "Raw admin kubeconfig."
   value       = data.opentelekomcloud_cce_cluster_kubeconfig_v3.this.kubeconfig

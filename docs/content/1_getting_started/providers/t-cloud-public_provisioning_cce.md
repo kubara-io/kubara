@@ -12,7 +12,7 @@ Running `kubara generate --terraform` creates:
 - `network`: VPC, subnet, optional NAT gateway, optional external load balancer and EIP
 - `keypair`: SSH keypair for CCE node pools
 - `kms-key`: KMS key for encrypted node volumes
-- `cce-cluster`: CCE cluster, configurable node pools, and optional local kubeconfig output
+- `cce-cluster`: CCE cluster, configurable node pools, optional CCE addons, and optional local kubeconfig output
 
 The same bucket module is also used for Velero backup buckets. The generated customer infrastructure renders a `velero_bucket` module only when the cluster config contains `services.velero.status: enabled`.
 
@@ -41,6 +41,9 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `cluster_flavor_id`
 - `node_pools[*].availability_zone`
 - `node_pools`
+- `cce_addons`
+
+The generated `cce_addons` map enables `metrics-server`, `coredns`, and `everest` by default. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 

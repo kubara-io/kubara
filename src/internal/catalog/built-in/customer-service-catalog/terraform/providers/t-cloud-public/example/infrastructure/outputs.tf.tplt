@@ -21,6 +21,11 @@ output "subnet_id" {
   value       = module.network.subnet_id
 }
 
+output "cce_addons" {
+  description = "CCE addons managed for the cluster."
+  value       = module.cce_cluster.addons
+}
+
 output "dns_zone_id" {
   description = "DNS zone ID."
   value       = var.create_dns_zone ? module.dns_zone[0].id : null

@@ -334,6 +334,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, bootstrapMain, "opentelekomcloud.global-region = opentelekomcloud.global-region")
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
+	assert.Contains(t, infrastructureMain, "addons     = var.cce_addons")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
 	assert.NotContains(t, infrastructureVariables, "cce_agency_projects")
 	assert.NotContains(t, infrastructureEnv, "cce_agency_projects")
@@ -341,9 +342,17 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "obs_kms = {")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
+	assert.Contains(t, infrastructureVariables, `variable "cce_addons"`)
 	assert.NotContains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
 	assert.Contains(t, infrastructureEnv, "create_obs_kms_agency")
 	assert.Contains(t, infrastructureEnv, "= false")
+	assert.Contains(t, infrastructureEnv, "cce_addons = {")
+	assert.Contains(t, infrastructureEnv, "metrics-server = {")
+	assert.Contains(t, infrastructureEnv, `version = "1.3.104"`)
+	assert.Contains(t, infrastructureEnv, "coredns = {")
+	assert.Contains(t, infrastructureEnv, `version = "1.30.43"`)
+	assert.Contains(t, infrastructureEnv, "everest = {")
+	assert.Contains(t, infrastructureEnv, `version = "2.4.198"`)
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
 	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
 	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")
@@ -566,6 +575,58 @@ func TestTemplateFiles_TCloudPublicManagedModulesDoNotPreventDestroy(t *testing.
 			assert.NotContains(t, result.Content, "prevent_destroy", result.Path)
 		}
 	}
+}
+
+func TestTemplateFiles_TCloudPublicCCEClusterRendersAddons(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var cceMain string
+	var cceVariables string
+	var cceOutputs string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf":
+			cceMain = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/variables.tf":
+			cceVariables = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/outputs.tf":
+			cceOutputs = result.Content
+		}
+	}
+
+	require.NotEmpty(t, cceMain)
+	require.NotEmpty(t, cceVariables)
+	require.NotEmpty(t, cceOutputs)
+
+	assert.Contains(t, cceMain, `resource "opentelekomcloud_cce_addon_v3" "this"`)
+	assert.Contains(t, cceMain, "for_each = local.enabled_addons")
+	assert.Contains(t, cceMain, "template_name    = each.key")
+	assert.Contains(t, cceMain, "template_version = each.value.version")
+	assert.Contains(t, cceMain, "swr_addr = local.addon_image_endpoint")
+	assert.Contains(t, cceVariables, `variable "addons"`)
+	assert.Contains(t, cceOutputs, `output "addons"`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {

@@ -334,6 +334,17 @@ variable "node_pools" {
   default = []
 }
 
+variable "cce_addons" {
+  description = "CCE addons keyed by addon name. Set enabled = false to skip an addon."
+  type = map(object({
+    enabled = optional(bool, true)
+    version = string
+    basic   = optional(map(any), {})
+    custom  = optional(map(any), {})
+  }))
+  default = {}
+}
+
 variable "create_kubeconfig_local" {
   type        = bool
   default     = false

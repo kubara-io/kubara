@@ -95,6 +95,17 @@ EOF
   default = []
 }
 
+variable "addons" {
+  description = "CCE addons keyed by addon name. Disabled addons are not managed."
+  type = map(object({
+    enabled = optional(bool, true)
+    version = string
+    basic   = optional(map(any), {})
+    custom  = optional(map(any), {})
+  }))
+  default = {}
+}
+
 variable "create_kubeconfig_local" {
   type        = bool
   default     = false
