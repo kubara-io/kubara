@@ -290,6 +290,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	var infrastructureProviders string
 	var infrastructureVariables string
 	var infrastructureEnv string
+	var infrastructureOutputs string
 	var agencyMain string
 	var agencyVariables string
 	for _, result := range results {
@@ -305,6 +306,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 			infrastructureVariables = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt":
 			infrastructureEnv = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/outputs.tf.tplt":
+			infrastructureOutputs = result.Content
 		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf":
 			agencyMain = result.Content
 		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/variables.tf":
@@ -317,6 +320,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	require.NotEmpty(t, infrastructureProviders)
 	require.NotEmpty(t, infrastructureVariables)
 	require.NotEmpty(t, infrastructureEnv)
+	require.NotEmpty(t, infrastructureOutputs)
 	require.NotEmpty(t, agencyMain)
 	require.NotEmpty(t, agencyVariables)
 
@@ -360,6 +364,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureEnv, `version = "1.3.104"`)
 	assert.NotContains(t, infrastructureEnv, "coredns = {")
 	assert.NotContains(t, infrastructureEnv, "everest = {")
+	assert.Contains(t, infrastructureOutputs, `output "load_balancer_id"`)
+	assert.Contains(t, infrastructureOutputs, "module.network.load_balancer_id")
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
 	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
 	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")

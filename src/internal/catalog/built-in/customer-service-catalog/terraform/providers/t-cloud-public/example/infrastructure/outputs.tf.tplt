@@ -11,6 +11,11 @@ output "load_balancer_public_ip" {
   value       = module.network.load_balancer_public_ip
 }
 
+output "load_balancer_id" {
+  description = "Load balancer ID for the Traefik CCE Service annotation."
+  value       = module.network.load_balancer_id
+}
+
 output "vpc_id" {
   description = "VPC ID used by the CCE cluster."
   value       = module.network.vpc_id
