@@ -37,6 +37,12 @@ traefik:
             - X-Auth-Request-Email
             - Authorization
   {{- end }}
+  {{- if (and .cluster.terraform (eq .cluster.terraform.provider "t-cloud-public") (eq .cluster.terraform.kubernetesType "cce")) }}
+  service:
+    annotations:
+      kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"
+      kubernetes.io/elb.class: "union"
+  {{- end }}
   metrics:
     prometheus:
       serviceMonitor:

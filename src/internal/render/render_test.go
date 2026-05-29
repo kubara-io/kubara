@@ -772,6 +772,46 @@ func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing
 	assert.NotContains(t, externalDNSValues, "stackit")
 }
 
+func TestTemplateFiles_TCloudPublicCCETraefikValuesRenderELBAnnotations(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"terraform": map[string]any{
+					"provider":       "t-cloud-public",
+					"kubernetesType": "cce",
+				},
+				"services": fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var traefikValues string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/example/traefik/values.yaml.tplt" {
+			traefikValues = result.Content
+		}
+	}
+
+	require.NotEmpty(t, traefikValues)
+	assert.Contains(t, traefikValues, `kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"`)
+	assert.Contains(t, traefikValues, `kubernetes.io/elb.class: "union"`)
+}
+
 func TestTemplateFiles_StackitProviderOverridesExternalDNSValues(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()

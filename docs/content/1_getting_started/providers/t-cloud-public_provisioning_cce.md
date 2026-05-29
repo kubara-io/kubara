@@ -88,6 +88,33 @@ Run:
 
 The generated stack can optionally write a kubeconfig locally when `create_kubeconfig_local` is enabled.
 
+## Traefik Load Balancer Binding
+
+For T Cloud Public CCE, the generated Traefik values contain CCE Service annotations for binding Traefik to an existing ELB:
+
+```yaml
+traefik:
+  service:
+    annotations:
+      kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"
+      kubernetes.io/elb.class: "union"
+```
+
+After applying the infrastructure, get the generated load balancer ID:
+
+```bash
+cd customer-service-catalog/terraform/<cluster-name>/infrastructure
+terraform output -raw load_balancer_id
+```
+
+Set that value in:
+
+```text
+customer-service-catalog/helm/<cluster-name>/traefik/values.yaml
+```
+
+Keep `kubernetes.io/elb.class: "union"` for the default shared load balancer. If `load_balancer_type = "dedicated"` is used in Terraform, set `kubernetes.io/elb.class: "performance"` in the Traefik values.
+
 ## ExternalDNS
 
 For T Cloud Public, kubara generates provider-specific ExternalDNS values using the T Cloud Public DNS webhook:
