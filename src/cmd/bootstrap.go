@@ -12,6 +12,7 @@ import (
 	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/localmode"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
 
@@ -21,6 +22,7 @@ import (
 type BootstrapFlags struct {
 	WithES                 bool
 	WithProm               bool
+	Local                  bool
 	ClusterSecretStorePath string
 	ManagedCatalogPath     string
 	OverlayValuesPath      string
@@ -46,9 +48,9 @@ func NewBootstrapCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "bootstrap",
 		Usage:       "Bootstrap Argo CD onto a cluster",
-		UsageText:   "kubara bootstrap CLUSTER_NAME",
+		UsageText:   "kubara bootstrap CLUSTER_NAME [--local]",
 		ArgsUsage:   "CLUSTER_NAME",
-		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs.",
+		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
@@ -111,17 +113,6 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
-	// Load environment
-	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
-	if err := es.Load(); err != nil {
-		return nil, fmt.Errorf("load env: %w", err)
-	}
-	if err := es.ValidateAll(); err != nil {
-		return nil, fmt.Errorf("validate env: %w", err)
-	}
-
-	envMap := es.GetConfig()
-
 	// Load config file and find cluster by name
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
@@ -144,6 +135,16 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 	if clusterConfig == nil {
 		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
+	}
+
+	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
+	if err := es.Load(); err != nil {
+		return nil, fmt.Errorf("load env: %w", err)
+	}
+
+	envMap, err := prepareBootstrapEnv(clusterConfig, es.GetConfig(), flags.Local)
+	if err != nil {
+		return nil, fmt.Errorf("prepare env: %w", err)
 	}
 
 	// Validate and normalize ClusterSecretStore path if provided
@@ -170,19 +171,29 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("load catalog: %w", err)
 	}
 
+	timeout := flags.Timeout
+	if flags.Local && !cmd.IsSet("timeout") && timeout < 20*time.Minute {
+		timeout = 20 * time.Minute
+	}
+
 	return &bootstrap.Options{
-		Kubeconfig:     kubeconf,
-		ManagedCatalog: managedAbsPath,
-		OverlayValues:  customerAbsPath,
-		WithES:         flags.WithES,
-		WithProm:       flags.WithProm,
-		WithESCSSPath:  cssAbsPath,
-		EnvMap:         envMap,
-		Catalog:        catalog,
-		ClusterConfig:  clusterConfig,
-		DryRun:         flags.DryRun,
-		Timeout:        flags.Timeout,
-		ClusterName:    clusterName,
+		Kubeconfig:       kubeconf,
+		ManagedCatalog:   managedAbsPath,
+		OverlayValues:    customerAbsPath,
+		WithES:           flags.WithES,
+		WithProm:         flags.WithProm,
+		Local:            flags.Local,
+		WithESCSSPath:    cssAbsPath,
+		EnvMap:           envMap,
+		Catalog:          catalog,
+		ClusterConfig:    clusterConfig,
+		DryRun:           flags.DryRun,
+		Timeout:          timeout,
+		ClusterName:      clusterName,
+		WorkDir:          cwd,
+		ConfigFilePath:   configFilePath,
+		CatalogPath:      catalogOptions.CatalogPath,
+		CatalogOverwrite: catalogOptions.Overwrite,
 	}, nil
 }
 
@@ -204,6 +215,11 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Name:        "with-prometheus-crds",
 			Usage:       "Also install kube-prometheus-stack",
 			Destination: &flags.WithProm,
+		},
+		&cli.BoolFlag{
+			Name:        "local",
+			Usage:       "Provision an isolated local evaluation environment. Local testing only; not for production use.",
+			Destination: &flags.Local,
 		},
 		&cli.StringFlag{
 			Name:        "with-es-css-file",
@@ -244,4 +260,44 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 	defer cancelSignal()
 
 	return bootstrap.Bootstrap(ctx, o)
+}
+
+func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
+	if !local {
+		if err := envMap.ValidateAll(); err != nil {
+			return nil, err
+		}
+		return envMap, nil
+	}
+
+	if cluster == nil {
+		return nil, fmt.Errorf("cluster config is required for --local")
+	}
+
+	prepared := *envMap
+
+	if !envconfig.IsConfiguredEnvValue(prepared.ArgocdGitHttpsUrl) {
+		return nil, fmt.Errorf("ARGOCD_GIT_HTTPS_URL is required for --local")
+	}
+	if localmode.IsGeneratedPlaceholder(prepared.ArgocdGitHttpsUrl) {
+		return nil, fmt.Errorf("ARGOCD_GIT_HTTPS_URL still uses the generated local placeholder; update .env before running --local")
+	}
+	if !envconfig.IsConfiguredEnvValue(prepared.ArgocdWizardAccountPassword) {
+		return nil, fmt.Errorf("ARGOCD_WIZARD_ACCOUNT_PASSWORD is required for --local")
+	}
+	if localmode.IsGeneratedPlaceholder(prepared.ArgocdWizardAccountPassword) {
+		return nil, fmt.Errorf("ARGOCD_WIZARD_ACCOUNT_PASSWORD still uses the generated local placeholder; update .env before running --local")
+	}
+
+	if !envconfig.IsConfiguredEnvValue(prepared.ProjectName) {
+		prepared.ProjectName = cluster.Name
+	}
+	if !envconfig.IsConfiguredEnvValue(prepared.ProjectStage) {
+		prepared.ProjectStage = cluster.Stage
+	}
+	if !envconfig.IsConfiguredEnvValue(prepared.DomainName) {
+		prepared.DomainName = localmode.DomainName
+	}
+
+	return &prepared, nil
 }

@@ -273,53 +273,6 @@ func TestEnvStore_Validate(t *testing.T) {
 	}
 }
 
-func TestEnvStore_ValidateAll(t *testing.T) {
-	tests := []struct {
-		name    string
-		envMap  *EnvMap
-		wantErr bool
-	}{
-		{
-			name: "Valid config passes ValidateAll",
-			envMap: &EnvMap{
-				ProjectName:                 "test-project",
-				ProjectStage:                "dev",
-				DockerconfigBase64:          "dGVzdA==",
-				ArgocdWizardAccountPassword: "pass",
-				ArgocdHelmRepoUsername:      "user",
-				ArgocdHelmRepoPassword:      "pass",
-				ArgocdHelmRepoUrl:           "url",
-				ArgocdGitHttpsUrl:           "url",
-				ArgocdGitPatOrPassword:      "token",
-				ArgocdGitUsername:           "user",
-				DomainName:                  "example.com",
-			},
-			wantErr: false,
-		},
-		{
-			name: "Invalid config fails ValidateAll",
-			envMap: &EnvMap{
-				ProjectName: "",
-			},
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			m := &EnvStore{
-				envMap: tt.envMap,
-			}
-			err := m.ValidateAll()
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
 func TestEnvStore_GenerateEnvExample(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -340,8 +293,10 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 				assert.Contains(t, outputStr, "PROJECT_NAME='<...>'")
 				assert.Contains(t, outputStr, "PROJECT_STAGE='<...>'")
 				assert.Contains(t, outputStr, "DOMAIN_NAME='<...>'")
-				assert.Contains(t, outputStr, "DOCKERCONFIG_BASE64='<...>'")
+				assert.Contains(t, outputStr, "DOCKERCONFIG_BASE64=''")
 				assert.Contains(t, outputStr, "ARGOCD_WIZARD_ACCOUNT_PASSWORD='<...>'")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_PAT_OR_PASSWORD=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_USERNAME=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_USERNAME=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_PASSWORD=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_URL=''")

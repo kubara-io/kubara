@@ -86,14 +86,11 @@ func TestEnvMap_Validate(t *testing.T) {
 		return &EnvMap{
 			ProjectName:                 "test-project",
 			ProjectStage:                "dev",
-			DockerconfigBase64:          "dGVzdC1kb2NrZXItY29uZmlnCg==",
 			ArgocdWizardAccountPassword: "password123",
 			ArgocdHelmRepoUsername:      "helm-user",
 			ArgocdHelmRepoPassword:      "helm-pass",
 			ArgocdHelmRepoUrl:           "https://helm.example.com",
 			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			ArgocdGitPatOrPassword:      "github-token",
-			ArgocdGitUsername:           "git-user",
 			DomainName:                  "example.com",
 		}
 	}
@@ -130,12 +127,15 @@ func TestEnvMap_Validate(t *testing.T) {
 			errType: ErrDefaultIsSet,
 		},
 		{
-			name: "Missing optional helm repository fields passes validation",
+			name: "Missing optional fields pass validation",
 			envMap: func() *EnvMap {
 				em := validEnvMap()
+				em.DockerconfigBase64 = ""
 				em.ArgocdHelmRepoUsername = ""
 				em.ArgocdHelmRepoPassword = ""
 				em.ArgocdHelmRepoUrl = ""
+				em.ArgocdGitPatOrPassword = ""
+				em.ArgocdGitUsername = ""
 				return em
 			}(),
 			wantErr: false,
@@ -174,14 +174,11 @@ func TestEnvMap_ValidateAll(t *testing.T) {
 		return &EnvMap{
 			ProjectName:                 "test-project",
 			ProjectStage:                "dev",
-			DockerconfigBase64:          "dGVzdC1kb2NrZXItY29uZmlnCg==",
 			ArgocdWizardAccountPassword: "password123",
 			ArgocdHelmRepoUsername:      "helm-user",
 			ArgocdHelmRepoPassword:      "helm-pass",
 			ArgocdHelmRepoUrl:           "https://helm.example.com",
 			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			ArgocdGitPatOrPassword:      "github-token",
-			ArgocdGitUsername:           "git-user",
 			DomainName:                  "example.com",
 		}
 	}
@@ -275,14 +272,14 @@ func TestEnvMap_setDefaults_AllFields(t *testing.T) {
 		// Verify that all fields with default tags are set
 		assert.Equal(t, "<...>", em.ProjectName)
 		assert.Equal(t, "<...>", em.ProjectStage)
-		assert.Equal(t, "<...>", em.DockerconfigBase64)
+		assert.Equal(t, "", em.DockerconfigBase64)
 		assert.Equal(t, "<...>", em.ArgocdWizardAccountPassword)
 		assert.Equal(t, "", em.ArgocdHelmRepoUsername)
 		assert.Equal(t, "", em.ArgocdHelmRepoPassword)
 		assert.Equal(t, "", em.ArgocdHelmRepoUrl)
 		assert.Equal(t, "<...>", em.ArgocdGitHttpsUrl)
-		assert.Equal(t, "<...>", em.ArgocdGitPatOrPassword)
-		assert.Equal(t, "<...>", em.ArgocdGitUsername)
+		assert.Equal(t, "", em.ArgocdGitPatOrPassword)
+		assert.Equal(t, "", em.ArgocdGitUsername)
 		assert.Equal(t, "<...>", em.DomainName)
 	})
 }
@@ -332,14 +329,11 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 		em := &EnvMap{
 			ProjectName:                 "<...>",
 			ProjectStage:                "dev",
-			DockerconfigBase64:          "test",
 			ArgocdWizardAccountPassword: "test",
 			ArgocdHelmRepoUsername:      "test",
 			ArgocdHelmRepoPassword:      "test",
 			ArgocdHelmRepoUrl:           "test",
 			ArgocdGitHttpsUrl:           "test",
-			ArgocdGitPatOrPassword:      "test",
-			ArgocdGitUsername:           "test",
 			DomainName:                  "test",
 		}
 

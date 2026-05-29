@@ -75,11 +75,13 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init
+>kubara init [--prep] [--local]
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
+
+**--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use.
 
 **--overwrite**: Overwrite config if exists
 
@@ -115,13 +117,15 @@ Shows a list of commands or help for one command
 
 Bootstrap Argo CD onto a cluster
 
->kubara bootstrap CLUSTER_NAME
+>kubara bootstrap CLUSTER_NAME [--local]
 
 **--dry-run**: Run with dry-run
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
+
+**--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
 **--managed-catalog**="": Path to the managed catalog directory (default: "managed-service-catalog")
 

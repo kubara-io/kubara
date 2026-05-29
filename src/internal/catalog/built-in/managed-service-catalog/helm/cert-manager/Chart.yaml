@@ -3,7 +3,7 @@ apiVersion: v2
 name: cert-manager
 description: Umbrella Chart for cert-manager
 type: application
-version: 0.2.2
+version: 0.3.0
 dependencies:
   - name: template-library
     repository: file://../template-library

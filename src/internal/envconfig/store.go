@@ -81,14 +81,6 @@ func (em *EnvStore) Validate() error {
 	return nil
 }
 
-func (em *EnvStore) ValidateAll() error {
-	err := em.envMap.Validate()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
 func (em *EnvStore) GenerateEnvExample() ([]byte, error) {
 	var b strings.Builder
 
@@ -112,6 +104,41 @@ func (em *EnvStore) GenerateEnvExample() ([]byte, error) {
 			// Use the default value from the tag, or the current value
 			defaultVal := fieldType.Tag.Get("default")
 			fmt.Fprintf(&b, "%s='%s'\n", koanfKey, defaultVal)
+		}
+	}
+
+	return []byte(b.String()), nil
+}
+
+func (em *EnvStore) GenerateEnvFileFromCurrentValues() ([]byte, error) {
+	return RenderEnvFileFromValues(em.GetConfig())
+}
+
+func RenderEnvFileFromValues(envMap *EnvMap) ([]byte, error) {
+	if envMap == nil {
+		return nil, fmt.Errorf("env map is required")
+	}
+
+	var b strings.Builder
+
+	v := reflect.ValueOf(envMap).Elem()
+	t := v.Type()
+
+	for i := 0; i < v.NumField(); i++ {
+		fieldVal := v.Field(i)
+		fieldType := t.Field(i)
+
+		if doc := fieldType.Tag.Get("doc"); doc != "" {
+			b.WriteString(doc + "\n")
+		}
+
+		koanfKey := fieldType.Tag.Get("koanf")
+		if koanfKey != "" {
+			val := fmt.Sprint(fieldVal.Interface())
+			val = strings.ReplaceAll(val, "\\", "\\\\")
+			val = strings.ReplaceAll(val, "\"", "\\\"")
+			val = strings.ReplaceAll(val, "\n", "\\n")
+			fmt.Fprintf(&b, "%s=\"%s\"\n", koanfKey, val)
 		}
 	}
 

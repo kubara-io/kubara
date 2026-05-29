@@ -6,6 +6,7 @@ docs_dir: 'content'
 nav:
   - Home: index.md
   - Getting Started:
+      - Quick Start: 1_getting_started/quick_start.md
       - Concepts:
           - Overview: 1_getting_started/overview_core_concept.md
           - Catalogs: 1_getting_started/catalogs.md
