@@ -31,6 +31,16 @@ output "cce_addons" {
   value       = module.cce_cluster.addons
 }
 
+output "openbao_release_name" {
+  description = "OpenBao Helm release name, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].release_name : null
+}
+
+output "openbao_namespace" {
+  description = "OpenBao namespace, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].namespace : null
+}
+
 output "dns_zone_id" {
   description = "DNS zone ID."
   value       = var.create_dns_zone ? module.dns_zone[0].id : null

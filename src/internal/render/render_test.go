@@ -257,6 +257,7 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/kms-key/main.tf")
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf")
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/objectstorage-bucket/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/main.tf")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt")
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
 }
@@ -332,6 +333,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureProviders, `alias       = "global-region"`)
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureProviders, "skip_metadata_api_check")
+	assert.Contains(t, infrastructureProviders, `source  = "hashicorp/helm"`)
+	assert.Contains(t, infrastructureProviders, `provider "helm"`)
+	assert.Contains(t, infrastructureProviders, "yamldecode(module.cce_cluster.kubeconfig_raw)")
 	assert.Contains(t, bootstrapMain, `alias       = "global-region"`)
 	assert.Contains(t, bootstrapMain, "tenant_name = var.t_cloud_public_region")
 	assert.Contains(t, bootstrapMain, `module "bucket_kms_key"`)
@@ -340,6 +344,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
 	assert.Contains(t, infrastructureMain, "addons     = var.cce_addons")
+	assert.Contains(t, infrastructureMain, `module "openbao"`)
+	assert.Contains(t, infrastructureMain, "source = \"../../../../managed-service-catalog/terraform/modules/openbao-helm\"")
+	assert.Contains(t, infrastructureMain, "depends_on = [module.cce_cluster]")
 	assert.Contains(t, infrastructureMain, "load_balancer_type               = var.load_balancer_type")
 	assert.Contains(t, infrastructureMain, "dedicated_load_balancer_availability_zones = var.dedicated_load_balancer_availability_zones")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
@@ -350,6 +357,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
 	assert.Contains(t, infrastructureVariables, `variable "cce_addons"`)
+	assert.Contains(t, infrastructureVariables, `variable "enable_openbao"`)
+	assert.Contains(t, infrastructureVariables, `variable "openbao_seal_config"`)
 	assert.Contains(t, infrastructureVariables, `variable "load_balancer_type"`)
 	assert.Contains(t, infrastructureVariables, `variable "dedicated_load_balancer_availability_zones"`)
 	assert.NotContains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
@@ -364,8 +373,12 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureEnv, `version = "1.3.104"`)
 	assert.NotContains(t, infrastructureEnv, "coredns = {")
 	assert.NotContains(t, infrastructureEnv, "everest = {")
+	assert.Contains(t, infrastructureEnv, "enable_openbao")
+	assert.Contains(t, infrastructureEnv, `openbao_chart_version           = "0.28.3"`)
+	assert.Contains(t, infrastructureEnv, `openbao_seal_config             = ""`)
 	assert.Contains(t, infrastructureOutputs, `output "load_balancer_id"`)
 	assert.Contains(t, infrastructureOutputs, "module.network.load_balancer_id")
+	assert.Contains(t, infrastructureOutputs, `output "openbao_release_name"`)
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
 	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
 	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")
@@ -712,6 +725,60 @@ func TestTemplateFiles_TCloudPublicNetworkSupportsDedicatedLoadBalancer(t *testi
 	assert.Contains(t, networkOutputs, `opentelekomcloud_lb_loadbalancer_v3.dedicated[0].id`)
 	assert.Contains(t, networkOutputs, `opentelekomcloud_vpc_eip_v1.dedicated_load_balancer[0].publicip[0].ip_address`)
 	assert.Contains(t, networkOutputs, `value       = opentelekomcloud_vpc_subnet_v1.this.network_id`)
+}
+
+func TestTemplateFiles_TCloudPublicOpenBaoModuleUsesHelmRelease(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var openbaoMain string
+	var openbaoVariables string
+	var openbaoTerraform string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/main.tf":
+			openbaoMain = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/variables.tf":
+			openbaoVariables = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/terraform.tf":
+			openbaoTerraform = result.Content
+		}
+	}
+
+	require.NotEmpty(t, openbaoMain)
+	require.NotEmpty(t, openbaoVariables)
+	require.NotEmpty(t, openbaoTerraform)
+	assert.Contains(t, openbaoTerraform, `source  = "hashicorp/helm"`)
+	assert.Contains(t, openbaoMain, `resource "helm_release" "this"`)
+	assert.Contains(t, openbaoMain, `repository       = var.repository`)
+	assert.Contains(t, openbaoMain, `chart            = var.chart`)
+	assert.Contains(t, openbaoMain, `ha = {`)
+	assert.Contains(t, openbaoMain, `raft = {`)
+	assert.Contains(t, openbaoMain, `setNodeId = true`)
+	assert.Contains(t, openbaoMain, `${trimspace(var.seal_config)}`)
+	assert.Contains(t, openbaoVariables, `default     = "https://openbao.github.io/openbao-helm"`)
+	assert.Contains(t, openbaoVariables, `default     = "0.28.3"`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {

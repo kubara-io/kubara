@@ -13,6 +13,7 @@ Running `kubara generate --terraform` creates:
 - `keypair`: SSH keypair for CCE node pools
 - `kms-key`: KMS key for encrypted node volumes
 - `cce-cluster`: CCE cluster, configurable node pools, optional CCE addons, and optional local kubeconfig output
+- `openbao-helm`: OpenBao Helm release deployed after the CCE cluster is available
 
 The same bucket module is also used for Velero backup buckets. The generated customer infrastructure renders a `velero_bucket` module only when the cluster config contains `services.velero.status: enabled`.
 
@@ -46,10 +47,15 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `node_pools[*].availability_zone`
 - `node_pools`
 - `cce_addons`
+- `enable_openbao`
+- `openbao_chart_version`
+- `openbao_seal_config`
 
 The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
 The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
+
+The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. T Cloud Public KMS is not a native OpenBao seal today. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow, or set it to a supported OpenBao seal stanza when a supported seal or an installed KMS plugin is available.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 

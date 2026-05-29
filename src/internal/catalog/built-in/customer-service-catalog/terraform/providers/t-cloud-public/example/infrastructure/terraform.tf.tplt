@@ -20,6 +20,12 @@ terraform {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
     }
+    {{ if (eq .cluster.terraform.kubernetesType "cce") }}
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.17.0, < 3.0.0"
+    }
+    {{ end }}
   }
 }
 
@@ -39,3 +45,18 @@ provider "opentelekomcloud" {
   access_key  = var.t_cloud_public_access_key
   secret_key  = var.t_cloud_public_secret_key
 }
+
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+locals {
+  cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig_raw)
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = local.cce_kubeconfig.clusters[0].cluster.server
+    cluster_ca_certificate = base64decode(local.cce_kubeconfig.clusters[0].cluster.certificate-authority-data)
+    client_certificate     = base64decode(local.cce_kubeconfig.users[0].user.client-certificate-data)
+    client_key             = base64decode(local.cce_kubeconfig.users[0].user.client-key-data)
+  }
+}
+{{ end }}

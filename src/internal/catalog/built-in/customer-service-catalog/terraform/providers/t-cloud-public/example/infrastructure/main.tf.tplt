@@ -124,6 +124,25 @@ module "cce_cluster" {
   depends_on = [module.t_cloud_public_agencies]
 }
 
+module "openbao" {
+  count  = var.enable_openbao ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/openbao-helm"
+
+  release_name       = var.openbao_release_name
+  namespace          = var.openbao_namespace
+  chart_version      = var.openbao_chart_version
+  replicas           = var.openbao_replicas
+  image_pull_secrets = var.openbao_image_pull_secrets
+
+  injector_enabled       = var.openbao_injector_enabled
+  data_storage_size      = var.openbao_data_storage_size
+  data_storage_class     = var.openbao_data_storage_class
+  seal_config            = var.openbao_seal_config
+  extra_environment_vars = var.openbao_extra_environment_vars
+
+  depends_on = [module.cce_cluster]
+}
+
 {{ if (eq .cluster.services.velero.status "enabled") }}
 module "velero_bucket_kms_key" {
   count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0

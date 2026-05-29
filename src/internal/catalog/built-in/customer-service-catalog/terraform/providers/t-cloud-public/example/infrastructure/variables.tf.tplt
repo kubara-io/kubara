@@ -379,6 +379,72 @@ variable "cce_addons" {
   default = {}
 }
 
+variable "enable_openbao" {
+  description = "Deploy OpenBao with Helm after the CCE cluster is available."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_release_name" {
+  description = "OpenBao Helm release name."
+  type        = string
+  default     = "openbao"
+}
+
+variable "openbao_namespace" {
+  description = "Kubernetes namespace for OpenBao."
+  type        = string
+  default     = "openbao"
+}
+
+variable "openbao_chart_version" {
+  description = "OpenBao Helm chart version."
+  type        = string
+  default     = "0.28.3"
+}
+
+variable "openbao_replicas" {
+  description = "OpenBao HA replica count."
+  type        = number
+  default     = 3
+}
+
+variable "openbao_image_pull_secrets" {
+  description = "Image pull secrets for OpenBao pods."
+  type        = list(string)
+  default     = ["image-pull-secret"]
+}
+
+variable "openbao_injector_enabled" {
+  description = "Enable the OpenBao agent injector."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_data_storage_size" {
+  description = "OpenBao raft PVC size."
+  type        = string
+  default     = "10Gi"
+}
+
+variable "openbao_data_storage_class" {
+  description = "OpenBao raft PVC storage class. Leave empty to use the cluster default."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_seal_config" {
+  description = "Optional OpenBao seal stanza appended to the HA raft config. T Cloud Public KMS is not a native OpenBao seal; use this for a supported seal or an installed KMS plugin."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_extra_environment_vars" {
+  description = "Extra environment variables for the OpenBao server pods, for example credentials required by a seal plugin."
+  type        = map(string)
+  default     = {}
+}
+
 variable "create_kubeconfig_local" {
   type        = bool
   default     = false
