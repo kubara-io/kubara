@@ -327,6 +327,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
 	assert.Contains(t, infrastructureProviders, `alias       = "global-region"`)
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_region")
+	assert.Contains(t, infrastructureProviders, "skip_metadata_api_check")
 	assert.Contains(t, bootstrapMain, `alias       = "global-region"`)
 	assert.Contains(t, bootstrapMain, "tenant_name = var.t_cloud_public_region")
 	assert.Contains(t, bootstrapMain, `module "bucket_kms_key"`)
@@ -441,6 +442,8 @@ func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials
 	var infrastructureEnv string
 	var bootstrapEnv string
 	var infrastructureVariables string
+	var setEnvSh string
+	var setEnvPS1 string
 	for _, result := range results {
 		require.NoError(t, result.Error)
 		switch result.Path {
@@ -450,12 +453,18 @@ func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials
 			bootstrapEnv = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/variables.tf.tplt":
 			infrastructureVariables = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/set-env-changeme.sh.tplt":
+			setEnvSh = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/set-env-changeme.ps1.tplt":
+			setEnvPS1 = result.Content
 		}
 	}
 
 	require.NotEmpty(t, infrastructureEnv)
 	require.NotEmpty(t, bootstrapEnv)
 	require.NotEmpty(t, infrastructureVariables)
+	require.NotEmpty(t, setEnvSh)
+	require.NotEmpty(t, setEnvPS1)
 
 	for _, content := range []string{infrastructureEnv, bootstrapEnv} {
 		assert.NotContains(t, content, "t_cloud_public_region")
@@ -465,6 +474,10 @@ func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials
 		assert.NotContains(t, content, "t_cloud_public_secret_key")
 	}
 	assert.Contains(t, infrastructureVariables, `default     = "test-tenant"`)
+	assert.Contains(t, setEnvSh, `export AWS_REQUEST_CHECKSUM_CALCULATION="when_required"`)
+	assert.Contains(t, setEnvSh, `export AWS_RESPONSE_CHECKSUM_VALIDATION="when_required"`)
+	assert.Contains(t, setEnvPS1, `$env:AWS_REQUEST_CHECKSUM_CALCULATION = "when_required"`)
+	assert.Contains(t, setEnvPS1, `$env:AWS_RESPONSE_CHECKSUM_VALIDATION = "when_required"`)
 }
 
 func TestTemplateFiles_TCloudPublicBootstrapCredentialsAreSensitive(t *testing.T) {

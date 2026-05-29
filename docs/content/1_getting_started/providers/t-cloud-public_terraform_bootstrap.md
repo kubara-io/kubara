@@ -40,6 +40,8 @@ source set-env.sh
 # . .\set-env.ps1
 ```
 
+The generated environment file also sets `AWS_REQUEST_CHECKSUM_CALCULATION=when_required` and `AWS_RESPONSE_CHECKSUM_VALIDATION=when_required`. Keep these values for the T Cloud Public OBS backend. Terraform's `s3` backend only supports S3-compatible APIs on a best-effort basis, and recent AWS SDK checksum behavior can otherwise produce unreadable state objects against some S3-compatible backends.
+
 ## 2. Create Terraform Backend State
 
 Then navigate to:

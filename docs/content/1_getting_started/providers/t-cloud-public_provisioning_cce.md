@@ -65,6 +65,7 @@ key    = "tf-state-<cluster-name>-<stage>"
 The default backend endpoint is `https://obs.eu-de.otc.t-systems.com`, which is the technical OBS endpoint for the `eu-de` region. For `eu-nl`, adjust the generated backend endpoint and region before running `terraform init`.
 
 Make sure `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` from the bootstrap stack are exported before initializing the backend.
+Also source the generated `set-env.sh` / `set-env.ps1` before running `terraform init`; it sets the AWS SDK checksum compatibility options required for the T Cloud Public OBS S3-compatible backend.
 
 ## 3. Apply Infrastructure
 
