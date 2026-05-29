@@ -700,6 +700,8 @@ func TestTemplateFiles_TCloudPublicNetworkSupportsDedicatedLoadBalancer(t *testi
 	assert.Contains(t, networkMain, `create_dedicated_load_balancer = var.enable_load_balancer && var.load_balancer_type == "dedicated"`)
 	assert.Contains(t, networkMain, `resource "opentelekomcloud_lb_loadbalancer_v2" "this"`)
 	assert.Contains(t, networkMain, `resource "opentelekomcloud_lb_loadbalancer_v3" "dedicated"`)
+	assert.Contains(t, networkMain, `network_ids        = [opentelekomcloud_vpc_subnet_v1.this.network_id]`)
+	assert.Contains(t, networkMain, `vip_subnet_id = opentelekomcloud_vpc_subnet_v1.this.subnet_id`)
 	assert.Contains(t, networkMain, `availability_zones = var.dedicated_load_balancer_availability_zones`)
 	assert.Contains(t, networkMain, `l4_flavor          = var.dedicated_load_balancer_l4_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l4[0].id : null`)
 	assert.Contains(t, networkMain, `l7_flavor          = var.dedicated_load_balancer_l7_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l7[0].id : null`)
@@ -709,6 +711,7 @@ func TestTemplateFiles_TCloudPublicNetworkSupportsDedicatedLoadBalancer(t *testi
 	assert.Contains(t, networkVariables, `default     = "L7_flavor.elb.s1.small"`)
 	assert.Contains(t, networkOutputs, `opentelekomcloud_lb_loadbalancer_v3.dedicated[0].id`)
 	assert.Contains(t, networkOutputs, `opentelekomcloud_vpc_eip_v1.dedicated_load_balancer[0].publicip[0].ip_address`)
+	assert.Contains(t, networkOutputs, `value       = opentelekomcloud_vpc_subnet_v1.this.network_id`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {

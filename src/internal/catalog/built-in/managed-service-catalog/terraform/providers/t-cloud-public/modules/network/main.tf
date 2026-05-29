@@ -108,7 +108,7 @@ resource "opentelekomcloud_lb_loadbalancer_v3" "dedicated" {
 
   name               = "elb-${var.name}"
   router_id          = opentelekomcloud_vpc_v1.this.id
-  network_ids        = [opentelekomcloud_vpc_subnet_v1.this.subnet_id]
+  network_ids        = [opentelekomcloud_vpc_subnet_v1.this.network_id]
   availability_zones = var.dedicated_load_balancer_availability_zones
   l4_flavor          = var.dedicated_load_balancer_l4_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l4[0].id : null
   l7_flavor          = var.dedicated_load_balancer_l7_flavor_name != "" ? data.opentelekomcloud_lb_flavor_v3.dedicated_l7[0].id : null

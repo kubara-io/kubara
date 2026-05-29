@@ -10,7 +10,7 @@ output "subnet_id" {
 
 output "subnet_network_id" {
   description = "Subnet network ID used by load balancers."
-  value       = opentelekomcloud_vpc_subnet_v1.this.subnet_id
+  value       = opentelekomcloud_vpc_subnet_v1.this.network_id
 }
 
 output "nat_gateway_id" {
