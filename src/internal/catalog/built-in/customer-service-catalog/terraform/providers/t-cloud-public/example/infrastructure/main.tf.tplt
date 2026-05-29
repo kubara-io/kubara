@@ -49,6 +49,14 @@ module "t_cloud_public_agencies" {
   agencies = local.t_cloud_public_agencies
 }
 
+resource "time_sleep" "obs_kms_agency_propagation" {
+  count = var.create_obs_kms_agency ? 1 : 0
+
+  create_duration = var.obs_kms_agency_propagation_delay
+
+  depends_on = [module.t_cloud_public_agencies]
+}
+
 module "dns_zone" {
   count  = var.create_dns_zone ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/dns-zone"
@@ -137,7 +145,7 @@ module "velero_bucket" {
   enable_server_side_encryption = var.velero_bucket_enable_server_side_encryption
   kms_key_id                    = var.velero_bucket_enable_server_side_encryption ? module.velero_bucket_kms_key[0].id : null
 
-  depends_on = [module.t_cloud_public_agencies]
+  depends_on = [time_sleep.obs_kms_agency_propagation]
 }
 {{ end }}
 {{ end }}

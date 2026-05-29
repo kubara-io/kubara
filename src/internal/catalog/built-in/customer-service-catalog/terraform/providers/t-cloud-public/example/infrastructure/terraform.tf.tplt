@@ -19,6 +19,10 @@ terraform {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.1, < 1.0.0"
+    }
   }
 }
 

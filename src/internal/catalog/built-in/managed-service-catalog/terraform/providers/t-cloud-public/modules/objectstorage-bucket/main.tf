@@ -123,8 +123,6 @@ resource "opentelekomcloud_obs_bucket" "this" {
   }
 
   lifecycle {
-    prevent_destroy = true
-
     precondition {
       condition     = !var.enable_server_side_encryption || var.kms_key_id != null
       error_message = "kms_key_id must be set when enable_server_side_encryption is true."

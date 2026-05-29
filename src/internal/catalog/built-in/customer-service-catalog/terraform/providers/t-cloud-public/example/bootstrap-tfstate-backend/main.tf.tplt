@@ -6,6 +6,10 @@ terraform {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = ">= 0.12.1, < 1.0.0"
+    }
   }
 }
 
@@ -52,6 +56,14 @@ module "bucket_kms_key" {
   pending_days = var.bucket_kms_pending_days
 }
 
+resource "time_sleep" "obs_kms_agency_propagation" {
+  count = var.enable_bucket_server_side_encryption && var.create_obs_kms_agency ? 1 : 0
+
+  create_duration = var.obs_kms_agency_propagation_delay
+
+  depends_on = [module.obs_kms_agency]
+}
+
 module "objectstorage_bucket" {
   source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
 
@@ -63,7 +75,7 @@ module "objectstorage_bucket" {
   # The OBS service must have the KMS agency in place before we can ask it to
   # encrypt a bucket with a customer KMS key. When create_obs_kms_agency is
   # false we trust that the agency already exists outside this stack.
-  depends_on = [module.obs_kms_agency]
+  depends_on = [time_sleep.obs_kms_agency_propagation]
 }
 
 output "bucket_name" {

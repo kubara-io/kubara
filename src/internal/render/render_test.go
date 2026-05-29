@@ -328,6 +328,10 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 		assert.NotContains(t, content, "providers = {")
 	}
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_tenant_name")
+	assert.Contains(t, infrastructureProviders, `source  = "hashicorp/time"`)
+	assert.Contains(t, bootstrapMain, `source  = "hashicorp/time"`)
+	assert.Contains(t, bootstrapMain, `resource "time_sleep" "obs_kms_agency_propagation"`)
+	assert.Contains(t, bootstrapMain, "create_duration = var.obs_kms_agency_propagation_delay")
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
@@ -335,7 +339,10 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.NotContains(t, infrastructureEnv, "cce_agency_projects")
 	assert.Contains(t, infrastructureMain, "var.create_obs_kms_agency ? {")
 	assert.Contains(t, infrastructureMain, "obs_kms = {")
+	assert.Contains(t, infrastructureMain, `resource "time_sleep" "obs_kms_agency_propagation"`)
+	assert.Contains(t, infrastructureMain, "create_duration = var.obs_kms_agency_propagation_delay")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
+	assert.Contains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
 	assert.Contains(t, infrastructureEnv, "create_obs_kms_agency")
 	assert.Contains(t, infrastructureEnv, "= false")
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
@@ -384,7 +391,7 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	require.NotEmpty(t, mainContent)
 	require.NotEmpty(t, envContent)
 	assert.Contains(t, mainContent, `module "velero_bucket"`)
-	assert.Contains(t, mainContent, "depends_on = [module.t_cloud_public_agencies]")
+	assert.Contains(t, mainContent, "depends_on = [time_sleep.obs_kms_agency_propagation]")
 	assert.Contains(t, envContent, "velero_bucket_name")
 }
 
@@ -482,6 +489,49 @@ func TestTemplateFiles_TCloudPublicBootstrapCredentialsAreSensitive(t *testing.T
 	require.NotEqual(t, -1, accessKeyOutputEnd)
 
 	assert.Contains(t, accessKeyOutput[:accessKeyOutputEnd], "sensitive   = true")
+}
+
+func TestTemplateFiles_TCloudPublicOBSBucketCanBeDestroyed(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var objectstorageMain string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "managed-service-catalog/terraform/providers/t-cloud-public/modules/objectstorage-bucket/main.tf" {
+			objectstorageMain = result.Content
+		}
+	}
+
+	require.NotEmpty(t, objectstorageMain)
+	bucketResourceIndex := strings.Index(objectstorageMain, `resource "opentelekomcloud_obs_bucket" "this" {`)
+	require.NotEqual(t, -1, bucketResourceIndex)
+
+	bucketResource := objectstorageMain[bucketResourceIndex:]
+	bucketPolicyIndex := strings.Index(bucketResource, `resource "opentelekomcloud_obs_bucket_policy"`)
+	require.NotEqual(t, -1, bucketPolicyIndex)
+
+	assert.NotContains(t, bucketResource[:bucketPolicyIndex], "prevent_destroy = true")
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
