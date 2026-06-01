@@ -1,0 +1,38 @@
+---
+namespace: {}
+externalSecrets: {}
+velero:
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+  credentials:
+    useSecret: true
+    existingSecret: velero-credentials
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  extraVolumes:
+    - name: home-cnb
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: home-cnb
+      mountPath: /home/cnb
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.14.0
+      securityContext:
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 64Mi
+      volumeMounts:
+        - mountPath: /target
+          name: plugins

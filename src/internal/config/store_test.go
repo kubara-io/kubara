@@ -66,6 +66,7 @@ func newValidTestConfig() *Config {
 					"metrics-server":          {Status: service.StatusEnabled},
 					"metallb":                 {Status: service.StatusEnabled},
 					"longhorn":                {Status: service.StatusEnabled},
+					"velero":                  {Status: service.StatusEnabled, Config: service.Config{"fsBackupEnabled": true}},
 				},
 			},
 		},
