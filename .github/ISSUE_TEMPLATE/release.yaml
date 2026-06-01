@@ -16,10 +16,12 @@ body:
         ### Pre-release
 
         #### Step 1: Get an overview of open PRs
-        - [ ] Are there any open PRs relevant for the release? 
+        - [ ] Are there any open PRs relevant for the release?
         - [ ] Check with Team if there are any questions regarding the PRs
 
         #### Step 2: Merge PRs
+        - [ ] Trigger the RenovateBot workflow to fetch all new updates; otherwise, some updates may be skipped.
+        https://github.com/kubara-io/kubara/actions/workflows/renovate.yaml
         - [ ] Helm & Terraform Updates
         - [ ] Check Pull requests (renovate)
         - [ ] Are there any Breaking changes?
@@ -53,5 +55,11 @@ body:
         - [ ] Have all artifacts been published (binaries, sbom, licenses, container)?
         - [ ] Has the docs `latest-dev` version been promoted to `latest-stable`
         - [ ] (Internal): Trigger [release notification](https://github.com/kubara-io/kubara/actions/workflows/release-announce-google-chat.yaml)
+        - [ ] (External): Post new realease in Slack Channel (check if it makes sense to generate a release picture with AI)
+        - [ ] Test brew upgrade
+
+        Learnings (optional):
+        - ... add learnings here for the next release
+
     validations:
       required: true
