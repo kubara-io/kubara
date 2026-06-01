@@ -5,15 +5,11 @@
 {{- $kubePrometheusStatus := dig "cluster" "services" "kube-prometheus-stack" "status" "disabled" . -}}
 {{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
 {{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
-{{- $openbaoEnabled := false -}}
 {{- $tCloudPublic := false -}}
+{{- $openbaoEnabled := false -}}
 {{- with .cluster.terraform -}}
-{{- if eq .provider "t-cloud-public" -}}
-{{- $tCloudPublic = true -}}
-{{- end -}}
-{{- if (and (eq .provider "t-cloud-public") (eq .kubernetesType "cce")) -}}
-{{- $openbaoEnabled = true -}}
-{{- end -}}
+{{- $tCloudPublic = eq .provider "t-cloud-public" -}}
+{{- $openbaoEnabled = and $tCloudPublic (eq .kubernetesType "cce") -}}
 {{- end -}}
 {{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
