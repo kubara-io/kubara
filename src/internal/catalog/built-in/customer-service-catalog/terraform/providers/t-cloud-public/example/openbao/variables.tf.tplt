@@ -93,6 +93,18 @@ variable "openbao_oidc_groups_claim" {
   default     = "groups"
 }
 
+variable "openbao_oidc_scopes" {
+  description = "OIDC scopes requested by OpenBao when authenticating an admin. Matches the legacy Vault setup, which requested openid/email/profile to get group claims."
+  type        = list(string)
+  default     = ["openid", "email", "profile"]
+}
+
+variable "openbao_oidc_admin_token_ttl" {
+  description = "Token TTL in seconds for the OpenBao OIDC admin role. Default is 7 days, matching the legacy Vault setup."
+  type        = number
+  default     = 604800
+}
+
 variable "manage_openbao_kubernetes_auth_backend" {
   description = "Create the OpenBao Kubernetes auth backend."
   type        = bool
@@ -181,6 +193,12 @@ variable "openbao_namespace_kv_read_auth_audience" {
   description = "Kubernetes service account token audience for the namespace-scoped KV read role."
   type        = string
   default     = "vault"
+}
+
+variable "openbao_namespace_kv_read_token_ttl" {
+  description = "Token TTL in seconds for the namespace-scoped KV read role. Default is 24 hours, matching the legacy Vault setup."
+  type        = number
+  default     = 86400
 }
 
 variable "manage_openbao_userpass_auth_backend" {

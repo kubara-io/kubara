@@ -20,6 +20,10 @@ resource "vault_policy" "admin" {
       capabilities = ["create", "read", "update", "delete", "list", "sudo"]
     }
 
+    path "sys/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
     path "vault_seed/*" {
       capabilities = ["create", "read", "update", "delete", "list", "sudo"]
     }
@@ -59,6 +63,8 @@ resource "vault_jwt_auth_backend_role" "oidc_admin" {
   allowed_redirect_uris = var.openbao_oidc_admin_allowed_redirect_uris
   user_claim            = var.openbao_oidc_user_claim
   groups_claim          = var.openbao_oidc_groups_claim
+  oidc_scopes           = var.openbao_oidc_scopes
+  token_ttl             = var.openbao_oidc_admin_token_ttl
   token_policies        = [vault_policy.admin[0].name]
 }
 
@@ -184,6 +190,7 @@ resource "vault_kubernetes_auth_backend_role" "kubernetes_namespace_kv_read" {
   bound_service_account_names      = var.openbao_namespace_kv_read_bound_service_account_names
   bound_service_account_namespaces = var.openbao_namespace_kv_read_bound_service_account_namespaces
   audience                         = var.openbao_namespace_kv_read_auth_audience
+  token_ttl                        = var.openbao_namespace_kv_read_token_ttl
   token_policies                   = [vault_policy.kubernetes_namespace_kv_read[0].name]
 
   depends_on = [
