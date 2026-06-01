@@ -27,4 +27,4 @@ export TF_VAR_oauth2_client_id=""
 export TF_VAR_oauth2_client_secret=""
 
 # Imported from the .env. Used by the OpenBao Terraform layer.
-export TF_VAR_image_pull_secret="{{ dig "env" "DockerconfigBase64" "" . }}"
+export TF_VAR_image_pull_secret="{{ .env.DockerconfigBase64 }}"
