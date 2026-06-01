@@ -54,15 +54,19 @@ provider "opentelekomcloud" {
 locals {
   cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig_raw)
 
-  # OTC CCE returns a kubeconfig with both an "internalCluster" (VPC-internal
-  # API server URL like https://10.0.x.y:5443) and, when an EIP is bound, an
-  # "externalCluster" (public API server URL). When Terraform runs the
-  # helm/kubernetes providers from outside the VPC we must point them at the
-  # external entry, otherwise the connection times out.
+  # OTC CCE returns three cluster entries in the generated kubeconfig when
+  # an EIP is bound to the master:
+  #   - internalCluster:          VPC-internal API server, has certificate-authority-data
+  #   - externalCluster:          public API server, NO certificate-authority-data,
+  #                               relies on insecure-skip-tls-verify = true
+  #   - externalClusterTLSVerify: public API server, has certificate-authority-data
+  # We pick externalClusterTLSVerify when the public endpoint is bound so the
+  # provider verifies TLS properly. With enable_cluster_public_endpoint = false
+  # only internalCluster is present (Terraform must run inside the VPC then).
   cce_kubeconfig_clusters = {
     for entry in local.cce_kubeconfig.clusters : entry.name => entry.cluster
   }
-  cce_target_cluster_name = var.enable_cluster_public_endpoint ? "externalCluster" : "internalCluster"
+  cce_target_cluster_name = var.enable_cluster_public_endpoint ? "externalClusterTLSVerify" : "internalCluster"
   cce_target_cluster = lookup(
     local.cce_kubeconfig_clusters,
     local.cce_target_cluster_name,
