@@ -98,6 +98,25 @@ locals {
     BAO_API_ADDR = "http://$(HOSTNAME).${var.release_name}-internal:8200"
   }
   merged_extra_env = merge(local.per_pod_api_addr_env, var.extra_environment_vars)
+
+  # The OpenBao Helm chart applies its affinity field through `tpl`, so it
+  # must be provided as a YAML string, not a structured object. The default
+  # chart value uses required anti-affinity on hostname, which leaves the
+  # third pod unscheduled when the cluster only has two worker nodes (a
+  # common kubara CCE setup). preferredDuringScheduling spreads pods across
+  # nodes when possible but allows co-location on the same node if no other
+  # node is available.
+  server_affinity = <<-EOT
+    podAntiAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+        - weight: 100
+          podAffinityTerm:
+            labelSelector:
+              matchLabels:
+                app.kubernetes.io/name: openbao
+                component: server
+            topologyKey: kubernetes.io/hostname
+  EOT
 }
 
 resource "helm_release" "this" {
@@ -119,6 +138,8 @@ resource "helm_release" "this" {
       }
       server = {
         extraEnvironmentVars = local.merged_extra_env
+        updateStrategyType   = "RollingUpdate"
+        affinity             = local.server_affinity
         dataStorage = {
           enabled      = true
           size         = var.data_storage_size
