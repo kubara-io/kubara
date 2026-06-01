@@ -6,7 +6,11 @@
 {{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
 {{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
 {{- $openbaoEnabled := false -}}
+{{- $tCloudPublic := false -}}
 {{- with .cluster.terraform -}}
+{{- if eq .provider "t-cloud-public" -}}
+{{- $tCloudPublic = true -}}
+{{- end -}}
 {{- if (and (eq .provider "t-cloud-public") (eq .kubernetesType "cce")) -}}
 {{- $openbaoEnabled = true -}}
 {{- end -}}
@@ -168,7 +172,7 @@ dashboardConfig:
         {{- end }}
     - name: "DevOps Links"
       items:
-        {{- if $openbaoEnabled }}
+        {{- if $tCloudPublic }}
         - name: "OTC Console"
           icon: "fas fa-cloud"
           url: "https://console.otc.t-systems.com"
