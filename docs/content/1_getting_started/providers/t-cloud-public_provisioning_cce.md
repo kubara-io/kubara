@@ -109,17 +109,78 @@ The generated stack can optionally write a kubeconfig locally when `create_kubec
 
 ## OpenBao Manual Init and Unseal
 
-After the infrastructure apply has installed the OpenBao Helm release, wait until the OpenBao pods exist, then initialize OpenBao and unseal the required pods:
+After the infrastructure apply has installed the OpenBao Helm release, OpenBao is running as a 3-replica HA Raft cluster but sealed. Until it is initialized and unsealed, the pods report `0/1` ready, which is expected: the readiness probe deliberately fails on a sealed pod.
+
+The generated Helm release configures Raft peer discovery (`retry_join`) so the replicas find each other automatically. You only need to run `init` once on the first pod, then `unseal` on each replica.
+
+### 1. Wait for the pods to be Running
 
 ```bash
-kubectl -n openbao get pods
-kubectl exec -n openbao -ti openbao-0 -- bao operator init
-kubectl exec -n openbao -ti openbao-0 -- bao operator unseal
-kubectl exec -n openbao -ti openbao-1 -- bao operator unseal
-kubectl exec -n openbao -ti openbao-2 -- bao operator unseal
+kubectl -n openbao get pods -w
 ```
 
-Store the generated root token and unseal keys securely, then unseal OpenBao according to the OpenBao HA/Raft runbook.
+You should see `openbao-0`, `openbao-1`, `openbao-2` reach `Running` state (still `0/1`). Press Ctrl-C once they all show `Running`.
+
+### 2. Initialize OpenBao on the first pod
+
+This generates the unseal keys and the initial root token. **Run this exactly once.** The output appears only once and cannot be recovered later.
+
+```bash
+kubectl exec -n openbao -ti openbao-0 -- bao operator init
+```
+
+Save the output securely. By default OpenBao prints **5 unseal keys** and **1 initial root token**:
+
+- Any **3 of the 5** unseal keys are needed to unseal a pod (Shamir threshold 3-of-5).
+- Distribute the keys to separate trusted operators if possible — anyone who collects 3 keys can decrypt the cluster.
+- The root token gives full access; rotate or revoke it after creating a long-lived admin role.
+
+### 3. Unseal each pod with 3 keys
+
+Unsealing is per-pod and per-restart. Repeat the command **3 times per pod**, each time with a different unseal key:
+
+```bash
+# Pod 0
+kubectl exec -n openbao -ti openbao-0 -- bao operator unseal <unseal-key-1>
+kubectl exec -n openbao -ti openbao-0 -- bao operator unseal <unseal-key-2>
+kubectl exec -n openbao -ti openbao-0 -- bao operator unseal <unseal-key-3>
+
+# Pod 1 — retry_join already attached it to the cluster as a follower
+kubectl exec -n openbao -ti openbao-1 -- bao operator unseal <unseal-key-1>
+kubectl exec -n openbao -ti openbao-1 -- bao operator unseal <unseal-key-2>
+kubectl exec -n openbao -ti openbao-1 -- bao operator unseal <unseal-key-3>
+
+# Pod 2
+kubectl exec -n openbao -ti openbao-2 -- bao operator unseal <unseal-key-1>
+kubectl exec -n openbao -ti openbao-2 -- bao operator unseal <unseal-key-2>
+kubectl exec -n openbao -ti openbao-2 -- bao operator unseal <unseal-key-3>
+```
+
+After the third successful key on a pod, that pod becomes unsealed and ready.
+
+### 4. Verify the cluster
+
+```bash
+kubectl exec -n openbao -ti openbao-0 -- bao status
+```
+
+Expected output:
+
+```text
+Sealed         false
+Initialized    true
+HA Enabled     true
+HA Cluster     http://openbao-0.openbao-internal:8201
+Active Node    true
+```
+
+`kubectl -n openbao get pods` should now show all three pods as `1/1` ready.
+
+### Pod restarts and rotation reminders
+
+- Every time a pod restarts (cluster upgrade, node maintenance, manual delete), it comes back sealed and needs to be unsealed again with 3 of the 5 keys. This is by design.
+- Native OpenBao auto-unseal for T Cloud Public KMS does not exist out of the box. See [hashicorp/vault#20338](https://github.com/hashicorp/vault/issues/20338) for the upstream tracking issue.
+- After initialization, the root token should be replaced with an OIDC admin role (configured in the OpenBao Terraform layer below) and revoked.
 
 Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao configuration and secrets in a separate step after OpenBao is initialized, unsealed, and a valid OpenBao token is available.
 
