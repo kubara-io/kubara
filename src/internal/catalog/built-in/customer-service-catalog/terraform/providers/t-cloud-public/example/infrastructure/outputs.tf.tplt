@@ -41,6 +41,11 @@ output "cce_addons" {
   value       = module.cce_cluster.addons
 }
 
+output "storage_classes" {
+  description = "kubara-managed CCE StorageClass names."
+  value       = var.create_storage_classes ? module.storage_classes[0].names : []
+}
+
 output "openbao_release_name" {
   description = "OpenBao Helm release name, if enabled."
   value       = var.enable_openbao ? module.openbao[0].release_name : null

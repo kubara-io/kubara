@@ -410,6 +410,56 @@ variable "cce_addons" {
   default = {}
 }
 
+variable "create_storage_classes" {
+  description = "Create kubara-managed CCE StorageClasses."
+  type        = bool
+  default     = true
+}
+
+variable "storage_classes" {
+  description = "Kubernetes StorageClasses keyed by StorageClass name. Set use_node_storage_kms_key = true to inject the generated node storage KMS key ID as everest.io/crypt-key-id."
+  type = map(object({
+    annotations              = optional(map(string), {})
+    labels                   = optional(map(string), {})
+    parameters               = map(string)
+    storage_provisioner      = optional(string, "everest-csi-provisioner")
+    reclaim_policy           = optional(string, "Retain")
+    volume_binding_mode      = optional(string, "WaitForFirstConsumer")
+    allow_volume_expansion   = optional(bool, true)
+    use_node_storage_kms_key = optional(bool, false)
+  }))
+  default = {
+    csi-disk-retain-topology-crypt = {
+      parameters = {
+        "csi.storage.k8s.io/csi-driver-name" = "disk.csi.everest.io"
+        "csi.storage.k8s.io/fstype"          = "ext4"
+        "everest.io/disk-volume-type"        = "SSD"
+        "everest.io/passthrough"             = "true"
+      }
+      volume_binding_mode      = "WaitForFirstConsumer"
+      use_node_storage_kms_key = true
+    }
+    csi-obsfs-retain = {
+      parameters = {
+        "csi.storage.k8s.io/csi-driver-name" = "obs.csi.everest.io"
+        "csi.storage.k8s.io/fstype"          = "obsfs"
+        "everest.io/obs-volume-type"         = "STANDARD"
+      }
+      volume_binding_mode = "WaitForFirstConsumer"
+    }
+    csi-disk-default = {
+      parameters = {
+        "csi.storage.k8s.io/csi-driver-name" = "disk.csi.everest.io"
+        "csi.storage.k8s.io/fstype"          = "ext4"
+        "everest.io/disk-volume-type"        = "SSD"
+        "everest.io/passthrough"             = "true"
+      }
+      volume_binding_mode      = "Immediate"
+      use_node_storage_kms_key = true
+    }
+  }
+}
+
 variable "enable_openbao" {
   description = "Deploy OpenBao with Helm after the CCE cluster is available."
   type        = bool

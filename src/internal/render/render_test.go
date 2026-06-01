@@ -259,6 +259,7 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/identity-agencies/main.tf")
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/objectstorage-bucket/main.tf")
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/main.tf")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/bootstrap-tfstate-backend/main.tf.tplt")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/terraform.tf.tplt")
@@ -338,7 +339,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureProviders, "tenant_name = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureProviders, "skip_metadata_api_check")
 	assert.Contains(t, infrastructureProviders, `source  = "hashicorp/helm"`)
+	assert.Contains(t, infrastructureProviders, `source  = "hashicorp/kubernetes"`)
 	assert.Contains(t, infrastructureProviders, `provider "helm"`)
+	assert.Contains(t, infrastructureProviders, `provider "kubernetes"`)
 	assert.Contains(t, infrastructureProviders, "yamldecode(module.cce_cluster.kubeconfig_raw)")
 	assert.Contains(t, bootstrapMain, `alias       = "global-region"`)
 	assert.Contains(t, bootstrapMain, "tenant_name = var.t_cloud_public_region")
@@ -348,6 +351,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0")
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_tenant_name")
 	assert.Contains(t, infrastructureMain, "addons     = var.cce_addons")
+	assert.Contains(t, infrastructureMain, `module "storage_classes"`)
+	assert.Contains(t, infrastructureMain, "source = \"../../../../managed-service-catalog/terraform/modules/storage-classes\"")
+	assert.Contains(t, infrastructureMain, `"everest.io/crypt-key-id" = module.node_storage_kms_key.id`)
 	assert.Contains(t, infrastructureMain, `module "openbao"`)
 	assert.Contains(t, infrastructureMain, "source = \"../../../../managed-service-catalog/terraform/modules/openbao-helm\"")
 	assert.Contains(t, infrastructureMain, "depends_on = [module.cce_cluster]")
@@ -364,6 +370,8 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, "project = var.t_cloud_public_region")
 	assert.Contains(t, infrastructureVariables, `variable "create_obs_kms_agency"`)
 	assert.Contains(t, infrastructureVariables, `variable "cce_addons"`)
+	assert.Contains(t, infrastructureVariables, `variable "create_storage_classes"`)
+	assert.Contains(t, infrastructureVariables, `variable "storage_classes"`)
 	assert.Contains(t, infrastructureVariables, `variable "enable_openbao"`)
 	assert.Contains(t, infrastructureVariables, `variable "openbao_seal_config"`)
 	assert.Contains(t, infrastructureVariables, `variable "openbao_ingress_enabled"`)
@@ -383,6 +391,13 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureEnv, `version = "1.3.104"`)
 	assert.NotContains(t, infrastructureEnv, "coredns = {")
 	assert.NotContains(t, infrastructureEnv, "everest = {")
+	assert.Contains(t, infrastructureEnv, "create_storage_classes = true")
+	assert.Contains(t, infrastructureEnv, "csi-disk-retain-topology-crypt")
+	assert.Contains(t, infrastructureEnv, "csi-obsfs-retain")
+	assert.Contains(t, infrastructureEnv, "csi-disk-default")
+	assert.Contains(t, infrastructureEnv, `"everest.io/disk-volume-type"        = "SSD"`)
+	assert.NotContains(t, infrastructureEnv, `"everest.io/disk-volume-type"        = "SATA"`)
+	assert.Contains(t, infrastructureEnv, `use_node_storage_kms_key = true`)
 	assert.Contains(t, infrastructureEnv, "enable_openbao")
 	assert.Contains(t, infrastructureEnv, `openbao_chart_version           = "0.28.3"`)
 	assert.Contains(t, infrastructureEnv, `openbao_seal_config             = ""`)
@@ -391,6 +406,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureEnv, `openbao_ingress_path            = "/openbao"`)
 	assert.Contains(t, infrastructureOutputs, `output "load_balancer_id"`)
 	assert.Contains(t, infrastructureOutputs, "module.network.load_balancer_id")
+	assert.Contains(t, infrastructureOutputs, `output "storage_classes"`)
 	assert.Contains(t, infrastructureOutputs, `output "openbao_release_name"`)
 	assert.Contains(t, infrastructureOutputs, `output "openbao_ingress_url"`)
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
@@ -628,6 +644,68 @@ func TestTemplateFiles_TCloudPublicManagedModulesDoNotPreventDestroy(t *testing.
 			assert.NotContains(t, result.Content, "prevent_destroy", result.Path)
 		}
 	}
+}
+
+func TestTemplateFiles_TCloudPublicStorageClassesUseKMSKey(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":  "test-cluster",
+				"stage": "dev",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+
+	var moduleMain string
+	var moduleVariables string
+	var moduleTerraform string
+	var infrastructureMain string
+	var infrastructureEnv string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/main.tf":
+			moduleMain = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/variables.tf":
+			moduleVariables = result.Content
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/terraform.tf":
+			moduleTerraform = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt":
+			infrastructureMain = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/env.auto.tfvars.tplt":
+			infrastructureEnv = result.Content
+		}
+	}
+
+	require.NotEmpty(t, moduleMain)
+	require.NotEmpty(t, moduleVariables)
+	require.NotEmpty(t, moduleTerraform)
+	require.NotEmpty(t, infrastructureMain)
+	require.NotEmpty(t, infrastructureEnv)
+
+	assert.Contains(t, moduleTerraform, `source  = "hashicorp/kubernetes"`)
+	assert.Contains(t, moduleMain, `resource "kubernetes_storage_class_v1" "this"`)
+	assert.Contains(t, moduleMain, `storage_provisioner    = each.value.storage_provisioner`)
+	assert.Contains(t, moduleMain, `allow_volume_expansion = each.value.allow_volume_expansion`)
+	assert.Contains(t, moduleVariables, `parameters             = map(string)`)
+	assert.Contains(t, infrastructureMain, `"everest.io/crypt-key-id" = module.node_storage_kms_key.id`)
+	assert.NotContains(t, infrastructureEnv, `everest.io/crypt-key-id`)
+	assert.Contains(t, infrastructureEnv, `use_node_storage_kms_key = true`)
+	assert.Contains(t, infrastructureEnv, `volume_binding_mode      = "Immediate"`)
 }
 
 func TestTemplateFiles_TCloudPublicCCEClusterRendersAddons(t *testing.T) {

@@ -130,6 +130,32 @@ module "cce_cluster" {
   depends_on = [module.t_cloud_public_agencies]
 }
 
+locals {
+  storage_classes = {
+    for name, storage_class in var.storage_classes : name => {
+      annotations            = storage_class.annotations
+      labels                 = storage_class.labels
+      parameters = merge(
+        storage_class.parameters,
+        storage_class.use_node_storage_kms_key ? { "everest.io/crypt-key-id" = module.node_storage_kms_key.id } : {},
+      )
+      storage_provisioner    = storage_class.storage_provisioner
+      reclaim_policy         = storage_class.reclaim_policy
+      volume_binding_mode    = storage_class.volume_binding_mode
+      allow_volume_expansion = storage_class.allow_volume_expansion
+    }
+  }
+}
+
+module "storage_classes" {
+  count  = var.create_storage_classes ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/storage-classes"
+
+  storage_classes = local.storage_classes
+
+  depends_on = [module.cce_cluster]
+}
+
 module "openbao" {
   count  = var.enable_openbao ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/openbao-helm"

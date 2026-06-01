@@ -48,6 +48,8 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `node_pools[*].availability_zone`
 - `node_pools`
 - `cce_addons`
+- `create_storage_classes`
+- `storage_classes`
 - `enable_cluster_public_endpoint`
 - `enable_openbao`
 - `openbao_chart_version`
@@ -60,6 +62,8 @@ The generated `enable_cluster_public_endpoint` default is `true`. This binds a s
 The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
 The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
+
+The generated `create_storage_classes` default is `true` and creates `csi-disk-retain-topology-crypt`, `csi-obsfs-retain`, and `csi-disk-default`. Set it to `false` if these StorageClasses already exist or are managed elsewhere. The encrypted disk StorageClasses set `use_node_storage_kms_key = true`, so Terraform injects the generated `node_storage_kms_key` ID into `everest.io/crypt-key-id` instead of hard-coding a KMS key ID.
 
 The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow. The generated OpenBao ingress defaults to `https://<cluster-dns-name>/openbao`.
 
