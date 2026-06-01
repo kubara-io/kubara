@@ -58,8 +58,19 @@ locals {
     }),
   ] : []
 
+  # HA-Raft needs each pod to discover its peers. Without retry_join, only
+  # the pod where you run `bao operator init` ever joins the cluster; the
+  # other pods stay uninitialized and unseal calls against them fail. The
+  # OpenBao headless service is named "<release>-internal" by the chart and
+  # exposes per-pod DNS entries like openbao-0.openbao-internal.
+  raft_retry_joins = join("\n      ", [
+    for i in range(var.replicas) :
+    "retry_join {\n        leader_api_addr = \"http://${var.release_name}-${i}.${var.release_name}-internal:8200\"\n      }"
+  ])
+
   raft_config = trimspace(<<-EOT
     ui = true
+    disabled_mlock = true
 
     listener "tcp" {
       tls_disable = 1
@@ -69,6 +80,8 @@ locals {
 
     storage "raft" {
       path = "/openbao/data"
+
+      ${local.raft_retry_joins}
     }
 
     service_registration "kubernetes" {}
@@ -76,6 +89,15 @@ locals {
     ${trimspace(var.seal_config)}
   EOT
   )
+
+  # Tell each pod its own externally-reachable API address, used by Raft for
+  # standby-to-leader request forwarding. Kubernetes substitutes $(HOSTNAME)
+  # at pod start, so this resolves to per-pod URLs like
+  # http://openbao-0.openbao-internal:8200.
+  per_pod_api_addr_env = {
+    BAO_API_ADDR = "http://$(HOSTNAME).${var.release_name}-internal:8200"
+  }
+  merged_extra_env = merge(local.per_pod_api_addr_env, var.extra_environment_vars)
 }
 
 resource "helm_release" "this" {
@@ -96,7 +118,7 @@ resource "helm_release" "this" {
         enabled = var.injector_enabled
       }
       server = {
-        extraEnvironmentVars = var.extra_environment_vars
+        extraEnvironmentVars = local.merged_extra_env
         dataStorage = {
           enabled      = true
           size         = var.data_storage_size

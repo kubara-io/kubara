@@ -503,9 +503,9 @@ variable "openbao_injector_enabled" {
 }
 
 variable "openbao_data_storage_size" {
-  description = "OpenBao raft PVC size."
+  description = "OpenBao raft PVC size. OpenBao only persists Raft state and KV data."
   type        = string
-  default     = "10Gi"
+  default     = "1Gi"
 }
 
 variable "openbao_data_storage_class" {

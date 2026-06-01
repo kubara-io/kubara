@@ -47,9 +47,9 @@ variable "injector_enabled" {
 }
 
 variable "data_storage_size" {
-  description = "OpenBao raft PVC size."
+  description = "OpenBao raft PVC size. OpenBao only persists Raft state and KV data, so 1 GiB is plenty for typical kubara platform secret workloads."
   type        = string
-  default     = "10Gi"
+  default     = "1Gi"
 }
 
 variable "data_storage_class" {
