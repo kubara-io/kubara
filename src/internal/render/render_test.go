@@ -393,7 +393,7 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.NotContains(t, infrastructureEnv, "everest = {")
 	assert.Contains(t, infrastructureEnv, "create_storage_classes = true")
 	assert.Contains(t, infrastructureEnv, "csi-disk-retain-topology-crypt")
-	assert.Contains(t, infrastructureEnv, "csi-obsfs-retain")
+	assert.Contains(t, infrastructureEnv, "csi-obs-pfs-retain")
 	assert.Contains(t, infrastructureEnv, "csi-disk-default")
 	assert.Contains(t, infrastructureEnv, `"everest.io/disk-volume-type"        = "SSD"`)
 	assert.NotContains(t, infrastructureEnv, `"everest.io/disk-volume-type"        = "SATA"`)

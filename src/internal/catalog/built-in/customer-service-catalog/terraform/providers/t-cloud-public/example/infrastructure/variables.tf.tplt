@@ -439,7 +439,7 @@ variable "storage_classes" {
       volume_binding_mode      = "WaitForFirstConsumer"
       use_node_storage_kms_key = true
     }
-    csi-obsfs-retain = {
+    csi-obs-pfs-retain = {
       parameters = {
         "csi.storage.k8s.io/csi-driver-name" = "obs.csi.everest.io"
         "csi.storage.k8s.io/fstype"          = "obsfs"
