@@ -14,6 +14,7 @@ Running `kubara generate --terraform` creates:
 - `kms-key`: KMS key for encrypted node volumes
 - `cce-cluster`: CCE cluster, configurable node pools, optional CCE addons, and optional local kubeconfig output
 - `openbao-helm`: OpenBao Helm release deployed after the CCE cluster is available
+- `openbao`: separate Terraform layer for OpenBao KV, External Secrets access, and platform secrets
 
 The same bucket module is also used for Velero backup buckets. The generated customer infrastructure renders a `velero_bucket` module only when the cluster config contains `services.velero.status: enabled`.
 
@@ -50,17 +51,14 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `enable_cluster_public_endpoint`
 - `enable_openbao`
 - `openbao_chart_version`
-- `openbao_auto_unseal_enabled`
-- `openbao_image_repository`
-- `openbao_image_tag`
 
-The generated `enable_cluster_public_endpoint` default is `true`. This binds a small EIP (`5_bgp`, 5 Mbit/s, traffic charge) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm/Kubernetes providers (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set this to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN) and want to avoid the public master endpoint.
+The generated `enable_cluster_public_endpoint` default is `true`. This binds a small EIP (`5_bgp`, 5 Mbit/s, traffic charge) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm provider (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set this to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN) and want to avoid the public master endpoint.
 
 The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
 The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 
-The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The generated stack includes an optional T Cloud Public KMS auto-unseal test path. Keep `openbao_auto_unseal_enabled = false` for the default manual initialization/unseal flow. Set it to `true` to create a tenant-global KMS key, generate a `seal "tcloudpublickms"` stanza, create the Kubernetes Secret with the T Cloud Public AK/SK credentials, and pass the Secret to the OpenBao pods. The official OpenBao image must support the `tcloudpublickms` seal, or `openbao_image_repository` / `openbao_image_tag` must point to a test image that includes it.
+The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
@@ -100,30 +98,52 @@ Run:
 
 The generated stack can optionally write a kubeconfig locally when `create_kubeconfig_local` is enabled.
 
-## OpenBao Auto-Unseal Test Path
+## OpenBao Manual Init and Unseal
 
-To test T Cloud Public KMS auto-unseal, enable the generated test path before applying:
-
-```hcl
-openbao_auto_unseal_enabled = true
-```
-
-By default, Terraform creates a tenant-global KMS key with the `opentelekomcloud.global-region` provider and uses that key in the generated OpenBao seal stanza. To use an existing key instead:
-
-```hcl
-openbao_auto_unseal_create_kms_key = false
-openbao_auto_unseal_kms_key_id     = "<kms-key-id>"
-```
-
-The generated seal omits `project` by default so the T Cloud Public wrapper uses the global KMS scope. Set `openbao_auto_unseal_project` only when you explicitly want to test a project-scoped KMS endpoint.
-
-If the official OpenBao image does not include the `tcloudpublickms` seal yet, set `openbao_image_repository` and `openbao_image_tag` to an image that contains the wrapper integration. The first initialization is still manual:
+After the infrastructure apply has installed the OpenBao Helm release, wait until the OpenBao pods exist, then initialize OpenBao and unseal the required pods:
 
 ```bash
+kubectl -n openbao get pods
 kubectl exec -n openbao -ti openbao-0 -- bao operator init
+kubectl exec -n openbao -ti openbao-0 -- bao operator unseal
+kubectl exec -n openbao -ti openbao-1 -- bao operator unseal
+kubectl exec -n openbao -ti openbao-2 -- bao operator unseal
 ```
 
-With auto-unseal, OpenBao returns recovery keys instead of classic unseal keys. Store them securely. After initialization, OpenBao should unseal through T Cloud Public KMS on restart.
+Store the generated root token and unseal keys securely, then unseal OpenBao according to the OpenBao HA/Raft runbook.
+
+Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao configuration and secrets in a separate step after OpenBao is initialized, unsealed, and a valid OpenBao token is available.
+
+## OpenBao Configuration and Secrets
+
+kubara also renders a separate OpenBao Terraform layer:
+
+```text
+customer-service-catalog/terraform/<cluster-name>/openbao
+```
+
+This layer uses the same OBS backend bucket as the infrastructure layer, but stores state under a separate key:
+
+```hcl
+key = "tf-state-<cluster-name>-<stage>-openbao"
+```
+
+Run it after the infrastructure apply has completed and OpenBao is initialized and unsealed:
+
+```bash
+kubectl -n openbao port-forward svc/openbao 8200:8200
+export VAULT_TOKEN="<openbao-token>"
+
+cd customer-service-catalog/terraform/<cluster-name>/openbao
+terraform init
+terraform apply
+```
+
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets such as `docker_config`, `t-cloud-public-clouds-yaml`, OAuth2 credentials, and Grafana credentials. User-provided secrets are disabled by default in `env.auto.tfvars`; enable the matching `manage_*` flag and provide the sensitive value in a local `*.auto.tfvars` file before applying.
+
+The generated T Cloud Public External Secrets values create a `ClusterSecretStore` named `<cluster-name>-<stage>` that points to `http://openbao.openbao.svc.cluster.local:8200`, uses `path: secret`, `version: v2`, and authenticates via Kubernetes auth with the `external-secrets` service account. The optional userpass fallback remains available in Terraform, but is disabled by default.
+
+OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file.
 
 ## Traefik Load Balancer Binding
 
@@ -162,7 +182,7 @@ ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 
 The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
 
-When `external-secrets` is enabled, kubara renders an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml` through the cluster `ClusterSecretStore` named `<cluster-name>-<stage>`. Create that `ClusterSecretStore` during bootstrap with `--with-es-css-file`, or add it to `customer-service-catalog/helm/<cluster-name>/external-secrets/additional-values.yaml`.
+When `external-secrets` is enabled, kubara renders both the OpenBao-backed `ClusterSecretStore` named `<cluster-name>-<stage>` and an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml`. Enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer to write that backend value.
 
 The referenced secret backend value should contain a `clouds.yaml` entry like:
 

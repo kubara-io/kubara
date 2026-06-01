@@ -1,0 +1,52 @@
+output "openbao_kv_mount_path" {
+  description = "OpenBao KV v2 mount path used by kubara ExternalSecrets."
+  value       = var.openbao_kv_mount_path
+}
+
+output "openbao_kubernetes_auth_path" {
+  description = "OpenBao Kubernetes auth backend path."
+  value       = var.manage_openbao_kubernetes_auth_backend ? vault_auth_backend.kubernetes[0].path : null
+}
+
+output "external_secrets_kubernetes_auth_role_name" {
+  description = "OpenBao Kubernetes auth role used by External Secrets."
+  value       = local.manage_external_secrets_kubernetes_auth_role ? vault_kubernetes_auth_backend_role.external_secrets[0].role_name : null
+}
+
+output "openbao_namespace_kv_read_role_name" {
+  description = "OpenBao Kubernetes auth role for namespace-scoped KV reads."
+  value       = local.manage_namespace_kv_read_role ? vault_kubernetes_auth_backend_role.kubernetes_namespace_kv_read[0].role_name : null
+}
+
+output "external_secrets_username" {
+  description = "Optional OpenBao userpass username for External Secrets fallback setups."
+  value       = local.manage_external_secrets_userpass ? var.external_secrets_username : null
+}
+
+output "external_secrets_password" {
+  description = "OpenBao userpass password for External Secrets."
+  value       = local.manage_external_secrets_userpass ? local.external_secrets_password : null
+  sensitive   = true
+}
+
+output "external_secrets_password_b64" {
+  description = "Base64-encoded OpenBao userpass password for External Secrets Kubernetes Secret manifests."
+  value       = local.manage_external_secrets_userpass ? base64encode(local.external_secrets_password) : null
+  sensitive   = true
+}
+
+output "external_secrets_policy_name" {
+  description = "OpenBao policy assigned to the External Secrets user."
+  value       = local.manage_external_secrets_policy ? vault_policy.external_secrets_read[0].name : null
+}
+
+output "grafana_admin_user" {
+  description = "Grafana admin username."
+  value       = var.manage_grafana_admin_credentials ? local.grafana_admin_user : null
+}
+
+output "grafana_admin_password" {
+  description = "Grafana admin password."
+  value       = var.manage_grafana_admin_credentials ? local.grafana_admin_password : null
+  sensitive   = true
+}

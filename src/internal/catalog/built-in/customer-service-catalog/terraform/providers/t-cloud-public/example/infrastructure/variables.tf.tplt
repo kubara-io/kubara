@@ -434,42 +434,6 @@ variable "openbao_chart_version" {
   default     = "0.28.3"
 }
 
-variable "openbao_create_namespace" {
-  description = "Create the OpenBao namespace."
-  type        = bool
-  default     = true
-}
-
-variable "openbao_helm_timeout" {
-  description = "OpenBao Helm release timeout in seconds."
-  type        = number
-  default     = 3600
-}
-
-variable "openbao_image_registry" {
-  description = "OpenBao server image registry."
-  type        = string
-  default     = "quay.io"
-}
-
-variable "openbao_image_repository" {
-  description = "OpenBao server image repository. Override this for custom test images that include the tcloudpublickms wrapper."
-  type        = string
-  default     = "openbao/openbao"
-}
-
-variable "openbao_image_tag" {
-  description = "OpenBao server image tag. Leave empty to use the chart appVersion."
-  type        = string
-  default     = ""
-}
-
-variable "openbao_image_pull_policy" {
-  description = "OpenBao server image pull policy."
-  type        = string
-  default     = "IfNotPresent"
-}
-
 variable "openbao_replicas" {
   description = "OpenBao HA replica count."
   type        = number
@@ -485,7 +449,7 @@ variable "openbao_image_pull_secrets" {
 variable "openbao_injector_enabled" {
   description = "Enable the OpenBao agent injector."
   type        = bool
-  default     = true
+  default     = false
 }
 
 variable "openbao_data_storage_size" {
@@ -510,76 +474,6 @@ variable "openbao_extra_environment_vars" {
   description = "Extra environment variables for the OpenBao server pods, for example credentials required by a seal plugin."
   type        = map(string)
   default     = {}
-}
-
-variable "openbao_extra_secret_environment_vars" {
-  description = "Extra OpenBao server environment variables sourced from existing Kubernetes Secrets."
-  type = list(object({
-    envName    = string
-    secretName = string
-    secretKey  = string
-  }))
-  default = []
-}
-
-variable "openbao_auto_unseal_enabled" {
-  description = "Enable the generated experimental T Cloud Public KMS auto-unseal configuration."
-  type        = bool
-  default     = false
-}
-
-variable "openbao_auto_unseal_create_kms_key" {
-  description = "Create a tenant-global T Cloud Public KMS key for OpenBao auto-unseal."
-  type        = bool
-  default     = true
-}
-
-variable "openbao_auto_unseal_kms_key_id" {
-  description = "Existing T Cloud Public KMS key ID for OpenBao auto-unseal when openbao_auto_unseal_create_kms_key is false."
-  type        = string
-  default     = ""
-}
-
-variable "openbao_auto_unseal_kms_key_name" {
-  description = "Optional name prefix for the generated OpenBao auto-unseal KMS key."
-  type        = string
-  default     = ""
-}
-
-variable "openbao_auto_unseal_kms_key_description" {
-  description = "Description for the generated OpenBao auto-unseal KMS key."
-  type        = string
-  default     = "kubara managed OpenBao auto-unseal key"
-}
-
-variable "openbao_auto_unseal_kms_pending_days" {
-  description = "Pending deletion days for the generated OpenBao auto-unseal KMS key."
-  type        = number
-  default     = 7
-}
-
-variable "openbao_auto_unseal_project" {
-  description = "Optional T Cloud Public project scope for the tcloudpublickms seal. Leave empty to use the global KMS scope."
-  type        = string
-  default     = ""
-}
-
-variable "openbao_auto_unseal_identity_endpoint" {
-  description = "Optional IAM endpoint for the tcloudpublickms seal. Leave empty to derive it from t_cloud_public_region."
-  type        = string
-  default     = ""
-}
-
-variable "openbao_auto_unseal_create_secret" {
-  description = "Create the Kubernetes Secret that provides T Cloud Public AK/SK to the OpenBao pods."
-  type        = bool
-  default     = true
-}
-
-variable "openbao_auto_unseal_secret_name" {
-  description = "Kubernetes Secret name that contains TCLOUDPUBLIC_ACCESS_KEY and TCLOUDPUBLIC_SECRET_KEY for OpenBao auto-unseal."
-  type        = string
-  default     = "openbao-tcloudpublickms"
 }
 
 variable "create_kubeconfig_local" {

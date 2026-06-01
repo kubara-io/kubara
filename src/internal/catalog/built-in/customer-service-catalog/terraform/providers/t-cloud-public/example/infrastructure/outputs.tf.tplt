@@ -51,21 +51,6 @@ output "openbao_namespace" {
   value       = var.enable_openbao ? module.openbao[0].namespace : null
 }
 
-output "openbao_auto_unseal_enabled" {
-  description = "Whether the generated OpenBao T Cloud Public KMS auto-unseal test path is enabled."
-  value       = local.openbao_auto_unseal_enabled
-}
-
-output "openbao_auto_unseal_kms_key_id" {
-  description = "T Cloud Public KMS key ID used for OpenBao auto-unseal, if enabled."
-  value       = local.openbao_auto_unseal_enabled ? local.openbao_auto_unseal_kms_key_id : null
-}
-
-output "openbao_auto_unseal_secret_name" {
-  description = "Kubernetes Secret name used for OpenBao auto-unseal credentials, if enabled."
-  value       = local.openbao_auto_unseal_enabled ? var.openbao_auto_unseal_secret_name : null
-}
-
 output "dns_zone_id" {
   description = "DNS zone ID."
   value       = var.create_dns_zone ? module.dns_zone[0].id : null
