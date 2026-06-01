@@ -1,0 +1,16 @@
+---
+apiVersion: v2
+name: velero
+description: Umbrella Chart for Velero Config
+type: application
+version: 0.0.1
+dependencies:
+  - name: velero
+    version: "12.0.1"
+    repository: https://vmware-tanzu.github.io/helm-charts
+  - name: template-library
+    repository: file://../template-library
+    version: 0.0.7
+  - name: external-secrets
+    repository: https://charts.external-secrets.io/
+    version: 2.5.0  # https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets
