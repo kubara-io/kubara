@@ -39,6 +39,7 @@ func fullServiceContext() map[string]any {
 		"metrics-server":          map[string]any{"status": "disabled"},
 		"metallb":                 map[string]any{"status": "disabled"},
 		"longhorn":                map[string]any{"status": "disabled"},
+		"velero":                  map[string]any{"status": "disabled", "config": map[string]any{"fsBackupEnabled": true}},
 	}
 }
 
@@ -60,6 +61,7 @@ func fullCatalogContext() map[string]any {
 			"metrics-server":          map[string]any{"chartPath": "metrics-server"},
 			"metallb":                 map[string]any{"chartPath": "metallb"},
 			"longhorn":                map[string]any{"chartPath": "longhorn"},
+			"velero":                  map[string]any{"chartPath": "velero"},
 		},
 	}
 }
