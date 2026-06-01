@@ -115,3 +115,9 @@ variable "ingress_tls_secret_name" {
   type        = string
   default     = ""
 }
+
+variable "ingress_create_traefik_middlewares" {
+  description = "Create the Traefik Middleware objects for the OpenBao subpath ingress. Requires the traefik.io/v1alpha1 CRD to already exist in the cluster. Set to true on a follow-up apply once Traefik is installed."
+  type        = bool
+  default     = false
+}

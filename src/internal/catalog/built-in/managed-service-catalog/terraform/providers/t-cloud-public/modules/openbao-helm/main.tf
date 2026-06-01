@@ -8,10 +8,16 @@ locals {
   ingress_path = var.ingress_path == "/" ? "/" : trimsuffix(var.ingress_path, "/")
   ingress_url  = var.ingress_enabled && var.ingress_host != "" ? "https://${var.ingress_host}${local.ingress_path == "/" ? "" : local.ingress_path}" : null
 
-  ingress_default_annotations = local.ingress_path == "/" ? {} : {
+  # The traefik.io/v1alpha1 Middleware CRD is only available after Traefik is
+  # installed in the cluster. When OpenBao is rolled out before Traefik (the
+  # default kubara flow), creating the middlewares here breaks the Helm
+  # release. Set ingress_create_traefik_middlewares = true once Traefik and
+  # its CRDs exist (typically on a follow-up apply).
+  ingress_create_middlewares  = var.ingress_enabled && local.ingress_path != "/" && var.ingress_create_traefik_middlewares
+  ingress_default_annotations = local.ingress_create_middlewares ? {
     "traefik.ingress.kubernetes.io/app-root"           = "${local.ingress_path}/ui/"
     "traefik.ingress.kubernetes.io/router.middlewares" = "${var.namespace}-openbao-redirect-noslash@kubernetescrd,${var.namespace}-openbao-strip-prefix@kubernetescrd"
-  }
+  } : {}
 
   ingress_tls = var.ingress_tls_secret_name == "" ? [] : [
     {
@@ -20,7 +26,7 @@ locals {
     }
   ]
 
-  ingress_extra_objects = var.ingress_enabled && local.ingress_path != "/" ? [
+  ingress_extra_objects = local.ingress_create_middlewares ? [
     yamlencode({
       apiVersion = "traefik.io/v1alpha1"
       kind       = "Middleware"

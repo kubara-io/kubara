@@ -171,12 +171,13 @@ module "openbao" {
   data_storage_class     = var.openbao_data_storage_class
   seal_config            = var.openbao_seal_config
   extra_environment_vars = var.openbao_extra_environment_vars
-  ingress_enabled         = var.openbao_ingress_enabled
-  ingress_host            = var.openbao_ingress_host
-  ingress_path            = var.openbao_ingress_path
-  ingress_class_name      = var.openbao_ingress_class_name
-  ingress_annotations     = var.openbao_ingress_annotations
-  ingress_tls_secret_name = var.openbao_ingress_tls_secret_name
+  ingress_enabled                    = var.openbao_ingress_enabled
+  ingress_host                       = var.openbao_ingress_host
+  ingress_path                       = var.openbao_ingress_path
+  ingress_class_name                 = var.openbao_ingress_class_name
+  ingress_annotations                = var.openbao_ingress_annotations
+  ingress_tls_secret_name            = var.openbao_ingress_tls_secret_name
+  ingress_create_traefik_middlewares = var.openbao_ingress_create_traefik_middlewares
 
   depends_on = [module.cce_cluster]
 }

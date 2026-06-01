@@ -67,6 +67,8 @@ The generated `create_storage_classes` default is `true` and creates `csi-disk-r
 
 The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow. The generated OpenBao ingress defaults to `https://<cluster-dns-name>/openbao`.
 
+The subpath ingress (`/openbao`) needs two Traefik `Middleware` objects to strip the prefix before routing to OpenBao. Because Traefik (and its `traefik.io/v1alpha1` CRD) is typically installed later through Argo CD, the default value of `openbao_ingress_create_traefik_middlewares` is `false`. On the first infrastructure apply, OpenBao is reachable at `https://<cluster-dns-name>/openbao` but routes incorrectly without the middlewares. Once Traefik is installed, re-apply with `openbao_ingress_create_traefik_middlewares = true` to add the middlewares. If Traefik is not part of the cluster at all, set `openbao_ingress_path = "/"` and use a dedicated subdomain instead.
+
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
 ## 2. Initialize Backend
