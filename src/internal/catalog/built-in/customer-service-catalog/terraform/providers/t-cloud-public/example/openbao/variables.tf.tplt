@@ -76,7 +76,7 @@ variable "openbao_oidc_admin_allowed_redirect_uris" {
   description = "Allowed OIDC redirect URIs for the OpenBao admin role."
   type        = list(string)
   default = [
-    "https://{{ .cluster.dnsName | default "CHANGE_ME_OPENBAO_DNS_NAME" }}/ui/vault/auth/oidc/oidc/callback",
+    "https://{{ .cluster.dnsName }}/openbao/ui/vault/auth/oidc/oidc/callback",
     "http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback",
   ]
 }

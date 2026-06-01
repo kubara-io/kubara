@@ -351,6 +351,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureMain, `module "openbao"`)
 	assert.Contains(t, infrastructureMain, "source = \"../../../../managed-service-catalog/terraform/modules/openbao-helm\"")
 	assert.Contains(t, infrastructureMain, "depends_on = [module.cce_cluster]")
+	assert.Contains(t, infrastructureMain, "ingress_enabled")
+	assert.Contains(t, infrastructureMain, "var.openbao_ingress_enabled")
+	assert.Contains(t, infrastructureMain, "var.openbao_ingress_host")
 	assert.Contains(t, infrastructureMain, "load_balancer_type               = var.load_balancer_type")
 	assert.Contains(t, infrastructureMain, "dedicated_load_balancer_availability_zones = var.dedicated_load_balancer_availability_zones")
 	assert.NotContains(t, infrastructureMain, "cce_agency_projects")
@@ -363,6 +366,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureVariables, `variable "cce_addons"`)
 	assert.Contains(t, infrastructureVariables, `variable "enable_openbao"`)
 	assert.Contains(t, infrastructureVariables, `variable "openbao_seal_config"`)
+	assert.Contains(t, infrastructureVariables, `variable "openbao_ingress_enabled"`)
+	assert.Contains(t, infrastructureVariables, `default     = "test.example.com"`)
+	assert.Contains(t, infrastructureVariables, `default     = "/openbao"`)
 	assert.Contains(t, infrastructureVariables, `variable "load_balancer_type"`)
 	assert.Contains(t, infrastructureVariables, `variable "dedicated_load_balancer_availability_zones"`)
 	assert.NotContains(t, infrastructureVariables, `variable "obs_kms_agency_propagation_delay"`)
@@ -380,9 +386,13 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureEnv, "enable_openbao")
 	assert.Contains(t, infrastructureEnv, `openbao_chart_version           = "0.28.3"`)
 	assert.Contains(t, infrastructureEnv, `openbao_seal_config             = ""`)
+	assert.Contains(t, infrastructureEnv, `openbao_ingress_enabled         = true`)
+	assert.Contains(t, infrastructureEnv, `openbao_ingress_host            = "test.example.com"`)
+	assert.Contains(t, infrastructureEnv, `openbao_ingress_path            = "/openbao"`)
 	assert.Contains(t, infrastructureOutputs, `output "load_balancer_id"`)
 	assert.Contains(t, infrastructureOutputs, "module.network.load_balancer_id")
 	assert.Contains(t, infrastructureOutputs, `output "openbao_release_name"`)
+	assert.Contains(t, infrastructureOutputs, `output "openbao_ingress_url"`)
 	assert.Contains(t, agencyMain, "domain_roles          = try(length(each.value.domain_roles), 0) > 0 ? each.value.domain_roles : null")
 	assert.Contains(t, agencyVariables, "domain_roles = optional(list(string))")
 	assert.NotContains(t, agencyVariables, "domain_roles = optional(list(string), [])")
@@ -785,8 +795,16 @@ func TestTemplateFiles_TCloudPublicOpenBaoModuleUsesHelmRelease(t *testing.T) {
 	assert.Contains(t, openbaoMain, `raft = {`)
 	assert.Contains(t, openbaoMain, `setNodeId = true`)
 	assert.Contains(t, openbaoMain, `${trimspace(var.seal_config)}`)
+	assert.Contains(t, openbaoMain, `apiAddr  = local.ingress_url`)
+	assert.Contains(t, openbaoMain, `ingress = {`)
+	assert.Contains(t, openbaoMain, `"traefik.ingress.kubernetes.io/app-root"`)
+	assert.Contains(t, openbaoMain, `"traefik.ingress.kubernetes.io/router.middlewares"`)
+	assert.Contains(t, openbaoMain, `extraObjects = local.ingress_extra_objects`)
+	assert.Contains(t, openbaoMain, `replacePathRegex`)
 	assert.Contains(t, openbaoVariables, `default     = "https://openbao.github.io/openbao-helm"`)
 	assert.Contains(t, openbaoVariables, `default     = "0.28.3"`)
+	assert.Contains(t, openbaoVariables, `variable "ingress_enabled"`)
+	assert.Contains(t, openbaoVariables, `default     = "/openbao"`)
 }
 
 func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
@@ -809,6 +827,9 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 				},
 				"services": map[string]any{},
 			},
+			"env": map[string]any{
+				"DockerconfigBase64": "e30=",
+			},
 		},
 	})
 
@@ -820,9 +841,15 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	var openbaoEnv string
 	var openbaoOutputs string
 	var openbaoSecretsExample string
+	var setEnvSh string
+	var setEnvPs1 string
 	for _, result := range results {
 		require.NoError(t, result.Error)
 		switch result.Path {
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/set-env-changeme.sh.tplt":
+			setEnvSh = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/set-env-changeme.ps1.tplt":
+			setEnvPs1 = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/terraform.tf.tplt":
 			openbaoTerraform = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt":
@@ -844,6 +871,8 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	require.NotEmpty(t, openbaoEnv)
 	require.NotEmpty(t, openbaoOutputs)
 	require.NotEmpty(t, openbaoSecretsExample)
+	require.NotEmpty(t, setEnvSh)
+	require.NotEmpty(t, setEnvPs1)
 	assert.Contains(t, openbaoTerraform, `key    = "tf-state-test-cluster-dev-openbao"`)
 	assert.Contains(t, openbaoTerraform, `source  = "hashicorp/vault"`)
 	assert.Contains(t, openbaoTerraform, `provider "vault"`)
@@ -854,28 +883,57 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoMain, `resource "vault_kubernetes_auth_backend_role" "external_secrets"`)
 	assert.Contains(t, openbaoMain, `resource "vault_policy" "external_secrets_read"`)
 	assert.Contains(t, openbaoMain, `resource "vault_policy" "kubernetes_namespace_kv_read"`)
+	assert.Contains(t, openbaoMain, `path "sys/*"`)
+	assert.Contains(t, openbaoMain, `oidc_scopes           = var.openbao_oidc_scopes`)
+	assert.Contains(t, openbaoMain, `token_ttl             = var.openbao_oidc_admin_token_ttl`)
+	assert.Contains(t, openbaoMain, `token_ttl                        = var.openbao_namespace_kv_read_token_ttl`)
 	assert.Contains(t, openbaoMain, `identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace`)
 	assert.Contains(t, openbaoMain, `resource "vault_generic_endpoint" "external_secrets_user"`)
 	assert.Contains(t, openbaoMain, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
 	assert.Contains(t, openbaoMain, `name  = "t-cloud-public-clouds-yaml"`)
+	assert.NotContains(t, openbaoMain, `argocd_customer_repository_credentials`)
+	assert.NotContains(t, openbaoMain, `argocd_managed_repository_credentials`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_token"`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_oidc_discovery_url"`)
-	assert.Contains(t, openbaoVariables, `https://test.example.com/ui/vault/auth/oidc/oidc/callback`)
+	assert.Contains(t, openbaoVariables, `https://test.example.com/openbao/ui/vault/auth/oidc/oidc/callback`)
+	assert.Contains(t, openbaoVariables, `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`)
+	assert.NotContains(t, openbaoVariables, `CHANGE_ME_OPENBAO_DNS_NAME`)
+	assert.Contains(t, openbaoVariables, `variable "openbao_oidc_scopes"`)
+	assert.Contains(t, openbaoVariables, `default     = ["openid", "email", "profile"]`)
+	assert.Contains(t, openbaoVariables, `variable "openbao_oidc_admin_token_ttl"`)
+	assert.Contains(t, openbaoVariables, `default     = 604800`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_kubernetes_auth_path"`)
+	assert.Contains(t, openbaoVariables, `variable "openbao_namespace_kv_read_token_ttl"`)
+	assert.Contains(t, openbaoVariables, `default     = 86400`)
+	assert.NotContains(t, openbaoVariables, `argocd_customer_repository`)
+	assert.NotContains(t, openbaoVariables, `argocd_managed_repository`)
 	assert.Contains(t, openbaoVariables, `sensitive   = true`)
 	assert.Contains(t, openbaoEnv, `external_secrets_username`)
+	assert.Contains(t, openbaoEnv, `openbao_address       = "http://127.0.0.1:8200"`)
 	assert.Contains(t, openbaoEnv, `"test-cluster-dev-external-secrets"`)
 	assert.Contains(t, openbaoEnv, `manage_openbao_kubernetes_auth_backend`)
 	assert.Contains(t, openbaoEnv, `manage_external_secrets_kubernetes_auth_role = true`)
 	assert.Contains(t, openbaoEnv, `manage_openbao_userpass_auth_backend`)
 	assert.Contains(t, openbaoEnv, `manage_external_secrets_user`)
+	assert.Contains(t, openbaoEnv, `manage_image_pull_secret             = false`)
+	assert.NotContains(t, openbaoEnv, `manage_argocd_customer_repository_credentials`)
 	assert.NotContains(t, openbaoEnv, `openbao_token`)
 	assert.NotContains(t, openbaoEnv, `image_pull_secret =`)
+	assert.Contains(t, setEnvSh, `export TF_VAR_argo_oauth2_client_id=""`)
+	assert.Contains(t, setEnvSh, `export TF_VAR_grafana_oauth2_client_secret=""`)
+	assert.Contains(t, setEnvSh, `export TF_VAR_oauth2_client_secret=""`)
+	assert.Contains(t, setEnvSh, `export TF_VAR_image_pull_secret="e30="`)
+	assert.Contains(t, setEnvPs1, `$env:TF_VAR_argo_oauth2_client_id = ""`)
+	assert.Contains(t, setEnvPs1, `$env:TF_VAR_oauth2_client_secret = ""`)
+	assert.Contains(t, setEnvPs1, `$env:TF_VAR_image_pull_secret = "e30="`)
+	assert.NotContains(t, setEnvSh, `argocd_customer_repository`)
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_kubernetes_auth_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "openbao_namespace_kv_read_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_password_b64"`)
 	assert.Contains(t, openbaoSecretsExample, `manage_t_cloud_public_clouds_yaml = true`)
+	assert.NotContains(t, openbaoSecretsExample, `argocd_customer_repository`)
 	assert.Contains(t, openbaoSecretsExample, `manage_openbao_oidc_auth_backend = true`)
+	assert.Contains(t, openbaoSecretsExample, `https://test.example.com/openbao/ui/vault/auth/oidc/oidc/callback`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
@@ -1037,6 +1095,47 @@ func TestTemplateFiles_TCloudPublicCCETraefikValuesRenderELBAnnotations(t *testi
 	require.NotEmpty(t, traefikValues)
 	assert.Contains(t, traefikValues, `kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"`)
 	assert.Contains(t, traefikValues, `kubernetes.io/elb.class: "union"`)
+}
+
+func TestTemplateFiles_TCloudPublicCCEHomerDashboardIncludesOpenBaoLink(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"terraform": map[string]any{
+					"provider":       "t-cloud-public",
+					"kubernetesType": "cce",
+				},
+				"services": fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var homerValues string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt" {
+			homerValues = result.Content
+		}
+	}
+
+	require.NotEmpty(t, homerValues)
+	assert.Contains(t, homerValues, `name: "openbao"`)
+	assert.Contains(t, homerValues, `url: "/openbao/ui/"`)
+	assert.Contains(t, homerValues, `logo: "/assets/tools/secretsmanager.png"`)
 }
 
 func TestTemplateFiles_StackitProviderOverridesExternalDNSValues(t *testing.T) {

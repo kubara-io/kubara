@@ -8,7 +8,7 @@ The Terraform state uses the same OBS backend bucket as the infrastructure layer
 key = "tf-state-{{ .cluster.name }}-{{ .cluster.stage }}-openbao"
 ```
 
-Run this layer only after OpenBao is reachable and a valid token is available. For a local run, port-forward OpenBao and provide the token through `VAULT_TOKEN`:
+Run this layer only after OpenBao is reachable and a valid token is available. By default, this layer uses a local port-forward so Terraform does not need to use the public OpenBao ingress API:
 
 ```bash
 kubectl -n openbao port-forward svc/openbao 8200:8200
@@ -20,6 +20,8 @@ terraform apply
 
 The layer creates the KV v2 mount, the Kubernetes auth backend, an External Secrets role, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the platform secrets selected in `*.auto.tfvars`.
 
+By default it writes generated Grafana admin credentials. Docker registry, ExternalDNS (`t-cloud-public-clouds-yaml`), and OAuth2 credentials stay disabled until the matching `manage_*` flag and secret value are provided.
+
 By default the generated External Secrets `ClusterSecretStore` authenticates with OpenBao via Kubernetes auth using the `external-secrets` service account in the `external-secrets` namespace. The optional userpass fallback is disabled by default.
 
-OIDC login for admins is available through `manage_openbao_oidc_auth_backend`, but remains disabled until an OIDC client ID and secret are provided.
+OIDC login for admins is available through `manage_openbao_oidc_auth_backend`, but remains disabled until an OIDC client ID and secret are provided. The default redirect URIs include the generated ingress callback below `/openbao` and the local port-forward callback.

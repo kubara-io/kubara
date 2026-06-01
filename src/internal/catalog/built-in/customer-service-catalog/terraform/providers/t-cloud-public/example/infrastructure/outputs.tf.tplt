@@ -51,6 +51,11 @@ output "openbao_namespace" {
   value       = var.enable_openbao ? module.openbao[0].namespace : null
 }
 
+output "openbao_ingress_url" {
+  description = "OpenBao ingress URL, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].ingress_url : null
+}
+
 output "dns_zone_id" {
   description = "DNS zone ID."
   value       = var.create_dns_zone ? module.dns_zone[0].id : null

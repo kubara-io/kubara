@@ -476,6 +476,44 @@ variable "openbao_extra_environment_vars" {
   default     = {}
 }
 
+variable "openbao_ingress_enabled" {
+  description = "Expose OpenBao through the cluster ingress."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_ingress_host" {
+  description = "OpenBao ingress host."
+  type        = string
+  default     = "{{ .cluster.dnsName }}"
+}
+
+variable "openbao_ingress_path" {
+  description = "OpenBao ingress path prefix."
+  type        = string
+  default     = "/openbao"
+}
+
+variable "openbao_ingress_class_name" {
+  description = "IngressClass name used for the OpenBao ingress."
+  type        = string
+  default     = "{{ .cluster.ingressClassName | default "traefik" }}"
+}
+
+variable "openbao_ingress_annotations" {
+  description = "Additional OpenBao ingress annotations."
+  type        = map(string)
+  default = {
+    "cert-manager.io/cluster-issuer" = "{{ dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . }}"
+  }
+}
+
+variable "openbao_ingress_tls_secret_name" {
+  description = "TLS secret name for the OpenBao ingress."
+  type        = string
+  default     = "tls-openbao"
+}
+
 variable "create_kubeconfig_local" {
   type        = bool
   default     = false

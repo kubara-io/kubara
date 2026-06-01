@@ -69,3 +69,49 @@ variable "extra_environment_vars" {
   type        = map(string)
   default     = {}
 }
+
+variable "ingress_enabled" {
+  description = "Expose OpenBao through an ingress."
+  type        = bool
+  default     = false
+}
+
+variable "ingress_host" {
+  description = "OpenBao ingress host."
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = !var.ingress_enabled || var.ingress_host != ""
+    error_message = "ingress_host must be set when ingress_enabled is true."
+  }
+}
+
+variable "ingress_path" {
+  description = "Path prefix for the OpenBao ingress."
+  type        = string
+  default     = "/openbao"
+
+  validation {
+    condition     = startswith(var.ingress_path, "/")
+    error_message = "ingress_path must start with '/'."
+  }
+}
+
+variable "ingress_class_name" {
+  description = "IngressClass name used for the OpenBao ingress."
+  type        = string
+  default     = ""
+}
+
+variable "ingress_annotations" {
+  description = "Additional OpenBao ingress annotations. Values override module defaults on key conflicts."
+  type        = map(string)
+  default     = {}
+}
+
+variable "ingress_tls_secret_name" {
+  description = "TLS secret name for the OpenBao ingress. Leave empty to omit TLS."
+  type        = string
+  default     = ""
+}

@@ -17,3 +17,14 @@ $env:AWS_SECRET_ACCESS_KEY = ""
 # can corrupt state uploads against some S3-compatible APIs.
 $env:AWS_REQUEST_CHECKSUM_CALCULATION = "when_required"
 $env:AWS_RESPONSE_CHECKSUM_VALIDATION = "when_required"
+
+# Add known credentials for OAuth2 apps here.
+$env:TF_VAR_argo_oauth2_client_id = ""
+$env:TF_VAR_argo_oauth2_client_secret = ""
+$env:TF_VAR_grafana_oauth2_client_id = ""
+$env:TF_VAR_grafana_oauth2_client_secret = ""
+$env:TF_VAR_oauth2_client_id = ""
+$env:TF_VAR_oauth2_client_secret = ""
+
+# Imported from the .env. Used by the OpenBao Terraform layer.
+$env:TF_VAR_image_pull_secret = "{{ dig "env" "DockerconfigBase64" "" . }}"

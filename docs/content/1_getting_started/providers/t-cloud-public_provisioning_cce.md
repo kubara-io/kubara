@@ -51,6 +51,9 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `enable_cluster_public_endpoint`
 - `enable_openbao`
 - `openbao_chart_version`
+- `openbao_ingress_enabled`
+- `openbao_ingress_host`
+- `openbao_ingress_path`
 
 The generated `enable_cluster_public_endpoint` default is `true`. This binds a small EIP (`5_bgp`, 5 Mbit/s, traffic charge) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm provider (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set this to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN) and want to avoid the public master endpoint.
 
@@ -58,7 +61,7 @@ The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to
 
 The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 
-The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow.
+The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow. The generated OpenBao ingress defaults to `https://<cluster-dns-name>/openbao`.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
@@ -139,11 +142,13 @@ terraform init
 terraform apply
 ```
 
-The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets such as `docker_config`, `t-cloud-public-clouds-yaml`, OAuth2 credentials, and Grafana credentials. User-provided secrets are disabled by default in `env.auto.tfvars`; enable the matching `manage_*` flag and provide the sensitive value in a local `*.auto.tfvars` file before applying.
+The generated `openbao_address` default is `http://127.0.0.1:8200`, so Terraform configures OpenBao through the local port-forward. The OpenBao ingress is still rendered for browser access and OIDC callbacks.
+
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets. By default it writes `grafana_credentials`. `docker_config`, `t-cloud-public-clouds-yaml` for ExternalDNS, and the OAuth2 credentials stay disabled until the matching `manage_*` flag and secret value are provided in a local `*.auto.tfvars` file before applying.
 
 The generated T Cloud Public External Secrets values create a `ClusterSecretStore` named `<cluster-name>-<stage>` that points to `http://openbao.openbao.svc.cluster.local:8200`, uses `path: secret`, `version: v2`, and authenticates via Kubernetes auth with the `external-secrets` service account. The optional userpass fallback remains available in Terraform, but is disabled by default.
 
-OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file.
+OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
 
 ## Traefik Load Balancer Binding
 

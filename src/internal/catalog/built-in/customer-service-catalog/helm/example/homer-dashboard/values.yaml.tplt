@@ -5,6 +5,12 @@
 {{- $kubePrometheusStatus := dig "cluster" "services" "kube-prometheus-stack" "status" "disabled" . -}}
 {{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
 {{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
+{{- $openbaoEnabled := false -}}
+{{- with .cluster.terraform -}}
+{{- if (and (eq .provider "t-cloud-public") (eq .kubernetesType "cce")) -}}
+{{- $openbaoEnabled = true -}}
+{{- end -}}
+{{- end -}}
 {{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
@@ -115,6 +121,13 @@ dashboardConfig:
           url: "/argocd/"
           subtitle: "GitOps Deployment Dashboard"
           target: "_blank"
+        {{- if $openbaoEnabled }}
+        - name: "openbao"
+          logo: "/assets/tools/secretsmanager.png"
+          url: "/openbao/ui/"
+          subtitle: "Secrets Management"
+          target: "_blank"
+        {{- end }}
         {{- if (eq $kubePrometheusStatus "enabled") }}
         - name: "grafana"
           logo: "/assets/tools/grafana.png"
