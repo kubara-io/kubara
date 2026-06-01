@@ -123,7 +123,7 @@ dashboardConfig:
           target: "_blank"
         {{- if $openbaoEnabled }}
         - name: "openbao"
-          logo: "/assets/tools/secretsmanager.png"
+          logo: "/assets/tools/openbao.png"
           url: "/openbao/ui/"
           subtitle: "Secrets Management"
           target: "_blank"
@@ -168,6 +168,14 @@ dashboardConfig:
         {{- end }}
     - name: "DevOps Links"
       items:
+        {{- if $openbaoEnabled }}
+        - name: "OTC Console"
+          icon: "fas fa-cloud"
+          url: "https://console.otc.t-systems.com"
+          subtitle: "Open Telekom Cloud Console"
+          target: "_blank"
+        {{- else }}
         - name: "Secretsmanager"
           logo: "/assets/tools/secretsmanager.png"
           url: "https://replace-me-with-your-url"
+        {{- end }}

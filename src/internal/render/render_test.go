@@ -1213,7 +1213,10 @@ func TestTemplateFiles_TCloudPublicCCEHomerDashboardIncludesOpenBaoLink(t *testi
 	require.NotEmpty(t, homerValues)
 	assert.Contains(t, homerValues, `name: "openbao"`)
 	assert.Contains(t, homerValues, `url: "/openbao/ui/"`)
-	assert.Contains(t, homerValues, `logo: "/assets/tools/secretsmanager.png"`)
+	assert.Contains(t, homerValues, `logo: "/assets/tools/openbao.png"`)
+	assert.NotContains(t, homerValues, `logo: "/assets/tools/secretsmanager.png"`)
+	assert.Contains(t, homerValues, `name: "OTC Console"`)
+	assert.Contains(t, homerValues, `url: "https://console.otc.t-systems.com"`)
 }
 
 func TestTemplateFiles_StackitProviderOverridesExternalDNSValues(t *testing.T) {
