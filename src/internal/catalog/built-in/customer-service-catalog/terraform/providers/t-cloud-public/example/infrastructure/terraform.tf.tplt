@@ -53,21 +53,36 @@ provider "opentelekomcloud" {
 {{ if (eq .cluster.terraform.kubernetesType "cce") }}
 locals {
   cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig_raw)
+
+  # OTC CCE returns a kubeconfig with both an "internalCluster" (VPC-internal
+  # API server URL like https://10.0.x.y:5443) and, when an EIP is bound, an
+  # "externalCluster" (public API server URL). When Terraform runs the
+  # helm/kubernetes providers from outside the VPC we must point them at the
+  # external entry, otherwise the connection times out.
+  cce_kubeconfig_clusters = {
+    for entry in local.cce_kubeconfig.clusters : entry.name => entry.cluster
+  }
+  cce_target_cluster_name = var.enable_cluster_public_endpoint ? "externalCluster" : "internalCluster"
+  cce_target_cluster = lookup(
+    local.cce_kubeconfig_clusters,
+    local.cce_target_cluster_name,
+    local.cce_kubeconfig.clusters[0].cluster,
+  )
 }
 
 provider "helm" {
   kubernetes {
-    host                   = local.cce_kubeconfig.clusters[0].cluster.server
-    cluster_ca_certificate = base64decode(local.cce_kubeconfig.clusters[0].cluster.certificate-authority-data)
-    client_certificate     = base64decode(local.cce_kubeconfig.users[0].user.client-certificate-data)
-    client_key             = base64decode(local.cce_kubeconfig.users[0].user.client-key-data)
+    host                   = local.cce_target_cluster.server
+    cluster_ca_certificate = base64decode(local.cce_target_cluster["certificate-authority-data"])
+    client_certificate     = base64decode(local.cce_kubeconfig.users[0].user["client-certificate-data"])
+    client_key             = base64decode(local.cce_kubeconfig.users[0].user["client-key-data"])
   }
 }
 
 provider "kubernetes" {
-  host                   = local.cce_kubeconfig.clusters[0].cluster.server
-  cluster_ca_certificate = base64decode(local.cce_kubeconfig.clusters[0].cluster.certificate-authority-data)
-  client_certificate     = base64decode(local.cce_kubeconfig.users[0].user.client-certificate-data)
-  client_key             = base64decode(local.cce_kubeconfig.users[0].user.client-key-data)
+  host                   = local.cce_target_cluster.server
+  cluster_ca_certificate = base64decode(local.cce_target_cluster["certificate-authority-data"])
+  client_certificate     = base64decode(local.cce_kubeconfig.users[0].user["client-certificate-data"])
+  client_key             = base64decode(local.cce_kubeconfig.users[0].user["client-key-data"])
 }
 {{ end }}
