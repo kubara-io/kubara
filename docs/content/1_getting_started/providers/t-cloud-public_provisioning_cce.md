@@ -107,7 +107,7 @@ Run:
 
 The generated stack can optionally write a kubeconfig locally when `create_kubeconfig_local` is enabled.
 
-## OpenBao Manual Init and Unseal
+## 4. OpenBao Manual Init and Unseal
 
 After the infrastructure apply has installed the OpenBao Helm release, OpenBao is running as a 3-replica HA Raft cluster but sealed. Until it is initialized and unsealed, the pods report `0/1` ready, which is expected: the readiness probe deliberately fails on a sealed pod.
 
@@ -184,7 +184,7 @@ Active Node    true
 
 Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao configuration and secrets in a separate step after OpenBao is initialized, unsealed, and a valid OpenBao token is available.
 
-## OpenBao Configuration and Secrets
+## 5. OpenBao Configuration and Secrets
 
 kubara also renders a separate OpenBao Terraform layer:
 
@@ -217,7 +217,17 @@ The generated T Cloud Public External Secrets values create a `ClusterSecretStor
 
 OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
 
-## Traefik Load Balancer Binding
+## 6. Generate Helm Values
+
+The remaining steps (Traefik ELB binding, ExternalDNS, the Argo CD bootstrap) work against the customer Helm overlays, which only exist after Helm rendering. Generate them now:
+
+```bash
+kubara generate --helm
+```
+
+This writes provider-specific values for Traefik, ExternalDNS, external-secrets, the homer dashboard, and the other built-in services into `customer-service-catalog/helm/<cluster-name>/`. The values reference the Terraform outputs and the OpenBao auth backend that you configured in the previous steps.
+
+## 7. Traefik Load Balancer Binding
 
 For T Cloud Public CCE, the generated Traefik values contain CCE Service annotations for binding Traefik to an existing ELB:
 
@@ -229,22 +239,22 @@ traefik:
       kubernetes.io/elb.class: "union"
 ```
 
-After applying the infrastructure, get the generated load balancer ID:
+Get the load balancer ID that the infrastructure apply produced:
 
 ```bash
 cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 terraform output -raw load_balancer_id
 ```
 
-Set that value in:
+Set that value in the Traefik overlay rendered by step 6:
 
 ```text
 customer-service-catalog/helm/<cluster-name>/traefik/values.yaml
 ```
 
-Keep `kubernetes.io/elb.class: "union"` for the default shared load balancer. If `load_balancer_type = "dedicated"` is used in Terraform, set `kubernetes.io/elb.class: "performance"` in the Traefik values.
+Keep `kubernetes.io/elb.class: "union"` for the default shared load balancer. If `load_balancer_type = "dedicated"` was set in Terraform, switch to `kubernetes.io/elb.class: "performance"` in the Traefik values.
 
-## ExternalDNS
+## 8. ExternalDNS
 
 For T Cloud Public, kubara generates provider-specific ExternalDNS values using the T Cloud Public DNS webhook:
 
@@ -254,7 +264,7 @@ ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 
 The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
 
-When `external-secrets` is enabled, kubara renders both the OpenBao-backed `ClusterSecretStore` named `<cluster-name>-<stage>` and an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml`. Enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer to write that backend value.
+When `external-secrets` is enabled, kubara renders both the OpenBao-backed `ClusterSecretStore` named `<cluster-name>-<stage>` and an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml`. Enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer (step 5) to write that backend value.
 
 The referenced secret backend value should contain a `clouds.yaml` entry like:
 
@@ -281,8 +291,15 @@ kubectl -n external-dns create secret generic tcloudpubliccloudsyaml --from-file
 
 The DNS zone itself is created by the Terraform `dns-zone` module when `create_dns_zone` is enabled.
 
-## 4. Continue With Platform Bootstrap
+## 9. Continue With Platform Bootstrap
 
-Use the CCE kubeconfig for the generic kubara bootstrap guide.
+Use the CCE kubeconfig for the generic kubara bootstrap guide:
+
+```bash
+terraform -chdir=customer-service-catalog/terraform/<cluster-name>/infrastructure \
+  output -raw kubeconfig_raw > ~/.kube/<cluster-name>.yaml
+```
 
 Now continue with the [Bootstrap Your Own Platform](../bootstrapping.md) guide.
+
+The ClusterSecretStore is already part of the rendered Helm values in step 6, so the bootstrap command does **not** need `--with-es-css-file` for this provider — see the bootstrap doc for the exact command.

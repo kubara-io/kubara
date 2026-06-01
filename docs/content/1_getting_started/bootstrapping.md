@@ -223,7 +223,9 @@ For external-secrets, create provider credential secret(s) first (for example vi
 
 A) **recommended for first bootstrap:** pass a `ClusterSecretStore` manifest to bootstrap with `--with-es-css-file` together with `--with-es-crds`, 
 
-or B) apply your `ClusterSecretStore` manually (only if external-secrets CRDs are already installed on the cluster).
+or B) apply your `ClusterSecretStore` manually (only if external-secrets CRDs are already installed on the cluster),
+
+or C) **no extra flag needed** if your provider already renders the `ClusterSecretStore` into the external-secrets Helm values. T Cloud Public CCE clusters use this path: kubara installs OpenBao in-cluster and the rendered `external-secrets/values.yaml` already contains a `clusterSecretStores` entry pointing at it. In that case `--with-es-crds` is enough and you can skip `--with-es-css-file` and the manual provider credential secret. See [T Cloud Public CCE Provisioning](providers/t-cloud-public_provisioning_cce.md) for the full flow.
 
 If the namespace does not exist yet, create it once before creating the provider credential secret(s):
 
