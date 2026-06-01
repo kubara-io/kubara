@@ -63,11 +63,11 @@ locals {
   # other pods stay uninitialized and unseal calls against them fail. The
   # OpenBao headless service is named "<release>-internal" by the chart and
   # exposes per-pod DNS entries like openbao-0.openbao-internal.
-  #
-  # The blocks below are hardcoded for the standard 3-replica HA layout.
-  # With more replicas, Raft discovers the additional peers via gossip
-  # after one of the first three pods is reached. With fewer replicas, the
-  # extra entries fail silently and do not break the cluster.
+  raft_retry_joins = join("\n      ", [
+    for i in range(var.replicas) :
+    "retry_join {\n        leader_api_addr = \"http://${var.release_name}-${i}.${var.release_name}-internal:8200\"\n      }"
+  ])
+
   raft_config = trimspace(<<-EOT
     ui = true
     disabled_mlock = true
@@ -81,15 +81,7 @@ locals {
     storage "raft" {
       path = "/openbao/data"
 
-      retry_join {
-        leader_api_addr = "http://${var.release_name}-0.${var.release_name}-internal:8200"
-      }
-      retry_join {
-        leader_api_addr = "http://${var.release_name}-1.${var.release_name}-internal:8200"
-      }
-      retry_join {
-        leader_api_addr = "http://${var.release_name}-2.${var.release_name}-internal:8200"
-      }
+      ${local.raft_retry_joins}
     }
 
     service_registration "kubernetes" {}
