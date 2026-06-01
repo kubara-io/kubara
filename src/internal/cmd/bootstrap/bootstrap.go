@@ -207,6 +207,7 @@ func ensureNamespaces(ctx context.Context, client *k8s.Client, opts *Options, ch
 func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 	log.Info().Msg("Adding helm repositories")
 
+	added := false
 	for _, chart := range charts {
 		if chart.EnsureCRD {
 			repo := helm.RepoOptions{Name: chart.Name, URL: chart.RepoURL}
@@ -218,7 +219,20 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 				return fmt.Errorf("update helm repository %q: %w", repo.Name, err)
 			}
 			log.Info().Msgf("Added helm repository: %q", repo.Name)
+			added = true
 		}
+	}
+
+	// Refresh the global repository index too. Per-alias updates can leave the
+	// shared cache out of date for charts whose Chart.yaml references the
+	// repository by URL rather than by the alias added above, which triggers
+	// "can't get a valid version for subchart" errors on the next
+	// helm dependency update.
+	if added {
+		if err := helm.UpdateAllRepositories(ctx); err != nil {
+			return fmt.Errorf("refresh helm repository index: %w", err)
+		}
+		log.Info().Msg("Refreshed helm repository index")
 	}
 
 	return nil
@@ -230,6 +244,14 @@ func updateHelmDependencies(ctx context.Context, opts *Options, charts []Bootstr
 
 	for _, chart := range charts {
 		if chart.EnsureCRD {
+			// Discard any previously downloaded subchart archives and the lock
+			// file so the next dependency update resolves against the freshly
+			// refreshed repository index. Otherwise a stale Chart.lock can pin
+			// kubara to a subchart version that no longer matches the cache.
+			if err := helm.CleanDependencies(chart.Path); err != nil {
+				return fmt.Errorf("clean helm chart dependencies for %q: %w", chart.Name, err)
+			}
+
 			dep := helm.DependencyOptions{ChartPath: chart.Path, Timeout: opts.Timeout}
 			if err := helm.UpdateDependencies(ctx, dep); err != nil {
 				return fmt.Errorf("update helm chart dependencies for %q: %w", chart.Name, err)
