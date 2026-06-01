@@ -1,0 +1,15 @@
+# required class for the velero snapshots
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: velero-csi
+  labels:
+    velero.io/csi-volumesnapshot-class: "true"
+driver: cinder.csi.openstack.org
+deletionPolicy: Retain
+parameters:
+# stackit specific flag, since stackit uses openstack
+# openstack disallows the creation of volumesnapshots while they are 'in-use'
+# force-create overrides it
+  force-create: "true"
+  type: "snapshot"

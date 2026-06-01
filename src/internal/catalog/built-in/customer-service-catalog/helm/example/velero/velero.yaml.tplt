@@ -1,0 +1,62 @@
+
+namespace:
+  labels:
+    project-name: "{{ .cluster.name }}"
+    stage: "{{ .cluster.stage }}"
+
+externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secretStores:
+    {{ .cluster.name }}-{{ .cluster.stage }}:
+      kind: ClusterSecretStore
+      name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secrets:
+    velero-credentials:
+      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      data:
+        - secretKey: cloud
+          remoteKey: velero_s3_credentials
+          remoteKeyProperty: cloud
+
+velero:
+{{- $fsBackup := (index .cluster.services "velero" "config" "fsBackupEnabled") }}
+{{- if $fsBackup }}
+  deployNodeAgent: true
+  nodeAgent:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
+{{- end }}
+
+  configuration:
+    {{- if $fsBackup }}
+    defaultVolumesToFsBackup: true
+    {{- else }}
+    features: EnableCSI
+    {{- end }}
+    backupStorageLocation:
+      - name: default
+        provider: aws
+        bucket: {{ (index .cluster.services "velero" "config" "s3bucketName") }}
+        config:
+          region: {{ (index .cluster.services "velero" "config" "s3bucketRegion") }}
+          s3Url: {{ (index .cluster.services "velero" "config" "s3Url") }}
+          s3ForcePathStyle: "true"
+    volumeSnapshotLocation: []

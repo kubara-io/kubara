@@ -1,11 +1,12 @@
 package config
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
-	"path/filepath"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -99,6 +100,9 @@ func TestNewClusterFromEnv(t *testing.T) {
 			"metrics-server":          {Status: service.StatusDisabled},
 			"metallb":                 {Status: service.StatusDisabled},
 			"longhorn":                {Status: service.StatusDisabled},
+			"velero": {
+				Status: service.StatusDisabled,
+				Config: service.Config{"fsBackupEnabled": true}},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
