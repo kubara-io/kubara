@@ -31,9 +31,9 @@ resource "helm_release" "this" {
   chart            = var.chart
   version          = var.chart_version
   namespace        = var.namespace
-  create_namespace = true
+  create_namespace = var.create_namespace
   wait             = true
-  timeout          = 900
+  timeout          = var.helm_timeout
 
   values = [
     yamlencode({
@@ -44,7 +44,14 @@ resource "helm_release" "this" {
         enabled = var.injector_enabled
       }
       server = {
-        extraEnvironmentVars = var.extra_environment_vars
+        image = {
+          registry   = var.image_registry
+          repository = var.image_repository
+          tag        = var.image_tag
+          pullPolicy = var.image_pull_policy
+        }
+        extraEnvironmentVars       = var.extra_environment_vars
+        extraSecretEnvironmentVars = var.extra_secret_environment_vars
         dataStorage = {
           enabled      = true
           size         = var.data_storage_size

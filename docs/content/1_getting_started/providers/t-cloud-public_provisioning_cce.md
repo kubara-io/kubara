@@ -47,15 +47,20 @@ Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
 - `node_pools[*].availability_zone`
 - `node_pools`
 - `cce_addons`
+- `enable_cluster_public_endpoint`
 - `enable_openbao`
 - `openbao_chart_version`
-- `openbao_seal_config`
+- `openbao_auto_unseal_enabled`
+- `openbao_image_repository`
+- `openbao_image_tag`
+
+The generated `enable_cluster_public_endpoint` default is `true`. This binds a small EIP (`5_bgp`, 5 Mbit/s, traffic charge) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm/Kubernetes providers (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set this to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN) and want to avoid the public master endpoint.
 
 The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
 
 The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
 
-The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. T Cloud Public KMS is not a native OpenBao seal today. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow, or set it to a supported OpenBao seal stanza when a supported seal or an installed KMS plugin is available.
+The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The generated stack includes an optional T Cloud Public KMS auto-unseal test path. Keep `openbao_auto_unseal_enabled = false` for the default manual initialization/unseal flow. Set it to `true` to create a tenant-global KMS key, generate a `seal "tcloudpublickms"` stanza, create the Kubernetes Secret with the T Cloud Public AK/SK credentials, and pass the Secret to the OpenBao pods. The official OpenBao image must support the `tcloudpublickms` seal, or `openbao_image_repository` / `openbao_image_tag` must point to a test image that includes it.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
 
@@ -94,6 +99,31 @@ Run:
     ```
 
 The generated stack can optionally write a kubeconfig locally when `create_kubeconfig_local` is enabled.
+
+## OpenBao Auto-Unseal Test Path
+
+To test T Cloud Public KMS auto-unseal, enable the generated test path before applying:
+
+```hcl
+openbao_auto_unseal_enabled = true
+```
+
+By default, Terraform creates a tenant-global KMS key with the `opentelekomcloud.global-region` provider and uses that key in the generated OpenBao seal stanza. To use an existing key instead:
+
+```hcl
+openbao_auto_unseal_create_kms_key = false
+openbao_auto_unseal_kms_key_id     = "<kms-key-id>"
+```
+
+The generated seal omits `project` by default so the T Cloud Public wrapper uses the global KMS scope. Set `openbao_auto_unseal_project` only when you explicitly want to test a project-scoped KMS endpoint.
+
+If the official OpenBao image does not include the `tcloudpublickms` seal yet, set `openbao_image_repository` and `openbao_image_tag` to an image that contains the wrapper integration. The first initialization is still manual:
+
+```bash
+kubectl exec -n openbao -ti openbao-0 -- bao operator init
+```
+
+With auto-unseal, OpenBao returns recovery keys instead of classic unseal keys. Store them securely. After initialization, OpenBao should unseal through T Cloud Public KMS on restart.
 
 ## Traefik Load Balancer Binding
 

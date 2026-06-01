@@ -28,6 +28,42 @@ variable "chart_version" {
   default     = "0.28.3"
 }
 
+variable "create_namespace" {
+  description = "Create the OpenBao namespace through the Helm release."
+  type        = bool
+  default     = true
+}
+
+variable "helm_timeout" {
+  description = "Helm release timeout in seconds."
+  type        = number
+  default     = 900
+}
+
+variable "image_registry" {
+  description = "OpenBao server image registry."
+  type        = string
+  default     = "quay.io"
+}
+
+variable "image_repository" {
+  description = "OpenBao server image repository."
+  type        = string
+  default     = "openbao/openbao"
+}
+
+variable "image_tag" {
+  description = "OpenBao server image tag. Leave empty to use the chart appVersion."
+  type        = string
+  default     = ""
+}
+
+variable "image_pull_policy" {
+  description = "OpenBao server image pull policy."
+  type        = string
+  default     = "IfNotPresent"
+}
+
 variable "replicas" {
   description = "OpenBao HA replica count."
   type        = number
@@ -68,4 +104,14 @@ variable "extra_environment_vars" {
   description = "Extra environment variables for the OpenBao server pods."
   type        = map(string)
   default     = {}
+}
+
+variable "extra_secret_environment_vars" {
+  description = "Extra environment variables sourced from existing Kubernetes Secrets."
+  type = list(object({
+    envName    = string
+    secretName = string
+    secretKey  = string
+  }))
+  default = []
 }

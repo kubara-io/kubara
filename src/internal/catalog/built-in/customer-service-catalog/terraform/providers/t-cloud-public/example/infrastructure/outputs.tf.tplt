@@ -6,6 +6,16 @@ output "kubeconfig_raw" {
   sensitive   = true
 }
 
+output "cluster_public_endpoint_ip" {
+  description = "Public IPv4 bound to the CCE master, if enable_cluster_public_endpoint is true. Use this for kubectl access from outside the VPC."
+  value       = module.cce_cluster.public_endpoint_ip
+}
+
+output "cluster_public_endpoint_eip_id" {
+  description = "EIP resource ID bound to the CCE master, if enable_cluster_public_endpoint is true."
+  value       = module.cce_cluster.public_endpoint_eip_id
+}
+
 output "load_balancer_public_ip" {
   description = "Public IP address assigned to the optional load balancer."
   value       = module.network.load_balancer_public_ip
@@ -39,6 +49,21 @@ output "openbao_release_name" {
 output "openbao_namespace" {
   description = "OpenBao namespace, if enabled."
   value       = var.enable_openbao ? module.openbao[0].namespace : null
+}
+
+output "openbao_auto_unseal_enabled" {
+  description = "Whether the generated OpenBao T Cloud Public KMS auto-unseal test path is enabled."
+  value       = local.openbao_auto_unseal_enabled
+}
+
+output "openbao_auto_unseal_kms_key_id" {
+  description = "T Cloud Public KMS key ID used for OpenBao auto-unseal, if enabled."
+  value       = local.openbao_auto_unseal_enabled ? local.openbao_auto_unseal_kms_key_id : null
+}
+
+output "openbao_auto_unseal_secret_name" {
+  description = "Kubernetes Secret name used for OpenBao auto-unseal credentials, if enabled."
+  value       = local.openbao_auto_unseal_enabled ? var.openbao_auto_unseal_secret_name : null
 }
 
 output "dns_zone_id" {

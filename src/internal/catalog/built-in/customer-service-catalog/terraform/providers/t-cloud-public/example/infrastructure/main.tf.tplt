@@ -40,6 +40,27 @@ locals {
       }
     } : {},
   )
+  openbao_auto_unseal_enabled    = var.enable_openbao && var.openbao_auto_unseal_enabled
+  openbao_auto_unseal_kms_key_id = local.openbao_auto_unseal_enabled ? (var.openbao_auto_unseal_create_kms_key ? module.openbao_unseal_kms_key[0].id : var.openbao_auto_unseal_kms_key_id) : ""
+  openbao_auto_unseal_identity_endpoint = var.openbao_auto_unseal_identity_endpoint != "" ? var.openbao_auto_unseal_identity_endpoint : "https://iam.${var.t_cloud_public_region}.otc.t-systems.com:443/v3"
+  openbao_tcloudpublickms_seal_config = local.openbao_auto_unseal_enabled ? trimspace(join("\n", compact([
+    "seal \"tcloudpublickms\" {",
+    "  key_id = \"${local.openbao_auto_unseal_kms_key_id}\"",
+    "  region = \"${var.t_cloud_public_region}\"",
+    var.openbao_auto_unseal_project != "" ? "  project = \"${var.openbao_auto_unseal_project}\"" : "",
+    "  identity_endpoint = \"${local.openbao_auto_unseal_identity_endpoint}\"",
+    "}",
+  ]))) : ""
+  openbao_effective_seal_config = local.openbao_auto_unseal_enabled ? local.openbao_tcloudpublickms_seal_config : var.openbao_seal_config
+  openbao_auto_unseal_secret_environment_vars = [
+    for env_name in ["TCLOUDPUBLIC_ACCESS_KEY", "TCLOUDPUBLIC_SECRET_KEY"] : {
+      envName    = env_name
+      secretName = var.openbao_auto_unseal_secret_name
+      secretKey  = env_name
+    } if local.openbao_auto_unseal_enabled
+  ]
+  openbao_extra_secret_environment_vars = concat(var.openbao_extra_secret_environment_vars, local.openbao_auto_unseal_secret_environment_vars)
+  openbao_precreate_namespace          = local.openbao_auto_unseal_enabled && var.openbao_auto_unseal_create_secret && var.openbao_create_namespace
 }
 
 module "t_cloud_public_agencies" {
@@ -99,6 +120,19 @@ module "node_storage_kms_key" {
   pending_days = var.node_storage_kms_pending_days
 }
 
+module "openbao_unseal_kms_key" {
+  count  = local.openbao_auto_unseal_enabled && var.openbao_auto_unseal_create_kms_key ? 1 : 0
+  source = "../../../../managed-service-catalog/terraform/modules/kms-key"
+
+  providers = {
+    opentelekomcloud = opentelekomcloud.global-region
+  }
+
+  name         = var.openbao_auto_unseal_kms_key_name != "" ? var.openbao_auto_unseal_kms_key_name : "${local.cluster_name}-openbao-unseal"
+  description  = var.openbao_auto_unseal_kms_key_description
+  pending_days = var.openbao_auto_unseal_kms_pending_days
+}
+
 module "cce_cluster" {
   source = "../../../../managed-service-catalog/terraform/modules/cce-cluster"
 
@@ -117,11 +151,43 @@ module "cce_cluster" {
   node_pools = var.node_pools
   addons     = var.cce_addons
 
+  enable_public_endpoint                    = var.enable_cluster_public_endpoint
+  public_endpoint_eip_type                  = var.cluster_public_endpoint_eip_type
+  public_endpoint_eip_bandwidth_size        = var.cluster_public_endpoint_eip_bandwidth_size
+  public_endpoint_eip_bandwidth_share_type  = var.cluster_public_endpoint_eip_bandwidth_share_type
+  public_endpoint_eip_bandwidth_charge_mode = var.cluster_public_endpoint_eip_bandwidth_charge_mode
+
   create_kubeconfig_local = var.create_kubeconfig_local
   kubeconfig_path         = var.kubeconfig_path
   kubeconfig_duration     = var.kubeconfig_duration
 
   depends_on = [module.t_cloud_public_agencies]
+}
+
+resource "kubernetes_namespace_v1" "openbao" {
+  count = local.openbao_precreate_namespace ? 1 : 0
+
+  metadata {
+    name = var.openbao_namespace
+  }
+}
+
+resource "kubernetes_secret_v1" "openbao_auto_unseal" {
+  count = local.openbao_auto_unseal_enabled && var.openbao_auto_unseal_create_secret ? 1 : 0
+
+  metadata {
+    name      = var.openbao_auto_unseal_secret_name
+    namespace = var.openbao_namespace
+  }
+
+  data = {
+    TCLOUDPUBLIC_ACCESS_KEY = var.t_cloud_public_access_key
+    TCLOUDPUBLIC_SECRET_KEY = var.t_cloud_public_secret_key
+  }
+
+  type = "Opaque"
+
+  depends_on = [kubernetes_namespace_v1.openbao]
 }
 
 module "openbao" {
@@ -131,16 +197,23 @@ module "openbao" {
   release_name       = var.openbao_release_name
   namespace          = var.openbao_namespace
   chart_version      = var.openbao_chart_version
+  create_namespace   = var.openbao_create_namespace && !local.openbao_precreate_namespace
+  helm_timeout       = var.openbao_helm_timeout
+  image_registry     = var.openbao_image_registry
+  image_repository   = var.openbao_image_repository
+  image_tag          = var.openbao_image_tag
+  image_pull_policy  = var.openbao_image_pull_policy
   replicas           = var.openbao_replicas
   image_pull_secrets = var.openbao_image_pull_secrets
 
-  injector_enabled       = var.openbao_injector_enabled
-  data_storage_size      = var.openbao_data_storage_size
-  data_storage_class     = var.openbao_data_storage_class
-  seal_config            = var.openbao_seal_config
-  extra_environment_vars = var.openbao_extra_environment_vars
+  injector_enabled              = var.openbao_injector_enabled
+  data_storage_size             = var.openbao_data_storage_size
+  data_storage_class            = var.openbao_data_storage_class
+  seal_config                   = local.openbao_effective_seal_config
+  extra_environment_vars        = var.openbao_extra_environment_vars
+  extra_secret_environment_vars = local.openbao_extra_secret_environment_vars
 
-  depends_on = [module.cce_cluster]
+  depends_on = [module.cce_cluster, kubernetes_secret_v1.openbao_auto_unseal]
 }
 
 {{ if (eq .cluster.services.velero.status "enabled") }}

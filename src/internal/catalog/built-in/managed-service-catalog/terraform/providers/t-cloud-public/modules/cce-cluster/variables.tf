@@ -54,6 +54,42 @@ variable "container_network_type" {
   default     = "overlay_l2"
 }
 
+variable "enable_public_endpoint" {
+  description = "Create an EIP and bind it to the CCE master so the API server is reachable from outside the VPC. Required for running Terraform Helm/Kubernetes providers against the cluster from an external machine."
+  type        = bool
+  default     = true
+}
+
+variable "public_endpoint_eip_type" {
+  description = "EIP type for the CCE master public endpoint."
+  type        = string
+  default     = "5_bgp"
+}
+
+variable "public_endpoint_eip_bandwidth_name" {
+  description = "Bandwidth name for the CCE master public endpoint EIP. If empty, the cluster name is used."
+  type        = string
+  default     = ""
+}
+
+variable "public_endpoint_eip_bandwidth_size" {
+  description = "Bandwidth size in Mbit/s for the CCE master public endpoint EIP."
+  type        = number
+  default     = 5
+}
+
+variable "public_endpoint_eip_bandwidth_share_type" {
+  description = "Bandwidth share type for the CCE master public endpoint EIP."
+  type        = string
+  default     = "PER"
+}
+
+variable "public_endpoint_eip_bandwidth_charge_mode" {
+  description = "Bandwidth charge mode for the CCE master public endpoint EIP."
+  type        = string
+  default     = "traffic"
+}
+
 variable "node_pools" {
   description = <<EOF
 List of CCE node pools. Each element must be an object with:

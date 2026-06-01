@@ -1,3 +1,18 @@
+resource "opentelekomcloud_vpc_eip_v1" "public_endpoint" {
+  count = var.enable_public_endpoint ? 1 : 0
+
+  publicip {
+    type = var.public_endpoint_eip_type
+  }
+
+  bandwidth {
+    name        = var.public_endpoint_eip_bandwidth_name != "" ? var.public_endpoint_eip_bandwidth_name : "eip-cce-${var.name}"
+    size        = var.public_endpoint_eip_bandwidth_size
+    share_type  = var.public_endpoint_eip_bandwidth_share_type
+    charge_mode = var.public_endpoint_eip_bandwidth_charge_mode
+  }
+}
+
 resource "opentelekomcloud_cce_cluster_v3" "this" {
   name                   = var.name
   cluster_type           = var.cluster_type
@@ -8,6 +23,10 @@ resource "opentelekomcloud_cce_cluster_v3" "this" {
   container_network_type = var.container_network_type
   billing_mode           = 0
   description            = var.description
+
+  # Binds the EIP to the CCE master so the API server is reachable from outside
+  # the VPC. The provider takes the public IP as a string, not an EIP ID.
+  eip = var.enable_public_endpoint ? opentelekomcloud_vpc_eip_v1.public_endpoint[0].publicip[0].ip_address : null
 
   timeouts {
     create = "60m"
