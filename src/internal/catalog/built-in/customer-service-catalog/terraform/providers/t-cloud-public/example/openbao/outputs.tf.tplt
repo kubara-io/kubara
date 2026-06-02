@@ -9,7 +9,7 @@ output "openbao_kubernetes_auth_path" {
 }
 
 output "external_secrets_kubernetes_auth_role_name" {
-  description = "OpenBao Kubernetes auth role used by External Secrets."
+  description = "OpenBao Kubernetes auth role used by the cluster-wide External Secrets store for the image pull secret."
   value       = local.manage_external_secrets_kubernetes_auth_role ? vault_kubernetes_auth_backend_role.external_secrets[0].role_name : null
 }
 
@@ -36,7 +36,7 @@ output "external_secrets_password_b64" {
 }
 
 output "external_secrets_policy_name" {
-  description = "OpenBao policy assigned to the External Secrets user."
+  description = "OpenBao policy assigned to the cluster-wide External Secrets image pull secret reader."
   value       = local.manage_external_secrets_policy ? vault_policy.external_secrets_read[0].name : null
 }
 

@@ -126,12 +126,12 @@ resource "vault_policy" "external_secrets_read" {
   name = var.external_secrets_policy_name
 
   policy = <<-EOT
-    path "${var.openbao_kv_mount_path}/data/*" {
+    path "${var.openbao_kv_mount_path}/data/docker_config" {
       capabilities = ["read"]
     }
 
-    path "${var.openbao_kv_mount_path}/metadata/*" {
-      capabilities = ["list", "read"]
+    path "${var.openbao_kv_mount_path}/metadata/docker_config" {
+      capabilities = ["read"]
     }
   EOT
 

@@ -130,7 +130,7 @@ variable "openbao_kubernetes_auth_disable_iss_validation" {
 }
 
 variable "manage_external_secrets_kubernetes_auth_role" {
-  description = "Create the OpenBao Kubernetes auth role used by External Secrets."
+  description = "Create the OpenBao Kubernetes auth role used by the cluster-wide External Secrets store for the image pull secret."
   type        = bool
   default     = true
 }
@@ -227,7 +227,7 @@ variable "external_secrets_password" {
 }
 
 variable "external_secrets_policy_name" {
-  description = "OpenBao policy name for External Secrets read access."
+  description = "OpenBao policy name for the cluster-wide External Secrets image pull secret read access."
   type        = string
   default     = "{{ .cluster.name }}-{{ .cluster.stage }}-external-secrets-read"
 }

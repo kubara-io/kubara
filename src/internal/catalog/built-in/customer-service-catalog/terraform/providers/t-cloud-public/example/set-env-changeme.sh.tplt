@@ -44,7 +44,8 @@ export TF_VAR_image_pull_secret="{{ .env.DockerconfigBase64 }}"
 # export TF_VAR_openbao_oidc_client_secret=""
 
 # Optional ExternalDNS clouds.yaml for the T Cloud Public webhook.
-# Uncomment when enabling manage_t_cloud_public_clouds_yaml.
+# Uncomment after copying the matching block from openbao/secrets.tf-example
+# to openbao/secrets.tf.
 # export TF_VAR_t_cloud_public_clouds_yaml="$(cat <<'EOT'
 # clouds:
 #   openstack:
@@ -66,8 +67,8 @@ export TF_VAR_image_pull_secret="{{ .env.DockerconfigBase64 }}"
 # the OBS state backend):
 #   VELERO_S3_AK=$(terraform -chdir=../infrastructure output -raw velero_credential_access_key)
 #   VELERO_S3_SK=$(terraform -chdir=../infrastructure output -raw velero_credential_secret_access_key)
-# Then uncomment and source again with manage_velero_credentials enabled in
-# env.auto.tfvars:
+# Then uncomment and source again after copying the matching block from
+# openbao/secrets.tf-example to openbao/secrets.tf:
 # export TF_VAR_velero_s3_credentials_cloud="$(cat <<EOT
 # [default]
 # aws_access_key_id=${VELERO_S3_AK}

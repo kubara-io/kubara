@@ -203,7 +203,7 @@ terraform apply
 
 The generated `openbao_address` default is `http://127.0.0.1:8200`, so Terraform configures OpenBao through the local port-forward. The OpenBao ingress is still rendered for browser access and OIDC callbacks.
 
-The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role (used only for the cluster-wide image pull secret), and the generated Grafana admin credentials.
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role (used only for the cluster-wide image pull secret and limited to `secret/docker_config`), and the generated Grafana admin credentials.
 
 User-provided secrets — the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials — are written through a separate `secrets.tf-example` file. Copy it to activate the blocks you need:
 
@@ -229,7 +229,7 @@ Following [ADR-0003](../../7_decisions/ADR-0003-namespace-isolated-secret-access
 
 Every chart renders a `SecretStore` in its own namespace that authenticates with that namespace's `default` ServiceAccount through the `k8s-kv-read` role. The templated policy resolves the token to `secret/<namespace>/*`, so a workload in one namespace cannot read another namespace's secrets. The image pull secret is the deliberate exception: it is distributed to every namespace through a `ClusterExternalSecret`, so it stays on the cluster-wide store at a flat path.
 
-The cluster-wide `ClusterSecretStore` named `<cluster-name>-<stage>` (authenticating with the `external-secrets` ServiceAccount) is therefore only used for the image pull secret distribution.
+The cluster-wide `ClusterSecretStore` named `<cluster-name>-<stage>` (authenticating with the `external-secrets` ServiceAccount) is therefore only used for the image pull secret distribution, and the OpenBao policy behind it is limited to `secret/docker_config`.
 
 OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` in `env.auto.tfvars` and provide `openbao_oidc_discovery_url` plus `openbao_oidc_client_id` there; export the secret as `TF_VAR_openbao_oidc_client_secret` in `set-env.sh`. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
 
@@ -274,7 +274,7 @@ ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 
 The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
 
-When `external-secrets` is enabled, ExternalDNS uses the [namespace-isolated access model](#namespace-isolated-secret-access) like every other consumer: kubara renders a namespaced `SecretStore` in the `external-dns` namespace, scoped to `secret/external-dns/*` via the `k8s-kv-read` role. The matching KV write therefore lives at `secret/external-dns/t-cloud-public-clouds-yaml`; enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer (step 5) to populate it. The `ExternalSecret` reads remote key `external-dns/t-cloud-public-clouds-yaml`, property `clouds.yaml`.
+When `external-secrets` is enabled, ExternalDNS uses the [namespace-isolated access model](#namespace-isolated-secret-access) like every other consumer: kubara renders a namespaced `SecretStore` in the `external-dns` namespace, scoped to `secret/external-dns/*` via the `k8s-kv-read` role. The matching KV write therefore lives at `secret/external-dns/t-cloud-public-clouds-yaml`; copy the matching block from `openbao/secrets.tf-example` to `openbao/secrets.tf` in the OpenBao Terraform layer (step 5) to populate it. The `ExternalSecret` reads remote key `external-dns/t-cloud-public-clouds-yaml`, property `clouds.yaml`.
 
 The referenced secret backend value should contain a `clouds.yaml` entry like:
 

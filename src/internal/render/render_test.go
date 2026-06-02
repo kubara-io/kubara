@@ -974,6 +974,10 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoMain, `resource "vault_kubernetes_auth_backend_config" "kubernetes"`)
 	assert.Contains(t, openbaoMain, `resource "vault_kubernetes_auth_backend_role" "external_secrets"`)
 	assert.Contains(t, openbaoMain, `resource "vault_policy" "external_secrets_read"`)
+	assert.Contains(t, openbaoMain, `path "${var.openbao_kv_mount_path}/data/docker_config"`)
+	assert.Contains(t, openbaoMain, `path "${var.openbao_kv_mount_path}/metadata/docker_config"`)
+	assert.NotContains(t, openbaoMain, `path "${var.openbao_kv_mount_path}/data/*"`)
+	assert.NotContains(t, openbaoMain, `path "${var.openbao_kv_mount_path}/metadata/*"`)
 	assert.Contains(t, openbaoMain, `resource "vault_policy" "kubernetes_namespace_kv_read"`)
 	assert.Contains(t, openbaoMain, `path "sys/*"`)
 	assert.Contains(t, openbaoMain, `oidc_scopes           = var.openbao_oidc_scopes`)
@@ -1046,7 +1050,11 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, setEnvSh, `TF_VAR_velero_s3_credentials_cloud`)
 	assert.Contains(t, setEnvSh, `TF_VAR_openbao_oidc_client_secret`)
 	assert.Contains(t, setEnvSh, `TF_VAR_t_cloud_public_clouds_yaml`)
+	assert.NotContains(t, setEnvSh, `manage_t_cloud_public_clouds_yaml`)
+	assert.NotContains(t, setEnvSh, `manage_velero_credentials`)
 	assert.Contains(t, setEnvPs1, `TF_VAR_velero_s3_credentials_cloud`)
+	assert.NotContains(t, setEnvPs1, `manage_t_cloud_public_clouds_yaml`)
+	assert.NotContains(t, setEnvPs1, `manage_velero_credentials`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
