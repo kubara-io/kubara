@@ -920,6 +920,7 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	var openbaoVariables string
 	var openbaoEnv string
 	var openbaoOutputs string
+	var openbaoSecretsExample string
 	var setEnvSh string
 	var setEnvPs1 string
 	for _, result := range results {
@@ -939,6 +940,8 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 			openbaoEnv = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/outputs.tf.tplt":
 			openbaoOutputs = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/secrets.tf-example.tplt":
+			openbaoSecretsExample = result.Content
 		}
 	}
 
@@ -947,6 +950,7 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	require.NotEmpty(t, openbaoVariables)
 	require.NotEmpty(t, openbaoEnv)
 	require.NotEmpty(t, openbaoOutputs)
+	require.NotEmpty(t, openbaoSecretsExample)
 	require.NotEmpty(t, setEnvSh)
 	require.NotEmpty(t, setEnvPs1)
 	assert.Contains(t, openbaoTerraform, `key    = "tf-state-test-cluster-dev-openbao"`)
@@ -965,10 +969,20 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoMain, `token_ttl                        = var.openbao_namespace_kv_read_token_ttl`)
 	assert.Contains(t, openbaoMain, `identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace`)
 	assert.Contains(t, openbaoMain, `resource "vault_generic_endpoint" "external_secrets_user"`)
-	assert.Contains(t, openbaoMain, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
-	assert.Contains(t, openbaoMain, `name  = "t-cloud-public-clouds-yaml"`)
+	assert.Contains(t, openbaoMain, `resource "vault_kv_secret_v2" "grafana_admin_credentials"`)
 	assert.NotContains(t, openbaoMain, `argocd_customer_repository_credentials`)
 	assert.NotContains(t, openbaoMain, `argocd_managed_repository_credentials`)
+	// User-provided secrets live in secrets.tf-example, not in main.tf.
+	assert.NotContains(t, openbaoMain, `vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
+	assert.NotContains(t, openbaoMain, `vault_kv_secret_v2" "velero_credentials"`)
+	assert.NotContains(t, openbaoMain, `vault_kv_secret_v2" "oauth2_credentials"`)
+	assert.NotContains(t, openbaoMain, `manage_image_pull_secret`)
+	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "t-cloud-public-clouds-yaml"`)
+	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "velero_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "velero_s3_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `variable "argo_oauth2_client_secret"`)
+	assert.Contains(t, openbaoSecretsExample, `variable "velero_s3_credentials_cloud"`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_token"`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_oidc_discovery_url"`)
 	assert.Contains(t, openbaoVariables, `https://test.example.com/openbao/ui/vault/auth/oidc/oidc/callback`)
@@ -991,7 +1005,11 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoEnv, `manage_external_secrets_kubernetes_auth_role = true`)
 	assert.Contains(t, openbaoEnv, `manage_openbao_userpass_auth_backend`)
 	assert.Contains(t, openbaoEnv, `manage_external_secrets_user`)
-	assert.Contains(t, openbaoEnv, `manage_image_pull_secret             = false`)
+	assert.Contains(t, openbaoEnv, `manage_grafana_admin_credentials = true`)
+	// The user-provided secret toggles are gone; secrets.tf-example handles them.
+	assert.NotContains(t, openbaoEnv, `manage_image_pull_secret`)
+	assert.NotContains(t, openbaoEnv, `manage_oauth2_credentials`)
+	assert.NotContains(t, openbaoEnv, `manage_velero_credentials`)
 	assert.NotContains(t, openbaoEnv, `manage_argocd_customer_repository_credentials`)
 	assert.NotContains(t, openbaoEnv, `openbao_token`)
 	assert.NotContains(t, openbaoEnv, `image_pull_secret =`)

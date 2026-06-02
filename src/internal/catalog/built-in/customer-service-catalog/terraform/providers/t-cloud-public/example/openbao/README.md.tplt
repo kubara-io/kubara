@@ -18,9 +18,15 @@ terraform init
 terraform apply
 ```
 
-The layer creates the KV v2 mount, the Kubernetes auth backend, an External Secrets role, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the platform secrets selected via `manage_*` flags in `env.auto.tfvars`.
+The layer creates the KV v2 mount, the Kubernetes auth backend, an External Secrets role, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the generated Grafana admin credentials.
 
-By default it writes generated Grafana admin credentials. Docker registry, ExternalDNS (`t-cloud-public-clouds-yaml`), OAuth2, and Velero credentials stay disabled until the matching `manage_*` flag is set to `true` in `env.auto.tfvars` and the corresponding `TF_VAR_*` environment variable is exported in your sourced `set-env.sh`. The set-env file contains commented-out templates for each one.
+User-provided secrets (image pull config, OAuth2 client credentials, the ExternalDNS `t-cloud-public-clouds-yaml`, and the Velero S3 credentials) are kept out of the always-applied config. To write them, copy the example file and keep only the blocks you need:
+
+```bash
+cp secrets.tf-example secrets.tf
+```
+
+`secrets.tf-example` declares one `variable` per secret and the matching `vault_kv_secret_v2` resource. Terraform does not load `*.tf-example` files, so nothing happens until you copy it to `secrets.tf`. The values are never written into the file - they come from `TF_VAR_*` environment variables in your sourced `set-env.sh`, which already contains commented-out templates for each one.
 
 By default the generated External Secrets `ClusterSecretStore` authenticates with OpenBao via Kubernetes auth using the `external-secrets` service account in the `external-secrets` namespace. The optional userpass fallback is disabled by default.
 

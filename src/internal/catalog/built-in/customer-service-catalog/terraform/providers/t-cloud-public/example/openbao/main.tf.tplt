@@ -110,13 +110,6 @@ resource "random_password" "grafana_admin_password" {
   length = 32
 }
 
-resource "random_password" "oauth2_cookie_secret" {
-  count = var.manage_oauth2_credentials ? 1 : 0
-
-  length           = 32
-  override_special = "-_"
-}
-
 locals {
   manage_external_secrets_userpass             = var.manage_openbao_userpass_auth_backend && var.manage_external_secrets_user
   manage_external_secrets_kubernetes_auth_role = var.manage_openbao_kubernetes_auth_backend && var.manage_external_secrets_kubernetes_auth_role
@@ -216,88 +209,6 @@ resource "vault_generic_endpoint" "external_secrets_user" {
     vault_auth_backend.userpass,
     vault_policy.external_secrets_read,
   ]
-}
-
-resource "vault_kv_secret_v2" "image_pull_secret" {
-  count = var.manage_image_pull_secret ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "docker_config"
-
-  data_json = jsonencode({
-    "pull-secret" = base64decode(var.image_pull_secret)
-  })
-
-  depends_on = [vault_mount.kv]
-}
-
-resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml" {
-  count = var.manage_t_cloud_public_clouds_yaml ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "t-cloud-public-clouds-yaml"
-
-  data_json = jsonencode({
-    "clouds.yaml" = var.t_cloud_public_clouds_yaml
-  })
-
-  depends_on = [vault_mount.kv]
-}
-
-resource "vault_kv_secret_v2" "velero_credentials" {
-  count = var.manage_velero_credentials ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "velero_s3_credentials"
-
-  data_json = jsonencode({
-    cloud = var.velero_s3_credentials_cloud
-  })
-
-  depends_on = [vault_mount.kv]
-}
-
-resource "vault_kv_secret_v2" "oauth2_credentials" {
-  count = var.manage_oauth2_credentials ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "oauth2_credentials"
-
-  data_json = jsonencode({
-    "cookie-secret" = random_password.oauth2_cookie_secret[0].result
-    "client-secret" = var.oauth2_client_secret
-    "client-id"     = var.oauth2_client_id
-  })
-
-  depends_on = [vault_mount.kv]
-}
-
-resource "vault_kv_secret_v2" "argo_oauth2_credentials" {
-  count = var.manage_argo_oauth2_credentials ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "argo_oauth2_credentials"
-
-  data_json = jsonencode({
-    "client-secret" = var.argo_oauth2_client_secret
-    "client-id"     = var.argo_oauth2_client_id
-  })
-
-  depends_on = [vault_mount.kv]
-}
-
-resource "vault_kv_secret_v2" "grafana_oauth2_credentials" {
-  count = var.manage_grafana_oauth2_credentials ? 1 : 0
-
-  mount = var.openbao_kv_mount_path
-  name  = "grafana_oauth2_credentials"
-
-  data_json = jsonencode({
-    "client-secret" = var.grafana_oauth2_client_secret
-    "client-id"     = var.grafana_oauth2_client_id
-  })
-
-  depends_on = [vault_mount.kv]
 }
 
 resource "vault_kv_secret_v2" "grafana_admin_credentials" {

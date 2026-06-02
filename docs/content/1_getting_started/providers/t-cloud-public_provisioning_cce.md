@@ -203,7 +203,16 @@ terraform apply
 
 The generated `openbao_address` default is `http://127.0.0.1:8200`, so Terraform configures OpenBao through the local port-forward. The OpenBao ingress is still rendered for browser access and OIDC callbacks.
 
-The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets. By default it writes `grafana_credentials`. `docker_config`, `t-cloud-public-clouds-yaml` for ExternalDNS, the OAuth2 credentials, and the Velero S3 credentials stay disabled until the matching `manage_*` flag is set to `true` in `env.auto.tfvars` and the corresponding `TF_VAR_*` is exported in your sourced `set-env.sh`. The set-env file contains commented-out templates for each one.
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the generated `grafana_credentials`.
+
+User-provided secrets — `docker_config`, the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials — are written through a separate `secrets.tf-example` file. Copy it to activate the blocks you need:
+
+```bash
+cd customer-service-catalog/terraform/<cluster-name>/openbao
+cp secrets.tf-example secrets.tf
+```
+
+Each block declares a `variable` and the matching `vault_kv_secret_v2` resource; the values come from `TF_VAR_*` environment variables in your sourced `set-env.sh` (which has commented-out templates for each one), so no secret is ever written into a committed file. Delete the blocks you do not use before applying.
 
 The generated T Cloud Public External Secrets values create a `ClusterSecretStore` named `<cluster-name>-<stage>` that points to `http://openbao.openbao.svc.cluster.local:8200`, uses `path: secret`, `version: v2`, and authenticates via Kubernetes auth with the `external-secrets` service account. The optional userpass fallback remains available in Terraform, but is disabled by default.
 
