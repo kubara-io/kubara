@@ -234,6 +234,45 @@ prometheus-blackbox-exporter:
   global:
     imageRegistry: {{ .cluster.globalHelmChartRepo | default "quay.io" }}
 
+{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
+{{- if $tcp }}
+# T Cloud Public: namespace-isolated access through a SecretStore in the
+# kube-prometheus-stack namespace (k8s-kv-read role), reading
+# secret/kube-prometheus-stack/* only.
+namespacedSecretStores:
+  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+            audiences:
+              - vault
+
+externalSecrets:
+  secrets:
+    grafana-admin-credentials:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: kube-prometheus-stack/grafana_credentials
+
+    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+    oauth2-credentials:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: kube-prometheus-stack/grafana_oauth2_credentials
+    {{- end }}
+{{- else }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -256,6 +295,7 @@ externalSecrets:
       dataFrom:
         - remoteKey: grafana_oauth2_credentials
     {{- end }}
+{{- end }}
 
 namespace:
   labels:

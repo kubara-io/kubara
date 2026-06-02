@@ -10,6 +10,35 @@ namespace:
     stage: "{{ .cluster.stage }}"
 
 
+{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
+{{- if $tcp }}
+# T Cloud Public: namespace-isolated access through a SecretStore in the
+# oauth2-proxy namespace (k8s-kv-read role), reading secret/oauth2-proxy/* only.
+namespacedSecretStores:
+  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+            audiences:
+              - vault
+
+externalSecrets:
+  secrets:
+    oauth2-credentials:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: oauth2-proxy/oauth2_credentials
+{{- else }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -25,6 +54,7 @@ externalSecrets:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: oauth2_credentials
+{{- end }}
 
 
 oauth2-proxy:

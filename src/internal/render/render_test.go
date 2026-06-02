@@ -45,6 +45,18 @@ func fullServiceContext() map[string]any {
 	}
 }
 
+func fullArgoCDContext() map[string]any {
+	return map[string]any{
+		"repo": map[string]any{
+			"https": map[string]any{
+				"managed":  map[string]any{"url": "https://example.com/managed", "path": "managed-service-catalog/helm", "targetRevision": "main"},
+				"customer": map[string]any{"url": "https://example.com/customer", "path": "customer-service-catalog/helm", "targetRevision": "main"},
+			},
+		},
+		"helmRepo": map[string]any{"url": ""},
+	}
+}
+
 func fullCatalogContext() map[string]any {
 	return map[string]any{
 		"services": map[string]any{
@@ -980,9 +992,16 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
 	assert.Contains(t, openbaoSecretsExample, `name  = "external-dns/t-cloud-public-clouds-yaml"`)
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "velero_credentials"`)
-	assert.Contains(t, openbaoSecretsExample, `name  = "velero_s3_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "velero/velero_s3_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `variable "argo_oauth2_client_secret"`)
 	assert.Contains(t, openbaoSecretsExample, `variable "velero_s3_credentials_cloud"`)
+	// Namespace-isolated KV paths (ADR-0003): each consumer's secret lives under
+	// its own namespace; only the cluster-wide image pull secret stays flat.
+	assert.Contains(t, openbaoSecretsExample, `name  = "oauth2-proxy/oauth2_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "argocd/argo_oauth2_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "kube-prometheus-stack/grafana_oauth2_credentials"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "docker_config"`)
+	assert.Contains(t, openbaoMain, `name = "kube-prometheus-stack/grafana_credentials"`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_token"`)
 	assert.Contains(t, openbaoVariables, `variable "openbao_oidc_discovery_url"`)
 	assert.Contains(t, openbaoVariables, `https://test.example.com/openbao/ui/vault/auth/oidc/oidc/callback`)
@@ -1113,6 +1132,106 @@ func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing
 	assert.Contains(t, externalDNSValues, "kind: SecretStore")
 	assert.Contains(t, externalDNSValues, "remoteKey: external-dns/t-cloud-public-clouds-yaml")
 	assert.NotContains(t, externalDNSValues, "kind: ClusterSecretStore")
+}
+
+func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	// Enable oauth2-proxy so the argo-cd and grafana oauth2 ExternalSecrets render.
+	svc := fullServiceContext()
+	svc["oauth2-proxy"] = map[string]any{"status": "enabled"}
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"type":             "hub",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"terraform": map[string]any{
+					"provider":       "t-cloud-public",
+					"kubernetesType": "cce",
+				},
+				"argocd":   fullArgoCDContext(),
+				"services": svc,
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+	require.NoError(t, err)
+
+	got := map[string]string{}
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		got[result.Path] = result.Content
+	}
+
+	// Each consumer reads its own namespace path through a namespaced SecretStore.
+	cases := map[string]string{
+		"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt": "remoteKey: kube-prometheus-stack/grafana_credentials",
+		"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt":          "remoteKey: oauth2-proxy/oauth2_credentials",
+		"customer-service-catalog/helm/example/velero/velero.yaml.tplt":                "remoteKey: velero/velero_s3_credentials",
+		"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt":               "remoteKey: argocd/argo_oauth2_credentials",
+	}
+	for path, wantKey := range cases {
+		content := got[path]
+		require.NotEmpty(t, content, "missing %s", path)
+		assert.Contains(t, content, "namespacedSecretStores:", "%s should render a namespaced store", path)
+		assert.Contains(t, content, "role: k8s-kv-read", "%s should use the k8s-kv-read role", path)
+		assert.Contains(t, content, wantKey, "%s should read its namespace-scoped key", path)
+	}
+
+	// The image pull secret must stay on the cluster-wide store (cross-namespace).
+	argocd := got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"]
+	assert.Contains(t, argocd, "remoteKey: docker_config")
+}
+
+func TestTemplateFiles_StackitConsumerChartsKeepClusterSecretStore(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "stackit",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":             "test-cluster",
+				"stage":            "dev",
+				"type":             "hub",
+				"dnsName":          "test.example.com",
+				"ingressClassName": "traefik",
+				"ssoOrg":           "myorg",
+				"ssoTeam":          "myteam",
+				"terraform": map[string]any{
+					"provider":       "stackit",
+					"kubernetesType": "ske",
+				},
+				"argocd":   fullArgoCDContext(),
+				"services": fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+	require.NoError(t, err)
+
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		switch result.Path {
+		case "customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt",
+			"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt",
+			"customer-service-catalog/helm/example/velero/velero.yaml.tplt":
+			// STACKIT must remain on the cluster-wide store with flat keys.
+			assert.Contains(t, result.Content, "kind: ClusterSecretStore", "%s", result.Path)
+			assert.NotContains(t, result.Content, "namespacedSecretStores:", "%s must not be namespace-isolated", result.Path)
+			assert.NotContains(t, result.Content, "role: k8s-kv-read", "%s", result.Path)
+		}
+	}
 }
 
 func TestTemplateFiles_TCloudPublicExternalSecretsValuesConfigureOpenBaoClusterSecretStore(t *testing.T) {

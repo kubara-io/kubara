@@ -10,7 +10,7 @@ This page provides an overview of all Architecture Decision Records (ADRs) in **
 | -------------------------------------------------------- | --------------------------------------------------- | -------- |
 | [ADR-0001](ADR-0001-replace-deprecated-nginx-ingress.md) | Replace Deprecated Nginx Ingress                    | accepted |
 | [ADR-0002](ADR-0002-declarative-service-catalogs.md)     | Declarative Service Catalogs With ServiceDefinition | accepted |
-| [ADR-0003](ADR-0003-namespace-isolated-secret-access.md) | Namespace-Isolated Secret Access                    | proposed |
+| [ADR-0003](ADR-0003-namespace-isolated-secret-access.md) | Namespace-Isolated Secret Access                    | accepted |
 
 !!! info
     Add new ADRs to this table once created (or generate this page automatically via CI.)

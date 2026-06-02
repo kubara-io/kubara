@@ -1,9 +1,40 @@
+{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
 
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"
     stage: "{{ .cluster.stage }}"
 
+{{- if $tcp }}
+# T Cloud Public: namespace-isolated access through a SecretStore in the velero
+# namespace (k8s-kv-read role), reading secret/velero/* only.
+namespacedSecretStores:
+  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+            audiences:
+              - vault
+
+externalSecrets:
+  secrets:
+    velero-credentials:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      data:
+        - secretKey: cloud
+          remoteKey: velero/velero_s3_credentials
+          remoteKeyProperty: cloud
+{{- else }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -21,6 +52,7 @@ externalSecrets:
         - secretKey: cloud
           remoteKey: velero_s3_credentials
           remoteKeyProperty: cloud
+{{- end }}
 
 velero:
 {{- $fsBackup := (index .cluster.services "velero" "config" "fsBackupEnabled") }}

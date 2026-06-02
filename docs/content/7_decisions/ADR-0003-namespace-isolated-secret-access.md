@@ -1,6 +1,15 @@
 | status       | date       | decision-makers | consulted          | informed           |
 |--------------|------------|-----------------|--------------------|--------------------|
-| **proposed** | 2026-06-02 | kubara-Team     | Internal community | Internal community |
+| **accepted** | 2026-06-02 | kubara-Team     | Internal community | Internal community |
+
+!!! note "Implementation status"
+    Realized for the **T Cloud Public** path (OpenBao, kubernetes auth): every
+    built-in consumer chart reads its secrets through a namespaced `SecretStore`
+    scoped to `secret/<namespace>/*` via the `k8s-kv-read` role. The image pull
+    secret remains on the cluster-wide store as the documented cross-namespace
+    exception. **STACKIT is intentionally unchanged** and stays on the
+    cluster-wide `ClusterSecretStore` until the userpass-vs-kubernetes-auth
+    question below is resolved.
 
 # Namespace-Isolated Secret Access via Per-Namespace SecretStores
 

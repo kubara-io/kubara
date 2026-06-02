@@ -215,7 +215,9 @@ resource "vault_kv_secret_v2" "grafana_admin_credentials" {
   count = var.manage_grafana_admin_credentials ? 1 : 0
 
   mount = var.openbao_kv_mount_path
-  name  = "grafana_credentials"
+  # Namespace-isolated under the kube-prometheus-stack namespace, where Grafana
+  # runs and reads it through that namespace's SecretStore.
+  name = "kube-prometheus-stack/grafana_credentials"
 
   data_json = jsonencode({
     "admin-user"     = local.grafana_admin_user

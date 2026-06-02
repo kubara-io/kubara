@@ -59,6 +59,39 @@ inClusterSecretLabels:
 {{- end }}
 {{- end }}
 
+{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
+{{- if $tcp }}
+# T Cloud Public: namespace-isolated access through a SecretStore in the argocd
+# namespace (k8s-kv-read role), reading secret/argocd/* only. The image pull
+# secret above stays on the cluster-wide store because it is distributed to all
+# namespaces.
+namespacedSecretStores:
+  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+            audiences:
+              - vault
+
+externalSecrets:
+{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+  secrets:
+    oauth2-credentials:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      dataFrom:
+        - remoteKey: argocd/argo_oauth2_credentials
+{{ end }}
+{{- else }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -76,6 +109,7 @@ externalSecrets:
       dataFrom:
         - remoteKey: argo_oauth2_credentials
 {{ end }}
+{{- end }}
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
