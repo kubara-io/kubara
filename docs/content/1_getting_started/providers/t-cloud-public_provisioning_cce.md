@@ -24,52 +24,24 @@ Encrypted OBS buckets also require the tenant-wide OBS KMS agency. The bootstrap
 
 ## 1. Review Generated Values
 
-Open the generated infrastructure values:
+Open the generated infrastructure values and adjust them to your environment:
 
 ```bash
 cd customer-service-catalog/terraform/<cluster-name>/infrastructure
+$EDITOR env.auto.tfvars
 ```
 
-Review and adjust `env.auto.tfvars` before applying. At minimum, verify:
+Everything is rendered with sensible defaults — feature flags (`enable_*`, `create_*`), node pool flavors, network CIDRs, OpenBao replicas, ingress host, and so on. The file is self-documenting: each block shows its default, and disabling a section is just flipping the matching `enable_*` flag.
 
-- `create_t_cloud_public_agencies`
-- `create_dns_zone`
-- `dns_zone_name`
-- `cce_agency_name`
-- `evs_kms_agency_name`
-- `create_obs_kms_agency`
-- `vpc_cidr`
-- `subnet_cidr`
-- `load_balancer_type`
-- `dedicated_load_balancer_availability_zones`
-- `dedicated_load_balancer_l4_flavor_name`
-- `dedicated_load_balancer_l7_flavor_name`
-- `cluster_flavor_id`
-- `node_pools[*].availability_zone`
-- `node_pools`
-- `cce_addons`
-- `create_storage_classes`
-- `storage_classes`
-- `enable_cluster_public_endpoint`
-- `enable_openbao`
-- `openbao_chart_version`
-- `openbao_ingress_enabled`
-- `openbao_ingress_host`
-- `openbao_ingress_path`
+A few defaults that often need attention before the first apply:
 
-The generated `enable_cluster_public_endpoint` default is `true`. This binds a small EIP (`5_bgp`, 5 Mbit/s, traffic charge) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm provider (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set this to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN) and want to avoid the public master endpoint.
+- **`enable_cluster_public_endpoint = true`** binds a small EIP (`5_bgp`, 5 Mbit/s, traffic-charged) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm provider (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN).
 
-The generated `load_balancer_type` default is `shared`. Set it to `dedicated` to create a dedicated ELB v3 load balancer. Dedicated load balancers use `dedicated_load_balancer_availability_zones` and the configured L4/L7 flavor names; the defaults select one AZ and the Small I specifications.
+- **`load_balancer_type = "shared"`** uses CCE's shared ELB. Set to `dedicated` to provision a dedicated ELB v3 (Small I flavor in one AZ by default).
+- **`enable_openbao = true`** rolls out the in-cluster OpenBao Helm release after CCE comes up. The release is **not** initialized or unsealed automatically — that happens manually in step 4 below.
+- **`openbao_ingress_create_traefik_middlewares = false`** on the first apply because the `traefik.io/v1alpha1` CRD only exists after Traefik is installed through Argo CD. Re-apply with `true` once Traefik is up to enable the `/openbao` subpath routing, or set `openbao_ingress_path = "/"` and use a dedicated subdomain instead.
 
-The generated `cce_addons` map enables `metrics-server` by default. CCE installs `coredns` and `everest` by default, so kubara does not manage them unless you add them explicitly. Set an addon's `enabled` value to `false` to skip it, or adjust `version`, `basic`, and `custom` values before applying.
-
-The generated `create_storage_classes` default is `true` and creates `csi-disk-retain-topology-crypt`, `csi-obsfs-retain`, and `csi-disk-default`. Set it to `false` if these StorageClasses already exist or are managed elsewhere. The encrypted disk StorageClasses set `use_node_storage_kms_key = true`, so Terraform injects the generated `node_storage_kms_key` ID into `everest.io/crypt-key-id` instead of hard-coding a KMS key ID.
-
-The generated `enable_openbao` default is `true`. OpenBao is installed with the official Helm chart in HA mode with integrated Raft storage after the CCE cluster is available. The OpenBao Helm release does not wait for readiness because OpenBao is not ready before manual initialization and unseal. Keep `openbao_seal_config = ""` for the default manual initialization/unseal flow. The generated OpenBao ingress defaults to `https://<cluster-dns-name>/openbao`.
-
-The subpath ingress (`/openbao`) needs two Traefik `Middleware` objects to strip the prefix before routing to OpenBao. Because Traefik (and its `traefik.io/v1alpha1` CRD) is typically installed later through Argo CD, the default value of `openbao_ingress_create_traefik_middlewares` is `false`. On the first infrastructure apply, OpenBao is reachable at `https://<cluster-dns-name>/openbao` but routes incorrectly without the middlewares. Once Traefik is installed, re-apply with `openbao_ingress_create_traefik_middlewares = true` to add the middlewares. If Traefik is not part of the cluster at all, set `openbao_ingress_path = "/"` and use a dedicated subdomain instead.
-
-The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables. They are not written into `env.auto.tfvars`.
+The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables and are not written into `env.auto.tfvars`.
 
 ## 2. Initialize Backend
 
@@ -176,6 +148,26 @@ Active Node    true
 
 `kubectl -n openbao get pods` should now show all three pods as `1/1` ready.
 
+### 5. Make the root token available for the OpenBao Terraform layer
+
+The Initial Root Token from step 2 is what the next stack (`openbao/`) uses to authenticate against OpenBao through the local port-forward. There is intentionally **no Terraform output** for it — the token is created by `bao operator init`, never leaves the pod, and is not stored in any Terraform state.
+
+The set-env script already contains commented-out lines for it. Uncomment them and fill in the token you saved:
+
+```bash
+# customer-service-catalog/terraform/<cluster-name>/set-env.sh
+export VAULT_ADDR="http://127.0.0.1:8200"
+export VAULT_TOKEN="hvb.AAAAAQ..."   # Initial Root Token from `bao operator init`
+```
+
+Then re-source the file so the new variables apply to the next `terraform apply`:
+
+```bash
+source set-env.sh
+```
+
+After the OpenBao Terraform layer in the next step has set up OIDC admin access, revoke the root token (`bao token revoke -self`) and remove `VAULT_TOKEN` from `set-env.sh` again. From then on use `bao login -method=oidc` for further OpenBao changes.
+
 ### Pod restarts and rotation reminders
 
 - Every time a pod restarts (cluster upgrade, node maintenance, manual delete), it comes back sealed and needs to be unsealed again with 3 of the 5 keys. This is by design.
@@ -217,17 +209,11 @@ The generated T Cloud Public External Secrets values create a `ClusterSecretStor
 
 OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
 
-## 6. Generate Helm Values
+## Provider-Specific Helm Adjustments
 
-The remaining steps (Traefik ELB binding, ExternalDNS, the Argo CD bootstrap) work against the customer Helm overlays, which only exist after Helm rendering. Generate them now:
+The remaining provider-specific tweaks (Traefik ELB binding, ExternalDNS clouds.yaml) edit files under `customer-service-catalog/helm/<cluster-name>/`. Those files only exist after the Helm render step in the generic [Bootstrap Your Own Platform](../bootstrapping.md) guide. The two subsections below describe the T Cloud Public-specific adjustments you'll do **between** `kubara generate --helm` and `kubara bootstrap` in that guide.
 
-```bash
-kubara generate --helm
-```
-
-This writes provider-specific values for Traefik, ExternalDNS, external-secrets, the homer dashboard, and the other built-in services into `customer-service-catalog/helm/<cluster-name>/`. The values reference the Terraform outputs and the OpenBao auth backend that you configured in the previous steps.
-
-## 7. Traefik Load Balancer Binding
+### Traefik Load Balancer Binding
 
 For T Cloud Public CCE, the generated Traefik values contain CCE Service annotations for binding Traefik to an existing ELB:
 
@@ -246,7 +232,7 @@ cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 terraform output -raw load_balancer_id
 ```
 
-Set that value in the Traefik overlay rendered by step 6:
+Set that value in the rendered Traefik overlay:
 
 ```text
 customer-service-catalog/helm/<cluster-name>/traefik/values.yaml
@@ -254,7 +240,7 @@ customer-service-catalog/helm/<cluster-name>/traefik/values.yaml
 
 Keep `kubernetes.io/elb.class: "union"` for the default shared load balancer. If `load_balancer_type = "dedicated"` was set in Terraform, switch to `kubernetes.io/elb.class: "performance"` in the Traefik values.
 
-## 8. ExternalDNS
+### ExternalDNS
 
 For T Cloud Public, kubara generates provider-specific ExternalDNS values using the T Cloud Public DNS webhook:
 
@@ -291,15 +277,15 @@ kubectl -n external-dns create secret generic tcloudpubliccloudsyaml --from-file
 
 The DNS zone itself is created by the Terraform `dns-zone` module when `create_dns_zone` is enabled.
 
-## 9. Continue With Platform Bootstrap
+## 6. Continue With Platform Bootstrap
 
-Use the CCE kubeconfig for the generic kubara bootstrap guide:
+Export the kubeconfig for the generic kubara bootstrap guide:
 
 ```bash
 terraform -chdir=customer-service-catalog/terraform/<cluster-name>/infrastructure \
   output -raw kubeconfig_raw > ~/.kube/<cluster-name>.yaml
 ```
 
-Now continue with the [Bootstrap Your Own Platform](../bootstrapping.md) guide.
+Now continue with the [Bootstrap Your Own Platform](../bootstrapping.md) guide. The Helm render step there (`kubara generate --helm`) materializes the Traefik and ExternalDNS overlays referenced in the section above — make those provider-specific adjustments **after** that render and **before** `kubara bootstrap`.
 
-The ClusterSecretStore is already part of the rendered Helm values in step 6, so the bootstrap command does **not** need `--with-es-css-file` for this provider — see the bootstrap doc for the exact command.
+The ClusterSecretStore is rendered as part of the external-secrets Helm values, so the bootstrap command does **not** need `--with-es-css-file` for this provider.

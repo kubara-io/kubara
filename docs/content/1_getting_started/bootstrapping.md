@@ -205,6 +205,13 @@ Merge behavior reminder:
 
 CI-specific values can be stored in chart-local CI files (for example `ci/ci-values.yaml`) to keep pipeline-only settings out of runtime overlays.
 
+!!! info "T Cloud Public CCE: bind Traefik to the ELB before bootstrap"
+    For `terraform.provider: t-cloud-public`, replace the Traefik service annotation placeholder with the load balancer ID from Terraform:
+    ```bash
+    terraform -chdir=customer-service-catalog/terraform/<cluster>/infrastructure \
+      output -raw load_balancer_id
+    ```
+    Set the value in `customer-service-catalog/helm/<cluster>/traefik/values.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Switch `kubernetes.io/elb.class` to `performance` if you provisioned a dedicated ELB. Full provider context: [T Cloud Public CCE Provisioning](providers/t-cloud-public_provisioning_cce.md#provider-specific-helm-adjustments).
 
 !!! warning
     **Don't forget to commit and push your changes to Git!**
