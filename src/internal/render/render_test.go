@@ -920,7 +920,6 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	var openbaoVariables string
 	var openbaoEnv string
 	var openbaoOutputs string
-	var openbaoSecretsExample string
 	var setEnvSh string
 	var setEnvPs1 string
 	for _, result := range results {
@@ -940,8 +939,6 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 			openbaoEnv = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/outputs.tf.tplt":
 			openbaoOutputs = result.Content
-		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/secrets.auto.tfvars.example.tplt":
-			openbaoSecretsExample = result.Content
 		}
 	}
 
@@ -950,7 +947,6 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	require.NotEmpty(t, openbaoVariables)
 	require.NotEmpty(t, openbaoEnv)
 	require.NotEmpty(t, openbaoOutputs)
-	require.NotEmpty(t, openbaoSecretsExample)
 	require.NotEmpty(t, setEnvSh)
 	require.NotEmpty(t, setEnvPs1)
 	assert.Contains(t, openbaoTerraform, `key    = "tf-state-test-cluster-dev-openbao"`)
@@ -1010,10 +1006,10 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_kubernetes_auth_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "openbao_namespace_kv_read_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_password_b64"`)
-	assert.Contains(t, openbaoSecretsExample, `manage_t_cloud_public_clouds_yaml = true`)
-	assert.NotContains(t, openbaoSecretsExample, `argocd_customer_repository`)
-	assert.Contains(t, openbaoSecretsExample, `manage_openbao_oidc_auth_backend = true`)
-	assert.Contains(t, openbaoSecretsExample, `https://test.example.com/openbao/ui/vault/auth/oidc/oidc/callback`)
+	assert.Contains(t, setEnvSh, `TF_VAR_velero_s3_credentials_cloud`)
+	assert.Contains(t, setEnvSh, `TF_VAR_openbao_oidc_client_secret`)
+	assert.Contains(t, setEnvSh, `TF_VAR_t_cloud_public_clouds_yaml`)
+	assert.Contains(t, setEnvPs1, `TF_VAR_velero_s3_credentials_cloud`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {

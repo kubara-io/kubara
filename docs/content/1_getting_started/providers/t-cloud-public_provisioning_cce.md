@@ -203,11 +203,11 @@ terraform apply
 
 The generated `openbao_address` default is `http://127.0.0.1:8200`, so Terraform configures OpenBao through the local port-forward. The OpenBao ingress is still rendered for browser access and OIDC callbacks.
 
-The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets. By default it writes `grafana_credentials`. `docker_config`, `t-cloud-public-clouds-yaml` for ExternalDNS, and the OAuth2 credentials stay disabled until the matching `manage_*` flag and secret value are provided in a local `*.auto.tfvars` file before applying.
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the `external-secrets` role used by the generated `ClusterSecretStore`, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and selected platform secrets. By default it writes `grafana_credentials`. `docker_config`, `t-cloud-public-clouds-yaml` for ExternalDNS, the OAuth2 credentials, and the Velero S3 credentials stay disabled until the matching `manage_*` flag is set to `true` in `env.auto.tfvars` and the corresponding `TF_VAR_*` is exported in your sourced `set-env.sh`. The set-env file contains commented-out templates for each one.
 
 The generated T Cloud Public External Secrets values create a `ClusterSecretStore` named `<cluster-name>-<stage>` that points to `http://openbao.openbao.svc.cluster.local:8200`, uses `path: secret`, `version: v2`, and authenticates via Kubernetes auth with the `external-secrets` service account. The optional userpass fallback remains available in Terraform, but is disabled by default.
 
-OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` and provide `openbao_oidc_discovery_url`, `openbao_oidc_client_id`, and `openbao_oidc_client_secret` in a local `*.auto.tfvars` file. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
+OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` in `env.auto.tfvars` and provide `openbao_oidc_discovery_url` plus `openbao_oidc_client_id` there; export the secret as `TF_VAR_openbao_oidc_client_secret` in `set-env.sh`. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.
 
 ## Provider-Specific Helm Adjustments
 

@@ -38,3 +38,39 @@ export TF_VAR_image_pull_secret="{{ .env.DockerconfigBase64 }}"
 # (`bao token revoke -self`) once OIDC admin login is configured.
 # export VAULT_ADDR="http://127.0.0.1:8200"
 # export VAULT_TOKEN=""
+
+# Optional OpenBao OIDC admin login. Uncomment when enabling
+# manage_openbao_oidc_auth_backend in env.auto.tfvars.
+# export TF_VAR_openbao_oidc_client_secret=""
+
+# Optional ExternalDNS clouds.yaml for the T Cloud Public webhook.
+# Uncomment when enabling manage_t_cloud_public_clouds_yaml.
+# export TF_VAR_t_cloud_public_clouds_yaml="$(cat <<'EOT'
+# clouds:
+#   openstack:
+#     auth:
+#       auth_url: https://iam.eu-de.otc.t-systems.com/v3
+#       user_domain_name: "<domain-name>"
+#       project_name: "<project-name>"
+#       username: "<username>"
+#       password: "<password>"
+#     identity_api_version: 3
+#     region_name: "eu-de"
+#     interface: "public"
+# EOT
+# )"
+
+# Optional Velero S3 credentials for the OBS-backed backup bucket.
+# Assemble from the infrastructure layer outputs (distinct names so they do
+# not shadow the AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY exported above for
+# the OBS state backend):
+#   VELERO_S3_AK=$(terraform -chdir=../infrastructure output -raw velero_credential_access_key)
+#   VELERO_S3_SK=$(terraform -chdir=../infrastructure output -raw velero_credential_secret_access_key)
+# Then uncomment and source again with manage_velero_credentials enabled in
+# env.auto.tfvars:
+# export TF_VAR_velero_s3_credentials_cloud="$(cat <<EOT
+# [default]
+# aws_access_key_id=${VELERO_S3_AK}
+# aws_secret_access_key=${VELERO_S3_SK}
+# EOT
+# )"

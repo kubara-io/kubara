@@ -18,9 +18,9 @@ terraform init
 terraform apply
 ```
 
-The layer creates the KV v2 mount, the Kubernetes auth backend, an External Secrets role, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the platform secrets selected in `*.auto.tfvars`.
+The layer creates the KV v2 mount, the Kubernetes auth backend, an External Secrets role, the namespace-scoped `k8s-kv-read` role from the legacy Vault setup, and the platform secrets selected via `manage_*` flags in `env.auto.tfvars`.
 
-By default it writes generated Grafana admin credentials. Docker registry, ExternalDNS (`t-cloud-public-clouds-yaml`), and OAuth2 credentials stay disabled until the matching `manage_*` flag and secret value are provided.
+By default it writes generated Grafana admin credentials. Docker registry, ExternalDNS (`t-cloud-public-clouds-yaml`), OAuth2, and Velero credentials stay disabled until the matching `manage_*` flag is set to `true` in `env.auto.tfvars` and the corresponding `TF_VAR_*` environment variable is exported in your sourced `set-env.sh`. The set-env file contains commented-out templates for each one.
 
 By default the generated External Secrets `ClusterSecretStore` authenticates with OpenBao via Kubernetes auth using the `external-secrets` service account in the `external-secrets` namespace. The optional userpass fallback is disabled by default.
 
