@@ -1003,7 +1003,10 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "velero_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `name  = "velero/velero_s3_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `variable "argo_oauth2_client_secret"`)
-	assert.Contains(t, openbaoSecretsExample, `variable "velero_s3_credentials_cloud"`)
+	assert.Contains(t, openbaoSecretsExample, `variable "velero_access_key_id"`)
+	assert.Contains(t, openbaoSecretsExample, `variable "velero_secret_access_key"`)
+	assert.Contains(t, openbaoSecretsExample, `aws_access_key_id=${var.velero_access_key_id}`)
+	assert.NotContains(t, openbaoSecretsExample, `variable "velero_s3_credentials_cloud"`)
 	// Namespace-isolated KV paths (ADR-0003): each consumer's secret lives under
 	// its own namespace; only the cluster-wide image pull secret stays flat.
 	assert.Contains(t, openbaoSecretsExample, `name  = "oauth2-proxy/oauth2_credentials"`)
@@ -1052,15 +1055,15 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_kubernetes_auth_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "openbao_namespace_kv_read_role_name"`)
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_password_b64"`)
-	assert.Contains(t, setEnvSh, `TF_VAR_velero_s3_credentials_cloud`)
+	assert.Contains(t, setEnvSh, `TF_VAR_velero_access_key_id`)
+	assert.Contains(t, setEnvSh, `TF_VAR_velero_secret_access_key`)
 	assert.Contains(t, setEnvSh, `TF_VAR_openbao_oidc_client_secret`)
 	assert.Contains(t, setEnvSh, `TF_VAR_external_dns_os_username`)
 	assert.Contains(t, setEnvSh, `TF_VAR_external_dns_os_password`)
 	assert.NotContains(t, setEnvSh, `TF_VAR_t_cloud_public_clouds_yaml`)
-	assert.NotContains(t, setEnvSh, `manage_velero_credentials`)
-	assert.Contains(t, setEnvPs1, `TF_VAR_velero_s3_credentials_cloud`)
+	assert.NotContains(t, setEnvSh, `TF_VAR_velero_s3_credentials_cloud`)
+	assert.Contains(t, setEnvPs1, `TF_VAR_velero_access_key_id`)
 	assert.Contains(t, setEnvPs1, `TF_VAR_external_dns_os_username`)
-	assert.NotContains(t, setEnvPs1, `manage_velero_credentials`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsUsesGenericCCENodePoolFlavor(t *testing.T) {
