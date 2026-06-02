@@ -78,8 +78,8 @@ namespacedSecretStores:
             role: k8s-kv-read
             serviceAccountRef:
               name: default
-            audiences:
-              - vault
+              audiences:
+                - vault
 
 externalSecrets:
 {{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}

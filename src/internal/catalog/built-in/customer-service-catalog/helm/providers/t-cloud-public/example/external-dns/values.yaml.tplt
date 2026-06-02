@@ -17,8 +17,8 @@ namespacedSecretStores:
             role: k8s-kv-read
             serviceAccountRef:
               name: default
-            audiences:
-              - vault
+              audiences:
+                - vault
 
 externalSecrets:
   secrets:

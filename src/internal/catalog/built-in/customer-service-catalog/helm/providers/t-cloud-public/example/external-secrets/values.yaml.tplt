@@ -12,8 +12,8 @@ clusterSecretStores:
             serviceAccountRef:
               name: external-secrets
               namespace: external-secrets
-            audiences:
-              - vault
+              audiences:
+                - vault
 
 namespace:
   labels:
