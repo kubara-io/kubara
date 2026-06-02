@@ -244,6 +244,19 @@ resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml" {
   depends_on = [vault_mount.kv]
 }
 
+resource "vault_kv_secret_v2" "velero_credentials" {
+  count = var.manage_velero_credentials ? 1 : 0
+
+  mount = var.openbao_kv_mount_path
+  name  = "velero_s3_credentials"
+
+  data_json = jsonencode({
+    cloud = var.velero_s3_credentials_cloud
+  })
+
+  depends_on = [vault_mount.kv]
+}
+
 resource "vault_kv_secret_v2" "oauth2_credentials" {
   count = var.manage_oauth2_credentials ? 1 : 0
 
