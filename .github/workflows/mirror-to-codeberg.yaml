@@ -1,0 +1,26 @@
+name: mirror-to-codeberg
+
+on:
+  push:
+    branches:
+      - 'main'
+    tags:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.CODEBERG_MIRROR_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan codeberg.org >> ~/.ssh/known_hosts
+
+      - name: Mirror push to Codeberg
+        run: |
+          git clone --mirror https://github.com/kubara-io/kubara.git
+          cd kubara.git
+          git push --force --prune git@codeberg.org:kubara-io/kubara.git 'refs/heads/*:refs/heads/*' 'refs/tags/*:refs/tags/*'
