@@ -29,47 +29,14 @@ $env:TF_VAR_oauth2_client_secret = ""
 # Imported from the .env. Used by the OpenBao Terraform layer.
 $env:TF_VAR_image_pull_secret = "{{ .env.DockerconfigBase64 }}"
 
-# OpenBao Terraform layer (separate apply step after `bao operator init`).
-# Only relevant when running the openbao/ layer; the infrastructure/ layer
-# does not need a Vault/OpenBao token. The address matches a local
-# port-forward:
+# OpenBao Terraform layer (openbao/) only. Port-forward OpenBao first:
 #   kubectl -n openbao port-forward svc/openbao 8200:8200
-# VAULT_TOKEN is the Initial Root Token from `bao operator init`. Revoke it
-# (`bao token revoke -self`) once OIDC admin login is configured.
+# VAULT_TOKEN is the Initial Root Token from `bao operator init`.
 # $env:VAULT_ADDR = "http://127.0.0.1:8200"
 # $env:VAULT_TOKEN = ""
 
-# Optional OpenBao OIDC admin login. Uncomment when enabling
-# manage_openbao_oidc_auth_backend in env.auto.tfvars.
+# Optional OpenBao secrets. Uncomment the ones whose block you copied into
+# openbao/secrets.tf and set the values.
 # $env:TF_VAR_openbao_oidc_client_secret = ""
-
-# Optional ExternalDNS clouds.yaml for the T Cloud Public webhook.
-# Uncomment after copying the matching block from openbao/secrets.tf-example
-# to openbao/secrets.tf.
-# $env:TF_VAR_t_cloud_public_clouds_yaml = @"
-# clouds:
-#   openstack:
-#     auth:
-#       auth_url: https://iam.eu-de.otc.t-systems.com/v3
-#       user_domain_name: "<domain-name>"
-#       project_name: "<project-name>"
-#       username: "<username>"
-#       password: "<password>"
-#     identity_api_version: 3
-#     region_name: "eu-de"
-#     interface: "public"
-# "@
-
-# Optional Velero S3 credentials for the OBS-backed backup bucket.
-# Assemble from the infrastructure layer outputs (distinct names so they do
-# not shadow the AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY exported above for
-# the OBS state backend):
-#   $VELERO_S3_AK = terraform -chdir=../infrastructure output -raw velero_credential_access_key
-#   $VELERO_S3_SK = terraform -chdir=../infrastructure output -raw velero_credential_secret_access_key
-# Then uncomment and re-run after copying the matching block from
-# openbao/secrets.tf-example to openbao/secrets.tf:
-# $env:TF_VAR_velero_s3_credentials_cloud = @"
-# [default]
-# aws_access_key_id=$VELERO_S3_AK
-# aws_secret_access_key=$VELERO_S3_SK
-# "@
+# $env:TF_VAR_t_cloud_public_clouds_yaml = ""
+# $env:TF_VAR_velero_s3_credentials_cloud = ""
