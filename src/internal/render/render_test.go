@@ -978,7 +978,7 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.NotContains(t, openbaoMain, `vault_kv_secret_v2" "oauth2_credentials"`)
 	assert.NotContains(t, openbaoMain, `manage_image_pull_secret`)
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
-	assert.Contains(t, openbaoSecretsExample, `name  = "t-cloud-public-clouds-yaml"`)
+	assert.Contains(t, openbaoSecretsExample, `name  = "external-dns/t-cloud-public-clouds-yaml"`)
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "velero_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `name  = "velero_s3_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `variable "argo_oauth2_client_secret"`)
@@ -1106,6 +1106,13 @@ func TestTemplateFiles_TCloudPublicProviderOverridesExternalDNSValues(t *testing
 	assert.Contains(t, externalDNSValues, "secretName: tcloudpubliccloudsyaml")
 	assert.Contains(t, externalDNSValues, "key: clouds.yaml")
 	assert.NotContains(t, externalDNSValues, "stackit")
+	// Namespace-isolated access: a namespaced SecretStore using the k8s-kv-read
+	// role, reading the namespace-scoped KV path instead of the cluster store.
+	assert.Contains(t, externalDNSValues, "namespacedSecretStores:")
+	assert.Contains(t, externalDNSValues, "role: k8s-kv-read")
+	assert.Contains(t, externalDNSValues, "kind: SecretStore")
+	assert.Contains(t, externalDNSValues, "remoteKey: external-dns/t-cloud-public-clouds-yaml")
+	assert.NotContains(t, externalDNSValues, "kind: ClusterSecretStore")
 }
 
 func TestTemplateFiles_TCloudPublicExternalSecretsValuesConfigureOpenBaoClusterSecretStore(t *testing.T) {

@@ -259,7 +259,7 @@ ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 
 The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
 
-When `external-secrets` is enabled, kubara renders both the OpenBao-backed `ClusterSecretStore` named `<cluster-name>-<stage>` and an `ExternalSecret` that reads this value from remote key `t-cloud-public-clouds-yaml` and property `clouds.yaml`. Enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer (step 5) to write that backend value.
+When `external-secrets` is enabled, ExternalDNS uses the **namespace-isolated** access model (the first consumer of [ADR-0003](../../7_decisions/ADR-0003-namespace-isolated-secret-access.md)): kubara renders a namespaced `SecretStore` in the `external-dns` namespace that authenticates with that namespace's `default` ServiceAccount via the `k8s-kv-read` OpenBao role. The templated policy scopes that token to `secret/external-dns/*`, so ExternalDNS can only read its own namespace's secrets — not the cluster-wide store the other services still use. The matching KV write therefore lives at `secret/external-dns/t-cloud-public-clouds-yaml`; enable `manage_t_cloud_public_clouds_yaml` in the OpenBao Terraform layer (step 5) to populate it. The `ExternalSecret` reads remote key `external-dns/t-cloud-public-clouds-yaml`, property `clouds.yaml`.
 
 The referenced secret backend value should contain a `clouds.yaml` entry like:
 
