@@ -36,7 +36,9 @@ $env:TF_VAR_image_pull_secret = "{{ .env.DockerconfigBase64 }}"
 # $env:VAULT_TOKEN = ""
 
 # Optional OpenBao secrets. Uncomment the ones whose block you copied into
-# openbao/secrets.tf and set the values.
+# openbao/secrets.tf and set the values. The ExternalDNS clouds.yaml is built
+# from these plus the TF_VAR_t_cloud_public_* values exported above.
 # $env:TF_VAR_openbao_oidc_client_secret = ""
-# $env:TF_VAR_t_cloud_public_clouds_yaml = ""
+# $env:TF_VAR_external_dns_os_username = ""
+# $env:TF_VAR_external_dns_os_password = ""
 # $env:TF_VAR_velero_s3_credentials_cloud = ""

@@ -274,25 +274,32 @@ ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook:1.1.2
 
 The generated values expect a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key in the `external-dns` namespace.
 
-When `external-secrets` is enabled, ExternalDNS uses the [namespace-isolated access model](#namespace-isolated-secret-access) like every other consumer: kubara renders a namespaced `SecretStore` in the `external-dns` namespace, scoped to `secret/external-dns/*` via the `k8s-kv-read` role. The matching KV write therefore lives at `secret/external-dns/t-cloud-public-clouds-yaml`; copy the matching block from `openbao/secrets.tf-example` to `openbao/secrets.tf` in the OpenBao Terraform layer (step 5) to populate it. The `ExternalSecret` reads remote key `external-dns/t-cloud-public-clouds-yaml`, property `clouds.yaml`.
+When `external-secrets` is enabled, ExternalDNS uses the [namespace-isolated access model](#namespace-isolated-secret-access) like every other consumer: kubara renders a namespaced `SecretStore` in the `external-dns` namespace, scoped to `secret/external-dns/*` via the `k8s-kv-read` role. The matching KV write lives at `secret/external-dns/t-cloud-public-clouds-yaml`; copy the matching block from `openbao/secrets.tf-example` to `openbao/secrets.tf` in the OpenBao Terraform layer (step 5) to populate it. The `ExternalSecret` reads remote key `external-dns/t-cloud-public-clouds-yaml`, property `clouds.yaml`.
 
-The referenced secret backend value should contain a `clouds.yaml` entry like:
+You do **not** paste a full `clouds.yaml`. The OpenBao Terraform layer assembles it from individual variables, so you only provide the OTC DNS user's credentials:
+
+```bash
+export TF_VAR_external_dns_os_username="<otc-dns-user>"
+export TF_VAR_external_dns_os_password="<otc-dns-password>"
+```
+
+The domain, project and region are reused from the `TF_VAR_t_cloud_public_*` values you already export in `set-env.sh`. Terraform builds the final document:
 
 ```yaml
 clouds:
   openstack:
     auth:
-      auth_url: https://iam.eu-de.otc.t-systems.com/v3
-      user_domain_name: "<domain-name>"
-      project_name: "<project-name>"
-      username: "<username>"
-      password: "<password>"
+      auth_url: https://iam.<region>.otc.t-systems.com/v3
+      user_domain_name: <t_cloud_public_domain_name>
+      project_name: <t_cloud_public_tenant_name>
+      username: <external_dns_os_username>
+      password: <external_dns_os_password>
     identity_api_version: 3
-    region_name: "eu-de"
+    region_name: <region>
     interface: "public"
 ```
 
-If you do not use `external-secrets`, create the Kubernetes Secret before ExternalDNS is synced:
+If you do not use `external-secrets`, create the Kubernetes Secret with a hand-written `clouds.yaml` before ExternalDNS is synced:
 
 ```bash
 kubectl create namespace external-dns

@@ -995,6 +995,11 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.NotContains(t, openbaoMain, `manage_image_pull_secret`)
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "t_cloud_public_clouds_yaml"`)
 	assert.Contains(t, openbaoSecretsExample, `name  = "external-dns/t-cloud-public-clouds-yaml"`)
+	// clouds.yaml is assembled in Terraform from individual fields, not pasted whole.
+	assert.Contains(t, openbaoSecretsExample, `variable "external_dns_os_username"`)
+	assert.Contains(t, openbaoSecretsExample, `variable "external_dns_os_password"`)
+	assert.Contains(t, openbaoSecretsExample, `"clouds.yaml" = yamlencode({`)
+	assert.NotContains(t, openbaoSecretsExample, `variable "t_cloud_public_clouds_yaml"`)
 	assert.Contains(t, openbaoSecretsExample, `resource "vault_kv_secret_v2" "velero_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `name  = "velero/velero_s3_credentials"`)
 	assert.Contains(t, openbaoSecretsExample, `variable "argo_oauth2_client_secret"`)
@@ -1049,11 +1054,12 @@ func TestTemplateFiles_TCloudPublicOpenBaoLayerConfiguresSecrets(t *testing.T) {
 	assert.Contains(t, openbaoOutputs, `output "external_secrets_password_b64"`)
 	assert.Contains(t, setEnvSh, `TF_VAR_velero_s3_credentials_cloud`)
 	assert.Contains(t, setEnvSh, `TF_VAR_openbao_oidc_client_secret`)
-	assert.Contains(t, setEnvSh, `TF_VAR_t_cloud_public_clouds_yaml`)
-	assert.NotContains(t, setEnvSh, `manage_t_cloud_public_clouds_yaml`)
+	assert.Contains(t, setEnvSh, `TF_VAR_external_dns_os_username`)
+	assert.Contains(t, setEnvSh, `TF_VAR_external_dns_os_password`)
+	assert.NotContains(t, setEnvSh, `TF_VAR_t_cloud_public_clouds_yaml`)
 	assert.NotContains(t, setEnvSh, `manage_velero_credentials`)
 	assert.Contains(t, setEnvPs1, `TF_VAR_velero_s3_credentials_cloud`)
-	assert.NotContains(t, setEnvPs1, `manage_t_cloud_public_clouds_yaml`)
+	assert.Contains(t, setEnvPs1, `TF_VAR_external_dns_os_username`)
 	assert.NotContains(t, setEnvPs1, `manage_velero_credentials`)
 }
 
