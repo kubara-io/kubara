@@ -14,31 +14,23 @@ kubara generate --terraform
 
 Commit and push the generated files to your Git repository.
 
-!!! info 
+!!! info
     You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) & [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
     Make sure your created Service Account has Project Owner permissions.
 
 ## 1. Terraform Bootstrap
 
-Before the first `terraform init`, prepare and load your environment variables:
+
+Set `STACKIT_SERVICE_ACCOUNT_KEY_PATH` to the path of your Service Account key file:
 
 ```bash
-cd customer-service-catalog/terraform/<cluster-name>
-cp set-env-changeme.sh set-env.sh
+export STACKIT_SERVICE_ACCOUNT_KEY_PATH="<path-to-your-service-account-key-file>"
 ```
-Set at least `STACKIT_SERVICE_ACCOUNT_KEY_PATH` in `set-env.sh` / `set-env.ps1` before sourcing.
-```bash
-source set-env.sh
-# or for PowerShell
-# cp set-env-changeme.ps1 set-env.ps1
-# . .\set-env.ps1
-```
-
 
 Then navigate to:
 
 ```bash
-cd bootstrap-tfstate-backend
+cd customer-service-catalog/terraform/<cluster-name>/bootstrap-tfstate-backend
 ```
 
 Run:
@@ -73,7 +65,7 @@ Use the output to configure Terraform backend credentials:
     tofu output debug | grep -E "credential_access_key|credential_secret_access_key"
     ```
 
-You can set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `set-env.sh` / `set-env.ps1` and source the file again, or export them directly:
+Set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` like:
 
 ```bash
 export AWS_ACCESS_KEY_ID="<credential_access_key from terraform output>"
@@ -175,9 +167,9 @@ Sensitive output example:
 
 If you use OAuth2, create a GitHub application as shown [here](../../2_managing_your_platform/sso/add_sso.md).
 
-If you want Terraform to create OAuth2-related Vault entries:
+If you want Terraform to create OAuth2-related Vault entries and Grafana credentials:
 
-* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `customer-service-catalog/terraform/<cluster-name>/`
+* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `customer-service-catalog/terraform/<cluster-name>/` and fill out missing values.
 * `TF_Var_image_pull_secret` will already be set by kubara with what is present in the .env
 * In `customer-service-catalog/terraform/<cluster-name>/infrastructure`, copy `secrets.tf-example` to `oauth2-secrets.tf` and adjust values if needed
 
@@ -244,4 +236,3 @@ You must manually create the Kubernetes cluster via the cloud portal. This will 
 Now continue with the generic guide on the [Bootstrap Your Own Platform](../bootstrapping.md) page.
 
 ---
-
