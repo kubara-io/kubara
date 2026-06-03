@@ -1274,6 +1274,9 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 	velero := got["customer-service-catalog/helm/example/velero/values.yaml.tplt"]
 	assert.Contains(t, velero, "secretKey: cloud")
 	assert.Contains(t, velero, "remoteKeyProperty: cloud")
+	assert.Contains(t, velero, "credential:")
+	assert.Contains(t, velero, "name: velero-credentials")
+	assert.Contains(t, velero, "key: cloud")
 	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
 
 	// The image pull secret must stay on the cluster-wide store (cross-namespace).
@@ -1323,6 +1326,9 @@ func TestTemplateFiles_StackitConsumerChartsKeepClusterSecretStore(t *testing.T)
 				assert.Contains(t, result.Content, `k8sProvider: "stackit"`)
 				assert.Contains(t, result.Content, "secretKey: cloud")
 				assert.Contains(t, result.Content, "remoteKeyProperty: cloud")
+				assert.Contains(t, result.Content, "credential:")
+				assert.Contains(t, result.Content, "name: velero-credentials")
+				assert.Contains(t, result.Content, "key: cloud")
 			}
 		}
 	}

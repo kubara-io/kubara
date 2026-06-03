@@ -88,6 +88,9 @@ velero:
       - name: default
         provider: aws
         bucket: {{ (index .cluster.services "velero" "config" "s3bucketName") }}
+        credential:
+          name: velero-credentials
+          key: cloud
         config:
           region: {{ (index .cluster.services "velero" "config" "s3bucketRegion") }}
           s3Url: {{ (index .cluster.services "velero" "config" "s3Url") }}
