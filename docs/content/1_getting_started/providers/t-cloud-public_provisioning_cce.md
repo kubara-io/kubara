@@ -229,6 +229,8 @@ Following [ADR-0003](../../7_decisions/ADR-0003-namespace-isolated-secret-access
 
 Every chart renders a `SecretStore` in its own namespace that authenticates with that namespace's `default` ServiceAccount through the `k8s-kv-read` role. The templated policy resolves the token to `secret/<namespace>/*`, so a workload in one namespace cannot read another namespace's secrets. The image pull secret is the deliberate exception: it is distributed to every namespace through a `ClusterExternalSecret`, so it stays on the cluster-wide store at a flat path.
 
+Velero reads its S3 credentials through an `ExternalSecret` in the `velero` namespace. Keep the separate `external-secrets` service enabled; the Velero chart consumes External Secrets CRDs but does not install the External Secrets Operator itself.
+
 The cluster-wide `ClusterSecretStore` named `<cluster-name>-<stage>` (authenticating with the `external-secrets` ServiceAccount) is therefore only used for the image pull secret distribution, and the OpenBao policy behind it is limited to `secret/docker_config`.
 
 OIDC admin login can also be managed by this layer. Set `manage_openbao_oidc_auth_backend = true` in `env.auto.tfvars` and provide `openbao_oidc_discovery_url` plus `openbao_oidc_client_id` there; export the secret as `TF_VAR_openbao_oidc_client_secret` in `set-env.sh`. The default redirect URIs include `https://<cluster-dns-name>/openbao/ui/vault/auth/oidc/oidc/callback` and the local port-forward URL `http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback`.

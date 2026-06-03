@@ -480,6 +480,48 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 	assert.Contains(t, envContent, "velero_bucket_name")
 }
 
+func TestTemplateFiles_VeleroChartDoesNotInstallExternalSecretsOperator(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":    "test-cluster",
+				"stage":   "dev",
+				"dnsName": "test.example.com",
+				"type":    "hub",
+				"terraform": map[string]any{
+					"provider":       "t-cloud-public",
+					"kubernetesType": "cce",
+				},
+				"argocd":   fullArgoCDContext(),
+				"services": fullServiceContext(),
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+
+	require.NoError(t, err)
+
+	var chart string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "managed-service-catalog/helm/velero/Chart.yaml" {
+			chart = result.Content
+		}
+	}
+
+	require.NotEmpty(t, chart)
+	assert.Contains(t, chart, `name: velero`)
+	assert.Contains(t, chart, `repository: https://vmware-tanzu.github.io/helm-charts`)
+	assert.Contains(t, chart, `name: template-library`)
+	assert.NotContains(t, chart, `repository: https://charts.external-secrets.io/`)
+	assert.NotContains(t, chart, `name: external-secrets`)
+}
+
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
