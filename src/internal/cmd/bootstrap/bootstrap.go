@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -87,7 +88,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Name:            "argocd",
 			Namespace:       argocdNamespace,
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", argocdChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, argocdChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
 			RepoURL:         "https://argoproj.github.io/argo-helm",
 			EnsureNamespace: true,
 			EnsureCRD:       true,
@@ -96,7 +97,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Name:            "external-secrets",
 			Namespace:       externalSecretsNamespace,
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", externalSecretsChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, externalSecretsChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, externalSecretsChartPath),
 			RepoURL:         "https://charts.external-secrets.io",
 			EnsureNamespace: opts.WithES,
 			EnsureCRD:       opts.WithES,
@@ -104,7 +105,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		{
 			Name:            "kube-prometheus-stack",
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", prometheusChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, prometheusChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, prometheusChartPath),
 			RepoURL:         "https://prometheus-community.github.io/helm-charts",
 			EnsureNamespace: false,
 			EnsureCRD:       opts.WithProm,
@@ -173,6 +174,18 @@ func chartPathForService(cat catalog.Catalog, serviceName string) (string, error
 	}
 
 	return definition.Spec.ChartPath, nil
+}
+
+func overlayValuesForChart(opts *Options, chartPath string) []string {
+	chartOverlayPath := filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, chartPath)
+	valuesPaths := []string{filepath.Join(chartOverlayPath, "values.yaml")}
+
+	additionalValuesPath := filepath.Join(chartOverlayPath, "additional-values.yaml")
+	if _, err := os.Stat(additionalValuesPath); err == nil {
+		valuesPaths = append(valuesPaths, additionalValuesPath)
+	}
+
+	return valuesPaths
 }
 
 // ensureNamespaces ensures required namespaces exist
