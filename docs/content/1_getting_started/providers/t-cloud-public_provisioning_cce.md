@@ -39,7 +39,7 @@ A few defaults that often need attention before the first apply:
 
 - **`load_balancer_type = "shared"`** uses CCE's shared ELB. Set to `dedicated` to provision a dedicated ELB v3 (Small I flavor in one AZ by default).
 - **`enable_openbao = true`** rolls out the in-cluster OpenBao Helm release after CCE comes up. The release is **not** initialized or unsealed automatically — that happens manually in step 4 below.
-- OpenBao is exposed below `/openbao`. The OpenBao Terraform layer only annotates the ingress with the expected Traefik middlewares; the middleware objects themselves are rendered by the Traefik Helm values and become active once Traefik is installed through Argo CD. The same ingress also routes `/ui` and `/v1` so OpenBao's root-relative UI assets and API calls keep working behind `/openbao`. The Homer dashboard link `/openbao/ui/` works after Traefik has synced.
+- OpenBao is exposed below `/openbao`. The OpenBao Terraform layer only annotates the ingress with the expected Traefik middlewares; the middleware objects themselves are rendered by the Traefik Helm values and become active once Traefik is installed through Argo CD. The same ingress also routes `/ui` and `/v1` so OpenBao's root-relative UI assets and API calls keep working behind `/openbao`. The Homer dashboard links directly to `https://<cluster-dns-name>/ui/` to avoid relative redirects below the Homer path.
 
 The provider credentials are read from `TF_VAR_t_cloud_public_*` environment variables and are not written into `env.auto.tfvars`.
 

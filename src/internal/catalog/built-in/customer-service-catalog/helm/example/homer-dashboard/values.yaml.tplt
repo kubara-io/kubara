@@ -124,7 +124,7 @@ dashboardConfig:
         {{- if $openbaoEnabled }}
         - name: "openbao"
           logo: "/assets/tools/openbao.png"
-          url: "/openbao/ui/"
+          url: "https://{{ .cluster.dnsName }}/ui/"
           subtitle: "Secrets Management"
           target: "_blank"
         {{- end }}
