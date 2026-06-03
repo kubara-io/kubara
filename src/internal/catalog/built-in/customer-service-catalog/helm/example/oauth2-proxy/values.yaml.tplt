@@ -65,11 +65,6 @@ oauth2-proxy:
     configFile: |-
       reverse_proxy = true
       redirect_url = "https://{{ .cluster.dnsName }}/oauth2/callback"
-      # Allow post-auth redirects back to the cluster host. With Traefik
-      # forwardAuth, oauth2-proxy rebuilds the original URL as an absolute
-      # redirect from the X-Forwarded-* headers and validates it against this
-      # list; without it every redirect to the app is rejected as
-      # "domain / port not in whitelist" and login dead-ends at /oauth2/.
       whitelist_domains = [ "{{ .cluster.dnsName }}" ]
       email_domains = [ "*" ]
       cookie_secure = true
