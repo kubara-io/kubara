@@ -507,19 +507,34 @@ func TestTemplateFiles_VeleroChartDoesNotInstallExternalSecretsOperator(t *testi
 	require.NoError(t, err)
 
 	var chart string
+	var values string
+	var volumeSnapshotClass string
 	for _, result := range results {
 		require.NoError(t, result.Error)
-		if result.Path == "managed-service-catalog/helm/velero/Chart.yaml" {
+		switch result.Path {
+		case "managed-service-catalog/helm/velero/Chart.yaml":
 			chart = result.Content
+		case "managed-service-catalog/helm/velero/values.yaml":
+			values = result.Content
+		case "managed-service-catalog/helm/velero/templates/volumesnapshotclass.yaml":
+			volumeSnapshotClass = result.Content
 		}
 	}
 
 	require.NotEmpty(t, chart)
+	require.NotEmpty(t, values)
+	require.NotEmpty(t, volumeSnapshotClass)
 	assert.Contains(t, chart, `name: velero`)
 	assert.Contains(t, chart, `repository: https://vmware-tanzu.github.io/helm-charts`)
 	assert.Contains(t, chart, `name: template-library`)
 	assert.NotContains(t, chart, `repository: https://charts.external-secrets.io/`)
 	assert.NotContains(t, chart, `name: external-secrets`)
+	assert.Contains(t, values, `stackit:`)
+	assert.Contains(t, values, `driver: cinder.csi.openstack.org`)
+	assert.Contains(t, values, `t-cloud-public:`)
+	assert.Contains(t, values, `driver: disk.csi.everest.io`)
+	assert.Contains(t, volumeSnapshotClass, `volumeSnapshotClass.k8sProvider`)
+	assert.Contains(t, volumeSnapshotClass, `toYaml $providerConfig`)
 }
 
 func TestTemplateFiles_TCloudPublicEnvAutoTfvarsDoesNotRenderProviderCredentials(t *testing.T) {
@@ -1245,7 +1260,7 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 	cases := map[string]string{
 		"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt": "remoteKey: kube-prometheus-stack/grafana_credentials",
 		"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt":          "remoteKey: oauth2-proxy/oauth2_credentials",
-		"customer-service-catalog/helm/example/velero/velero.yaml.tplt":                "remoteKey: velero/velero_s3_credentials",
+		"customer-service-catalog/helm/example/velero/values.yaml.tplt":                "remoteKey: velero/velero_s3_credentials",
 		"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt":               "remoteKey: argocd/argo_oauth2_credentials",
 	}
 	for path, wantKey := range cases {
@@ -1255,6 +1270,11 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 		assert.Contains(t, content, "role: k8s-kv-read", "%s should use the k8s-kv-read role", path)
 		assert.Contains(t, content, wantKey, "%s should read its namespace-scoped key", path)
 	}
+	assert.Empty(t, got["customer-service-catalog/helm/example/velero/velero.yaml.tplt"])
+	velero := got["customer-service-catalog/helm/example/velero/values.yaml.tplt"]
+	assert.Contains(t, velero, "secretKey: cloud")
+	assert.Contains(t, velero, "remoteKeyProperty: cloud")
+	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
 
 	// The image pull secret must stay on the cluster-wide store (cross-namespace).
 	argocd := got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"]
@@ -1294,11 +1314,16 @@ func TestTemplateFiles_StackitConsumerChartsKeepClusterSecretStore(t *testing.T)
 		switch result.Path {
 		case "customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt",
 			"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt",
-			"customer-service-catalog/helm/example/velero/velero.yaml.tplt":
+			"customer-service-catalog/helm/example/velero/values.yaml.tplt":
 			// STACKIT must remain on the cluster-wide store with flat keys.
 			assert.Contains(t, result.Content, "kind: ClusterSecretStore", "%s", result.Path)
 			assert.NotContains(t, result.Content, "namespacedSecretStores:", "%s must not be namespace-isolated", result.Path)
 			assert.NotContains(t, result.Content, "role: k8s-kv-read", "%s", result.Path)
+			if result.Path == "customer-service-catalog/helm/example/velero/values.yaml.tplt" {
+				assert.Contains(t, result.Content, `k8sProvider: "stackit"`)
+				assert.Contains(t, result.Content, "secretKey: cloud")
+				assert.Contains(t, result.Content, "remoteKeyProperty: cloud")
+			}
 		}
 	}
 }

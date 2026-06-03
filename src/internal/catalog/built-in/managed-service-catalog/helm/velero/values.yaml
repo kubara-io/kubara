@@ -36,3 +36,19 @@ velero:
       volumeMounts:
         - mountPath: /target
           name: plugins
+  configuration:
+    backupStorageLocation: []
+    volumeSnapshotLocation: []
+volumeSnapshotClass:
+  k8sProvider: "stackit"
+  customDefinition: {}
+  providers:
+    stackit:
+      driver: cinder.csi.openstack.org
+      deletionPolicy: Retain
+      parameters:
+        force-create: "true"
+        type: snapshot
+    t-cloud-public:
+      driver: disk.csi.everest.io
+      deletionPolicy: Retain

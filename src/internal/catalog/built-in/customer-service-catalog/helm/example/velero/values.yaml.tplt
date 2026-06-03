@@ -1,4 +1,5 @@
-{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
+{{- $provider := dig "cluster" "terraform" "provider" "stackit" . -}}
+{{- $tcp := eq $provider "t-cloud-public" -}}
 
 namespace:
   labels:
@@ -92,3 +93,5 @@ velero:
           s3Url: {{ (index .cluster.services "velero" "config" "s3Url") }}
           s3ForcePathStyle: "true"
     volumeSnapshotLocation: []
+volumeSnapshotClass:
+  k8sProvider: "{{ $provider }}"

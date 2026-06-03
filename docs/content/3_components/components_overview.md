@@ -50,6 +50,7 @@ More tools will be added in future releases of the kubara framework.
 | Tool                                                            | Description                                                | Functionality      | Key Features                                                        |
 | --------------------------------------------------------------- | ---------------------------------------------------------- | ------------------ | ------------------------------------------------------------------- |
 | <div style="width: 80px;">![Longhorn](../images/longhorn-logo.png)</div> | Longhorn. Distributed block storage system for Kubernetes. | Persistent storage | - Replication<br>- Snapshots<br>- Backups<br>- Dynamic provisioning |
+| <div style="width: 80px;">![Velero](../images/velero-logo.png)</div> | [Velero](backup_and_recovery.md). Backup, restore, disaster recovery, and migration for Kubernetes resources and persistent volumes. | Backup & Recovery | - Backups<br>- Snapshots<br>- Recovery<br>- Migration |
 
 ---
 
@@ -66,25 +67,28 @@ More tools will be added in future releases of the kubara framework.
 
 If you deactivate or replace applications (Y-axis) with others not part of the kubara framework, be sure to resolve custom resource dependencies such as ServiceMonitors, Certificates, and Secrets accordingly.
 
-| ↓                       | argo-cd | homer-dashboard | kube-prometheus-stack | loki | metrics-server | cert-manager | external-secrets | kyverno | kyverno-policies | kyverno-policy-reporter | oauth2-proxy | longhorn | external-dns | traefik | metallb |
-| ----------------------- | ------- | --------------- | --------------------- | ---- | -------------- | ------------ | ---------------- | ------- | ---------------- | ----------------------- | ------------ | -------- | ------------ | ------- | ------- |
-| argo-cd                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| homer-dashboard         |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| kube-prometheus-stack   | X       |                 |                       |      |                | X            | X                | X       |                  |                         |              |          | X            | X             |         |
-| loki                    |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| metric-server           |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| cert-manager            | X       |                 | X                     | X    |                |              |                  |         |                  |                         |              |          |              |               |         |
-| external-secrets        | X       |                 | X                     | X    |                | X            |                  |         |                  |                         |              |          | X            |               |         |
-| kyverno                 |         |                 |                       |      |                |              |                  |         |                  | X                       |              |          |              |               |         |
-| kyverno-policies        |         |                 |                       |      |                |              |                  |         |                  | X                       |              |          |              |               |         |
-| kyverno-policy-reporter |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| oauth2-proxy            | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              |               |         |
-| longhorn                | X       |                 | X                     | X    |                |              |                  |         |                  |                         |              |          |              |               |         |
-| external-dns            |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |               |         |
-| traefik                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |
-| metalLB                 | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              | X             |         |
+| ↓                       | argo-cd | homer-dashboard | kube-prometheus-stack | loki | metrics-server | cert-manager | external-secrets | kyverno | kyverno-policies | kyverno-policy-reporter | oauth2-proxy | longhorn | external-dns | traefik | metallb | velero |
+| ----------------------- | ------- | --------------- | --------------------- | ---- | -------------- | ------------ | ---------------- | ------- | ---------------- | ----------------------- | ------------ | -------- | ------------ | ------- | ------- | ------ |
+| argo-cd                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| homer-dashboard         |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| kube-prometheus-stack   | X       |                 |                       |      |                | X            | X                | X       |                  |                         |              |          | X            | X       |         |        |
+| loki                    |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| metric-server           |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| cert-manager            | X       |                 | X                     | X    |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| external-secrets        | X       |                 | X                     | X    |                | X            |                  |         |                  |                         |              |          | X            |         |         |        |
+| kyverno                 |         |                 |                       |      |                |              |                  |         |                  | X                       |              |          |              |         |         |        |
+| kyverno-policies        |         |                 |                       |      |                |              |                  |         |                  | X                       |              |          |              |         |         |        |
+| kyverno-policy-reporter |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| oauth2-proxy            | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              |         |         |        |
+| longhorn                | X       |                 | X                     | X    |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| external-dns            |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| traefik                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
+| metalLB                 | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              | X       |         |        |
+| velero                  |         |                 |                       |      |                |              | X                |         |                  |                         |              |          |              |         |         |        |
 
 ## Not enough?
+
+For kubara-specific backup and recovery guidance, see [Backup & Recovery](backup_and_recovery.md).
 
 If the built-in catalog does not meet your needs or is missing key features, you can either:
 

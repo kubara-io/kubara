@@ -179,15 +179,16 @@ The chart directories where values usually need review are:
 * external-dns
 * external-secrets
 * homer-dashboard
-* traefik
 * kube-prometheus-stack
-* kyverno-policy-reporter
 * kyverno
+* kyverno-policy-reporter
 * loki
 * longhorn
 * metallb
 * metrics-server
 * oauth2-proxy
+* traefik
+* velero
 
 ### 3.1 Additional value files and CI value files
 
