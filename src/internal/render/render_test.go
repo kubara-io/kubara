@@ -686,6 +686,9 @@ func TestTemplateFiles_TCloudPublicOBSBucketCanBeDestroyed(t *testing.T) {
 	require.NotEqual(t, -1, bucketPolicyIndex)
 
 	assert.NotContains(t, bucketResource[:bucketPolicyIndex], "prevent_destroy = true")
+	assert.Contains(t, objectstorageMain, `"HeadBucket"`)
+	assert.Contains(t, objectstorageMain, `"ListBucket"`)
+	assert.Contains(t, objectstorageMain, `"GetBucketLocation"`)
 }
 
 func TestTemplateFiles_TCloudPublicManagedModulesDoNotPreventDestroy(t *testing.T) {

@@ -115,6 +115,7 @@ resource "opentelekomcloud_obs_bucket_policy" "this" {
         "ID": ["domain/${opentelekomcloud_identity_user_v3.this.domain_id}:user/${opentelekomcloud_identity_user_v3.this.id}"]
       },
       "Action": [
+        "HeadBucket",
         "ListBucket",
         "GetBucketLocation",
         "ListBucketMultipartUploads"
