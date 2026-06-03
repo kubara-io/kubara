@@ -7,6 +7,11 @@ locals {
 
   ingress_path = var.ingress_path == "/" ? "/" : trimsuffix(var.ingress_path, "/")
   ingress_url  = var.ingress_enabled && var.ingress_host != "" ? "https://${var.ingress_host}${local.ingress_path == "/" ? "" : local.ingress_path}" : null
+  ingress_paths = local.ingress_path == "/" ? ["/"] : distinct([
+    local.ingress_path,
+    "/ui",
+    "/v1",
+  ])
 
   ingress_default_annotations = var.ingress_enabled && local.ingress_path != "/" ? {
     "traefik.ingress.kubernetes.io/app-root"           = "${local.ingress_path}/ui/"
@@ -126,7 +131,7 @@ resource "helm_release" "this" {
           hosts = [
             {
               host  = var.ingress_host
-              paths = [local.ingress_path]
+              paths = local.ingress_paths
             }
           ]
           tls = local.ingress_tls
