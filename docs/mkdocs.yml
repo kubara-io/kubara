@@ -63,6 +63,9 @@ plugins:
       assets: false
       links_attr_map:
         target: _blank
+  - drawio:
+      edit: false
+      darkmode: false
 markdown_extensions:
   - attr_list
   - admonition

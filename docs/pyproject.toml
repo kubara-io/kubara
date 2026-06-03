@@ -8,4 +8,5 @@ dependencies = [
     "mike",
     "mkdocs",
     "mkdocs-material",
+    "mkdocs-drawio",
 ]

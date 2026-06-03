@@ -4,9 +4,7 @@
 
 It is designed as a reusable platform foundation: kubara ships a default built-in catalog of platform components, generates reproducible Terraform and Helm artifacts, and expects ongoing operations to happen through Git instead of manual cluster changes.
 
-<p align="center">
-  <img src="../../images/architecture-overview.jpg" alt="kubara Architecture Overview" width="700"/>
-</p>
+![Overview](../assets/diagrams.drawio)
 
 ## The main ideas behind kubara
 

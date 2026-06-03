@@ -196,7 +196,7 @@ bootstrapValues:
 
 The `remoteRef` points to the spoke kubeconfig secret in your secret backend.
 
-![Add Workload Cluster](../images/add-workload-cluster.png)
+![Hub_n_Spoke](../assets/diagrams.drawio)
 
 ## 6. Commit and roll out
 
