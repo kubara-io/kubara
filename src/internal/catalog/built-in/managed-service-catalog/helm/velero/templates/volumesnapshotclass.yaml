@@ -1,3 +1,12 @@
+{{- $volumeSnapshotClass := .Values.volumeSnapshotClass | default dict -}}
+{{- if $volumeSnapshotClass.customDefinition }}
+{{ toYaml $volumeSnapshotClass.customDefinition }}
+{{- else }}
+{{- $providerName := $volumeSnapshotClass.k8sProvider -}}
+{{- $providerConfig := index ($volumeSnapshotClass.providers | default dict) $providerName -}}
+{{- if not $providerConfig }}
+{{- fail (printf "volumeSnapshotClass.k8sProvider %q is not configured; define volumeSnapshotClass.providers.%s or volumeSnapshotClass.customDefinition" $providerName $providerName) }}
+{{- end }}
 # required class for the velero snapshots
 apiVersion: snapshot.storage.k8s.io/v1
 kind: VolumeSnapshotClass
@@ -5,11 +14,5 @@ metadata:
   name: velero-csi
   labels:
     velero.io/csi-volumesnapshot-class: "true"
-driver: cinder.csi.openstack.org
-deletionPolicy: Retain
-parameters:
-# stackit specific flag, since stackit uses openstack
-# openstack disallows the creation of volumesnapshots while they are 'in-use'
-# force-create overrides it
-  force-create: "true"
-  type: "snapshot"
+{{ toYaml $providerConfig }}
+{{- end }}
