@@ -177,7 +177,6 @@ module "openbao" {
   ingress_class_name                 = var.openbao_ingress_class_name
   ingress_annotations                = var.openbao_ingress_annotations
   ingress_tls_secret_name            = var.openbao_ingress_tls_secret_name
-  ingress_create_traefik_middlewares = var.openbao_ingress_create_traefik_middlewares
 
   depends_on = [module.cce_cluster]
 }

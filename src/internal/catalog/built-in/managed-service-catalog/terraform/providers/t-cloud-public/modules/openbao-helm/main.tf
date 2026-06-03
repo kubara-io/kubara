@@ -8,13 +8,7 @@ locals {
   ingress_path = var.ingress_path == "/" ? "/" : trimsuffix(var.ingress_path, "/")
   ingress_url  = var.ingress_enabled && var.ingress_host != "" ? "https://${var.ingress_host}${local.ingress_path == "/" ? "" : local.ingress_path}" : null
 
-  # The traefik.io/v1alpha1 Middleware CRD is only available after Traefik is
-  # installed in the cluster. When OpenBao is rolled out before Traefik (the
-  # default kubara flow), creating the middlewares here breaks the Helm
-  # release. Set ingress_create_traefik_middlewares = true once Traefik and
-  # its CRDs exist (typically on a follow-up apply).
-  ingress_create_middlewares  = var.ingress_enabled && local.ingress_path != "/" && var.ingress_create_traefik_middlewares
-  ingress_default_annotations = local.ingress_create_middlewares ? {
+  ingress_default_annotations = var.ingress_enabled && local.ingress_path != "/" ? {
     "traefik.ingress.kubernetes.io/app-root"           = "${local.ingress_path}/ui/"
     "traefik.ingress.kubernetes.io/router.middlewares" = "${var.namespace}-openbao-redirect-noslash@kubernetescrd,${var.namespace}-openbao-strip-prefix@kubernetescrd"
   } : {}
@@ -25,38 +19,6 @@ locals {
       hosts      = [var.ingress_host]
     }
   ]
-
-  ingress_extra_objects = local.ingress_create_middlewares ? [
-    yamlencode({
-      apiVersion = "traefik.io/v1alpha1"
-      kind       = "Middleware"
-      metadata = {
-        name      = "openbao-redirect-noslash"
-        namespace = var.namespace
-      }
-      spec = {
-        redirectRegex = {
-          permanent   = true
-          regex       = "^(https?://[^/]+${local.ingress_path})$"
-          replacement = "$${1}/"
-        }
-      }
-    }),
-    yamlencode({
-      apiVersion = "traefik.io/v1alpha1"
-      kind       = "Middleware"
-      metadata = {
-        name      = "openbao-strip-prefix"
-        namespace = var.namespace
-      }
-      spec = {
-        replacePathRegex = {
-          regex       = "^${local.ingress_path}/(.*)"
-          replacement = "/$${1}"
-        }
-      }
-    }),
-  ] : []
 
   # HA-Raft needs each pod to discover its peers. Without retry_join, only
   # the pod where you run `bao operator init` ever joins the cluster; the
@@ -170,7 +132,6 @@ resource "helm_release" "this" {
           tls = local.ingress_tls
         }
       }
-      extraObjects = local.ingress_extra_objects
     })
   ]
 }

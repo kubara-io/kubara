@@ -389,6 +389,9 @@ func TestTemplateFiles_TCloudPublicAgenciesUseDefaultProvider(t *testing.T) {
 	assert.Contains(t, infrastructureVariables, `variable "enable_openbao"`)
 	assert.Contains(t, infrastructureVariables, `variable "openbao_seal_config"`)
 	assert.Contains(t, infrastructureVariables, `variable "openbao_ingress_enabled"`)
+	assert.NotContains(t, infrastructureVariables, `openbao_ingress_create_traefik_middlewares`)
+	assert.NotContains(t, infrastructureMain, `ingress_create_traefik_middlewares`)
+	assert.NotContains(t, infrastructureEnv, `openbao_ingress_create_traefik_middlewares`)
 	assert.Contains(t, infrastructureVariables, `default     = "test.example.com"`)
 	assert.Contains(t, infrastructureVariables, `default     = "/openbao"`)
 	assert.Contains(t, infrastructureVariables, `variable "load_balancer_type"`)
@@ -891,11 +894,13 @@ func TestTemplateFiles_TCloudPublicOpenBaoModuleUsesHelmRelease(t *testing.T) {
 	assert.Contains(t, openbaoMain, `ingress = {`)
 	assert.Contains(t, openbaoMain, `"traefik.ingress.kubernetes.io/app-root"`)
 	assert.Contains(t, openbaoMain, `"traefik.ingress.kubernetes.io/router.middlewares"`)
-	assert.Contains(t, openbaoMain, `extraObjects = local.ingress_extra_objects`)
-	assert.Contains(t, openbaoMain, `replacePathRegex`)
+	assert.NotContains(t, openbaoMain, `extraObjects = local.ingress_extra_objects`)
+	assert.NotContains(t, openbaoMain, `replacePathRegex`)
+	assert.NotContains(t, openbaoMain, `kind       = "Middleware"`)
 	assert.Contains(t, openbaoVariables, `default     = "https://openbao.github.io/openbao-helm"`)
 	assert.Contains(t, openbaoVariables, `default     = "0.28.3"`)
 	assert.Contains(t, openbaoVariables, `variable "ingress_enabled"`)
+	assert.NotContains(t, openbaoVariables, `variable "ingress_create_traefik_middlewares"`)
 	assert.Contains(t, openbaoVariables, `default     = "/openbao"`)
 }
 
@@ -1332,6 +1337,11 @@ func TestTemplateFiles_TCloudPublicCCETraefikValuesRenderELBAnnotations(t *testi
 	require.NotEmpty(t, traefikValues)
 	assert.Contains(t, traefikValues, `kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"`)
 	assert.Contains(t, traefikValues, `kubernetes.io/elb.class: "union"`)
+	assert.Contains(t, traefikValues, `name: openbao-redirect-noslash`)
+	assert.Contains(t, traefikValues, `namespace: openbao`)
+	assert.Contains(t, traefikValues, `regex: "^(https?://[^/]+/openbao)$"`)
+	assert.Contains(t, traefikValues, `name: openbao-strip-prefix`)
+	assert.Contains(t, traefikValues, `regex: "^/openbao/(.*)"`)
 }
 
 func TestTemplateFiles_TCloudPublicCCEHomerDashboardIncludesOpenBaoLink(t *testing.T) {
