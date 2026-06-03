@@ -17,9 +17,9 @@ externalSecrets:
     velero-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - secretKey: cloud
+        - secretKey: s3_credentials
           remoteKey: velero_s3_credentials
-          remoteKeyProperty: cloud
+          remoteKeyProperty: s3_credentials
 
 velero:
 {{- $fsBackup := (index .cluster.services "velero" "config" "fsBackupEnabled") }}
@@ -59,3 +59,5 @@ velero:
           s3Url: {{ (index .cluster.services "velero" "config" "s3Url") }}
           s3ForcePathStyle: "true"
     volumeSnapshotLocation: []
+volumeSnapshotClass:
+  k8sProvider: "{{ dig "terraform" "provider" "" .cluster }}"
