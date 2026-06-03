@@ -2,9 +2,12 @@ package bootstrap
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const completionMessageTemplate = `
@@ -41,4 +44,37 @@ func Test_MissingEnvVariableLeadsToURLBeingOmitted(t *testing.T) {
 	actual := CreateCompletionMessage(config)
 
 	assert.Equal(t, expected, actual)
+}
+
+func TestOverlayValuesForChartIncludesValuesYaml(t *testing.T) {
+	tempDir := t.TempDir()
+	opts := &Options{
+		OverlayValues: tempDir,
+		ClusterName:   "test-cluster",
+	}
+
+	valuesPaths := overlayValuesForChart(opts, "argo-cd")
+
+	assert.Equal(t, []string{
+		filepath.Join(tempDir, "helm", "test-cluster", "argo-cd", "values.yaml"),
+	}, valuesPaths)
+}
+
+func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) {
+	tempDir := t.TempDir()
+	chartDir := filepath.Join(tempDir, "helm", "test-cluster", "argo-cd")
+	require.NoError(t, os.MkdirAll(chartDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "additional-values.yaml"), []byte("argo-cd: {}\n"), 0o644))
+
+	opts := &Options{
+		OverlayValues: tempDir,
+		ClusterName:   "test-cluster",
+	}
+
+	valuesPaths := overlayValuesForChart(opts, "argo-cd")
+
+	assert.Equal(t, []string{
+		filepath.Join(chartDir, "values.yaml"),
+		filepath.Join(chartDir, "additional-values.yaml"),
+	}, valuesPaths)
 }
