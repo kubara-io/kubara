@@ -37,7 +37,7 @@ Decide these three things first:
 
 ## Enable Velero
 
-Example `config.yaml`:
+Example `config.yaml` for a custom S3-compatible target:
 
 ```yaml
 clusters:
@@ -62,6 +62,7 @@ aws_secret_access_key = <SECRET_ACCESS_KEY>
 ```
 
 For T Cloud Public CCE, copy the matching Velero block from `customer-service-catalog/terraform/<cluster-name>/openbao/secrets.tf-example` to `secrets.tf`; it writes `secret/velero/velero_s3_credentials` with property `cloud`.
+The generated T Cloud Public values default to the Terraform-managed bucket `velero-<cluster-name>-<stage>`, region `eu-de`, and endpoint `https://obs.eu-de.otc.t-systems.com`. Override `s3BucketName`, `s3BucketRegion`, or `s3Url` only when you also changed the generated infrastructure values or target a different OBS region.
 
 For the generic ClusterSecretStore path, store the same credentials file at remote key `velero_s3_credentials`, property `cloud`.
 The generated `BackupStorageLocation` references the synchronized Kubernetes Secret `velero-credentials` with key `cloud`.

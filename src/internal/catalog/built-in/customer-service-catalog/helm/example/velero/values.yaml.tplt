@@ -1,5 +1,19 @@
 {{- $provider := dig "cluster" "terraform" "provider" "stackit" . -}}
 {{- $tcp := eq $provider "t-cloud-public" -}}
+{{- $veleroConfig := dig "cluster" "services" "velero" "config" (dict) . -}}
+{{- $defaultS3BucketName := "" -}}
+{{- $defaultS3BucketRegion := "" -}}
+{{- if $tcp -}}
+{{- $defaultS3BucketName = printf "velero-%s-%s" .cluster.name .cluster.stage -}}
+{{- $defaultS3BucketRegion = "eu-de" -}}
+{{- end -}}
+{{- $s3BucketName := coalesce (dig "s3BucketName" "" $veleroConfig) (dig "s3bucketName" "" $veleroConfig) $defaultS3BucketName -}}
+{{- $s3BucketRegion := coalesce (dig "s3BucketRegion" "" $veleroConfig) (dig "s3bucketRegion" "" $veleroConfig) $defaultS3BucketRegion -}}
+{{- $defaultS3Url := "" -}}
+{{- if and $tcp $s3BucketRegion -}}
+{{- $defaultS3Url = printf "https://obs.%s.otc.t-systems.com" $s3BucketRegion -}}
+{{- end -}}
+{{- $s3Url := coalesce (dig "s3Url" "" $veleroConfig) $defaultS3Url -}}
 
 namespace:
   labels:
@@ -56,7 +70,7 @@ externalSecrets:
 {{- end }}
 
 velero:
-{{- $fsBackup := (index .cluster.services "velero" "config" "fsBackupEnabled") }}
+{{- $fsBackup := (dig "fsBackupEnabled" true $veleroConfig) }}
 {{- if $fsBackup }}
   deployNodeAgent: true
   nodeAgent:
@@ -87,13 +101,13 @@ velero:
     backupStorageLocation:
       - name: default
         provider: aws
-        bucket: {{ (index .cluster.services "velero" "config" "s3bucketName") }}
+        bucket: {{ $s3BucketName | quote }}
         credential:
           name: velero-credentials
           key: cloud
         config:
-          region: {{ (index .cluster.services "velero" "config" "s3bucketRegion") }}
-          s3Url: {{ (index .cluster.services "velero" "config" "s3Url") }}
+          region: {{ $s3BucketRegion | quote }}
+          s3Url: {{ $s3Url | quote }}
           s3ForcePathStyle: "true"
     volumeSnapshotLocation: []
 volumeSnapshotClass:

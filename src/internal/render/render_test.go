@@ -1281,10 +1281,63 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 	assert.Contains(t, velero, "name: velero-credentials")
 	assert.Contains(t, velero, "key: cloud")
 	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
+	assert.Contains(t, velero, `bucket: "velero-test-cluster-dev"`)
+	assert.Contains(t, velero, `region: "eu-de"`)
+	assert.Contains(t, velero, `s3Url: "https://obs.eu-de.otc.t-systems.com"`)
 
 	// The image pull secret must stay on the cluster-wide store (cross-namespace).
 	argocd := got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"]
 	assert.Contains(t, argocd, "remoteKey: docker_config")
+}
+
+func TestTemplateFiles_VeleroValuesUseCamelCaseS3Config(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	svc := fullServiceContext()
+	svc["velero"] = map[string]any{
+		"status": "enabled",
+		"config": map[string]any{
+			"fsBackupEnabled": true,
+			"s3BucketName":    "custom-velero-bucket",
+			"s3BucketRegion":  "eu-nl",
+			"s3Url":           "https://obs.eu-nl.otc.t-systems.com",
+		},
+	}
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Helm,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":    "test-cluster",
+				"stage":   "dev",
+				"type":    "hub",
+				"dnsName": "test.example.com",
+				"terraform": map[string]any{
+					"provider":       "t-cloud-public",
+					"kubernetesType": "cce",
+				},
+				"argocd":   fullArgoCDContext(),
+				"services": svc,
+			},
+			"catalog": fullCatalogContext(),
+		},
+	})
+	require.NoError(t, err)
+
+	var velero string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		if result.Path == "customer-service-catalog/helm/example/velero/values.yaml.tplt" {
+			velero = result.Content
+		}
+	}
+
+	require.NotEmpty(t, velero)
+	assert.Contains(t, velero, `bucket: "custom-velero-bucket"`)
+	assert.Contains(t, velero, `region: "eu-nl"`)
+	assert.Contains(t, velero, `s3Url: "https://obs.eu-nl.otc.t-systems.com"`)
 }
 
 func TestTemplateFiles_StackitConsumerChartsKeepClusterSecretStore(t *testing.T) {
