@@ -41,7 +41,13 @@ func fullServiceContext() map[string]any {
 		"metrics-server":          map[string]any{"status": "disabled"},
 		"metallb":                 map[string]any{"status": "disabled"},
 		"longhorn":                map[string]any{"status": "disabled"},
-		"velero":                  map[string]any{"status": "disabled", "config": map[string]any{"fsBackupEnabled": true}},
+		"velero": map[string]any{
+			"status": "disabled",
+			"config": map[string]any{
+				"backupMode":    "fs-backup",
+				"backupStorage": map[string]any{"create": true, "region": "eu01"},
+			},
+		},
 	}
 }
 
@@ -450,7 +456,17 @@ func TestTemplateFiles_TCloudPublicProviderRendersVeleroBucketWhenEnabled(t *tes
 					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
 				},
 				"services": map[string]any{
-					"velero": map[string]any{"status": "enabled"},
+					"velero": map[string]any{
+						"status": "enabled",
+						"config": map[string]any{
+							"backupMode": "fs-backup",
+							"backupStorage": map[string]any{
+								"create": true,
+								"region": "eu-de",
+								"s3Url":  "https://obs.eu-de.otc.t-systems.com",
+							},
+						},
+					},
 				},
 			},
 		},
@@ -1228,6 +1244,17 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 	// Enable oauth2-proxy so the argo-cd and grafana oauth2 ExternalSecrets render.
 	svc := fullServiceContext()
 	svc["oauth2-proxy"] = map[string]any{"status": "enabled"}
+	svc["velero"] = map[string]any{
+		"status": "enabled",
+		"config": map[string]any{
+			"backupMode": "fs-backup",
+			"backupStorage": map[string]any{
+				"create": true,
+				"region": "eu-de",
+				"s3Url":  "https://obs.eu-de.otc.t-systems.com",
+			},
+		},
+	}
 
 	results, err := TemplateFiles(TemplateOptions{
 		Type:     Helm,
@@ -1281,16 +1308,16 @@ func TestTemplateFiles_TCloudPublicConsumerChartsUseNamespacedSecretStore(t *tes
 	assert.Contains(t, velero, "name: velero-credentials")
 	assert.Contains(t, velero, "key: cloud")
 	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
-	assert.Contains(t, velero, `bucket: "velero-test-cluster-dev"`)
-	assert.Contains(t, velero, `region: "eu-de"`)
-	assert.Contains(t, velero, `s3Url: "https://obs.eu-de.otc.t-systems.com"`)
+	assert.Contains(t, velero, `bucket: velero-test-cluster-dev`)
+	assert.Contains(t, velero, `region: eu-de`)
+	assert.Contains(t, velero, `s3Url: https://obs.eu-de.otc.t-systems.com`)
 
 	// The image pull secret must stay on the cluster-wide store (cross-namespace).
 	argocd := got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"]
 	assert.Contains(t, argocd, "remoteKey: docker_config")
 }
 
-func TestTemplateFiles_VeleroValuesUseCamelCaseS3Config(t *testing.T) {
+func TestTemplateFiles_VeleroValuesUseBackupStorageConfig(t *testing.T) {
 	cleanup := setupTestFS(t)
 	defer cleanup()
 
@@ -1298,10 +1325,13 @@ func TestTemplateFiles_VeleroValuesUseCamelCaseS3Config(t *testing.T) {
 	svc["velero"] = map[string]any{
 		"status": "enabled",
 		"config": map[string]any{
-			"fsBackupEnabled": true,
-			"s3BucketName":    "custom-velero-bucket",
-			"s3BucketRegion":  "eu-nl",
-			"s3Url":           "https://obs.eu-nl.otc.t-systems.com",
+			"backupMode": "fs-backup",
+			"backupStorage": map[string]any{
+				"create":     false,
+				"bucketName": "custom-velero-bucket",
+				"region":     "eu-nl",
+				"s3Url":      "https://obs.eu-nl.otc.t-systems.com",
+			},
 		},
 	}
 
@@ -1335,9 +1365,9 @@ func TestTemplateFiles_VeleroValuesUseCamelCaseS3Config(t *testing.T) {
 	}
 
 	require.NotEmpty(t, velero)
-	assert.Contains(t, velero, `bucket: "custom-velero-bucket"`)
-	assert.Contains(t, velero, `region: "eu-nl"`)
-	assert.Contains(t, velero, `s3Url: "https://obs.eu-nl.otc.t-systems.com"`)
+	assert.Contains(t, velero, `bucket: custom-velero-bucket`)
+	assert.Contains(t, velero, `region: eu-nl`)
+	assert.Contains(t, velero, `s3Url: https://obs.eu-nl.otc.t-systems.com`)
 }
 
 func TestTemplateFiles_StackitConsumerChartsKeepClusterSecretStore(t *testing.T) {

@@ -66,7 +66,13 @@ func newValidTestConfig() *Config {
 					"metrics-server":          {Status: service.StatusEnabled},
 					"metallb":                 {Status: service.StatusEnabled},
 					"longhorn":                {Status: service.StatusEnabled},
-					"velero":                  {Status: service.StatusEnabled, Config: service.Config{"fsBackupEnabled": true}},
+					"velero": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"backupMode":    "fs-backup",
+							"backupStorage": map[string]any{"create": true, "region": "eu01"},
+						},
+					},
 				},
 			},
 		},
@@ -337,12 +343,6 @@ clusters:
 			cs := NewConfigStore(configPath)
 			err := cs.Load()
 			require.Error(t, err)
-			if tt.name == "duplicate canonical service names" {
-				assert.Contains(t, err.Error(), `conflicting keys`)
-				assert.Contains(t, err.Error(), `"certManager"`)
-				assert.Contains(t, err.Error(), `"cert-manager"`)
-				return
-			}
 			assert.ErrorContains(t, err, tt.wantErr)
 		})
 	}

@@ -181,7 +181,7 @@ module "openbao" {
   depends_on = [module.cce_cluster]
 }
 
-{{ if (eq .cluster.services.velero.status "enabled") }}
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
 module "velero_bucket_kms_key" {
   count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0
   source = "../../../../managed-service-catalog/terraform/modules/kms-key"

@@ -1,26 +1,9 @@
-{{- $provider := dig "cluster" "terraform" "provider" "stackit" . -}}
-{{- $tcp := eq $provider "t-cloud-public" -}}
-{{- $veleroConfig := dig "cluster" "services" "velero" "config" (dict) . -}}
-{{- $defaultS3BucketName := "" -}}
-{{- $defaultS3BucketRegion := "" -}}
-{{- if $tcp -}}
-{{- $defaultS3BucketName = printf "velero-%s-%s" .cluster.name .cluster.stage -}}
-{{- $defaultS3BucketRegion = "eu-de" -}}
-{{- end -}}
-{{- $s3BucketName := coalesce (dig "s3BucketName" "" $veleroConfig) (dig "s3bucketName" "" $veleroConfig) $defaultS3BucketName -}}
-{{- $s3BucketRegion := coalesce (dig "s3BucketRegion" "" $veleroConfig) (dig "s3bucketRegion" "" $veleroConfig) $defaultS3BucketRegion -}}
-{{- $defaultS3Url := "" -}}
-{{- if and $tcp $s3BucketRegion -}}
-{{- $defaultS3Url = printf "https://obs.%s.otc.t-systems.com" $s3BucketRegion -}}
-{{- end -}}
-{{- $s3Url := coalesce (dig "s3Url" "" $veleroConfig) $defaultS3Url -}}
-
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"
     stage: "{{ .cluster.stage }}"
 
-{{- if $tcp }}
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
 # T Cloud Public: namespace-isolated access through a SecretStore in the velero
 # namespace (k8s-kv-read role), reading secret/velero/* only.
 namespacedSecretStores:
@@ -45,6 +28,8 @@ externalSecrets:
       secretStoreRef:
         kind: SecretStore
         name: {{ .cluster.name }}-{{ .cluster.stage }}
+      # name needs to cloud, as the aws plugin for velero looks at cloud per default
+      # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
           remoteKey: velero/velero_s3_credentials
@@ -63,6 +48,8 @@ externalSecrets:
   secrets:
     velero-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      # name needs to cloud, as the aws plugin for velero looks at cloud per default
+      # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
           remoteKey: velero_s3_credentials
@@ -70,45 +57,41 @@ externalSecrets:
 {{- end }}
 
 velero:
-{{- $fsBackup := (dig "fsBackupEnabled" true $veleroConfig) }}
-{{- if $fsBackup }}
+{{- if and (eq (index .cluster.services "velero" "status") "enabled") (not (index .cluster.services "velero" "config" "backupStorage" "s3Url")) }}
+{{- fail "cluster.services.velero.config.backupStorage.s3Url must be set when velero is enabled" }}
+{{- end }}
+{{- if or (eq (index .cluster.services "velero" "config" "backupMode") "fs-backup") (eq (index .cluster.services "velero" "config" "backupMode") "csi-data-mover") }}
   deployNodeAgent: true
-  nodeAgent:
-    resources:
-      requests:
-        cpu: 100m
-        memory: 128Mi
-      limits:
-        cpu: 500m
-        memory: 512Mi
-    containerSecurityContext:
-      readOnlyRootFilesystem: true
-      allowPrivilegeEscalation: false
-    extraVolumes:
-      - name: tmp
-        emptyDir: {}
-    extraVolumeMounts:
-      - name: tmp
-        mountPath: /tmp
 {{- end }}
 
   configuration:
-    {{- if $fsBackup }}
+    {{- if eq (index .cluster.services "velero" "config" "backupMode") "fs-backup" }}
     defaultVolumesToFsBackup: true
     {{- else }}
     features: EnableCSI
+    {{- if eq (index .cluster.services "velero" "config" "backupMode") "csi-data-mover" }}
+    defaultSnapshotMoveData: true
+    {{- end }}
     {{- end }}
     backupStorageLocation:
       - name: default
         provider: aws
-        bucket: {{ $s3BucketName | quote }}
+        {{- if and (eq .cluster.terraform.provider "stackit") (index .cluster.services "velero" "config" "backupStorage" "create") }}
+        bucket: bucket-velero-{{ .cluster.name }}-{{ .cluster.stage }}
+        {{- else if and (eq .cluster.terraform.provider "t-cloud-public") (index .cluster.services "velero" "config" "backupStorage" "create") }}
+        bucket: velero-{{ .cluster.name }}-{{ .cluster.stage }}
+        {{- else }}
+        bucket: {{ (index .cluster.services "velero" "config" "backupStorage" "bucketName") }}
+        {{- end }}
         credential:
           name: velero-credentials
           key: cloud
         config:
-          region: {{ $s3BucketRegion | quote }}
-          s3Url: {{ $s3Url | quote }}
+          region: {{ (index .cluster.services "velero" "config" "backupStorage" "region") }}
+          {{- with (index .cluster.services "velero" "config" "backupStorage" "s3Url") }}
+          s3Url: {{ . }}
+          {{- end }}
           s3ForcePathStyle: "true"
     volumeSnapshotLocation: []
 volumeSnapshotClass:
-  k8sProvider: "{{ $provider }}"
+  k8sProvider: "{{ .cluster.terraform.provider }}"

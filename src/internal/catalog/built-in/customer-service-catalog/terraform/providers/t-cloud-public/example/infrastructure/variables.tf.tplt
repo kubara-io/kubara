@@ -582,7 +582,7 @@ variable "kubeconfig_duration" {
   default     = -1
 }
 
-{{ if (eq .cluster.services.velero.status "enabled") }}
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
 ### Velero
 variable "velero_bucket_name" {
   description = "OBS bucket name for Velero backups."

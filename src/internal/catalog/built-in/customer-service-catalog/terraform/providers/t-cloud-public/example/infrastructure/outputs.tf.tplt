@@ -76,7 +76,7 @@ output "dns_zone_masters" {
   value       = var.create_dns_zone ? module.dns_zone[0].masters : null
 }
 
-{{ if (eq .cluster.services.velero.status "enabled") }}
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
 output "velero_bucket_name" {
   description = "OBS bucket name for Velero backups."
   value       = module.velero_bucket.bucket_name
