@@ -16,6 +16,8 @@ externalSecrets:
   secrets:
     velero-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
+      # name needs to cloud, as the aws plugin for velero looks at cloud per default
+      # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
           remoteKey: velero_s3_credentials
