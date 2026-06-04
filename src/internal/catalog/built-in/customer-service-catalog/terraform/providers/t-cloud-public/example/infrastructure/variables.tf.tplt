@@ -312,31 +312,38 @@ variable "nat_eip_bandwidth_size" {
   default     = 300
 }
 
-variable "enable_load_balancer" {
-  description = "Create an external load balancer with an associated EIP."
+variable "enable_shared_load_balancer" {
+  description = "Create the shared external load balancer used by cluster ingress, with an associated EIP."
   type        = bool
   default     = true
 }
 
-variable "load_balancer_type" {
-  description = "External load balancer type. Use shared for ELB v2 or dedicated for ELB v3."
-  type        = string
-  default     = "shared"
-
-  validation {
-    condition     = contains(["shared", "dedicated"], var.load_balancer_type)
-    error_message = "Allowed values for load_balancer_type are \"shared\" and \"dedicated\"."
-  }
+variable "enable_dedicated_load_balancer" {
+  description = "Create an additional dedicated external load balancer with an associated EIP."
+  type        = bool
+  default     = false
 }
 
 variable "load_balancer_eip_type" {
-  description = "EIP type for the external load balancer."
+  description = "EIP type for the shared external load balancer."
   type        = string
   default     = "5_bgp"
 }
 
 variable "load_balancer_eip_bandwidth_size" {
-  description = "Load balancer EIP bandwidth in Mbit/s."
+  description = "Shared load balancer EIP bandwidth in Mbit/s."
+  type        = number
+  default     = 300
+}
+
+variable "dedicated_load_balancer_eip_type" {
+  description = "EIP type for the dedicated external load balancer."
+  type        = string
+  default     = "5_bgp"
+}
+
+variable "dedicated_load_balancer_eip_bandwidth_size" {
+  description = "Dedicated load balancer EIP bandwidth in Mbit/s."
   type        = number
   default     = 300
 }

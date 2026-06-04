@@ -1,9 +1,4 @@
 {{ if (eq (index .cluster.services "external-secrets" "status") "enabled") }}
-# Namespace-isolated access: external-dns reads its secrets through a
-# SecretStore in its own namespace, authenticating with the namespace's
-# default ServiceAccount via the k8s-kv-read OpenBao role. The templated
-# policy scopes that token to secret/<namespace>/*, so external-dns can only
-# read secrets stored under secret/external-dns/.
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:

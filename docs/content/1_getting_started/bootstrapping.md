@@ -208,13 +208,17 @@ Merge behavior reminder:
 
 CI-specific values can be stored in chart-local CI files (for example `ci/ci-values.yaml`) to keep pipeline-only settings out of runtime overlays.
 
-!!! info "T Cloud Public CCE: bind Traefik to the ELB before bootstrap"
-    For `terraform.provider: t-cloud-public`, replace the Traefik service annotation placeholder with the load balancer ID from Terraform:
+!!! info "T Cloud Public CCE: provider-specific Helm adjustments"
+    After `kubara generate --helm` and before `kubara bootstrap`, replace the Traefik service annotation placeholder with the shared load balancer ID from Terraform:
+
     ```bash
-    terraform -chdir=customer-service-catalog/terraform/<cluster>/infrastructure \
-      output -raw load_balancer_id
+    cd customer-service-catalog/terraform/<cluster>/infrastructure
+    terraform output -raw load_balancer_id
     ```
-    Set the value in `customer-service-catalog/helm/<cluster>/traefik/values.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Switch `kubernetes.io/elb.class` to `performance` if you provisioned a dedicated ELB. Full provider context: [T Cloud Public CCE Provisioning](providers/t-cloud-public_provisioning_cce.md#provider-specific-helm-adjustments).
+
+    Set the value in `customer-service-catalog/helm/<cluster>/traefik/values.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Keep `kubernetes.io/elb.class: "union"`.
+
+    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `customer-service-catalog/terraform/<cluster>/openbao/secrets.tf-example` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](overview_core_concept.md#terraform-value-overrides).
 
 !!! warning
     **Don't forget to commit and push your changes to Git!**
@@ -229,13 +233,11 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
     This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
     To target a specific cluster, provide your own config with `--kubeconfig your-kubeconfig`
 
-For external-secrets, create provider credential secret(s) first (for example via `kubectl create secret ...`), then:
+External Secrets needs a `ClusterSecretStore`.
 
-A) **recommended for first bootstrap:** pass a `ClusterSecretStore` manifest to bootstrap with `--with-es-css-file` together with `--with-es-crds`, 
+For T Cloud Public CCE, kubara already renders the OpenBao-backed `ClusterSecretStore` into `external-secrets/values.yaml`. Use `--with-es-crds`; do not pass `--with-es-css-file` and do not create a separate provider credential secret.
 
-or B) apply your `ClusterSecretStore` manually (only if external-secrets CRDs are already installed on the cluster),
-
-or C) **no extra flag needed** if your provider already renders the `ClusterSecretStore` into the external-secrets Helm values. T Cloud Public CCE clusters use this path: kubara installs OpenBao in-cluster and the rendered `external-secrets/values.yaml` already contains a `clusterSecretStores` entry pointing at it. In that case `--with-es-crds` is enough and you can skip `--with-es-css-file` and the manual provider credential secret. See [T Cloud Public CCE Provisioning](providers/t-cloud-public_provisioning_cce.md) for the full flow.
+For other providers, create the provider credential secret first and either pass a `ClusterSecretStore` manifest during bootstrap with `--with-es-css-file` and `--with-es-crds`, or apply the `ClusterSecretStore` manually if the External Secrets CRDs already exist.
 
 If the namespace does not exist yet, create it once before creating the provider credential secret(s):
 
@@ -285,7 +287,7 @@ spec:
 kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds
 ```
 
-Recommended for the first bootstrap with external-secrets: let kubara apply a templated `ClusterSecretStore` manifest during bootstrap:
+For providers that need an external `ClusterSecretStore` manifest, pass it during bootstrap:
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> \

@@ -4,8 +4,6 @@ namespace:
     stage: "{{ .cluster.stage }}"
 
 {{- if eq .cluster.terraform.provider "t-cloud-public" }}
-# T Cloud Public: namespace-isolated access through a SecretStore in the velero
-# namespace (k8s-kv-read role), reading secret/velero/* only.
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:

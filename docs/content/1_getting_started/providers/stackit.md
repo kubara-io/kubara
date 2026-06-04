@@ -41,6 +41,8 @@ Then navigate to:
 cd bootstrap-tfstate-backend
 ```
 
+For persistent changes to generated Terraform values, use a separate override file as described in [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides).
+
 Run:
 
 === "Terraform"
@@ -108,7 +110,7 @@ Run:
     tofu plan
     ```
 
-Check the values generated in `env.auto.tfvars`, which is [automatically applied in your Terraform deployment.](https://developer.hashicorp.com/terraform/language/values/variables#assign-values-to-variables)
+Check the values generated in `env.auto.tfvars`, which is [automatically applied in your Terraform deployment.](https://developer.hashicorp.com/terraform/language/values/variables#assign-values-to-variables). Put persistent changes in an override file; see [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides).
 
 ===  "Terraform"
 
@@ -244,4 +246,3 @@ You must manually create the Kubernetes cluster via the cloud portal. This will 
 Now continue with the generic guide on the [Bootstrap Your Own Platform](../bootstrapping.md) page.
 
 ---
-

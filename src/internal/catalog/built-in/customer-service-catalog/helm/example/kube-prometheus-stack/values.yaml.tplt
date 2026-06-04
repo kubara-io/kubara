@@ -236,9 +236,6 @@ prometheus-blackbox-exporter:
 
 {{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
 {{- if $tcp }}
-# T Cloud Public: namespace-isolated access through a SecretStore in the
-# kube-prometheus-stack namespace (k8s-kv-read role), reading
-# secret/kube-prometheus-stack/* only.
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:

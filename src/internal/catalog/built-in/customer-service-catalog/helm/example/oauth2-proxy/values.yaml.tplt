@@ -12,8 +12,6 @@ namespace:
 
 {{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
 {{- if $tcp }}
-# T Cloud Public: namespace-isolated access through a SecretStore in the
-# oauth2-proxy namespace (k8s-kv-read role), reading secret/oauth2-proxy/* only.
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:

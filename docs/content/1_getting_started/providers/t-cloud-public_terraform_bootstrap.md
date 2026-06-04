@@ -50,6 +50,8 @@ Then navigate to:
 cd bootstrap-tfstate-backend
 ```
 
+For persistent changes to generated Terraform values, use a separate override file as described in [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides).
+
 ### OBS-to-KMS Agency
 
 The bootstrap stack creates an IAM agency named `OBSAccessKMS` (delegated to the `op_svc_obs` service principal) so that OBS can use the generated KMS key for server-side bucket encryption. Without this agency, the bucket creation fails with `Status=403 Forbidden, Code=AccessDenied` the moment `server_side_encryption` is set.

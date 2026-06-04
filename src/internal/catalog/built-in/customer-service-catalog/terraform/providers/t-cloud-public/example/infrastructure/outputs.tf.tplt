@@ -17,13 +17,23 @@ output "cluster_public_endpoint_eip_id" {
 }
 
 output "load_balancer_public_ip" {
-  description = "Public IP address assigned to the optional load balancer."
+  description = "Public IP address assigned to the shared load balancer."
   value       = module.network.load_balancer_public_ip
 }
 
 output "load_balancer_id" {
-  description = "Load balancer ID for the Traefik CCE Service annotation."
+  description = "Shared load balancer ID for the Traefik CCE Service annotation."
   value       = module.network.load_balancer_id
+}
+
+output "dedicated_load_balancer_public_ip" {
+  description = "Public IP address assigned to the dedicated load balancer, if created."
+  value       = module.network.dedicated_load_balancer_public_ip
+}
+
+output "dedicated_load_balancer_id" {
+  description = "Dedicated load balancer ID, if created."
+  value       = module.network.dedicated_load_balancer_id
 }
 
 output "vpc_id" {
