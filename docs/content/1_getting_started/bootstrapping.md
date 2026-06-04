@@ -198,6 +198,7 @@ Every generated app supports:
 * optional `additional-values.yaml` for overrides/extra values
 
 kubara's generated ApplicationSet already references both files and ignores missing files, so you can add `additional-values.yaml` only when needed.
+During bootstrap kubara uses `additional-values.yaml` files when they exist as well.
 
 Merge behavior reminder:
 
