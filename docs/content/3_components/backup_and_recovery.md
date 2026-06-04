@@ -44,6 +44,18 @@ Decide these three things first:
 3. **Recovery goal**  
    Be clear whether you are optimizing for namespace restore, cluster rebuild, disaster recovery, or migration.
 
+!!! warning "File-system backup and CSI snapshots are mutually exclusive"
+    `fsBackupEnabled: true` (file-system backup via Kopia) and CSI volume snapshots are **mutually exclusive** — they cannot both be active for the same PVC at once. When FSB is enabled globally, Velero uses file-system backup for all volumes and takes no CSI snapshots. Choose one approach before going to production; switching later may leave gaps in your backup history.
+
+    References: [File-system backup](https://velero.io/docs/v1.18/file-system-backup/) · [CSI snapshots](https://velero.io/docs/v1.18/csi/)
+
+!!! warning "Volume snapshots may not be true independent backups — know your provider"
+    Volume snapshots are **not necessarily independent of the source volume**. On some cloud providers (e.g. Open Telekom Cloud / OTC), deleting a volume also deletes all its snapshots, so a CSI snapshot cannot protect you from accidental volume deletion or infrastructure-layer loss.
+
+    Before relying on CSI snapshots, verify in your provider's block storage documentation whether snapshots survive the deletion of their source volume. If they do not, use file-system backup (`fsBackupEnabled: true`) to store data in S3, where it persists independently of volume state.
+
+    References: verify with your provider's storage docs — e.g. [AWS EBS snapshots](https://docs.aws.amazon.com/ebs/latest/userguide/EBSSnapshots.html) are independent of their source volume; T Cloud Public EVS (Elastic Volume Service) snapshots are not.
+
 ---
 
 ## Enable Velero
@@ -82,8 +94,9 @@ Then:
      - `customer-service-catalog/helm/<cluster-name>/velero/values.yaml`
      - `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`
 3. Commit and push so Argo CD can deploy Velero
-4. Create one backup and test one restore early
-   For more details, see [Disaster recovery](https://velero.io/docs/v1.18/disaster-case/)
+4. **Test a full backup and restore cycle immediately after setup**  
+   Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).  
+   References: [Backup reference](https://velero.io/docs/v1.18/backup-reference/) · [Restore reference](https://velero.io/docs/v1.18/restore-reference/) · [Disaster recovery](https://velero.io/docs/v1.18/disaster-case/)
 
 Use `additional-values.yaml` for environment-specific overrides you want to keep next to the generated baseline.
 
