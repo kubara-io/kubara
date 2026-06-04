@@ -36,27 +36,29 @@ What stays with you as a Platform Operator / Team:
 Decide these three things first:
 
 1. **Backup storage**  
-  The most common way to use velero is with a **S3-compatible** object storage target plus credentials from your secret backend.
+   The most common way to use Velero is with an **S3-compatible** object storage target plus credentials from your secret backend. `backupStorage.create: true` lets kubara create the bucket and credentials where supported. On STACKIT this is the default when Velero is enabled (see below).
 2. **Volume backup mode**  
-   `fsBackupEnabled: true` uses file-system backup via the node-agent.  
-   `fsBackupEnabled: false` uses CSI snapshots instead.  
+   Choose the mode based on your provider's snapshot durability and your recovery goal:
+   - `fs-backup`: Uses the Velero node-agent to back up volume contents to object storage. This is the default.
+   - `csi-snapshot`: Uses CSI snapshots. Snapshot durability depends on the provider and CSI driver.
+   - `csi-data-mover`: Creates CSI snapshots and moves their data to object storage through the Velero node-agent.
    More about File System Backups can be found in the official [Velero docs](https://velero.io/docs/v1.18/file-system-backup/).
 3. **Recovery goal**  
    Be clear whether you are optimizing for namespace restore, cluster rebuild, disaster recovery, or migration.
 
 !!! warning "File-system backup and CSI snapshots are mutually exclusive"
-    `fsBackupEnabled: true` (file-system backup via Kopia) and CSI volume snapshots are **mutually exclusive** — they cannot both be active for the same PVC at once. When FSB is enabled globally, Velero uses file-system backup for all volumes and takes no CSI snapshots. Choose one approach before going to production; switching later may leave gaps in your backup history.
+    File-system backup via Kopia and CSI volume snapshots are **mutually exclusive** — they cannot both be active for the same PVC at once. When `backupMode: fs-backup` is enabled, Velero uses file-system backup for all volumes and takes no CSI snapshots. Choose one approach before going to production; switching later may leave gaps in your backup history.
 
     References: [File-system backup](https://velero.io/docs/v1.18/file-system-backup/) · [CSI snapshots](https://velero.io/docs/v1.18/csi/)
 
-!!! warning "Volume snapshots may not be true independent backups — know your provider"
-    Volume snapshots are **not necessarily independent of the source volume**. On some cloud providers (e.g. Open Telekom Cloud / OTC), deleting a volume also deletes all its snapshots, so a CSI snapshot cannot protect you from accidental volume deletion or infrastructure-layer loss.
+!!! warning "CSI snapshots are not full backups — know your provider"
+    A CSI snapshot is generally **not a full, standalone backup** and is **not necessarily independent of its source volume**. Snapshot durability depends on your cloud provider and CSI driver.
 
-    Before relying on CSI snapshots, verify in your provider's block storage documentation whether snapshots survive the deletion of their source volume. If they do not, use file-system backup (`fsBackupEnabled: true`) to store data in S3, where it persists independently of volume state.
+    Before relying on plain CSI snapshots, check your provider's block storage documentation. If snapshots are removed together with their source volume — or if you need true off-volume backups — use `backupMode: fs-backup` or `backupMode: csi-data-mover`, so the data is stored in object storage independently of volume state.
 
-    References: verify with your provider's storage docs — e.g. [AWS EBS snapshots](https://docs.aws.amazon.com/ebs/latest/userguide/EBSSnapshots.html) are independent of their source volume; T Cloud Public EVS (Elastic Volume Service) snapshots are not.
+    For example, the [Open Telekom Cloud EVS documentation](https://docs.otc.t-systems.com/elastic-volume-service/dev-guide/deleting_an_evs_disk.html) states: "When you delete an EVS disk, all the disk data including the snapshots created for this disk will be deleted."
 
----
+    References: [Velero CSI support](https://velero.io/docs/main/csi/) · [CSI Snapshot Data Movement](https://velero.io/docs/main/csi-snapshot-data-movement/)
 
 ## Enable Velero
 
@@ -70,22 +72,34 @@ clusters:
       velero:
         status: enabled
         config:
-          fsBackupEnabled: true
-          s3BucketName: my-velero-backups
-          s3BucketRegion: eu01
-          s3Url: https://s3.example.com
+          backupStorage:
+            s3Url: https://object.storage.eu01.onstackit.cloud
 ```
 
-Add your S3 credentials to your Secret Backend:
+For STACKIT, `backupStorage.create: true` makes kubara generate the dedicated Object Storage bucket (`bucket-velero-<name>-<stage>`) and credentials group. The bucket region defaults to `eu01` and can be changed through `backupStorage.region`. Set `backupStorage.s3Url` to the matching S3 endpoint for that region.
 
-- Path: velero_s3_credentials
-- Key: cloud 
-- Contents:
-  ```toml
-  [default]
-  aws_access_key_id = <ACCESS_KEY_ID>
-  aws_secret_access_key = <SECRET_ACCESS_KEY>
-  ```
+The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path `velero_s3_credentials`, key `cloud`, in the form:
+
+```toml
+[default]
+aws_access_key_id = <ACCESS_KEY_ID>
+aws_secret_access_key = <SECRET_ACCESS_KEY>
+```
+
+So on STACKIT you need `status: enabled` and `backupStorage.s3Url` unless you intentionally change the backup mode, bucket region, or use an existing bucket.
+
+To use an existing S3-compatible bucket instead, set `backupStorage.create: false` and provide the bucket connection details in the Velero config:
+
+```yaml
+config:
+  backupStorage:
+    create: false
+    bucketName: my-velero-backups
+    region: eu01
+    s3Url: https://s3.example.com
+```
+
+With `backupStorage.create: false`, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path `velero_s3_credentials`, key `cloud`, using the same format shown above.
 
 Then:
 
@@ -102,7 +116,7 @@ Use `additional-values.yaml` for environment-specific overrides you want to keep
 
 ### Custom `VolumeSnapshotClass` via `additional-values.yaml`
 
-When you use `fsBackupEnabled: false`, Velero uses **CSI snapshots** instead of file-system backups.
+When you use `backupMode: csi-snapshot` or `backupMode: csi-data-mover`, Velero uses **CSI snapshots** instead of file-system backups.
 
 kubara writes `volumeSnapshotClass.k8sProvider` into the generated Velero values based on `terraform.provider`.
 If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own `VolumeSnapshotClass` in `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`.
