@@ -102,7 +102,11 @@ func TestNewClusterFromEnv(t *testing.T) {
 			"longhorn":                {Status: service.StatusDisabled},
 			"velero": {
 				Status: service.StatusDisabled,
-				Config: service.Config{"fsBackupEnabled": true}},
+				Config: service.Config{
+					"backupMode":    "fs-backup",
+					"backupStorage": map[string]any{"create": true, "region": "eu01"},
+				},
+			},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster

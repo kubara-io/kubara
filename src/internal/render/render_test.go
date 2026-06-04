@@ -39,7 +39,13 @@ func fullServiceContext() map[string]any {
 		"metrics-server":          map[string]any{"status": "disabled"},
 		"metallb":                 map[string]any{"status": "disabled"},
 		"longhorn":                map[string]any{"status": "disabled"},
-		"velero":                  map[string]any{"status": "disabled", "config": map[string]any{"fsBackupEnabled": true}},
+		"velero": map[string]any{
+			"status": "disabled",
+			"config": map[string]any{
+				"backupMode":    "fs-backup",
+				"backupStorage": map[string]any{"create": true, "region": "eu01"},
+			},
+		},
 	}
 }
 
