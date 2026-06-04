@@ -17,9 +17,9 @@ externalSecrets:
     velero-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - secretKey: s3_credentials
+        - secretKey: cloud
           remoteKey: velero_s3_credentials
-          remoteKeyProperty: s3_credentials
+          remoteKeyProperty: cloud
 
 velero:
 {{- $fsBackup := (index .cluster.services "velero" "config" "fsBackupEnabled") }}

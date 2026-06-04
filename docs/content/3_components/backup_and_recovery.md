@@ -67,7 +67,7 @@ clusters:
 Add your S3 credentials to your Secret Backend:
 
 - Path: velero_s3_credentials
-- Key: s3_credentials
+- Key: cloud 
 - Contents:
   ```toml
   [default]

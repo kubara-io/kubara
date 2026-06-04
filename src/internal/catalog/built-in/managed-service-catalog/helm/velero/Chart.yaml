@@ -11,6 +11,3 @@ dependencies:
   - name: template-library
     repository: file://../template-library
     version: 0.0.7
-  - name: external-secrets
-    repository: https://charts.external-secrets.io/
-    version: 2.5.0  # https://artifacthub.io/packages/helm/external-secrets-operator/external-secrets
