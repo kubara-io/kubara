@@ -280,7 +280,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
       cert-manager:
         status: enabled
 `,
-			wantErr: `conflicting keys "certManager" and "cert-manager"`,
+			wantErr: `for canonical service "cert-manager"`,
 		},
 		{
 			name: "cert-manager clusterIssuer conflict",
