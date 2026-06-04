@@ -2719,7 +2719,8 @@ Edit the generated files in:
 <li><code>values.yaml</code> as the main customer overlay file</li>
 <li>optional <code>additional-values.yaml</code> for overrides/extra values</li>
 </ul>
-<p>kubara's generated ApplicationSet already references both files and ignores missing files, so you can add <code>additional-values.yaml</code> only when needed.</p>
+<p>kubara's generated ApplicationSet already references both files and ignores missing files, so you can add <code>additional-values.yaml</code> only when needed.
+During bootstrap kubara uses <code>additional-values.yaml</code> files when they exist as well.</p>
 <p>Merge behavior reminder:</p>
 <ul>
 <li>maps/dictionaries are merged recursively</li>
