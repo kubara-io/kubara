@@ -21,11 +21,14 @@ spec:
           - fs-backup
           - csi-snapshot
           - csi-data-mover
-        description: "Volume backup strategy. fs-backup uses file-system backups via the node agent. csi-snapshot uses CSI snapshots. csi-data-mover uses CSI snapshots and moves snapshot data to object storage."
+        description: "Volume backup strategy. fs-backup uses file-system backups via the node agent. csi-snapshot uses CSI\
+          \ snapshots. csi-data-mover uses CSI snapshots and moves snapshot data to object storage."
       backupStorage:
         type: object
         default: {}
-        description: "Backup storage configuration. Set create to true to let kubara create the backup bucket and credentials where supported. Set create to false to use an existing S3-compatible bucket. Set s3Url explicitly to the S3-compatible endpoint Velero should use."
+        description: "Backup storage configuration. Set create to true to let kubara create the backup bucket and credentials\
+          \ where supported. Set create to false to use an existing S3-compatible bucket. Set s3Url explicitly to the S3-compatible\
+          \ endpoint Velero should use."
         properties:
           create:
             type: boolean
