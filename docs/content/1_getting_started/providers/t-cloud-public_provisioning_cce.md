@@ -30,6 +30,7 @@ A few defaults that often need attention before the first apply:
 
 - **`enable_cluster_public_endpoint = true`** binds a small EIP (`5_bgp`, 5 Mbit/s, traffic-charged) to the CCE master so the API server is reachable from the machine that runs Terraform — required for the in-stack Helm provider (e.g. the OpenBao Helm release) when applying from outside the VPC. After apply, the public IP is exposed as the `cluster_public_endpoint_ip` output. Set to `false` if you only run Terraform from inside the VPC (CI runner inside OTC, bastion, VPN).
 
+- **`enable_nat_gateway = true`** creates the NAT gateway for node egress. Adjust `nat_gateway_spec` and `nat_eip_bandwidth_size` if the default size does not fit your cluster.
 - **`enable_shared_load_balancer = true`** creates the shared ELB used by Traefik. Set `enable_dedicated_load_balancer = true` only if you also need an independent dedicated ELB.
 - **`enable_openbao = true`** rolls out the in-cluster OpenBao Helm release after CCE comes up. The release is **not** initialized or unsealed automatically — that happens manually in step 4 below.
 
