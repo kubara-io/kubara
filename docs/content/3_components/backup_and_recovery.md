@@ -36,7 +36,7 @@ What stays with you as a Platform Operator / Team:
 Decide these three things first:
 
 1. **Backup storage**  
-   Velero needs an **S3-compatible** object storage target plus credentials from your secret backend.
+  The most common way to use velero is with a **S3-compatible** object storage target plus credentials from your secret backend.
 2. **Volume backup mode**  
    `fsBackupEnabled: true` uses file-system backup via the node-agent.  
    `fsBackupEnabled: false` uses CSI snapshots instead.  
@@ -154,6 +154,12 @@ Velero should **complement** GitOps, not replace it.
 4. Verify that Argo CD, External Secrets, ingress, certificates, DNS, and stateful workloads are healthy
 
 For most teams, the best first test is restoring one non-critical namespace or workload.
+
+---
+## Misc.
+
+### Other Storage Providers
+Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in `managed-service-catalog/helm/velero/values.yaml`. A list of available plugins can be found [here](https://velero.io/docs/v1.18/supported-providers/).
 
 ---
 
