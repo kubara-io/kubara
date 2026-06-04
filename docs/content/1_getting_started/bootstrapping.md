@@ -143,6 +143,7 @@ well:
 
 - [STACKIT](providers/stackit.md)
 - [T Cloud Public](providers/t-cloud-public.md)
+- More provider support is in the works
 
 If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please
 continue with the next section.
