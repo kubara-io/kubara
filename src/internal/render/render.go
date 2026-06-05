@@ -123,9 +123,13 @@ func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
 		return sources, nil
 	}
 
+	source, err := catalog.ResolveSource(options.CatalogPath)
+	if err != nil {
+		return nil, fmt.Errorf("resolve external catalog source: %w", err)
+	}
 	external := templateSource{
 		name:     "external",
-		fsys:     os.DirFS(options.CatalogPath),
+		fsys:     os.DirFS(source.RootPath),
 		baseRoot: ".",
 		external: true,
 	}

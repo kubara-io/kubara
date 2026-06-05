@@ -35,7 +35,7 @@ func NewSchemaCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "schema",
 		Usage:       "Generate a JSON schema for the config yaml structure",
-		UsageText:   "kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]",
+		UsageText:   "kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]",
 		Description: "Generates a JSON schema for the config yaml structure and catalog definitions to use for validation and editor autocompletion",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)

@@ -111,13 +111,13 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 		&cli.StringFlag{
 			Name:        "catalog",
 			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog directory.",
+			Usage:       "Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
 			Destination: &flags.CatalogPath,
 		},
 		&cli.BoolFlag{
 			Name:        "catalog-overwrite",
 			Value:       flags.CatalogOverwrite,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
+			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions",
 			Destination: &flags.CatalogOverwrite,
 		},
 		&cli.BoolFlag{
@@ -179,9 +179,17 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 	}
 
 	rawCatalogPath := strings.TrimSpace(cmd.String("catalog"))
+
 	if rawCatalogPath == "" {
 		return catalog.LoadOptions{
 			CatalogPath: "",
+			Overwrite:   cmd.Bool("catalog-overwrite"),
+		}, nil
+	}
+
+	if catalog.IsOCIReference(rawCatalogPath) {
+		return catalog.LoadOptions{
+			CatalogPath: rawCatalogPath,
 			Overwrite:   cmd.Bool("catalog-overwrite"),
 		}, nil
 	}
@@ -190,7 +198,6 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 	if err != nil {
 		return catalog.LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
 	}
-
 	return catalog.LoadOptions{
 		CatalogPath: absoluteCatalogPath,
 		Overwrite:   cmd.Bool("catalog-overwrite"),
