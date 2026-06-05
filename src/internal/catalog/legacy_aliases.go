@@ -68,11 +68,3 @@ func CanonicalServiceName(name string) string {
 	}
 	return trimmed
 }
-
-func LegacyServiceAliasMap() map[string]string {
-	out := make(map[string]string, len(canonicalToLegacyServiceName))
-	for canonical, legacy := range canonicalToLegacyServiceName {
-		out[canonical] = legacy
-	}
-	return out
-}

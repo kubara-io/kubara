@@ -143,7 +143,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewClusterFromEnv(tt.args.e)
+			got, err := NewClusterFromEnvWithCatalog(tt.args.e, catalog.LoadOptions{})
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})

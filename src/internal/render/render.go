@@ -117,32 +117,6 @@ func (tt TemplateType) String() string {
 	return templateName[tt]
 }
 
-func makeWalkDirFunc(tmplRoot string, out *[]string) fs.WalkDirFunc {
-	return func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() {
-			return nil
-		}
-
-		rel, err := filepath.Rel(tmplRoot, path)
-		if err != nil {
-			return err
-		}
-
-		if strings.HasPrefix(rel, "services") {
-			// TODO: Consider a cleaner separation of "template files" vs "catalog data"
-			// and avoid relying on path-based filtering. For now, we can simply
-			// ignore files under "services" as they are not templates but catalog data.
-			return nil
-		}
-
-		*out = append(*out, filepath.ToSlash(rel))
-		return nil
-	}
-}
-
 func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
 	sources := []templateSource{{
 		name:     "built-in",
@@ -311,48 +285,6 @@ func splitProviderPath(relPath string) (string, string, bool) {
 func StripProviderPath(relPath string) string {
 	stripped, _, _ := splitProviderPath(relPath)
 	return stripped
-}
-
-func selectTemplatesForProvider(files []string, provider string) []string {
-	selectedProvider := normalizeProviderName(provider)
-	sortedFiles := append([]string(nil), files...)
-	sort.Strings(sortedFiles)
-
-	selected := make(map[string]selectedTemplate, len(sortedFiles))
-	keys := make([]string, 0, len(sortedFiles))
-
-	for _, sourcePath := range sortedFiles {
-		strippedPath, sourceProvider, isProviderSpecific := splitProviderPath(sourcePath)
-		if isProviderSpecific && sourceProvider != selectedProvider {
-			continue
-		}
-
-		current, exists := selected[strippedPath]
-		if !exists {
-			selected[strippedPath] = selectedTemplate{
-				sourcePath:       sourcePath,
-				providerSpecific: isProviderSpecific,
-			}
-			keys = append(keys, strippedPath)
-			continue
-		}
-
-		// Provider-specific files override common files for the same output path.
-		if isProviderSpecific && !current.providerSpecific {
-			selected[strippedPath] = selectedTemplate{
-				sourcePath:       sourcePath,
-				providerSpecific: true,
-			}
-		}
-	}
-
-	sort.Strings(keys)
-	out := make([]string, 0, len(keys))
-	for _, key := range keys {
-		out = append(out, selected[key].sourcePath)
-	}
-
-	return out
 }
 
 func shouldPreferTemplateFile(current templateFile, next templateFile, currentProviderSpecific bool, nextProviderSpecific bool, overwrite bool, strippedPath string) (bool, error) {

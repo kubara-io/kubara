@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
@@ -80,29 +81,6 @@ func deepCopyConfig(c *Config) *Config {
 	return &newConfig
 }
 
-func TestNewConfigStore(t *testing.T) {
-	tests := []struct {
-		name     string
-		filePath string
-		want     *ConfigStore
-	}{
-		{
-			name:     "Create a new config store",
-			filePath: "/tmp/config.yaml",
-			want: &ConfigStore{
-				filepath: "/tmp/config.yaml",
-				config:   &Config{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewConfigStore(tt.filePath)
-			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
 func TestConfigStore_Load(t *testing.T) {
 	tempDir := t.TempDir()
 
@@ -166,7 +144,7 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := NewConfigStore(tt.filepath)
+			cs := NewConfigStoreWithCatalog(tt.filepath, catalog.LoadOptions{})
 			err := cs.Load()
 
 			if tt.wantErr {
@@ -218,7 +196,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "legacy-config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-	cs := NewConfigStore(configPath)
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
@@ -333,7 +311,7 @@ clusters:
 			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
 			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-			cs := NewConfigStore(configPath)
+			cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 			err := cs.Load()
 			require.Error(t, err)
 			assert.ErrorContains(t, err, tt.wantErr)
@@ -607,7 +585,7 @@ func TestGenerateSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			schemaDoc, err := GenerateSchema()
+			schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -646,7 +624,7 @@ func TestGenerateSchema(t *testing.T) {
 }
 
 func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
-	schemaDoc, err := GenerateSchema()
+	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	defs, ok := schemaDoc["$defs"].(map[string]any)
@@ -702,7 +680,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cs := NewConfigStore(configPath)
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load(), "Load should succeed")
 
 	c := cs.GetConfig().Clusters[0]
