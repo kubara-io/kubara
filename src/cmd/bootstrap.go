@@ -263,7 +263,7 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 }
 
 func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
-	if err := envMap.ValidateAll(); err != nil {
+	if err := envMap.Validate(); err != nil {
 		return nil, err
 	}
 

@@ -57,14 +57,6 @@ type EnvMap struct {
 	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 }
 
-// ValidateAll performs basic validation on the envMap.
-func (em *EnvMap) ValidateAll() error {
-	if err := em.Validate(); err != nil {
-		return err
-	}
-	return nil
-}
-
 // Validate performs basic validation on the envMap.
 // It looks at all fields but only raises an error if non optional fields are not set or set to default.
 func (em *EnvMap) Validate() error {

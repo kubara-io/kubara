@@ -169,53 +169,6 @@ func TestEnvMap_Validate(t *testing.T) {
 	}
 }
 
-func TestEnvMap_ValidateAll(t *testing.T) {
-	validEnvMap := func() *EnvMap {
-		return &EnvMap{
-			ProjectName:                 "test-project",
-			ProjectStage:                "dev",
-			ArgocdWizardAccountPassword: "password123",
-			ArgocdHelmRepoUsername:      "helm-user",
-			ArgocdHelmRepoPassword:      "helm-pass",
-			ArgocdHelmRepoUrl:           "https://helm.example.com",
-			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			DomainName:                  "example.com",
-		}
-	}
-
-	tests := []struct {
-		name    string
-		envMap  *EnvMap
-		wantErr bool
-	}{
-		{
-			name:    "Valid EnvMap passes ValidateAll",
-			envMap:  validEnvMap(),
-			wantErr: false,
-		},
-		{
-			name: "Invalid EnvMap fails ValidateAll",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ProjectName = ""
-				return em
-			}(),
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.envMap.ValidateAll()
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
 func TestEnvMap_setDefaults(t *testing.T) {
 	tests := []struct {
 		name          string
