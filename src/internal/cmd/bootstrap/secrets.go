@@ -88,13 +88,46 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 
 // createGitRepositorySecret creates the ArgoCD git repository secret
 func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
+	secretName := "https-init-repo-access"
+	if em.GitAuthMode() == envconfig.GitAuthModeSSH {
+		secretName = "ssh-init-repo-access"
+	}
+	if em.GitAuthMode() == envconfig.GitAuthModeGitHubApp {
+		secretName = "github-app-init-repo-access"
+	}
+
+	stringData := map[string]string{
+		"enableLfs": "true",
+		"insecure":  "false",
+		"name":      secretName,
+		"project":   fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
+		"type":      "git",
+		"url":       em.GitRepositoryURL(),
+	}
+
+	switch em.GitAuthMode() {
+	case envconfig.GitAuthModeSSH:
+		stringData["sshPrivateKey"] = em.ArgocdGitSshPrivateKey
+	case envconfig.GitAuthModeGitHubApp:
+		stringData["githubAppID"] = em.ArgocdGitGithubAppID
+		stringData["githubAppInstallationID"] = em.ArgocdGitGithubAppInstallationID
+		stringData["githubAppPrivateKey"] = em.ArgocdGitGithubAppPrivateKey
+		if envconfig.IsConfiguredEnvValue(em.ArgocdGitGithubAppEnterpriseBaseUrl) {
+			stringData["githubAppEnterpriseBaseUrl"] = em.ArgocdGitGithubAppEnterpriseBaseUrl
+		}
+	default:
+		stringData["forceHttpBasicAuth"] = "true"
+		stringData["password"] = em.ArgocdGitPatOrPassword
+		stringData["username"] = em.ArgocdGitUsername
+	}
+
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
 			Kind:       "Secret",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "https-init-repo-access",
+			Name:      secretName,
 			Namespace: argocdNamespace,
 			Labels: map[string]string{
 				"argocd.argoproj.io/secret-type": "repository",
@@ -103,17 +136,8 @@ func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1
 				"managed-by": "argocd.argoproj.io",
 			},
 		},
-		Type: corev1.SecretTypeOpaque,
-		StringData: map[string]string{
-			"enableLfs":          "true",
-			"forceHttpBasicAuth": "true",
-			"insecure":           "false",
-			"password":           em.ArgocdGitPatOrPassword,
-			"username":           em.ArgocdGitUsername,
-			"name":               "https-init-repo-access",
-			"url":                em.ArgocdGitHttpsUrl,
-			"project":            fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
-		},
+		Type:       corev1.SecretTypeOpaque,
+		StringData: stringData,
 	}
 }
 

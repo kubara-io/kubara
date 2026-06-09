@@ -164,7 +164,7 @@ func TestTemplateFiles(t *testing.T) {
 					},
 					"argocd": map[string]any{
 						"repo": map[string]any{
-							"https": map[string]any{
+							"git": map[string]any{
 								"managed": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "managed-service-catalog/helm",
@@ -276,7 +276,7 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoTeam":          "myteam",
 					"argocd": map[string]any{
 						"repo": map[string]any{
-							"https": map[string]any{
+							"git": map[string]any{
 								"managed": map[string]any{
 									"url":            "https://github.com/example/repo",
 									"path":           "managed-service-catalog/helm",

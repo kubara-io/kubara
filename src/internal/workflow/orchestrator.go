@@ -10,6 +10,7 @@ import (
 func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	gitRepoURL := e.GitRepositoryURL()
 
 	// Attempt to find the cluster to update
 	for i := range cfg.Clusters {
@@ -20,8 +21,9 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			cfg.Clusters[i].Stage = e.ProjectStage
 			cfg.Clusters[i].DNSName = dnsName
 			cfg.Clusters[i].Terraform.DNS.Name = dnsName
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.AuthMode = e.GitAuthMode()
+			cfg.Clusters[i].ArgoCD.Repo.Git.Managed.URL = gitRepoURL
+			cfg.Clusters[i].ArgoCD.Repo.Git.Customer.URL = gitRepoURL
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{

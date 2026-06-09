@@ -31,7 +31,8 @@ clusters:
         email: platform@example.com
     argocd:
       repo:
-        https:
+        authMode: https
+        git:
           customer:
             url: https://git.example.com/platform/repo.git
             targetRevision: main

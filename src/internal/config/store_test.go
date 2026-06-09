@@ -39,7 +39,8 @@ func newValidTestConfig() *Config {
 				},
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
-						HTTPS: &RepoType{
+						AuthMode: "https",
+						Git: &RepoType{
 							Customer: Repository{
 								URL:            "https://github.com/customer/repo.git",
 								TargetRevision: "main",
@@ -165,7 +166,7 @@ clusters:
     type: hub
     argocd:
       repo:
-        https:
+        git:
           customer:
             url: "https://github.com/customer/repo.git"
           managed:
@@ -206,6 +207,9 @@ clusters:
 	cluster := loaded.Clusters[0]
 	assert.Equal(t, cluster.Type, "hub")
 	assert.Contains(t, cluster.Services, "argocd")
+	require.NotNil(t, cluster.ArgoCD.Repo.Git)
+	assert.Equal(t, "https://github.com/customer/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
+	assert.Equal(t, "https://github.com/managed/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
 
 	certManager := cluster.Services["cert-manager"]
 	clusterIssuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
@@ -228,6 +232,8 @@ clusters:
 	assert.Contains(t, savedContent, "version: v1alpha1")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
+	assert.Contains(t, savedContent, "git:")
+	assert.NotContains(t, savedContent, "\n        https:")
 	assert.NotContains(t, savedContent, "certManager:")
 	assert.NotContains(t, savedContent, "storageClassName:")
 	assert.NotContains(t, savedContent, "ingress:")
@@ -235,6 +241,108 @@ clusters:
 	assert.Contains(t, savedContent, "className: logs-rwo")
 	assert.Contains(t, savedContent, "networking:")
 	assert.Contains(t, savedContent, "clusterIssuer:")
+}
+
+func TestConfigStore_LoadMigratesRepoHTTPSKeyForVersionedConfig(t *testing.T) {
+	configYAML := `
+version: v1alpha1
+clusters:
+  - name: migrated-cluster
+    dnsName: migrated.example.com
+    type: hub
+    argocd:
+      repo:
+        authMode: ssh
+        https:
+          customer:
+            url: "git@github.com:customer/repo.git"
+          managed:
+            url: "git@github.com:managed/repo.git"
+    services:
+      argocd:
+        status: enabled
+      cert-manager:
+        status: enabled
+        config:
+          clusterIssuer:
+            name: letsencrypt-staging
+            email: cert@example.com
+            server: https://acme-staging-v02.api.letsencrypt.org/directory
+      external-dns:
+        status: enabled
+      external-secrets:
+        status: enabled
+      homer-dashboard:
+        status: enabled
+      kube-prometheus-stack:
+        status: enabled
+      kyverno:
+        status: enabled
+      kyverno-policies:
+        status: enabled
+      kyverno-policy-reporter:
+        status: enabled
+      loki:
+        status: enabled
+      longhorn:
+        status: enabled
+      metallb:
+        status: enabled
+      metrics-server:
+        status: enabled
+      oauth2-proxy:
+        status: enabled
+      traefik:
+        status: enabled
+`
+
+	configPath := filepath.Join(t.TempDir(), "versioned-config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	require.NoError(t, cs.Load())
+
+	cluster := cs.GetConfig().Clusters[0]
+	assert.Equal(t, "ssh", cluster.ArgoCD.Repo.AuthMode)
+	require.NotNil(t, cluster.ArgoCD.Repo.Git)
+	assert.Equal(t, "git@github.com:customer/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
+	assert.Equal(t, "git@github.com:managed/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
+
+	savedBytes, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	savedContent := string(savedBytes)
+	assert.Contains(t, savedContent, "git:")
+	assert.NotContains(t, savedContent, "\n        https:")
+}
+
+func TestConfigStore_LoadRejectsRepoMigrationConflict(t *testing.T) {
+	configYAML := `
+version: v1alpha1
+clusters:
+  - name: conflict-cluster
+    dnsName: conflict.example.com
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/legacy.git"
+          managed:
+            url: "https://github.com/managed/legacy.git"
+        git:
+          customer:
+            url: "https://github.com/customer/current.git"
+          managed:
+            url: "https://github.com/managed/current.git"
+    services: {}
+`
+
+	configPath := filepath.Join(t.TempDir(), "repo-conflict.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	err := cs.Load()
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "both legacy https and git repositories")
 }
 
 func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
@@ -306,7 +414,7 @@ clusters:
     dnsName: legacy.example.com
     argocd:
       repo:
-        https:
+        git:
           customer:
             url: "https://github.com/customer/repo.git"
           managed:

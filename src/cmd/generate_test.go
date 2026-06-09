@@ -233,7 +233,7 @@ func TestGenerateCmd(t *testing.T) {
 					},
 					ArgoCD: config.ArgoCD{
 						Repo: config.RepoProto{
-							HTTPS: &config.RepoType{
+							Git: &config.RepoType{
 								Customer: config.Repository{
 									URL:            "https://github.com/example/customer",
 									TargetRevision: "main",
@@ -318,7 +318,7 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
 					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
@@ -376,7 +376,7 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
 					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},

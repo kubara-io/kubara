@@ -34,6 +34,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
+	sampleEnvMapWithGenericGitURL := &envconfig.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitUrl:      "git@github.com:org/repo.git",
+		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
+	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
@@ -58,7 +65,8 @@ func TestNewClusterFromEnv(t *testing.T) {
 		},
 		ArgoCD: ArgoCD{
 			Repo: RepoProto{
-				HTTPS: &RepoType{
+				AuthMode: envconfig.GitAuthModeHTTPS,
+				Git: &RepoType{
 					Customer: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",
@@ -107,6 +115,11 @@ func TestNewClusterFromEnv(t *testing.T) {
 	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
 		URL: "registry-1.docker.io/bitnamicharts",
 	}
+	expectedClusterWithGenericGitURL := expectedClusterWithoutHelmRepo
+	genericGitRepo := *expectedClusterWithoutHelmRepo.ArgoCD.Repo.Git
+	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git = &genericGitRepo
+	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git.Customer.URL = "git@github.com:org/repo.git"
+	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git.Managed.URL = "git@github.com:org/repo.git"
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -137,6 +150,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 				e: sampleEnvMapWithOCIHelmRepo,
 			},
 			want: expectedClusterWithOCIHelmRepo,
+		},
+		{
+			name: "should prefer generic git repo URL over legacy HTTPS URL",
+			args: args{
+				e: sampleEnvMapWithGenericGitURL,
+			},
+			want: expectedClusterWithGenericGitURL,
 		},
 	}
 

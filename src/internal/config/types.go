@@ -49,9 +49,10 @@ type ArgoCD struct {
 }
 
 type RepoProto struct {
-	_     struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
-	HTTPS *RepoType `json:"https,omitempty" yaml:"https,omitempty" jsonschema:"title=Https Repository"`
-	OCI   *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
+	_        struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
+	AuthMode string    `json:"authMode,omitempty" yaml:"authMode,omitempty" jsonschema:"title=Git Auth Mode,description=Authentication mode kubara uses for the initial Argo CD Git repository secret.,enum=https,enum=ssh,enum=github-app,default=https"`
+	Git      *RepoType `json:"git" yaml:"git" jsonschema:"required,title=Git Repository"`
+	OCI      *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
 }
 
 type RepoType struct {
@@ -60,7 +61,7 @@ type RepoType struct {
 }
 
 type Repository struct {
-	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
+	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Git repository URL used by Argo CD. Use an HTTP(S) URL for https/github-app auth modes or an SSH URL for ssh auth mode.,minLength=1"`
 	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
 }
 

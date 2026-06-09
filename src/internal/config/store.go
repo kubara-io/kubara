@@ -55,6 +55,10 @@ func (cs *ConfigStore) Load() error {
 			return fmt.Errorf("migrate legacy config: %w", err)
 		}
 	}
+	shapeMigrated, err := migrateConfigShape(raw)
+	if err != nil {
+		return fmt.Errorf("migrate config shape: %w", err)
+	}
 
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
@@ -79,13 +83,73 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("validate config: %w", err)
 	}
 
-	if legacyConfig {
+	if legacyConfig || shapeMigrated {
 		if err := cs.SaveToFile(); err != nil {
 			return fmt.Errorf("persist migrated config: %w", err)
 		}
 	}
 
 	return nil
+}
+
+func migrateConfigShape(raw map[string]any) (bool, error) {
+	clustersRaw, ok := raw["clusters"]
+	if !ok {
+		return false, nil
+	}
+
+	clusters, ok := clustersRaw.([]any)
+	if !ok {
+		return false, nil
+	}
+
+	migrated := false
+	for i, clusterRaw := range clusters {
+		cluster, ok := clusterRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		changed, err := migrateRepoHTTPSKey(cluster, i)
+		if err != nil {
+			return false, err
+		}
+		migrated = migrated || changed
+	}
+
+	return migrated, nil
+}
+
+func migrateRepoHTTPSKey(cluster map[string]any, clusterIndex int) (bool, error) {
+	argocdRaw, ok := cluster["argocd"]
+	if !ok || argocdRaw == nil {
+		return false, nil
+	}
+	argocd, ok := argocdRaw.(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("%s.argocd must be an object", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	repoRaw, ok := argocd["repo"]
+	if !ok || repoRaw == nil {
+		return false, nil
+	}
+	repo, ok := repoRaw.(map[string]any)
+	if !ok {
+		return false, fmt.Errorf("%s.argocd.repo must be an object", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	httpsRepo, hasHTTPS := repo["https"]
+	if !hasHTTPS {
+		return false, nil
+	}
+	if _, hasGit := repo["git"]; hasGit {
+		return false, fmt.Errorf("%s.argocd.repo has both legacy https and git repositories", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	repo["git"] = httpsRepo
+	delete(repo, "https")
+	return true, nil
 }
 
 func isLegacyConfig(raw map[string]any) bool {
