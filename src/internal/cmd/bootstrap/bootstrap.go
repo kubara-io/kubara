@@ -218,9 +218,6 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 				return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
 			}
 
-			if err := helm.UpdateRepository(ctx, repo); err != nil {
-				return fmt.Errorf("update helm repository %q: %w", repo.Name, err)
-			}
 			log.Info().Msgf("Added helm repository: %q", repo.Name)
 		}
 	}
@@ -246,7 +243,7 @@ func updateHelmDependencies(ctx context.Context, opts *Options, charts []Bootstr
 		if chart.Enabled {
 			dep := helm.DependencyOptions{ChartPath: chart.Path, Timeout: opts.Timeout}
 			if err := helm.BuildDependencies(ctx, dep); err != nil {
-				return fmt.Errorf("update helm chart dependencies for %q: %w", chart.Name, err)
+				return fmt.Errorf("build helm chart dependencies for %q: %w", chart.Name, err)
 			}
 			log.Info().Msgf("Updated helm dependencies for chart: %q", chart.Name)
 

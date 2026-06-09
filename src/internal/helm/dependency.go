@@ -45,31 +45,6 @@ func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
 	return nil
 }
 
-// UpdateDependencies updates helm dependencies for a chart
-func UpdateDependencies(ctx context.Context, opts DependencyOptions) error {
-	args := []string{"dependency", "update"}
-	if opts.ChartPath != "" {
-		args = append(args, opts.ChartPath)
-	}
-
-	var stdout, stderr bytes.Buffer
-	cmd := exec.CommandContext(ctx, "helm", args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-
-	err := cmd.Run()
-	if err != nil {
-		return &HelmDependencyError{
-			Operation: "update",
-			ChartPath: opts.ChartPath,
-			Err:       err,
-			Stderr:    stderr.String(),
-		}
-	}
-
-	return nil
-}
-
 // Dependency represents a helm chart dependency
 type Dependency struct {
 	Name       string `json:"name"`
