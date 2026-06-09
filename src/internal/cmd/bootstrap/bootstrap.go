@@ -45,6 +45,7 @@ type BootstrapChart struct {
 	Path            string
 	OverlayValues   []string
 	RepoURL         string
+	Enabled         bool
 	EnsureNamespace bool
 	EnsureCRD       bool
 }
@@ -90,6 +91,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", argocdChartPath),
 			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
 			RepoURL:         "https://argoproj.github.io/argo-helm",
+			Enabled:         true,
 			EnsureNamespace: true,
 			EnsureCRD:       true,
 		},
@@ -99,6 +101,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", externalSecretsChartPath),
 			OverlayValues:   overlayValuesForChart(opts, externalSecretsChartPath),
 			RepoURL:         "https://charts.external-secrets.io",
+			Enabled:         opts.WithES,
 			EnsureNamespace: opts.WithES,
 			EnsureCRD:       opts.WithES,
 		},
@@ -107,6 +110,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", prometheusChartPath),
 			OverlayValues:   overlayValuesForChart(opts, prometheusChartPath),
 			RepoURL:         "https://prometheus-community.github.io/helm-charts",
+			Enabled:         opts.WithProm,
 			EnsureNamespace: false,
 			EnsureCRD:       opts.WithProm,
 		},
@@ -208,7 +212,7 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 	log.Info().Msg("Adding helm repositories")
 
 	for _, chart := range charts {
-		if chart.EnsureCRD {
+		if chart.Enabled {
 			repo := helm.RepoOptions{Name: chart.Name, URL: chart.RepoURL}
 			if err := helm.AddRepository(ctx, repo); err != nil {
 				return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
@@ -239,7 +243,7 @@ func updateHelmDependencies(ctx context.Context, opts *Options, charts []Bootstr
 	log.Info().Msg("Updating helm chart dependencies")
 
 	for _, chart := range charts {
-		if chart.EnsureCRD {
+		if chart.Enabled {
 			dep := helm.DependencyOptions{ChartPath: chart.Path, Timeout: opts.Timeout}
 			if err := helm.BuildDependencies(ctx, dep); err != nil {
 				return fmt.Errorf("update helm chart dependencies for %q: %w", chart.Name, err)
