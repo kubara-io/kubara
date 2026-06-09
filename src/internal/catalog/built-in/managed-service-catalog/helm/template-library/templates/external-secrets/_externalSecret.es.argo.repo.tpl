@@ -53,8 +53,8 @@ spec:
         {{- else if eq $authMode "ssh" }}
         sshPrivateKey: "{{ "{{" }} .sshPrivateKey }}"
         {{- else if eq $authMode "github-app" }}
-        githubAppID: {{ .githubAppID | quote }}
-        githubAppInstallationID: {{ .githubAppInstallationID | quote }}
+        githubAppID: {{ required (printf "githubAppID is required when authMode is github-app for repository %q" .name) .githubAppID | quote }}
+        githubAppInstallationID: {{ required (printf "githubAppInstallationID is required when authMode is github-app for repository %q" .name) .githubAppInstallationID | quote }}
         githubAppPrivateKey: "{{ "{{" }} .githubAppPrivateKey }}"
         {{- if .githubAppEnterpriseBaseUrl }}
         githubAppEnterpriseBaseUrl: {{ .githubAppEnterpriseBaseUrl | quote }}

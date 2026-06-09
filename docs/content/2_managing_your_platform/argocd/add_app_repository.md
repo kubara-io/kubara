@@ -103,7 +103,7 @@ repositories:
 
 For GitHub Enterprise, also set `githubAppEnterpriseBaseUrl`.
 
-That whats happening behind the scenes:
+That's what's happening behind the scenes:
 
 ![Add Repository](../../images/add-repository.png)
 
