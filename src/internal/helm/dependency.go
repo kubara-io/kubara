@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"os"
 	"os/exec"
-	"path/filepath"
 	"time"
 )
 
@@ -17,52 +15,30 @@ type DependencyOptions struct {
 	SkipRefresh bool
 }
 
-// // BuildDependencies builds helm dependencies for a chart
-// func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
-// 	args := []string{"dependency", "build"}
+// BuildDependencies builds helm dependencies for a chart.
+func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
+	args := []string{"dependency", "build"}
 
-// 	if opts.SkipRefresh {
-// 		args = append(args, "--skip-refresh")
-// 	}
-
-// 	if opts.ChartPath != "" {
-// 		args = append(args, opts.ChartPath)
-// 	}
-
-// 	var stdout, stderr bytes.Buffer
-// 	cmd := exec.CommandContext(ctx, "helm", args...)
-// 	cmd.Stdout = &stdout
-// 	cmd.Stderr = &stderr
-
-// 	err := cmd.Run()
-// 	if err != nil {
-// 		return &HelmDependencyError{
-// 			Operation: "build",
-// 			ChartPath: opts.ChartPath,
-// 			Err:       err,
-// 			Stderr:    stderr.String(),
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// CleanDependencies removes the helm dependency lock file and the previously
-// downloaded subchart archives so the next `helm dependency update` re-resolves
-// the dependency tree from the current repository indexes. A stale Chart.lock
-// referencing a subchart version that is no longer available leads to
-// "can't get a valid version for subchart" errors.
-func CleanDependencies(chartPath string) error {
-	if chartPath == "" {
-		return nil
+	if opts.SkipRefresh {
+		args = append(args, "--skip-refresh")
 	}
 
-	for _, p := range []string{
-		filepath.Join(chartPath, "Chart.lock"),
-		filepath.Join(chartPath, "charts"),
-	} {
-		if err := os.RemoveAll(p); err != nil {
-			return fmt.Errorf("clean helm dependency artifact %q: %w", p, err)
+	if opts.ChartPath != "" {
+		args = append(args, opts.ChartPath)
+	}
+
+	var stdout, stderr bytes.Buffer
+	cmd := exec.CommandContext(ctx, "helm", args...)
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	err := cmd.Run()
+	if err != nil {
+		return &HelmDependencyError{
+			Operation: "build",
+			ChartPath: opts.ChartPath,
+			Err:       err,
+			Stderr:    stderr.String(),
 		}
 	}
 
