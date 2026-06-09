@@ -241,7 +241,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
 	tests := []struct {
 		name        string
 		servicesYML string
-		wantErr     string
+		wantErrs    []string
 	}{
 		{
 			name: "duplicate canonical service names",
@@ -251,7 +251,12 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
       cert-manager:
         status: enabled
 `,
-			wantErr: `conflicting keys "certManager" and "cert-manager"`,
+			wantErrs: []string{
+				"conflicting keys",
+				`"certManager"`,
+				`"cert-manager"`,
+				`canonical service "cert-manager"`,
+			},
 		},
 		{
 			name: "cert-manager clusterIssuer conflict",
@@ -264,7 +269,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
           clusterIssuer:
             name: letsencrypt-prod
 `,
-			wantErr: "both legacy clusterIssuer and config.clusterIssuer",
+			wantErrs: []string{"both legacy clusterIssuer and config.clusterIssuer"},
 		},
 		{
 			name: "storage class conflict",
@@ -275,7 +280,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
         storage:
           className: already-set
 `,
-			wantErr: "both legacy storageClassName and storage.className",
+			wantErrs: []string{"both legacy storageClassName and storage.className"},
 		},
 		{
 			name: "ingress annotations conflict",
@@ -289,7 +294,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
           annotations:
             custom: value
 `,
-			wantErr: "both legacy ingress.annotations and networking.annotations",
+			wantErrs: []string{"both legacy ingress.annotations and networking.annotations"},
 		},
 	}
 
@@ -314,7 +319,9 @@ clusters:
 			cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 			err := cs.Load()
 			require.Error(t, err)
-			assert.ErrorContains(t, err, tt.wantErr)
+			for _, wantErr := range tt.wantErrs {
+				assert.ErrorContains(t, err, wantErr)
+			}
 		})
 	}
 }

@@ -94,11 +94,6 @@ type TemplateOptions struct {
 	Data        any
 }
 
-type selectedTemplate struct {
-	sourcePath       string
-	providerSpecific bool
-}
-
 type templateSource struct {
 	name     string
 	fsys     fs.FS

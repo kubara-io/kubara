@@ -433,6 +433,8 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 // Takes a directory and an EnvMap and validates the envMap before writing it
 func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	envPath := filepath.Join(dir, ".env")
+	err := env.Validate()
+	require.NoError(t, err)
 
 	var b strings.Builder
 	v := reflect.ValueOf(&env).Elem()
@@ -447,7 +449,7 @@ func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
 	}
 
-	err := os.WriteFile(envPath, []byte(b.String()), 0600)
+	err = os.WriteFile(envPath, []byte(b.String()), 0600)
 
 	require.NoError(t, err)
 
