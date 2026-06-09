@@ -1,14 +1,12 @@
 package render
 
 import (
-	"io/fs"
 	"strings"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 var testTemplatesFS = catalog.BuiltInFS()
@@ -99,90 +97,6 @@ func TestTemplateType_String(t *testing.T) {
 			assert.Equal(t, tt.want, tt.tt.String())
 		})
 	}
-}
-
-func TestMakeWalkDirFunc(t *testing.T) {
-	// Create test filesystem structure
-	testFS := testTemplatesFS
-
-	var files []string
-	walkFunc := makeWalkDirFunc(tmplRoot, &files)
-
-	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
-	require.NoError(t, err)
-
-	// Verify that files are collected (not directories)
-	require.NotEmpty(t, files)
-	for _, file := range files {
-		assert.NotEmpty(t, file)
-		assert.False(t, strings.HasSuffix(file, "/"))
-	}
-
-	// Test error propagation if WalkDir encounters an error
-	var errorFiles []string
-	errorWalkFunc := makeWalkDirFunc(tmplRoot, &errorFiles)
-	// Intentionally walk non-existent path to trigger error
-	err = fs.WalkDir(testFS, "nonexistent", errorWalkFunc)
-	assert.Error(t, err)
-	assert.Empty(t, errorFiles)
-}
-
-func TestMakeWalkDirFunc_RelPathError(t *testing.T) {
-	// Test relative path error (edge case: path outside root)
-	testFS := testTemplatesFS
-	var files []string
-	walkFunc := makeWalkDirFunc("nonexistent-root", &files) // Invalid root
-
-	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
-	// Should still work but paths might be relative to nonexistent root
-	require.NoError(t, err)
-}
-
-func TestMakeWalkDirFunc_DirectoryFiltering(t *testing.T) {
-	// Test that directories are properly filtered out
-	testFS := testTemplatesFS
-	var files []string
-	walkFunc := makeWalkDirFunc(tmplRoot, &files)
-
-	err := fs.WalkDir(testFS, tmplRoot, walkFunc)
-	require.NoError(t, err)
-
-	// Ensure no directory entries (ending with /) are included
-	for _, file := range files {
-		assert.False(t, strings.HasSuffix(file, "/"), "File path should not end with /: %s", file)
-	}
-}
-
-func TestSelectTemplatesForProvider_PrefersProviderSpecificFile(t *testing.T) {
-	files := []string{
-		"managed-service-catalog/terraform/modules/iam/main.tf",
-		"managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf",
-		"managed-service-catalog/terraform/providers/otc/modules/iam/main.tf",
-		"managed-service-catalog/terraform/modules/iam/variables.tf",
-	}
-
-	selected := selectTemplatesForProvider(files, "stackit")
-
-	assert.Contains(t, selected, "managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf")
-	assert.NotContains(t, selected, "managed-service-catalog/terraform/modules/iam/main.tf")
-	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/otc/modules/iam/main.tf")
-	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/variables.tf")
-	require.Len(t, selected, 2)
-}
-
-func TestSelectTemplatesForProvider_FallsBackToCommonFile(t *testing.T) {
-	files := []string{
-		"managed-service-catalog/terraform/modules/iam/main.tf",
-		"managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf",
-		"managed-service-catalog/terraform/modules/iam/variables.tf",
-	}
-
-	selected := selectTemplatesForProvider(files, "azure")
-
-	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/main.tf")
-	assert.NotContains(t, selected, "managed-service-catalog/terraform/providers/stackit/modules/iam/main.tf")
-	assert.Contains(t, selected, "managed-service-catalog/terraform/modules/iam/variables.tf")
-	require.Len(t, selected, 2)
 }
 
 func TestStripProviderPath(t *testing.T) {

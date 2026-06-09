@@ -29,13 +29,6 @@ func NewEnvStore(filePath, delim, envPrfx string) *EnvStore {
 	}
 }
 
-// SetEnvMap receives an EnvMap and sets it to the manager
-// Returns newly set map
-func (em *EnvStore) SetEnvMap(envMap EnvMap) EnvMap {
-	em.envMap = &envMap
-	return *em.envMap
-}
-
 func (em *EnvStore) SetDefaults() {
 	em.envMap.setDefaults()
 }
@@ -94,32 +87,6 @@ func (em *EnvStore) ValidateAll() error {
 		return err
 	}
 	return nil
-}
-
-func (em *EnvStore) ValidateAndSaveToFile(path string) error {
-	err := em.Validate()
-	if err != nil {
-		return err
-	}
-	return em.SaveToFile(path)
-}
-
-func (em *EnvStore) SaveToFile(path string) error {
-	var b strings.Builder
-	v := reflect.ValueOf(em.envMap).Elem()
-	t := v.Type()
-
-	for i := 0; i < v.NumField(); i++ {
-		fieldVal := v.Field(i)
-		fieldType := t.Field(i)
-		koanfKey := fieldType.Tag.Get("koanf")
-		if koanfKey == "" {
-			continue
-		}
-		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
-	}
-
-	return os.WriteFile(path, []byte(b.String()), 0600)
 }
 
 func (em *EnvStore) GenerateEnvExample() ([]byte, error) {

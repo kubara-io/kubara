@@ -28,10 +28,6 @@ type ConfigStore struct {
 	catalogOptions catalog.LoadOptions
 }
 
-func NewConfigStore(filePath string) *ConfigStore {
-	return NewConfigStoreWithCatalog(filePath, catalog.LoadOptions{})
-}
-
 func NewConfigStoreWithCatalog(filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
 	return &ConfigStore{
 		filepath:       filePath,
@@ -295,11 +291,6 @@ func legacyClusterLabel(cluster map[string]any, clusterIndex int) string {
 	}
 
 	return fmt.Sprintf("clusters[%d]", clusterIndex)
-}
-
-// GenerateSchema generates a JSON schema from the Config struct
-func GenerateSchema() (map[string]any, error) {
-	return GenerateSchemaWithCatalog(catalog.LoadOptions{})
 }
 
 // GenerateSchemaWithCatalog generates a JSON schema from the Config struct
