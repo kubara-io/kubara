@@ -134,6 +134,9 @@ To restore from a backup:
 velero restore create --from-backup my-backup --wait
 ```
 
+These are the most simple commands Velero offers for backup. For production we advice you to create automated backups.
+For more information on that have a look at the [official documentation](https://velero.io/docs/main/backup-reference/).
+You can also create a cronjob via the `values.yaml` setting, with the help of the `additional-values.yaml` file. You can look [here](https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762), how this might look like.
 
 Use `additional-values.yaml` for environment-specific overrides you want to keep next to the generated baseline.
 
