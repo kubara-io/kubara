@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/3_components/observability_logs/">
+        <link rel="canonical" href="https://docs.kubara.io/next/3_components/backup_and_recovery/">
       
       
-        <link rel="prev" href="../observability_alerts/">
+        <link rel="prev" href="../best_practices/">
       
       
-        <link rel="next" href="../../4_architecture/architecture_overview/">
+        <link rel="next" href="../network_external_dns/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Logs - kubara - Docs</title>
+        <title>Backup & Recovery - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#logs" class="md-skip">
+        <a href="#backup-recovery" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Logs
+              Backup & Recovery
             
           </span>
         </div>
@@ -1186,10 +1186,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../backup_and_recovery/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup & Recovery
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1205,6 +1232,165 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#velero-kubara" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Velero &amp; kubara
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#before-enabling-velero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Before enabling Velero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Before enabling Velero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-2-1-backups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3-2-1 Backups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-velero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enable Velero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enable Velero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-volumesnapshotclass-via-additional-valuesyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom VolumeSnapshotClass via additional-values.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recovery-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery model
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recommended-recovery-flow" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recommended recovery flow
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#misc" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Misc.
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Misc.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#other-storage-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Storage Providers
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#crash-consistency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Crash Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#official-velero-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official Velero docs
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1384,8 +1570,6 @@ You're not viewing the latest stable version.
                 
   
   
-    
-  
   
   
     
@@ -1395,11 +1579,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
         
           
           <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
@@ -1420,7 +1604,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_4_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1519,37 +1703,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Logs
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../observability_logs/" class="md-nav__link">
         
   
   
@@ -1565,81 +1722,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#component-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Component Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#access-integration" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Access &amp; Integration
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kubara-standardization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        kubara Standardization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#label-based-logging" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Label-Based Logging
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best Practices
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -2228,10 +2310,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#component-overview" class="md-nav__link">
+  <a href="#velero-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Component Overview
+        Velero &amp; kubara
       
     </span>
   </a>
@@ -2239,10 +2321,66 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#access-integration" class="md-nav__link">
+  <a href="#before-enabling-velero" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Access &amp; Integration
+        Before enabling Velero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Before enabling Velero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#3-2-1-backups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3-2-1 Backups
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#enable-velero" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Enable Velero
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Enable Velero">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#custom-volumesnapshotclass-via-additional-valuesyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom VolumeSnapshotClass via additional-values.yaml
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#recovery-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Recovery model
       
     </span>
   </a>
@@ -2250,10 +2388,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#kubara-standardization" class="md-nav__link">
+  <a href="#recommended-recovery-flow" class="md-nav__link">
     <span class="md-ellipsis">
       
-        kubara Standardization
+        Recommended recovery flow
       
     </span>
   </a>
@@ -2261,21 +2399,49 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#label-based-logging" class="md-nav__link">
+  <a href="#misc" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Label-Based Logging
+        Misc.
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Misc.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#other-storage-providers" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other Storage Providers
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#crash-consistency" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Best Practices
+        Crash Consistency
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#official-velero-docs" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Official Velero docs
       
     </span>
   </a>
@@ -2302,39 +2468,194 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="logs">Logs</h1>
-<p>Centralized log processing in our Kubernetes observability stack is handled by <strong>Loki</strong> and <strong>Alloy</strong>, with <strong>Grafana</strong> as the frontend for analysis. This stack provides a lightweight and scalable logging solution tailored for Kubernetes - similar to what Prometheus offers for metrics.</p>
-<h2 id="component-overview">Component Overview</h2>
+<h1 id="backup-recovery">Backup &amp; Recovery</h1>
+<p>kubara is <strong>GitOps first</strong>:</p>
 <ul>
-<li><strong>Loki</strong> is a log aggregation system that indexes logs by labels (e.g., pod, namespace, container). Unlike traditional logging systems (e.g., Elasticsearch), Loki does not index log content, which results in lower resource usage.</li>
-<li><strong>Alloy</strong> runs as a DaemonSet on each node and collects logs directly from container log files. These logs are then pushed to Loki.</li>
-<li><strong>Grafana</strong> acts as the user interface for exploring and analyzing logs with filters, queries, and correlations to metrics.</li>
+<li>Use <strong>Git</strong> and <code>kubara generate</code> / <code>kubara bootstrap</code> to recreate desired platform state</li>
+<li>Use your <strong>secret backend</strong> as the source of truth for credentials and sensitive values</li>
+<li>Use <strong>Velero</strong> to recover runtime resources and persistent data that Git cannot recreate</li>
 </ul>
-<h2 id="access-integration">Access &amp; Integration</h2>
-<p>Logs can be accessed directly in Grafana under <strong>Explore &gt; Loki</strong>. This interface allows you to search, filter, and group logs by labels, and even combine them with Prometheus metrics.</p>
-<p><img alt="Grafana Loki" src="../../images/loki.jpeg" /></p>
-<p>You can find more about Grafana in the <a href="../observability_dashboards/">Dashboards</a> chapter.</p>
-<h2 id="kubara-standardization">kubara Standardization</h2>
-<p>In kubara, <strong>Alloy is enabled by default</strong>. It is configured to automatically collect logs and enrich them with Kubernetes metadata such as namespace, pod name, container, and user-defined labels.</p>
-<p>This ensures that logs from all applications are captured consistently and are immediately available for centralized analysis without per-project setup.</p>
-<h2 id="label-based-logging">Label-Based Logging</h2>
-<p>A core concept of Loki is <strong>label-based filtering and grouping</strong>. Typical labels applied automatically include:</p>
+<p>This page covers the <strong>kubara-specific path</strong>. For Velero installation details, command usage, and troubleshooting, use the official Velero documentation.</p>
+<p>Your goal should be to have as much of your desired state inside your GitOps repository and secret backend and only rely
+on Velero for dynamic data that gets generated in runtime like the contents of PVCs of databases etc.</p>
+<hr />
+<h2 id="velero-kubara">Velero &amp; kubara</h2>
+<p>kubara supports <strong>Velero</strong> as a built-in component for backup, restore, disaster recovery, and migration.</p>
+<p>What kubara covers:</p>
 <ul>
-<li><code>namespace</code></li>
-<li><code>pod</code></li>
-<li><code>container</code></li>
-<li><code>app</code> (from pod labels)</li>
-<li><code>loglevel</code> (optionally extracted from log content)</li>
+<li>Enabling Velero in cluster config</li>
+<li>Generated overlay files and GitOps rollout</li>
+<li>Documentation on how Velero fits into a recommended recovery model</li>
 </ul>
-<p>This enables precise queries like:</p>
-<div class="highlight"><pre><span></span><code>{namespace=&quot;my-app&quot;, loglevel=&quot;error&quot;} |= &quot;failed&quot;
+<p>What stays with you as a Platform Operator / Team:</p>
+<ul>
+<li>Provider-specific installation and configuration</li>
+<li>Backup and restore command tutorials and runbooks</li>
+<li>Scheduling, CSI, file-system backup internals, and troubleshooting</li>
+</ul>
+<hr />
+<h2 id="before-enabling-velero">Before enabling Velero</h2>
+<p>Decide these three things first:</p>
+<ol>
+<li><strong>Backup storage</strong><br />
+   The most common way to use Velero is with an <strong>S3-compatible</strong> object storage target plus credentials from your secret backend. <code>backupStorage.create: true</code> lets kubara create the bucket and credentials where supported. On STACKIT this is the default when Velero is enabled (see below).</li>
+<li><strong>Volume backup mode</strong><br />
+   Choose the mode based on your provider's snapshot durability and your recovery goal:</li>
+<li><code>fs-backup</code>: Uses the Velero node-agent to back up volume contents to object storage. This is the default.</li>
+<li><code>csi-snapshot</code>: Uses CSI snapshots. Snapshot durability depends on the provider and CSI driver.</li>
+<li><code>csi-data-mover</code>: Creates CSI snapshots and moves their data to object storage through the Velero node-agent.
+   More about File System Backups can be found in the official <a href="https://velero.io/docs/v1.18/file-system-backup/" target="_blank" rel="noopener">Velero docs</a>.</li>
+<li><strong>Recovery goal</strong><br />
+   Be clear whether you are optimizing for namespace restore, cluster rebuild, disaster recovery, or migration.</li>
+</ol>
+<div class="admonition warning">
+<p class="admonition-title">File-system backup and CSI snapshots are mutually exclusive</p>
+<p>File-system backup via Kopia and CSI volume snapshots are <strong>mutually exclusive</strong> — they cannot both be active for the same PVC at once. When <code>backupMode: fs-backup</code> is enabled, Velero uses file-system backup for all volumes and takes no CSI snapshots. Choose one approach before going to production; switching later may leave gaps in your backup history.</p>
+<p>References: <a href="https://velero.io/docs/v1.18/file-system-backup/" target="_blank" rel="noopener">File-system backup</a> · <a href="https://velero.io/docs/v1.18/csi/" target="_blank" rel="noopener">CSI snapshots</a></p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">CSI snapshots are not full backups — know your provider</p>
+<p>A CSI snapshot is generally <strong>not a full, standalone backup</strong> and is <strong>not necessarily independent of its source volume</strong>. Snapshot durability depends on your cloud provider and CSI driver.</p>
+<p>Before relying on plain CSI snapshots, check your provider's block storage documentation. If snapshots are removed together with their source volume — or if you need true off-volume backups — use <code>backupMode: fs-backup</code> or <code>backupMode: csi-data-mover</code>, so the data is stored in object storage independently of volume state.</p>
+<p>For example, the <a href="https://docs.otc.t-systems.com/elastic-volume-service/dev-guide/deleting_an_evs_disk.html" target="_blank" rel="noopener">Open Telekom Cloud EVS documentation</a> states: "When you delete an EVS disk, all the disk data including the snapshots created for this disk will be deleted."</p>
+<p>References: <a href="https://velero.io/docs/main/csi/" target="_blank" rel="noopener">Velero CSI support</a> · <a href="https://velero.io/docs/main/csi-snapshot-data-movement/" target="_blank" rel="noopener">CSI Snapshot Data Movement</a></p>
+</div>
+<h3 id="3-2-1-backups">3-2-1 Backups</h3>
+<p>On a more general note, your team should try to follow the 3-2-1 backup strategy, meaning:
+3 Copies of your data
+2 Different mediums, so not on the same disk as describe above
+1 Offsite location, e.g different Region or even different Provider</p>
+<p>This makes your setup more resilient against possible disasters.</p>
+<h2 id="enable-velero">Enable Velero</h2>
+<p>Example <code>config.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-cluster</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">velero</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">backupStorage</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">s3Url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://object.storage.eu01.onstackit.cloud</span>
 </code></pre></div>
-<h2 id="best-practices">Best Practices</h2>
+<p>For STACKIT, <code>backupStorage.create: true</code> makes kubara generate the dedicated Object Storage bucket (<code>bucket-velero-&lt;name&gt;-&lt;stage&gt;</code>) and credentials group. The bucket region defaults to <code>eu01</code> and can be changed through <code>backupStorage.region</code>. Set <code>backupStorage.s3Url</code> to the matching S3 endpoint for that region.</p>
+<p>The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path <code>velero_s3_credentials</code>, key <code>cloud</code>, in the form:</p>
+<div class="highlight"><pre><span></span><code><span class="k">[default]</span>
+<span class="n">aws_access_key_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">&lt;ACCESS</span><span class="mi">_</span><span class="n">KEY_ID</span><span class="err">&gt;</span>
+<span class="n">aws_secret_access_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">&lt;SECRET</span><span class="mi">_</span><span class="n">ACCESS_KEY</span><span class="err">&gt;</span>
+</code></pre></div>
+<p>So on STACKIT you need <code>status: enabled</code> and <code>backupStorage.s3Url</code> unless you intentionally change the backup mode, bucket region, or use an existing bucket.</p>
+<p>To use an existing S3-compatible bucket instead, set <code>backupStorage.create: false</code> and provide the bucket connection details in the Velero config:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">config</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">backupStorage</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">create</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">bucketName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-velero-backups</span>
+<span class="w">    </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eu01</span>
+<span class="w">    </span><span class="nt">s3Url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://s3.example.com</span>
+</code></pre></div>
+<p>With <code>backupStorage.create: false</code>, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path <code>velero_s3_credentials</code>, key <code>cloud</code>, using the same format shown above.</p>
+<p>Then:</p>
+<ol>
+<li>Run <code>kubara generate</code></li>
+<li>Review:<ul>
+<li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/values.yaml</code></li>
+<li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code></li>
+</ul>
+</li>
+<li>Commit and push so Argo CD can deploy Velero</li>
+<li><strong>Test a full backup and restore cycle immediately after setup</strong><br />
+   Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).<br />
+   References: <a href="https://velero.io/docs/v1.18/backup-reference/" target="_blank" rel="noopener">Backup reference</a> · <a href="https://velero.io/docs/v1.18/restore-reference/" target="_blank" rel="noopener">Restore reference</a> · <a href="https://velero.io/docs/v1.18/disaster-case/" target="_blank" rel="noopener">Disaster recovery</a></li>
+</ol>
+<p>With a healthy Velero setup, create a backup with:</p>
+<p><div class="highlight"><pre><span></span><code>velero<span class="w"> </span>backup<span class="w"> </span>create<span class="w"> </span>my-backup<span class="w"> </span>--wait
+</code></pre></div>
+Follow progress of the backup process with:
+<div class="highlight"><pre><span></span><code>velero<span class="w"> </span>backup<span class="w"> </span>describe<span class="w"> </span>my-backup
+</code></pre></div>
+To restore from a backup:
+<div class="highlight"><pre><span></span><code>velero<span class="w"> </span>restore<span class="w"> </span>create<span class="w"> </span>--from-backup<span class="w"> </span>my-backup<span class="w"> </span>--wait
+</code></pre></div></p>
+<p>These are the most simple commands Velero offers for backup. For production we advice you to create automated backups.
+For more information on that have a look at the <a href="https://velero.io/docs/main/backup-reference/" target="_blank" rel="noopener">official documentation</a>.
+You can also create a cronjob via the <code>values.yaml</code> setting, with the help of the <code>additional-values.yaml</code> file. You can look <a href="https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762" target="_blank" rel="noopener">here</a>, how this might look like.</p>
+<p>Use <code>additional-values.yaml</code> for environment-specific overrides you want to keep next to the generated baseline.</p>
+<h3 id="custom-volumesnapshotclass-via-additional-valuesyaml">Custom <code>VolumeSnapshotClass</code> via <code>additional-values.yaml</code></h3>
+<p>When you use <code>backupMode: csi-snapshot</code> or <code>backupMode: csi-data-mover</code>, Velero uses <strong>CSI snapshots</strong> instead of file-system backups.</p>
+<p>kubara writes <code>volumeSnapshotClass.k8sProvider</code> into the generated Velero values based on <code>terraform.provider</code>.
+If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own <code>VolumeSnapshotClass</code> in <code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code>.</p>
+<p><code>volumeSnapshotClass.customDefinition</code> takes precedence over the provider mapping, so this is the recommended way to supply a fully custom snapshot class.</p>
+<p>Example:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">volumeSnapshotClass</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">customDefinition</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">snapshot.storage.k8s.io/v1</span>
+<span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">VolumeSnapshotClass</span>
+<span class="w">    </span><span class="nt">metadata</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">velero-csi</span>
+<span class="w">      </span><span class="nt">labels</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">velero.io/csi-volumesnapshot-class</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;true&quot;</span>
+<span class="w">    </span><span class="nt">driver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ebs.csi.aws.com</span>
+<span class="w">    </span><span class="nt">deletionPolicy</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Retain</span>
+<span class="w">    </span><span class="nt">parameters</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">tagSpecification_1</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Name=velero-snapshot&quot;</span>
+</code></pre></div>
+<p>Important notes:</p>
 <ul>
-<li>Use structured logging (e.g., JSON) whenever possible for better field extraction.</li>
-<li>Maintain consistent labels - especially <code>app</code>, <code>loglevel</code>, <code>team</code>, etc.</li>
-<li>Leverage Grafana's "Live Tail" feature for real-time log monitoring.</li>
-<li>Combine logs with metrics for faster root cause analysis (e.g., using "Split View").</li>
+<li>Keep <code>name: velero-csi</code> and the label <code>velero.io/csi-volumesnapshot-class: "true"</code> unless you intentionally want Velero to use a different class selection setup.</li>
+<li>Put this override into <code>additional-values.yaml</code>, not the generated <code>values.yaml</code>, because <code>values.yaml</code> is regenerated by kubara.</li>
+<li>If the built-in provider mapping already matches your environment, you usually do not need a custom definition.</li>
+</ul>
+<hr />
+<h2 id="recovery-model">Recovery model</h2>
+<p>Velero should <strong>complement</strong> GitOps, not replace it.</p>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Typical content</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Git + kubara + Argo CD</td>
+<td>Cluster definitions, generated platform config, Helm values, ApplicationSets, managed manifests</td>
+</tr>
+<tr>
+<td>Secret backend</td>
+<td>External credentials, OAuth secrets, provider tokens, synced secret resources</td>
+</tr>
+<tr>
+<td>Velero</td>
+<td>Runtime Kubernetes resources and persistent volume data</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="recommended-recovery-flow">Recommended recovery flow</h2>
+<ol>
+<li>Required access to Git, the secret backend, the Velero object storage, and a working target cluster</li>
+<li>Bootstrap the cluster again and let Argo CD restore the declared platform state</li>
+<li>Use Velero to restore runtime resources and persistent data</li>
+<li>Verify that Argo CD, External Secrets, ingress, certificates, DNS, and stateful workloads are healthy</li>
+</ol>
+<p>For most teams, the best first test is restoring one non-critical namespace or workload.</p>
+<hr />
+<h2 id="misc">Misc.</h2>
+<h3 id="other-storage-providers">Other Storage Providers</h3>
+<p>Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in <code>managed-service-catalog/helm/velero/values.yaml</code>. A list of available plugins can be found <a href="https://velero.io/docs/v1.18/supported-providers/" target="_blank" rel="noopener">here</a>.</p>
+<h3 id="crash-consistency">Crash Consistency</h3>
+<p>If you use file based backup, to backup a deployed database, please refer to the backup tools of choice for your database. File based backup is not crash-consistent. E.g use <code>pg_dump</code> or <code>mysqldump</code> instead.</p>
+<hr />
+<h2 id="official-velero-docs">Official Velero docs</h2>
+<ul>
+<li><a href="https://velero.io/docs/v1.18/basic-install/" target="_blank" rel="noopener">Basic Install</a></li>
+<li><a href="https://velero.io/docs/v1.18/customize-installation/" target="_blank" rel="noopener">Customize Install</a></li>
+<li><a href="https://velero.io/docs/v1.18/backup-reference/" target="_blank" rel="noopener">Backup Reference</a></li>
+<li><a href="https://velero.io/docs/v1.18/restore-reference/" target="_blank" rel="noopener">Restore Reference</a></li>
+<li><a href="https://velero.io/docs/v1.18/file-system-backup/" target="_blank" rel="noopener">File System Backup</a></li>
+<li><a href="https://velero.io/docs/v1.18/csi/" target="_blank" rel="noopener">CSI support</a></li>
+<li><a href="https://velero.io/docs/v1.18/migration-case/" target="_blank" rel="noopener">Cluster migration</a></li>
+<li><a href="https://velero.io/docs/v1.18/on-premises/" target="_blank" rel="noopener">On-premises environments</a></li>
 </ul>
 
 
