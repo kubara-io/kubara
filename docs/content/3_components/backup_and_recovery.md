@@ -60,6 +60,14 @@ Decide these three things first:
 
     References: [Velero CSI support](https://velero.io/docs/main/csi/) · [CSI Snapshot Data Movement](https://velero.io/docs/main/csi-snapshot-data-movement/)
 
+### 3-2-1 Backups
+On a more general note, your team should try to follow the 3-2-1 backup strategy, meaning:
+3 Copies of your data
+2 Different mediums, so not on the same disk as describe above
+1 Offsite location, e.g different Region or even different Provider
+
+This makes your setup more resilient against possible disasters.
+
 ## Enable Velero
 
 Example `config.yaml`:
@@ -111,6 +119,21 @@ Then:
 4. **Test a full backup and restore cycle immediately after setup**  
    Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).  
    References: [Backup reference](https://velero.io/docs/v1.18/backup-reference/) · [Restore reference](https://velero.io/docs/v1.18/restore-reference/) · [Disaster recovery](https://velero.io/docs/v1.18/disaster-case/)
+
+With a healthy Velero setup, create a backup with:
+
+```bash
+velero backup create my-backup --wait
+```
+Follow progress of the backup process with:
+```bash
+velero backup describe my-backup
+```
+To restore from a backup:
+```bash
+velero restore create --from-backup my-backup --wait
+```
+
 
 Use `additional-values.yaml` for environment-specific overrides you want to keep next to the generated baseline.
 
@@ -174,6 +197,9 @@ For most teams, the best first test is restoring one non-critical namespace or w
 
 ### Other Storage Providers
 Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in `managed-service-catalog/helm/velero/values.yaml`. A list of available plugins can be found [here](https://velero.io/docs/v1.18/supported-providers/).
+
+### Crash Consistency
+If you use file based backup, to backup a deployed database, please refer to the backup tools of choice for your database. File based backup is not crash-consistent. E.g use `pg_dump` or `mysqldump` instead.
 
 ---
 
