@@ -350,6 +350,11 @@ func TestConfigStore_Validate(t *testing.T) {
 	invalidConfigEnumMismatch := deepCopyConfig(validConfig)
 	invalidConfigEnumMismatch.Clusters[0].Type = "invalid-type"
 
+	invalidConfigProviderEnumMismatch := deepCopyConfig(validConfig)
+	clonedTerraformProvider := *invalidConfigProviderEnumMismatch.Clusters[0].Terraform
+	clonedTerraformProvider.Provider = TerraformProvider("unknown")
+	invalidConfigProviderEnumMismatch.Clusters[0].Terraform = &clonedTerraformProvider
+
 	// Test format validation (email)
 	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
 	clonedTerraform := *invalidConfigFormatMismatch.Clusters[0].Terraform
@@ -405,6 +410,11 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_enum_mismatch",
 			config:  invalidConfigEnumMismatch,
+			wantErr: true,
+		},
+		{
+			name:    "invalid_config_should_fail_on_provider_enum_mismatch",
+			config:  invalidConfigProviderEnumMismatch,
 			wantErr: true,
 		},
 		{

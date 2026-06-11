@@ -4,6 +4,33 @@ import "github.com/kubara-io/kubara/internal/service"
 
 const ConfigVersionV1Alpha1 = "v1alpha1"
 
+// TerraformProvider identifies an infrastructure provider with embedded Terraform templates.
+type TerraformProvider string
+
+const (
+	TerraformProviderPlaceholder TerraformProvider = "<provider>"
+	TerraformProviderStackit     TerraformProvider = "stackit"
+)
+
+var supportedTerraformProviders = [...]TerraformProvider{
+	TerraformProviderStackit,
+}
+
+// IsSupported reports whether kubara ships Terraform templates for the provider.
+func (p TerraformProvider) IsSupported() bool {
+	for _, supported := range supportedTerraformProviders {
+		if p == supported {
+			return true
+		}
+	}
+	return false
+}
+
+// SupportedTerraformProviders returns the providers with embedded Terraform templates.
+func SupportedTerraformProviders() []TerraformProvider {
+	return append([]TerraformProvider(nil), supportedTerraformProviders[:]...)
+}
+
 // Config is the root of the configuration structure.
 type Config struct {
 	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
@@ -31,11 +58,11 @@ type Cluster struct {
 }
 
 type Terraform struct {
-	Provider          string `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Currently supported providers: stackit.,minLength=1,default=stackit"`
-	ProjectID         string `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
-	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
-	KubernetesVersion string `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
-	DNS               DNS    `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
+	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Currently supported providers: stackit.,enum=<provider>,enum=stackit,default=stackit"`
+	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
+	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
+	KubernetesVersion string            `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
+	DNS               DNS               `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
 }
 
 type DNS struct {

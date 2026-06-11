@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -54,11 +53,11 @@ func (o *Options) resolveOutputPath(result render.TemplateResult, clusterName st
 }
 
 func supportedProviderList() string {
-	providers := make([]string, 0, len(render.SupportedProviders))
-	for provider := range render.SupportedProviders {
-		providers = append(providers, provider)
+	supported := config.SupportedTerraformProviders()
+	providers := make([]string, 0, len(supported))
+	for _, provider := range supported {
+		providers = append(providers, string(provider))
 	}
-	sort.Strings(providers)
 	return strings.Join(providers, ", ")
 }
 
@@ -66,11 +65,11 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 	if clusterBlock.Terraform == nil {
 		return "", fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
 	}
-	provider := strings.ToLower(strings.TrimSpace(clusterBlock.Terraform.Provider))
+	provider := clusterBlock.Terraform.Provider
 	if provider == "" {
 		return "", fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
 	}
-	if provider == "<provider>" {
+	if provider == config.TerraformProviderPlaceholder {
 		return "", fmt.Errorf(
 			"cluster %q still uses placeholder provider %q; supported providers: %q",
 			clusterBlock.Name,
@@ -78,10 +77,10 @@ func resolveProvider(clusterBlock config.Cluster) (string, error) {
 			supportedProviderList(),
 		)
 	}
-	if !render.SupportedProviders[provider] {
+	if !provider.IsSupported() {
 		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
 	}
-	return provider, nil
+	return string(provider), nil
 }
 
 func resolveCatalog(cat catalog.Catalog) map[string]any {

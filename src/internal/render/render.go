@@ -34,12 +34,6 @@ const (
 
 var templatesFSNew fs.FS = catalog.BuiltInFS()
 
-// SupportedProviders lists every provider that has embedded templates.
-// Add new entries here when introducing provider-specific template directories.
-var SupportedProviders = map[string]bool{
-	"stackit": true,
-}
-
 var templateName = map[TemplateType]string{
 	Terraform: "terraform",
 	Helm:      "helm",
@@ -50,6 +44,9 @@ func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
 	fileList, err := getTemplateFiles(options)
 	if err != nil {
 		return nil, fmt.Errorf("get template files for provider %q: %w", options.Provider, err)
+	}
+	if err := rejectHelmProviderPaths(fileList); err != nil {
+		return nil, err
 	}
 
 	selected, err := selectTemplateFilesForProvider(fileList, options.Provider, options.Overwrite)
@@ -250,6 +247,25 @@ func normalizeProviderName(provider string) string {
 	return strings.ToLower(strings.TrimSpace(provider))
 }
 
+func isHelmProviderPath(relPath string) bool {
+	parts := strings.Split(filepath.ToSlash(relPath), "/")
+	for idx := 1; idx < len(parts); idx++ {
+		if parts[idx] == providerFolderName && parts[idx-1] == Helm.String() {
+			return true
+		}
+	}
+	return false
+}
+
+func rejectHelmProviderPaths(files []templateFile) error {
+	for _, file := range files {
+		if isHelmProviderPath(file.sourcePath) {
+			return fmt.Errorf("helm provider template directories are not supported: %q", file.sourcePath)
+		}
+	}
+	return nil
+}
+
 func splitProviderPath(relPath string) (string, string, bool) {
 	normalized := filepath.ToSlash(relPath)
 	parts := strings.Split(normalized, "/")
@@ -259,10 +275,10 @@ func splitProviderPath(relPath string) (string, string, bool) {
 		}
 
 		// Only treat this segment as a provider selector when it appears
-		// directly inside a template-type directory (terraform or helm).
+		// directly inside the Terraform template directory.
 		// This prevents stripping unrelated "providers/<x>" segments that
 		// may appear elsewhere in the path.
-		if idx == 0 || (parts[idx-1] != "terraform" && parts[idx-1] != "helm") {
+		if idx == 0 || parts[idx-1] != Terraform.String() {
 			continue
 		}
 
@@ -279,8 +295,8 @@ func splitProviderPath(relPath string) (string, string, bool) {
 	return normalized, "", false
 }
 
-// StripProviderPath removes a provider selector segment from a relative
-// template path (e.g. ".../providers/stackit/...") if present.
+// StripProviderPath removes a Terraform provider selector segment from a
+// relative template path (e.g. ".../terraform/providers/stackit/...") if present.
 func StripProviderPath(relPath string) string {
 	stripped, _, _ := splitProviderPath(relPath)
 	return stripped

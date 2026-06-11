@@ -129,7 +129,7 @@ func TestStripProviderPath(t *testing.T) {
 			want:  "managed-service-catalog/terraform/images/public-cloud-0.png",
 		},
 		{
-			name:  "does not strip providers/<name> outside terraform or helm context",
+			name:  "does not strip providers/<name> outside terraform context",
 			input: "some-catalog/providers/stackit/file.txt",
 			want:  "some-catalog/providers/stackit/file.txt",
 		},
