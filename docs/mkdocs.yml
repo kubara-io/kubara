@@ -29,6 +29,7 @@ nav:
   - Components (Built-in):
       - Overview: 3_components/components_overview.md
       - Best Practices: 3_components/best_practices.md
+      - Backup & Recovery: 3_components/backup_and_recovery.md
       - Network:
           - ExternalDNS: 3_components/network_external_dns.md
       - Security:

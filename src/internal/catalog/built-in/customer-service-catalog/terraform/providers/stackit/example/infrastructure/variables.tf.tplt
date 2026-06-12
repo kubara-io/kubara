@@ -46,6 +46,24 @@ variable "region" {
   default     = "eu01"
 }
 
+{{ if (and (eq (index .cluster.services "velero" "status") "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) -}}
+### Velero Object Storage variables
+variable "velero_bucket_region" {
+  description = "STACKIT Object Storage region for the Velero backup bucket."
+  type        = string
+}
+
+variable "velero_bucket_name" {
+  description = "STACKIT Object Storage bucket name for Velero backups."
+  type        = string
+}
+
+variable "velero_credentials_group_name" {
+  description = "STACKIT Object Storage credentials group name for Velero backup access."
+  type        = string
+}
+
+{{ end -}}
 ### DNS Zone variables
 
 variable "dns_name" {

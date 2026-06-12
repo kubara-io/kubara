@@ -2,8 +2,11 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/config"
@@ -430,10 +433,23 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 // Takes a directory and an EnvMap and validates the envMap before writing it
 func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	envPath := filepath.Join(dir, ".env")
+	err := env.Validate()
+	require.NoError(t, err)
 
-	es := envconfig.NewEnvStore(envPath, ".", "")
-	es.SetEnvMap(env)
-	err := es.ValidateAndSaveToFile(envPath)
+	var b strings.Builder
+	v := reflect.ValueOf(&env).Elem()
+	typ := v.Type()
+	for i := 0; i < v.NumField(); i++ {
+		fieldVal := v.Field(i)
+		fieldType := typ.Field(i)
+		koanfKey := fieldType.Tag.Get("koanf")
+		if koanfKey == "" {
+			continue
+		}
+		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
+	}
+
+	err = os.WriteFile(envPath, []byte(b.String()), 0600)
 
 	require.NoError(t, err)
 
