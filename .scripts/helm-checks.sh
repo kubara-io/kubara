@@ -267,6 +267,9 @@ while read -r render_file; do
       -schema-location "$SCHEMA_POOL/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
       -schema-location default \
       -schema-location "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json" \
+      # ignored because not part of baseline k8s schemas
+      # https://github.com/yannh/kubernetes-json-schema/issues/44
+      -skip snapshot.storage.k8s.io/v1/VolumeSnapshotClass \
       "$render_file" \
       | tee "$REPORT_DIR/helm/$chart-$name-kubeconform.log"; then
     echo "::error file=$render_file::kubeconform failed"

@@ -57,6 +57,15 @@
       "groupSlug": "sigs-k8s-io-go-modules"
     },
     {
+      "description": "Override: group controller-runtime with k8s.io modules because it follows the k8s.io/client-go minor",
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["sigs.k8s.io/controller-runtime"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "enabled": true,
+      "groupName": "k8s.io go modules",
+      "groupSlug": "k8s-io-go-modules"
+    },
+    {
       "description": "Group golang.org/x go modules (minor and patch)",
       "matchManagers": ["gomod"],
       "matchPackagePrefixes": ["golang.org/x/"],
