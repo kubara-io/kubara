@@ -20,9 +20,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 				Stage:   "stage",
 				DNSName: "kubara-test-stage.example.com",
 				Terraform: &config.Terraform{
-					DNS: config.DNS{
-						Name: "kubara-test-stage.example.com",
-					},
+					DNSContactEmail: "admin@example.com",
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
@@ -56,7 +54,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	updated := cfg.Clusters[0]
 	assert.Equal(t, "dev", updated.Stage)
 	assert.Equal(t, "kubara-test-dev.example.com", updated.DNSName)
-	assert.Equal(t, "kubara-test-dev.example.com", updated.Terraform.DNS.Name)
+	assert.Equal(t, "admin@example.com", updated.Terraform.DNSContactEmail)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.Git.Managed.URL)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.Git.Customer.URL)
 	require.NotNil(t, updated.ArgoCD.HelmRepo)
@@ -92,7 +90,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesGitURLAndAuthMode(t *testing.T) {
 				Stage:   "stage",
 				DNSName: "kubara-test-stage.example.com",
 				Terraform: &config.Terraform{
-					DNS: config.DNS{Name: "kubara-test-stage.example.com"},
+					DNSContactEmail: "admin@example.com",
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
@@ -132,9 +130,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 				Stage:   "stage",
 				DNSName: "kubara-test-stage.example.com",
 				Terraform: &config.Terraform{
-					DNS: config.DNS{
-						Name: "kubara-test-stage.example.com",
-					},
+					DNSContactEmail: "admin@example.com",
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{

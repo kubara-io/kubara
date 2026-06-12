@@ -94,7 +94,7 @@ This command creates a `config.yaml` file based on the values from your `.env`.
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
 The generated Argo CD repository config records the selected Git auth mode in `argocd.repo.authMode`.
 Repository URLs are stored under `argocd.repo.git`.
-Existing configs that still use the old `argocd.repo.https` key are migrated to `argocd.repo.git` when kubara loads and saves the config.
+Existing `v1alpha1` configs are migrated to `v1alpha2` when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`, and the old `terraform.dns` block is replaced by `terraform.dnsContactEmail` (the zone name is derived from the cluster `dnsName`).
 
 When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
@@ -145,9 +145,7 @@ clusters:
       projectId: <project-id>
       kubernetesType: <ske or edge>
       kubernetesVersion: 1.34
-      dns:
-        name: <dns-name>
-        email: <email>
+      dnsContactEmail: <email>
 ...
 ```
 

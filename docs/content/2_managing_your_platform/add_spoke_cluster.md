@@ -26,9 +26,7 @@ clusters:
       projectId: <project-id>
       kubernetesType: ske
       kubernetesVersion: 1.34
-      dns:
-        name: workload-0.dev.example.com
-        email: platform@example.com
+      dnsContactEmail: platform@example.com
     argocd:
       repo:
         authMode: https

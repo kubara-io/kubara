@@ -54,7 +54,7 @@ func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID:         "some-id",
 					KubernetesVersion: "1.34",
-					DNS:               DNS{Name: "example.com", Email: "admin@example.com"},
+					DNSContactEmail:   "admin@example.com",
 					// Should get defaults for:
 					// Provider and KubernetesType
 				},

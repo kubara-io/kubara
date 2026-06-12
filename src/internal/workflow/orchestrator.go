@@ -20,7 +20,6 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			// Apply the new values from the environment to the found cluster.
 			cfg.Clusters[i].Stage = e.ProjectStage
 			cfg.Clusters[i].DNSName = dnsName
-			cfg.Clusters[i].Terraform.DNS.Name = dnsName
 			cfg.Clusters[i].ArgoCD.Repo.AuthMode = e.GitAuthMode()
 			cfg.Clusters[i].ArgoCD.Repo.Git.Managed.URL = gitRepoURL
 			cfg.Clusters[i].ArgoCD.Repo.Git.Customer.URL = gitRepoURL

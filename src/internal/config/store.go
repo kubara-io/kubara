@@ -54,10 +54,15 @@ func (cs *ConfigStore) Load() error {
 		if err != nil {
 			return fmt.Errorf("migrate legacy config: %w", err)
 		}
+		raw["version"] = ConfigVersionV1Alpha1
 	}
-	shapeMigrated, err := migrateConfigShape(raw)
-	if err != nil {
-		return fmt.Errorf("migrate config shape: %w", err)
+	versionMigrated := false
+	if isV1Alpha1(raw) {
+		if err := migrateV1Alpha1ToV1Alpha2(raw); err != nil {
+			return fmt.Errorf("migrate config from %s to %s: %w", ConfigVersionV1Alpha1, ConfigVersionV1Alpha2, err)
+		}
+		raw["version"] = ConfigVersionV1Alpha2
+		versionMigrated = true
 	}
 
 	dc := &mapstructure.DecoderConfig{
@@ -83,7 +88,7 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("validate config: %w", err)
 	}
 
-	if legacyConfig || shapeMigrated {
+	if legacyConfig || versionMigrated {
 		if err := cs.SaveToFile(); err != nil {
 			return fmt.Errorf("persist migrated config: %w", err)
 		}
@@ -92,64 +97,101 @@ func (cs *ConfigStore) Load() error {
 	return nil
 }
 
-func migrateConfigShape(raw map[string]any) (bool, error) {
+func isV1Alpha1(raw map[string]any) bool {
+	version, ok := raw["version"].(string)
+	return ok && version == ConfigVersionV1Alpha1
+}
+
+func migrateV1Alpha1ToV1Alpha2(raw map[string]any) error {
 	clustersRaw, ok := raw["clusters"]
 	if !ok {
-		return false, nil
+		return nil
 	}
 
 	clusters, ok := clustersRaw.([]any)
 	if !ok {
-		return false, nil
+		return nil
 	}
 
-	migrated := false
 	for i, clusterRaw := range clusters {
 		cluster, ok := clusterRaw.(map[string]any)
 		if !ok {
 			continue
 		}
 
-		changed, err := migrateRepoHTTPSKey(cluster, i)
-		if err != nil {
-			return false, err
+		if err := migrateRepoHTTPSKey(cluster, i); err != nil {
+			return err
 		}
-		migrated = migrated || changed
+		if err := migrateTerraformDNS(cluster, i); err != nil {
+			return err
+		}
 	}
 
-	return migrated, nil
+	return nil
 }
 
-func migrateRepoHTTPSKey(cluster map[string]any, clusterIndex int) (bool, error) {
+func migrateRepoHTTPSKey(cluster map[string]any, clusterIndex int) error {
 	argocdRaw, ok := cluster["argocd"]
 	if !ok || argocdRaw == nil {
-		return false, nil
+		return nil
 	}
 	argocd, ok := argocdRaw.(map[string]any)
 	if !ok {
-		return false, fmt.Errorf("%s.argocd must be an object", legacyClusterLabel(cluster, clusterIndex))
+		return fmt.Errorf("%s.argocd must be an object", legacyClusterLabel(cluster, clusterIndex))
 	}
 
 	repoRaw, ok := argocd["repo"]
 	if !ok || repoRaw == nil {
-		return false, nil
+		return nil
 	}
 	repo, ok := repoRaw.(map[string]any)
 	if !ok {
-		return false, fmt.Errorf("%s.argocd.repo must be an object", legacyClusterLabel(cluster, clusterIndex))
+		return fmt.Errorf("%s.argocd.repo must be an object", legacyClusterLabel(cluster, clusterIndex))
 	}
 
 	httpsRepo, hasHTTPS := repo["https"]
 	if !hasHTTPS {
-		return false, nil
+		return nil
 	}
 	if _, hasGit := repo["git"]; hasGit {
-		return false, fmt.Errorf("%s.argocd.repo has both legacy https and git repositories", legacyClusterLabel(cluster, clusterIndex))
+		return fmt.Errorf("%s.argocd.repo has both legacy https and git repositories", legacyClusterLabel(cluster, clusterIndex))
 	}
 
 	repo["git"] = httpsRepo
 	delete(repo, "https")
-	return true, nil
+	return nil
+}
+
+// migrateTerraformDNS removes the v1alpha1 terraform.dns object. The zone name
+// duplicated the cluster dnsName, the contact email moves to terraform.dnsContactEmail.
+func migrateTerraformDNS(cluster map[string]any, clusterIndex int) error {
+	terraformRaw, ok := cluster["terraform"]
+	if !ok || terraformRaw == nil {
+		return nil
+	}
+	terraform, ok := terraformRaw.(map[string]any)
+	if !ok {
+		return fmt.Errorf("%s.terraform must be an object", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	dnsRaw, hasDNS := terraform["dns"]
+	if !hasDNS {
+		return nil
+	}
+	dns, ok := dnsRaw.(map[string]any)
+	if !ok {
+		return fmt.Errorf("%s.terraform.dns must be an object", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	if email, ok := dns["email"]; ok {
+		if _, exists := terraform["dnsContactEmail"]; exists {
+			return fmt.Errorf("%s.terraform has both legacy dns.email and dnsContactEmail", legacyClusterLabel(cluster, clusterIndex))
+		}
+		terraform["dnsContactEmail"] = email
+	}
+
+	delete(terraform, "dns")
+	return nil
 }
 
 func isLegacyConfig(raw map[string]any) bool {
@@ -487,7 +529,7 @@ func (cs *ConfigStore) GetFilepath() string {
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
-		cs.config.Version = ConfigVersionV1Alpha1
+		cs.config.Version = ConfigVersionV1Alpha2
 	}
 
 	// Ensure directory exists

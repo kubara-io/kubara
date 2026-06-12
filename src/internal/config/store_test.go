@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha1,
+		Version: ConfigVersionV1Alpha2,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -32,10 +32,7 @@ func newValidTestConfig() *Config {
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",
-					DNS: DNS{
-						Name:  "example.com",
-						Email: "admin@example.com",
-					},
+					DNSContactEmail:   "admin@example.com",
 				},
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
@@ -201,7 +198,7 @@ clusters:
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha1, loaded.Version)
+	require.Equal(t, ConfigVersionV1Alpha2, loaded.Version)
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
@@ -229,7 +226,7 @@ clusters:
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha1")
+	assert.Contains(t, savedContent, "version: v1alpha2")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
 	assert.Contains(t, savedContent, "git:")
@@ -243,13 +240,21 @@ clusters:
 	assert.Contains(t, savedContent, "clusterIssuer:")
 }
 
-func TestConfigStore_LoadMigratesRepoHTTPSKeyForVersionedConfig(t *testing.T) {
+func TestConfigStore_LoadMigratesV1Alpha1ToV1Alpha2(t *testing.T) {
 	configYAML := `
 version: v1alpha1
 clusters:
   - name: migrated-cluster
     dnsName: migrated.example.com
     type: hub
+    terraform:
+      provider: stackit
+      projectId: "00000000-0000-0000-0000-000000000000"
+      kubernetesType: ske
+      kubernetesVersion: "1.34"
+      dns:
+        name: migrated.example.com
+        email: admin@example.com
     argocd:
       repo:
         authMode: ssh
@@ -302,17 +307,57 @@ clusters:
 	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
-	cluster := cs.GetConfig().Clusters[0]
+	loaded := cs.GetConfig()
+	assert.Equal(t, ConfigVersionV1Alpha2, loaded.Version)
+
+	cluster := loaded.Clusters[0]
 	assert.Equal(t, "ssh", cluster.ArgoCD.Repo.AuthMode)
 	require.NotNil(t, cluster.ArgoCD.Repo.Git)
 	assert.Equal(t, "git@github.com:customer/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
 	assert.Equal(t, "git@github.com:managed/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
+	require.NotNil(t, cluster.Terraform)
+	assert.Equal(t, "admin@example.com", cluster.Terraform.DNSContactEmail)
 
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
+	assert.Contains(t, savedContent, "version: v1alpha2")
 	assert.Contains(t, savedContent, "git:")
 	assert.NotContains(t, savedContent, "\n        https:")
+	assert.Contains(t, savedContent, "dnsContactEmail: admin@example.com")
+	assert.NotContains(t, savedContent, "\n      dns:")
+}
+
+func TestConfigStore_LoadRejectsTerraformDNSMigrationConflict(t *testing.T) {
+	configYAML := `
+version: v1alpha1
+clusters:
+  - name: conflict-cluster
+    dnsName: conflict.example.com
+    terraform:
+      projectId: "00000000-0000-0000-0000-000000000000"
+      kubernetesVersion: "1.34"
+      dnsContactEmail: new@example.com
+      dns:
+        name: conflict.example.com
+        email: old@example.com
+    argocd:
+      repo:
+        git:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+    services: {}
+`
+
+	configPath := filepath.Join(t.TempDir(), "dns-conflict.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	err := cs.Load()
+	require.Error(t, err)
+	assert.ErrorContains(t, err, "both legacy dns.email and dnsContactEmail")
 }
 
 func TestConfigStore_LoadRejectsRepoMigrationConflict(t *testing.T) {
@@ -454,7 +499,7 @@ func TestConfigStore_Validate(t *testing.T) {
 	// Test format validation (email)
 	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
 	clonedTerraform := *invalidConfigFormatMismatch.Clusters[0].Terraform
-	clonedTerraform.DNS.Email = "not-an-email"
+	clonedTerraform.DNSContactEmail = "not-an-email"
 	invalidConfigFormatMismatch.Clusters[0].Terraform = &clonedTerraform
 
 	// Terraform is optional at the cluster level

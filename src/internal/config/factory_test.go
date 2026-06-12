@@ -58,10 +58,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
-			DNS: DNS{
-				Name:  expectedDNSName,
-				Email: "my-test@nowhere.com",
-			},
+			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD: ArgoCD{
 			Repo: RepoProto{

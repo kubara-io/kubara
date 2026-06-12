@@ -51,10 +51,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
-			DNS: DNS{
-				Name:  dnsName,
-				Email: "my-test@nowhere.com",
-			},
+			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD:   argoCD,
 		Services: services,

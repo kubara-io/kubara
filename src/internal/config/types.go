@@ -2,11 +2,14 @@ package config
 
 import "github.com/kubara-io/kubara/internal/service"
 
-const ConfigVersionV1Alpha1 = "v1alpha1"
+const (
+	ConfigVersionV1Alpha1 = "v1alpha1"
+	ConfigVersionV1Alpha2 = "v1alpha2"
+)
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha2,default=v1alpha2"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
 
@@ -35,12 +38,7 @@ type Terraform struct {
 	ProjectID         string `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
 	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
 	KubernetesVersion string `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
-	DNS               DNS    `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
-}
-
-type DNS struct {
-	Name  string `json:"name" yaml:"name" jsonschema:"required,title=DNS Zone Name,description=The managed DNS zone name.,format=hostname"`
-	Email string `json:"email" yaml:"email" jsonschema:"required,title=Admin Email,description=Administrative email for the DNS zone.,format=email"`
+	DNSContactEmail   string `json:"dnsContactEmail" yaml:"dnsContactEmail" jsonschema:"required,title=DNS Zone Contact Email,description=Administrative contact email for the managed DNS zone. The zone name itself is derived from the cluster dnsName.,format=email"`
 }
 
 type ArgoCD struct {
