@@ -49,7 +49,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -73,7 +73,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -123,7 +123,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -141,7 +141,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -159,7 +159,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
 
-	err := CreateOrUpdateClusterFromEnv(cfg, e)
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)

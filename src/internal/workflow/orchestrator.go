@@ -7,12 +7,6 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
-// CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
-// or creates it if it doesn't exist.
-func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envconfig.EnvMap) error {
-	return CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
-}
-
 func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
