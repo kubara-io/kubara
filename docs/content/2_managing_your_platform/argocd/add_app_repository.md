@@ -8,12 +8,11 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/
 
 ## **Add credentials to vault**
 Add the repository credentials to your vault.
-The example below uses HTTPS username + password/PAT authentication.
-For most Git providers, `PAT` means Personal Access Token and is often tied to a user account.
+The examples below use one secret value per repository credential.
+
+For HTTPS username + password/PAT authentication, `PAT` usually means Personal Access Token and is often tied to a user account.
 For platform automation, prefer a technical or machine account instead of a personal user account.
 Set `username` to the account name expected by your Git provider; the exact value is provider-dependent.
-The helper shown on this page currently covers HTTPS username + password/PAT repositories.
-For SSH deploy keys or GitHub App authentication on additional app repositories, create the Argo CD repository Secret manually according to the Argo CD documentation until the helper supports those modes as well.
 
 ```json
 {
@@ -22,25 +21,89 @@ For SSH deploy keys or GitHub App authentication on additional app repositories,
   }
 }
 ```
-## **Modify Argo CD overlays**
-Add the following to your `argo-cd/values.yaml`.
-```yaml
-repositories:
-    - name: user-repo-mock
-      projectScope: k8s-spoke-0
-      # # This points to the secret in vault
-      remoteRef:
-        remoteKey: repo_pat
-        remoteKeyProperty: pat
-      repoType: git
-      secretStoreRef:
-        kind: ClusterSecretStore
-        name: hub-0-production
-      url: <the repo url you want to add>
-      username: <the username for connection. also needed for PAT>
+
+For SSH deploy key authentication:
+
+```json
+{
+  "repo_ssh": {
+    "privateKey": "-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"
+  }
+}
 ```
 
-That whats happening behind the scenes:
+For GitHub App authentication:
+
+```json
+{
+  "repo_github_app": {
+    "privateKey": "-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"
+  }
+}
+```
+
+## **Modify Argo CD overlays**
+Add one of the following repository definitions to your `argo-cd/values.yaml`.
+
+HTTPS username + password/PAT:
+
+```yaml
+repositories:
+  - name: user-repo-mock
+    authMode: https
+    projectScope: k8s-spoke-0
+    remoteRef:
+      remoteKey: repo_pat
+      remoteKeyProperty: pat
+    repoType: git
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: hub-0-production
+    url: https://git.example.com/org/repo.git
+    username: <technical-account-username>
+```
+
+SSH deploy key:
+
+```yaml
+repositories:
+  - name: user-repo-ssh
+    authMode: ssh
+    projectScope: k8s-spoke-0
+    sshPrivateKeyRemoteRef:
+      remoteKey: repo_ssh
+      remoteKeyProperty: privateKey
+    repoType: git
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: hub-0-production
+    url: git@git.example.com:org/repo.git
+```
+
+For SSH repositories, make sure Argo CD already trusts the SSH host key. See the bootstrap documentation for `configs.ssh.extraHosts`.
+
+GitHub App:
+
+```yaml
+repositories:
+  - name: user-repo-github-app
+    authMode: github-app
+    projectScope: k8s-spoke-0
+    githubAppID: "123456"
+    githubAppInstallationID: "987654"
+    githubAppPrivateKeyRemoteRef:
+      remoteKey: repo_github_app
+      remoteKeyProperty: privateKey
+    repoType: git
+    secretStoreRef:
+      kind: ClusterSecretStore
+      name: hub-0-production
+    url: https://github.com/org/repo.git
+```
+
+For GitHub Enterprise, also set `githubAppEnterpriseBaseUrl`.
+
+That's what's happening behind the scenes:
 
 ![Add Repository](../../images/add-repository.png)
 

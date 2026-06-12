@@ -1,4 +1,31 @@
+{{- define "templateLibrary.externalSecrets.argocd.repository.remoteRef" }}
+{{- if .remoteRef }}
+key: {{ .remoteRef.remoteKey }}
+{{- if .remoteRef.remoteKeyProperty }}
+property: {{ .remoteRef.remoteKeyProperty }}
+{{- end }}
+{{- else }}
+key: {{ .name }}
+{{- end }}
+conversionStrategy: Default
+decodingStrategy: None
+metadataPolicy: None
+nullBytePolicy: Fail
+{{- end }}
+
 {{- define "templateLibrary.externalSecrets.argocd.repository" }}
+{{- $authMode := default "https" .authMode }}
+{{- $credentialSecretKey := "pat" }}
+{{- $credentialRemoteRef := .remoteRef }}
+{{- if eq $authMode "ssh" }}
+{{- $credentialSecretKey = "sshPrivateKey" }}
+{{- $credentialRemoteRef = default .remoteRef .sshPrivateKeyRemoteRef }}
+{{- else if eq $authMode "github-app" }}
+{{- $credentialSecretKey = "githubAppPrivateKey" }}
+{{- $credentialRemoteRef = default .remoteRef .githubAppPrivateKeyRemoteRef }}
+{{- else if ne $authMode "https" }}
+{{- fail (printf "unsupported Argo CD repository authMode %q for repository %q" $authMode .name) }}
+{{- end }}
 apiVersion: external-secrets.io/v1
 kind: ExternalSecret
 metadata:
@@ -18,10 +45,21 @@ spec:
           argocd.argoproj.io/secret-type: repository
       data:
         name: {{.name}}
-        type: {{ .repoType }}
+        type: {{ default "git" .repoType }}
         url: {{.url}}
+        {{- if eq $authMode "https" }}
         username: {{ .username }}
         password: "{{ "{{" }} .pat }}"
+        {{- else if eq $authMode "ssh" }}
+        sshPrivateKey: "{{ "{{" }} .sshPrivateKey }}"
+        {{- else if eq $authMode "github-app" }}
+        githubAppID: {{ required (printf "githubAppID is required when authMode is github-app for repository %q" .name) .githubAppID | quote }}
+        githubAppInstallationID: {{ required (printf "githubAppInstallationID is required when authMode is github-app for repository %q" .name) .githubAppInstallationID | quote }}
+        githubAppPrivateKey: "{{ "{{" }} .githubAppPrivateKey }}"
+        {{- if .githubAppEnterpriseBaseUrl }}
+        githubAppEnterpriseBaseUrl: {{ .githubAppEnterpriseBaseUrl | quote }}
+        {{- end }}
+        {{- end }}
         {{- if .proxy }}
         proxy: {{.proxy}}
         {{- end }}
@@ -37,19 +75,8 @@ spec:
         insecure: "false"
         {{- end }}
   data:
-    - secretKey: pat
+    - secretKey: {{ $credentialSecretKey }}
       remoteRef:
-        {{- if .remoteRef }}
-        key: {{ .remoteRef.remoteKey }}
-        {{- if .remoteRef.remoteKeyProperty }}
-        property: {{ .remoteRef.remoteKeyProperty }}
-        {{- end }}
-        {{- else }}
-        key: {{ .name }}
-        {{- end }}
-        conversionStrategy: Default
-        decodingStrategy: None
-        metadataPolicy: None
-        nullBytePolicy: Fail
+{{- include "templateLibrary.externalSecrets.argocd.repository.remoteRef" (dict "name" .name "remoteRef" $credentialRemoteRef) | nindent 8 }}
 ---
 {{- end }}
