@@ -23,7 +23,7 @@ jobs:
     steps:
       - name: Create GitHub App token for docs publish
         id: docs-app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_ID }}
           private-key: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_PRIVATE_KEY }}
@@ -32,14 +32,14 @@ jobs:
             ${{ github.event.repository.name }}
 
       - name: Checkout kubara repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           token: ${{ steps.docs-app-token.outputs.token }}
           fetch-depth: 0
           fetch-tags: true
 
       - name: Install and setup uv
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@fac544c07dec837d0ccb6301d7b5580bf5edae39 # v8.2.0
         with:
           version: '0.11.17'
           enable-cache: true

@@ -48,12 +48,12 @@ jobs:
         working-directory: ${{ env.CODE_PATH }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           sparse-checkout: src
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: src/go.mod
           cache: true
@@ -98,7 +98,7 @@ jobs:
         run: |
           go vet ./... 2>&1 | tee "${{ env.REPORT_DIR }}/vet-results.txt"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v9
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           install-mode: goinstall
@@ -110,7 +110,7 @@ jobs:
       - name: Cache gosec
         if: always()
         id: cache-gosec
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ~/.local/bin/gosec
           key: ${{ runner.os }}-${{ runner.arch }}-gosec-${{ env.GOSEC_VERSION }}
@@ -185,7 +185,7 @@ jobs:
           fi
 
       - name: Upload static analysis results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: go-static-analysis-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -200,12 +200,12 @@ jobs:
         working-directory: ${{ env.CODE_PATH }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           sparse-checkout: src
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: src/go.mod
           cache: true
@@ -235,7 +235,7 @@ jobs:
           echo "Test coverage: $COVERAGE"
 
       - name: Upload test results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: go-test-results-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -276,10 +276,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
         with:
           go-version-file: src/go.mod
           cache: true
@@ -318,7 +318,7 @@ jobs:
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
 
       - name: Upload generated helm and terraform files
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
@@ -332,14 +332,14 @@ jobs:
         shell: bash
     steps:
       - name: Checkout CI overlay profiles
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           sparse-checkout: |
             .github/helm-profiles
             .scripts
 
       - name: Download generated kubara artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
@@ -350,7 +350,7 @@ jobs:
 
       - name: Cache kubeconform
         id: cache-kubeconform
-        uses: actions/cache@v5
+        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
         with:
           path: ~/.local/bin/kubeconform
           key: tools-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
@@ -359,7 +359,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p ~/.local/bin
-          
+
           if ! [ -x "$HOME/.local/bin/kubeconform" ]; then
             KUBECONFORM_ARCHIVE="kubeconform-linux-amd64.tar.gz"
             KUBECONFORM_BASE_URL="https://github.com/yannh/kubeconform/releases/download/${{ env.KUBECONFORM_VERSION }}"
@@ -372,14 +372,14 @@ jobs:
             rm -f "$TMP_ARCHIVE"
             chmod +x "$HOME/.local/bin/kubeconform"
           fi
-          
+
           kubeconform -v
 
       - name: Lint, render and validate Helm charts
         run: .scripts/helm-checks.sh
 
       - name: Upload Helm validation results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: helm-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
@@ -396,23 +396,23 @@ jobs:
         shell: bash
     steps:
       - name: Checkout CI scripts
-        uses: actions/checkout@v6
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
         with:
           sparse-checkout: |
             .scripts
 
       - name: Download generated kubara artifacts
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
           name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
 
       - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v4
+        uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4
         with:
           terraform_version: 1.9.3
 
       - name: Setup TFLint
-        uses: terraform-linters/setup-tflint@v6
+        uses: terraform-linters/setup-tflint@b480b8fcdaa6f2c577f8e4fa799e89e756bb7c93 # v6
         with:
           tflint_version: ${{ env.TFLINT_VERSION }}
 
@@ -420,7 +420,7 @@ jobs:
         run: .scripts/terraform-checks.sh
 
       - name: Upload Terraform validation results
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
         if: always()
         with:
           name: terraform-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
