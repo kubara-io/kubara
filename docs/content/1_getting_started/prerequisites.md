@@ -16,7 +16,7 @@ entities can be added to .env to smoothen bootstrap process.
 - `helm`
 - `git`
 - `terraform` (optional, but recommended)
-- `kubara` for your OS (Windows, Linux, or macOS) - follow the [installation guide](https://github.com/kubara-io/kubara/blob/main/INSTALLATION.md)
+- `kubara` for your OS (Windows, Linux, or macOS) - follow the [installation guide](installation.md)
 
 !!! warning "Internet access required"
     You will also need access to the internet to download the necessary Helm charts and CRDs.

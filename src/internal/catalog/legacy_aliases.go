@@ -37,24 +37,6 @@ var legacyToCanonicalServiceName = map[string]string{
 	"metalLb":             "metallb",
 }
 
-var canonicalToLegacyServiceName = map[string]string{
-	"argocd":                  "argocd",
-	"cert-manager":            "certManager",
-	"external-dns":            "externalDns",
-	"external-secrets":        "externalSecrets",
-	"kube-prometheus-stack":   "kubePrometheusStack",
-	"traefik":                 "traefik",
-	"kyverno":                 "kyverno",
-	"kyverno-policies":        "kyvernoPolicies",
-	"kyverno-policy-reporter": "kyvernoPolicyReport",
-	"loki":                    "loki",
-	"homer-dashboard":         "homerDashboard",
-	"oauth2-proxy":            "oauth2Proxy",
-	"metrics-server":          "metricsServer",
-	"metallb":                 "metalLb",
-	"longhorn":                "longhorn",
-}
-
 func CanonicalServiceName(name string) string {
 	trimmed := strings.TrimSpace(name)
 	if trimmed == "" {
@@ -67,12 +49,4 @@ func CanonicalServiceName(name string) string {
 		return canonical
 	}
 	return trimmed
-}
-
-func LegacyServiceAliasMap() map[string]string {
-	out := make(map[string]string, len(canonicalToLegacyServiceName))
-	for canonical, legacy := range canonicalToLegacyServiceName {
-		out[canonical] = legacy
-	}
-	return out
 }

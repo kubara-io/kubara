@@ -78,6 +78,8 @@ clusters:
         status: disabled
       longhorn:
         status: disabled
+      velero:
+        status: disabled
 ```
 
 ### Optional: Ingress annotation overrides

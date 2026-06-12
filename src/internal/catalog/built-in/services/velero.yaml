@@ -1,0 +1,46 @@
+---
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: velero
+  annotations:
+    kubara.io/category: storage
+spec:
+  chartPath: velero
+  status: disabled
+  clusterTypes:
+    - hub
+    - spoke
+  configSchema:
+    type: object
+    properties:
+      backupMode:
+        type: string
+        default: fs-backup
+        enum:
+          - fs-backup
+          - csi-snapshot
+          - csi-data-mover
+        description: "Volume backup strategy. fs-backup uses file-system backups via the node agent. csi-snapshot uses CSI\
+          \ snapshots. csi-data-mover uses CSI snapshots and moves snapshot data to object storage."
+      backupStorage:
+        type: object
+        default: {}
+        description: "Backup storage configuration. Set create to true to let kubara create the backup bucket and credentials\
+          \ where supported. Set create to false to use an existing S3-compatible bucket. Set s3Url explicitly to the S3-compatible\
+          \ endpoint Velero should use."
+        properties:
+          create:
+            type: boolean
+            default: true
+          bucketName:
+            type: string
+            minLength: 1
+          region:
+            type: string
+            default: eu01
+            minLength: 1
+          s3Url:
+            type: string
+            format: uri
+            description: "S3-compatible endpoint URL used by Velero. Must be set when Velero is enabled."

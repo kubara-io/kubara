@@ -15,39 +15,14 @@ type DependencyOptions struct {
 	SkipRefresh bool
 }
 
-// // BuildDependencies builds helm dependencies for a chart
-// func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
-// 	args := []string{"dependency", "build"}
+// BuildDependencies builds helm dependencies for a chart.
+func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
+	args := []string{"dependency", "build"}
 
-// 	if opts.SkipRefresh {
-// 		args = append(args, "--skip-refresh")
-// 	}
+	if opts.SkipRefresh {
+		args = append(args, "--skip-refresh")
+	}
 
-// 	if opts.ChartPath != "" {
-// 		args = append(args, opts.ChartPath)
-// 	}
-
-// 	var stdout, stderr bytes.Buffer
-// 	cmd := exec.CommandContext(ctx, "helm", args...)
-// 	cmd.Stdout = &stdout
-// 	cmd.Stderr = &stderr
-
-// 	err := cmd.Run()
-// 	if err != nil {
-// 		return &HelmDependencyError{
-// 			Operation: "build",
-// 			ChartPath: opts.ChartPath,
-// 			Err:       err,
-// 			Stderr:    stderr.String(),
-// 		}
-// 	}
-
-// 	return nil
-// }
-
-// UpdateDependencies updates helm dependencies for a chart
-func UpdateDependencies(ctx context.Context, opts DependencyOptions) error {
-	args := []string{"dependency", "update"}
 	if opts.ChartPath != "" {
 		args = append(args, opts.ChartPath)
 	}
@@ -60,7 +35,7 @@ func UpdateDependencies(ctx context.Context, opts DependencyOptions) error {
 	err := cmd.Run()
 	if err != nil {
 		return &HelmDependencyError{
-			Operation: "update",
+			Operation: "build",
 			ChartPath: opts.ChartPath,
 			Err:       err,
 			Stderr:    stderr.String(),
