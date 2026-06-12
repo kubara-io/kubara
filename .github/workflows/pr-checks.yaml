@@ -98,7 +98,7 @@ jobs:
         run: |
           go vet ./... 2>&1 | tee "${{ env.REPORT_DIR }}/vet-results.txt"
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@63c23d5020da8f97005b6de340504130bdbe42c7 # v9
+        uses: golangci/golangci-lint-action@82606bf257cbaff209d206a39f5134f0cfbfd2ee # v9
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           install-mode: goinstall
