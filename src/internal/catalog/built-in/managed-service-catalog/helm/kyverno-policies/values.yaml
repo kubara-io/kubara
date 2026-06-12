@@ -27,6 +27,13 @@ kyverno-policies:
             namespaces:
               - kube-system
               - longhorn
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - node-agent-*
+            namespaces:
+              - velero
     certificate-duration-max-100days:
       any:
         - resources:
@@ -310,6 +317,13 @@ kyverno-policies:
               - kyverno-migrate-resources-*
             namespaces:
               - kyverno
+        - resources:
+            kinds:
+              - Pod
+            names:
+              - node-agent-*
+            namespaces:
+              - velero
 global:
   k8sVersion: ""
   kyvernoVersion: autodetect

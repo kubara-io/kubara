@@ -69,6 +69,9 @@ When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.
 
+!!! info 
+    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../3_components/backup_and_recovery.md).
+
 ### 1.4 Validate your `config.yaml` against schema (optional, recommended)
 
 Generate a JSON schema file:
@@ -177,15 +180,16 @@ The chart directories where values usually need review are:
 * external-dns
 * external-secrets
 * homer-dashboard
-* traefik
 * kube-prometheus-stack
-* kyverno-policy-reporter
 * kyverno
+* kyverno-policy-reporter
 * loki
 * longhorn
 * metallb
 * metrics-server
 * oauth2-proxy
+* traefik
+* velero
 
 ### 3.1 Additional value files and CI value files
 
