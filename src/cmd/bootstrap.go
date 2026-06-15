@@ -263,32 +263,20 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 }
 
 func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
+	if err := envMap.ValidateAll(); err != nil {
+		return nil, err
+	}
+
+	if (envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && !envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) ||
+		(!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) {
+		return nil, fmt.Errorf("if you are using a private repository you need to configure both ARGOCD_GIT_PAT_OR_PASSWORD and ARGOCD_GIT_USERNAME")
+	}
+
 	if !local {
-		if err := envMap.ValidateAll(); err != nil {
-			return nil, err
-		}
 		return envMap, nil
 	}
 
-	if cluster == nil {
-		return nil, fmt.Errorf("cluster config is required for --local")
-	}
-
 	prepared := *envMap
-
-	if !envconfig.IsConfiguredEnvValue(prepared.ArgocdGitHttpsUrl) {
-		return nil, fmt.Errorf("ARGOCD_GIT_HTTPS_URL is required for --local")
-	}
-	if localmode.IsGeneratedPlaceholder(prepared.ArgocdGitHttpsUrl) {
-		return nil, fmt.Errorf("ARGOCD_GIT_HTTPS_URL still uses the generated local placeholder; update .env before running --local")
-	}
-	if !envconfig.IsConfiguredEnvValue(prepared.ArgocdWizardAccountPassword) {
-		return nil, fmt.Errorf("ARGOCD_WIZARD_ACCOUNT_PASSWORD is required for --local")
-	}
-	if localmode.IsGeneratedPlaceholder(prepared.ArgocdWizardAccountPassword) {
-		return nil, fmt.Errorf("ARGOCD_WIZARD_ACCOUNT_PASSWORD still uses the generated local placeholder; update .env before running --local")
-	}
-
 	if !envconfig.IsConfiguredEnvValue(prepared.ProjectName) {
 		prepared.ProjectName = cluster.Name
 	}

@@ -99,10 +99,8 @@ func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1
 		"url":       em.ArgocdGitHttpsUrl,
 		"project":   fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
 	}
-	if envconfig.IsConfiguredEnvValue(em.ArgocdGitUsername) {
+	if envconfig.IsConfiguredEnvValue(em.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(em.ArgocdGitPatOrPassword) {
 		stringData["username"] = em.ArgocdGitUsername
-	}
-	if envconfig.IsConfiguredEnvValue(em.ArgocdGitPatOrPassword) {
 		stringData["password"] = em.ArgocdGitPatOrPassword
 		stringData["forceHttpBasicAuth"] = "true"
 	}
