@@ -30,25 +30,26 @@ type EnvMap struct {
 	_                           struct{} `doc:"# 🔁 Everything in <angle brackets> MUST be replaced."`
 	_                           struct{} `doc:"# 💡 Dummy values (without <>) are optional and can be left as-is if not needed"`
 	_                           struct{} `doc:"#    (e.g. no private image registry). It will still create a secret, but it will be not valid."`
-	_                           struct{} `doc:"\n### Project related values"`
+	_                           struct{} `doc:"\n# Project related values"`
 	ProjectName                 string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                string   `default:"<...>" koanf:"PROJECT_STAGE"`
-	_                           struct{} `doc:"\n### Container Registry Config"`
-	_                           struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
-	DockerconfigBase64          string   `default:"" koanf:"DOCKERCONFIG_BASE64" optional:"true"`
-	_                           struct{} `doc:"\n### Argo CD related values"`
+	_                           struct{} `doc:"\n# Argo CD related values"`
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
-	_                           struct{} `doc:"\n### Git repository values"`
+	_                           struct{} `doc:"\n# Git repository values"`
 	ArgocdGitHttpsUrl           string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL"`
-	ArgocdGitPatOrPassword      string   `default:"" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD" optional:"true"`
-	ArgocdGitUsername           string   `default:"" koanf:"ARGOCD_GIT_USERNAME" optional:"true"`
-	_                           struct{} `doc:"\n### DNS Name/Zones related values"`
+	_                           struct{} `doc:"\n# DNS Name/Zones related values"`
 	_                           struct{} `doc:"# The Domain name under which your dns-entries will be added."`
 	_                           struct{} `doc:"# The resulting dnsZone name will be a concatenation of <PROJECT_NAME>-<PROJECT_STAGE>.<DOMAIN_NAME>"`
 	_                           struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
 	DomainName                  string   `default:"<...>" koanf:"DOMAIN_NAME"`
-	_                           struct{} `doc:"\n### Optional values"`
-	_                           struct{} `doc:"# Helm repository values (leave empty to disable)."`
+	_                           struct{} `doc:"\n# Optional values"`
+	_                           struct{} `doc:"\n# Container Registry Config"`
+	_                           struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
+	DockerconfigBase64          string   `default:"" koanf:"DOCKERCONFIG_BASE64" optional:"true"`
+	_                           struct{} `doc:"\n# Argo CD related values"`
+	ArgocdGitUsername           string   `default:"" koanf:"ARGOCD_GIT_USERNAME" optional:"true"`
+	ArgocdGitPatOrPassword      string   `default:"" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD" optional:"true"`
+	_                           struct{} `doc:"\n# Helm repository values (leave empty to disable)."`
 	_                           struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
 	_                           struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
 	ArgocdHelmRepoUsername      string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`

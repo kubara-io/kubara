@@ -287,7 +287,7 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 
 				// Check that documentation comments are included
 				assert.Contains(t, outputStr, "These values MUST be known BEFORE running Terraform.")
-				assert.Contains(t, outputStr, "### Project related values")
+				assert.Contains(t, outputStr, "# Project related values")
 
 				// Check that all required fields are present with default values
 				assert.Contains(t, outputStr, "PROJECT_NAME='<...>'")
