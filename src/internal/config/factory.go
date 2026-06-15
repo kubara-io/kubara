@@ -10,6 +10,7 @@ import (
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	gitRepoURL := e.GitRepositoryURL()
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
@@ -17,13 +18,14 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 
 	argoCD := ArgoCD{
 		Repo: RepoProto{
-			HTTPS: &RepoType{
+			AuthMode: e.GitAuthMode(),
+			Git: &RepoType{
 				Customer: Repository{
-					URL:            e.ArgocdGitHttpsUrl,
+					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
 				Managed: Repository{
-					URL:            e.ArgocdGitHttpsUrl,
+					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
 			},
@@ -49,10 +51,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
-			DNS: DNS{
-				Name:  dnsName,
-				Email: "my-test@nowhere.com",
-			},
+			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD:   argoCD,
 		Services: services,

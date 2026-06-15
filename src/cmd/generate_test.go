@@ -226,14 +226,11 @@ func TestGenerateCmd(t *testing.T) {
 						ProjectID:         "00000000-0000-0000-0000-000000000000",
 						KubernetesType:    "ske",
 						KubernetesVersion: "1.28.0",
-						DNS: config.DNS{
-							Name:  "example.com",
-							Email: "admin@example.com",
-						},
+						DNSContactEmail:   "admin@example.com",
 					},
 					ArgoCD: config.ArgoCD{
 						Repo: config.RepoProto{
-							HTTPS: &config.RepoType{
+							Git: &config.RepoType{
 								Customer: config.Repository{
 									URL:            "https://github.com/example/customer",
 									TargetRevision: "main",
@@ -314,11 +311,11 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
 			KubernetesType:    "ske",
 			KubernetesVersion: "1.28.0",
-			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+			DNSContactEmail:   "admin@example.com",
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
 					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
@@ -372,11 +369,11 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
 			KubernetesType:    "ske",
 			KubernetesVersion: "1.28.0",
-			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+			DNSContactEmail:   "admin@example.com",
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
 					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},

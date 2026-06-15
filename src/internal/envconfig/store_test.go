@@ -342,9 +342,18 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 				assert.Contains(t, outputStr, "DOMAIN_NAME='<...>'")
 				assert.Contains(t, outputStr, "DOCKERCONFIG_BASE64='<...>'")
 				assert.Contains(t, outputStr, "ARGOCD_WIZARD_ACCOUNT_PASSWORD='<...>'")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_AUTH_MODE='https'")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_URL=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_HTTPS_URL='<...>'")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_SSH_PRIVATE_KEY=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_GITHUB_APP_ID=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY=''")
+				assert.Contains(t, outputStr, "ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_USERNAME=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_PASSWORD=''")
 				assert.Contains(t, outputStr, "ARGOCD_HELM_REPO_URL=''")
+				assert.Contains(t, outputStr, "PAT usually means Personal Access Token")
 			},
 		},
 		{

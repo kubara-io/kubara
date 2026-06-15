@@ -141,6 +141,98 @@ func TestEnvMap_Validate(t *testing.T) {
 			wantErr: false,
 		},
 		{
+			name: "Valid SSH git auth passes validation",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeSSH
+				em.ArgocdGitUrl = "git@github.com:example/repo.git"
+				em.ArgocdGitHttpsUrl = ""
+				em.ArgocdGitPatOrPassword = ""
+				em.ArgocdGitUsername = ""
+				em.ArgocdGitSshPrivateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----"
+				return em
+			}(),
+			wantErr: false,
+		},
+		{
+			name: "SSH git auth requires private key",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeSSH
+				em.ArgocdGitUrl = "git@github.com:example/repo.git"
+				em.ArgocdGitSshPrivateKey = ""
+				return em
+			}(),
+			wantErr: true,
+			errType: ErrEnvsNotSet,
+		},
+		{
+			name: "SSH git auth rejects HTTPS URL",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeSSH
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitSshPrivateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----"
+				return em
+			}(),
+			wantErr: true,
+			errType: ErrInvalidEnvValue,
+		},
+		{
+			name: "Valid GitHub App git auth passes validation",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitHttpsUrl = ""
+				em.ArgocdGitPatOrPassword = ""
+				em.ArgocdGitUsername = ""
+				em.ArgocdGitGithubAppID = "123"
+				em.ArgocdGitGithubAppInstallationID = "456"
+				em.ArgocdGitGithubAppPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----"
+				return em
+			}(),
+			wantErr: false,
+		},
+		{
+			name: "GitHub App git auth requires private key",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitGithubAppID = "123"
+				em.ArgocdGitGithubAppInstallationID = "456"
+				em.ArgocdGitGithubAppPrivateKey = ""
+				return em
+			}(),
+			wantErr: true,
+			errType: ErrEnvsNotSet,
+		},
+		{
+			name: "GitHub App git auth rejects SSH URL",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
+				em.ArgocdGitUrl = "git@github.com:example/repo.git"
+				em.ArgocdGitGithubAppID = "123"
+				em.ArgocdGitGithubAppInstallationID = "456"
+				em.ArgocdGitGithubAppPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----"
+				return em
+			}(),
+			wantErr: true,
+			errType: ErrInvalidEnvValue,
+		},
+		{
+			name: "Invalid git auth mode fails validation",
+			envMap: func() *EnvMap {
+				em := validEnvMap()
+				em.ArgocdGitAuthMode = "token"
+				return em
+			}(),
+			wantErr: true,
+			errType: ErrInvalidEnvValue,
+		},
+		{
 			name: "Multiple missing required fields",
 			envMap: func() *EnvMap {
 				em := validEnvMap()
@@ -280,9 +372,16 @@ func TestEnvMap_setDefaults_AllFields(t *testing.T) {
 		assert.Equal(t, "", em.ArgocdHelmRepoUsername)
 		assert.Equal(t, "", em.ArgocdHelmRepoPassword)
 		assert.Equal(t, "", em.ArgocdHelmRepoUrl)
+		assert.Equal(t, "https", em.ArgocdGitAuthMode)
+		assert.Equal(t, "", em.ArgocdGitUrl)
 		assert.Equal(t, "<...>", em.ArgocdGitHttpsUrl)
 		assert.Equal(t, "<...>", em.ArgocdGitPatOrPassword)
 		assert.Equal(t, "<...>", em.ArgocdGitUsername)
+		assert.Equal(t, "", em.ArgocdGitSshPrivateKey)
+		assert.Equal(t, "", em.ArgocdGitGithubAppID)
+		assert.Equal(t, "", em.ArgocdGitGithubAppInstallationID)
+		assert.Equal(t, "", em.ArgocdGitGithubAppPrivateKey)
+		assert.Equal(t, "", em.ArgocdGitGithubAppEnterpriseBaseUrl)
 		assert.Equal(t, "<...>", em.DomainName)
 	})
 }

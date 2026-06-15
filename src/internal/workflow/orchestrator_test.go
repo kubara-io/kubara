@@ -20,13 +20,11 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 				Stage:   "stage",
 				DNSName: "kubara-test-stage.example.com",
 				Terraform: &config.Terraform{
-					DNS: config.DNS{
-						Name: "kubara-test-stage.example.com",
-					},
+					DNSContactEmail: "admin@example.com",
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
-						HTTPS: &config.RepoType{
+						Git: &config.RepoType{
 							Customer: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
@@ -56,9 +54,9 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	updated := cfg.Clusters[0]
 	assert.Equal(t, "dev", updated.Stage)
 	assert.Equal(t, "kubara-test-dev.example.com", updated.DNSName)
-	assert.Equal(t, "kubara-test-dev.example.com", updated.Terraform.DNS.Name)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Managed.URL)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Customer.URL)
+	assert.Equal(t, "admin@example.com", updated.Terraform.DNSContactEmail)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.Git.Managed.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.Git.Customer.URL)
 	require.NotNil(t, updated.ArgoCD.HelmRepo)
 	assert.Equal(t, "https://charts.example.com", updated.ArgoCD.HelmRepo.URL)
 }
@@ -78,10 +76,50 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
-	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Managed.URL)
-	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Customer.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
 	require.NotNil(t, cluster.ArgoCD.HelmRepo)
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.URL)
+}
+
+func TestCreateOrUpdateClusterFromEnv_UpdatesGitURLAndAuthMode(t *testing.T) {
+	cfg := &config.Config{
+		Clusters: []config.Cluster{
+			{
+				Name:    "kubara-test",
+				Stage:   "stage",
+				DNSName: "kubara-test-stage.example.com",
+				Terraform: &config.Terraform{
+					DNSContactEmail: "admin@example.com",
+				},
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						AuthMode: envconfig.GitAuthModeHTTPS,
+						Git: &config.RepoType{
+							Customer: config.Repository{URL: "https://github.com/old/repo.git", TargetRevision: "main"},
+							Managed:  config.Repository{URL: "https://github.com/old/repo.git", TargetRevision: "main"},
+						},
+					},
+				},
+			},
+		},
+	}
+	e := &envconfig.EnvMap{
+		ProjectName:       "kubara-test",
+		ProjectStage:      "dev",
+		DomainName:        "example.com",
+		ArgocdGitAuthMode: envconfig.GitAuthModeSSH,
+		ArgocdGitUrl:      "git@github.com:org/repo.git",
+		ArgocdGitHttpsUrl: "https://github.com/old/repo.git",
+	}
+
+	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	require.NoError(t, err)
+
+	updated := cfg.Clusters[0]
+	assert.Equal(t, envconfig.GitAuthModeSSH, updated.ArgoCD.Repo.AuthMode)
+	assert.Equal(t, "git@github.com:org/repo.git", updated.ArgoCD.Repo.Git.Managed.URL)
+	assert.Equal(t, "git@github.com:org/repo.git", updated.ArgoCD.Repo.Git.Customer.URL)
 }
 
 func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
@@ -92,13 +130,11 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 				Stage:   "stage",
 				DNSName: "kubara-test-stage.example.com",
 				Terraform: &config.Terraform{
-					DNS: config.DNS{
-						Name: "kubara-test-stage.example.com",
-					},
+					DNSContactEmail: "admin@example.com",
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
-						HTTPS: &config.RepoType{
+						Git: &config.RepoType{
 							Customer: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",

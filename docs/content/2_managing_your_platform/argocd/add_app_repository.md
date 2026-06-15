@@ -7,11 +7,18 @@ For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/
 
 ## **Add credentials to vault**
-Add the repository credentials to your vault. This can be a `password` or a `PAT`.
+Add the repository credentials to your vault.
+The example below uses HTTPS username + password/PAT authentication.
+For most Git providers, `PAT` means Personal Access Token and is often tied to a user account.
+For platform automation, prefer a technical or machine account instead of a personal user account.
+Set `username` to the account name expected by your Git provider; the exact value is provider-dependent.
+The helper shown on this page currently covers HTTPS username + password/PAT repositories.
+For SSH deploy keys or GitHub App authentication on additional app repositories, create the Argo CD repository Secret manually according to the Argo CD documentation until the helper supports those modes as well.
+
 ```json
 {
   "repo_pat": {
-    "pat": "<the kubeconfig>"
+    "pat": "<repository password or PAT>"
   }
 }
 ```
