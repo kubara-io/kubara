@@ -251,21 +251,17 @@ func ensureKindCluster(ctx context.Context, clusterName, kubeconfigPath, kindCon
 }
 
 func writeLocalKindConfig(state *LocalState) error {
-	content := `kind: Cluster
+	// Does not need to be guarded against. It is guarenteed that any developer system that can run kind is based on linux
+	// and therefore will have local ca-certificates installed
+	content := fmt.Sprintf(`kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 nodes:
 - role: control-plane
-`
-
-	if _, err := os.Stat(localKindHostCACertPath); err == nil {
-		content += fmt.Sprintf(`  extraMounts:
+  extraMounts:
   - hostPath: %s
     containerPath: %s
     readOnly: true
 `, localKindHostCACertPath, localKindHostCACertPath)
-	} else {
-		log.Warn().Str("path", localKindHostCACertPath).Msg("Host CA bundle not found; skipping kind extraMounts")
-	}
 
 	return writeLocalFile(state.KindConfigPath, content)
 }

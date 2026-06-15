@@ -1,6 +1,6 @@
 # Quick Start
 
-This quick start (15-30min) walks you through kubara's **local test setup** for evaluation purposes. 
+This quick start (15-30min) walks you through kubara's **local test setup** for evaluation purposes.
 
 It is intended for **local testing only**, not for production use.
 
@@ -99,7 +99,7 @@ And then start `cloud-provider-kind` in another terminal:
 sudo cloud-provider-kind
 ```
 
-Cloud-Provider-Kind works by automatically allocating a local IP address in the range of your Docker network for each Service of type LoadBalancer. For example in the next steps you will see `172.18.0.3`. It will most likely be different for your local environment. 
+Cloud-Provider-Kind works by automatically allocating a local IP address in the range of your Docker network for each Service of type LoadBalancer. For example in the next steps you will see `172.18.0.3`. It will most likely be different for your local environment.
 
 kubara should then continue with the bootstrapping after just a couple seconds (If not look into the Troubleshooting section at the bottom of this page):
 
@@ -197,7 +197,7 @@ On macOS using Colima the bootstrapping might get stuck due to a combination of 
    2026-06-11 10:45:35 INF Waiting for the local Traefik LoadBalancer IP
    ```
 2. Restart `cloud-provider-kind`
-3. If the process still gets stuck, watch the `cloud-provider-kind` terminal output. Repeat this step if needed. 
+3. If the process still gets stuck, watch the `cloud-provider-kind` terminal output. Repeat this step if needed.
    You should no longer see failing readiness checks like:
    ```
    I0611 10:51:09.391260   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
@@ -234,19 +234,19 @@ When you are done with the evaluation, remove the local cluster and stop `cloud-
    Ctrl+C
    ```
 
-Optional: check whether the local LoadBalancer IP is still attached. Sometimes the LoadBalancer IP added by `cloud-provider-kind` 
+Optional: check whether the local LoadBalancer IP is still attached. Sometimes the LoadBalancer IP added by `cloud-provider-kind`
 may still be present on the loopback device after cleanup. This is optional to fix and usually disappears after a reboot anyway.
 
 === "Linux"
 
     Check whether the IP is still present:
-    
+
     ```bash
     ip addr show lo
     ```
-    
+
     If needed, remove it manually:
-    
+
     ```bash
     sudo ip addr del <your-ip>/32 dev lo
     ```
@@ -254,13 +254,13 @@ may still be present on the loopback device after cleanup. This is optional to f
 === "macOS"
 
     Check the loopback aliases:
-    
+
     ```bash
     ifconfig lo0
     ```
-    
+
     If needed, remove the alias manually:
-    
+
     ```bash
     sudo ifconfig lo0 -alias <your-ip>
     ```
