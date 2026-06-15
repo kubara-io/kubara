@@ -40,8 +40,8 @@ github.com/evanphx/json-patch v0.5.2 h1:xVCHIVMUu1wtM/VkR9jVZ45N3FhZfYMMYGorLCR8
 github.com/evanphx/json-patch v0.5.2/go.mod h1:ZWS5hhDbVDyob71nXKNL0+PWn6ToqBHMikGIFbs31qQ=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
-github.com/external-secrets/external-secrets/apis v0.0.0-20260612083758-a788bad06644 h1:cH5Vflf7jb3ddDeXI/TGa/63W/YhjY1x5w/oBWo+E2g=
-github.com/external-secrets/external-secrets/apis v0.0.0-20260612083758-a788bad06644/go.mod h1:V/9SKrIdrfOS76cqxocw3VnvMX6pkvlST+GrN4O9jhk=
+github.com/external-secrets/external-secrets/apis v0.0.0-20260614211243-31616d63b983 h1:NTXfYWK7B2hp1/hGJCxHHTR5x+NTH+LZssYEp/FHjAI=
+github.com/external-secrets/external-secrets/apis v0.0.0-20260614211243-31616d63b983/go.mod h1:V/9SKrIdrfOS76cqxocw3VnvMX6pkvlST+GrN4O9jhk=
 github.com/fatih/color v1.19.0 h1:Zp3PiM21/9Ld6FzSKyL5c/BULoe/ONr9KlbYVOfG8+w=
 github.com/fatih/color v1.19.0/go.mod h1:zNk67I0ZUT1bEGsSGyCZYZNrHuTkJJB+r6Q9VuMi0LE=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
