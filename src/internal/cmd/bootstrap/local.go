@@ -49,11 +49,12 @@ type localChart struct {
 	Repo        helm.RepoOptions
 	ReleaseName string
 	ChartRef    string
+	Version     string
 	Namespace   string
 }
 
 var (
-	localOpenBaoChart = localChart{"OpenBao", helm.RepoOptions{Name: "openbao", URL: "https://openbao.github.io/openbao-helm"}, localOpenBaoReleaseName, "openbao/openbao", localOpenBaoNamespace}
+	localOpenBaoChart = localChart{"OpenBao", helm.RepoOptions{Name: "openbao", URL: "https://openbao.github.io/openbao-helm"}, localOpenBaoReleaseName, "openbao/openbao", "0.28.3", localOpenBaoNamespace}
 )
 
 func prepareLocalBootstrap(ctx context.Context, opts *Options) error {
@@ -152,6 +153,8 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 	}
 
 	log.Info().Msg("Configuring OpenBao for local external-secrets access")
+	// Intentianolly using the ArgoCD Wizard password for grafana as well. For convenience on the local evaluation
+	// environment and not requiring the user to fill out yet another variable during bootstrapping.
 	if err := configureLocalOpenBao(ctx, state.KubeconfigPath, opts.EnvMap.ArgocdWizardAccountPassword); err != nil {
 		return err
 	}
@@ -274,7 +277,7 @@ func installLocalChart(ctx context.Context, kubeconfigPath string, chart localCh
 	if err := helm.UpdateRepository(ctx, chart.Repo); err != nil {
 		return fmt.Errorf("update %s helm repository: %w", chart.DisplayName, err)
 	}
-	return helmUpgradeInstall(ctx, kubeconfigPath, chart.ReleaseName, chart.ChartRef, chart.Namespace, valuesPath, timeout)
+	return helmUpgradeInstall(ctx, kubeconfigPath, chart.ReleaseName, chart.ChartRef, chart.Version, chart.Namespace, valuesPath, timeout)
 }
 
 func ensureLocalTraefikBootstrapService(ctx context.Context, client *k8s.Client) error {
@@ -376,12 +379,14 @@ func waitForLocalOpenBaoReady(ctx context.Context, client *k8s.Client, kubeconfi
 	}
 }
 
-func helmUpgradeInstall(ctx context.Context, kubeconfigPath, releaseName, chartRef, namespace, valuesPath string, timeout time.Duration) error {
+func helmUpgradeInstall(ctx context.Context, kubeconfigPath, releaseName, chartRef, chartVersion, namespace, valuesPath string, timeout time.Duration) error {
 	args := []string{
 		"upgrade",
 		"--install",
 		releaseName,
 		chartRef,
+		"--version",
+		chartVersion,
 		"--namespace",
 		namespace,
 		"--create-namespace",
@@ -532,6 +537,12 @@ path "kv/metadata/*" {
 		return fmt.Errorf("configure OpenBao policy: %w", err)
 	}
 
+	// The role for OpenBao in the local setup is intentianolly wide open for
+	// evaluation purposes and this is not reflective of strict production model
+	// and best-practices. This was done as OpenBao is anyways configured to run
+	// in a none secure dev mode on the local setup and for ease of use and playing
+	// around with the test environment it was decided to keep the kubernetes access
+	// integration lax as well.
 	if _, err := kubectlExec(ctx, kubeconfigPath,
 		"-n", localOpenBaoNamespace,
 		"exec", localOpenBaoPodName,

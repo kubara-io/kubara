@@ -149,7 +149,7 @@ They essentially give instructions to do the following:
     - Open Argo CD and check whether all apps become `Healthy` and `Synced`. (Maybe force a refresh)
     - Open Argo CD Settings -> Repositories and check whether Argo can access your repository (is it public? is your pat correct?)
 4. Once the platform components are ready, open the exposed UIs through the local ingress host.
-6. You should be able to reach the kubara Developer Portal via `https://<your-ip>.traefik.me`
+5. You should be able to reach the kubara Developer Portal via `https://<your-ip>.traefik.me`
 
 If Argo CD cannot fetch your repository, double-check the repository URL and credentials in your `.env`. If you did not provide Git credentials, the repository must be public for this local evaluation flow.
 
@@ -187,6 +187,8 @@ For more details about the directory and file structure have a look at the conce
 
 ## Troubleshooting
 
+**macOS + Colima**
+
 On macOS using Colima the bootstrapping might get stuck due to a combination of bugs in cloud-provider-kind and lima-guest-agent.
 
 1. If your bootstrap command doesn't proceed beyond this point:
@@ -204,6 +206,15 @@ On macOS using Colima the bootstrapping might get stuck due to a combination of 
    I0611 10:51:12.393818   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
    ```
 4. Otherwise restart `cloud-provider-kind` again
+
+
+**OpenBao only runs with in-memory**
+
+OpenBao runs with its [dev mode](https://openbao.org/docs/concepts/dev-server/) for lax evaluation purposes. This causes the following:
+
+* It only runs with an in-memory database and with a restart its pod, runtime or host system its database will be lost and you will have to rerun: `kubara bootstrap --local test-cluster`
+* The instance is not secure and always unsealed
+* The instances root token is not a random string but instead always `root`
 
 
 ## How to clean up your local environment
