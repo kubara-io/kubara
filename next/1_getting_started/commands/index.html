@@ -366,6 +366,34 @@ You're not viewing the latest stable version.
   
   
   
+    <li class="md-nav__item">
+      <a href="../quick_start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
     
     
     
@@ -377,10 +405,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_2" >
         
           
-          <label class="md-nav__link" for="__nav_2_1" id="__nav_2_1_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_2" id="__nav_2_2_label" tabindex="0">
             
   
   
@@ -398,8 +426,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_1_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_1">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_2">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -574,10 +602,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
         
           
-          <label class="md-nav__link" for="__nav_2_5" id="__nav_2_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
             
   
   
@@ -595,8 +623,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_5_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2_5">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2191,10 +2219,11 @@ You're not viewing the latest stable version.
 <h2 id="init">init</h2>
 <p>Initialize kubara config for your GitOps repository</p>
 <blockquote>
-<p>kubara init</p>
+<p>kubara init [--prep] [--local]</p>
 </blockquote>
 <p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
 <p><strong>--help, -h</strong>: show help</p>
+<p><strong>--local</strong>: Initialize files for the local evaluation workflow. Local testing only; not for production use.</p>
 <p><strong>--overwrite</strong>: Overwrite config if exists</p>
 <p><strong>--prep</strong>: Copy embedded prep/ folder into current working directory</p>
 <h3 id="help-h">help, h</h3>
@@ -2215,11 +2244,12 @@ You're not viewing the latest stable version.
 <h2 id="bootstrap">bootstrap</h2>
 <p>Bootstrap Argo CD onto a cluster</p>
 <blockquote>
-<p>kubara bootstrap CLUSTER_NAME</p>
+<p>kubara bootstrap CLUSTER_NAME [--local]</p>
 </blockquote>
 <p><strong>--dry-run</strong>: Run with dry-run</p>
 <p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
 <p><strong>--help, -h</strong>: show help</p>
+<p><strong>--local</strong>: Provision an isolated local evaluation environment. Local testing only; not for production use.</p>
 <p><strong>--managed-catalog</strong>="": Path to the managed catalog directory (default: "managed-service-catalog")</p>
 <p><strong>--overlay-values</strong>="": Path to overlay values directory (default: "customer-service-catalog")</p>
 <p><strong>--timeout</strong>="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)</p>
