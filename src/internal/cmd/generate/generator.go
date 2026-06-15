@@ -12,6 +12,7 @@ import (
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
+	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
@@ -180,6 +181,41 @@ func (o *Options) writeTemplateResults(results []render.TemplateResult) error {
 	return nil
 }
 
+// getServiceNameFromPath returns a possible Service name in string form from a given path
+// receives a catalog to search and a path string to look into
+// if the path does not contain a Service name return the empty String
+func getServiceNameFromPath(catalog catalog.Catalog, path string) string {
+	//replace seperators with '/' to allow for windows usage
+	//todo check if really necessary or more elegant solution is possible
+	pathParts := strings.SplitSeq(filepath.ToSlash(path), "/")
+	for possibleName := range pathParts {
+		if _, ok := catalog.Services[possibleName]; ok {
+			return possibleName
+		}
+	}
+	return ""
+}
+
+// filterDisabledServices receives a list of rendered Template Results and removes those items
+// where in the config the service is disabled
+// returns a list of filtered template results
+func filterDisabledServices(templateResults []render.TemplateResult, cluster config.Cluster, catalog catalog.Catalog) []render.TemplateResult {
+	filtered := make([]render.TemplateResult, 0)
+	for _, result := range templateResults {
+		serviceName := getServiceNameFromPath(catalog, result.Path)
+		//probably rendered terraform
+		if serviceName == "" {
+			filtered = append(filtered, result)
+			continue
+		}
+		svc := cluster.Services[serviceName]
+		if svc.Status == service.StatusEnabled {
+			filtered = append(filtered, result)
+		}
+	}
+	return filtered
+}
+
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	catalogOptions := catalog.LoadOptions{
@@ -246,6 +282,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template files: %w", err)
 		}
+		clusterTplResults = filterDisabledServices(clusterTplResults, clusterBlock, cat)
 
 		for i, result := range clusterTplResults {
 			if result.Error != nil {
