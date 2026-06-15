@@ -2275,18 +2275,11 @@ For this purposes we provide the necessary terraform configuration and modules.<
 Make sure your created Service Account has Project Owner permissions.</p>
 </div>
 <h2 id="1-terraform-bootstrap">1. Terraform Bootstrap</h2>
-<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
-<p><div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
-cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
+<p>Set <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> to the path of your Service Account key file:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">STACKIT_SERVICE_ACCOUNT_KEY_PATH</span><span class="o">=</span><span class="s2">&quot;&lt;path-to-your-service-account-key-file&gt;&quot;</span>
 </code></pre></div>
-Set at least <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing.
-<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
-<span class="c1"># or for PowerShell</span>
-<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
-<span class="c1"># . .\set-env.ps1</span>
-</code></pre></div></p>
 <p>Then navigate to:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;/bootstrap-tfstate-backend
 </code></pre></div>
 <p>Run:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
@@ -2318,7 +2311,7 @@ tofu<span class="w"> </span>apply
 </div>
 </div>
 </div>
-<p>You can set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again, or export them directly:</p>
+<p>Set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> like:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;&lt;credential_access_key from terraform output&gt;&quot;</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;credential_secret_access_key from terraform output&gt;&quot;</span>
 </code></pre></div>
@@ -2405,9 +2398,9 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 </div>
 </div>
 <p>If you use OAuth2, create a GitHub application as shown <a href="../../../2_managing_your_platform/sso/add_sso/">here</a>.</p>
-<p>If you want Terraform to create OAuth2-related Vault entries:</p>
+<p>If you want Terraform to create OAuth2-related Vault entries and Grafana credentials:</p>
 <ul>
-<li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code></li>
+<li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code> and fill out missing values.</li>
 <li><code>TF_Var_image_pull_secret</code> will already be set by kubara with what is present in the .env</li>
 <li>In <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/infrastructure</code>, copy <code>secrets.tf-example</code> to <code>oauth2-secrets.tf</code> and adjust values if needed</li>
 </ul>
