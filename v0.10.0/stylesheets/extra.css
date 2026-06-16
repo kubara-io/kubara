@@ -1,0 +1,49 @@
+:root > * {
+    --navbar-text-color: black;
+    --color-accent: #0a1e2d;
+    --md-accent-fg-color: var(--color-accent);
+}
+
+[data-md-color-scheme="default"] {
+    --md-primary-fg-color: var(--color-accent);
+}
+
+[data-md-color-scheme="slate"] {
+    --md-primary-fg-color: var(--color-accent);
+    --md-default-bg-color: var(--color-accent);
+    --md-typeset-a-color: #00c3cd;
+    --md-accent-fg-color: #00c3cd;
+
+}
+
+.md-nav__item  .md-nav__link, .md-typeset a {
+    color: #00c3cd;
+}
+
+.md-nav__item  .md-nav__link--active, .md-nav__link[href]:hover, .md-typeset a:hover {
+    color: #ef7c00;
+}
+
+
+[data-md-color-scheme="slate"][data-md-color-primary="indigo"]{
+
+    --md-typeset-a-color: #00c3cd;
+}
+
+/* bigger logo */
+.md-header__button.md-logo {
+    margin-top: 0;
+    margin-bottom: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    width: auto;
+}
+.md-header__button.md-logo img, .md-header__button.md-logo svg {
+    height: 3rem;
+    width: auto;
+    max-width: none;
+    display: block;
+}
+.mermaid {
+    text-align: center;
+}
