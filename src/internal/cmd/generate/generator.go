@@ -30,8 +30,24 @@ type Options struct {
 	EnvPath            string
 }
 
+func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, error) {
+	spokeMaps := make([]map[string]any, 0)
+	for _, cluster := range clusters {
+		if cluster.Type != "spoke" {
+			continue
+		}
+		spokeMap, err := toJSONMap(cluster)
+		if err != nil {
+			return nil, fmt.Errorf("convert spoke %q to map: %w", cluster.Name, err)
+		}
+		spokeMaps = append(spokeMaps, spokeMap)
+
+	}
+	return spokeMaps, nil
+}
+
 // buildTemplateContext creates a map for rendering templates with cluster config, catalog services, and env vars.
-func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envconfig.EnvMap) (map[string]any, error) {
+func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envconfig.EnvMap, allClusters []config.Cluster) (map[string]any, error) {
 	clusterMap, err := toJSONMap(cluster)
 	if err != nil {
 		return nil, fmt.Errorf("convert cluster config to map: %w", err)
@@ -42,11 +58,19 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 		}
 	}
 
-	return map[string]any{
+	context := map[string]any{
 		"env":     em,
 		"cluster": clusterMap,
 		"catalog": resolveCatalog(cat),
-	}, nil
+	}
+	if cluster.Type == "hub" {
+		spokes, err := getSpokesFromAllClusters(allClusters)
+		if err != nil {
+			return nil, err
+		}
+		context["spokes"] = spokes
+	}
+	return context, nil
 }
 
 func (o *Options) resolveOutputPath(result render.TemplateResult, clusterName string) string {
@@ -242,7 +266,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	}
 
 	for _, clusterBlock := range cnf.Clusters {
-		tmplContext, err := buildTemplateContext(clusterBlock, cat, dotEnvMap)
+		tmplContext, err := buildTemplateContext(clusterBlock, cat, dotEnvMap, cnf.Clusters)
 		if err != nil {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
 		}

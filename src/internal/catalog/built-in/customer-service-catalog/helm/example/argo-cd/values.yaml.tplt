@@ -26,6 +26,26 @@ bootstrapValues:
         ignore:
           - kind: Secret
             name: cert-manager-webhook-ca
+{{/*
+Problem: Presumes that the secret exists in the secretstore,
+currently needs to be added manually.
+possible idea: add remotekey property to cluster structure
+*/}}
+{{- if .spokes }}
+  cluster:
+{{- range .spokes }}
+    - name: {{ .name }}
+      project: {{ $.cluster.name }}-{{ $.cluster.stage }}
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: {{ $.cluster.name }}-{{ $.cluster.stage }}
+      additionalLabels:
+{{- range $svcName, $svc := .services }}
+        {{ $svcName }}: "{{ index $svc "status" | default "disabled" }}"
+{{- end }}
+{{- end }}
+{{- end }}
+
 
   applicationSets:
     {{ .cluster.name }}-{{ .cluster.stage }}:
