@@ -29,6 +29,7 @@ func AddCluster() *cli.Command {
 
 		Action: func(c context.Context, cmd *cli.Command) error {
 			//TODO: add command line flag for config.yaml
+			//TODO: add cli flag for catalog
 			spokeName := cmd.StringArg("cluster-name")
 			if len(spokeName) == 0 {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
