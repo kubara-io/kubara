@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
@@ -72,7 +73,7 @@ func (cs *ConfigStore) Load() error {
 
 	applyDefaults(cs.config)
 	normalizeDisabledTerraform(cs.config)
-	if err := cs.applyServiceCatalogDefaults(); err != nil {
+	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
 	}
 
@@ -592,7 +593,7 @@ func buildServiceNetworkingSchema() map[string]any {
 	}
 }
 
-func (cs *ConfigStore) applyServiceCatalogDefaults() error {
+func (cs *ConfigStore) ApplyServiceCatalogDefaults() error {
 	cat, err := cs.GetCatalog()
 	if err != nil {
 		return err
@@ -604,6 +605,13 @@ func (cs *ConfigStore) applyServiceCatalogDefaults() error {
 		}
 
 		for name, def := range cat.Services {
+			catalogService, _ := cat.Services[name]
+			supportedTypes := catalogService.Spec.ClusterTypes
+
+			if !slices.Contains(supportedTypes, cluster.Type) {
+				continue
+			}
+
 			existing, exists := cluster.Services[name]
 			if !exists {
 				cfg, err := applySchemaDefaults(def.Spec.ConfigSchema, map[string]any{})

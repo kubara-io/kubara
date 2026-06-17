@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"fmt"
-	"maps"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
@@ -19,17 +18,14 @@ func AddCluster(configFilePath string, spokeName string) error {
 	currentConfig := configStore.GetConfig()
 
 	clusters := currentConfig.Clusters
-	hubCluster := findHubCluster(clusters)
 
-	//create new cluster and append it
-	newCluster := hubCluster
-	newCluster.Name = spokeName
-	newCluster.Type = "spoke"
-
-	spokeServices := maps.Clone(newCluster.Services)
-	newCluster.Services = disableServicesFor(spokeServices, []string{"homer-dashboard", "argocd"})
+	newCluster := config.CreateBlankSpokeCluster(spokeName)
 
 	currentConfig.Clusters = append(clusters, newCluster)
+
+	if err = configStore.ApplyServiceCatalogDefaults(); err != nil {
+		return fmt.Errorf("apply spoke catalog defaults: %w", err)
+	}
 
 	configStore.SaveToFile()
 

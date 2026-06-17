@@ -30,6 +30,7 @@ type Options struct {
 	EnvPath            string
 }
 
+// getSpokesFromAllClusters returns a list of all spoke Clusters of a given cluster list
 func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, error) {
 	spokeMaps := make([]map[string]any, 0)
 	for _, cluster := range clusters {
@@ -46,7 +47,8 @@ func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, erro
 	return spokeMaps, nil
 }
 
-// buildTemplateContext creates a map for rendering templates with cluster config, catalog services, and env vars.
+// buildTemplateContext creates a map for rendering templates with cluster config, catalog services, and env vars and all clusters
+// if it is called with a hub cluster, the map contains also the spokes infos for all of them
 func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envconfig.EnvMap, allClusters []config.Cluster) (map[string]any, error) {
 	clusterMap, err := toJSONMap(cluster)
 	if err != nil {

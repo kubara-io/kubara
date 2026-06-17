@@ -28,7 +28,7 @@ bootstrapValues:
             name: cert-manager-webhook-ca
 {{/*
 Problem: Presumes that the secret exists in the secretstore,
-currently needs to be added manually.
+currently remoteRef needs to be added manually via additional-Values.yaml
 possible idea: add remotekey property to cluster structure
 */}}
 {{- if .spokes }}

@@ -93,3 +93,27 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 
 	return services, nil
 }
+
+// dirty temporyary solution to create blanked spoke cluster
+func CreateBlankSpokeCluster(name string) Cluster {
+	return Cluster{
+		Name:             name,
+		Stage:            "project-stage",
+		Type:             "spoke",
+		DNSName:          "<dns-name>",
+		SSOOrg:           "<my-org>",
+		SSOTeam:          "<my-team>",
+		IngressClassName: "traefik",
+		Terraform: &Terraform{
+			Provider:          "<provider>",
+			ProjectID:         "<project-id>",
+			KubernetesType:    "<edge or ske>",
+			KubernetesVersion: "1.34",
+			DNS: DNS{
+				Name:  "<dns-name>",
+				Email: "my-test@nowhere.com",
+			},
+		},
+		Services: nil,
+	}
+}
