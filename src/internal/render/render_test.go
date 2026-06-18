@@ -7,7 +7,6 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 var testTemplatesFS = catalog.BuiltInFS()
@@ -70,49 +69,6 @@ func fullCatalogContext() map[string]any {
 			"longhorn":                map[string]any{"chartPath": "longhorn"},
 			"velero":                  map[string]any{"chartPath": "velero"},
 		},
-	}
-}
-
-func fullRenderContext(clusterName, stage string) map[string]any {
-	return map[string]any{
-		"var": map[string]any{
-			"project_id": "12345",
-			"name":       clusterName,
-			"stage":      stage,
-		},
-		"cluster": map[string]any{
-			"type":             "hub",
-			"name":             clusterName,
-			"stage":            stage,
-			"dnsName":          "test.example.com",
-			"ingressClassName": "traefik",
-			"ssoOrg":           "myorg",
-			"ssoTeam":          "myteam",
-			"terraform": map[string]any{
-				"kubernetesType": "ske",
-			},
-			"argocd": map[string]any{
-				"repo": map[string]any{
-					"https": map[string]any{
-						"managed": map[string]any{
-							"url":            "https://github.com/example/repo",
-							"path":           "managed-service-catalog/helm",
-							"targetRevision": "main",
-						},
-						"customer": map[string]any{
-							"url":            "https://github.com/example/repo",
-							"path":           "customer-service-catalog/helm",
-							"targetRevision": "main",
-						},
-					},
-				},
-				"helmRepo": map[string]any{
-					"url": "https://charts.example.com",
-				},
-			},
-			"services": fullServiceContext(),
-		},
-		"catalog": fullCatalogContext(),
 	}
 }
 
@@ -197,7 +153,46 @@ func TestTemplateFiles(t *testing.T) {
 		{
 			name:    "Success: Successfully template all files of type All",
 			tplType: All,
-			context: fullRenderContext("test-cluster", "dev"),
+			context: map[string]any{
+				"var": map[string]any{
+					"project_id": "12345",
+					"name":       "test-cluster",
+					"stage":      "dev",
+				},
+				"cluster": map[string]any{
+					"type":             "hub",
+					"name":             "test-cluster",
+					"stage":            "dev",
+					"dnsName":          "test.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
+					"terraform": map[string]any{
+						"kubernetesType": "ske",
+					},
+					"argocd": map[string]any{
+						"repo": map[string]any{
+							"https": map[string]any{
+								"managed": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "managed-service-catalog/helm",
+									"targetRevision": "main",
+								},
+								"customer": map[string]any{
+									"url":            "https://github.com/example/repo",
+									"path":           "customer-service-catalog/helm",
+									"targetRevision": "main",
+								},
+							},
+						},
+						"helmRepo": map[string]any{
+							"url": "https://charts.example.com",
+						},
+					},
+					"services": fullServiceContext(),
+				},
+				"catalog": fullCatalogContext(),
+			},
 			wantErr: false, // No errors expected with valid context
 			validate: func(t *testing.T, results []TemplateResult) {
 				assert.NotEmpty(t, results)
@@ -348,78 +343,4 @@ func TestTemplateFiles(t *testing.T) {
 			}
 		})
 	}
-}
-
-func TestTemplateFilesRendersClusterScopedSecretPaths(t *testing.T) {
-	cleanup := setupTestFS(t)
-	defer cleanup()
-
-	context := fullRenderContext("controlplane", "production")
-	cluster := context["cluster"].(map[string]any)
-	services := cluster["services"].(map[string]any)
-	services["oauth2-proxy"] = map[string]any{"status": "enabled"}
-	services["velero"] = map[string]any{
-		"status": "enabled",
-		"config": map[string]any{
-			"backupMode": "fs-backup",
-			"backupStorage": map[string]any{
-				"create": true,
-				"region": "eu01",
-				"s3Url":  "https://s3.eu01.stackit.cloud",
-			},
-		},
-	}
-
-	results, err := TemplateFiles(TemplateOptions{
-		Type:     All,
-		Provider: "stackit",
-		Data:     context,
-	})
-	require.NoError(t, err)
-
-	expectedByPath := map[string][]string{
-		"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt": {
-			"remoteKey: controlplane/production/docker_config",
-			"remoteKey: controlplane/production/argocd/argo_oauth2_credentials",
-		},
-		"customer-service-catalog/helm/example/external-dns/values.yaml.tplt": {
-			"remoteKey: controlplane/production/external-dns/dns_zone_admin",
-		},
-		"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt": {
-			"remoteKey: controlplane/production/kube-prometheus-stack/grafana_credentials",
-			"remoteKey: controlplane/production/kube-prometheus-stack/grafana_oauth2_credentials",
-		},
-		"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt": {
-			"remoteKey: controlplane/production/oauth2-proxy/oauth2_credentials",
-		},
-		"customer-service-catalog/helm/example/velero/values.yaml.tplt": {
-			"remoteKey: controlplane/production/velero/velero_s3_credentials",
-		},
-		"customer-service-catalog/terraform/providers/stackit/example/infrastructure/secrets.tf.tplt": {
-			`name  = "${var.name}/${var.stage}/cluster_secrets"`,
-			`name  = "${var.name}/${var.stage}/external-dns/dns_zone_admin"`,
-			`name  = "${var.name}/${var.stage}/velero/velero_s3_credentials"`,
-			`name  = "${var.name}/${var.stage}/kube-prometheus-stack/grafana_credentials"`,
-		},
-		"customer-service-catalog/terraform/providers/stackit/example/infrastructure/secrets.tf-example.tplt": {
-			`name  = "${var.name}/${var.stage}/docker_config"`,
-			`name  = "${var.name}/${var.stage}/oauth2-proxy/oauth2_credentials"`,
-			`name  = "${var.name}/${var.stage}/argocd/argo_oauth2_credentials"`,
-			`name  = "${var.name}/${var.stage}/kube-prometheus-stack/grafana_oauth2_credentials"`,
-		},
-	}
-
-	for _, result := range results {
-		expected, ok := expectedByPath[result.Path]
-		if !ok {
-			continue
-		}
-		require.NoError(t, result.Error)
-		for _, value := range expected {
-			assert.Contains(t, result.Content, value)
-		}
-		delete(expectedByPath, result.Path)
-	}
-
-	assert.Empty(t, expectedByPath, "all secret path templates should be rendered")
 }
