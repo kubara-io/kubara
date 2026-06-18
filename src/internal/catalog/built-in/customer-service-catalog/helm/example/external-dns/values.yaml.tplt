@@ -12,10 +12,10 @@ externalSecrets:
     external-dns-webhook:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - remoteKey: dns_zone_admin
+        - remoteKey: external-dns/dns_zone_admin
           remoteKeyProperty: project_id
           secretKey: PROJECT_ID
-        - remoteKey: dns_zone_admin
+        - remoteKey: external-dns/dns_zone_admin
           remoteKeyProperty: sa_key_json
           secretKey: SA_KEY_JSON
 

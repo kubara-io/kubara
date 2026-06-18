@@ -155,7 +155,7 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 	log.Info().Msg("Configuring OpenBao for local external-secrets access")
 	// Intentianolly using the ArgoCD Wizard password for grafana as well. For convenience on the local evaluation
 	// environment and not requiring the user to fill out yet another variable during bootstrapping.
-	if err := configureLocalOpenBao(ctx, state.KubeconfigPath, opts.EnvMap.ArgocdWizardAccountPassword); err != nil {
+	if err := configureLocalOpenBao(ctx, state.KubeconfigPath, opts.EnvMap.ArgocdWizardAccountPassword, opts.EnvMap.DockerconfigBase64); err != nil {
 		return err
 	}
 	log.Info().
@@ -496,7 +496,7 @@ func writeLocalGenerateEnvFile(state *LocalState, envMap *envconfig.EnvMap) (str
 	return envPath, nil
 }
 
-func configureLocalOpenBao(ctx context.Context, kubeconfigPath, grafanaAdminPassword string) error {
+func configureLocalOpenBao(ctx context.Context, kubeconfigPath, grafanaAdminPassword, dockerconfigBase64 string) error {
 	if err := ensureOpenBaoSecretEngine(ctx, kubeconfigPath); err != nil {
 		return err
 	}
@@ -553,11 +553,23 @@ path "kv/metadata/*" {
 		return fmt.Errorf("configure OpenBao kubernetes role: %w", err)
 	}
 
-	if err := writeOpenBaoKVSecret(ctx, kubeconfigPath, "grafana_credentials", map[string]string{
+	if err := writeOpenBaoKVSecret(ctx, kubeconfigPath, "kube-prometheus-stack/grafana_credentials", map[string]string{
 		"admin-user":     "wizard",
 		"admin-password": grafanaAdminPassword,
 	}); err != nil {
 		return err
+	}
+
+	if envconfig.IsConfiguredEnvValue(dockerconfigBase64) {
+		dockerconfig, err := utils.DecodeB64(dockerconfigBase64)
+		if err != nil {
+			return fmt.Errorf("decode DOCKERCONFIG_BASE64 for local OpenBao: %w", err)
+		}
+		if err := writeOpenBaoKVSecret(ctx, kubeconfigPath, "docker_config", map[string]string{
+			"pull-secret": dockerconfig,
+		}); err != nil {
+			return err
+		}
 	}
 
 	return nil

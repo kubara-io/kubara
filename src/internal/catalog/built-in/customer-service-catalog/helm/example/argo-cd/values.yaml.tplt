@@ -74,7 +74,7 @@ externalSecrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: argo_oauth2_credentials
+        - remoteKey: argocd/argo_oauth2_credentials
 {{ end }}
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}

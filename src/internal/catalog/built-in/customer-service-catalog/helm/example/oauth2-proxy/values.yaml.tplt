@@ -24,7 +24,7 @@ externalSecrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: oauth2_credentials
+        - remoteKey: oauth2-proxy/oauth2_credentials
 
 
 oauth2-proxy:

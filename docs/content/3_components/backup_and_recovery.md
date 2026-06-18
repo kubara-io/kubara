@@ -86,7 +86,7 @@ clusters:
 
 For STACKIT, `backupStorage.create: true` makes kubara generate the dedicated Object Storage bucket (`bucket-velero-<name>-<stage>`) and credentials group. The bucket region defaults to `eu01` and can be changed through `backupStorage.region`. Set `backupStorage.s3Url` to the matching S3 endpoint for that region.
 
-The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path `velero_s3_credentials`, key `cloud`, in the form:
+The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path `velero/velero_s3_credentials`, key `cloud`, in the form:
 
 ```toml
 [default]
@@ -107,7 +107,7 @@ config:
     s3Url: https://s3.example.com
 ```
 
-With `backupStorage.create: false`, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path `velero_s3_credentials`, key `cloud`, using the same format shown above.
+With `backupStorage.create: false`, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path `velero/velero_s3_credentials`, key `cloud`, using the same format shown above.
 
 Then:
 

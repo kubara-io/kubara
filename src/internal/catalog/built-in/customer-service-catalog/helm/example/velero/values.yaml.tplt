@@ -20,7 +20,7 @@ externalSecrets:
       # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
-          remoteKey: velero_s3_credentials
+          remoteKey: velero/velero_s3_credentials
           remoteKeyProperty: cloud
 
 velero:
