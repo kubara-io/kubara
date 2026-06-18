@@ -11,6 +11,6 @@ func TestTerraformProviderIsSupported(t *testing.T) {
 		assert.True(t, provider.IsSupported(), "listed provider %q must be supported", provider)
 	}
 
-	assert.False(t, TerraformProviderPlaceholder.IsSupported())
+	assert.False(t, TerraformProviderNone.IsSupported())
 	assert.False(t, TerraformProvider("unknown").IsSupported())
 }

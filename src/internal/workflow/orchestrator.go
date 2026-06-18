@@ -19,7 +19,9 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			// Apply the new values from the environment to the found cluster.
 			cfg.Clusters[i].Stage = e.ProjectStage
 			cfg.Clusters[i].DNSName = dnsName
-			cfg.Clusters[i].Terraform.DNS.Name = dnsName
+			if cfg.Clusters[i].Terraform != nil {
+				cfg.Clusters[i].Terraform.DNS.Name = dnsName
+			}
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {

@@ -194,9 +194,11 @@ During `kubara generate`, kubara renders templates and writes them into your rep
 - `example` path segments with the current cluster name
 
 Provider-specific template variants are supported only below `terraform/providers/<provider>/`, for example `customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt`.
-When `terraform.provider` matches the provider name, kubara strips the `providers/<provider>/` path segment and uses that provider-specific file for the generated output path. If a common template and a provider-specific template resolve to the same output path, the provider-specific template replaces the common one; kubara does not deep-merge template files.
+When `terraform.provider` matches a supported provider name, kubara strips the `providers/<provider>/` path segment and uses that provider-specific file for the generated output path. If a common template and a provider-specific template resolve to the same output path, the provider-specific template replaces the common one; kubara does not deep-merge template files.
 
-Helm provider directories such as `helm/providers/<provider>/` are not supported. Keep provider-specific Helm behavior in a common values template or in the Helm chart itself.
+If a cluster has no Terraform block or uses `terraform.provider: none`, the default `kubara generate` command skips Terraform templates for that cluster. `kubara generate --terraform` still requires a supported Terraform provider.
+
+Provider directories below Helm paths are not treated as provider-specific overrides. Keep provider-specific Helm behavior in a common values template or in the Helm chart itself.
 
 ## Creating your own catalog
 

@@ -45,9 +45,6 @@ func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get template files for provider %q: %w", options.Provider, err)
 	}
-	if err := rejectHelmProviderPaths(fileList); err != nil {
-		return nil, err
-	}
 
 	selected, err := selectTemplateFilesForProvider(fileList, options.Provider, options.Overwrite)
 	if err != nil {
@@ -245,25 +242,6 @@ func getTemplateFiles(options TemplateOptions) ([]templateFile, error) {
 
 func normalizeProviderName(provider string) string {
 	return strings.ToLower(strings.TrimSpace(provider))
-}
-
-func isHelmProviderPath(relPath string) bool {
-	parts := strings.Split(filepath.ToSlash(relPath), "/")
-	for idx := 1; idx < len(parts); idx++ {
-		if parts[idx] == providerFolderName && parts[idx-1] == Helm.String() {
-			return true
-		}
-	}
-	return false
-}
-
-func rejectHelmProviderPaths(files []templateFile) error {
-	for _, file := range files {
-		if isHelmProviderPath(file.sourcePath) {
-			return fmt.Errorf("helm provider template directories are not supported: %q", file.sourcePath)
-		}
-	}
-	return nil
 }
 
 func splitProviderPath(relPath string) (string, string, bool) {

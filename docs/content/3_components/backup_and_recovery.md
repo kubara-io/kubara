@@ -146,6 +146,7 @@ When you use `backupMode: csi-snapshot` or `backupMode: csi-data-mover`, Velero 
 
 kubara writes `volumeSnapshotClass.k8sProvider` into the generated Velero values based on `terraform.provider`.
 If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own `VolumeSnapshotClass` in `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`.
+When `terraform.provider` is `none`, kubara does not select a built-in `VolumeSnapshotClass` provider.
 
 `volumeSnapshotClass.customDefinition` takes precedence over the provider mapping, so this is the recommended way to supply a fully custom snapshot class.
 

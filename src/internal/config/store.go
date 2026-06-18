@@ -71,6 +71,7 @@ func (cs *ConfigStore) Load() error {
 	}
 
 	applyDefaults(cs.config)
+	normalizeDisabledTerraform(cs.config)
 	if err := cs.applyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
 	}
@@ -86,6 +87,15 @@ func (cs *ConfigStore) Load() error {
 	}
 
 	return nil
+}
+
+func normalizeDisabledTerraform(cfg *Config) {
+	for idx := range cfg.Clusters {
+		terraform := cfg.Clusters[idx].Terraform
+		if terraform != nil && terraform.Provider == TerraformProviderNone {
+			cfg.Clusters[idx].Terraform = nil
+		}
+	}
 }
 
 func isLegacyConfig(raw map[string]any) bool {
@@ -328,11 +338,43 @@ func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
 		return nil, fmt.Errorf("unmarshal schema: %w", err)
 	}
 	ensureServiceConfigDefinition(schemaDoc)
+	allowDisabledTerraformSchema(schemaDoc)
 	if err := composeServiceSchema(schemaDoc, cat); err != nil {
 		return nil, fmt.Errorf("compose service schema: %w", err)
 	}
 
 	return schemaDoc, nil
+}
+
+func allowDisabledTerraformSchema(schemaDoc map[string]any) {
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	if !ok {
+		return
+	}
+
+	terraform, ok := defs["Terraform"].(map[string]any)
+	if !ok {
+		return
+	}
+
+	required, ok := terraform["required"].([]any)
+	if !ok || len(required) == 0 {
+		return
+	}
+
+	terraform["anyOf"] = []any{
+		map[string]any{
+			"properties": map[string]any{
+				"provider": map[string]any{
+					"const": string(TerraformProviderNone),
+				},
+			},
+		},
+		map[string]any{
+			"required": required,
+		},
+	}
+	delete(terraform, "required")
 }
 
 // ensureServiceConfigDefinition ensures that for every service the

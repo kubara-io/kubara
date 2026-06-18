@@ -249,19 +249,7 @@ func TestGenerateCmd(t *testing.T) {
 				})
 
 				//dummy values
-				envPath := createTestEnv(t, tempDir, envconfig.EnvMap{
-					ProjectName:                 "project-name",
-					ProjectStage:                "project-stage",
-					DockerconfigBase64:          "DockerConfig",
-					ArgocdWizardAccountPassword: "wizardpassword",
-					ArgocdGitHttpsUrl:           "https://example.com",
-					ArgocdGitUsername:           "CoolCapybara",
-					ArgocdGitPatOrPassword:      "password",
-					ArgocdHelmRepoUrl:           "https://example.com",
-					ArgocdHelmRepoUsername:      "CoolCapybara",
-					ArgocdHelmRepoPassword:      "password",
-					DomainName:                  "example.com",
-				})
+				envPath := createDefaultGenerateTestEnv(t, tempDir)
 
 				// Add global flags
 				globalFlags := []string{
@@ -301,7 +289,7 @@ func TestGenerateCmd(t *testing.T) {
 	}
 }
 
-func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
+func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
 	configPath := createTestConfig(t, tempDir, config.Cluster{
@@ -328,47 +316,25 @@ func TestGenerateCmd_MissingProviderUsesDefault(t *testing.T) {
 	})
 
 	//dummy values
-	createTestEnv(t, tempDir, envconfig.EnvMap{
-		ProjectName:                 "project-name",
-		ProjectStage:                "project-stage",
-		DockerconfigBase64:          "DockerConfig",
-		ArgocdWizardAccountPassword: "wizardpassword",
-		ArgocdGitHttpsUrl:           "https://example.com",
-		ArgocdGitUsername:           "CoolCapybara",
-		ArgocdGitPatOrPassword:      "password",
-		ArgocdHelmRepoUrl:           "https://example.com",
-		ArgocdHelmRepoUsername:      "CoolCapybara",
-		ArgocdHelmRepoPassword:      "password",
-		DomainName:                  "example.com",
-	})
+	createDefaultGenerateTestEnv(t, tempDir)
 
 	app := createTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
-	require.NoError(t, err)
-
-	terraformDir := filepath.Join(tempDir, "managed-service-catalog", "terraform")
-	entries, err := os.ReadDir(terraformDir)
-	require.NoError(t, err)
-	assert.NotEmpty(t, entries)
-
-	// Provider ske-cluster directory and main.tf exists
-	// as stackit is the default provider when none is specified.
-	_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
-	require.NoError(t, err)
-
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "missing terraform configuration")
 }
 
-func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
+func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
 	configPath := createTestConfig(t, tempDir, config.Cluster{
-		Name:    "placeholder-provider-cluster",
+		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
 		DNSName: "test.example.com",
 		Terraform: &config.Terraform{
-			Provider:          "<provider>",
+			Provider:          "",
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
 			KubernetesType:    "ske",
 			KubernetesVersion: "1.28.0",
@@ -385,28 +351,86 @@ func TestGenerateCmd_PlaceholderProviderFailsWithHint(t *testing.T) {
 		Services: createTestServices(),
 	})
 
-	app := createTestApp(NewGenerateCmd())
-
 	//dummy values
-	createTestEnv(t, tempDir, envconfig.EnvMap{
-		ProjectName:                 "project-name",
-		ProjectStage:                "project-stage",
-		DockerconfigBase64:          "DockerConfig",
-		ArgocdWizardAccountPassword: "wizardpassword",
-		ArgocdGitHttpsUrl:           "https://example.com",
-		ArgocdGitUsername:           "CoolCapybara",
-		ArgocdGitPatOrPassword:      "password",
-		ArgocdHelmRepoUrl:           "https://example.com",
-		ArgocdHelmRepoUsername:      "CoolCapybara",
-		ArgocdHelmRepoPassword:      "password",
-		DomainName:                  "example.com",
+	createDefaultGenerateTestEnv(t, tempDir)
+
+	app := createTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	entries, err := os.ReadDir(helmDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, entries)
+
+	_, err = os.Stat(filepath.Join(tempDir, "managed-service-catalog", "terraform"))
+	assert.ErrorIs(t, err, os.ErrNotExist)
+}
+
+func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "helm-only-cluster",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "test.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: createTestServices(),
 	})
 
+	//dummy values
+	createDefaultGenerateTestEnv(t, tempDir)
+
+	app := createTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	entries, err := os.ReadDir(helmDir)
+	require.NoError(t, err)
+	assert.NotEmpty(t, entries)
+
+	_, err = os.Stat(filepath.Join(tempDir, "managed-service-catalog", "terraform"))
+	assert.ErrorIs(t, err, os.ErrNotExist)
+}
+
+func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
+	tempDir := t.TempDir()
+
+	configPath := createTestConfig(t, tempDir, config.Cluster{
+		Name:    "missing-terraform-cluster",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "test.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: createTestServices(),
+	})
+
+	//dummy values
+	createDefaultGenerateTestEnv(t, tempDir)
+
+	app := createTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "placeholder provider")
-	assert.Contains(t, err.Error(), "supported providers: \"stackit\"")
+	assert.Contains(t, err.Error(), "missing terraform configuration")
 }
 
 // Helper function
@@ -426,6 +450,24 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 	require.NoError(t, err)
 
 	return configPath
+}
+
+func createDefaultGenerateTestEnv(t *testing.T, dir string) string {
+	t.Helper()
+
+	return createTestEnv(t, dir, envconfig.EnvMap{
+		ProjectName:                 "project-name",
+		ProjectStage:                "project-stage",
+		DockerconfigBase64:          "DockerConfig",
+		ArgocdWizardAccountPassword: "wizardpassword",
+		ArgocdGitHttpsUrl:           "https://example.com",
+		ArgocdGitUsername:           "CoolCapybara",
+		ArgocdGitPatOrPassword:      "password",
+		ArgocdHelmRepoUrl:           "https://example.com",
+		ArgocdHelmRepoUsername:      "CoolCapybara",
+		ArgocdHelmRepoPassword:      "password",
+		DomainName:                  "example.com",
+	})
 }
 
 // createTestEnv writes an envMap to the file system
