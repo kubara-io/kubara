@@ -66,6 +66,7 @@ plugins:
       links_attr_map:
         target: _blank
   - drawio:
+      viewer_js: "/js/viewer-static.min.js"
       edit: false
       darkmode: false
 markdown_extensions:
@@ -85,6 +86,7 @@ theme:
   custom_dir: overrides
   logo: images/logo.svg
   favicon: images/favicon.ico
+  font: false
   features:
     - search.suggest
     - navigation.sections
@@ -117,4 +119,6 @@ extra:
     provider: mike
     alias: true
     default: latest-stable
+copyright: Copyright &copy; kubara &middot; <a href="https://stackit.com/de/impressum?hidebanner=true">Imprint</a> &middot;
+  <a href="https://kubara.io/privacy/">Privacy</a>
 strict: true
