@@ -272,7 +272,7 @@ spec:
       version: v2
 ```
 
-Kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
+kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
 `<cluster-name>/<stage>/<namespace>/<secret>`, while cluster-wide secrets use
 `<cluster-name>/<stage>/<secret>`. For example, Grafana credentials for the
 `controlplane` production cluster live at
