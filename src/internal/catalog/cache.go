@@ -180,7 +180,9 @@ func copyFile(sourcePath, targetPath string, mode fs.FileMode) error {
 	if err != nil {
 		return fmt.Errorf("open cached catalog file %q: %w", sourcePath, err)
 	}
-	defer sourceFile.Close()
+	defer func() {
+		_ = sourceFile.Close()
+	}()
 
 	targetFile, err := os.OpenFile(targetPath, os.O_CREATE|os.O_EXCL|os.O_WRONLY, mode)
 	if err != nil {

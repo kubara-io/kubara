@@ -72,7 +72,9 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	if err != nil {
 		return CachedArtifact{}, fmt.Errorf("create file store: %w", err)
 	}
-	defer fileStore.Close()
+	defer func() {
+		_ = fileStore.Close()
+	}()
 	fileStore.TarReproducible = true
 
 	layerDescriptor, err := fileStore.Add(ctx, manifest.Metadata.Name, CatalogLayerMediaType, stagingRoot)
@@ -132,7 +134,9 @@ func extractCatalogContents(ctx context.Context, layoutStore *oci.Store, desc v1
 	if err != nil {
 		return "", fmt.Errorf("create extracted file store: %w", err)
 	}
-	defer fileStore.Close()
+	defer func() {
+		_ = fileStore.Close()
+	}()
 
 	if err := oras.CopyGraph(ctx, layoutStore, fileStore, desc, oras.DefaultCopyGraphOptions); err != nil {
 		return "", fmt.Errorf("extract catalog contents: %w", err)
