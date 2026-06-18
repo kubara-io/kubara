@@ -2832,6 +2832,11 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://&lt;your-secrets-manager-endpoint&gt;&quot;</span>
 <span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
 </code></pre></div>
+<p>kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
+<code>&lt;cluster-name&gt;/&lt;stage&gt;/&lt;namespace&gt;/&lt;secret&gt;</code>, while cluster-wide secrets use
+<code>&lt;cluster-name&gt;/&lt;stage&gt;/cluster_secrets/&lt;secret&gt;</code>. For example, Grafana credentials for the
+<code>controlplane</code> production cluster live at
+<code>controlplane/production/kube-prometheus-stack/grafana_credentials</code>.</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
 <p>Recommended for the first bootstrap with external-secrets: let kubara apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>

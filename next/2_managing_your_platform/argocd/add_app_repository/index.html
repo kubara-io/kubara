@@ -2287,7 +2287,8 @@ a way to deploy their applications onto your platform without much intervention 
 For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <h2 id="add-credentials-to-vault"><strong>Add credentials to vault</strong></h2>
-<p>Add the repository credentials to your vault. This can be a <code>password</code> or a <code>PAT</code>.
+<p>Add the repository credentials to your vault at
+<code>&lt;cluster-name&gt;/&lt;stage&gt;/argocd/repo_pat</code>. This can be a <code>password</code> or a <code>PAT</code>.
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">&quot;repo_pat&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
 <span class="w">    </span><span class="nt">&quot;pat&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;&lt;the kubeconfig&gt;&quot;</span>
@@ -2301,7 +2302,7 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <span class="w">      </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
 <span class="w">      </span><span class="c1"># # This points to the secret in vault</span>
 <span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">repo_pat</span>
+<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-name&gt;/&lt;stage&gt;/argocd/repo_pat</span>
 <span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pat</span>
 <span class="w">      </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
 <span class="w">      </span><span class="nt">secretStoreRef</span><span class="p">:</span>

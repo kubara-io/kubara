@@ -1293,7 +1293,7 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-spoke-0</span>
 <span class="w">      </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-production</span>
 <span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my_clusters</span>
+<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub-cluster-name&gt;/&lt;stage&gt;/argocd/my_clusters</span>
 <span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
 <span class="w">      </span><span class="nt">secretStoreRef</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>

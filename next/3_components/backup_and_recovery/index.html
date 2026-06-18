@@ -2561,7 +2561,7 @@ on Velero for dynamic data that gets generated in runtime like the contents of P
 <span class="w">            </span><span class="nt">s3Url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://object.storage.eu01.onstackit.cloud</span>
 </code></pre></div>
 <p>For STACKIT, <code>backupStorage.create: true</code> makes kubara generate the dedicated Object Storage bucket (<code>bucket-velero-&lt;name&gt;-&lt;stage&gt;</code>) and credentials group. The bucket region defaults to <code>eu01</code> and can be changed through <code>backupStorage.region</code>. Set <code>backupStorage.s3Url</code> to the matching S3 endpoint for that region.</p>
-<p>The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path <code>velero_s3_credentials</code>, key <code>cloud</code>, in the form:</p>
+<p>The generated Terraform writes the S3-compatible credentials into STACKIT Secrets Manager at path <code>&lt;cluster-name&gt;/&lt;stage&gt;/velero/velero_s3_credentials</code>, key <code>cloud</code>, in the form:</p>
 <div class="highlight"><pre><span></span><code><span class="k">[default]</span>
 <span class="n">aws_access_key_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">&lt;ACCESS</span><span class="mi">_</span><span class="n">KEY_ID</span><span class="err">&gt;</span>
 <span class="n">aws_secret_access_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">&lt;SECRET</span><span class="mi">_</span><span class="n">ACCESS_KEY</span><span class="err">&gt;</span>
@@ -2575,7 +2575,7 @@ on Velero for dynamic data that gets generated in runtime like the contents of P
 <span class="w">    </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eu01</span>
 <span class="w">    </span><span class="nt">s3Url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://s3.example.com</span>
 </code></pre></div>
-<p>With <code>backupStorage.create: false</code>, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path <code>velero_s3_credentials</code>, key <code>cloud</code>, using the same format shown above.</p>
+<p>With <code>backupStorage.create: false</code>, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path <code>&lt;cluster-name&gt;/&lt;stage&gt;/velero/velero_s3_credentials</code>, key <code>cloud</code>, using the same format shown above.</p>
 <p>Then:</p>
 <ol>
 <li>Run <code>kubara generate</code></li>
