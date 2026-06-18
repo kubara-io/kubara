@@ -62,11 +62,6 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}
 	defer cleanup()
 
-	stagingRoot := filepath.Join(tempArtifactDir, "staging", manifest.Metadata.Name)
-	if err := stageCatalogPackageRoot(catalogRoot, stagingRoot); err != nil {
-		return CachedArtifact{}, fmt.Errorf("stage catalog package contents: %w", err)
-	}
-
 	ctx := context.Background()
 	fileStore, err := file.New(tempArtifactDir)
 	if err != nil {
@@ -77,7 +72,7 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}()
 	fileStore.TarReproducible = true
 
-	layerDescriptor, err := fileStore.Add(ctx, manifest.Metadata.Name, CatalogLayerMediaType, stagingRoot)
+	layerDescriptor, err := fileStore.Add(ctx, manifest.Metadata.Name, CatalogLayerMediaType, catalogRoot)
 	if err != nil {
 		return CachedArtifact{}, fmt.Errorf("package catalog directory: %w", err)
 	}
@@ -151,12 +146,4 @@ func extractCatalogContents(ctx context.Context, layoutStore *oci.Store, desc v1
 	}
 
 	return filepath.Join(contentsDir, entries[0].Name()), nil
-}
-
-func stageCatalogPackageRoot(sourceRoot, targetRoot string) error {
-	if err := os.MkdirAll(filepath.Dir(targetRoot), 0o755); err != nil {
-		return fmt.Errorf("create staging directory %q: %w", filepath.Dir(targetRoot), err)
-	}
-
-	return copyDirectory(sourceRoot, targetRoot)
 }

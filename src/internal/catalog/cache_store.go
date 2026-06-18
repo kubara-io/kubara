@@ -81,13 +81,34 @@ func readJSONFile(path, label string, target any) error {
 	return nil
 }
 
+// writeJSONFile atomically writes files. Meaning if a file already exists
+// it guarantees that no partial overwrite can happen by first writting to
+// a temporary file and then overwriting the original by renaming
 func writeJSONFile(path, label string, value any) error {
 	raw, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {
 		return fmt.Errorf("marshal %s: %w", label, err)
 	}
-	if err := os.WriteFile(path, raw, 0o600); err != nil {
-		return fmt.Errorf("write %s: %w", label, err)
+	dir := filepath.Dir(path)
+	f, err := os.CreateTemp(dir, ".tmp-*")
+	if err != nil {
+		return fmt.Errorf("create temp %s: %w", label, err)
+	}
+	tmp := f.Name()
+	defer func() { _ = os.Remove(tmp) }()
+
+	if _, err := f.Write(raw); err != nil {
+		_ = f.Close()
+		return fmt.Errorf("write temp %s: %w", label, err)
+	}
+	if err := f.Close(); err != nil {
+		return fmt.Errorf("close temp %s: %w", label, err)
+	}
+	if err := os.Chmod(tmp, 0o600); err != nil {
+		return fmt.Errorf("chmod temp %s: %w", label, err)
+	}
+	if err := os.Rename(tmp, path); err != nil {
+		return fmt.Errorf("replace %s: %w", label, err)
 	}
 	return nil
 }
