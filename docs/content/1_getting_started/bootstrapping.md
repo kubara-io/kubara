@@ -274,7 +274,7 @@ spec:
 
 kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
 `<cluster-name>/<stage>/<namespace>/<secret>`, while cluster-wide secrets use
-`<cluster-name>/<stage>/<secret>`. For example, Grafana credentials for the
+`<cluster-name>/<stage>/cluster_secrets/<secret>`. For example, Grafana credentials for the
 `controlplane` production cluster live at
 `controlplane/production/kube-prometheus-stack/grafana_credentials`.
 

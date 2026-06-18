@@ -566,7 +566,7 @@ path "kv/metadata/*" {
 		if err != nil {
 			return fmt.Errorf("decode DOCKERCONFIG_BASE64 for local OpenBao: %w", err)
 		}
-		if err := writeOpenBaoKVSecret(ctx, kubeconfigPath, secretPathPrefix+"/docker_config", map[string]string{
+		if err := writeOpenBaoKVSecret(ctx, kubeconfigPath, secretPathPrefix+"/cluster_secrets/docker_config", map[string]string{
 			"pull-secret": dockerconfig,
 		}); err != nil {
 			return err

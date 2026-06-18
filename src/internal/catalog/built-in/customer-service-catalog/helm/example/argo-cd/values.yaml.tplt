@@ -10,7 +10,7 @@ bootstrapValues:
         kind: ClusterSecretStore
         name: "{{ .cluster.name }}-{{ .cluster.stage }}"
       remoteRef:
-        remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/docker_config
+        remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/cluster_secrets/docker_config
         remoteKeyProperty: pull-secret
   projects:
     {{ .cluster.name }}-{{ .cluster.stage }}:
