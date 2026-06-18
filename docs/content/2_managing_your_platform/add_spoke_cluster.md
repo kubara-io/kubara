@@ -178,7 +178,7 @@ bootstrapValues:
     - name: my-new-spoke-0
       project: hub-production
       remoteRef:
-        remoteKey: my_clusters
+        remoteKey: <hub-cluster-name>/<stage>/argocd/my_clusters
         remoteKeyProperty: k8s-spoke-0
       secretStoreRef:
         kind: ClusterSecretStore

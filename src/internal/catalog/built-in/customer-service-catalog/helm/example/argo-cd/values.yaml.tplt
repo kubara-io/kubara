@@ -10,7 +10,7 @@ bootstrapValues:
         kind: ClusterSecretStore
         name: "{{ .cluster.name }}-{{ .cluster.stage }}"
       remoteRef:
-        remoteKey: docker_config
+        remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/docker_config
         remoteKeyProperty: pull-secret
   projects:
     {{ .cluster.name }}-{{ .cluster.stage }}:
@@ -74,7 +74,7 @@ externalSecrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: argocd/argo_oauth2_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/argocd/argo_oauth2_credentials
 {{ end }}
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}

@@ -7,7 +7,8 @@ For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/
 
 ## **Add credentials to vault**
-Add the repository credentials to your vault. This can be a `password` or a `PAT`.
+Add the repository credentials to your vault at
+`<cluster-name>/<stage>/argocd/repo_pat`. This can be a `password` or a `PAT`.
 ```json
 {
   "repo_pat": {
@@ -23,7 +24,7 @@ repositories:
       projectScope: k8s-spoke-0
       # # This points to the secret in vault
       remoteRef:
-        remoteKey: repo_pat
+        remoteKey: <cluster-name>/<stage>/argocd/repo_pat
         remoteKeyProperty: pat
       repoType: git
       secretStoreRef:
