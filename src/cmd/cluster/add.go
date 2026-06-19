@@ -17,9 +17,9 @@ import (
 func AddCluster() *cli.Command {
 	return &cli.Command{
 		Name:        "add",
-		Usage:       "Create a new spoke cluster for the hub",
+		Usage:       "Add a new spoke cluster to your config",
 		UsageText:   "kubara cluster add <cluster-name>",
-		Description: "Adds a new spoke cluster to the existing hub cluster",
+		Description: "Adds a new spoke cluster to an existing config yaml",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name: "cluster-name",

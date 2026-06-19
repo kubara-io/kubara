@@ -5,11 +5,10 @@ import (
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/service"
 )
 
+// Internal Function for the 'kubara cluster add [spoke-name]' command
 func AddCluster(configFilePath string, spokeName string, catalogOptions catalog.LoadOptions) error {
-
 	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
 	err := configStore.Load()
 	if err != nil {
@@ -26,31 +25,9 @@ func AddCluster(configFilePath string, spokeName string, catalogOptions catalog.
 	if err = configStore.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply spoke catalog defaults: %w", err)
 	}
-	configStore.SaveToFile()
+	if err = configStore.SaveToFile(); err != nil {
+		return fmt.Errorf("save config to file: %w", err)
+	}
 
 	return nil
-}
-
-// findHubCluster looks for the Hub cluster in a list of clusters and returns it
-func findHubCluster(clusters []config.Cluster) config.Cluster {
-	for _, cluster := range clusters {
-		if cluster.Type == "hub" {
-			return cluster
-		}
-	}
-	// base case, only necessary for compiler,
-	// should not execute in a default environment
-	return config.Cluster{}
-}
-
-// disableServicesFor, receives a service map and a list of serviceNames
-// Goes through the list of service names and for each sets the status to disabled
-// Returns an updated list of serviceName
-func disableServicesFor(services map[string]service.Service, serviceNames []string) service.Services {
-	for _, name := range serviceNames {
-		svc := services[name]
-		svc.Status = service.StatusDisabled
-		services[name] = svc
-	}
-	return services
 }

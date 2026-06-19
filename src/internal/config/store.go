@@ -605,7 +605,7 @@ func (cs *ConfigStore) ApplyServiceCatalogDefaults() error {
 		}
 
 		for name, def := range cat.Services {
-			catalogService, _ := cat.Services[name]
+			catalogService := cat.Services[name]
 			supportedTypes := catalogService.Spec.ClusterTypes
 
 			if !slices.Contains(supportedTypes, cluster.Type) {

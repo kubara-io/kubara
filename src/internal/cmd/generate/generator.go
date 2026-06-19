@@ -34,7 +34,7 @@ type Options struct {
 func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, error) {
 	spokeMaps := make([]map[string]any, 0)
 	for _, cluster := range clusters {
-		if cluster.Type != "spoke" {
+		if cluster.Type != config.Spoke {
 			continue
 		}
 		spokeMap, err := toJSONMap(cluster)
@@ -65,7 +65,7 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 		"cluster": clusterMap,
 		"catalog": resolveCatalog(cat),
 	}
-	if cluster.Type == "hub" {
+	if cluster.Type == config.Hub {
 		spokes, err := getSpokesFromAllClusters(allClusters)
 		if err != nil {
 			return nil, err

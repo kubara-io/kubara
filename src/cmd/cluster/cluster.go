@@ -5,9 +5,9 @@ import "github.com/urfave/cli/v3"
 func NewClusterCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "cluster",
-		Usage:       "Manage clusters for Kubara",
+		Usage:       "Manage your kubara cluster configurations",
 		UsageText:   "kubara cluster [command]",
-		Description: "Enables handling for hub and spoke clusters",
+		Description: "Enables the configuration and quick setup of clusters",
 		Commands: []*cli.Command{
 			CreateClusterList(),
 			AddCluster(),

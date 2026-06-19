@@ -8,6 +8,11 @@ import (
 
 const ConfigVersionV1Alpha1 = "v1alpha1"
 
+const (
+	Hub   string = "hub"
+	Spoke string = "spoke"
+)
+
 // TerraformProvider identifies an infrastructure provider with embedded Terraform templates.
 type TerraformProvider string
 

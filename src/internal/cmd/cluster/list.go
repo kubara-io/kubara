@@ -10,10 +10,7 @@ import (
 )
 
 // Internal Function for the 'kubara cluster ls' command
-// Requires the configFilePath for the ConfigStore
-// Prints out the context in tabular form
 func ListClusters(configFilePath string) error {
-
 	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalog.LoadOptions{})
 	err := configStore.Load()
 	if err != nil {
@@ -23,15 +20,21 @@ func ListClusters(configFilePath string) error {
 	clusters := configStore.GetConfig().Clusters
 
 	writer := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(writer, "NAME\tTYPE\tPROVIDER")
+	_, err = fmt.Fprintln(writer, "NAME\tTYPE\tPROVIDER")
+	if err != nil {
+		return fmt.Errorf("print table head into buffer: %w", err)
+	}
 	for _, cluster := range clusters {
-		fmt.Fprintf(
+		_, err = fmt.Fprintf(
 			writer,
 			"%s\t%s\t%s\n",
 			cluster.Name,
 			cluster.Type,
 			cluster.Terraform.Provider,
 		)
+		if err != nil {
+			return fmt.Errorf("print list into buffer: %w", err)
+		}
 	}
 	return writer.Flush()
 }
