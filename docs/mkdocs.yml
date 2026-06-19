@@ -19,7 +19,7 @@ nav:
               - Terraform Bootstrap: 1_getting_started/providers/stackit_terraform_bootstrap.md
               - Provisioning Infrastructure:
                   - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
-                  - Edge Cloud: 1_getting_started/providers/stackit_provisioning_edgecloud.md
+                  - Edge Cloud (Beta): 1_getting_started/providers/stackit_provisioning_edgecloud.md
       - Commands: 1_getting_started/commands.md
   - Managing Your Platform:
       - How to add a Spoke Cluster: 2_managing_your_platform/add_spoke_cluster.md

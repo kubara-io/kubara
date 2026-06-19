@@ -1,5 +1,10 @@
 # STACKIT Provisioning Infrastructure (Edge Cloud)
 
+!!! warning "Beta support"
+    kubara's Edge Cloud provisioning path is currently beta and intentionally documents one example integration path.
+    STACKIT Edge Cloud itself is also still a beta service and may only be available to selected customers.
+    Expect provider APIs, service behavior, and the generated kubara examples to change.
+
 Edge Cloud setups are usually highly individual.
 Some teams run only STACKIT VMs, some run only bare metal, and others use mixed environments (VM + bare metal, even across different clouds).
 
