@@ -43,6 +43,9 @@ bootstrapValues:
         {{ $serviceName }}:
           name: {{ $serviceName }}
           path: {{ dig "catalog" "services" $serviceName "chartPath" $serviceName $ }}
+{{- if eq $serviceName "longhorn" }}
+          namespace: longhorn
+{{- end }}
 {{- end }}
 
 
