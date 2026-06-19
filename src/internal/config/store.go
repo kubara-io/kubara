@@ -56,6 +56,14 @@ func (cs *ConfigStore) Load() error {
 		}
 	}
 
+	V1Alpha1Config := isV1Alpha1Config(raw)
+	if V1Alpha1Config {
+		raw, err = migrateV1Alpha1Config(raw)
+		if err != nil {
+			return fmt.Errorf("migrate V1Alpha1 config: %w", err)
+		}
+	}
+
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
@@ -80,7 +88,7 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("validate config: %w", err)
 	}
 
-	if legacyConfig {
+	if legacyConfig || V1Alpha1Config {
 		if err := cs.SaveToFile(); err != nil {
 			return fmt.Errorf("persist migrated config: %w", err)
 		}
@@ -101,6 +109,11 @@ func normalizeDisabledTerraform(cfg *Config) {
 func isLegacyConfig(raw map[string]any) bool {
 	_, hasVersion := raw["version"]
 	return !hasVersion
+}
+
+func isV1Alpha1Config(raw map[string]any) bool {
+	version, hasVersion := raw["version"]
+	return version == ConfigVersionV1Alpha1 && hasVersion
 }
 
 func migrateLegacyConfig(raw map[string]any) (map[string]any, error) {
@@ -129,6 +142,67 @@ func migrateLegacyConfig(raw map[string]any) (map[string]any, error) {
 
 	raw["clusters"] = clusters
 	return raw, nil
+}
+
+func migrateV1Alpha1Config(config map[string]any) (map[string]any, error) {
+	config["version"] = ConfigVersionV1Alpha2
+	clustersRaw, ok := config["clusters"]
+	if !ok {
+		return config, nil
+	}
+
+	clusters, ok := clustersRaw.([]any)
+	if !ok {
+		return config, nil
+	}
+
+	for i, clusterRaw := range clusters {
+		cluster, ok := clusterRaw.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		if err := migrateV1Alpha1Cluster(cluster, i); err != nil {
+			return nil, fmt.Errorf("cannot migrate cluster number %d: %w", i, err)
+		}
+
+		clusters[i] = cluster
+	}
+
+	config["clusters"] = clusters
+	return config, nil
+}
+
+func migrateV1Alpha1Cluster(cluster map[string]any, clusterIndex int) error {
+	publicIps, hasPublic := cluster["publicLoadBalancerIP"]
+	privateIps, hasPrivate := cluster["privateLoadBalancerIP"]
+	if !hasPublic && !hasPrivate {
+		return nil
+	}
+
+	servicesRaw, ok := cluster["services"]
+	if !ok {
+		return nil
+	}
+
+	servicesMap, ok := servicesRaw.(map[string]any)
+	if !ok {
+		return fmt.Errorf("%s.services must be an object", legacyClusterLabel(cluster, clusterIndex))
+	}
+
+	metallb, ok := servicesMap["metallb"].(map[string]any)
+	if !ok {
+		metallb = map[string]any{}
+	}
+
+	metallb["config"] = map[string]any{
+		"publicLoadBalancerIp":  publicIps,
+		"privateLoadBalancerIp": privateIps,
+	}
+	servicesMap["metallb"] = metallb
+	delete(cluster, "publicLoadBalancerIP")
+	delete(cluster, "privateLoadBalancerIP")
+	return nil
 }
 
 func migrateLegacyCluster(cluster map[string]any, clusterIndex int) error {

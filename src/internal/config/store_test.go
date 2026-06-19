@@ -65,8 +65,14 @@ func newValidTestConfig() *Config {
 					"homer-dashboard":         {Status: service.StatusEnabled},
 					"oauth2-proxy":            {Status: service.StatusEnabled},
 					"metrics-server":          {Status: service.StatusEnabled},
-					"metallb":                 {Status: service.StatusEnabled},
-					"longhorn":                {Status: service.StatusEnabled},
+					// KPE-396 - #TODO: Fully Implement KPE-396
+					"metallb": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"publicIpRange":   "127.0.0.1",
+							"privateIpRange":   "127.0.0.1",
+					},
+					"longhorn": {Status: service.StatusEnabled},
 					"velero": {
 						Status: service.StatusEnabled,
 						Config: service.Config{
