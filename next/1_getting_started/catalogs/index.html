@@ -2696,6 +2696,10 @@ kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w">
 <li><code>customer-service-catalog/</code> with the configured customer overlay output path</li>
 <li><code>example</code> path segments with the current cluster name</li>
 </ul>
+<p>Provider-specific template variants are supported only below <code>terraform/providers/&lt;provider&gt;/</code>, for example <code>customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt</code>.
+When <code>terraform.provider</code> matches a supported provider name, kubara strips the <code>providers/&lt;provider&gt;/</code> path segment and uses that provider-specific file for the generated output path. If a common template and a provider-specific template resolve to the same output path, the provider-specific template replaces the common one; kubara does not deep-merge template files.</p>
+<p>If a cluster has no Terraform block or uses <code>terraform.provider: none</code>, the default <code>kubara generate</code> command skips Terraform templates for that cluster. <code>kubara generate --terraform</code> still requires a supported Terraform provider.</p>
+<p>Provider directories below Helm paths are not treated as provider-specific overrides. Keep provider-specific Helm behavior in a common values template or in the Helm chart itself.</p>
 <h2 id="creating-your-own-catalog">Creating your own catalog</h2>
 <p>If you want to understand how to create a custom catalog for your multi cluster platform have a look at <a href="../../2_managing_your_platform/create_catalog/">How to create your own catalog</a></p>
 

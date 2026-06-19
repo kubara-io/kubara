@@ -2605,7 +2605,8 @@ You can also create a cronjob via the <code>values.yaml</code> setting, with the
 <h3 id="custom-volumesnapshotclass-via-additional-valuesyaml">Custom <code>VolumeSnapshotClass</code> via <code>additional-values.yaml</code></h3>
 <p>When you use <code>backupMode: csi-snapshot</code> or <code>backupMode: csi-data-mover</code>, Velero uses <strong>CSI snapshots</strong> instead of file-system backups.</p>
 <p>kubara writes <code>volumeSnapshotClass.k8sProvider</code> into the generated Velero values based on <code>terraform.provider</code>.
-If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own <code>VolumeSnapshotClass</code> in <code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code>.</p>
+If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own <code>VolumeSnapshotClass</code> in <code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code>.
+When <code>terraform.provider</code> is <code>none</code>, kubara does not select a built-in <code>VolumeSnapshotClass</code> provider.</p>
 <p><code>volumeSnapshotClass.customDefinition</code> takes precedence over the provider mapping, so this is the recommended way to supply a fully custom snapshot class.</p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">volumeSnapshotClass</span><span class="p">:</span>
