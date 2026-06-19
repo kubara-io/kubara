@@ -1,0 +1,71 @@
+---
+namespace: {}
+externalSecrets: {}
+velero:
+  containerSecurityContext:
+    readOnlyRootFilesystem: true
+    allowPrivilegeEscalation: false
+  credentials:
+    useSecret: true
+    existingSecret: velero-credentials
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+  nodeAgent:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    containerSecurityContext:
+      readOnlyRootFilesystem: true
+      allowPrivilegeEscalation: false
+    extraVolumes:
+      - name: tmp
+        emptyDir: {}
+    extraVolumeMounts:
+      - name: tmp
+        mountPath: /tmp
+  extraVolumes:
+    - name: home-cnb
+      emptyDir: {}
+  extraVolumeMounts:
+    - name: home-cnb
+      mountPath: /home/cnb
+  initContainers:
+    - name: velero-plugin-for-aws
+      image: velero/velero-plugin-for-aws:v1.14.1
+      securityContext:
+        readOnlyRootFilesystem: true
+        allowPrivilegeEscalation: false
+      resources:
+        requests:
+          cpu: 10m
+          memory: 64Mi
+        limits:
+          memory: 64Mi
+      volumeMounts:
+        - mountPath: /target
+          name: plugins
+  configuration:
+    backupStorageLocation: []
+    volumeSnapshotLocation: []
+volumeSnapshotClass:
+  # Selects a predefined VolumeSnapshotClass configuration.
+  k8sProvider: "stackit"
+  # Optionally provide a complete custom VolumeSnapshotClass manifest.
+  # When set, it takes precedence over the predefined provider mapping.
+  customDefinition: {}
+  providers:
+    stackit:
+      driver: cinder.csi.openstack.org
+      deletionPolicy: Retain
+      parameters:
+        force-create: "true"
+        type: snapshot

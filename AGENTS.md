@@ -51,6 +51,12 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Prefer table-driven tests when extending test coverage.
 - Reuse existing structure under `src/cmd/` and `src/internal/`.
 
+## Catalog Boundary
+- Treat the catalog feature as the boundary between generic CLI logic and app-specific platform components.
+- Do not hard-code Helm application behavior, chart values, provider webhook details, or built-in app names in Go code unless the code is explicitly testing catalog loading, service aliases, or schema composition where those names are the behavior under test.
+- Keep app-specific behavior in catalog data, Helm/Terraform templates, service definitions, and docs. Go code should operate on generic catalog metadata, provider selectors, template paths, and service definitions.
+- When testing renderer or generator behavior, prefer synthetic catalog/template fixtures over assertions about concrete built-in Helm apps.
+
 ## Documentation
 - Docs live under `docs/content/`.
 - Keep changes aligned with `docs/mkdocs.yml` navigation.

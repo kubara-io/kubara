@@ -40,9 +40,9 @@ kubara [command]
 
 **--base64**: Enable base64 encode/decode mode
 
-**--catalog**="": Path to external ServiceDefinition catalog directory.
+**--catalog**="": Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
-**--catalog-overwrite**: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.
+**--catalog-overwrite**: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions
 
 **--check-update**: Check online for a newer kubara release
 
@@ -75,11 +75,13 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init
+>kubara init [--prep] [--local]
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
+
+**--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use.
 
 **--overwrite**: Overwrite config if exists
 
@@ -93,7 +95,7 @@ Shows a list of commands or help for one command
 
 Generate files from catalog templates
 
->kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]
+>kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
 
 **--dry-run**: Preview generation without creating files
 
@@ -115,13 +117,15 @@ Shows a list of commands or help for one command
 
 Bootstrap Argo CD onto a cluster
 
->kubara bootstrap CLUSTER_NAME
+>kubara bootstrap CLUSTER_NAME [--local]
 
 **--dry-run**: Run with dry-run
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
+
+**--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
 **--managed-catalog**="": Path to the managed catalog directory (default: "managed-service-catalog")
 
@@ -143,7 +147,7 @@ Shows a list of commands or help for one command
 
 Generate a JSON schema for the config yaml structure
 
->kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]
+>kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]
 
 **--help, -h**: show help
 
@@ -178,6 +182,42 @@ Shows a list of commands or help for one command
 Add a service definition to the current catalog
 
 >kubara catalog add SERVICE_NAME
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### list, ls
+
+List cached local and OCI-backed catalogs
+
+>kubara catalog list
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### package, pkg
+
+Package the current catalog directory into the local OCI cache with an OCI reference base
+
+>kubara catalog package [oci://registry/path/]
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### unpackage, unpkg
+
+Materialize a cached OCI catalog as an editable directory
+
+>kubara catalog unpackage oci://registry/repository:x.y.z [directory]
 
 **--help, -h**: show help
 

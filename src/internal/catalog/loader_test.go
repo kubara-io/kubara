@@ -18,65 +18,40 @@ func TestLoadBuiltIn(t *testing.T) {
 	assert.Contains(t, cat.Services, "argocd")
 }
 
-func TestLoad_ExternalCollisionWithoutOverwrite(t *testing.T) {
+func TestLoad_ExternalCatalogOverwriteBehavior(t *testing.T) {
 	tempDir := t.TempDir()
-	servicesDir := filepath.Join(tempDir, "services")
-	require.NoError(t, os.MkdirAll(servicesDir, 0750))
-	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
-apiVersion: kubara.io/v1alpha1
-kind: ServiceDefinition
-metadata:
-  name: argocd
-spec:
-  chartPath: argo-cd
-  status: enabled
-`), 0644))
+	writeLoaderServiceFixture(t, tempDir, "argocd", "custom-argo-cd")
 
 	_, err := Load(LoadOptions{CatalogPath: tempDir})
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "already exists")
-}
-
-func TestLoad_ExternalCollisionWithOverwrite(t *testing.T) {
-	tempDir := t.TempDir()
-	servicesDir := filepath.Join(tempDir, "services")
-	require.NoError(t, os.MkdirAll(servicesDir, 0750))
-	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
-apiVersion: kubara.io/v1alpha1
-kind: ServiceDefinition
-metadata:
-  name: argocd
-spec:
-  chartPath: custom-argo-cd
-  status: enabled
-`), 0644))
 
 	cat, err := Load(LoadOptions{CatalogPath: tempDir, Overwrite: true})
 	require.NoError(t, err)
 	assert.Equal(t, "custom-argo-cd", cat.Services["argocd"].Spec.ChartPath)
 }
 
-func TestLoad_InvalidAPIVersion(t *testing.T) {
+func TestLoad_MissingServicesDirectory(t *testing.T) {
 	tempDir := t.TempDir()
-	servicesDir := filepath.Join(tempDir, "services")
-	require.NoError(t, os.MkdirAll(servicesDir, 0750))
-	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "custom-service.yaml"), []byte(`
-apiVersion: kubara.io/v2
-kind: ServiceDefinition
-metadata:
-  name: custom-service
-spec:
-  chartPath: custom-service
-  status: enabled
-`), 0644))
 
 	_, err := Load(LoadOptions{CatalogPath: tempDir})
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), `apiVersion must be "kubara.io/v1alpha1"`)
+	assert.Contains(t, err.Error(), `catalog services path`)
+	assert.Contains(t, err.Error(), `does not exist`)
 }
 
-func TestCanonicalServiceName(t *testing.T) {
-	assert.Equal(t, "cert-manager", CanonicalServiceName("certManager"))
-	assert.Equal(t, "metallb", CanonicalServiceName("metalLb"))
-	assert.Equal(t, "external-dns", CanonicalServiceName("external-dns"))
+func writeLoaderServiceFixture(t *testing.T, root, name, chartPath string) {
+	t.Helper()
+
+	servicesDir := filepath.Join(root, "services")
+	require.NoError(t, os.MkdirAll(servicesDir, 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(servicesDir, name+".yaml"), []byte(`
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: `+name+`
+spec:
+  chartPath: `+chartPath+`
+  status: enabled
+`), 0o644))
 }

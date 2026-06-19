@@ -7,12 +7,6 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
-// CreateOrUpdateClusterFromEnv finds a cluster by name and updates it,
-// or creates it if it doesn't exist.
-func CreateOrUpdateClusterFromEnv(cfg *config.Config, e *envconfig.EnvMap) error {
-	return CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
-}
-
 func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
@@ -25,7 +19,9 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			// Apply the new values from the environment to the found cluster.
 			cfg.Clusters[i].Stage = e.ProjectStage
 			cfg.Clusters[i].DNSName = dnsName
-			cfg.Clusters[i].Terraform.DNS.Name = dnsName
+			if cfg.Clusters[i].Terraform != nil {
+				cfg.Clusters[i].Terraform.DNS.Name = dnsName
+			}
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
 			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {

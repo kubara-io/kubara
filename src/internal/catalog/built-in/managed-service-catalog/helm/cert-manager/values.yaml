@@ -1,5 +1,11 @@
 ---
 letsencrypt: true
+clusterIssuer:
+  name: ""
+  email: ""
+  server: ""
+  ingressClassName: ""
+  customDefinition: {}
 cert-manager:
   resources:
     requests:

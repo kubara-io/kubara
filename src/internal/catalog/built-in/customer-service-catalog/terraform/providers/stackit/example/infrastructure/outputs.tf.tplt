@@ -35,6 +35,18 @@ output "vault_instance_id" {
   value       = module.secretsmanager.instance_id
 }
 
+{{ if (and (eq (index .cluster.services "velero" "status") "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) -}}
+output "velero_bucket_name" {
+  description = "STACKIT Object Storage bucket name for Velero backups."
+  value       = module.velero_bucket.bucket_name
+}
+
+output "velero_bucket_url_path_style" {
+  description = "STACKIT Object Storage path-style endpoint for the Velero backup bucket."
+  value       = module.velero_bucket.bucket_url_path_style
+}
+
+{{ end -}}
 {{ if (eq .cluster.terraform.kubernetesType "ske") }}
 ### Kubernetes Instance
 output "kubeconfig_raw" {

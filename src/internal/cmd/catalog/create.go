@@ -38,7 +38,9 @@ func CreateCatalog(catalogName string) (err error) {
 	catalogYaml := fmt.Sprintf(`apiVersion: kubara.io/v1alpha1
 kind: Catalog
 metadata:
-  name: %s`, catalogName)
+  name: %s
+spec:
+  version: 0.1.0`, catalogName)
 
 	if err = os.WriteFile(filepath.Join(catalogName, "Catalog.yaml"), []byte(catalogYaml), 0o600); err != nil {
 		return fmt.Errorf("cannot create Catalog.yaml: %w", err)

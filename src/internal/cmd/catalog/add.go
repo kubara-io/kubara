@@ -21,6 +21,9 @@ func CreateService(serviceName string) error {
 	if _, err := os.Stat("Catalog.yaml"); errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("this directory is missing a Catalog.yaml")
 	}
+	if _, err := cat.LoadCatalogManifest("."); err != nil {
+		return err
+	}
 
 	servicePath := filepath.Join("services", fmt.Sprintf("%s.yaml", serviceName))
 	if _, err := os.Stat(servicePath); err == nil {

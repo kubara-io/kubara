@@ -8,12 +8,6 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 )
 
-// NewClusterFromEnv creates a new Cluster configuration populated with default
-// values and information from an EnvMap.
-func NewClusterFromEnv(e *envconfig.EnvMap) (Cluster, error) {
-	return NewClusterFromEnvWithCatalog(e, catalog.LoadOptions{})
-}
-
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
@@ -51,7 +45,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
-			Provider:          "<provider>",
+			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",

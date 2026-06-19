@@ -14,10 +14,7 @@ This includes infrastructure provisioning, multi-tenancy setup, GitOps onboardin
 tooling - all in a single reusable [GitOps](4_architecture/architecture_overview.md#gitops) workflow.  
 
 
-<p align="center">
-  <img src="images/architecture-overview.jpg" alt="kubara Architecture Overview" width="700"/>
-</p>
-
+![Overview](assets/diagrams.drawio)
 
 kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and maximum 
 consistency whether you're running on Cloud, Edge or Hybrid Setup.

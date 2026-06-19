@@ -1,11 +1,12 @@
 package config
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
-	"path/filepath"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -47,7 +48,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
-			Provider:          "<provider>",
+			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "1.34",
@@ -99,6 +100,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 			"metrics-server":          {Status: service.StatusDisabled},
 			"metallb":                 {Status: service.StatusDisabled},
 			"longhorn":                {Status: service.StatusDisabled},
+			"velero": {
+				Status: service.StatusDisabled,
+				Config: service.Config{
+					"backupMode":    "fs-backup",
+					"backupStorage": map[string]any{"create": true, "region": "eu01"},
+				},
+			},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
@@ -143,7 +151,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewClusterFromEnv(tt.args.e)
+			got, err := NewClusterFromEnvWithCatalog(tt.args.e, catalog.LoadOptions{})
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})

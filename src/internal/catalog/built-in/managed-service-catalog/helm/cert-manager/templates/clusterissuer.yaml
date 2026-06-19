@@ -18,3 +18,7 @@ spec:
         ingress: {}
 {{- end }}
 {{ end }}
+{{- if .Values.clusterIssuer.customDefinition }}
+---
+{{ toYaml .Values.clusterIssuer.customDefinition }}
+{{- end }}

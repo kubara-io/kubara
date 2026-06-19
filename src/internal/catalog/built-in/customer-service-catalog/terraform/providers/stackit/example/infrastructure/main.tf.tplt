@@ -30,6 +30,17 @@ module "secretsmanager" {
   users = var.users
 }
 
+{{ if (and (eq (index .cluster.services "velero" "status") "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) -}}
+module "velero_bucket" {
+  source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
+
+  project_id             = var.project_id
+  region                 = var.velero_bucket_region
+  credentials_group_name = var.velero_credentials_group_name
+  bucket_name            = var.velero_bucket_name
+}
+
+{{ end -}}
 {{ if (eq .cluster.terraform.kubernetesType "ske") }}
 module "ske_cluster" {
   source = "../../../../managed-service-catalog/terraform/modules/ske-cluster"

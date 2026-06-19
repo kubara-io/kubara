@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
@@ -66,6 +67,13 @@ func newValidTestConfig() *Config {
 					"metrics-server":          {Status: service.StatusEnabled},
 					"metallb":                 {Status: service.StatusEnabled},
 					"longhorn":                {Status: service.StatusEnabled},
+					"velero": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"backupMode":    "fs-backup",
+							"backupStorage": map[string]any{"create": true, "region": "eu01"},
+						},
+					},
 				},
 			},
 		},
@@ -78,29 +86,6 @@ func deepCopyConfig(c *Config) *Config {
 	newConfig.Clusters = make([]Cluster, len(c.Clusters))
 	copy(newConfig.Clusters, c.Clusters)
 	return &newConfig
-}
-
-func TestNewConfigStore(t *testing.T) {
-	tests := []struct {
-		name     string
-		filePath string
-		want     *ConfigStore
-	}{
-		{
-			name:     "Create a new config store",
-			filePath: "/tmp/config.yaml",
-			want: &ConfigStore{
-				filepath: "/tmp/config.yaml",
-				config:   &Config{},
-			},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got := NewConfigStore(tt.filePath)
-			assert.Equal(t, tt.want, got)
-		})
-	}
 }
 
 func TestConfigStore_Load(t *testing.T) {
@@ -166,7 +151,7 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := NewConfigStore(tt.filepath)
+			cs := NewConfigStoreWithCatalog(tt.filepath, catalog.LoadOptions{})
 			err := cs.Load()
 
 			if tt.wantErr {
@@ -218,7 +203,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "legacy-config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-	cs := NewConfigStore(configPath)
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
@@ -263,7 +248,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
 	tests := []struct {
 		name        string
 		servicesYML string
-		wantErr     string
+		wantErrs    []string
 	}{
 		{
 			name: "duplicate canonical service names",
@@ -273,7 +258,12 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
       cert-manager:
         status: enabled
 `,
-			wantErr: `conflicting keys "certManager" and "cert-manager"`,
+			wantErrs: []string{
+				"conflicting keys",
+				`"certManager"`,
+				`"cert-manager"`,
+				`canonical service "cert-manager"`,
+			},
 		},
 		{
 			name: "cert-manager clusterIssuer conflict",
@@ -286,7 +276,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
           clusterIssuer:
             name: letsencrypt-prod
 `,
-			wantErr: "both legacy clusterIssuer and config.clusterIssuer",
+			wantErrs: []string{"both legacy clusterIssuer and config.clusterIssuer"},
 		},
 		{
 			name: "storage class conflict",
@@ -297,7 +287,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
         storage:
           className: already-set
 `,
-			wantErr: "both legacy storageClassName and storage.className",
+			wantErrs: []string{"both legacy storageClassName and storage.className"},
 		},
 		{
 			name: "ingress annotations conflict",
@@ -311,7 +301,7 @@ func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
           annotations:
             custom: value
 `,
-			wantErr: "both legacy ingress.annotations and networking.annotations",
+			wantErrs: []string{"both legacy ingress.annotations and networking.annotations"},
 		},
 	}
 
@@ -333,10 +323,12 @@ clusters:
 			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
 			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-			cs := NewConfigStore(configPath)
+			cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 			err := cs.Load()
 			require.Error(t, err)
-			assert.ErrorContains(t, err, tt.wantErr)
+			for _, wantErr := range tt.wantErrs {
+				assert.ErrorContains(t, err, wantErr)
+			}
 		})
 	}
 }
@@ -357,6 +349,11 @@ func TestConfigStore_Validate(t *testing.T) {
 	// Test enum validation
 	invalidConfigEnumMismatch := deepCopyConfig(validConfig)
 	invalidConfigEnumMismatch.Clusters[0].Type = "invalid-type"
+
+	invalidConfigProviderEnumMismatch := deepCopyConfig(validConfig)
+	clonedTerraformProvider := *invalidConfigProviderEnumMismatch.Clusters[0].Terraform
+	clonedTerraformProvider.Provider = TerraformProvider("unknown")
+	invalidConfigProviderEnumMismatch.Clusters[0].Terraform = &clonedTerraformProvider
 
 	// Test format validation (email)
 	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
@@ -413,6 +410,11 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_enum_mismatch",
 			config:  invalidConfigEnumMismatch,
+			wantErr: true,
+		},
+		{
+			name:    "invalid_config_should_fail_on_provider_enum_mismatch",
+			config:  invalidConfigProviderEnumMismatch,
 			wantErr: true,
 		},
 		{
@@ -607,7 +609,7 @@ func TestGenerateSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			schemaDoc, err := GenerateSchema()
+			schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -645,8 +647,46 @@ func TestGenerateSchema(t *testing.T) {
 	}
 }
 
+func TestGenerateSchema_TerraformProviderNoneAllowsMissingTerraformDetails(t *testing.T) {
+	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
+	require.NoError(t, err)
+
+	const schemaURL = "mem://config.schema.json"
+	c := schemaValidator.NewCompiler()
+	c.AssertFormat()
+	require.NoError(t, c.AddResource(schemaURL, schemaDoc))
+
+	compiled, err := c.Compile(schemaURL)
+	require.NoError(t, err)
+
+	validNoneConfig := configInstance(t, newValidTestConfig())
+	cluster := validNoneConfig["clusters"].([]any)[0].(map[string]any)
+	cluster["terraform"] = map[string]any{
+		"provider": "none",
+	}
+	assert.NoError(t, compiled.Validate(validNoneConfig))
+
+	invalidStackitConfig := configInstance(t, newValidTestConfig())
+	cluster = invalidStackitConfig["clusters"].([]any)[0].(map[string]any)
+	cluster["terraform"] = map[string]any{
+		"provider": "stackit",
+	}
+	assert.Error(t, compiled.Validate(invalidStackitConfig))
+}
+
+func configInstance(t *testing.T, cfg *Config) map[string]any {
+	t.Helper()
+
+	data, err := json.Marshal(cfg)
+	require.NoError(t, err)
+
+	var instance map[string]any
+	require.NoError(t, json.Unmarshal(data, &instance))
+	return instance
+}
+
 func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
-	schemaDoc, err := GenerateSchema()
+	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
 	require.NoError(t, err)
 
 	defs, ok := schemaDoc["$defs"].(map[string]any)
@@ -702,7 +742,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cs := NewConfigStore(configPath)
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load(), "Load should succeed")
 
 	c := cs.GetConfig().Clusters[0]
@@ -711,4 +751,31 @@ clusters:
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 
 	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
+}
+
+func TestLoadAndValidate_TerraformProviderNoneDisablesTerraform(t *testing.T) {
+	configYAML := `
+clusters:
+  - name: helm-only-cluster
+    dnsName: helm-only.example.com
+    terraform:
+      provider: none
+    argocd:
+      repo:
+        https:
+          customer:
+            url: "https://github.com/customer/repo.git"
+          managed:
+            url: "https://github.com/managed/repo.git"
+`
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	require.NoError(t, cs.Load())
+
+	require.Len(t, cs.GetConfig().Clusters, 1)
+	assert.Nil(t, cs.GetConfig().Clusters[0].Terraform)
 }

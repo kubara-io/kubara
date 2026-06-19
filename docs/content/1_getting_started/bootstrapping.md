@@ -69,6 +69,9 @@ When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.
 
+!!! info 
+    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../3_components/backup_and_recovery.md).
+
 ### 1.4 Validate your `config.yaml` against schema (optional, recommended)
 
 Generate a JSON schema file:
@@ -177,15 +180,16 @@ The chart directories where values usually need review are:
 * external-dns
 * external-secrets
 * homer-dashboard
-* traefik
 * kube-prometheus-stack
-* kyverno-policy-reporter
 * kyverno
+* kyverno-policy-reporter
 * loki
 * longhorn
 * metallb
 * metrics-server
 * oauth2-proxy
+* traefik
+* velero
 
 ### 3.1 Additional value files and CI value files
 
@@ -195,6 +199,7 @@ Every generated app supports:
 * optional `additional-values.yaml` for overrides/extra values
 
 kubara's generated ApplicationSet already references both files and ignores missing files, so you can add `additional-values.yaml` only when needed.
+During bootstrap kubara uses `additional-values.yaml` files when they exist as well.
 
 Merge behavior reminder:
 
@@ -266,6 +271,12 @@ spec:
       server: "https://<your-secrets-manager-endpoint>"
       version: v2
 ```
+
+kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
+`<cluster-name>/<stage>/<namespace>/<secret>`, while cluster-wide secrets use
+`<cluster-name>/<stage>/cluster_secrets/<secret>`. For example, Grafana credentials for the
+`controlplane` production cluster live at
+`controlplane/production/kube-prometheus-stack/grafana_credentials`.
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds

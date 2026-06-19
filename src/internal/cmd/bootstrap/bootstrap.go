@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"time"
 
@@ -24,18 +25,24 @@ const (
 
 // Options for bootstrap operations
 type Options struct {
-	Kubeconfig     string
-	ManagedCatalog string
-	OverlayValues  string
-	WithES         bool
-	WithProm       bool
-	WithESCSSPath  string
-	EnvMap         *envconfig.EnvMap
-	Catalog        catalog.Catalog
-	ClusterConfig  *config.Cluster
-	DryRun         bool
-	Timeout        time.Duration
-	ClusterName    string
+	Kubeconfig       string
+	ManagedCatalog   string
+	OverlayValues    string
+	WithES           bool
+	WithProm         bool
+	Local            bool
+	WithESCSSPath    string
+	EnvMap           *envconfig.EnvMap
+	Catalog          catalog.Catalog
+	ClusterConfig    *config.Cluster
+	DryRun           bool
+	Timeout          time.Duration
+	ClusterName      string
+	WorkDir          string
+	ConfigFilePath   string
+	CatalogPath      string
+	CatalogOverwrite bool
+	LocalState       *LocalState
 }
 
 type BootstrapChart struct {
@@ -44,16 +51,50 @@ type BootstrapChart struct {
 	Path            string
 	OverlayValues   []string
 	RepoURL         string
+	Enabled         bool
 	EnsureNamespace bool
 	EnsureCRD       bool
 }
 
+type LocalState struct {
+	RuntimeDir             string
+	KubeconfigPath         string
+	KindConfigPath         string
+	LoadBalancerIP         string
+	BaseHost               string
+	OpenBaoHost            string
+	TraefikOverlayPath     string
+	CertManagerValuesPath  string
+	OpenBaoValuesPath      string
+	ArgocdValuesPath       string
+	HomerValuesPath        string
+	PrometheusValuesPath   string
+	KyvernoValuesPath      string
+	LonghornValuesPath     string
+	OAuth2ProxyValuesPath  string
+	ClusterSecretStorePath string
+	GenerateEnvPath        string
+}
+
 // Bootstrap orchestrates the complete ArgoCD bootstrap process
 func Bootstrap(ctx context.Context, opts *Options) error {
+	if opts.Local && opts.DryRun {
+		return fmt.Errorf("--dry-run is not supported together with --local")
+	}
 	if opts.Timeout > 0 {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, opts.Timeout)
 		defer cancel()
+	}
+
+	if opts.Local {
+		if err := prepareLocalBootstrap(ctx, opts); err != nil {
+			return fmt.Errorf("prepare local bootstrap: %w", err)
+		}
+		if opts.LocalState == nil || opts.LocalState.KubeconfigPath == "" {
+			return fmt.Errorf("local bootstrap did not provide a kubeconfig path")
+		}
+		opts.Kubeconfig = opts.LocalState.KubeconfigPath
 	}
 
 	// Create Kubernetes client
@@ -87,8 +128,9 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Name:            "argocd",
 			Namespace:       argocdNamespace,
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", argocdChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, argocdChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
 			RepoURL:         "https://argoproj.github.io/argo-helm",
+			Enabled:         true,
 			EnsureNamespace: true,
 			EnsureCRD:       true,
 		},
@@ -96,16 +138,18 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			Name:            "external-secrets",
 			Namespace:       externalSecretsNamespace,
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", externalSecretsChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, externalSecretsChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, externalSecretsChartPath),
 			RepoURL:         "https://charts.external-secrets.io",
+			Enabled:         opts.WithES,
 			EnsureNamespace: opts.WithES,
 			EnsureCRD:       opts.WithES,
 		},
 		{
 			Name:            "kube-prometheus-stack",
 			Path:            filepath.Join(opts.ManagedCatalog, "helm", prometheusChartPath),
-			OverlayValues:   []string{filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, prometheusChartPath, "values.yaml")},
+			OverlayValues:   overlayValuesForChart(opts, prometheusChartPath),
 			RepoURL:         "https://prometheus-community.github.io/helm-charts",
+			Enabled:         opts.WithProm,
 			EnsureNamespace: false,
 			EnsureCRD:       opts.WithProm,
 		},
@@ -175,6 +219,18 @@ func chartPathForService(cat catalog.Catalog, serviceName string) (string, error
 	return definition.Spec.ChartPath, nil
 }
 
+func overlayValuesForChart(opts *Options, chartPath string) []string {
+	chartOverlayPath := filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, chartPath)
+	valuesPaths := []string{filepath.Join(chartOverlayPath, "values.yaml")}
+
+	additionalValuesPath := filepath.Join(chartOverlayPath, "additional-values.yaml")
+	if _, err := os.Stat(additionalValuesPath); err == nil {
+		valuesPaths = append(valuesPaths, additionalValuesPath)
+	}
+
+	return valuesPaths
+}
+
 // ensureNamespaces ensures required namespaces exist
 func ensureNamespaces(ctx context.Context, client *k8s.Client, opts *Options, charts []BootstrapChart) error {
 	log.Info().Msg("Ensuring namespaces exist")
@@ -195,18 +251,25 @@ func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 	log.Info().Msg("Adding helm repositories")
 
 	for _, chart := range charts {
-		if chart.EnsureCRD {
+		if chart.Enabled {
 			repo := helm.RepoOptions{Name: chart.Name, URL: chart.RepoURL}
 			if err := helm.AddRepository(ctx, repo); err != nil {
 				return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
 			}
 
-			if err := helm.UpdateRepository(ctx, repo); err != nil {
-				return fmt.Errorf("update helm repository %q: %w", repo.Name, err)
-			}
 			log.Info().Msgf("Added helm repository: %q", repo.Name)
 		}
 	}
+
+	// Refresh the global repository index too. Per-alias updates can leave the
+	// shared cache out of date for charts whose Chart.yaml references the
+	// repository by URL rather than by the alias added above, which triggers
+	// "can't get a valid version for subchart" errors on the next
+	// helm dependency build.
+	if err := helm.UpdateAllRepositories(ctx); err != nil {
+		return fmt.Errorf("refresh helm repository index: %w", err)
+	}
+	log.Info().Msg("Refreshed helm repository index")
 
 	return nil
 }
@@ -216,10 +279,10 @@ func updateHelmDependencies(ctx context.Context, opts *Options, charts []Bootstr
 	log.Info().Msg("Updating helm chart dependencies")
 
 	for _, chart := range charts {
-		if chart.EnsureCRD {
+		if chart.Enabled {
 			dep := helm.DependencyOptions{ChartPath: chart.Path, Timeout: opts.Timeout}
-			if err := helm.UpdateDependencies(ctx, dep); err != nil {
-				return fmt.Errorf("update helm chart dependencies for %q: %w", chart.Name, err)
+			if err := helm.BuildDependencies(ctx, dep); err != nil {
+				return fmt.Errorf("build helm chart dependencies for %q: %w", chart.Name, err)
 			}
 			log.Info().Msgf("Updated helm dependencies for chart: %q", chart.Name)
 
@@ -359,6 +422,8 @@ func applySecrets(ctx context.Context, client *k8s.Client, opts *Options) error 
 type CompletionLogConfig struct {
 	WizardPassword string
 	ClusterDNSName string
+	Local          bool
+	OpenBaoHost    string
 }
 
 // printCompletionMessage prints the completion message with access instructions
@@ -371,6 +436,10 @@ func printCompletionMessage(opts *Options) {
 			config.ClusterDNSName = opts.ClusterConfig.DNSName
 		}
 		config.WizardPassword = opts.EnvMap.ArgocdWizardAccountPassword
+		config.Local = opts.Local
+		if opts.LocalState != nil {
+			config.OpenBaoHost = opts.LocalState.OpenBaoHost
+		}
 		log.Info().Msg(CreateCompletionMessage(config))
 	}
 }
@@ -381,6 +450,32 @@ func completionIngressHost(config CompletionLogConfig) string {
 
 // CreateCompletionMessage returns the formatted completion message.
 func CreateCompletionMessage(config CompletionLogConfig) string {
+	if config.Local {
+		return fmt.Sprintf(`
+🎉 Local kubara bootstrap complete!
+
+📝 Next steps:
+1. Commit and push all repository contents generated by kubara.
+2. Ensure the Git repository is reachable by Argo CD.
+   If you did not provide both ARGOCD_GIT_USERNAME and ARGOCD_GIT_PAT_OR_PASSWORD, ensure the Git repository is public so Argo CD can pull it.
+
+Argo CD should be reachable in a couple of minutes via:
+    https://%s/argocd
+
+You can otherwise immediately access the Argo CD UI via:
+    kubectl --kubeconfig .local/kind.kubeconfig port-forward svc/argocd-server -n argocd 8080:443
+    then open http://localhost:8080/argocd in your browser
+
+Log in with:
+    wizard / %s
+
+Other useful links:
+  - Portal:  https://%s
+  - OpenBao: https://%s/ui login with root
+
+`, config.ClusterDNSName, config.WizardPassword, config.ClusterDNSName, config.OpenBaoHost)
+	}
+
 	formattedOutput := ""
 	ingressHost := completionIngressHost(config)
 	if ingressHost != "" {

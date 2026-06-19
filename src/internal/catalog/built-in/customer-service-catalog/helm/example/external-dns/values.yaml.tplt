@@ -1,3 +1,4 @@
+{{- if eq .cluster.terraform.provider "stackit" }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -12,12 +13,13 @@ externalSecrets:
     external-dns-webhook:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - remoteKey: dns_zone_admin
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
           remoteKeyProperty: project_id
           secretKey: PROJECT_ID
-        - remoteKey: dns_zone_admin
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
           remoteKeyProperty: sa_key_json
           secretKey: SA_KEY_JSON
+{{- end }}
 
 namespace:
   labels:
@@ -46,6 +48,7 @@ external-dns:
         resources:
           - "namespaces"
         verbs: ["get", "watch", "list"]
+{{- if eq .cluster.terraform.provider "stackit" }}
   extraVolumes:
     - name: stackit-sa-authentication
       secret:
@@ -53,16 +56,18 @@ external-dns:
         items:
           - key: SA_KEY_JSON
             path: sa_key.json
+{{- end }}
   global:
     imagePullSecrets:
       - name: image-pull-secret
     security:
       allowInsecureImages: true
+{{- if eq .cluster.terraform.provider "stackit" }}
   provider:
     webhook:
       image:
         repository: ghcr.io/stackitcloud/external-dns-stackit-webhook
-        tag: v0.3.8
+        tag: v0.3.9
       extraVolumeMounts:
         - name: stackit-sa-authentication
           mountPath: /var/run/secrets/stackit
@@ -76,6 +81,7 @@ external-dns:
             secretKeyRef:
               name: external-dns-webhook
               key: PROJECT_ID
+{{- end }}
   serviceMonitor:
     {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
     enabled: true
