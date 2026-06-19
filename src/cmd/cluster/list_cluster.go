@@ -17,7 +17,6 @@ func CreateClusterList() *cli.Command {
 		UsageText:   "kubara cluster ls",
 		Description: "List all the clusters available in the current config.yaml file",
 		Action: func(c context.Context, cmd *cli.Command) error {
-			//TODO: add command line flag for config yaml
 			cwd, err := filepath.Abs(cmd.String("work-dir"))
 			if err != nil {
 				return fmt.Errorf("get working directory: %w", err)

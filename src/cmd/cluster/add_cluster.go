@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
+	"strings"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	internal "github.com/kubara-io/kubara/internal/cmd/cluster"
 	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/urfave/cli/v3"
@@ -28,8 +30,6 @@ func AddCluster() *cli.Command {
 		},
 
 		Action: func(c context.Context, cmd *cli.Command) error {
-			//TODO: add command line flag for config.yaml
-			//TODO: add cli flag for catalog
 			spokeName := cmd.StringArg("cluster-name")
 			if len(spokeName) == 0 {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
@@ -39,12 +39,22 @@ func AddCluster() *cli.Command {
 			if err != nil {
 				return fmt.Errorf("get working directory: %w", err)
 			}
+
+			rawCatalog := strings.TrimSpace(cmd.String("catalog"))
+			catalogOptions := catalog.LoadOptions{Overwrite: cmd.Bool("catalog-overwrite")}
+			if rawCatalog != "" {
+				catalogOptions.CatalogPath, err = utils.GetFullPath(rawCatalog, cwd)
+				if err != nil {
+					return fmt.Errorf("get catalog path: %w", err)
+				}
+			}
+
 			configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 			if err != nil {
 				return fmt.Errorf("get config file path: %w", err)
 			}
 
-			return internal.AddCluster(configFilePath, spokeName)
+			return internal.AddCluster(configFilePath, spokeName, catalogOptions)
 		},
 	}
 }

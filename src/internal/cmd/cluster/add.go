@@ -8,9 +8,9 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 )
 
-func AddCluster(configFilePath string, spokeName string) error {
+func AddCluster(configFilePath string, spokeName string, catalogOptions catalog.LoadOptions) error {
 
-	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalog.LoadOptions{})
+	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
 	err := configStore.Load()
 	if err != nil {
 		return fmt.Errorf("config load: %w", err)
@@ -26,7 +26,6 @@ func AddCluster(configFilePath string, spokeName string) error {
 	if err = configStore.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply spoke catalog defaults: %w", err)
 	}
-
 	configStore.SaveToFile()
 
 	return nil
