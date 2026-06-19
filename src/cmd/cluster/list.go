@@ -12,10 +12,11 @@ import (
 
 func CreateClusterList() *cli.Command {
 	return &cli.Command{
-		Name:        "ls",
+		Name:        "list",
 		Usage:       "List all the cluster in the config file",
 		UsageText:   "kubara cluster ls",
 		Description: "List all the clusters available in the current config.yaml file",
+		Aliases:     []string{"ls"},
 		Action: func(c context.Context, cmd *cli.Command) error {
 			cwd, err := filepath.Abs(cmd.String("work-dir"))
 			if err != nil {

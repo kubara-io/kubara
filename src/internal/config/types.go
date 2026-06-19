@@ -75,8 +75,12 @@ type DNS struct {
 }
 
 type ArgoCD struct {
-	Repo     RepoProto       `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	HelmRepo *HelmRepository `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	Repo       RepoProto       `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo   *HelmRepository `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	ClusterRef *ClusterRef     `json:"clusterRef,omitempty" yaml:"clusterRef,omitempty" jsonschema:"title=Cluster Registration,description=Secret backend reference for spoke kubeconfig registration in hub Argo CD."`
+}
+
+type ClusterRef struct {
 }
 
 type RepoProto struct {

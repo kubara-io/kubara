@@ -25,12 +25,16 @@ func ListClusters(configFilePath string) error {
 		return fmt.Errorf("print table head into buffer: %w", err)
 	}
 	for _, cluster := range clusters {
+		provider := config.TerraformProviderNone
+		if cluster.Terraform != nil {
+			provider = cluster.Terraform.Provider
+		}
 		_, err = fmt.Fprintf(
 			writer,
 			"%s\t%s\t%s\n",
 			cluster.Name,
 			cluster.Type,
-			cluster.Terraform.Provider,
+			string(provider),
 		)
 		if err != nil {
 			return fmt.Errorf("print list into buffer: %w", err)

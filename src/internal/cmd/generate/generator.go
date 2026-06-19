@@ -70,7 +70,9 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 		if err != nil {
 			return nil, err
 		}
-		context["spokes"] = spokes
+		if len(spokes) > 0 {
+			context["spokes"] = spokes
+		}
 	}
 	return context, nil
 }

@@ -27,9 +27,8 @@ bootstrapValues:
           - kind: Secret
             name: cert-manager-webhook-ca
 {{/*
-Problem: Presumes that the secret exists in the secretstore,
-currently remoteRef needs to be added manually via additional-Values.yaml
-possible idea: add remotekey property to cluster structure
+Idea: for each spoke cluster we automatically generate/ template an external secret ressource pointing to <cluster-name>/<stage-name>/argocd/<spoke-name>
+TODO: add to docs
 */}}
 {{- if .spokes }}
   cluster:
@@ -39,6 +38,9 @@ possible idea: add remotekey property to cluster structure
       secretStoreRef:
         kind: ClusterSecretStore
         name: {{ $.cluster.name }}-{{ $.cluster.stage }}
+      remoteRef:
+        remoteKey: {{ $.cluster.name }}/{{ $.cluster.stage }}/argocd/{{ .name }}-{{ .stage }}
+        remoteKeyProperty: kubeconfig
       additionalLabels:
 {{- range $svcName, $svc := .services }}
         {{ $svcName }}: "{{ index $svc "status" | default "disabled" }}"

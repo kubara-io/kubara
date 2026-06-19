@@ -514,7 +514,6 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 	sort.Strings(keys)
 
 	serviceProperties := make(map[string]any, len(keys))
-	required := make([]any, 0, len(keys))
 	for _, serviceName := range keys {
 		definition := cat.Services[serviceName]
 		instanceSchema, err := buildServiceInstanceSchema(definition)
@@ -522,7 +521,6 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 			return nil, fmt.Errorf("build schema for service %q: %w", serviceName, err)
 		}
 		serviceProperties[serviceName] = instanceSchema
-		required = append(required, serviceName)
 	}
 
 	return map[string]any{
@@ -531,7 +529,6 @@ func buildServicesSchema(cat catalog.Catalog) (map[string]any, error) {
 		"description":          "Configuration for deployed services.",
 		"additionalProperties": false,
 		"properties":           serviceProperties,
-		"required":             required,
 	}, nil
 }
 
