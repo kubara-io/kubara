@@ -64,8 +64,8 @@ No modules.
 | Name | Type |
 |------|------|
 | [local_file.kubeconfig](https://registry.terraform.io/providers/hashicorp/local/2.8.0/docs/resources/file) | resource |
-| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_cluster) | resource |
-| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_kubeconfig) | resource |
+| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/ske_cluster) | resource |
+| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/ske_kubeconfig) | resource |
 
 ## Inputs
 
