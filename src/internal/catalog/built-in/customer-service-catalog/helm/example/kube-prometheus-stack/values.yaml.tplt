@@ -234,8 +234,7 @@ prometheus-blackbox-exporter:
   global:
     imageRegistry: {{ .cluster.globalHelmChartRepo | default "quay.io" }}
 
-{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
-{{- if $tcp }}
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:
@@ -251,48 +250,29 @@ namespacedSecretStores:
               name: default
               audiences:
                 - vault
+{{- end }}
 
 externalSecrets:
-  secrets:
-    grafana-admin-credentials:
-      secretStoreRef:
-        kind: SecretStore
-        name: {{ .cluster.name }}-{{ .cluster.stage }}
-      dataFrom:
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_credentials
-
-    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
-    oauth2-credentials:
-      secretStoreRef:
-        kind: SecretStore
-        name: {{ .cluster.name }}-{{ .cluster.stage }}
-      dataFrom:
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_oauth2_credentials
-    {{- end }}
-{{- else }}
-externalSecrets:
+{{ if eq .cluster.terraform.provider "t-cloud-public" }}
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ else }}
   secretStoreRef:
     kind: ClusterSecretStore
     name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ end }}
 
   secrets:
     grafana-admin-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_credentials
 
     {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     oauth2-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_oauth2_credentials
     {{- end }}
-{{- end }}
 
 namespace:
   labels:

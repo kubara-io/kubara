@@ -291,6 +291,7 @@ kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
 `<cluster-name>/<stage>/cluster_secrets/<secret>`. For example, Grafana credentials for the
 `controlplane` production cluster live at
 `controlplane/production/kube-prometheus-stack/grafana_credentials`.
+This path layout is the same for every provider and secret backend, including the local OpenBao setup.
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds

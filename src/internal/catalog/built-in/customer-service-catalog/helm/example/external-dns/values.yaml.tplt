@@ -1,26 +1,4 @@
-{{- if eq .cluster.terraform.provider "stackit" }}
-externalSecrets:
-  secretStoreRef:
-    kind: ClusterSecretStore
-    name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secrets:
-    external-dns-webhook:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
-      data:
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
-          remoteKeyProperty: project_id
-          secretKey: PROJECT_ID
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
-          remoteKeyProperty: sa_key_json
-          secretKey: SA_KEY_JSON
-{{- else if eq .cluster.terraform.provider "t-cloud-public" }}
-{{- if eq (index .cluster.services "external-secrets" "status") "enabled" }}
+{{- if and (eq .cluster.terraform.provider "t-cloud-public") (eq (index .cluster.services "external-secrets" "status") "enabled") }}
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:
@@ -36,13 +14,32 @@ namespacedSecretStores:
               name: default
               audiences:
                 - vault
+{{- end }}
 
+{{- if eq .cluster.terraform.provider "stackit" }}
 externalSecrets:
+  secretStoreRef:
+    kind: ClusterSecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
+  secrets:
+    external-dns-webhook:
+      data:
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
+          remoteKeyProperty: project_id
+          secretKey: PROJECT_ID
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
+          remoteKeyProperty: sa_key_json
+          secretKey: SA_KEY_JSON
+{{- else if eq .cluster.terraform.provider "t-cloud-public" }}
+{{- if eq (index .cluster.services "external-secrets" "status") "enabled" }}
+externalSecrets:
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+
   secrets:
     tcloudpubliccloudsyaml:
-      secretStoreRef:
-        kind: SecretStore
-        name: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/t-cloud-public-clouds-yaml
           remoteKeyProperty: clouds.yaml
@@ -50,6 +47,8 @@ externalSecrets:
 {{- else }}
 externalSecrets: {}
 {{- end }}
+{{- else }}
+externalSecrets: {}
 {{- end }}
 
 namespace:

@@ -59,8 +59,7 @@ inClusterSecretLabels:
 {{- end }}
 {{- end }}
 
-{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
-{{- if $tcp }}
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:
@@ -76,36 +75,25 @@ namespacedSecretStores:
               name: default
               audiences:
                 - vault
+{{- end }}
 
 externalSecrets:
-{{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
-  secrets:
-    oauth2-credentials:
-      secretStoreRef:
-        kind: SecretStore
-        name: {{ .cluster.name }}-{{ .cluster.stage }}
-      dataFrom:
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/argocd/argo_oauth2_credentials
-{{ end }}
-{{- else }}
-externalSecrets:
+{{ if eq .cluster.terraform.provider "t-cloud-public" }}
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ else }}
   secretStoreRef:
     kind: ClusterSecretStore
     name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ end }}
 
 {{ if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
   secrets:
     oauth2-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/argocd/argo_oauth2_credentials
 {{ end }}
-{{- end }}
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}

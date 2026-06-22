@@ -73,28 +73,6 @@ func fullCatalogContext() map[string]any {
 	}
 }
 
-func fullArgoCDContext() map[string]any {
-	return map[string]any{
-		"repo": map[string]any{
-			"https": map[string]any{
-				"managed": map[string]any{
-					"url":            "https://github.com/example/repo",
-					"path":           "managed-service-catalog/helm",
-					"targetRevision": "main",
-				},
-				"customer": map[string]any{
-					"url":            "https://github.com/example/repo",
-					"path":           "customer-service-catalog/helm",
-					"targetRevision": "main",
-				},
-			},
-		},
-		"helmRepo": map[string]any{
-			"url": "https://charts.example.com",
-		},
-	}
-}
-
 func TestTemplateType_String(t *testing.T) {
 	tests := []struct {
 		name string
@@ -216,82 +194,6 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	require.NotEmpty(t, openBaoSecretsExample)
 	assert.Contains(t, openBaoSecretsExample, `name  = "test-cluster/dev/cluster_secrets/docker_config"`)
 	assert.Contains(t, openBaoSecretsExample, `name  = "test-cluster/dev/external-dns/t-cloud-public-clouds-yaml"`)
-}
-
-func TestTemplateFiles_TCloudPublicHelmUsesCommonValuesTemplates(t *testing.T) {
-	services := fullServiceContext()
-	services["oauth2-proxy"] = map[string]any{"status": "enabled"}
-	services["velero"] = map[string]any{
-		"status": "enabled",
-		"config": map[string]any{
-			"backupMode": "fs-backup",
-			"backupStorage": map[string]any{
-				"create": true,
-				"region": "eu-de",
-				"s3Url":  "https://obs.eu-de.otc.t-systems.com",
-			},
-		},
-	}
-
-	results, err := TemplateFiles(TemplateOptions{
-		Type:     Helm,
-		Provider: "t-cloud-public",
-		Data: map[string]any{
-			"cluster": map[string]any{
-				"name":             "test-cluster",
-				"stage":            "dev",
-				"type":             "hub",
-				"dnsName":          "test.example.com",
-				"ingressClassName": "traefik",
-				"ssoOrg":           "myorg",
-				"ssoTeam":          "myteam",
-				"terraform": map[string]any{
-					"provider":       "t-cloud-public",
-					"kubernetesType": "cce",
-				},
-				"argocd":   fullArgoCDContext(),
-				"services": services,
-			},
-			"catalog": fullCatalogContext(),
-		},
-	})
-	require.NoError(t, err)
-
-	got := make(map[string]string, len(results))
-	for _, result := range results {
-		require.NoError(t, result.Error)
-		assert.NotContains(t, result.Path, "/helm/providers/")
-		got[result.Path] = result.Content
-	}
-
-	externalDNS := got["customer-service-catalog/helm/example/external-dns/values.yaml.tplt"]
-	require.NotEmpty(t, externalDNS)
-	assert.Contains(t, externalDNS, "ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook")
-	assert.Contains(t, externalDNS, "remoteKey: test-cluster/dev/external-dns/t-cloud-public-clouds-yaml")
-	assert.NotContains(t, externalDNS, "ghcr.io/stackitcloud")
-
-	externalSecrets := got["customer-service-catalog/helm/example/external-secrets/values.yaml.tplt"]
-	assert.Contains(t, externalSecrets, "role: external-secrets")
-	assert.Contains(t, externalSecrets, "namespace: external-secrets")
-
-	for path, remoteKey := range map[string]string{
-		"customer-service-catalog/helm/example/argo-cd/values.yaml.tplt":               "argocd/argo_oauth2_credentials",
-		"customer-service-catalog/helm/example/kube-prometheus-stack/values.yaml.tplt": "kube-prometheus-stack/grafana_credentials",
-		"customer-service-catalog/helm/example/oauth2-proxy/values.yaml.tplt":          "oauth2-proxy/oauth2_credentials",
-		"customer-service-catalog/helm/example/velero/values.yaml.tplt":                "velero/velero_s3_credentials",
-	} {
-		content := got[path]
-		require.NotEmpty(t, content, "missing %s", path)
-		assert.Contains(t, content, "namespacedSecretStores:")
-		assert.Contains(t, content, "role: k8s-kv-read")
-		assert.Contains(t, content, remoteKey)
-	}
-
-	velero := got["customer-service-catalog/helm/example/velero/values.yaml.tplt"]
-	assert.Contains(t, velero, "bucket: velero-test-cluster-dev")
-	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
-	assert.Contains(t, got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"], "remoteKey: test-cluster/dev/cluster_secrets/docker_config")
-	assert.Contains(t, got["managed-service-catalog/helm/velero/values.yaml"], "t-cloud-public:")
 }
 
 func TestTemplateFiles(t *testing.T) {

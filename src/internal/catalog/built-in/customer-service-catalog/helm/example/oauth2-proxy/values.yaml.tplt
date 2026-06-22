@@ -26,32 +26,23 @@ namespacedSecretStores:
               name: default
               audiences:
                 - vault
+{{- end }}
 
 externalSecrets:
-  secrets:
-    oauth2-credentials:
-      secretStoreRef:
-        kind: SecretStore
-        name: {{ .cluster.name }}-{{ .cluster.stage }}
-      dataFrom:
-        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/oauth2-proxy/oauth2_credentials
-{{- else }}
-externalSecrets:
+{{ if eq .cluster.terraform.provider "t-cloud-public" }}
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ else }}
   secretStoreRef:
     kind: ClusterSecretStore
     name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ end }}
 
   secrets:
     oauth2-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/oauth2-proxy/oauth2_credentials
-{{- end }}
 
 
 oauth2-proxy:
