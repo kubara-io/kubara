@@ -7,7 +7,7 @@ import (
 	"github.com/kubara-io/kubara/internal/config"
 )
 
-// Internal Function for the 'kubara cluster add [spoke-name]' command
+// AddCluster is an internal Function for the 'kubara cluster add [spoke-name]' command
 func AddCluster(configFilePath string, spokeName string, catalogOptions catalog.LoadOptions) error {
 	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
 	err := configStore.Load()

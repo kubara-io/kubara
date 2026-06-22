@@ -14,7 +14,7 @@ import (
 
 // Creates the Command for the 'kubara cluster add command
 // Command necessitates a cluster-name as an arg
-func AddCluster() *cli.Command {
+func CreateAddClusterCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "add",
 		Usage:       "Add a new spoke cluster to your config",

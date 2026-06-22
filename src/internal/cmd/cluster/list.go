@@ -9,7 +9,7 @@ import (
 	"github.com/kubara-io/kubara/internal/config"
 )
 
-// Internal Function for the 'kubara cluster ls' command
+// ListClusters is an internal Function for the 'kubara cluster ls' command
 func ListClusters(configFilePath string) error {
 	configStore := config.NewConfigStoreWithCatalog(configFilePath, catalog.LoadOptions{})
 	err := configStore.Load()

@@ -10,7 +10,7 @@ func NewClusterCommand() *cli.Command {
 		Description: "Enables the configuration and quick setup of clusters",
 		Commands: []*cli.Command{
 			CreateClusterList(),
-			AddCluster(),
+			CreateAddClusterCommand(),
 		},
 	}
 }

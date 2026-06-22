@@ -9,36 +9,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
-	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 	"go.yaml.in/yaml/v3"
 )
-
-func createTestServices() service.Services {
-	return service.Services{
-		"argocd":                  {Status: service.StatusEnabled},
-		"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            {Status: service.StatusEnabled},
-		"external-secrets":        {Status: service.StatusEnabled},
-		"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-		"traefik":                 {Status: service.StatusEnabled},
-		"kyverno":                 {Status: service.StatusEnabled},
-		"kyverno-policies":        {Status: service.StatusEnabled},
-		"kyverno-policy-reporter": {Status: service.StatusEnabled},
-		"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-		"homer-dashboard":         {Status: service.StatusEnabled},
-		"oauth2-proxy":            {Status: service.StatusEnabled},
-		"metrics-server":          {Status: service.StatusEnabled},
-		"metallb":                 {Status: service.StatusEnabled},
-		"longhorn":                {Status: service.StatusEnabled},
-	}
-}
 
 func TestNewGenerateFlags(t *testing.T) {
 	t.Parallel()
@@ -215,7 +195,7 @@ func TestGenerateCmd(t *testing.T) {
 
 			// Create config file if not testing error case
 			if !tt.wantErr || tt.errContains != "load config" {
-				configPath := createTestConfig(t, tempDir, config.Cluster{
+				configPath := CreateTestConfig(t, tempDir, config.Cluster{
 					Name:             "test-cluster",
 					Stage:            "dev",
 					IngressClassName: "traefik",
@@ -245,7 +225,7 @@ func TestGenerateCmd(t *testing.T) {
 							},
 						},
 					},
-					Services: createTestServices(),
+					Services: testutil.CreateTestServices(),
 				})
 
 				//dummy values
@@ -265,7 +245,7 @@ func TestGenerateCmd(t *testing.T) {
 			}
 
 			// Create app with generate command and global flags
-			app := createTestApp(NewGenerateCmd())
+			app := CreateTestApp(NewGenerateCmd())
 
 			// Run: kubara generate [flags]
 			args := append([]string{"kubara", "generate"}, tt.flags...)
@@ -292,7 +272,7 @@ func TestGenerateCmd(t *testing.T) {
 func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := createTestConfig(t, tempDir, config.Cluster{
+	configPath := CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -312,13 +292,13 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 				},
 			},
 		},
-		Services: createTestServices(),
+		Services: testutil.CreateTestServices(),
 	})
 
 	//dummy values
 	createDefaultGenerateTestEnv(t, tempDir)
 
-	app := createTestApp(NewGenerateCmd())
+	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
@@ -328,7 +308,7 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := createTestConfig(t, tempDir, config.Cluster{
+	configPath := CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -348,13 +328,13 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 				},
 			},
 		},
-		Services: createTestServices(),
+		Services: testutil.CreateTestServices(),
 	})
 
 	//dummy values
 	createDefaultGenerateTestEnv(t, tempDir)
 
-	app := createTestApp(NewGenerateCmd())
+	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
@@ -371,7 +351,7 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := createTestConfig(t, tempDir, config.Cluster{
+	configPath := CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "helm-only-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -384,13 +364,13 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 				},
 			},
 		},
-		Services: createTestServices(),
+		Services: testutil.CreateTestServices(),
 	})
 
 	//dummy values
 	createDefaultGenerateTestEnv(t, tempDir)
 
-	app := createTestApp(NewGenerateCmd())
+	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
@@ -407,7 +387,7 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := createTestConfig(t, tempDir, config.Cluster{
+	configPath := CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -420,22 +400,64 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 				},
 			},
 		},
-		Services: createTestServices(),
+		Services: testutil.CreateTestServices(),
 	})
 
 	//dummy values
 	createDefaultGenerateTestEnv(t, tempDir)
 
-	app := createTestApp(NewGenerateCmd())
+	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing terraform configuration")
 }
 
+func TestDisabledServicesDontGetWritten(t *testing.T) {
+	tempDir := t.TempDir()
+	services := testutil.CreateTestServices()
+	// D'oh!
+	homerName := "homer-dashboard"
+	homer := services[homerName]
+	homer.Status = "disabled"
+	services[homerName] = homer
+
+	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+		Name:    "missing-terraform-cluster",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "test.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: services,
+	})
+	//dummy values
+	createDefaultGenerateTestEnv(t, tempDir)
+
+	app := CreateTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	entries, err := os.ReadDir(helmDir)
+	names := make([]string, 0)
+	for _, entry := range entries {
+		names = append(names, entry.Name())
+	}
+	require.NoError(t, err)
+	assert.NotContains(t, names, homerName)
+}
+
 // Helper function
 
-func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
+func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
 	t.Helper()
 
 	configPath := filepath.Join(dir, "config.yaml")
@@ -450,6 +472,25 @@ func createTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 	require.NoError(t, err)
 
 	return configPath
+}
+
+func CreateTestCluster(t *testing.T) config.Cluster {
+	t.Helper()
+	return config.Cluster{
+		Name:    "missing-terraform-cluster",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "test.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: testutil.CreateTestServices(),
+	}
 }
 
 func createDefaultGenerateTestEnv(t *testing.T, dir string) string {
@@ -498,7 +539,7 @@ func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	return envPath
 }
 
-func createTestApp(commands ...*cli.Command) *cli.Command {
+func CreateTestApp(commands ...*cli.Command) *cli.Command {
 	globalFlags := NewGlobalFlags()
 
 	return &cli.Command{
