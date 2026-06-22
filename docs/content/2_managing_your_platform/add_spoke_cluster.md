@@ -149,7 +149,7 @@ Example:
 
 ```yaml
 clusterSecretStores:
-  - name: workload-0-dev
+  workload-0-dev:
     labels:
       argocd.argoproj.io/instance: workload-0-external-secrets
     provider:
