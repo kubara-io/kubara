@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 
@@ -78,11 +79,8 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}
 
 	packOptions := oras.PackManifestOptions{
-		Layers: []v1.Descriptor{layerDescriptor},
-		ManifestAnnotations: map[string]string{
-			"io.kubara.catalog.name":    manifest.Metadata.Name,
-			"io.kubara.catalog.version": manifest.Spec.Version,
-		},
+		Layers:              []v1.Descriptor{layerDescriptor},
+		ManifestAnnotations: buildCatalogManifestAnnotations(manifest),
 	}
 	manifestDescriptor, err := oras.PackManifest(ctx, fileStore, oras.PackManifestVersion1_1, CatalogArtifactType, packOptions)
 	if err != nil {
@@ -118,6 +116,18 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}
 
 	return artifact, nil
+}
+
+func buildCatalogManifestAnnotations(manifest CatalogManifest) map[string]string {
+	annotations := maps.Clone(manifest.Metadata.Annotations)
+	if annotations == nil {
+		annotations = make(map[string]string, 2)
+	}
+
+	annotations["io.kubara.catalog.name"] = manifest.Metadata.Name
+	annotations["io.kubara.catalog.version"] = manifest.Spec.Version
+
+	return annotations
 }
 
 func extractCatalogContents(ctx context.Context, layoutStore *oci.Store, desc v1.Descriptor, contentsDir string) (string, error) {
