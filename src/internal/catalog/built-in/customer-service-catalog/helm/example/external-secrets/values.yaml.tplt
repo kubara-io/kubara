@@ -1,6 +1,6 @@
 {{- if eq .cluster.terraform.provider "t-cloud-public" }}
 clusterSecretStores:
-  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+  {{ .cluster.name }}-{{ .cluster.stage }}:
     provider:
       vault:
         server: http://openbao.openbao.svc.cluster.local:8200

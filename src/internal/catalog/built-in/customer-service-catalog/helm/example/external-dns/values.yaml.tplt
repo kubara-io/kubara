@@ -1,6 +1,6 @@
 {{- if and (eq .cluster.terraform.provider "t-cloud-public") (eq (index .cluster.services "external-secrets" "status") "enabled") }}
 namespacedSecretStores:
-  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+  {{ .cluster.name }}-{{ .cluster.stage }}:
     provider:
       vault:
         server: http://openbao.openbao.svc.cluster.local:8200
