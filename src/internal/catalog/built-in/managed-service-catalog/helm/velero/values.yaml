@@ -40,7 +40,7 @@ velero:
       mountPath: /home/cnb
   initContainers:
     - name: velero-plugin-for-aws
-      image: velero/velero-plugin-for-aws:v1.14.0
+      image: velero/velero-plugin-for-aws:v1.14.1
       securityContext:
         readOnlyRootFilesystem: true
         allowPrivilegeEscalation: false

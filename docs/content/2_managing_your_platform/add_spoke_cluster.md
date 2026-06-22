@@ -178,7 +178,7 @@ bootstrapValues:
     - name: my-new-spoke-0
       project: hub-production
       remoteRef:
-        remoteKey: my_clusters
+        remoteKey: <hub-cluster-name>/<stage>/argocd/my_clusters
         remoteKeyProperty: k8s-spoke-0
       secretStoreRef:
         kind: ClusterSecretStore
@@ -198,7 +198,7 @@ bootstrapValues:
 
 The `remoteRef` points to the spoke kubeconfig secret in your secret backend.
 
-![Add Workload Cluster](../images/add-workload-cluster.png)
+![Hub_n_Spoke](../assets/diagrams.drawio)
 
 ## 6. Commit and roll out
 

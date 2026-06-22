@@ -359,6 +359,8 @@ runtime_settings.properties
 # Specific
 launchers/demo-e2e/edc-config.properties
 .env
+.kubara/
+.local/
 
 #########################################
 # Logs

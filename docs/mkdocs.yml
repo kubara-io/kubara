@@ -6,6 +6,7 @@ docs_dir: 'content'
 nav:
   - Home: index.md
   - Getting Started:
+      - Quick Start: 1_getting_started/quick_start.md
       - Concepts:
           - Overview: 1_getting_started/overview_core_concept.md
           - Catalogs: 1_getting_started/catalogs.md
@@ -70,6 +71,10 @@ plugins:
       assets: false
       links_attr_map:
         target: _blank
+  - drawio:
+      viewer_js: "js/viewer-static.min.js"
+      edit: false
+      darkmode: false
 markdown_extensions:
   - attr_list
   - admonition
@@ -87,6 +92,7 @@ theme:
   custom_dir: overrides
   logo: images/logo.svg
   favicon: images/favicon.ico
+  font: false
   features:
     - search.suggest
     - navigation.sections
@@ -119,4 +125,6 @@ extra:
     provider: mike
     alias: true
     default: latest-stable
+copyright: Copyright &copy; kubara &middot; <a href="https://stackit.com/de/impressum?hidebanner=true">Imprint</a> &middot;
+  <a href="https://kubara.io/privacy/">Privacy</a>
 strict: true

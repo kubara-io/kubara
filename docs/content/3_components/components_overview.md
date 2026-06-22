@@ -50,7 +50,7 @@ More tools will be added in future releases of the kubara framework.
 | Tool                                                            | Description                                                | Functionality      | Key Features                                                        |
 | --------------------------------------------------------------- | ---------------------------------------------------------- | ------------------ | ------------------------------------------------------------------- |
 | <div style="width: 80px;">![Longhorn](../images/longhorn-logo.png)</div> | Longhorn. Distributed block storage system for Kubernetes. | Persistent storage | - Replication<br>- Snapshots<br>- Backups<br>- Dynamic provisioning |
-| <div style="width: 80px;">![Velero](../images/velero-logo.png)</div> | [Velero](backup_and_recovery.md). Backup, restore, disaster recovery, and migration for Kubernetes resources and persistent volumes. | Backup & Recovery | - Backups<br>- Snapshots<br>- Recovery<br>- Migration |
+| <div style="width: 80px;">![Velero](../images/velero-logo.png)</div> | [Velero](backup_and_recovery.md). Safely backup and restore, perform disaster recovery, and migrate Kubernetes cluster resources and persistent volumes. | Backup & Recovery | - Backup<br>- Snapshots<br>- Recovery<br>- Migration |
 
 ---
 
@@ -84,7 +84,7 @@ If you deactivate or replace applications (Y-axis) with others not part of the k
 | external-dns            |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
 | traefik                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
 | metalLB                 | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              | X       |         |        |
-| velero                  |         |                 |                       |      |                |              | X                |         |                  |                         |              |          |              |         |         |        |
+| velero                  |         |                 |                       |      |                |              |         X         |         |                  |                         |              |          |              |         |         |        |
 
 ## Not enough?
 

@@ -117,5 +117,5 @@ resource "local_file" "kubeconfig" {
   count           = var.create_kubeconfig_local ? 1 : 0
   content         = data.opentelekomcloud_cce_cluster_kubeconfig_v3.this.kubeconfig
   filename        = var.kubeconfig_path
-  file_permission = "0644"
+  file_permission = "0600"
 }

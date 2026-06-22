@@ -39,9 +39,13 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 	k8sOpts.DryRun = o.DryRun
 
 	var manifest []byte
+	imagePullSecret, err := sm.createImagePullSecret(o.EnvMap, argocdNamespace)
+	if err != nil {
+		return fmt.Errorf("create image pull secret: %w", err)
+	}
 	secrets := []*corev1.Secret{
 		sm.createGitRepositorySecret(o.EnvMap),
-		sm.createImagePullSecret(o.EnvMap, argocdNamespace),
+		imagePullSecret,
 		sm.createHelmRepositorySecret(o.EnvMap),
 	}
 
@@ -88,6 +92,19 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 
 // createGitRepositorySecret creates the ArgoCD git repository secret
 func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
+	stringData := map[string]string{
+		"enableLfs": "true",
+		"insecure":  "false",
+		"name":      "https-init-repo-access",
+		"url":       em.ArgocdGitHttpsUrl,
+		"project":   fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
+	}
+	if envconfig.IsConfiguredEnvValue(em.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(em.ArgocdGitPatOrPassword) {
+		stringData["username"] = em.ArgocdGitUsername
+		stringData["password"] = em.ArgocdGitPatOrPassword
+		stringData["forceHttpBasicAuth"] = "true"
+	}
+
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -103,23 +120,22 @@ func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1
 				"managed-by": "argocd.argoproj.io",
 			},
 		},
-		Type: corev1.SecretTypeOpaque,
-		StringData: map[string]string{
-			"enableLfs":          "true",
-			"forceHttpBasicAuth": "true",
-			"insecure":           "false",
-			"password":           em.ArgocdGitPatOrPassword,
-			"username":           em.ArgocdGitUsername,
-			"name":               "https-init-repo-access",
-			"url":                em.ArgocdGitHttpsUrl,
-			"project":            fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
-		},
+		Type:       corev1.SecretTypeOpaque,
+		StringData: stringData,
 	}
 }
 
 // createImagePullSecret creates the docker registry pull secret
-func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace string) *corev1.Secret {
-	secretString, _ := utils.DecodeB64(em.DockerconfigBase64)
+func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace string) (*corev1.Secret, error) {
+	if !envconfig.IsConfiguredEnvValue(em.DockerconfigBase64) {
+		return nil, nil
+	}
+
+	secretString, err := utils.DecodeB64(em.DockerconfigBase64)
+	if err != nil {
+		return nil, fmt.Errorf("decode DOCKERCONFIG_BASE64: %w", err)
+	}
+
 	return &corev1.Secret{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "v1",
@@ -133,7 +149,7 @@ func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace s
 		StringData: map[string]string{
 			corev1.DockerConfigJsonKey: secretString,
 		},
-	}
+	}, nil
 }
 
 // createHelmRepositorySecret creates the Helm repository secret

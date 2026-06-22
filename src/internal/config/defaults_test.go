@@ -65,7 +65,7 @@ func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {
 	applyDefaults(cfg)
 
 	tf := cfg.Clusters[0].Terraform
-	assert.Equal(t, "stackit", tf.Provider, "Provider should default to stackit")
+	assert.Equal(t, TerraformProviderNone, tf.Provider, "Provider should default to none")
 	assert.Equal(t, "ske", tf.KubernetesType, "KubernetesType should default to ske")
 }
 

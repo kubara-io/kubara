@@ -2,9 +2,10 @@ package catalog
 
 import (
 	"context"
-	"github.com/urfave/cli/v3"
 
 	internal "github.com/kubara-io/kubara/internal/cmd/catalog"
+
+	"github.com/urfave/cli/v3"
 )
 
 func NewCatalogCreate() *cli.Command {

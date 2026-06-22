@@ -10,8 +10,7 @@ namespace:
     stage: "{{ .cluster.stage }}"
 
 
-{{- $tcp := eq (dig "cluster" "terraform" "provider" "" .) "t-cloud-public" -}}
-{{- if $tcp }}
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
 namespacedSecretStores:
   - name: {{ .cluster.name }}-{{ .cluster.stage }}
     provider:
@@ -51,7 +50,7 @@ externalSecrets:
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: oauth2_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/oauth2-proxy/oauth2_credentials
 {{- end }}
 
 

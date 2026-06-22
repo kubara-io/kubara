@@ -28,10 +28,6 @@ type ConfigStore struct {
 	catalogOptions catalog.LoadOptions
 }
 
-func NewConfigStore(filePath string) *ConfigStore {
-	return NewConfigStoreWithCatalog(filePath, catalog.LoadOptions{})
-}
-
 func NewConfigStoreWithCatalog(filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
 	return &ConfigStore{
 		filepath:       filePath,
@@ -75,6 +71,7 @@ func (cs *ConfigStore) Load() error {
 	}
 
 	applyDefaults(cs.config)
+	normalizeDisabledTerraform(cs.config)
 	if err := cs.applyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
 	}
@@ -90,6 +87,15 @@ func (cs *ConfigStore) Load() error {
 	}
 
 	return nil
+}
+
+func normalizeDisabledTerraform(cfg *Config) {
+	for idx := range cfg.Clusters {
+		terraform := cfg.Clusters[idx].Terraform
+		if terraform != nil && terraform.Provider == TerraformProviderNone {
+			cfg.Clusters[idx].Terraform = nil
+		}
+	}
 }
 
 func isLegacyConfig(raw map[string]any) bool {
@@ -297,11 +303,6 @@ func legacyClusterLabel(cluster map[string]any, clusterIndex int) string {
 	return fmt.Sprintf("clusters[%d]", clusterIndex)
 }
 
-// GenerateSchema generates a JSON schema from the Config struct
-func GenerateSchema() (map[string]any, error) {
-	return GenerateSchemaWithCatalog(catalog.LoadOptions{})
-}
-
 // GenerateSchemaWithCatalog generates a JSON schema from the Config struct
 // with optional external service definitions merged into the built-in catalog.
 func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]any, error) {
@@ -337,11 +338,43 @@ func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
 		return nil, fmt.Errorf("unmarshal schema: %w", err)
 	}
 	ensureServiceConfigDefinition(schemaDoc)
+	allowDisabledTerraformSchema(schemaDoc)
 	if err := composeServiceSchema(schemaDoc, cat); err != nil {
 		return nil, fmt.Errorf("compose service schema: %w", err)
 	}
 
 	return schemaDoc, nil
+}
+
+func allowDisabledTerraformSchema(schemaDoc map[string]any) {
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	if !ok {
+		return
+	}
+
+	terraform, ok := defs["Terraform"].(map[string]any)
+	if !ok {
+		return
+	}
+
+	required, ok := terraform["required"].([]any)
+	if !ok || len(required) == 0 {
+		return
+	}
+
+	terraform["anyOf"] = []any{
+		map[string]any{
+			"properties": map[string]any{
+				"provider": map[string]any{
+					"const": string(TerraformProviderNone),
+				},
+			},
+		},
+		map[string]any{
+			"required": required,
+		},
+	}
+	delete(terraform, "required")
 }
 
 // ensureServiceConfigDefinition ensures that for every service the
@@ -435,7 +468,7 @@ func validateProviderKubernetesTypes(cfg *Config) error {
 	return nil
 }
 
-func isKubernetesTypeSupportedByProvider(provider, kubernetesType string) bool {
+func isKubernetesTypeSupportedByProvider(provider TerraformProvider, kubernetesType string) bool {
 	for _, supported := range supportedKubernetesTypesForProvider(provider) {
 		if kubernetesType == supported {
 			return true
@@ -444,11 +477,11 @@ func isKubernetesTypeSupportedByProvider(provider, kubernetesType string) bool {
 	return false
 }
 
-func supportedKubernetesTypesForProvider(provider string) []string {
+func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
 	switch provider {
-	case "stackit":
+	case TerraformProviderStackit:
 		return []string{"ske", "edge"}
-	case "t-cloud-public":
+	case TerraformProviderTCloudPublic:
 		return []string{"cce"}
 	default:
 		return nil

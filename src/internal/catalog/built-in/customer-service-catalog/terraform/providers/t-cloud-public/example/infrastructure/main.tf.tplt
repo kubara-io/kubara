@@ -71,10 +71,10 @@ module "network" {
   subnet_gateway_ip = var.subnet_gateway_ip
   subnet_dns_list   = var.subnet_dns_list
 
-  enable_nat_gateway               = var.enable_nat_gateway
-  nat_gateway_spec                 = var.nat_gateway_spec
-  nat_eip_type                     = var.nat_eip_type
-  nat_eip_bandwidth_size           = var.nat_eip_bandwidth_size
+  enable_nat_gateway                         = var.enable_nat_gateway
+  nat_gateway_spec                           = var.nat_gateway_spec
+  nat_eip_type                               = var.nat_eip_type
+  nat_eip_bandwidth_size                     = var.nat_eip_bandwidth_size
   enable_shared_load_balancer                = var.enable_shared_load_balancer
   enable_dedicated_load_balancer             = var.enable_dedicated_load_balancer
   load_balancer_eip_type                     = var.load_balancer_eip_type
@@ -135,8 +135,8 @@ module "cce_cluster" {
 locals {
   storage_classes = {
     for name, storage_class in var.storage_classes : name => {
-      annotations            = storage_class.annotations
-      labels                 = storage_class.labels
+      annotations = storage_class.annotations
+      labels      = storage_class.labels
       parameters = merge(
         storage_class.parameters,
         storage_class.use_node_storage_kms_key ? { "everest.io/crypt-key-id" = module.node_storage_kms_key.id } : {},
@@ -168,17 +168,17 @@ module "openbao" {
   replicas           = var.openbao_replicas
   image_pull_secrets = var.openbao_image_pull_secrets
 
-  injector_enabled       = var.openbao_injector_enabled
-  data_storage_size      = var.openbao_data_storage_size
-  data_storage_class     = var.openbao_data_storage_class
-  seal_config            = var.openbao_seal_config
-  extra_environment_vars = var.openbao_extra_environment_vars
-  ingress_enabled                    = var.openbao_ingress_enabled
-  ingress_host                       = var.openbao_ingress_host
-  ingress_path                       = var.openbao_ingress_path
-  ingress_class_name                 = var.openbao_ingress_class_name
-  ingress_annotations                = var.openbao_ingress_annotations
-  ingress_tls_secret_name            = var.openbao_ingress_tls_secret_name
+  injector_enabled        = var.openbao_injector_enabled
+  data_storage_size       = var.openbao_data_storage_size
+  data_storage_class      = var.openbao_data_storage_class
+  seal_config             = var.openbao_seal_config
+  extra_environment_vars  = var.openbao_extra_environment_vars
+  ingress_enabled         = var.openbao_ingress_enabled
+  ingress_host            = var.openbao_ingress_host
+  ingress_path            = var.openbao_ingress_path
+  ingress_class_name      = var.openbao_ingress_class_name
+  ingress_annotations     = var.openbao_ingress_annotations
+  ingress_tls_secret_name = var.openbao_ingress_tls_secret_name
 
   depends_on = [module.cce_cluster]
 }

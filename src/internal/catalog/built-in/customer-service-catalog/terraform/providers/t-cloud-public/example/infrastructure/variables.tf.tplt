@@ -391,14 +391,14 @@ variable "node_pools" {
     root_volume = optional(object({
       size       = number
       volumetype = string
-    }), {
+      }), {
       size       = 50
       volumetype = "SSD"
     })
     data_volumes = optional(list(object({
       size       = number
       volumetype = string
-    })), [{
+      })), [{
       size       = 100
       volumetype = "SSD"
     }])

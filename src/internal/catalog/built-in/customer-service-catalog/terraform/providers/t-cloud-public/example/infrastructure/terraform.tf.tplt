@@ -20,7 +20,7 @@ terraform {
       source  = "opentelekomcloud/opentelekomcloud"
       version = ">= 1.36.64, < 2.0.0"
     }
-    {{ if (eq .cluster.terraform.kubernetesType "cce") }}
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
     helm = {
       source  = "hashicorp/helm"
       version = ">= 2.17.0, < 3.0.0"
@@ -29,7 +29,7 @@ terraform {
       source  = "hashicorp/kubernetes"
       version = ">= 2.36.0, < 3.0.0"
     }
-    {{ end }}
+{{ end }}
   }
 }
 

@@ -76,6 +76,29 @@ func UpdateRepository(ctx context.Context, opts RepoOptions) error {
 	return nil
 }
 
+// UpdateAllRepositories refreshes the index for every configured helm repository.
+// This is necessary in addition to per-alias UpdateRepository calls because helm
+// dependency resolution can hit the global repository cache when a subchart in
+// Chart.yaml references a repository by URL rather than by alias. A stale entry
+// from a previous run is otherwise not invalidated, which leads to
+// "can't get a valid version for subchart" errors during dependency update.
+func UpdateAllRepositories(ctx context.Context) error {
+	var stdout, stderr bytes.Buffer
+	cmd := exec.CommandContext(ctx, "helm", "repo", "update")
+	cmd.Stdout = &stdout
+	cmd.Stderr = &stderr
+
+	if err := cmd.Run(); err != nil {
+		return &HelmRepoError{
+			Operation: "update",
+			Err:       err,
+			Stderr:    stderr.String(),
+		}
+	}
+
+	return nil
+}
+
 // Repository represents a helm repository
 type Repository struct {
 	Name string `json:"name"`

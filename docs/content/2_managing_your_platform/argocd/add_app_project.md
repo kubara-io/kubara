@@ -23,7 +23,7 @@ projects:
 
 That whats happening behind the scenes:
 
-![Add Proejct](../../images/add-project.png)
+![Add_Argo_Project](../../assets/diagrams.drawio)
 
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that is connected to your Argo CD instance.

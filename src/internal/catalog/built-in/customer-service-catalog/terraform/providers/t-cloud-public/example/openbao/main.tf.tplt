@@ -39,14 +39,14 @@ resource "vault_policy" "admin" {
 resource "vault_jwt_auth_backend" "oidc" {
   count = var.manage_openbao_oidc_auth_backend ? 1 : 0
 
-  path                = var.openbao_oidc_auth_path
-  type                = "oidc"
-  oidc_discovery_url  = var.openbao_oidc_discovery_url
-  oidc_client_id      = var.openbao_oidc_client_id
-  oidc_client_secret_wo = var.openbao_oidc_client_secret
+  path                          = var.openbao_oidc_auth_path
+  type                          = "oidc"
+  oidc_discovery_url            = var.openbao_oidc_discovery_url
+  oidc_client_id                = var.openbao_oidc_client_id
+  oidc_client_secret_wo         = var.openbao_oidc_client_secret
   oidc_client_secret_wo_version = var.openbao_oidc_client_secret_version
-  bound_issuer        = var.openbao_oidc_discovery_url
-  default_role        = var.openbao_oidc_admin_role_name
+  bound_issuer                  = var.openbao_oidc_discovery_url
+  default_role                  = var.openbao_oidc_admin_role_name
 
   tune {
     listing_visibility = "unauth"

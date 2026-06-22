@@ -284,13 +284,13 @@ externalSecrets:
     grafana-admin-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: grafana_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_credentials
 
     {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
     oauth2-credentials:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: grafana_oauth2_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_oauth2_credentials
     {{- end }}
 {{- end }}
 

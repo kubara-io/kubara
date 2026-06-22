@@ -26,8 +26,6 @@ externalSecrets:
       secretStoreRef:
         kind: SecretStore
         name: {{ .cluster.name }}-{{ .cluster.stage }}
-      # name needs to cloud, as the aws plugin for velero looks at cloud per default
-      # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
           remoteKey: velero/velero_s3_credentials
@@ -50,7 +48,7 @@ externalSecrets:
       # other key names need to be specified in the backupStorageLocation
       data:
         - secretKey: cloud
-          remoteKey: velero_s3_credentials
+          remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/velero/velero_s3_credentials
           remoteKeyProperty: cloud
 {{- end }}
 

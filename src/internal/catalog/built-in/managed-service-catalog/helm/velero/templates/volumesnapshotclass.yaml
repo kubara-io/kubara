@@ -2,7 +2,8 @@
 {{- if $volumeSnapshotClass.customDefinition }}
 {{ toYaml $volumeSnapshotClass.customDefinition }}
 {{- else }}
-{{- $providerName := $volumeSnapshotClass.k8sProvider | default "stackit" -}}
+{{- $providerName := $volumeSnapshotClass.k8sProvider -}}
+{{- if and $providerName (ne $providerName "none") }}
 {{- $providerConfig := index ($volumeSnapshotClass.providers | default dict) $providerName -}}
 {{- if not $providerConfig }}
 {{- fail (printf "volumeSnapshotClass.k8sProvider %q is not configured; define volumeSnapshotClass.providers.%s or volumeSnapshotClass.customDefinition" $providerName $providerName) }}
@@ -15,4 +16,5 @@ metadata:
   labels:
     velero.io/csi-volumesnapshot-class: "true"
 {{ toYaml $providerConfig }}
+{{- end }}
 {{- end }}

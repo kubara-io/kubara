@@ -1,3 +1,4 @@
+{{- if eq .cluster.terraform.provider "stackit" }}
 externalSecrets:
   secretStoreRef:
     kind: ClusterSecretStore
@@ -12,12 +13,44 @@ externalSecrets:
     external-dns-webhook:
       secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - remoteKey: dns_zone_admin
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
           remoteKeyProperty: project_id
           secretKey: PROJECT_ID
-        - remoteKey: dns_zone_admin
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/dns_zone_admin
           remoteKeyProperty: sa_key_json
           secretKey: SA_KEY_JSON
+{{- else if eq .cluster.terraform.provider "t-cloud-public" }}
+{{- if eq (index .cluster.services "external-secrets" "status") "enabled" }}
+namespacedSecretStores:
+  - name: {{ .cluster.name }}-{{ .cluster.stage }}
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+              audiences:
+                - vault
+
+externalSecrets:
+  secrets:
+    tcloudpubliccloudsyaml:
+      secretStoreRef:
+        kind: SecretStore
+        name: {{ .cluster.name }}-{{ .cluster.stage }}
+      data:
+        - remoteKey: external-dns/t-cloud-public-clouds-yaml
+          remoteKeyProperty: clouds.yaml
+          secretKey: clouds.yaml
+{{- else }}
+externalSecrets: {}
+{{- end }}
+{{- end }}
 
 namespace:
   labels:
@@ -30,6 +63,7 @@ external-dns:
   extraArgs:
     source:
       - traefik-proxy
+    webhook-provider-url: http://localhost:8080
   rbac:
     create: true
     additionalPermissions:
@@ -45,6 +79,62 @@ external-dns:
         resources:
           - "namespaces"
         verbs: ["get", "watch", "list"]
+{{- if eq .cluster.terraform.provider "stackit" }}
+  extraVolumes:
+    - name: stackit-sa-authentication
+      secret:
+        secretName: external-dns-webhook
+        items:
+          - key: SA_KEY_JSON
+            path: sa_key.json
+{{- else if eq .cluster.terraform.provider "t-cloud-public" }}
+  extraVolumes:
+    - name: tcloudpubliccloudsyaml
+      secret:
+        secretName: tcloudpubliccloudsyaml
+        items:
+          - key: clouds.yaml
+            path: clouds.yaml
+{{- end }}
+  global:
+    imagePullSecrets:
+      - name: image-pull-secret
+    security:
+      allowInsecureImages: true
+{{- if eq .cluster.terraform.provider "stackit" }}
+  provider:
+    webhook:
+      image:
+        repository: ghcr.io/stackitcloud/external-dns-stackit-webhook
+        tag: v0.3.9
+      extraVolumeMounts:
+        - name: stackit-sa-authentication
+          mountPath: /var/run/secrets/stackit
+      env:
+        - name: API_PORT
+          value: "8080"
+        - name: AUTH_KEY_PATH
+          value: /var/run/secrets/stackit/sa_key.json
+        - name: PROJECT_ID
+          valueFrom:
+            secretKeyRef:
+              name: external-dns-webhook
+              key: PROJECT_ID
+{{- else if eq .cluster.terraform.provider "t-cloud-public" }}
+  provider:
+    webhook:
+      image:
+        repository: ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook
+        tag: 1.1.2
+      extraVolumeMounts:
+        - name: tcloudpubliccloudsyaml
+          mountPath: /etc/openstack/
+      env:
+        - name: API_PORT
+          value: "8080"
+        - name: OS_CLOUD
+          value: openstack
+{{- end }}
   serviceMonitor:
     {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
     enabled: true

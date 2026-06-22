@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -36,6 +35,11 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 	if err != nil {
 		return nil, fmt.Errorf("convert cluster config to map: %w", err)
 	}
+	if cluster.Terraform == nil {
+		clusterMap["terraform"] = map[string]any{
+			"provider": config.TerraformProviderNone,
+		}
+	}
 
 	return map[string]any{
 		"env":     em,
@@ -54,45 +58,35 @@ func (o *Options) resolveOutputPath(result render.TemplateResult, clusterName st
 }
 
 func supportedProviderList() string {
-	providers := make([]string, 0, len(render.SupportedProviders))
-	for provider := range render.SupportedProviders {
-		providers = append(providers, provider)
+	supported := config.SupportedTerraformProviders()
+	providers := make([]string, 0, len(supported))
+	for _, provider := range supported {
+		providers = append(providers, string(provider))
 	}
-	sort.Strings(providers)
 	return strings.Join(providers, ", ")
 }
 
-func resolveProvider(clusterBlock config.Cluster) (string, error) {
+func resolveProvider(clusterBlock config.Cluster, requireTerraform bool) (string, bool, error) {
 	if clusterBlock.Terraform == nil {
-		return "", fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
+		if requireTerraform {
+			return "", false, fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
+		}
+		return "", false, nil
 	}
-	provider := strings.ToLower(strings.TrimSpace(clusterBlock.Terraform.Provider))
+	provider := clusterBlock.Terraform.Provider
+	if provider == config.TerraformProviderNone {
+		if requireTerraform {
+			return "", false, fmt.Errorf("cluster %q has terraform provider %q; configure one of: %q", clusterBlock.Name, provider, supportedProviderList())
+		}
+		return "", false, nil
+	}
 	if provider == "" {
-		return "", fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+		return "", false, fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
 	}
-	if provider == "<provider>" {
-		return "", fmt.Errorf(
-			"cluster %q still uses placeholder provider %q; supported providers: %q",
-			clusterBlock.Name,
-			clusterBlock.Terraform.Provider,
-			supportedProviderList(),
-		)
+	if !provider.IsSupported() {
+		return "", false, fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
 	}
-	if !render.SupportedProviders[provider] {
-		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
-	}
-	return provider, nil
-}
-
-func resolveProviderIfConfigured(clusterBlock config.Cluster) string {
-	if clusterBlock.Terraform == nil {
-		return ""
-	}
-	provider := strings.ToLower(strings.TrimSpace(clusterBlock.Terraform.Provider))
-	if provider == "" || provider == "<provider>" || !render.SupportedProviders[provider] {
-		return ""
-	}
-	return provider
+	return string(provider), true, nil
 }
 
 func resolveCatalog(cat catalog.Catalog) map[string]any {
@@ -130,18 +124,34 @@ func toJSONMap(value any) (map[string]any, error) {
 	return out, nil
 }
 
-func (o *Options) cleanupOldFiles() error {
+func pathHasSegment(path, segment string) bool {
+	for _, part := range strings.Split(filepath.ToSlash(path), "/") {
+		if part == segment {
+			return true
+		}
+	}
+	return false
+}
+
+func (o *Options) cleanupOldFiles(results []render.TemplateResult) error {
 	if o.DryRun {
 		return nil
 	}
 
-	if o.TemplateType == render.All || o.TemplateType == render.Terraform {
+	cleanupTerraform := false
+	cleanupHelm := false
+	for _, result := range results {
+		cleanupTerraform = cleanupTerraform || pathHasSegment(result.Path, render.Terraform.String())
+		cleanupHelm = cleanupHelm || pathHasSegment(result.Path, render.Helm.String())
+	}
+
+	if cleanupTerraform {
 		deletePath := filepath.Join(o.ManagedCatalogPath, render.Terraform.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
 	}
-	if o.TemplateType == render.All || o.TemplateType == render.Helm {
+	if cleanupHelm {
 		deletePath := filepath.Join(o.ManagedCatalogPath, render.Helm.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
@@ -201,19 +211,32 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
 		}
 
-		var provider string
-		if o.TemplateType == render.Helm {
-			provider = resolveProviderIfConfigured(clusterBlock)
-		} else {
-			provider, err = resolveProvider(clusterBlock)
+		provider := ""
+		templateType := o.TemplateType
+		if o.TemplateType == render.Terraform {
+			var renderTerraform bool
+			provider, renderTerraform, err = resolveProvider(clusterBlock, true)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)
+			}
+			if !renderTerraform {
+				continue
+			}
+		}
+		if o.TemplateType == render.All {
+			var renderTerraform bool
+			provider, renderTerraform, err = resolveProvider(clusterBlock, false)
+			if err != nil {
+				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)
+			}
+			if !renderTerraform {
+				templateType = render.Helm
 			}
 		}
 
 		clusterTplResults, err := render.TemplateFiles(
 			render.TemplateOptions{
-				Type:        o.TemplateType,
+				Type:        templateType,
 				Provider:    provider,
 				CatalogPath: o.CatalogPath,
 				Overwrite:   o.CatalogOverwrite,
@@ -243,7 +266,7 @@ func (o *Options) Run() error {
 		return errProcess
 	}
 
-	if errCleanup := o.cleanupOldFiles(); errCleanup != nil {
+	if errCleanup := o.cleanupOldFiles(allResults); errCleanup != nil {
 		return fmt.Errorf("cleanup old files: %w", errCleanup)
 	}
 
