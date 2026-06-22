@@ -11,6 +11,9 @@ You do not need Go installed to run the CLI.
 
     ```bash
     brew tap kubara-io/tap
+    brew trust kubara-io/tap
+    # Trust this tap so Homebrew will be able to update (required since Homebrew 6.0 for third-party taps).
+    # See: https://docs.brew.sh/Tap-Trust
     brew install kubara
     kubara --help
     ```
