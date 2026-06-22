@@ -188,11 +188,18 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 
 	paths := make([]string, 0, len(results))
 	var cceClusterModule string
+	var openBaoMain string
+	var openBaoSecretsExample string
 	for _, result := range results {
 		require.NoError(t, result.Error)
 		paths = append(paths, result.Path)
-		if result.Path == "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf" {
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf":
 			cceClusterModule = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt":
+			openBaoMain = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/secrets.tf-example.tplt":
+			openBaoSecretsExample = result.Content
 		}
 	}
 
@@ -203,6 +210,12 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
 	require.NotEmpty(t, cceClusterModule)
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
+	require.NotEmpty(t, openBaoMain)
+	assert.Contains(t, openBaoMain, "data/test-cluster/dev/cluster_secrets/docker_config")
+	assert.Contains(t, openBaoMain, "data/+/+/{{identity.entity.aliases.")
+	require.NotEmpty(t, openBaoSecretsExample)
+	assert.Contains(t, openBaoSecretsExample, `name  = "test-cluster/dev/cluster_secrets/docker_config"`)
+	assert.Contains(t, openBaoSecretsExample, `name  = "test-cluster/dev/external-dns/t-cloud-public-clouds-yaml"`)
 }
 
 func TestTemplateFiles_TCloudPublicHelmUsesCommonValuesTemplates(t *testing.T) {
@@ -254,7 +267,7 @@ func TestTemplateFiles_TCloudPublicHelmUsesCommonValuesTemplates(t *testing.T) {
 	externalDNS := got["customer-service-catalog/helm/example/external-dns/values.yaml.tplt"]
 	require.NotEmpty(t, externalDNS)
 	assert.Contains(t, externalDNS, "ghcr.io/opentelekomcloud/external-dns-t-cloud-public-webhook")
-	assert.Contains(t, externalDNS, "remoteKey: external-dns/t-cloud-public-clouds-yaml")
+	assert.Contains(t, externalDNS, "remoteKey: test-cluster/dev/external-dns/t-cloud-public-clouds-yaml")
 	assert.NotContains(t, externalDNS, "ghcr.io/stackitcloud")
 
 	externalSecrets := got["customer-service-catalog/helm/example/external-secrets/values.yaml.tplt"]
@@ -277,6 +290,7 @@ func TestTemplateFiles_TCloudPublicHelmUsesCommonValuesTemplates(t *testing.T) {
 	velero := got["customer-service-catalog/helm/example/velero/values.yaml.tplt"]
 	assert.Contains(t, velero, "bucket: velero-test-cluster-dev")
 	assert.Contains(t, velero, `k8sProvider: "t-cloud-public"`)
+	assert.Contains(t, got["customer-service-catalog/helm/example/argo-cd/values.yaml.tplt"], "remoteKey: test-cluster/dev/cluster_secrets/docker_config")
 	assert.Contains(t, got["managed-service-catalog/helm/velero/values.yaml"], "t-cloud-public:")
 }
 

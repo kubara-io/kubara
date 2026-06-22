@@ -34,7 +34,7 @@ externalSecrets:
         kind: SecretStore
         name: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: oauth2-proxy/oauth2_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/oauth2-proxy/oauth2_credentials
 {{- else }}
 externalSecrets:
   secretStoreRef:

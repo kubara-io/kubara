@@ -107,7 +107,7 @@ config:
     s3Url: https://obs.eu-de.otc.t-systems.com
 ```
 
-With `backupStorage.create: true`, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the `velero_credential_access_key` and `velero_credential_secret_access_key` Terraform outputs to the OpenBao layer as `TF_VAR_velero_access_key_id` and `TF_VAR_velero_secret_access_key`. Activate the `velero_credentials` block from `customer-service-catalog/terraform/<cluster-name>/openbao/secrets.tf-example` so OpenBao writes the credential file to `secret/velero/velero_s3_credentials`.
+With `backupStorage.create: true`, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the `velero_credential_access_key` and `velero_credential_secret_access_key` Terraform outputs to the OpenBao layer as `TF_VAR_velero_access_key_id` and `TF_VAR_velero_secret_access_key`. Activate the `velero_credentials` block from `customer-service-catalog/terraform/<cluster-name>/openbao/secrets.tf-example` so OpenBao writes the credential file to `secret/<cluster-name>/<stage>/velero/velero_s3_credentials`.
 
 To use an existing S3-compatible bucket instead, set `backupStorage.create: false` and provide the bucket connection details in the Velero config:
 

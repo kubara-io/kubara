@@ -126,11 +126,11 @@ resource "vault_policy" "external_secrets_read" {
   name = var.external_secrets_policy_name
 
   policy = <<-EOT
-    path "${var.openbao_kv_mount_path}/data/docker_config" {
+    path "${var.openbao_kv_mount_path}/data/{{ .cluster.name }}/{{ .cluster.stage }}/cluster_secrets/docker_config" {
       capabilities = ["read"]
     }
 
-    path "${var.openbao_kv_mount_path}/metadata/docker_config" {
+    path "${var.openbao_kv_mount_path}/metadata/{{ .cluster.name }}/{{ .cluster.stage }}/cluster_secrets/docker_config" {
       capabilities = ["read"]
     }
   EOT
@@ -160,11 +160,11 @@ resource "vault_policy" "kubernetes_namespace_kv_read" {
   name = var.openbao_namespace_kv_read_policy_name
 
   policy = <<-EOT
-    path "${var.openbao_kv_mount_path}/data/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
+    path "${var.openbao_kv_mount_path}/data/+/+/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
       capabilities = ["read"]
     }
 
-    path "${var.openbao_kv_mount_path}/metadata/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
+    path "${var.openbao_kv_mount_path}/metadata/+/+/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
       capabilities = ["list", "read"]
     }
   EOT
@@ -217,7 +217,7 @@ resource "vault_kv_secret_v2" "grafana_admin_credentials" {
   mount = var.openbao_kv_mount_path
   # Namespace-isolated under the kube-prometheus-stack namespace, where Grafana
   # runs and reads it through that namespace's SecretStore.
-  name = "kube-prometheus-stack/grafana_credentials"
+  name = "{{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_credentials"
 
   data_json = jsonencode({
     "admin-user"     = local.grafana_admin_user

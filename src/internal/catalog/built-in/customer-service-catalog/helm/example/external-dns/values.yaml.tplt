@@ -44,7 +44,7 @@ externalSecrets:
         kind: SecretStore
         name: {{ .cluster.name }}-{{ .cluster.stage }}
       data:
-        - remoteKey: external-dns/t-cloud-public-clouds-yaml
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/external-dns/t-cloud-public-clouds-yaml
           remoteKeyProperty: clouds.yaml
           secretKey: clouds.yaml
 {{- else }}

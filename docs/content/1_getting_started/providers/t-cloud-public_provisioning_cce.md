@@ -198,7 +198,7 @@ terraform init
 terraform apply
 ```
 
-The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role (used only for the cluster-wide image pull secret and limited to `secret/docker_config`), and the generated Grafana admin credentials.
+The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role (used only for the cluster-wide image pull secret), and the generated Grafana admin credentials.
 
 User-provided secrets — the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials — are written through a separate `secrets.tf-example` file. Copy it to activate the blocks you need:
 
@@ -214,14 +214,14 @@ T Cloud Public uses **namespace-isolated** secret access. Each consuming service
 
 | Secret | KV path | Consuming namespace |
 |--------|---------|---------------------|
-| Grafana admin / OAuth2 | `secret/kube-prometheus-stack/*` | `kube-prometheus-stack` |
-| Argo CD OAuth2 | `secret/argocd/*` | `argocd` |
-| OAuth2 Proxy | `secret/oauth2-proxy/*` | `oauth2-proxy` |
-| Velero S3 | `secret/velero/*` | `velero` |
-| ExternalDNS clouds.yaml | `secret/external-dns/*` | `external-dns` |
-| **Image pull secret** | `secret/docker_config` (flat) | **all** (cluster-wide) |
+| Grafana admin / OAuth2 | `secret/<cluster>/<stage>/kube-prometheus-stack/*` | `kube-prometheus-stack` |
+| Argo CD OAuth2 | `secret/<cluster>/<stage>/argocd/*` | `argocd` |
+| OAuth2 Proxy | `secret/<cluster>/<stage>/oauth2-proxy/*` | `oauth2-proxy` |
+| Velero S3 | `secret/<cluster>/<stage>/velero/*` | `velero` |
+| ExternalDNS clouds.yaml | `secret/<cluster>/<stage>/external-dns/*` | `external-dns` |
+| **Image pull secret** | `secret/<cluster>/<stage>/cluster_secrets/docker_config` | **all** (cluster-wide) |
 
-Every chart renders a `SecretStore` in its own namespace that authenticates with that namespace's `default` ServiceAccount through the `k8s-kv-read` role. The templated policy resolves the token to `secret/<namespace>/*`, so a workload in one namespace cannot read another namespace's secrets. The image pull secret is the deliberate exception: it is distributed to every namespace through a `ClusterExternalSecret`, so it stays on the cluster-wide store at a flat path.
+Every chart renders a `SecretStore` in its own namespace that authenticates with that namespace's `default` ServiceAccount through the `k8s-kv-read` role. The templated policy matches the namespace segment in `secret/<cluster>/<stage>/<namespace>/*`, so a workload in one namespace cannot read another namespace's secrets. The image pull secret is the deliberate exception: it is distributed to every namespace through a `ClusterExternalSecret` and remains on the cluster-wide store under `cluster_secrets`.
 
 Velero reads its S3 credentials through an `ExternalSecret` in the `velero` namespace. Keep the separate `external-secrets` service enabled; the Velero chart consumes External Secrets CRDs but does not install the External Secrets Operator itself. The generated `BackupStorageLocation` points at the same synchronized Kubernetes Secret (`velero-credentials`, key `cloud`).
 With `services.velero.config.backupStorage.create: true`, the generated Velero values point at the Terraform-managed bucket name `velero-<cluster-name>-<stage>`. Set the matching `backupStorage.region` and `backupStorage.s3Url` values in the cluster config. If you use an existing OBS or S3-compatible bucket instead, set `backupStorage.create: false` and provide `backupStorage.bucketName`.

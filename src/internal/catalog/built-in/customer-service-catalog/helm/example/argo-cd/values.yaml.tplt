@@ -85,7 +85,7 @@ externalSecrets:
         kind: SecretStore
         name: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
-        - remoteKey: argocd/argo_oauth2_credentials
+        - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/argocd/argo_oauth2_credentials
 {{ end }}
 {{- else }}
 externalSecrets:
