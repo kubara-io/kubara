@@ -1,0 +1,19 @@
+# T Cloud Public auth
+export TF_VAR_t_cloud_public_region="eu-de"
+export TF_VAR_t_cloud_public_domain_name=""
+export TF_VAR_t_cloud_public_tenant_name="{{ .cluster.terraform.projectId }}"
+export TF_VAR_t_cloud_public_access_key=""
+export TF_VAR_t_cloud_public_secret_key=""
+
+# Terraform S3-compatible OBS backend.
+# Set these after running bootstrap-tfstate-backend, or use existing OBS credentials.
+# AWS_ACCESS_KEY_ID -> Terraform output: credential_access_key
+export AWS_ACCESS_KEY_ID=""
+# AWS_SECRET_ACCESS_KEY -> Terraform output: credential_secret_access_key
+export AWS_SECRET_ACCESS_KEY=""
+
+# T Cloud Public OBS is S3-compatible, but not AWS S3. These settings keep
+# recent Terraform/AWS SDK versions from using optional checksum behavior that
+# can corrupt state uploads against some S3-compatible APIs.
+export AWS_REQUEST_CHECKSUM_CALCULATION="when_required"
+export AWS_RESPONSE_CHECKSUM_VALIDATION="when_required"

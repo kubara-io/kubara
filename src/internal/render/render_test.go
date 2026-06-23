@@ -7,6 +7,7 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testTemplatesFS = catalog.BuiltInFS()
@@ -140,6 +141,55 @@ func TestStripProviderPath(t *testing.T) {
 			assert.Equal(t, tt.want, StripProviderPath(tt.input))
 		})
 	}
+}
+
+func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":    "test-cluster",
+				"stage":   "dev",
+				"dnsName": "test.example.com",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	paths := make([]string, 0, len(results))
+	var cceClusterModule string
+	var infrastructureMain string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		paths = append(paths, result.Path)
+		switch result.Path {
+		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf":
+			cceClusterModule = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt":
+			infrastructureMain = result.Content
+		}
+	}
+
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/main.tf")
+	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt")
+	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
+	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/main.tf")
+	assert.NotContains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt")
+	require.NotEmpty(t, cceClusterModule)
+	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
+	require.NotEmpty(t, infrastructureMain)
+	assert.Contains(t, infrastructureMain, `source = "../../../../managed-service-catalog/terraform/modules/cce-cluster"`)
+	assert.NotContains(t, infrastructureMain, `source = "../../../../managed-service-catalog/terraform/modules/openbao-helm"`)
 }
 
 func TestTemplateFiles(t *testing.T) {

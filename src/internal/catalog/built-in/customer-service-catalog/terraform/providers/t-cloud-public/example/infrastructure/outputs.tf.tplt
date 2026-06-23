@@ -1,0 +1,73 @@
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+### Kubernetes Instance
+output "kubeconfig_raw" {
+  description = "Raw admin kubeconfig."
+  value       = module.cce_cluster.kubeconfig_raw
+  sensitive   = true
+}
+
+output "cluster_public_endpoint_ip" {
+  description = "Public IPv4 bound to the CCE master, if enable_cluster_public_endpoint is true. Use this for kubectl access from outside the VPC."
+  value       = module.cce_cluster.public_endpoint_ip
+}
+
+output "cluster_public_endpoint_eip_id" {
+  description = "EIP resource ID bound to the CCE master, if enable_cluster_public_endpoint is true."
+  value       = module.cce_cluster.public_endpoint_eip_id
+}
+
+output "load_balancer_public_ip" {
+  description = "Public IP address assigned to the shared load balancer."
+  value       = module.network.load_balancer_public_ip
+}
+
+output "load_balancer_id" {
+  description = "Shared load balancer ID for Kubernetes Service annotations."
+  value       = module.network.load_balancer_id
+}
+
+output "dedicated_load_balancer_public_ip" {
+  description = "Public IP address assigned to the dedicated load balancer, if created."
+  value       = module.network.dedicated_load_balancer_public_ip
+}
+
+output "dedicated_load_balancer_id" {
+  description = "Dedicated load balancer ID, if created."
+  value       = module.network.dedicated_load_balancer_id
+}
+
+output "vpc_id" {
+  description = "VPC ID used by the CCE cluster."
+  value       = module.network.vpc_id
+}
+
+output "subnet_id" {
+  description = "Subnet ID used by the CCE cluster."
+  value       = module.network.subnet_id
+}
+
+output "cce_addons" {
+  description = "CCE addons managed for the cluster."
+  value       = module.cce_cluster.addons
+}
+
+output "storage_classes" {
+  description = "kubara-managed CCE StorageClass names."
+  value       = var.create_storage_classes ? module.storage_classes[0].names : []
+}
+
+output "dns_zone_id" {
+  description = "DNS zone ID."
+  value       = var.create_dns_zone ? module.dns_zone[0].id : null
+}
+
+output "dns_zone_name" {
+  description = "DNS zone name."
+  value       = var.create_dns_zone ? module.dns_zone[0].name : null
+}
+
+output "dns_zone_masters" {
+  description = "DNS zone master name servers."
+  value       = var.create_dns_zone ? module.dns_zone[0].masters : null
+}
+{{ end }}
