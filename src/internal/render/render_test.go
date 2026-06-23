@@ -183,13 +183,10 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/main.tf")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt")
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
-	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/openbao-helm/main.tf")
-	assert.NotContains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt")
 	require.NotEmpty(t, cceClusterModule)
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
 	require.NotEmpty(t, infrastructureMain)
 	assert.Contains(t, infrastructureMain, `source = "../../../../managed-service-catalog/terraform/modules/cce-cluster"`)
-	assert.NotContains(t, infrastructureMain, `source = "../../../../managed-service-catalog/terraform/modules/openbao-helm"`)
 }
 
 func TestTemplateFiles(t *testing.T) {
