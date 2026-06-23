@@ -24,12 +24,12 @@
         {
           "filePatterns": ["{{packageFileDir}}/Chart.{yaml,yml}"],
           "matchStrings": ["version:\\s(?<version>[^\\s]+)"],
-          "bumpType": "{{#if isPatch}}patch{{else}}minor{{/if}}"
+          "bumpType": "{{#if isMajor}}major{{else if isMinor}}minor{{else}}patch{{/if}}"
         }
       ],
       "postUpgradeTasks": {
         "commands": [
-          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isPatch}}patch{{else}}minor{{/if}}\""
+          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isMajor}}major{{/if}}{{#if isMinor}}minor{{/if}}{{#if isPatch}}patch{{/if}}\""
         ],
         "fileFilters": ["**/CHANGELOG.md"],
         "executionMode": "update"
