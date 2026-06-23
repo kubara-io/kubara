@@ -1268,7 +1268,7 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <code>customer-service-catalog/helm/&lt;spoke-cluster-name&gt;/external-secrets/additional-values.yaml</code></p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusterSecretStores</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0-dev</span>
+<span class="w">  </span><span class="nt">workload-0-dev</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">argocd.argoproj.io/instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">workload-0-external-secrets</span>
 <span class="w">    </span><span class="nt">provider</span><span class="p">:</span>
