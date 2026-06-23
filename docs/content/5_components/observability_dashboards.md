@@ -37,11 +37,11 @@ These dashboards provide an immediate, comprehensive view of key operational met
 
 ## Logs in Grafana
 
-In Grafana you can also view logs, see [Logs](../3_components/observability_logs.md)
+In Grafana you can also view logs, see [Logs](../5_components/observability_logs.md)
 
 ## Alerts in Grafana
 
-In Grafana you can also view alerts, see [alerting](../3_components/observability_alerts.md)
+In Grafana you can also view alerts, see [alerting](../5_components/observability_alerts.md)
 
 ## Custom Dashboards
 

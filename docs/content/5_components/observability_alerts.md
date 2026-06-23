@@ -104,7 +104,7 @@ In this interface, active alerts can be viewed, silenced, and grouped. It also s
 
 You can access this via **Alerting > Alert Rules** in the Grafana sidebar.
 
-You can find more about Grafana in the [Dashboards](../3_components/observability_dashboards.md) chapter.
+You can find more about Grafana in the [Dashboards](../5_components/observability_dashboards.md) chapter.
 
 ![Grafana alerts](../images/grafana-alerts.jpeg)
 

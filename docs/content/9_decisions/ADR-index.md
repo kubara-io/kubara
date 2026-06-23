@@ -2,7 +2,7 @@
 
 This page provides an overview of all Architecture Decision Records (ADRs) in **kubara**.
 
-**Location of ADR files:** `docs/content/7_decisions/`
+**Location of ADR files:** `docs/content/9_decisions/`
 
 ## Overview
 

@@ -24,7 +24,7 @@ https://<customer-domain>/prometheus
 It provides a functional interface to explore metrics, debug scraping targets, and manually execute PromQL queries.
 
 Note: While Prometheus is excellent for direct queries and troubleshooting, **Grafana** is used as the primary interface for metric visualization, offering rich dashboards and user-friendly analytics.
-See more in the [Dashboards](../3_components/observability_dashboards.md) section.
+See more in the [Dashboards](../5_components/observability_dashboards.md) section.
 
 
 
@@ -101,7 +101,7 @@ The kube-prometheus-stack comes with a wide set of **preconfigured Grafana dashb
 - resource usage and capacity planning
 
 These dashboards are automatically imported when Grafana is deployed with the stack.
-You can find more about them in the [Dashboards](../3_components/observability_dashboards.md) chapter.
+You can find more about them in the [Dashboards](../5_components/observability_dashboards.md) chapter.
 
 ## Best Practices
 

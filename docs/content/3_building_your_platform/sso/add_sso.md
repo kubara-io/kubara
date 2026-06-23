@@ -10,7 +10,7 @@ To enable full Single Sign-On experience, you’ll need:
 ### 1. Argo CD SSO
 
 * **Homepage URL:** `https://cp.<your-domain>.stackit.run/argocd`
-* **Callback URL:** `https://cp.<your-domain>.stackit.run/argocd/api/dex/callback`
+* **Callback URL:** `https://cp.<your-domain>.stackit.run/api/dex/callback`
 
 ### 2. Grafana SSO
 

@@ -76,7 +76,7 @@ export AWS_SECRET_ACCESS_KEY="<credential_secret_access_key from terraform outpu
 
 !!! warning
     If you do not intend to use OAuth2 Proxy you can ignore some of the steps in the guide below pertaining to it, but might encounter some issues later.
-    For more infos please look at our [FAQ](../../6_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
+    For more infos please look at our [FAQ](../../8_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
 
 Then proceed to:
 
@@ -165,7 +165,7 @@ Sensitive output example:
     tofu output vault_user_ro_password_b64
     ```
 
-If you use OAuth2, create a GitHub application as shown [here](../../2_managing_your_platform/sso/add_sso.md).
+If you use OAuth2, create a GitHub application as shown [here](../../3_building_your_platform/sso/add_sso.md).
 
 If you want Terraform to create OAuth2-related Vault entries and Grafana credentials:
 

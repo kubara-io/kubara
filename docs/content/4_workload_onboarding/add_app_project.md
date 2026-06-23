@@ -9,7 +9,7 @@ For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 
 ## **Modify Argo CD overlays**
-Add the following to your `argo-cd/values.yaml`.
+Add the following to your `argo-cd/additional-values.yaml`.
 ```yaml
 projects:
   - description: k8s-ske-spoke-0 project
@@ -23,7 +23,7 @@ projects:
 
 That whats happening behind the scenes:
 
-![Add_Argo_Project](../../assets/diagrams.drawio)
+![Add_Argo_Project](../assets/diagrams.drawio)
 
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that is connected to your Argo CD instance.

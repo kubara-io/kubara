@@ -18,14 +18,16 @@ That gives you:
 - reviewable platform changes
 - repeatable generation instead of hand-maintained manifests
 
+If you want a short introduction to the bigger ideas around GitOps, Platform Engineering, and Internal Developer Platforms, see [GitOps, Platform Engineering, and IDPs](gitops_platform_engineering_idp.md).
+
 ### 2. kubara ships a default built-in catalog
 
 kubara comes with a built-in catalog of services and templates for common platform capabilities such as ingress, certificates, policies, observability, storage, and authentication.
 
 The **Components** section documents that default built-in catalog:
 
-- [Components Overview](../3_components/components_overview.md)
-- [Best Practices](../3_components/best_practices.md)
+- [Components Overview](../5_components/components_overview.md)
+- [Best Practices](../5_components/best_practices.md)
 
 If you want to understand how catalogs work internally or create your own external catalog, see [Catalogs](catalogs.md).
 
@@ -56,7 +58,7 @@ See [Catalogs](catalogs.md) for the detailed explanation.
 
 ## Conceptual flow
 
-The diagram below shows the typical kubara workflow when following the [bootstrapping guide](bootstrapping.md):
+The diagram below shows the typical kubara workflow when following the [bootstrapping guide](../1_getting_started/bootstrapping.md):
 
 ``` mermaid
 graph TD
@@ -69,7 +71,8 @@ graph TD
     I --> F[Enjoy your kubara Deployment 🎉];
 ```
 
-=======
+---
+
 1. Platform Engineer defines intent in `.env` and `config.yaml`.
 2. Run `kubara generate` to render Terraform and Helm output.
 3. Commit and push the generated result to Git.
@@ -115,6 +118,7 @@ Secrets are typically synced via External Secrets based on your configured Secre
 ## Where to go next
 
 - To understand catalog structure and create your own: [Catalogs](catalogs.md)
-- To see the default built-in services kubara ships: [Components Overview](../3_components/components_overview.md)
-- To continue the setup flow: [Bootstrapping](bootstrapping.md)
-- To understand the platform topology: [Architecture overview](../4_architecture/architecture_overview.md)
+- To understand the surrounding ideas and terminology: [GitOps, Platform Engineering, and IDPs](gitops_platform_engineering_idp.md)
+- To see the default built-in services kubara ships: [Components Overview](../5_components/components_overview.md)
+- To continue the setup flow: [Bootstrapping](../1_getting_started/bootstrapping.md)
+- To understand the platform topology: [Architecture overview](../6_architecture/architecture_overview.md)

@@ -159,7 +159,7 @@ Shows a list of commands or help for one command
 
 ## catalog
 
-Manage custom catalogs and service definitions
+Manage platform catalogs
 
 >kubara catalog [command]
 
@@ -189,6 +189,60 @@ Add a service definition to the current catalog
 
 Shows a list of commands or help for one command
 
+### pull
+
+Pull a catalog from a remote registry
+
+>kubara catalog pull [--insecure] oci://registry/repository:x.y.z
+
+**--help, -h**: show help
+
+**--insecure**: Ignore TLS certificate verification issues for the registry connection.
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### push
+
+Push catalog to a remote registry
+
+>kubara catalog push [--from oci://registry-source/repository:x.y.z] [--insecure] oci://registry-target/repository:x.y.z
+
+**--from**="": Push an existing cached catalog reference to another registry.
+
+**--help, -h**: show help
+
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### login
+
+Log into a registry and stores credentials
+
+>kubara catalog login [flags] <registry>
+
+**--help, -h**: show help
+
+**--identity-token**: Log in with identity token interactively
+
+**--identity-token-stdin**: Log in with identity token from stdin
+
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
+
+**--password, -p**: Log in with password interactively
+
+**--password-stdin**: Log in with password from stdin
+
+**--username, -u**="": Log in using username and password
+
+#### help, h
+
+Shows a list of commands or help for one command
+
 ### list, ls
 
 List cached local and OCI-backed catalogs
@@ -203,9 +257,9 @@ Shows a list of commands or help for one command
 
 ### package, pkg
 
-Package the current catalog directory into the local OCI cache with an OCI reference base
+Package the current catalog directory into the local cache
 
->kubara catalog package [oci://registry/path/]
+>kubara catalog package [oci://REGISTRY/BASE/PATH/]
 
 **--help, -h**: show help
 

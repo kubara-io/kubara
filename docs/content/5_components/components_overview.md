@@ -6,8 +6,8 @@ It answers the question **"Which platform components are included by default?"**
 
 For that, see:
 
-- [Core Concepts](../1_getting_started/overview_core_concept.md)
-- [Catalogs](../1_getting_started/catalogs.md)
+- [Core Concepts](../2_concepts/overview_core_concept.md)
+- [Catalogs](../2_concepts/catalogs.md)
 
 This document provides an overview of the tools included in the kubara built-in catalog, along with their functionality and key features.
 More tools will be added in future releases of the kubara framework.
@@ -92,5 +92,5 @@ For kubara-specific backup and recovery guidance, see [Backup & Recovery](backup
 
 If the built-in catalog does not meet your needs or is missing key features, you can either:
 
-- create your own external catalog as described in [Catalogs](../1_getting_started/catalogs.md)
+- create your own external catalog as described in [Catalogs](../2_concepts/catalogs.md)
 - propose new built-in tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue)
