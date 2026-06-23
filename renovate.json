@@ -29,7 +29,7 @@
       ],
       "postUpgradeTasks": {
         "commands": [
-          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isMajor}}major{{/if}}{{#if isMinor}}minor{{/if}}{{#if isPatch}}patch{{/if}}\""
+          "./.scripts/renovate_bot_update_helm_changelog.sh \"{{{depName}}}\" \"{{{currentVersion}}}\" \"{{{newVersion}}}\" \"{{{packageFileDir}}}\" \"{{#if isPatch}}patch{{else}}minor{{/if}}\""
         ],
         "fileFilters": ["**/CHANGELOG.md"],
         "executionMode": "update"
