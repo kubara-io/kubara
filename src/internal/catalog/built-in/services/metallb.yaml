@@ -18,4 +18,3 @@ spec:
         type: string
       privateLoadBalancerCIDR:
         type: string
-# ToDo: Just boilerplate yet, got to validate and think about it later.

@@ -65,12 +65,12 @@ func newValidTestConfig() *Config {
 					"homer-dashboard":         {Status: service.StatusEnabled},
 					"oauth2-proxy":            {Status: service.StatusEnabled},
 					"metrics-server":          {Status: service.StatusEnabled},
-					// KPE-396 - #TODO: Fully Implement KPE-396
 					"metallb": {
 						Status: service.StatusEnabled,
 						Config: service.Config{
-							"publicIpRange":   "127.0.0.1",
-							"privateIpRange":   "127.0.0.1",
+							"publicIpRange":  "127.0.0.1",
+							"privateIpRange": "127.0.0.1",
+						},
 					},
 					"longhorn": {Status: service.StatusEnabled},
 					"velero": {
@@ -376,17 +376,6 @@ func TestConfigStore_Validate(t *testing.T) {
 	clonedTerraformMissing := *invalidConfigMissingTerraformField.Clusters[0].Terraform
 	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
-
-	// Test optional IP address fields
-	validConfigWithLoadBalancerIPs := deepCopyConfig(validConfig)
-	validConfigWithLoadBalancerIPs.Clusters[0].PrivateLoadBalancerIP = "192.168.1.10"
-	validConfigWithLoadBalancerIPs.Clusters[0].PublicLoadBalancerIP = "203.0.113.10"
-
-	invalidConfigInvalidPrivateIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPrivateIP.Clusters[0].PrivateLoadBalancerIP = "not-an-ip"
-
-	invalidConfigInvalidPublicIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPublicIP.Clusters[0].PublicLoadBalancerIP = "999.999.999.999"
 
 	tests := []struct {
 		name    string
