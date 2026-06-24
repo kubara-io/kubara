@@ -32,7 +32,7 @@ The generated ApplicationSet already references both `values.yaml` and `addition
 
 ## **Modify Argo CD overlays**
 This is an example on how to add an AppSet to the hub cluster.
-Add the following to your `argo-cd/values.yaml`.
+Add the following to your `argo-cd/additional-values.yaml`.
 ```yaml
 bootstrapValues:
   applicationSets:  # usually your existing hub cluster key (for example "<cluster>-<stage>")

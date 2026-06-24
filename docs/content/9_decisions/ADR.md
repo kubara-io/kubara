@@ -30,7 +30,7 @@ ADRs are **not required** for small refactorings, minor implementation details, 
 
 ADRs are stored as **Markdown files in the repository** (versioned like code).
 
-**Location:** `docs/content/7_decisions/`
+**Location:** `docs/content/9_decisions/`
 
 This ensures ADRs are:
 - reviewable via PR
@@ -117,7 +117,7 @@ To create a new ADR:
 To keep ADRs discoverable, we maintain an **ADR index page** with a quick overview of 
 ADR number with link to the document, title and status. 
 
-**Index page location:** [ADR-index](ADR-index.md) -> `docs/content/7_decisions/ADR-index.md` 
+**Index page location:** [ADR-index](ADR-index.md) -> `docs/content/9_decisions/ADR-index.md` 
 
 The index can be maintained:
 - **manually** (simple table, best for a small number of ADRs), or

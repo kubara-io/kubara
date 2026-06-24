@@ -15,7 +15,7 @@ cert-manager handles requesting, renewing, and storing certificates so that your
 1. **Requirement: working domain**  
    - In order for a certificate provider to issue certificates, your domain must correctly resolve to the Ingress controller in the cluster.  
    - When using ACME providers (e.g. Let's Encrypt), validation usually happens via **http-01 challenges**: the provider calls a special path (`/.well-known/acme-challenge/...`) on your domain.  
-   - Whether you manage DNS records manually or automate them with [ExternalDNS](../3_components/network_external_dns.md) does not matter - what matters is that the domain resolves correctly.
+   - Whether you manage DNS records manually or automate them with [ExternalDNS](../5_components/network_external_dns.md) does not matter - what matters is that the domain resolves correctly.
 
 2. **Enable cert-manager**  
    - In `config.yaml` you enable the service `cert-manager`.  
@@ -79,6 +79,6 @@ clusters:
 
 ## Note on DNS / ExternalDNS
 
-- [ExternalDNS](../3_components/network_external_dns.md)  is **not strictly required**.  
+- [ExternalDNS](../5_components/network_external_dns.md)  is **not strictly required**.  
 - You can manage DNS records manually as long as the domain resolves to the cluster.  
-- With [ExternalDNS](../3_components/network_external_dns.md)  it becomes easier, since records are created and updated automatically.  
+- With [ExternalDNS](../5_components/network_external_dns.md)  it becomes easier, since records are created and updated automatically.  

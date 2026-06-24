@@ -3,6 +3,7 @@ package catalog
 import (
 	"context"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
 
@@ -44,7 +45,7 @@ func PackageCatalog(options PackageOptions) (PackageResult, error) {
 		return PackageResult{}, err
 	}
 
-	if err := writeLocalReference(ref, artifact); err != nil {
+	if err := writeCachedReference(ref, artifact); err != nil {
 		return PackageResult{}, err
 	}
 
@@ -78,16 +79,14 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}
 
 	packOptions := oras.PackManifestOptions{
-		Layers: []v1.Descriptor{layerDescriptor},
-		ManifestAnnotations: map[string]string{
-			"io.kubara.catalog.name":    manifest.Metadata.Name,
-			"io.kubara.catalog.version": manifest.Spec.Version,
-		},
+		Layers:              []v1.Descriptor{layerDescriptor},
+		ManifestAnnotations: buildCatalogManifestAnnotations(manifest),
 	}
 	manifestDescriptor, err := oras.PackManifest(ctx, fileStore, oras.PackManifestVersion1_1, CatalogArtifactType, packOptions)
 	if err != nil {
 		return CachedArtifact{}, fmt.Errorf("pack catalog manifest: %w", err)
 	}
+
 	if err := fileStore.Tag(ctx, manifestDescriptor, manifest.Spec.Version); err != nil {
 		return CachedArtifact{}, fmt.Errorf("tag packaged catalog: %w", err)
 	}
@@ -118,6 +117,20 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}
 
 	return artifact, nil
+}
+
+func buildCatalogManifestAnnotations(manifest CatalogManifest) map[string]string {
+	annotations := maps.Clone(manifest.Metadata.Annotations)
+	if annotations == nil {
+		annotations = make(map[string]string, 2)
+	}
+
+	annotations["io.kubara.catalog.name"] = manifest.Metadata.Name
+	annotations["io.kubara.catalog.version"] = manifest.Spec.Version
+	// Fake timestamp for forcing immutable manifest digests for the same catalog contents
+	annotations[v1.AnnotationCreated] = "1970-01-01T00:00:00Z"
+
+	return annotations
 }
 
 func extractCatalogContents(ctx context.Context, layoutStore *oci.Store, desc v1.Descriptor, contentsDir string) (string, error) {

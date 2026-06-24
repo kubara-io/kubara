@@ -15,7 +15,7 @@ Logs can be accessed directly in Grafana under **Explore > Loki**. This interfac
 
 ![Grafana Loki](../images/loki.jpeg)
 
-You can find more about Grafana in the [Dashboards](../3_components/observability_dashboards.md) chapter.
+You can find more about Grafana in the [Dashboards](../5_components/observability_dashboards.md) chapter.
 
 ## kubara Standardization
 

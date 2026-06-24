@@ -8,7 +8,7 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/
 
 ## **Add credentials to vault**
 Add the repository credentials to your vault at
-`<cluster-name>/<stage>/argocd/repo_pat`. This can be a `password` or a `PAT`.
+`<cluster-name>/<stage>/repo_pat`. This can be a `password` or a `PAT`.
 ```json
 {
   "repo_pat": {
@@ -17,14 +17,14 @@ Add the repository credentials to your vault at
 }
 ```
 ## **Modify Argo CD overlays**
-Add the following to your `argo-cd/values.yaml`.
+Add the following to your `argo-cd/additional-values.yaml`.
 ```yaml
 repositories:
     - name: user-repo-mock
       projectScope: k8s-spoke-0
       # # This points to the secret in vault
       remoteRef:
-        remoteKey: <cluster-name>/<stage>/argocd/repo_pat
+        remoteKey: <cluster-name>/<stage>/repo_pat
         remoteKeyProperty: pat
       repoType: git
       secretStoreRef:
@@ -36,7 +36,7 @@ repositories:
 
 That whats happening behind the scenes:
 
-![Add Repository](../../images/add-repository.png)
+![Add Repository](../images/add-repository.png)
 
 
 ## **Push your changes to git**
