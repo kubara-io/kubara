@@ -29,6 +29,18 @@
          <lastmod>2026-06-24</lastmod>
     </url>
     <url>
+         <loc>https://docs.kubara.io/next/1_getting_started/providers/stackit_provisioning_edgecloud/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.kubara.io/next/1_getting_started/providers/stackit_provisioning_ske/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.kubara.io/next/1_getting_started/providers/stackit_terraform_bootstrap/</loc>
+         <lastmod>2026-06-24</lastmod>
+    </url>
+    <url>
          <loc>https://docs.kubara.io/next/2_concepts/catalog_distribution/</loc>
          <lastmod>2026-06-24</lastmod>
     </url>

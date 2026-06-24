@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/4_workload_onboarding/overview/">
+        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/providers/stackit_terraform_bootstrap/">
       
       
-        <link rel="prev" href="../../3_building_your_platform/sso/add_sso_examples/">
+        <link rel="prev" href="../stackit/">
       
       
-        <link rel="next" href="../add_app_project/">
+        <link rel="next" href="../stackit_provisioning_ske/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
     
     
       
-        <title>Overview - kubara - Docs</title>
+        <title>Terraform Bootstrap - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.484c7ddc.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -45,9 +45,9 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#workload-onboarding-with-argo-cd" class="md-skip">
+        <a href="#stackit-terraform-bootstrap" class="md-skip">
           Skip to content
         </a>
       
@@ -87,12 +87,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -104,9 +104,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -123,7 +123,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Terraform Bootstrap
             
           </span>
         </div>
@@ -251,9 +251,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -280,7 +280,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -304,8 +304,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -316,11 +318,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -341,7 +343,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -359,7 +361,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/quick_start/" class="md-nav__link">
+      <a href="../../quick_start/" class="md-nav__link">
         
   
   
@@ -387,7 +389,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../../installation/" class="md-nav__link">
         
   
   
@@ -415,7 +417,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../../commands/" class="md-nav__link">
         
   
   
@@ -443,7 +445,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../../prerequisites/" class="md-nav__link">
         
   
   
@@ -471,7 +473,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../../bootstrapping/" class="md-nav__link">
         
   
   
@@ -496,6 +498,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -505,11 +509,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6" checked>
         
           
           <label class="md-nav__link" for="__nav_2_6" id="__nav_2_6_label" tabindex="0">
@@ -530,7 +534,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_2_6_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -545,6 +549,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -554,11 +560,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" checked>
         
           
           <label class="md-nav__link" for="__nav_2_6_1" id="__nav_2_6_1_label" tabindex="0">
@@ -579,7 +585,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_6_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -597,7 +603,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
+      <a href="../stackit/" class="md-nav__link">
         
   
   
@@ -622,10 +628,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit_terraform_bootstrap/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -641,6 +674,59 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-prepare-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-terraform-backend-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create Terraform Backend State
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-continue-with-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Continue With Provisioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -702,7 +788,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit_provisioning_ske/" class="md-nav__link">
+      <a href="../stackit_provisioning_ske/" class="md-nav__link">
         
   
   
@@ -730,7 +816,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/providers/stackit_provisioning_edgecloud/" class="md-nav__link">
+      <a href="../stackit_provisioning_edgecloud/" class="md-nav__link">
         
   
   
@@ -841,7 +927,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/overview_core_concept/" class="md-nav__link">
+      <a href="../../../2_concepts/overview_core_concept/" class="md-nav__link">
         
   
   
@@ -869,7 +955,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
+      <a href="../../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
         
   
   
@@ -897,7 +983,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalogs/" class="md-nav__link">
+      <a href="../../../2_concepts/catalogs/" class="md-nav__link">
         
   
   
@@ -925,7 +1011,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalog_distribution/" class="md-nav__link">
+      <a href="../../../2_concepts/catalog_distribution/" class="md-nav__link">
         
   
   
@@ -953,7 +1039,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalog_templating/" class="md-nav__link">
+      <a href="../../../2_concepts/catalog_templating/" class="md-nav__link">
         
   
   
@@ -1040,7 +1126,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_building_your_platform/add_spoke_cluster/" class="md-nav__link">
+      <a href="../../../3_building_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
   
@@ -1068,7 +1154,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_building_your_platform/create_catalog/" class="md-nav__link">
+      <a href="../../../3_building_your_platform/create_catalog/" class="md-nav__link">
         
   
   
@@ -1145,7 +1231,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_building_your_platform/sso/add_sso/" class="md-nav__link">
+      <a href="../../../3_building_your_platform/sso/add_sso/" class="md-nav__link">
         
   
   
@@ -1173,7 +1259,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_building_your_platform/sso/add_sso_examples/" class="md-nav__link">
+      <a href="../../../3_building_your_platform/sso/add_sso_examples/" class="md-nav__link">
         
   
   
@@ -1213,8 +1299,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -1227,11 +1311,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -1252,7 +1336,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1267,37 +1351,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Overview
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../4_workload_onboarding/overview/" class="md-nav__link">
         
   
   
@@ -1313,59 +1370,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#when-to-use-argo-cd-instead-of-a-catalog" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        When to use Argo CD instead of a catalog
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#which-argo-cd-guide-should-you-use" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Which Argo CD guide should you use?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#rule-of-thumb" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Rule of thumb
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1378,7 +1382,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_project/" class="md-nav__link">
+      <a href="../../../4_workload_onboarding/add_app_project/" class="md-nav__link">
         
   
   
@@ -1406,7 +1410,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_repository/" class="md-nav__link">
+      <a href="../../../4_workload_onboarding/add_app_repository/" class="md-nav__link">
         
   
   
@@ -1434,7 +1438,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_appset/" class="md-nav__link">
+      <a href="../../../4_workload_onboarding/add_appset/" class="md-nav__link">
         
   
   
@@ -1462,7 +1466,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_application/" class="md-nav__link">
+      <a href="../../../4_workload_onboarding/add_application/" class="md-nav__link">
         
   
   
@@ -1549,7 +1553,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/components_overview/" class="md-nav__link">
+      <a href="../../../5_components/components_overview/" class="md-nav__link">
         
   
   
@@ -1577,7 +1581,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/best_practices/" class="md-nav__link">
+      <a href="../../../5_components/best_practices/" class="md-nav__link">
         
   
   
@@ -1605,7 +1609,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/backup_and_recovery/" class="md-nav__link">
+      <a href="../../../5_components/backup_and_recovery/" class="md-nav__link">
         
   
   
@@ -1682,7 +1686,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/network_external_dns/" class="md-nav__link">
+      <a href="../../../5_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1767,7 +1771,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/security_certificates/" class="md-nav__link">
+      <a href="../../../5_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1852,7 +1856,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/observability_dashboards/" class="md-nav__link">
+      <a href="../../../5_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1880,7 +1884,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/observability_metrics/" class="md-nav__link">
+      <a href="../../../5_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1908,7 +1912,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/observability_alerts/" class="md-nav__link">
+      <a href="../../../5_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1936,7 +1940,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_components/observability_logs/" class="md-nav__link">
+      <a href="../../../5_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -2031,7 +2035,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../6_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -2059,7 +2063,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../9_decisions/ADR/" class="md-nav__link">
+      <a href="../../../9_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -2087,7 +2091,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../9_decisions/ADR-index/" class="md-nav__link">
+      <a href="../../../9_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -2174,7 +2178,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_community/community-n-support/" class="md-nav__link">
+      <a href="../../../7_community/community-n-support/" class="md-nav__link">
         
   
   
@@ -2230,7 +2234,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_community/maintainers/" class="md-nav__link">
+      <a href="../../../7_community/maintainers/" class="md-nav__link">
         
   
   
@@ -2317,7 +2321,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../../commands/" class="md-nav__link">
         
   
   
@@ -2345,7 +2349,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../8_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../8_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -2373,7 +2377,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../8_reference/known_issues/" class="md-nav__link">
+      <a href="../../../8_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -2401,7 +2405,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../8_reference/faq/" class="md-nav__link">
+      <a href="../../../8_reference/faq/" class="md-nav__link">
         
   
   
@@ -2568,10 +2572,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#when-to-use-argo-cd-instead-of-a-catalog" class="md-nav__link">
+  <a href="#1-prepare-environment-variables" class="md-nav__link">
     <span class="md-ellipsis">
       
-        When to use Argo CD instead of a catalog
+        1. Prepare Environment Variables
       
     </span>
   </a>
@@ -2579,10 +2583,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#which-argo-cd-guide-should-you-use" class="md-nav__link">
+  <a href="#2-create-terraform-backend-state" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Which Argo CD guide should you use?
+        2. Create Terraform Backend State
       
     </span>
   </a>
@@ -2590,10 +2594,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#rule-of-thumb" class="md-nav__link">
+  <a href="#3-continue-with-provisioning" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Rule of thumb
+        3. Continue With Provisioning
       
     </span>
   </a>
@@ -2620,60 +2624,77 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="workload-onboarding-with-argo-cd">Workload onboarding with Argo CD</h1>
-<p>This section is for workloads that should be added <strong>on top of</strong> your platform, not baked into the reusable platform catalog itself.</p>
-<h2 id="when-to-use-argo-cd-instead-of-a-catalog">When to use Argo CD instead of a catalog</h2>
-<p>Use the Argo CD path when the workload is:</p>
+<h1 id="stackit-terraform-bootstrap">STACKIT Terraform Bootstrap</h1>
+<p>For STACKIT-based setups, kubara provides Terraform configuration and modules to provision Kubernetes and additional infrastructure like a Secret Manager instance.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>In kubara version <code>0.2.0</code>, this step does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
+</div>
+<p>Generate Terraform modules:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
+</code></pre></div>
+<p>Commit and push the generated files to your Git repository.</p>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener">Terraform provider documentation</a> &amp; <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener">STACKIT Docs</a>.
+Make sure your created Service Account has Project Owner permissions.</p>
+</div>
+<h2 id="1-prepare-environment-variables">1. Prepare Environment Variables</h2>
+<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
+cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
+</code></pre></div>
+<p>Set at least <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
+<span class="c1"># . .\set-env.ps1</span>
+</code></pre></div>
+<h2 id="2-create-terraform-backend-state">2. Create Terraform Backend State</h2>
+<p>Then navigate to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
+</code></pre></div>
+<p>Run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>plan
+terraform<span class="w"> </span>apply
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>plan
+tofu<span class="w"> </span>apply
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Use the output to configure Terraform backend credentials:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>You can set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again, or export them directly:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;&lt;credential_access_key from terraform output&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;credential_secret_access_key from terraform output&gt;&quot;</span>
+</code></pre></div>
+<h2 id="3-continue-with-provisioning">3. Continue With Provisioning</h2>
+<p>Next, choose exactly one provisioning path based on your configured cluster type:</p>
 <ul>
-<li>Specific to one cluster</li>
-<li>Specific to one team</li>
-<li>Specific to one product area</li>
-<li>An application that should live outside the reusable platform baseline</li>
+<li><a href="../stackit_provisioning_ske/">Provisioning Infrastructure (SKE)</a> for <code>terraform.kubernetesType: ske</code></li>
+<li><a href="../stackit_provisioning_edgecloud/">Provisioning Infrastructure (Edge Cloud)</a> for <code>terraform.kubernetesType: edge</code></li>
 </ul>
-<p>Hint:</p>
-<ul>
-<li>Use Argo CD workload onboarding when the service you are adding is a <strong>cluster-specific or team-specific workload</strong>.</li>
-<li>Use a catalog only when the service you are describing is part of the <strong>reusable platform architecture</strong>.  </li>
-</ul>
-<h2 id="which-argo-cd-guide-should-you-use">Which Argo CD guide should you use?</h2>
-<table>
-<thead>
-<tr>
-<th>Need</th>
-<th>Guide</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Limit what a team can deploy and from where</td>
-<td><a href="../add_app_project/">How to add a Project</a></td>
-</tr>
-<tr>
-<td>Add a source repository</td>
-<td><a href="../add_app_repository/">How to add a Repository</a></td>
-</tr>
-<tr>
-<td>Roll out one workload pattern to many clusters or namespaces</td>
-<td><a href="../add_appset/">How to add an AppSet</a></td>
-</tr>
-<tr>
-<td>Add a single application or app-of-apps entry</td>
-<td><a href="../add_application/">How to add an Application</a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="rule-of-thumb">Rule of thumb</h2>
-<p>Ask this question:</p>
-<blockquote>
-<p>Am I changing the shared platform package, or am I adding a workload that should run on the platform?</p>
-</blockquote>
-<p>If you are changing the shared platform package, go to the catalog docs.<br />
-If you are adding a workload, stay in the Argo CD docs.</p>
-<p>Related catalog pages:</p>
-<ul>
-<li><a href="../../2_concepts/catalogs/">Catalogs</a></li>
-<li><a href="../../3_building_your_platform/create_catalog/">How to create a Catalog</a></li>
-</ul>
+<p>Do not run both paths for the same cluster. They describe alternative infrastructure flows.</p>
 
 
 
@@ -2727,10 +2748,10 @@ If you are adding a workload, stay in the Argo CD docs.</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.79ae519e.min.js"></script>
       
     
   </body>
