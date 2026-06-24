@@ -283,6 +283,42 @@ Shows a list of commands or help for one command
 
 Shows a list of commands or help for one command
 
+## cluster
+
+Manage your kubara cluster configurations
+
+>kubara cluster [command]
+
+**--help, -h**: show help
+
+### list, ls
+
+List all the cluster in the config file
+
+>kubara cluster ls
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### add
+
+Add a new spoke cluster to your config
+
+>kubara cluster add CLUSTER_NAME
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### help, h
+
+Shows a list of commands or help for one command
+
 ## help, h
 
 Shows a list of commands or help for one command

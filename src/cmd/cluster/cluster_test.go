@@ -66,7 +66,7 @@ func TestAddNewSpokesCluster(t *testing.T) {
 
 	require.NoError(t, err)
 	configStore := config.NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
-	configStore.Load()
+	_ = configStore.Load()
 
 	currentConfig := configStore.GetConfig()
 

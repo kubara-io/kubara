@@ -13,7 +13,6 @@ import (
 )
 
 // Creates the Command for the 'kubara cluster add command
-// Command necessitates a cluster-name as an arg
 func CreateAddClusterCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "add",
