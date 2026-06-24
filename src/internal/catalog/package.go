@@ -45,7 +45,7 @@ func PackageCatalog(options PackageOptions) (PackageResult, error) {
 		return PackageResult{}, err
 	}
 
-	if err := writeLocalReference(ref, artifact); err != nil {
+	if err := writeCachedReference(ref, artifact); err != nil {
 		return PackageResult{}, err
 	}
 

@@ -78,6 +78,34 @@ spec:
 	assert.Equal(t, "1.2.3", annotations["io.kubara.catalog.version"])
 }
 
+func TestPackageCatalog_RepackagePrunesPreviousArtifactForSameReference(t *testing.T) {
+	homeDir := t.TempDir()
+	t.Setenv("HOME", homeDir)
+
+	catalogRoot := filepath.Join(t.TempDir(), "demo-catalog")
+	writeCatalogFixture(t, catalogRoot, "demo-catalog", "1.2.3")
+	require.NoError(t, os.WriteFile(filepath.Join(catalogRoot, "notes.txt"), []byte("first package\n"), 0o600))
+
+	first, err := PackageCatalog(PackageOptions{CatalogRoot: catalogRoot})
+	require.NoError(t, err)
+
+	firstArtifactDir, err := artifactDirPath(first.Artifact.ManifestDigest)
+	require.NoError(t, err)
+
+	require.NoError(t, os.WriteFile(filepath.Join(catalogRoot, "notes.txt"), []byte("second package\n"), 0o600))
+
+	second, err := PackageCatalog(PackageOptions{CatalogRoot: catalogRoot})
+	require.NoError(t, err)
+
+	secondArtifactDir, err := artifactDirPath(second.Artifact.ManifestDigest)
+	require.NoError(t, err)
+
+	assert.Equal(t, first.Reference, second.Reference)
+	assert.NotEqual(t, first.Artifact.ManifestDigest, second.Artifact.ManifestDigest)
+	assert.NoFileExists(t, firstArtifactDir)
+	assert.DirExists(t, secondArtifactDir)
+}
+
 func writeCatalogFixture(t *testing.T, root, name, version string) {
 	t.Helper()
 

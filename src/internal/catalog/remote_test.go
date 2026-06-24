@@ -27,6 +27,49 @@ func TestPushCatalogRejectsDestinationVersionMismatch(t *testing.T) {
 	assert.Contains(t, err.Error(), `destination tag "9.9.9" must match catalog version "1.2.3"`)
 }
 
+func TestEnsureReferenceTagMatchesCatalogVersionRejectsPullVersionMismatch(t *testing.T) {
+	ref, err := ParseOCIReference("oci://registry.example.com/catalogs/example:1.2.3")
+	require.NoError(t, err)
+
+	err = ensureReferenceTagMatchesCatalogVersion(ref, "9.9.9", "pull")
+	require.Error(t, err)
+	assert.EqualError(t, err, `pull tag "1.2.3" must match catalog version "9.9.9"`)
+}
+
+func TestEnsureReferenceTagMatchesCatalogVersionAllowsDigestReferences(t *testing.T) {
+	ref, err := ParseOCIReference("oci://registry.example.com/catalogs/example@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	require.NoError(t, err)
+
+	err = ensureReferenceTagMatchesCatalogVersion(ref, "9.9.9", "pull")
+	require.NoError(t, err)
+}
+
+func TestListCachedCatalogsIncludesDigestReferences(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+
+	ref, err := ParseOCIReference("oci://registry.example.com/catalogs/example@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+	require.NoError(t, err)
+
+	artifact := CachedArtifact{
+		SchemaVersion:  cacheSchemaVersion,
+		CatalogName:    "example",
+		CatalogVersion: "1.2.3",
+		ManifestDigest: "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+		RootDirectory:  "example",
+	}
+	require.NoError(t, writeCachedReference(ref, artifact))
+
+	entries, err := ListCachedCatalogs()
+	require.NoError(t, err)
+	require.Len(t, entries, 1)
+	assert.Equal(t, CachedCatalogEntry{
+		Reference:      ref.Raw,
+		CatalogName:    artifact.CatalogName,
+		CatalogVersion: artifact.CatalogVersion,
+		ManifestDigest: artifact.ManifestDigest,
+	}, entries[0])
+}
+
 func TestPushCatalogRequiresCachedDestinationReferenceWhenFromIsEmpty(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 

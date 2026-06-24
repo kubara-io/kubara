@@ -129,10 +129,11 @@ func PullCatalog(ctx context.Context, options PullOptions) (PullResult, error) {
 	if err != nil {
 		return PullResult{}, err
 	}
-	if !ref.IsDigest {
-		if err := writeLocalReference(ref, artifact); err != nil {
-			return PullResult{}, err
-		}
+	if err := ensureReferenceTagMatchesCatalogVersion(ref, artifact.CatalogVersion, "pull"); err != nil {
+		return PullResult{}, err
+	}
+	if err := writeCachedReference(ref, artifact); err != nil {
+		return PullResult{}, err
 	}
 
 	return PullResult{
@@ -156,18 +157,14 @@ func PushCatalog(ctx context.Context, options PushOptions) (PushResult, error) {
 		return PushResult{}, err
 	}
 
-	if ref.Tag != artifact.CatalogVersion {
-		return PushResult{}, fmt.Errorf(
-			"destination tag %q must match catalog version %q",
-			ref.Tag,
-			artifact.CatalogVersion,
-		)
+	if err := ensureReferenceTagMatchesCatalogVersion(ref, artifact.CatalogVersion, "destination"); err != nil {
+		return PushResult{}, err
 	}
 
 	if err := pushCachedArtifact(ctx, ref, artifact, options.Insecure); err != nil {
 		return PushResult{}, err
 	}
-	if err := writeLocalReference(ref, artifact); err != nil {
+	if err := writeCachedReference(ref, artifact); err != nil {
 		return PushResult{}, err
 	}
 
@@ -280,6 +277,14 @@ func pullRemoteCatalog(ctx context.Context, ref OCIReference, insecure bool) (Ca
 	}
 
 	return artifact, nil
+}
+
+func ensureReferenceTagMatchesCatalogVersion(ref OCIReference, catalogVersion, subject string) error {
+	if ref.IsDigest || ref.Tag == catalogVersion {
+		return nil
+	}
+
+	return fmt.Errorf("%s tag %q must match catalog version %q", subject, ref.Tag, catalogVersion)
 }
 
 func newRemoteRepository(ref OCIReference, insecure bool) (*remote.Repository, error) {
