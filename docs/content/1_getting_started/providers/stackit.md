@@ -148,7 +148,7 @@ Review Terraform outputs:
     tofu output
     ```
 
-Use Terraform outputs to update values in `config.yaml` where needed (for example, on Edge: `privateLoadBalancerIP` and `publicLoadBalancerIP`).
+Use Terraform outputs to update values in `config.yaml` where needed (for example, on Edge: `privateLoadBalancerCIDR` and `publicLoadBalancerCIDR`).
 Do **not** export Secrets Manager credentials into `.env`; these provider-specific `.env` variables were removed.
 
 Sensitive output example:
@@ -228,7 +228,7 @@ To clean up:
 
 The provisioning steps remain the same. The only difference lies in the Terraform output:
 
-* You'll retrieve additional values like `privateLoadBalancerIP` and `publicLoadBalancerIP`
+* You'll retrieve additional values like `privateLoadBalancerCIDR` and `publicLoadBalancerCIDR`
 * These need to be added to `config.yaml`
 
 You must manually create the Kubernetes cluster via the cloud portal. This will be automated in the future.

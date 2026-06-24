@@ -7,7 +7,7 @@ namespace:
     pod-security.kubernetes.io/warn: privileged
 poolName: first-pool
 addresses:
-  - {{ .cluster.privateLoadBalancerIP }}/32
+  - {{ (index .cluster.services "metallb" "config" "privateLoadBalancerCIDR") }}
 
 metallb:
   imagePullSecrets:
