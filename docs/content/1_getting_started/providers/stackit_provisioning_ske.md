@@ -50,14 +50,14 @@ This creates the Kubernetes cluster and all required infrastructure.
 
     ```bash
     # change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
-    terraform output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
+    terraform output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
 === "Tofu"
 
     ```bash
     # change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
-    tofu output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
+    tofu output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
 Keep this `kubara.yaml` local and do not commit it to Git.

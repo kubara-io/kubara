@@ -13,8 +13,8 @@ output "status" {
   value       = stackit_edgecloud_instance.this.status
 }
 
-output "kubeconfig_raw" {
-  description = "Raw Edge Cloud kubeconfig (short-lived, sensitive)."
+output "kubeconfig" {
+  description = "Edge Cloud kubeconfig (short-lived, sensitive)."
   value       = stackit_edgecloud_kubeconfig.this.kubeconfig
   sensitive   = true
 }

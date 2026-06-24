@@ -247,7 +247,7 @@ terraform apply -target=module.edge_instance
 3. Save the generated short-lived Edge Cloud kubeconfig for the following `kubectl` steps:
 
 ```bash
-terraform output -raw edge_kubeconfig_raw > edge-kubeconfig.yaml
+terraform output -raw edge_kubeconfig > edge-kubeconfig.yaml
 chmod 600 edge-kubeconfig.yaml
 export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
 ```
@@ -462,7 +462,7 @@ In the picture above you can see what happening behind the scenes and which reso
 Extract and save the kubeconfig (SKE):
 
 ```bash
-terraform output -json kubeconfig_raw | jq -r > ~/.kube/<CLUSTERNAME>.yaml
+terraform output -json kubeconfig | jq -r > ~/.kube/<CLUSTERNAME>.yaml
 ```
 
 Then use it:
@@ -474,7 +474,7 @@ KUBECONFIG=~/.kube/<CLUSTERNAME>.yaml kubectl get nodes
 For Edge, Terraform also outputs a short-lived sensitive kubeconfig:
 
 ```bash
-terraform output -raw edge_kubeconfig_raw > ~/.kube/<CLUSTERNAME>-edge.yaml
+terraform output -raw edge_kubeconfig > ~/.kube/<CLUSTERNAME>-edge.yaml
 chmod 600 ~/.kube/<CLUSTERNAME>-edge.yaml
 ```
 

@@ -115,7 +115,7 @@ cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 ===  "Terraform"
 
     ```bash
-    terraform output -raw edge_kubeconfig_raw > edge-kubeconfig.yaml
+    terraform output -raw edge_kubeconfig > edge-kubeconfig.yaml
     chmod 600 edge-kubeconfig.yaml
     export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
     ```
@@ -123,7 +123,7 @@ cd customer-service-catalog/terraform/<cluster-name>/infrastructure
 ===  "Tofu"
 
     ```bash
-    tofu output -raw edge_kubeconfig_raw > edge-kubeconfig.yaml
+    tofu output -raw edge_kubeconfig > edge-kubeconfig.yaml
     chmod 600 edge-kubeconfig.yaml
     export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
     ```
@@ -320,8 +320,8 @@ Use a Talos version that is available in your STEC region and keep it aligned wi
 
 10. Export the kubeconfig for the Kubernetes cluster created by `EdgeCluster`.
 
-This is not the same file as `edge_kubeconfig_raw`.
-`edge_kubeconfig_raw` is the STEC management kubeconfig used for `EdgeImage`, `EdgeHost`, and `EdgeCluster`.
+This is not the same file as `edge_kubeconfig`.
+`edge_kubeconfig` is the STEC management kubeconfig used for `EdgeImage`, `EdgeHost`, and `EdgeCluster`.
 The cluster kubeconfig is used for the actual Kubernetes cluster and for the next kubara bootstrap steps.
 
 Read more in the official STACKIT guide: [Managing clusters](https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/managing-clusters/).

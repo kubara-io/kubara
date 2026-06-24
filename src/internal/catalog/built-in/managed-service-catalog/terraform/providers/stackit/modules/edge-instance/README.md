@@ -29,4 +29,4 @@ module "edge_instance" {
 - `instance_id`: Edge Cloud instance ID
 - `frontend_url`: Edge frontend URL
 - `status`: Instance status
-- `kubeconfig_raw`: Raw Edge Cloud kubeconfig (short-lived, sensitive)
+- `kubeconfig`: Edge Cloud kubeconfig (short-lived, sensitive)

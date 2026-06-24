@@ -49,9 +49,9 @@ output "velero_bucket_url_path_style" {
 {{ end -}}
 {{ if (eq .cluster.terraform.kubernetesType "ske") }}
 ### Kubernetes Instance
-output "kubeconfig_raw" {
-  description = "Raw admin kubeconfig (short-lived, sensitive)"
-  value       = module.ske_cluster.kubeconfig_raw
+output "kubeconfig" {
+  description = "Admin kubeconfig (short-lived, sensitive)"
+  value       = module.ske_cluster.kubeconfig
   sensitive   = true
 }
 {{ end }}
@@ -73,9 +73,9 @@ output "edge_status" {
   value       = module.edge_instance.status
 }
 
-output "edge_kubeconfig_raw" {
-  description = "Raw Edge Cloud kubeconfig (short-lived, sensitive)"
-  value       = module.edge_instance.kubeconfig_raw
+output "edge_kubeconfig" {
+  description = "Edge Cloud kubeconfig (short-lived, sensitive)"
+  value       = module.edge_instance.kubeconfig
   sensitive   = true
 }
 
