@@ -169,21 +169,9 @@ variable "expiration" {
 variable "edge_instance" {
   description = "Edge Cloud instance created by Terraform."
   type = object({
-    display_name = optional(string, "edge")
-    description  = optional(string, "")
-    expiration   = optional(number, 86400)
+    description = optional(string, "")
+    expiration  = optional(number, 86400)
   })
-
-  validation {
-    condition     = trimspace(var.edge_instance.display_name) != ""
-    error_message = "edge_instance.display_name must be set."
-  }
-
-  validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{2,6}[a-z0-9]$", trimspace(var.edge_instance.display_name)))
-    error_message = "edge_instance.display_name must be a valid hostname label with 4 to 8 characters."
-  }
-
 }
 
 ### Edge image variables

@@ -5,16 +5,11 @@ variable "project_id" {
 
 variable "display_name" {
   type        = string
-  description = "Display name of the Edge Cloud instance (4-8 chars, valid hostname label)."
+  description = "Display name of the Edge Cloud instance. Can only contain 8 characters."
 
   validation {
     condition     = trimspace(var.display_name) != ""
     error_message = "display_name must be set."
-  }
-
-  validation {
-    condition     = can(regex("^[a-z0-9][a-z0-9-]{2,6}[a-z0-9]$", var.display_name))
-    error_message = "display_name must be a valid hostname label with a length between 4 and 8 characters."
   }
 }
 

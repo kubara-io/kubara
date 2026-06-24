@@ -77,10 +77,22 @@ module "edge_instance" {
   source = "../../../../managed-service-catalog/terraform/modules/edge-instance"
 
   project_id   = var.project_id
-  display_name = var.edge_instance.display_name
+  display_name = "${local.edge_name_prefix}-${random_string.edge_name_suffix.result}"
   region       = var.region
   description  = var.edge_instance.description
   expiration   = var.edge_instance.expiration
+}
+
+locals {
+  edge_name_prefix        = substr(var.name, 0, 3)
+  edge_name_suffix_length = 7 - length(local.edge_name_prefix)
+}
+
+resource "random_string" "edge_name_suffix" {
+  length  = local.edge_name_suffix_length # edge cloud only allows for 8 characters
+  lower   = true
+  upper   = false
+  special = false
 }
 
 module "edge_image" {
