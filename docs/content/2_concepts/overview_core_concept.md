@@ -26,8 +26,8 @@ kubara comes with a built-in catalog of services and templates for common platfo
 
 The **Components** section documents that default built-in catalog:
 
-- [Components Overview](../5_components/components_overview.md)
-- [Best Practices](../5_components/best_practices.md)
+- [Components Overview](../6_components/components_overview.md)
+- [Best Practices](../6_components/best_practices.md)
 
 If you want to understand how catalogs work internally or create your own external catalog, see [Catalogs](catalogs.md).
 
@@ -131,6 +131,6 @@ Secrets are typically synced via External Secrets based on your configured Secre
 
 - To understand catalog structure and create your own: [Catalogs](catalogs.md)
 - To understand the surrounding ideas and terminology: [GitOps, Platform Engineering, and IDPs](gitops_platform_engineering_idp.md)
-- To see the default built-in services kubara ships: [Components Overview](../5_components/components_overview.md)
+- To see the default built-in services kubara ships: [Components Overview](../6_components/components_overview.md)
 - To continue the setup flow: [Bootstrapping](../1_getting_started/bootstrapping.md)
-- To understand the platform topology: [Architecture overview](../6_architecture/architecture_overview.md)
+- To understand the platform topology: [Architecture overview](../7_architecture/architecture_overview.md)

@@ -2,7 +2,7 @@
 
 This page explains what a catalog is, when to use one, and how catalogs fit into kubara's platform workflow.
 
-For the built-in services that ship with kubara, see [Components Overview](../5_components/components_overview.md). This page is about the **catalog model itself**.
+For the built-in services that ship with kubara, see [Components Overview](../6_components/components_overview.md). This page is about the **catalog model itself**.
 
 ## What is a catalog?
 
@@ -43,12 +43,12 @@ Do **not** create a catalog service for every workload.
 
 If a workload belongs to one cluster, one team, or one application domain, it is usually simpler to add it through Argo CD:
 
-- [Add a Project](../4_workload_onboarding/add_app_project.md)
-- [Add a Repository](../4_workload_onboarding/add_app_repository.md)
-- [Add an ApplicationSet](../4_workload_onboarding/add_appset.md)
-- [Add an Application](../4_workload_onboarding/add_application.md)
+- [Add a Project](../5_workload_onboarding/add_app_project.md)
+- [Add a Repository](../5_workload_onboarding/add_app_repository.md)
+- [Add an ApplicationSet](../5_workload_onboarding/add_appset.md)
+- [Add an Application](../5_workload_onboarding/add_application.md)
 
-Use the Argo CD guides in [Workload Onboarding with Argo CD](../4_workload_onboarding/overview.md) for that path.
+Use the Argo CD guides in [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md) for that path.
 
 Hint:
 
@@ -235,7 +235,7 @@ Read more:
 
 ## Where to go next
 
-- To build your own catalog: [How to create a Catalog](../3_building_your_platform/create_catalog.md)
+- To build your own catalog: [How to create a Catalog](../4_building_your_platform/create_catalog.md)
 - To distribute catalogs through a registry: [Catalog distribution](catalog_distribution.md)
 - To learn template authoring: [Catalog templating](catalog_templating.md)
-- To add simpler workloads through Argo CD instead: [Workload Onboarding with Argo CD](../4_workload_onboarding/overview.md)
+- To add simpler workloads through Argo CD instead: [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md)

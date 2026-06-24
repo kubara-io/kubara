@@ -148,4 +148,4 @@ kubara strips that provider path segment in the final output and picks the provi
 
 - To understand the catalog model: [Catalogs](../2_concepts/catalogs.md)
 - To package and share catalogs: [Catalog distribution](../2_concepts/catalog_distribution.md)
-- To author a full catalog: [How to create a Catalog](../3_building_your_platform/create_catalog.md)
+- To author a full catalog: [How to create a Catalog](../4_building_your_platform/create_catalog.md)

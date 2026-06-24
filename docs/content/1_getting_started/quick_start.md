@@ -181,9 +181,10 @@ kubectl --kubeconfig .local/kind.kubeconfig get applications -n argocd
 For more details about the directory and file structure have a look at the concept pages:
 - [Overview of Core Concepts](../2_concepts/overview_core_concept.md)
 - [What is a Catalog](../2_concepts/catalogs.md)
-- [How to create your own Catalog](../3_building_your_platform/create_catalog.md)
-- [How to add an Application](../4_workload_onboarding/add_application.md)
-- [How to add an AppSet](../4_workload_onboarding/add_appset.md)
+- [How the local kind preset works](../3_infrastructure/kind.md)
+- [How to create your own Catalog](../4_building_your_platform/create_catalog.md)
+- [How to add an Application](../5_workload_onboarding/add_application.md)
+- [How to add an AppSet](../5_workload_onboarding/add_appset.md)
 
 ## Troubleshooting
 

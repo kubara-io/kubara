@@ -8,9 +8,10 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 
 ## 1. Getting Started
 
-Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, or other cloud providers, we recommend you to use Terraform.
+kubara can run on any Kubernetes cluster as long as the required surrounding capabilities exist, especially a secret backend for `external-secrets` and DNS handling for `external-dns`.
 
-For STACKIT and T Cloud Public we provide dedicated modules and configurations. See the provider guides for [STACKIT](providers/stackit.md) and [T Cloud Public](providers/t-cloud-public.md).
+For the ready-made example flows, use the [Infrastructure Presets](../3_infrastructure/overview.md) section. Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, 
+or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions.
 
 If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
 
@@ -77,8 +78,8 @@ When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.
 
-!!! info
-    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../5_components/backup_and_recovery.md).
+!!! info 
+    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../6_components/backup_and_recovery.md).
 
 ### 1.4 Validate your `config.yaml` against schema (optional, recommended)
 
@@ -104,7 +105,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ### 1.5 Update and Prepare Templates
 
 !!! info
-    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../6_architecture/architecture_overview.md#hubnspoke)
+    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../7_architecture/architecture_overview.md#hubnspoke)
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
@@ -153,18 +154,17 @@ If you are not using Terraform, you can skip directly to Step 3.
 
 ## 2. Infrastructure Provisioning
 
-Kubara is mainly focused on the Platform Experience and Operations on top of Kubernetes for certain Cloud infrastructure 
-services we have built dedicated terraform provider modules and testing support.
+kubara is mainly focused on the platform layer on top of Kubernetes.
+For some environments we provide ready-made infrastructure presets and generated Terraform examples.
 
-Visit one of the following pages to learn more about how to use kubara for setting up the underlying infrastructure as
-well:
+Visit the [Infrastructure Presets](../3_infrastructure/overview.md) section for:
 
-- [STACKIT](providers/stackit.md)
-- [T Cloud Public](providers/t-cloud-public.md)
+- [STACKIT SKE](../3_infrastructure/stackit_ske.md)
+- [STACKIT Edge Cloud](../3_infrastructure/stackit_edge_cloud.md)
+- [T Cloud Public](../3_infrastructure/t-cloud-public.md)
 - More provider support is in the works
 
-If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please
-continue with the next section.
+If you already have an existing Kubernetes cluster and a secret manager supported by `external-secrets`, continue with the next section.
 
 ---
 ## 3. Helm
@@ -392,9 +392,9 @@ kubara bootstrap --config-file another-config.yaml --env-file .another-env <clus
 
 After bootstrapping your platform, you can:
 
-* [How to add Argo CD projects](../4_workload_onboarding/add_app_project.md)
-* [How to add Git repositories](../4_workload_onboarding/add_app_repository.md)
-* [How to add Argo CD applications](../4_workload_onboarding/add_application.md)
-* [How to add Argo CD appset](../4_workload_onboarding/add_appset.md)
-* [How to add SSO Configuration](../3_building_your_platform/sso/add_sso.md)
-* [How to add spoke clusters](../3_building_your_platform/add_spoke_cluster.md)
+* [How to add Argo CD projects](../5_workload_onboarding/add_app_project.md)
+* [How to add Git repositories](../5_workload_onboarding/add_app_repository.md)
+* [How to add Argo CD applications](../5_workload_onboarding/add_application.md)
+* [How to add Argo CD appset](../5_workload_onboarding/add_appset.md)
+* [How to add SSO Configuration](../4_building_your_platform/sso/add_sso.md)
+* [How to add spoke clusters](../4_building_your_platform/add_spoke_cluster.md)
