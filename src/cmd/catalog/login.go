@@ -101,10 +101,10 @@ func resolveCatalogLoginOptions(flags *catalogLoginFlags) (internal.LoginOptions
 		return internal.LoginOptions{}, fmt.Errorf("identity-token and identity-token-stdin cannot be used together")
 	}
 
-	usesPasswordAuth := flags.username != "" && (flags.password || flags.passwordStdin)
+	usesPasswordInputs := flags.username != "" || flags.password || flags.passwordStdin
 	usesIdentityTokenAuth := flags.identityToken || flags.identityTokenStdin
 
-	if usesPasswordAuth && usesIdentityTokenAuth {
+	if usesPasswordInputs && usesIdentityTokenAuth {
 		return internal.LoginOptions{}, fmt.Errorf("username/password and identity token authentication cannot be combined")
 	}
 
