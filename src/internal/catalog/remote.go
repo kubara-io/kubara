@@ -123,7 +123,8 @@ func PullCatalog(ctx context.Context, options PullOptions) (PullResult, error) {
 		return PullResult{}, err
 	}
 
-	cachedArtifact, _ := GetCachedArtifact(ref.Raw)
+	cachedArtifact, cachedErr := GetCachedArtifact(ref.Raw)
+	wasCached := cachedErr == nil
 	artifact, err := pullRemoteCatalog(ctx, ref, options.Insecure)
 	if err != nil {
 		return PullResult{}, err
@@ -137,7 +138,7 @@ func PullCatalog(ctx context.Context, options PullOptions) (PullResult, error) {
 	return PullResult{
 		Artifact:  artifact,
 		Reference: ref.Raw,
-		Updated:   cachedArtifact.ManifestDigest != artifact.ManifestDigest,
+		Updated:   wasCached && cachedArtifact.ManifestDigest != artifact.ManifestDigest,
 	}, nil
 }
 
@@ -311,7 +312,7 @@ func newRegistryHTTPClient(insecure bool) *http.Client {
 
 	baseTransport := http.DefaultTransport.(*http.Transport).Clone()
 	baseTransport.TLSClientConfig = &tls.Config{
-		InsecureSkipVerify: true, // #nosec G402 - this is only used if the user explicitely sets the insecure flag
+		InsecureSkipVerify: true, // #nosec G402 - this is only used if the user explicitly sets the insecure flag
 	}
 
 	return &http.Client{

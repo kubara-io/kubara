@@ -87,7 +87,7 @@ kubara helps you build the lower-level and mid-level parts of that platform foun
 These three ideas work well together:
 
 1. **Platform Engineering** builds and owns the shared platform.
-2. They use **GitOps** as their main way of delivering platfomr changes safely.
+2. They use **GitOps** as their main way of delivering platform changes safely.
 3. And the **IDP** is the internal product that the Platform Engineers produce to be used by the application teams.
 
 kubara sits mainly on the platform side:

@@ -26,7 +26,7 @@ func NewCatalogLogin() *cli.Command {
 	flags := &catalogLoginFlags{}
 	cmd := &cli.Command{
 		Name:        "login",
-		Usage:       "Log into a registry and stores credentials",
+		Usage:       "Log into a registry and store credentials",
 		UsageText:   "kubara catalog login [flags] <registry>",
 		Description: "Asks for your login credentials and stores them under $HOME/.kubara/credentials.json for future registry interactions.",
 		Flags: []cli.Flag{

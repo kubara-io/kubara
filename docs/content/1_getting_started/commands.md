@@ -221,7 +221,7 @@ Shows a list of commands or help for one command
 
 ### login
 
-Log into a registry and stores credentials
+Log into a registry and store credentials
 
 >kubara catalog login [flags] <registry>
 
