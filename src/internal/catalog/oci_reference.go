@@ -79,27 +79,27 @@ func GetCachedArtifact(reference string) (CachedArtifact, error) {
 	return CachedArtifact{}, fmt.Errorf("cached catalog %q was not found", ref.Raw)
 }
 
-func ParseOCIReference(raw string) (OCIReference, error) {
-	trimmed := strings.TrimSpace(raw)
-	if !IsOCIReference(trimmed) {
-		return OCIReference{}, fmt.Errorf("catalog reference %q must use the oci:// scheme", raw)
+func ParseOCIReference(ref string) (OCIReference, error) {
+	ref = strings.TrimSpace(ref)
+	if !IsOCIReference(ref) {
+		return OCIReference{}, fmt.Errorf("catalog reference %q must use the oci:// scheme", ref)
 	}
 
-	parsed, err := registry.ParseReference(strings.TrimPrefix(trimmed, ociScheme))
+	parsed, err := registry.ParseReference(strings.TrimPrefix(ref, ociScheme))
 	if err != nil {
-		return OCIReference{}, fmt.Errorf("parse OCI reference %q: %w", raw, err)
+		return OCIReference{}, fmt.Errorf("parse OCI reference %q: %w", ref, err)
 	}
 	if strings.TrimSpace(parsed.Reference) == "" {
-		return OCIReference{}, fmt.Errorf("OCI reference %q must include either a tag or a digest", raw)
+		return OCIReference{}, fmt.Errorf("OCI reference %q must include either a tag or a digest", ref)
 	}
 
 	if err := parsed.ValidateReferenceAsDigest(); err == nil {
 		dgst, err := parsed.Digest()
 		if err != nil {
-			return OCIReference{}, fmt.Errorf("parse digest from %q: %w", raw, err)
+			return OCIReference{}, fmt.Errorf("parse digest from %q: %w", ref, err)
 		}
 		return OCIReference{
-			Raw:        trimmed,
+			Raw:        ref,
 			Registry:   parsed.Registry,
 			Repository: parsed.Repository,
 			Reference:  parsed.Reference,
@@ -109,14 +109,14 @@ func ParseOCIReference(raw string) (OCIReference, error) {
 	}
 
 	if err := parsed.ValidateReferenceAsTag(); err != nil {
-		return OCIReference{}, fmt.Errorf("invalid OCI tag in %q: %w", raw, err)
+		return OCIReference{}, fmt.Errorf("invalid OCI tag in %q: %w", ref, err)
 	}
 	if !StrictCatalogVersion.MatchString(parsed.Reference) {
 		return OCIReference{}, fmt.Errorf(`OCI tag %q must match exact semantic version format "x.y.z" without a leading "v"`, parsed.Reference)
 	}
 
 	return OCIReference{
-		Raw:        trimmed,
+		Raw:        ref,
 		Registry:   parsed.Registry,
 		Repository: parsed.Repository,
 		Reference:  parsed.Reference,
@@ -125,13 +125,13 @@ func ParseOCIReference(raw string) (OCIReference, error) {
 	}, nil
 }
 
-func ParseOCIReferenceBase(raw string) (OCIReference, error) {
-	base := strings.TrimSpace(raw)
+func ParseOCIReferenceBase(base string) (OCIReference, error) {
+	base = strings.TrimSpace(base)
 	if base == "" {
 		base = defaultLocalCatalogRef
 	}
 	if !IsOCIReference(base) {
-		return OCIReference{}, fmt.Errorf("catalog reference base %q must use the oci:// scheme", raw)
+		return OCIReference{}, fmt.Errorf("catalog reference base %q must use the oci:// scheme", base)
 	}
 
 	normalized := base

@@ -49,27 +49,53 @@ output "velero_bucket_url_path_style" {
 {{ end -}}
 {{ if (eq .cluster.terraform.kubernetesType "ske") }}
 ### Kubernetes Instance
-output "kubeconfig_raw" {
-  description = "Raw admin kubeconfig (short-lived, sensitive)"
-  value       = module.ske_cluster.kubeconfig_raw
+output "kubeconfig" {
+  description = "Admin kubeconfig (short-lived, sensitive)"
+  value       = module.ske_cluster.kubeconfig
   sensitive   = true
 }
 {{ end }}
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
 ### Edge Cloud Instance
-output "server_id" {
-  description = "ID of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.server_id
+output "edge_instance_id" {
+  description = "ID of the Edge Cloud instance"
+  value       = module.edge_instance.instance_id
 }
 
-output "public_ip" {
-  description = "Public IP of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.public_ip
+output "edge_frontend_url" {
+  description = "Frontend URL of the Edge Cloud instance"
+  value       = module.edge_instance.frontend_url
 }
 
-output "private_ip" {
-  description = "Private IP of the created Edge Cloud instance"
-  value       = module.edgecloud_cluster_controlplane.private_ip
+output "edge_status" {
+  description = "Status of the Edge Cloud instance"
+  value       = module.edge_instance.status
+}
+
+output "edge_kubeconfig" {
+  description = "Edge Cloud kubeconfig (short-lived, sensitive)"
+  value       = module.edge_instance.kubeconfig
+  sensitive   = true
+}
+
+output "edge_uploaded_image_id" {
+  description = "ID of the image uploaded by edge_image module."
+  value       = module.edge_image.image_id
+}
+
+output "edge_host_metadata" {
+  description = "Per-node metadata (IDs and IPs)."
+  value       = module.edge_hosts.host_metadata
+}
+
+output "edge_network_id" {
+  description = "ID of the shared edge host network."
+  value       = module.edge_hosts.network_id
+}
+
+output "edge_security_group_id" {
+  description = "ID of the shared edge host security group."
+  value       = module.edge_hosts.security_group_id
 }
 {{ end }}

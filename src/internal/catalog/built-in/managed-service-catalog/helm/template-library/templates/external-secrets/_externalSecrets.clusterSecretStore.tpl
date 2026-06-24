@@ -1,10 +1,9 @@
-{{- define "templateLibrary.externalSecrets.clusterSecretStore" }}
-{{- range $idx, $data := .Values.clusterSecretStores }}
-{{- $storeName := default (printf "store-%d" $idx ) (default $data.storeName $data.name) }}
+{{- define "templateLibrary.externalSecrets.clusterSecretStores" }}
+{{- range $name, $data := .Values.clusterSecretStores }}
 apiVersion: external-secrets.io/v1
 kind: ClusterSecretStore
 metadata:
-  name: {{ $storeName }}
+  name: {{ $name }}
   {{- with $data.labels }}
   labels:
     {{- toYaml . | nindent 4 }}
@@ -12,10 +11,6 @@ metadata:
 spec:
   provider:
     {{- toYaml $data.provider | nindent 4 }}
-  {{- with $data.retrySettings }}
-  retrySettings:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
 ---
 {{- end }}
 {{- end }}

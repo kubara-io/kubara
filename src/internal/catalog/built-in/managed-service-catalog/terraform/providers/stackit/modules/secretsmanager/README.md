@@ -44,8 +44,8 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_secretsmanager_instance.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/secretsmanager_instance) | resource |
-| [stackit_secretsmanager_user.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/secretsmanager_user) | resource |
+| [stackit_secretsmanager_instance.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/secretsmanager_instance) | resource |
+| [stackit_secretsmanager_user.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/secretsmanager_user) | resource |
 
 ## Inputs
 

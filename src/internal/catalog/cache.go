@@ -37,6 +37,9 @@ func ListCachedCatalogs() ([]CachedCatalogEntry, error) {
 	if err := collectReferenceEntries(filepath.Join(cacheRoot, "refs"), entries, referencedDigests); err != nil {
 		return nil, err
 	}
+	if err := pruneUnreferencedArtifacts(filepath.Join(cacheRoot, "artifacts"), referencedDigests); err != nil {
+		return nil, err
+	}
 
 	result := make([]CachedCatalogEntry, 0, len(entries))
 	for _, entry := range entries {
@@ -55,6 +58,27 @@ func ListCachedCatalogs() ([]CachedCatalogEntry, error) {
 	})
 
 	return result, nil
+}
+
+func pruneArtifactIfUnreferenced(manifestDigest string) error {
+	if strings.TrimSpace(manifestDigest) == "" {
+		return nil
+	}
+
+	cacheRoot, err := defaultCatalogCacheRoot()
+	if err != nil {
+		return err
+	}
+
+	referencedDigests := make(map[string]struct{})
+	if err := collectReferenceEntries(filepath.Join(cacheRoot, "refs"), map[string]CachedCatalogEntry{}, referencedDigests); err != nil {
+		return err
+	}
+	if _, ok := referencedDigests[manifestDigest]; ok {
+		return nil
+	}
+
+	return removeArtifactDir(manifestDigest)
 }
 
 func UnpackageCatalog(options UnpackageOptions) (UnpackageResult, error) {
@@ -133,6 +157,46 @@ func readCachedReferenceFile(path string) (cachedReference, bool, error) {
 		return cachedReference{}, false, err
 	}
 	return ref, true, nil
+}
+
+func pruneUnreferencedArtifacts(root string, referencedDigests map[string]struct{}) error {
+	entries, err := os.ReadDir(root)
+	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return nil
+		}
+		return fmt.Errorf("read cached catalog artifacts: %w", err)
+	}
+
+	referencedPaths := make(map[string]struct{}, len(referencedDigests))
+	for digest := range referencedDigests {
+		referencedPaths[digestPathComponent(digest)] = struct{}{}
+	}
+
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		if _, ok := referencedPaths[entry.Name()]; ok {
+			continue
+		}
+		if err := os.RemoveAll(filepath.Join(root, entry.Name())); err != nil {
+			return fmt.Errorf("remove unreferenced cached catalog artifact %q: %w", entry.Name(), err)
+		}
+	}
+
+	return nil
+}
+
+func removeArtifactDir(manifestDigest string) error {
+	path, err := artifactDirPath(manifestDigest)
+	if err != nil {
+		return err
+	}
+	if err := os.RemoveAll(path); err != nil {
+		return fmt.Errorf("remove cached catalog artifact %q: %w", manifestDigest, err)
+	}
+	return nil
 }
 
 func remoteReferenceFromCachedReference(ref cachedReference) string {
