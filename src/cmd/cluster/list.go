@@ -10,6 +10,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+// CreateClusterList Creates Command for 'kubara cluster list'
 func CreateClusterList() *cli.Command {
 	return &cli.Command{
 		Name:        "list",

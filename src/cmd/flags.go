@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/utils"
@@ -202,7 +201,7 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
-	rawCatalogPath := strings.TrimSpace(cmd.String("catalog"))
+	rawCatalogPath := cmd.String("catalog")
 
 	if rawCatalogPath == "" {
 		return catalog.LoadOptions{

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	internal "github.com/kubara-io/kubara/internal/cmd/cluster"
@@ -39,7 +38,7 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("get working directory: %w", err)
 			}
 
-			rawCatalog := strings.TrimSpace(cmd.String("catalog"))
+			rawCatalog := cmd.String("catalog")
 			catalogOptions := catalog.LoadOptions{Overwrite: cmd.Bool("catalog-overwrite")}
 			if rawCatalog != "" {
 				catalogOptions.CatalogPath, err = utils.GetFullPath(rawCatalog, cwd)
