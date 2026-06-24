@@ -2,22 +2,17 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
-	"strings"
 	"testing"
 
 	"github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
-	"go.yaml.in/yaml/v3"
 )
 
 func TestNewGenerateFlags(t *testing.T) {
@@ -276,10 +271,10 @@ func TestGenerateCmd(t *testing.T) {
 				if tt.cluster != nil {
 					cluster = *tt.cluster
 				}
-				configPath := CreateTestConfig(t, tempDir, cluster)
+				configPath := testutil.CreateTestConfig(t, tempDir, cluster)
 
 				//dummy values
-				envPath := createDefaultGenerateTestEnv(t, tempDir)
+				envPath := testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 				// Add global flags
 				globalFlags := []string{
@@ -322,7 +317,7 @@ func TestGenerateCmd(t *testing.T) {
 func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -346,7 +341,7 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 	})
 
 	//dummy values
-	createDefaultGenerateTestEnv(t, tempDir)
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
@@ -358,7 +353,7 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -382,7 +377,7 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	})
 
 	//dummy values
-	createDefaultGenerateTestEnv(t, tempDir)
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -401,7 +396,7 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "helm-only-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -418,7 +413,7 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 	})
 
 	//dummy values
-	createDefaultGenerateTestEnv(t, tempDir)
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -437,7 +432,7 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
-	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -454,7 +449,7 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	})
 
 	//dummy values
-	createDefaultGenerateTestEnv(t, tempDir)
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
@@ -472,7 +467,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 	homer.Status = "disabled"
 	services[homerName] = homer
 
-	configPath := CreateTestConfig(t, tempDir, config.Cluster{
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -488,7 +483,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		Services: services,
 	})
 	//dummy values
-	createDefaultGenerateTestEnv(t, tempDir)
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -506,88 +501,6 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 }
 
 // Helper function
-
-func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
-	t.Helper()
-
-	configPath := filepath.Join(dir, "config.yaml")
-
-	cfg := config.Config{Clusters: clusters}
-
-	// Convert to YAML
-	yamlData, err := yaml.Marshal(cfg)
-	require.NoError(t, err)
-
-	err = os.WriteFile(configPath, yamlData, 0644)
-	require.NoError(t, err)
-
-	return configPath
-}
-
-func CreateTestCluster(t *testing.T) config.Cluster {
-	t.Helper()
-	return config.Cluster{
-		Name:    "missing-terraform-cluster",
-		Stage:   "dev",
-		Type:    "hub",
-		DNSName: "test.example.com",
-		ArgoCD: config.ArgoCD{
-			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
-				},
-			},
-		},
-		Services: testutil.CreateTestServices(),
-	}
-}
-
-func createDefaultGenerateTestEnv(t *testing.T, dir string) string {
-	t.Helper()
-
-	return createTestEnv(t, dir, envconfig.EnvMap{
-		ProjectName:                 "project-name",
-		ProjectStage:                "project-stage",
-		DockerconfigBase64:          "DockerConfig",
-		ArgocdWizardAccountPassword: "wizardpassword",
-		ArgocdGitHttpsUrl:           "https://example.com",
-		ArgocdGitUsername:           "CoolCapybara",
-		ArgocdGitPatOrPassword:      "password",
-		ArgocdHelmRepoUrl:           "https://example.com",
-		ArgocdHelmRepoUsername:      "CoolCapybara",
-		ArgocdHelmRepoPassword:      "password",
-		DomainName:                  "example.com",
-	})
-}
-
-// createTestEnv writes an envMap to the file system
-// It returns the file path
-// Takes a directory and an EnvMap and validates the envMap before writing it
-func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
-	envPath := filepath.Join(dir, ".env")
-	err := env.Validate()
-	require.NoError(t, err)
-
-	var b strings.Builder
-	v := reflect.ValueOf(&env).Elem()
-	typ := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		fieldVal := v.Field(i)
-		fieldType := typ.Field(i)
-		koanfKey := fieldType.Tag.Get("koanf")
-		if koanfKey == "" {
-			continue
-		}
-		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
-	}
-
-	err = os.WriteFile(envPath, []byte(b.String()), 0600)
-
-	require.NoError(t, err)
-
-	return envPath
-}
 
 func CreateTestApp(commands ...*cli.Command) *cli.Command {
 	globalFlags := NewGlobalFlags()

@@ -75,7 +75,7 @@ func CreateTestCluster(t *testing.T) config.Cluster {
 func CreateDefaultGenerateTestEnv(t *testing.T, dir string) string {
 	t.Helper()
 
-	return createTestEnv(t, dir, envconfig.EnvMap{
+	return CreateTestEnv(t, dir, envconfig.EnvMap{
 		ProjectName:                 "project-name",
 		ProjectStage:                "project-stage",
 		DockerconfigBase64:          "DockerConfig",
@@ -93,7 +93,7 @@ func CreateDefaultGenerateTestEnv(t *testing.T, dir string) string {
 // createTestEnv writes an envMap to the file system
 // It returns the file path
 // Takes a directory and an EnvMap and validates the envMap before writing it
-func createTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
+func CreateTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
 	envPath := filepath.Join(dir, ".env")
 	err := env.Validate()
 	require.NoError(t, err)
