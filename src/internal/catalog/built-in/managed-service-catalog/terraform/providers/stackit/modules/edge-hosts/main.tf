@@ -47,7 +47,7 @@ resource "stackit_volume" "this" {
   for_each = local.nodes_by_name
 
   project_id        = var.project_id
-  name              = "${var.name}-${each.key}-volume"
+  name              = "${var.name}-${each.key}"
   availability_zone = each.value.availability_zone
   size              = each.value.volume_size
   performance_class = each.value.volume_performance_class
@@ -64,7 +64,7 @@ resource "stackit_network_interface" "this" {
 
   project_id = var.project_id
   network_id = stackit_network.this.network_id
-  name       = "${var.name}-${each.key}-nic"
+  name       = "${var.name}-${each.key}"
 
   security_group_ids = [stackit_security_group.this.security_group_id]
 }
@@ -74,7 +74,7 @@ resource "stackit_server" "this" {
   for_each = local.nodes_by_name
 
   project_id   = var.project_id
-  name         = each.value.name
+  name         = "${var.name}-${each.key}"
   machine_type = each.value.flavor
 
   boot_volume = {
