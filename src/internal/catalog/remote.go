@@ -130,6 +130,8 @@ func PullCatalog(ctx context.Context, options PullOptions) (PullResult, error) {
 		return PullResult{}, err
 	}
 	if err := ensureReferenceTagMatchesCatalogVersion(ref, artifact.CatalogVersion, "pull"); err != nil {
+		// remove unreferenced orphan
+		_ = pruneArtifactIfUnreferenced(artifact.ManifestDigest)
 		return PullResult{}, err
 	}
 	if err := writeCachedReference(ref, artifact); err != nil {

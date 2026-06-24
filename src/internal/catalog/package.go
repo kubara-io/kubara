@@ -86,6 +86,7 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	if err != nil {
 		return CachedArtifact{}, fmt.Errorf("pack catalog manifest: %w", err)
 	}
+
 	if err := fileStore.Tag(ctx, manifestDescriptor, manifest.Spec.Version); err != nil {
 		return CachedArtifact{}, fmt.Errorf("tag packaged catalog: %w", err)
 	}
@@ -126,6 +127,8 @@ func buildCatalogManifestAnnotations(manifest CatalogManifest) map[string]string
 
 	annotations["io.kubara.catalog.name"] = manifest.Metadata.Name
 	annotations["io.kubara.catalog.version"] = manifest.Spec.Version
+	// Fake timestamp for forcing immutable manifest digests for the same catalog contents
+	annotations[v1.AnnotationCreated] = "1970-01-01T00:00:00Z"
 
 	return annotations
 }
