@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/installation/">
+        <link rel="canonical" href="https://docs.kubara.io/next/4_workload_onboarding/add_appset/">
       
       
-        <link rel="prev" href="../quick_start/">
+        <link rel="prev" href="../add_app_repository/">
       
       
-        <link rel="next" href="../prerequisites/">
+        <link rel="next" href="../add_application/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Installation - kubara - Docs</title>
+        <title>How to add an AppSet - kubara - Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#installation" class="md-skip">
+        <a href="#how-to-add-an-appset-to-argo-cd" class="md-skip">
           Skip to content
         </a>
       
@@ -123,7 +123,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Installation
+              How to add an AppSet
             
           </span>
         </div>
@@ -304,8 +304,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -318,11 +316,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
         
           
           <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
@@ -343,7 +341,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -361,7 +359,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../quick_start/" class="md-nav__link">
+      <a href="../../1_getting_started/quick_start/" class="md-nav__link">
         
   
   
@@ -386,37 +384,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Installation
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/installation/" class="md-nav__link">
         
   
   
@@ -432,59 +403,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#installation-methods" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Installation Methods
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#verify-checksums" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Verify Checksums
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#shell-completion" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Shell Completion
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -497,7 +415,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../prerequisites/" class="md-nav__link">
+      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
         
   
   
@@ -525,7 +443,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../bootstrapping/" class="md-nav__link">
+      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
@@ -602,7 +520,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../providers/stackit/" class="md-nav__link">
+      <a href="../../1_getting_started/providers/stackit/" class="md-nav__link">
         
   
   
@@ -1069,8 +987,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -1081,11 +1001,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -1106,7 +1026,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1124,7 +1044,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_workload_onboarding/overview/" class="md-nav__link">
+      <a href="../overview/" class="md-nav__link">
         
   
   
@@ -1152,7 +1072,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_workload_onboarding/add_app_project/" class="md-nav__link">
+      <a href="../add_app_project/" class="md-nav__link">
         
   
   
@@ -1180,7 +1100,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_workload_onboarding/add_app_repository/" class="md-nav__link">
+      <a href="../add_app_repository/" class="md-nav__link">
         
   
   
@@ -1205,10 +1125,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../4_workload_onboarding/add_appset/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an AppSet
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1224,6 +1171,103 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#add-chart-to-your-managed-service-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Chart to your managed-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Templates to your new Chart (optional)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-override-values-to-your-customer-service-catalog" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add Override Values to your customer-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Argo CD overlays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#push-your-changes-to-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push your changes to git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-app-from-another-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add App from another repository
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1236,7 +1280,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_workload_onboarding/add_application/" class="md-nav__link">
+      <a href="../add_application/" class="md-nav__link">
         
   
   
@@ -2091,7 +2135,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../commands/" class="md-nav__link">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
         
   
   
@@ -2342,10 +2386,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#installation-methods" class="md-nav__link">
+  <a href="#add-chart-to-your-managed-service-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Installation Methods
+        Add Chart to your managed-service-catalog
       
     </span>
   </a>
@@ -2353,10 +2397,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#verify-checksums" class="md-nav__link">
+  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Verify Checksums
+        Add Templates to your new Chart (optional)
       
     </span>
   </a>
@@ -2364,10 +2408,54 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#shell-completion" class="md-nav__link">
+  <a href="#add-override-values-to-your-customer-service-catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Shell Completion
+        Add Override Values to your customer-service-catalog
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modify Argo CD overlays
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#push-your-changes-to-git" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Push your changes to git
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Run kubara bootstrap again (if Argo CD is not managing itself )
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#add-app-from-another-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Add App from another repository
       
     </span>
   </a>
@@ -2394,112 +2482,84 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="installation">Installation</h1>
-<p>kubara is distributed via Homebrew and as prebuilt release archives.
-You do not need Go installed to run the CLI.</p>
-<h2 id="installation-methods">Installation Methods</h2>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:6"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><input id="__tabbed_1_4" name="__tabbed_1" type="radio" /><input id="__tabbed_1_5" name="__tabbed_1" type="radio" /><input id="__tabbed_1_6" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Homebrew</label><label for="__tabbed_1_2">APT</label><label for="__tabbed_1_3">Docker</label><label for="__tabbed_1_4">Install Script</label><label for="__tabbed_1_5">Manual (macOS/Linux)</label><label for="__tabbed_1_6">Manual (Windows)</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<p><strong>Install</strong></p>
-<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>tap<span class="w"> </span>kubara-io/tap
-brew<span class="w"> </span>trust<span class="w"> </span>kubara-io/tap
-<span class="c1"># Trust this tap so Homebrew will be able to install and update kubara (required since Homebrew 6.0 for third-party taps).</span>
-<span class="c1"># See: https://docs.brew.sh/Tap-Trust</span>
-brew<span class="w"> </span>install<span class="w"> </span>kubara
-kubara<span class="w"> </span>--help
-</code></pre></div>
-<p><strong>Update</strong></p>
-<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>upgrade<span class="w"> </span>kubara
-</code></pre></div>
-<p><strong>Uninstall</strong></p>
-<div class="highlight"><pre><span></span><code>brew<span class="w"> </span>uninstall<span class="w"> </span>kubara
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p><strong>Install</strong></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>install<span class="w"> </span>-d<span class="w"> </span>-m<span class="w"> </span><span class="m">0755</span><span class="w"> </span>/etc/apt/keyrings
-curl<span class="w"> </span>-fsSL<span class="w"> </span>https://apt.kubara.io/apt-public.key<span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>gpg<span class="w"> </span>--dearmor<span class="w"> </span>-o<span class="w"> </span>/etc/apt/keyrings/kubara.gpg
-<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;deb [signed-by=/etc/apt/keyrings/kubara.gpg] https://apt.kubara.io stable main&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sudo<span class="w"> </span>tee<span class="w"> </span>/etc/apt/sources.list.d/kubara.list<span class="w"> </span>&gt;<span class="w"> </span>/dev/null
-sudo<span class="w"> </span>apt<span class="w"> </span>update
-sudo<span class="w"> </span>apt<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>kubara
-</code></pre></div>
-<p><strong>Uninstall</strong></p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>apt<span class="w"> </span>remove<span class="w"> </span>-y<span class="w"> </span>kubara
-sudo<span class="w"> </span>rm<span class="w"> </span>-f<span class="w"> </span>/etc/apt/sources.list.d/kubara.list<span class="w"> </span>/etc/apt/keyrings/kubara.gpg
-sudo<span class="w"> </span>apt<span class="w"> </span>update
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>For commands that need cluster access (e.g. <code>bootstrap</code>), mount your kubeconfig:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span>~/.kube/config:/kubeconfig:ro<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ghcr.io/kubara-io/kubara<span class="w"> </span>&lt;your-command&gt;
-</code></pre></div>
-<p>For local-only commands (e.g. <code>init</code>, <code>generate</code>, <code>schema</code>), kubeconfig is not required:</p>
-<div class="highlight"><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-u<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ghcr.io/kubara-io/kubara<span class="w"> </span>&lt;your-command&gt;
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>curl<span class="w"> </span>-sSLf<span class="w"> </span>https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh<span class="w"> </span><span class="p">|</span><span class="w"> </span>sh
-kubara<span class="w"> </span>--help
-</code></pre></div>
-<p>The script downloads the latest release for your platform and verifies checksums automatically.</p>
-</div>
-<div class="tabbed-block">
-<p>Download the matching release archive from:</p>
-<p><a href="https://github.com/kubara-io/kubara/releases" target="_blank" rel="noopener">https://github.com/kubara-io/kubara/releases</a></p>
-<p>Current release artifacts:
-- Linux: <code>kubara_&lt;version&gt;_linux_amd64.tar.gz</code>, <code>kubara_&lt;version&gt;_linux_arm64.tar.gz</code>
-- macOS: <code>kubara_&lt;version&gt;_darwin_amd64.tar.gz</code>, <code>kubara_&lt;version&gt;_darwin_arm64.tar.gz</code></p>
-<div class="highlight"><pre><span></span><code>tar<span class="w"> </span>-xzf<span class="w"> </span>kubara_&lt;version&gt;_&lt;os&gt;_&lt;arch&gt;.tar.gz
-chmod<span class="w"> </span>+x<span class="w"> </span>kubara
-sudo<span class="w"> </span>mv<span class="w"> </span>kubara<span class="w"> </span>/usr/local/bin/kubara
-kubara<span class="w"> </span>--help
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<p>Download the matching Windows <code>.zip</code> release asset from:</p>
-<p><a href="https://github.com/kubara-io/kubara/releases" target="_blank" rel="noopener">https://github.com/kubara-io/kubara/releases</a></p>
-<p>Current release artifacts:
-- <code>kubara_&lt;version&gt;_windows_amd64.zip</code>
-- <code>kubara_&lt;version&gt;_windows_arm64.zip</code></p>
-<p>Open a terminal (PowerShell) in the extracted folder and run:</p>
-<div class="highlight"><pre><span></span><code><span class="p">.\</span><span class="n">kubara</span><span class="p">.</span><span class="n">exe</span> <span class="p">-</span><span class="n">-help</span>
-</code></pre></div>
-<p>Optional: move <code>kubara.exe</code> to a directory in your <code>PATH</code>.</p>
-</div>
-</div>
-</div>
-<h2 id="verify-checksums">Verify Checksums</h2>
-<p>Each release includes a checksum file.
-Run these checksum commands in your terminal on Linux/macOS:</p>
-<div class="highlight"><pre><span></span><code>sha256sum<span class="w"> </span>kubara_&lt;version&gt;_&lt;os&gt;_&lt;arch&gt;.&lt;ext&gt;
-</code></pre></div>
-<p>On macOS you can also use:</p>
-<div class="highlight"><pre><span></span><code>shasum<span class="w"> </span>-a<span class="w"> </span><span class="m">256</span><span class="w"> </span>kubara_&lt;version&gt;_&lt;os&gt;_&lt;arch&gt;.&lt;ext&gt;
-</code></pre></div>
-<h2 id="shell-completion">Shell Completion</h2>
-<p>kubara supports shell completion for bash, zsh, fish and powershell.</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># add the following line to your .bashrc</span>
-$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubara<span class="w"> </span>completion<span class="w"> </span>bash<span class="o">)</span>
-<span class="c1"># or for zsh</span>
-$<span class="w"> </span><span class="nb">source</span><span class="w"> </span>&lt;<span class="o">(</span>kubara<span class="w"> </span>completion<span class="w"> </span>zsh<span class="o">)</span>
-<span class="c1"># after loading your rc file or opening a new terminal you will have tab completion for kubara</span>
-$<span class="w"> </span>kubara<span class="w"> </span>&lt;tab&gt;
-bootstrap<span class="w">  </span>--<span class="w"> </span>Bootstrap<span class="w"> </span>ArgoCD<span class="w"> </span>onto<span class="w"> </span>the<span class="w"> </span>specified<span class="w"> </span>cluster<span class="w"> </span>with<span class="w"> </span>optional<span class="w"> </span>external-secrets<span class="w"> </span>and<span class="w"> </span>prometheus<span class="w"> </span>CRD
-generate<span class="w">   </span>--<span class="w"> </span>generates<span class="w"> </span>files<span class="w"> </span>from<span class="w"> </span>embedded<span class="w"> </span>templates<span class="w"> </span>and<span class="w"> </span>the<span class="w"> </span>config<span class="w"> </span>file<span class="p">;</span><span class="w"> </span>by<span class="w"> </span>default<span class="w"> </span><span class="k">for</span><span class="w"> </span>both<span class="w"> </span>Helm<span class="w"> </span>and<span class="w"> </span>Terraform
-<span class="nb">help</span><span class="w">       </span>--<span class="w"> </span>Shows<span class="w"> </span>a<span class="w"> </span>list<span class="w"> </span>of<span class="w"> </span>commands<span class="w"> </span>or<span class="w"> </span><span class="nb">help</span><span class="w"> </span><span class="k">for</span><span class="w"> </span>one<span class="w"> </span><span class="nb">command</span>
-init<span class="w">       </span>--<span class="w"> </span>Initialize<span class="w"> </span>a<span class="w"> </span>new<span class="w"> </span>kubara<span class="w"> </span>directory
-schema<span class="w">     </span>--<span class="w"> </span>Generate<span class="w"> </span>JSON<span class="w"> </span>schema<span class="w"> </span>file<span class="w"> </span><span class="k">for</span><span class="w"> </span>config<span class="w"> </span>structure
-</code></pre></div>
+<h1 id="how-to-add-an-appset-to-argo-cd">How to add an AppSet to Argo CD</h1>
+<p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
+Project.</p>
+<p>An Argo CD AppSet is a logical concept to create many Argo CD applications with just one manifest.<br>
+This allows Users to spawn one service with different configurations on many namespaces and clusters.
+For more information and possible configuration check:<br></p>
+<ul>
+<li>https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml</li>
+<li>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</li>
+</ul>
+<h2 id="add-chart-to-your-managed-service-catalog"><strong>Add Chart to your managed-service-catalog</strong></h2>
+<p>Add the Chart you want to add to your <code>managed-service-catalog</code>:<br>
+managed-service-catalog/helm/my-new-servie-in-a-long-dir-name/</p>
+<h2 id="add-templates-to-your-new-chart-optional"><strong>Add Templates to your new Chart (optional)</strong></h2>
+<p>To use pre-configured processes (e.g. get secrets from vault) you can leverage the Chart <code>template-library</code> inside 
+<code>managed-service-catalog</code>.<br>
+Take a look at other chart to find out how to use these templates.<br>
+The general steps are:
+1. Add template-library as a dependency to your Chart.yaml
+2. add a template to your new Chart's "templates/" directory and include the templates you need from <code>template-libary</code> Chart
+   (check other Chart templates to find out how)
+3. update the new Chart's values and/or override values according to the templates you included</p>
+<h2 id="add-override-values-to-your-customer-service-catalog"><strong>Add Override Values to your customer-service-catalog</strong></h2>
+<p>Add Override Values to your <code>customer-service-catalog</code>:<br>
+customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml</p>
+<p>Optional: Add <code>additional-values.yaml</code> in the same chart folder for cluster-specific overrides.
+The generated ApplicationSet already references both <code>values.yaml</code> and <code>additional-values.yaml</code>.</p>
+<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
+<p>This is an example on how to add an AppSet to the hub cluster.
+Add the following to your <code>argo-cd/additional-values.yaml</code>.
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span><span class="w">  </span><span class="c1"># usually your existing hub cluster key (for example &quot;&lt;cluster&gt;-&lt;stage&gt;&quot;)</span>
+<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-hub-dev</span>
+<span class="w">      </span><span class="nt">managedServices</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/managed.git</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">managed-service-catalog/helm</span>
+<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">customerServices</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/customer.git</span>
+<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">customer-service-catalog/helm</span>
+<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
+<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">my-new-service</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-service</span><span class="w"> </span><span class="c1"># This will determine the generated AppName</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-servie-in-a-long-dir-name</span><span class="w"> </span><span class="c1"># This points to the directory you created for the chart inside managed-service-catalog</span>
+<span class="nt">inClusterSecretLabels</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">my-new-service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+</code></pre></div></p>
+<p>This is meant to be added to the same directive where all pre-configured appSets are defined.
+It will deploy the app to all Argo CD clusters that have the label <code>my-new-service: enabled</code> set </p>
+<h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
+<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
+If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
+<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
+<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
+</code></pre></div></p>
+<h2 id="add-app-from-another-repository"><strong>Add App from another repository</strong></h2>
+<p>If you want to add an application that is stored in another repository you can use the <code>sources:</code> directive. It supports all the fields Argo CD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">akv2k8s</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
+<span class="w">          </span><span class="nt">sources</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://your-repo.de/with-overlay-values&quot;</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
+<span class="w">              </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valuesRepo</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://charts.spvapi.no</span>
+<span class="w">              </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2.7.3&quot;</span>
+<span class="w">              </span><span class="nt">helm</span><span class="p">:</span>
+<span class="w">                </span><span class="nt">valueFiles</span><span class="p">:</span>
+<span class="w">                  </span><span class="c1"># Keep `{{name}}`: the AppSet controller injects the cluster name</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;$valuesRepo/customer-service-catalog/helm/{{name}}/akv2k8s/values.yaml&quot;</span>
+</code></pre></div></p>
 
 
 
