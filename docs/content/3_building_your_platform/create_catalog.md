@@ -60,6 +60,16 @@ spec:
 
 `spec.version` is important because kubara uses it when packaging the catalog as an OCI artifact.
 
+kubara enforces strict semantic version formatting for catalogs:
+
+- allowed: `0.1.0`
+- not allowed: `v0.1.0`
+- not allowed: `0.1.0-rc.1`
+- not allowed: `0.1.0-beta`
+- not allowed: `0.1.0+build.5`
+
+Only plain `major.minor.patch` is accepted.
+
 ## Step 2: add service definitions
 
 Move into the catalog root and add a service:
