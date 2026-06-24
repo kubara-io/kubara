@@ -18,7 +18,7 @@ func AddCluster(configFilePath string, spokeName string, catalogOptions catalog.
 
 	clusters := currentConfig.Clusters
 
-	newCluster := config.CreateBlankSpokeCluster(spokeName)
+	newCluster := config.CreateSpokeScaffolding(spokeName)
 
 	currentConfig.Clusters = append(clusters, newCluster)
 

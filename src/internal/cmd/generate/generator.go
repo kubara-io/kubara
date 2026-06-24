@@ -37,12 +37,12 @@ func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, erro
 		if cluster.Type != config.Spoke {
 			continue
 		}
+
 		spokeMap, err := toJSONMap(cluster)
 		if err != nil {
 			return nil, fmt.Errorf("convert spoke %q to map: %w", cluster.Name, err)
 		}
 		spokeMaps = append(spokeMaps, spokeMap)
-
 	}
 	return spokeMaps, nil
 }
@@ -209,24 +209,25 @@ func (o *Options) writeTemplateResults(results []render.TemplateResult) error {
 	return nil
 }
 
-// getServiceNameFromPath returns a possible Service name in string form from a given path
-// receives a catalog to search and a path string to look into
-// if the path does not contain a Service name return the empty String
+// getServiceNameFromPath returns a possible service-name-string from the ChartPath from a given path and catalog
+// If the path does not contain a Service name return the empty String
 func getServiceNameFromPath(catalog catalog.Catalog, path string) string {
 	//replace seperators with '/' to allow for windows usage
-	//todo check if really necessary or more elegant solution is possible
-	pathParts := strings.SplitSeq(filepath.ToSlash(path), "/")
-	for possibleName := range pathParts {
-		if _, ok := catalog.Services[possibleName]; ok {
-			return possibleName
-		}
+	pathParts := strings.Split(filepath.ToSlash(path), "/")
+	// managed-service-catalog/helm/<name>
+	possibleName := pathParts[2]
+	if pathParts[0] == render.DefaultOverlayValuesPath {
+		//customer-service-catalog/helm/example/<name>
+		possibleName = pathParts[3]
+	}
+	if serviceDefinition, ok := catalog.Services[possibleName]; ok {
+		return serviceDefinition.Spec.ChartPath
 	}
 	return ""
 }
 
-// filterDisabledServices receives a list of rendered Template Results and removes those items
-// where in the config the service is disabled
-// returns a list of filtered template results
+// filterDisabledServices receives a list of rendered Template Results and removes those items where in the config the service is disabled
+// returns a new list of filtered template results
 func filterDisabledServices(templateResults []render.TemplateResult, cluster config.Cluster, catalog catalog.Catalog) []render.TemplateResult {
 	filtered := make([]render.TemplateResult, 0)
 	for _, result := range templateResults {

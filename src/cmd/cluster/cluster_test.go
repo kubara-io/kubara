@@ -1,3 +1,4 @@
+// own package because of circular dependencies otherwise of cmd and cluster
 package cluster_test
 
 import (
@@ -26,7 +27,7 @@ func TestNewClusterCommand(t *testing.T) {
 
 	assert.Equal(t, "add", addCommand.Name)
 	assert.Equal(t, "Add a new spoke cluster to your config", addCommand.Usage)
-	assert.Equal(t, "kubara cluster add <cluster-name>", addCommand.UsageText)
+	assert.Equal(t, "kubara cluster add CLUSTER_NAME", addCommand.UsageText)
 	assert.Equal(t, "Adds a new spoke cluster to an existing config yaml", addCommand.Description)
 
 	listCommand := cluster.CreateClusterList()
