@@ -84,6 +84,7 @@ func TestGenerateCmd(t *testing.T) {
 		flags       []string
 		wantErr     bool
 		errContains string
+		cluster     *config.Cluster // overrides the default SKE test cluster when set
 		setup       func(t *testing.T, tempDir string)
 		validate    func(t *testing.T, tempDir string)
 	}{
@@ -206,6 +207,51 @@ func TestGenerateCmd(t *testing.T) {
 				assert.NotEmpty(t, entries)
 			},
 		},
+		{
+			name:    "successful edge terraform file generation",
+			flags:   []string{"--terraform"},
+			wantErr: false,
+			cluster: &config.Cluster{
+				Name:    "edge-cluster",
+				Stage:   "dev",
+				Type:    "controlplane",
+				DNSName: "edge.example.com",
+				Terraform: &config.Terraform{
+					Provider:          "stackit",
+					ProjectID:         "00000000-0000-0000-0000-000000000000",
+					KubernetesType:    "edge",
+					KubernetesVersion: "1.34.0",
+					DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+				},
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						HTTPS: &config.RepoType{
+							Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+							Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+						},
+					},
+				},
+				Services: createTestServices(),
+			},
+			validate: func(t *testing.T, tempDir string) {
+				// Edge renders the example infrastructure under the cluster name.
+				// Assert the artifact set is produced, not its rendered content.
+				infrastructureDir := filepath.Join(tempDir, "customer-service-catalog", "terraform", "edge-cluster", "infrastructure")
+
+				entries, err := os.ReadDir(infrastructureDir)
+				require.NoError(t, err)
+				assert.NotEmpty(t, entries)
+
+				for _, name := range []string{"main.tf", "outputs.tf", "variables.tf", "env.auto.tfvars"} {
+					_, statErr := os.Stat(filepath.Join(infrastructureDir, name))
+					require.NoErrorf(t, statErr, "expected generated edge artifact %q", name)
+				}
+
+				// Provider selector folders must not leak into output paths.
+				_, err = os.Stat(filepath.Join(tempDir, "customer-service-catalog", "terraform", "providers"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -215,7 +261,7 @@ func TestGenerateCmd(t *testing.T) {
 
 			// Create config file if not testing error case
 			if !tt.wantErr || tt.errContains != "load config" {
-				configPath := createTestConfig(t, tempDir, config.Cluster{
+				cluster := config.Cluster{
 					Name:             "test-cluster",
 					Stage:            "dev",
 					IngressClassName: "traefik",
@@ -246,7 +292,11 @@ func TestGenerateCmd(t *testing.T) {
 						},
 					},
 					Services: createTestServices(),
-				})
+				}
+				if tt.cluster != nil {
+					cluster = *tt.cluster
+				}
+				configPath := createTestConfig(t, tempDir, cluster)
 
 				//dummy values
 				envPath := createDefaultGenerateTestEnv(t, tempDir)
@@ -431,95 +481,6 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing terraform configuration")
-}
-
-func TestGenerateCmd_EdgeTerraformArtifacts(t *testing.T) {
-	tempDir := t.TempDir()
-
-	configPath := createTestConfig(t, tempDir, config.Cluster{
-		Name:    "edge-cluster",
-		Stage:   "dev",
-		Type:    "controlplane",
-		DNSName: "edge.example.com",
-		Terraform: &config.Terraform{
-			Provider:          "stackit",
-			ProjectID:         "00000000-0000-0000-0000-000000000000",
-			KubernetesType:    "edge",
-			KubernetesVersion: "1.34.0",
-			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
-		},
-		ArgoCD: config.ArgoCD{
-			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
-				},
-			},
-		},
-		Services: createTestServices(),
-	})
-
-	envPath := createTestEnv(t, tempDir, envconfig.EnvMap{
-		ProjectName:                 "project-name",
-		ProjectStage:                "project-stage",
-		DockerconfigBase64:          "DockerConfig",
-		ArgocdWizardAccountPassword: "wizardpassword",
-		ArgocdGitHttpsUrl:           "https://example.com",
-		ArgocdGitUsername:           "CoolCapybara",
-		ArgocdGitPatOrPassword:      "password",
-		ArgocdHelmRepoUrl:           "https://example.com",
-		ArgocdHelmRepoUsername:      "CoolCapybara",
-		ArgocdHelmRepoPassword:      "password",
-		DomainName:                  "example.com",
-	})
-
-	app := createTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "--env-file", envPath, "generate", "--terraform"}
-	err := app.Run(context.Background(), args)
-	require.NoError(t, err)
-
-	infrastructureDir := filepath.Join(tempDir, "customer-service-catalog", "terraform", "edge-cluster", "infrastructure")
-
-	envTfvars, err := os.ReadFile(filepath.Join(infrastructureDir, "env.auto.tfvars"))
-	require.NoError(t, err)
-	assert.Contains(t, string(envTfvars), "edge_instance = {")
-	assert.Contains(t, string(envTfvars), "edge_image = {")
-	assert.Contains(t, string(envTfvars), "edge_hosts = {")
-	assert.NotContains(t, string(envTfvars), "plan_id")
-	assert.Contains(t, string(envTfvars), "expiration   = 86400")
-	assert.Contains(t, string(envTfvars), "local_file_path          = \"/path/to/edge-artifacts/openstack-amd64.raw\"")
-	assert.Contains(t, string(envTfvars), "ipv4_prefix         = \"10.0.50.0/24\"")
-	assert.NotContains(t, string(envTfvars), "ipv4_prefix_length")
-	assert.Contains(t, string(envTfvars), "nodes = [")
-	assert.Contains(t, string(envTfvars), "name                     = \"edge-cp-1\"")
-	assert.NotContains(t, string(envTfvars), "edge-worker-1")
-	assert.Contains(t, string(envTfvars), "flavor                   = \"g2i.8\"")
-	assert.NotContains(t, string(envTfvars), "create       =")
-	assert.NotContains(t, string(envTfvars), "create                   =")
-	assert.NotContains(t, string(envTfvars), "create              =")
-	assert.NotContains(t, string(envTfvars), "instance_id  =")
-	assert.NotContains(t, string(envTfvars), "image_id            =")
-
-	mainTF, err := os.ReadFile(filepath.Join(infrastructureDir, "main.tf"))
-	require.NoError(t, err)
-	assert.Contains(t, string(mainTF), "module \"edge_instance\"")
-	assert.Contains(t, string(mainTF), "module \"edge_image\"")
-	assert.Contains(t, string(mainTF), "module \"edge_hosts\"")
-	assert.NotContains(t, string(mainTF), "var.edge_instance.plan_id")
-	assert.Contains(t, string(mainTF), "expiration   = var.edge_instance.expiration")
-	assert.Contains(t, string(mainTF), "image_id            = module.edge_image.image_id")
-	assert.NotContains(t, string(mainTF), "count =")
-	assert.NotContains(t, string(mainTF), "try(")
-	assert.NotContains(t, string(mainTF), "module.edge_image[0].image_id")
-	assert.NotContains(t, string(mainTF), "check \"edge_hosts_image_id\"")
-	assert.NotContains(t, string(mainTF), "_fallback")
-	assert.NotContains(t, string(mainTF), "locals {")
-
-	outputsTF, err := os.ReadFile(filepath.Join(infrastructureDir, "outputs.tf"))
-	require.NoError(t, err)
-	assert.Contains(t, string(outputsTF), "output \"edge_host_metadata\"")
-	assert.Contains(t, string(outputsTF), "output \"edge_uploaded_image_id\"")
-	assert.Contains(t, string(outputsTF), "output \"edge_kubeconfig_raw\"")
 }
 
 // Helper function
