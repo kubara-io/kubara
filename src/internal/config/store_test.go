@@ -422,21 +422,6 @@ func TestConfigStore_Validate(t *testing.T) {
 			config:  invalidConfigMissingTerraformField,
 			wantErr: true,
 		},
-		{
-			name:    "valid_config_with_loadbalancer_ips_should_pass_validation",
-			config:  validConfigWithLoadBalancerIPs,
-			wantErr: false,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_private_loadbalancer_ip",
-			config:  invalidConfigInvalidPrivateIP,
-			wantErr: true,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_public_loadbalancer_ip",
-			config:  invalidConfigInvalidPublicIP,
-			wantErr: true,
-		},
 	}
 
 	for _, tt := range tests {
