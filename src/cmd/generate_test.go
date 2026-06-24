@@ -214,7 +214,7 @@ func TestGenerateCmd(t *testing.T) {
 			cluster: &config.Cluster{
 				Name:    "edge-cluster",
 				Stage:   "dev",
-				Type:    "controlplane",
+				Type:    "hub",
 				DNSName: "edge.example.com",
 				Terraform: &config.Terraform{
 					Provider:          "stackit",
