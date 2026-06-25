@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha1,
+		Version: ConfigVersionV1Alpha2,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -213,7 +213,7 @@ clusters:
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha1, loaded.Version)
+	require.Equal(t, ConfigVersionV1Alpha2, loaded.Version)
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
