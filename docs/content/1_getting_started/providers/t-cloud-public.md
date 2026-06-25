@@ -1,6 +1,6 @@
-# T Cloud Public Terraform core
+# T Cloud Public (Community)
 
-T Cloud Public is supported through provider-specific Terraform templates.
+The terraform modules for the T Cloud Public are built by the kubara community and aren't tested on a regular basis through integration nor regression tests by the kubara maintainers.
 
 The kubara provider key is `t-cloud-public` and the Kubernetes type is `cce` for Cloud Container Engine.
 

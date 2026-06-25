@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
@@ -452,7 +453,7 @@ func validateProviderKubernetesTypes(cfg *Config) error {
 		if len(supportedTypes) == 0 {
 			continue
 		}
-		if isKubernetesTypeSupportedByProvider(provider, kubernetesType) {
+		if slices.Contains(supportedTypes, kubernetesType) {
 			continue
 		}
 
@@ -466,15 +467,6 @@ func validateProviderKubernetesTypes(cfg *Config) error {
 	}
 
 	return nil
-}
-
-func isKubernetesTypeSupportedByProvider(provider TerraformProvider, kubernetesType string) bool {
-	for _, supported := range supportedKubernetesTypesForProvider(provider) {
-		if kubernetesType == supported {
-			return true
-		}
-	}
-	return false
 }
 
 func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
