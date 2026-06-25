@@ -70,7 +70,7 @@ Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.
 
 !!! info 
-    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../3_components/backup_and_recovery.md).
+    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../5_components/backup_and_recovery.md).
 
 ### 1.4 Validate your `config.yaml` against schema (optional, recommended)
 
@@ -96,7 +96,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 ### 1.5 Update and Prepare Templates
 
 !!! info
-    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../4_architecture/architecture_overview.md#hubnspoke)
+    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../6_architecture/architecture_overview.md#hubnspoke)
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
 
@@ -363,9 +363,9 @@ kubara bootstrap --config-file another-config.yaml --env-file .another-env <clus
 
 After bootstrapping your platform, you can:
 
-* [How to add Argo CD projects](../2_managing_your_platform/argocd/add_app_project.md)
-* [How to add Git repositories](../2_managing_your_platform/argocd/add_app_repository.md)
-* [How to add Argo CD applications](../2_managing_your_platform/argocd/add_application.md)
-* [How to add Argo CD appset](../2_managing_your_platform/argocd/add_appset.md)
-* [How to add SSO Configuration](../2_managing_your_platform/sso/add_sso.md)
-* [How to add spoke clusters](../2_managing_your_platform/add_spoke_cluster.md)
+* [How to add Argo CD projects](../4_workload_onboarding/add_app_project.md)
+* [How to add Git repositories](../4_workload_onboarding/add_app_repository.md)
+* [How to add Argo CD applications](../4_workload_onboarding/add_application.md)
+* [How to add Argo CD appset](../4_workload_onboarding/add_appset.md)
+* [How to add SSO Configuration](../3_building_your_platform/sso/add_sso.md)
+* [How to add spoke clusters](../3_building_your_platform/add_spoke_cluster.md)

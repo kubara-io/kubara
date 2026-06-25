@@ -23,12 +23,12 @@ variable "acls" {
 }
 
 variable "users" {
-  description = <<EOF
+  description = <<EOF_USERS
 List of users to create.
 Each element must be an object with:
-- description (string): human‐readable ID for the user
+- description (string): human-readable ID for the user
 - write_enabled (bool): whether this user has write access
-EOF
+EOF_USERS
   type = list(object({
     description   = string
     write_enabled = bool
@@ -105,7 +105,7 @@ variable "kubernetes_version_min" {
 }
 
 variable "node_pools" {
-  description = <<EOF
+  description = <<EOF_NODE_POOLS
 List of node pools. Each element must be an object with:
 - name               = string
 - machine_type       = string
@@ -120,7 +120,7 @@ List of node pools. Each element must be an object with:
     value  = string
     effect = string
   }))
-EOF
+EOF_NODE_POOLS
   type = list(object({
     name               = string
     machine_type       = string
@@ -165,31 +165,77 @@ variable "expiration" {
 
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
-### Edgecloud variables
-variable "ipv4_prefix" {
-  description = "IPv4 prefix for the edgecloud .cluster"
-  type        = string
+### Edge instance variables
+variable "edge_instance" {
+  description = "Edge Cloud instance created by Terraform."
+  type = object({
+    description = optional(string, "")
+    expiration  = optional(number, 86400)
+  })
 }
 
-variable "controlplane" {
-  description = "Config for control plane nodes"
+### Edge image variables
+variable "edge_image" {
+  description = "Edge image artifact uploaded by Terraform."
   type = object({
-    flavor                   = string
-    volume_size              = number
-    volume_performance_class = string
+    local_file_path          = optional(string, "")
+    name                     = optional(string, "talos-edge")
+    disk_format              = optional(string, "raw")
+    min_disk_size            = optional(number, 30)
+    operating_system         = optional(string, "linux")
+    operating_system_distro  = optional(string, "talos")
+    operating_system_version = optional(string, "v1.12.5-stackit.v1.7.1")
   })
-  default = {
-    flavor                   = "c1.4"
-    volume_size              = 30
-    volume_performance_class = "storage_premium_perf1"
+  default = {}
+
+  validation {
+    condition     = trimspace(var.edge_image.local_file_path) != ""
+    error_message = "edge_image.local_file_path must be set."
   }
 }
 
+### Edge host variables
+variable "edge_hosts" {
+  description = "Edge host infrastructure created by Terraform."
+  type = object({
+    name_prefix         = optional(string, "")
+    network_name        = optional(string, "")
+    security_group_name = optional(string, "")
+    ipv4_prefix         = optional(string, "10.0.50.0/24")
+    ipv4_nameservers    = optional(list(string), ["1.1.1.1", "1.0.0.1", "8.8.8.8"])
+    ingress_tcp_ports   = optional(list(number), [80, 443])
+    common_labels       = optional(map(string), {})
+    nodes = optional(list(object({
+      name                     = string
+      role                     = string
+      flavor                   = string
+      volume_size              = number
+      volume_performance_class = string
+      availability_zone        = string
+      assign_public_ip         = optional(bool, true)
+      labels                   = optional(map(string), {})
+    })), [])
+  })
+  default = {}
 
-variable "edgecloud_image_id" {
-  description = "Edgecloud image ID"
-  type        = string
-  default     = "7b670c7f-9c8e-47a6-8463-e6943c8b44bb"
+  validation {
+    condition     = length(var.edge_hosts.nodes) > 0
+    error_message = "edge_hosts.nodes must contain at least one host definition."
+  }
+
+  validation {
+    condition     = can(cidrhost(var.edge_hosts.ipv4_prefix, 0))
+    error_message = "edge_hosts.ipv4_prefix must be valid CIDR notation, for example 10.0.50.0/24."
+  }
+
+  validation {
+    condition = (
+      trimspace(var.edge_hosts.name_prefix) != "" &&
+      trimspace(var.edge_hosts.network_name) != "" &&
+      trimspace(var.edge_hosts.security_group_name) != ""
+    )
+    error_message = "edge_hosts.name_prefix, edge_hosts.network_name and edge_hosts.security_group_name must be set."
+  }
 }
 {{- end }}
 

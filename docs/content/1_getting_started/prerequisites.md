@@ -50,7 +50,7 @@ If you are relying on publicly available images (e.g. from dockerhub) you need a
     -  Grafana App that handles authentication for Grafana.
 
     If you choose not to use OAuth2-Proxy you might run into some issues with your setup.
-    For more infos please look at our [FAQ](../6_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
+    For more infos please look at our [FAQ](../8_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
 - **Credentials for external-secrets / secret backend (required when not using managed identities)**
 Prepare the provider credentials you will need later during bootstrap to create the Kubernetes secret(s) and configure external-secrets / `ClusterSecretStore` (see the bootstrap guide).
 

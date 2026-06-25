@@ -10,6 +10,8 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
+var ErrCatalogManifestNotFound = errors.New("catalog manifest not found")
+
 type SourceKind string
 
 const (
@@ -110,6 +112,9 @@ func LoadCatalogManifest(root string) (CatalogManifest, error) {
 	path := filepath.Join(root, "Catalog.yaml")
 	content, err := os.ReadFile(path)
 	if err != nil {
+		if errors.Is(err, os.ErrNotExist) {
+			return CatalogManifest{}, fmt.Errorf("catalog root %q is missing Catalog.yaml: %w", root, ErrCatalogManifestNotFound)
+		}
 		return CatalogManifest{}, fmt.Errorf("read %q: %w", path, err)
 	}
 

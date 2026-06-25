@@ -7,25 +7,27 @@
 
 ## 🤔 What is kubara?
 
-**kubara** is a single binary CLI tool written in Go providing a lightweight framework for bootstrapping 
-Kubernetes platforms with production-proven best practices very easily.  
+**kubara** is a single binary CLI tool written in Go to bootstrap, build, and package Kubernetes platforms.  
 
-This includes infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party 
-tooling - all in a single reusable [GitOps](4_architecture/architecture_overview.md#gitops) workflow.  
+You can think of kubara as a package manager for platform architecture: it helps you define a reusable platform setup, generate the needed artifacts, and package that setup for reuse across many clusters.  
+
+It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party tooling in one reusable [GitOps](6_architecture/architecture_overview.md#gitops) workflow.  
 
 
 ![Overview](assets/diagrams.drawio)
 
-kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and maximum 
-consistency whether you're running on Cloud, Edge or Hybrid Setup.
+kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and high consistency whether you run on cloud, edge, or hybrid infrastructure.
 
-kubara provides you with a reusable, extensible structure to build and operate your Kubernetes platform - including Terraform modules, Helm charts, and secrets management - while keeping configuration simple and declarative.  
+kubara also gives you a reusable packaging model for platform architecture: **what Helm charts are for single applications, kubara catalogs are for your platform setup**.
+
+That means you can not only bootstrap a platform with kubara, but also package, distribute, and reuse that platform setup across many clusters.
 
 
 
 ## ⭐ Main Features
 
 - ⚙️ **Full Platform Bootstrap** - From infrastructure to observability, GitOps, and secrets
+- 📦 **Platform Catalog Packaging** - Package, distribute, and reuse platform setups 
 - 🧱 **Modular by Design** - Helm and Terraform based components, easily extendable
 - 🔁 **Multi-cluster Support** - Hub + N Spoke clusters, with app targeting
 - 🚀 **Fast Setup** - Ready to go in under 30 minutes
@@ -43,6 +45,7 @@ kubara simplifies this with a single Go binary that:
 - Generates required configuration and secrets
 - Templatizes and deploys pre-vetted infrastructure components
 - Bootstraps your platform using Argo CD and GitOps
+- Packages reusable platform catalogs for repeatable rollout
 - Allows easy onboarding of new clusters and workloads
 
 All based on real-world usage at Schwarz Group and the experience of multiple engineering teams - so you don't have to reinvent the wheel.
