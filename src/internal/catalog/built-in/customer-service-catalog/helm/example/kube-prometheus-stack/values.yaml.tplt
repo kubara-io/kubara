@@ -4,7 +4,7 @@
 {{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
 {{- $kubePromIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $kubePromIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerCIDR" "" .) -}}
+{{- $_ := set $kubePromIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) -}}
 {{- end -}}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $kubePromIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}

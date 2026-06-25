@@ -68,8 +68,8 @@ func newValidTestConfig() *Config {
 					"metallb": {
 						Status: service.StatusEnabled,
 						Config: service.Config{
-							"publicLoadBalancerCIDR":  "127.0.0.1/32",
-							"privateLoadBalancerCIDR": "127.0.0.2/32",
+							"publicLoadBalancerIPs":   "127.0.0.1",
+							"loadBalancerAddressPool": []any{"127.0.0.2/32"},
 						},
 					},
 					"longhorn": {Status: service.StatusEnabled},

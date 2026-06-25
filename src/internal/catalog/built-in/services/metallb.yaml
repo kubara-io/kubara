@@ -14,10 +14,14 @@ spec:
   configSchema:
     type: object
     required:
-      - publicLoadBalancerCIDR
-      - privateLoadBalancerCIDR
+      - publicLoadBalancerIPs
+      - loadBalancerAddressPool
     properties:
-      publicLoadBalancerCIDR:
+      publicLoadBalancerIPs:
         type: string
-      privateLoadBalancerCIDR:
-        type: string
+        description: "Specifies a comma-separated list of IPs to be used for public DNS record targets https://kubernetes-sigs.github.io/external-dns/latest/docs/annotations/annotations/#external-dnsalphakubernetesiotarget"
+      loadBalancerAddressPool:
+        type: array
+        items:
+          type: string
+        description: "MetalLB will allocate IPs from any configured address pool with free addresses. https://metallb.universe.tf/configuration/_advanced_ipaddresspool_configuration/"
