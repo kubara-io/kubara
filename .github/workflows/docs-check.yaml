@@ -7,6 +7,9 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/docs-check.yaml'
+      # Re-run the agent doc-link guard when the template/package it validates changes.
+      # The normal Go jobs use a sparse `src` checkout where the guard skips (no docs tree).
+      - 'src/internal/agentcontext/**'
   workflow_dispatch:
 
 permissions:
