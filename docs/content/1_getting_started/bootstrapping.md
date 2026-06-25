@@ -8,9 +8,9 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 
 ## 1. Getting Started
 
-Whether you're running on STACKIT Cloud or STACKIT Edge or other Cloud providers, we recommend you to use Terraform.
+Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, or other cloud providers, we recommend you to use Terraform.
 
-For STACKIT we provide dedicated modules and configurations and have a guide on how to use them [on this page.](providers/stackit.md). 
+For STACKIT and T Cloud Public we provide dedicated modules and configurations. See the provider guides for [STACKIT](providers/stackit.md) and [T Cloud Public](providers/t-cloud-public.md).
 
 If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
 
@@ -111,9 +111,9 @@ clusters:
     ssoOrg: <oidc-org>
     ssoTeam: <org-team>
     terraform:
-      provider: stackit # currently supported: stackit
-      projectId: <project-id>
-      kubernetesType: <ske or edge>
+      provider: stackit # currently supported: stackit, t-cloud-public
+      projectId: <project-id-or-tenant-name>
+      kubernetesType: <ske, edge or cce>
       kubernetesVersion: 1.34
       dns:
         name: <dns-name>
@@ -128,6 +128,8 @@ clusters:
           publicLoadBalancerCIDR: 0.0.0.0    
 ...
 ```
+
+`terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
 `ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `ingress.annotations` map under `services.<service>.ingress.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
@@ -149,6 +151,7 @@ Visit one of the following pages to learn more about how to use kubara for setti
 well:
 
 - [STACKIT](providers/stackit.md)
+- [T Cloud Public](providers/t-cloud-public.md)
 - More provider support is in the works
 
 If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please

@@ -86,6 +86,41 @@ func newValidTestConfig() *Config {
 	}
 }
 
+func TestValidateProviderKubernetesTypes(t *testing.T) {
+	tests := []struct {
+		name           string
+		provider       TerraformProvider
+		kubernetesType string
+		wantErr        bool
+	}{
+		{name: "stackit supports ske", provider: TerraformProviderStackit, kubernetesType: "ske"},
+		{name: "stackit supports edge", provider: TerraformProviderStackit, kubernetesType: "edge"},
+		{name: "t-cloud-public supports cce", provider: TerraformProviderTCloudPublic, kubernetesType: "cce"},
+		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true},
+		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true},
+		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true},
+		{name: "unknown provider is ignored by combination validation", provider: TerraformProvider("unknown"), kubernetesType: "ske"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := newValidTestConfig()
+			cfg.Clusters[0].Terraform.Provider = tt.provider
+			cfg.Clusters[0].Terraform.KubernetesType = tt.kubernetesType
+
+			err := validateProviderKubernetesTypes(cfg)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "terraform.provider")
+				assert.Contains(t, err.Error(), "terraform.kubernetesType")
+				return
+			}
+
+			assert.NoError(t, err)
+		})
+	}
+}
+
 // Helper function to deep copy a config
 func deepCopyConfig(c *Config) *Config {
 	newConfig := *c

@@ -50,7 +50,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		Terraform: &Terraform{
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
-			KubernetesType:    "<edge or ske>",
+			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{
 				Name:  expectedDNSName,

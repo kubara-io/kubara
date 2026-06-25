@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"slices"
 	"sort"
 	"strings"
 
@@ -225,8 +226,50 @@ func (cs *ConfigStore) validate() error {
 		}
 		return fmt.Errorf("validate config: %w", err)
 	}
+	if err := validateProviderKubernetesTypes(cs.config); err != nil {
+		return fmt.Errorf("validate provider kubernetes types: %w", err)
+	}
 	return nil
 
+}
+
+func validateProviderKubernetesTypes(cfg *Config) error {
+	for _, cluster := range cfg.Clusters {
+		if cluster.Terraform == nil {
+			continue
+		}
+
+		provider := cluster.Terraform.Provider
+		kubernetesType := cluster.Terraform.KubernetesType
+		supportedTypes := supportedKubernetesTypesForProvider(provider)
+		if len(supportedTypes) == 0 {
+			continue
+		}
+		if slices.Contains(supportedTypes, kubernetesType) {
+			continue
+		}
+
+		return fmt.Errorf("cluster %q uses terraform.provider %q with terraform.kubernetesType %q; supported kubernetes types for %q are: %s",
+			cluster.Name,
+			provider,
+			kubernetesType,
+			provider,
+			strings.Join(supportedTypes, ", "),
+		)
+	}
+
+	return nil
+}
+
+func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
+	switch provider {
+	case TerraformProviderStackit:
+		return []string{"ske", "edge"}
+	case TerraformProviderTCloudPublic:
+		return []string{"cce"}
+	default:
+		return nil
+	}
 }
 
 // GetConfig returns the current configuration struct.
