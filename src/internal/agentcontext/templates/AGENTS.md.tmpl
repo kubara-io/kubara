@@ -12,11 +12,12 @@ over guessing, and open the linked docs only when you need depth.
 
 ## Core workflow (run in this order)
 
-1. `kubara init` — generate `config.yaml` from `.env`.
-2. `kubara generate --helm` (add `--terraform` if you provision infrastructure with kubara) — render
+1. Make sure you are in a git repository that is either empty or already contains a `config.yaml`.
+2. `kubara init` — generate `config.yaml` from `.env`.
+3. `kubara generate --helm` (add `--terraform` if you provision infrastructure with kubara) — render
    Helm/Terraform artifacts from the service catalog into this repository.
-3. `kubara bootstrap <cluster-name>` — install Argo CD onto the target cluster.
-4. Commit & push the generated files. Argo CD reconciles everything else from Git.
+4. `kubara bootstrap <cluster-name>` — install Argo CD onto the target cluster.
+5. Commit & push the generated files. Argo CD reconciles everything else from Git.
 
 Use `kubara generate --dry-run` to preview without writing.
 
@@ -25,16 +26,17 @@ Use `kubara generate --dry-run` to preview without writing.
 - `config.yaml` — the platform definition (clusters, stages, services). Run `kubara schema` for its
   JSON Schema instead of guessing field names.
 - `.env` — inputs/credentials consumed by `kubara init`. Git-ignored; never commit it.
-- `customer-service-catalog/` — generated Helm values and Terraform. Search for `change-me`
-  placeholders: those are the values to fill in before bootstrapping.
+- `customer-service-catalog/` — generated Helm values and Terraform overlays. Review them and fill
+  in any environment-specific values before bootstrapping.
 
 ## Conventions for agents
 
 - The CLI is fully non-interactive. Drive it with flags, the `.env` file, or `KUBARA_*` environment
   variables — never expect an interactive prompt.
 - Reach for `kubara <command> --help` and `kubara schema` before inferring flags or config fields.
-- Don't hand-write Argo CD `Application`s or chart values from scratch; let the catalog and
-  `kubara generate` produce them, then edit the generated `change-me` values.
+- Match the tool to the workload, and ask the user when it is unclear: use Argo CD
+  `Application`s/`ApplicationSet`s for cluster-specific workloads, and the catalog for components
+  that are part of the reusable platform (see the Catalogs doc — "when not to use a catalog").
 - Keep changes GitOps-friendly: the desired state is the committed files, not live `kubectl` mutations.
 
 ## Documentation (raw Markdown, pinned to `{{ .DocsRef }}`)
