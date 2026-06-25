@@ -16,7 +16,7 @@ module "ske_cluster" {
   node_pools = [
     {
       name               = "np-frontend"
-      machine_type       = "c1.2"
+      machine_type       = "c2i.8"
       volume_size        = 30
       minimum            = 2
       maximum            = 4
@@ -28,7 +28,7 @@ module "ske_cluster" {
     },
     {
       name               = "np-backend"
-      machine_type       = "c1.2"
+      machine_type       = "c2i.8"
       volume_size        = 30
       minimum            = 2
       maximum            = 5
@@ -64,8 +64,8 @@ No modules.
 | Name | Type |
 |------|------|
 | [local_file.kubeconfig](https://registry.terraform.io/providers/hashicorp/local/2.8.0/docs/resources/file) | resource |
-| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_cluster) | resource |
-| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/ske_kubeconfig) | resource |
+| [stackit_ske_cluster.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/ske_cluster) | resource |
+| [stackit_ske_kubeconfig.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/ske_kubeconfig) | resource |
 
 ## Inputs
 
@@ -88,8 +88,8 @@ No modules.
 |------|-------------|
 | <a name="output_egress_address_ranges"></a> [egress\_address\_ranges](#output\_egress\_address\_ranges) | Outbound CIDR ranges for cluster workloads |
 | <a name="output_id"></a> [id](#output\_id) | Terraform ID (project\_id,region,name) |
+| <a name="output_kubeconfig"></a> [kubeconfig](#output\_kubeconfig) | Admin kubeconfig (short-lived, sensitive) |
 | <a name="output_kubeconfig_file"></a> [kubeconfig\_file](#output\_kubeconfig\_file) | Path to the written kubeconfig file |
-| <a name="output_kubeconfig_raw"></a> [kubeconfig\_raw](#output\_kubeconfig\_raw) | Raw admin kubeconfig (short-lived, sensitive) |
 | <a name="output_kubernetes_version_used"></a> [kubernetes\_version\_used](#output\_kubernetes\_version\_used) | Full Kubernetes version currently running |
 | <a name="output_node_pools"></a> [node\_pools](#output\_node\_pools) | List of node\_pools as returned by the API (including any read-only fields) |
 <!-- END_TF_DOCS -->

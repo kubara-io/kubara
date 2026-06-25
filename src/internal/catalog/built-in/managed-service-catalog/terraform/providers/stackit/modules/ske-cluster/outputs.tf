@@ -21,8 +21,8 @@ output "node_pools" {
 
 
 ### Kubeconfig
-output "kubeconfig_raw" {
-  description = "Raw admin kubeconfig (short-lived, sensitive)"
+output "kubeconfig" {
+  description = "Admin kubeconfig (short-lived, sensitive)"
   value       = stackit_ske_kubeconfig.this.kube_config
   sensitive   = true
 }

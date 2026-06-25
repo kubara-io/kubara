@@ -1,6 +1,8 @@
 {{- $longhornIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) -}}
 {{- if (and (eq (index .cluster.services "oauth2-proxy" "status") "enabled") (eq (index .cluster.services "traefik" "status") "enabled")) -}}
-{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
+{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "longhorn-redirect-noslash@kubernetescrd,oauth2-proxy-oauth-auth@kubernetescrd,longhorn-strip-prefix@kubernetescrd" -}}
+{{- else if (eq (index .cluster.services "traefik" "status") "enabled") -}}
+{{- $_ := set $longhornIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "longhorn-redirect-noslash@kubernetescrd,longhorn-strip-prefix@kubernetescrd" -}}
 {{- end -}}
 {{- if (eq (index .cluster.services "metallb" "status") "enabled") -}}
 {{- $_ := set $longhornIngressAnnotations "external-dns.alpha.kubernetes.io/target" (index .cluster.services "metallb" "config" "publicLoadBalancerCIDR") -}}
@@ -32,9 +34,16 @@ longhorn:
     host: {{ .cluster.dnsName }}
     tls: true
     tlsSecret: tls-longhorn
-    path: "/longhorn(/|$)(.*)" # see path problems https://github.com/longhorn/longhorn/issues/1745
+    path: /longhorn
+    pathType: Prefix
     annotations:
       {{- toYaml $longhornIngressAnnotations | nindent 6 }}
+
+{{- if (eq (index .cluster.services "traefik" "status") "enabled") }}
+traefikPathRewrite:
+  enabled: true
+  pathPrefix: /longhorn
+{{- end }}
 
 namespace:
   labels:

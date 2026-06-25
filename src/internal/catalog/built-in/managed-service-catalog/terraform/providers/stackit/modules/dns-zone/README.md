@@ -36,7 +36,7 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_dns_zone.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/dns_zone) | resource |
+| [stackit_dns_zone.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/dns_zone) | resource |
 
 ## Inputs
 

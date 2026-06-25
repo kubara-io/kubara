@@ -8,10 +8,16 @@ nav:
   - Getting Started:
       - Quick Start: 1_getting_started/quick_start.md
       - Installation: 1_getting_started/installation.md
+      - Commands: 1_getting_started/commands.md
       - Prerequisites: 1_getting_started/prerequisites.md
       - Bootstrapping: 1_getting_started/bootstrapping.md
       - Providers:
-          - STACKIT: 1_getting_started/providers/stackit.md
+          - STACKIT:
+              - Overview: 1_getting_started/providers/stackit.md
+              - Terraform Bootstrap: 1_getting_started/providers/stackit_terraform_bootstrap.md
+              - Provisioning Infrastructure:
+                  - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
+                  - Edge Cloud (Beta): 1_getting_started/providers/stackit_provisioning_edgecloud.md
   - Concepts:
       - Overview: 2_concepts/overview_core_concept.md
       - Platform Engineering: 2_concepts/gitops_platform_engineering_idp.md

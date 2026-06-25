@@ -39,10 +39,10 @@ No modules.
 
 | Name | Type |
 |------|------|
-| [stackit_authorization_project_role_assignment.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/authorization_project_role_assignment) | resource |
-| [stackit_service_account.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/service_account) | resource |
-| [stackit_service_account_key.no_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/service_account_key) | resource |
-| [stackit_service_account_key.with_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.90.0/docs/resources/service_account_key) | resource |
+| [stackit_authorization_project_role_assignment.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/authorization_project_role_assignment) | resource |
+| [stackit_service_account.this](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/service_account) | resource |
+| [stackit_service_account_key.no_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/service_account_key) | resource |
+| [stackit_service_account_key.with_ttl](https://registry.terraform.io/providers/stackitcloud/stackit/0.99.0/docs/resources/service_account_key) | resource |
 | [time_rotating.rotate](https://registry.terraform.io/providers/hashicorp/time/0.13.1/docs/resources/rotating) | resource |
 
 ## Inputs
