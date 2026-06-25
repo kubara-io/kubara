@@ -57,7 +57,7 @@ func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
 // buildTemplateContext creates a map for rendering templates for a specific cluster based on the build context provided
 // if it is called with a hub cluster, the map contains also the full context of the spokes
 func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string]any, error) {
-	clusterMap, err := toJSONMap(bctx.Clusters)
+	clusterMap, err := toJSONMap(cluster)
 	if err != nil {
 		return nil, fmt.Errorf("convert cluster config to map: %w", err)
 	}
@@ -216,6 +216,11 @@ func (o *Options) writeTemplateResults(results []render.TemplateResult) error {
 func getServiceNameFromPath(catalog catalog.Catalog, path string) string {
 	//replace seperators with '/' to allow for windows usage
 	pathParts := strings.Split(filepath.ToSlash(path), "/")
+
+	if len(pathParts) < 4 {
+		return ""
+	}
+
 	// managed-service-catalog/helm/<name>
 	possibleName := pathParts[2]
 	if pathParts[0] == render.DefaultOverlayValuesPath {
@@ -225,6 +230,9 @@ func getServiceNameFromPath(catalog catalog.Catalog, path string) string {
 	if serviceDefinition, ok := catalog.Services[possibleName]; ok {
 		return serviceDefinition.Spec.ChartPath
 	}
+	fmt.Println("---")
+	fmt.Println(pathParts)
+	fmt.Println(possibleName)
 	return ""
 }
 
@@ -244,6 +252,8 @@ func filterDisabledServices(templateResults []render.TemplateResult, cluster con
 			filtered = append(filtered, result)
 		}
 	}
+	fmt.Println("---")
+	fmt.Printf("Filtering %d for cluster %q\n", len(filtered), cluster.Name)
 	return filtered
 }
 

@@ -15,7 +15,6 @@ import (
 )
 
 func TestNewClusterCommand(t *testing.T) {
-
 	command := cluster.NewClusterCommand()
 
 	assert.Equal(t, "cluster", command.Name)
@@ -33,9 +32,9 @@ func TestNewClusterCommand(t *testing.T) {
 	listCommand := cluster.CreateClusterList()
 
 	assert.Equal(t, "list", listCommand.Name)
-	assert.Equal(t, "List all the cluster in the config file", listCommand.Usage)
+	assert.Equal(t, "List all clusters in the config file", listCommand.Usage)
 	assert.Equal(t, "kubara cluster ls", listCommand.UsageText)
-	assert.Equal(t, "List all the clusters available in the current config.yaml file", listCommand.Description)
+	assert.Equal(t, "List all clusters available in the current config.yaml file", listCommand.Description)
 
 }
 

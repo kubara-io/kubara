@@ -37,13 +37,9 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("get working directory: %w", err)
 			}
 
-			rawCatalog := cmd.String("catalog")
-			catalogOptions := catalog.LoadOptions{Overwrite: cmd.Bool("catalog-overwrite")}
-			if rawCatalog != "" {
-				catalogOptions.CatalogPath, err = utils.GetFullPath(rawCatalog, cwd)
-				if err != nil {
-					return fmt.Errorf("get catalog path: %w", err)
-				}
+			catalogOptions, err := catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
+			if err != nil {
+				return fmt.Errorf("could not resolve catalog options: %w", err)
 			}
 
 			configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)

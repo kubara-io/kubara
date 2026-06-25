@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )
@@ -201,28 +200,5 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
-	rawCatalogPath := cmd.String("catalog")
-
-	if rawCatalogPath == "" {
-		return catalog.LoadOptions{
-			CatalogPath: "",
-			Overwrite:   cmd.Bool("catalog-overwrite"),
-		}, nil
-	}
-
-	if catalog.IsOCIReference(rawCatalogPath) {
-		return catalog.LoadOptions{
-			CatalogPath: rawCatalogPath,
-			Overwrite:   cmd.Bool("catalog-overwrite"),
-		}, nil
-	}
-
-	absoluteCatalogPath, err := utils.GetFullPath(rawCatalogPath, cwd)
-	if err != nil {
-		return catalog.LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
-	}
-	return catalog.LoadOptions{
-		CatalogPath: absoluteCatalogPath,
-		Overwrite:   cmd.Bool("catalog-overwrite"),
-	}, nil
+	return catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
 }
