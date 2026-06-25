@@ -117,7 +117,7 @@ func migrateV1Alpha1Cluster(cluster map[string]any, clusterIndex int) error {
 
 	metallb["config"] = map[string]any{
 		"publicLoadBalancerIPs":   publicIps,
-		"loadBalancerAddressPool": []any{privateIps},
+		"loadBalancerAddressPool": []any{fmt.Sprintf("%s/32", privateIps)},
 	}
 	servicesMap["metallb"] = metallb
 	delete(cluster, "publicLoadBalancerIP")
