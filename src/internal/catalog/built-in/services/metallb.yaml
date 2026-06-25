@@ -13,6 +13,9 @@ spec:
     - spoke
   configSchema:
     type: object
+    required:
+      - publicLoadBalancerCIDR
+      - privateLoadBalancerCIDR
     properties:
       publicLoadBalancerCIDR:
         type: string
