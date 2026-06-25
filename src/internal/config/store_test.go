@@ -238,7 +238,7 @@ clusters:
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha1")
+	assert.Contains(t, savedContent, "version: v1alpha2")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
 	assert.NotContains(t, savedContent, "certManager:")
