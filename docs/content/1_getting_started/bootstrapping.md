@@ -108,8 +108,6 @@ clusters:
     stage: project-stage-something-like-dev
     type: <hub or spoke>
     dnsName: <cp.demo-42.stackit.run>
-    privateLoadBalancerIP: 0.0.0.0
-    publicLoadBalancerIP: 0.0.0.0
     ssoOrg: <oidc-org>
     ssoTeam: <org-team>
     terraform:
@@ -120,6 +118,15 @@ clusters:
       dns:
         name: <dns-name>
         email: <email>
+...
+    services:  
+      ...
+      metallb:
+        status: enabled
+        config:
+          loadBalancerAddressPool:
+            - 0.0.0.0
+          publicLoadBalancerIPs: 0.0.0.0
 ...
 ```
 
