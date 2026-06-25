@@ -1016,6 +1016,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/t-cloud-public/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    T Cloud Public (Community)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2959,8 +2987,8 @@ You're not viewing the latest stable version.
 <p>This guide provides a step-by-step process for bootstrapping your platform running on Kubernetes, including the necessary <a href="../prerequisites/">prerequisites</a>, architecture setup, and deployment instructions. Try to follow the instructions first. If you have any questions or issues, please reach out directly via Teams. If you're interested in the setup details, explore the Wiki pages.</p>
 <hr />
 <h2 id="1-getting-started">1. Getting Started</h2>
-<p>Whether you're running on STACKIT Cloud or STACKIT Edge or other Cloud providers, we recommend you to use Terraform.</p>
-<p>For STACKIT we provide dedicated modules and configurations and have a guide on how to use them <a href="../providers/stackit/">on this page.</a>. </p>
+<p>Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, or other cloud providers, we recommend you to use Terraform.</p>
+<p>For STACKIT and T Cloud Public we provide dedicated modules and configurations. See the provider guides for <a href="../providers/stackit/">STACKIT</a> and <a href="../providers/t-cloud-public/">T Cloud Public</a>.</p>
 <p>If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the <code>config.yaml</code> file, which will be generated in the next steps.</p>
 <h3 id="11-environment-configuration">1.1 Environment Configuration</h3>
 <p>Refer to the <a href="../prerequisites/">Prerequisites</a> guide and ensure all non-optional tasks in that guide are completed.<br>
@@ -3045,15 +3073,16 @@ You can set a custom output file:</p>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;org-team&gt;</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit</span>
-<span class="w">      </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id&gt;</span>
-<span class="w">      </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;ske or edge&gt;</span>
+<span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit, t-cloud-public</span>
+<span class="w">      </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id-or-tenant-name&gt;</span>
+<span class="w">      </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;ske, edge or cce&gt;</span>
 <span class="w">      </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.34</span>
 <span class="w">      </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 <span class="nn">...</span>
 </code></pre></div>
+<p><code>terraform.projectId</code> is provider-specific. For <code>t-cloud-public</code>, use the T Cloud Public tenant/project name that the Terraform provider expects as <code>tenant_name</code>, not a UUID.</p>
 <p><code>ingressClassName</code> defaults to <code>traefik</code>. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional <code>ingress.annotations</code> map under <code>services.&lt;service&gt;.ingress.annotations</code> that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
 User-provided annotations are merged on top using <code>mergeOverwrite</code>: equal keys are overwritten, while kubara default keys that are not present in the override remain.</p>
@@ -3070,6 +3099,7 @@ services we have built dedicated terraform provider modules and testing support.
 well:</p>
 <ul>
 <li><a href="../providers/stackit/">STACKIT</a></li>
+<li><a href="../providers/t-cloud-public/">T Cloud Public</a></li>
 <li>More provider support is in the works</li>
 </ul>
 <p>If you already have an existing Kubernetes cluster and a secret manager which is supported by external-secrets please
