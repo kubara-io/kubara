@@ -122,10 +122,11 @@ clusters:
     services:  
       ...
       metallb:
-        status: disabled
+        status: enabled
         config:
-          privateLoadBalancerCIDR: 0.0.0.0
-          publicLoadBalancerCIDR: 0.0.0.0    
+          loadBalancerAddressPool:
+            - 0.0.0.0
+          publicLoadBalancerIPs: 0.0.0.0
 ...
 ```
 
