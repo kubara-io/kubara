@@ -3068,8 +3068,6 @@ You can set a custom output file:</p>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub or spoke&gt;</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cp.demo-42.stackit.run&gt;</span>
-<span class="w">    </span><span class="nt">privateLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
-<span class="w">    </span><span class="nt">publicLoadBalancerIP</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;org-team&gt;</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
@@ -3080,6 +3078,15 @@ You can set a custom output file:</p>
 <span class="w">      </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
+<span class="nn">...</span>
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span><span class="w">  </span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">...</span>
+<span class="w">      </span><span class="l l-Scalar l-Scalar-Plain">metallb</span><span class="p p-Indicator">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">loadBalancerAddressPool</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
+<span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="nn">...</span>
 </code></pre></div>
 <p><code>terraform.projectId</code> is provider-specific. For <code>t-cloud-public</code>, use the T Cloud Public tenant/project name that the Terraform provider expects as <code>tenant_name</code>, not a UUID.</p>
