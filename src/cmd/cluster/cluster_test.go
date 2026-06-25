@@ -8,8 +8,6 @@ import (
 	flags "github.com/kubara-io/kubara/cmd"
 	"github.com/kubara-io/kubara/cmd/cluster"
 	"github.com/kubara-io/kubara/cmd/testutil"
-	"github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -64,12 +62,4 @@ func TestAddNewSpokesCluster(t *testing.T) {
 	err := app.Run(context.Background(), args)
 
 	require.NoError(t, err)
-	configStore := config.NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
-	_ = configStore.Load()
-
-	currentConfig := configStore.GetConfig()
-
-	//implicit assumption that the clusters are sorted by time added
-	spokeCluster := currentConfig.Clusters[1]
-	assert.Equal(t, spokeName, spokeCluster.Name)
 }

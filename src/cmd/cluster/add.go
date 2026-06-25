@@ -8,6 +8,7 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/utils"
+	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 )
 
@@ -55,6 +56,11 @@ func CreateAddClusterCommand() *cli.Command {
 			currentConfig := configStore.GetConfig()
 
 			clusters := currentConfig.Clusters
+			for _, existing := range clusters {
+				if existing.Name == spokeName {
+					return fmt.Errorf("cluster %q already exists", spokeName)
+				}
+			}
 
 			newCluster := config.CreateSpokeScaffolding(spokeName)
 
@@ -67,6 +73,7 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("save config to file: %w", err)
 			}
 
+			log.Info().Msgf("Spoke cluster %q has been successfully added to the config", spokeName)
 			return nil
 		},
 	}

@@ -112,6 +112,14 @@ func CreateSpokeScaffolding(name string) Cluster {
 				Email: "<dns-mail>",
 			},
 		},
+		ArgoCD: ArgoCD{
+			Repo: RepoProto{
+				HTTPS: &RepoType{
+					Customer: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+					Managed:  Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+				},
+			},
+		},
 		Services: nil,
 	}
 }

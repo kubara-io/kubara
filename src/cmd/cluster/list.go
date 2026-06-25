@@ -31,7 +31,12 @@ func CreateClusterList() *cli.Command {
 				return fmt.Errorf("get config file path: %w", err)
 			}
 
-			configStore := config.NewConfigStoreWithCatalog(configFilePath, catalog.LoadOptions{})
+			catalogOptions, err := catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
+			if err != nil {
+				return fmt.Errorf("could not resolve catalog options: %w", err)
+			}
+
+			configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
 			err = configStore.Load()
 			if err != nil {
 				return fmt.Errorf("config load: %w", err)

@@ -13,7 +13,7 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
-	"go.yaml.in/yaml/v2"
+	"sigs.k8s.io/yaml"
 )
 
 func CreateTestServices() service.Services {
