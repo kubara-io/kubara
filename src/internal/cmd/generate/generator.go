@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -30,6 +31,12 @@ type Options struct {
 	EnvPath            string
 }
 
+type buildContext struct {
+	Catalog  catalog.Catalog
+	EnvMap   envconfig.EnvMap
+	Clusters []config.Cluster
+}
+
 // getSpokeClusters returns a list of all spoke Clusters of a given cluster list
 func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
 	spokeMaps := make([]map[string]any, 0)
@@ -47,10 +54,10 @@ func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
 	return spokeMaps, nil
 }
 
-// buildTemplateContext creates a map for rendering templates with cluster config, catalog services, and env vars and all clusters
-// if it is called with a hub cluster, the map contains also the spokes infos for all of them
-func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envconfig.EnvMap, allClusters []config.Cluster) (map[string]any, error) {
-	clusterMap, err := toJSONMap(cluster)
+// buildTemplateContext creates a map for rendering templates for a specific cluster based on the build context provided
+// if it is called with a hub cluster, the map contains also the full context of the spokes
+func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string]any, error) {
+	clusterMap, err := toJSONMap(bctx.Clusters)
 	if err != nil {
 		return nil, fmt.Errorf("convert cluster config to map: %w", err)
 	}
@@ -61,12 +68,12 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 	}
 
 	context := map[string]any{
-		"env":     em,
+		"env":     bctx.EnvMap,
 		"cluster": clusterMap,
-		"catalog": resolveCatalog(cat),
+		"catalog": resolveCatalog(bctx.Catalog),
 	}
 	if cluster.Type == config.Hub {
-		spokes, err := getSpokeClusters(allClusters)
+		spokes, err := getSpokeClusters(bctx.Clusters)
 		if err != nil {
 			return nil, err
 		}
@@ -154,12 +161,7 @@ func toJSONMap(value any) (map[string]any, error) {
 }
 
 func pathHasSegment(path, segment string) bool {
-	for _, part := range strings.Split(filepath.ToSlash(path), "/") {
-		if part == segment {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(strings.Split(filepath.ToSlash(path), "/"), segment)
 }
 
 func (o *Options) cleanupOldFiles(results []render.TemplateResult) error {
@@ -270,19 +272,23 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		return nil, fmt.Errorf("load env: %w", err)
 	}
 
-	for _, clusterBlock := range cnf.Clusters {
-		tmplContext, err := buildTemplateContext(clusterBlock, cat, dotEnvMap, cnf.Clusters)
+	for _, cluster := range cnf.Clusters {
+		tmplContext, err := buildTemplateContext(cluster, buildContext{
+			Catalog:  cat,
+			EnvMap:   dotEnvMap,
+			Clusters: cnf.Clusters,
+		})
 		if err != nil {
-			return nil, fmt.Errorf("build template context for cluster %q: %w", clusterBlock.Name, err)
+			return nil, fmt.Errorf("build template context for cluster %q: %w", cluster.Name, err)
 		}
 
 		provider := ""
 		templateType := o.TemplateType
 		if o.TemplateType == render.Terraform {
 			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(clusterBlock, true)
+			provider, renderTerraform, err = resolveProvider(cluster, true)
 			if err != nil {
-				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)
+				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
 			}
 			if !renderTerraform {
 				continue
@@ -290,9 +296,9 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		}
 		if o.TemplateType == render.All {
 			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(clusterBlock, false)
+			provider, renderTerraform, err = resolveProvider(cluster, false)
 			if err != nil {
-				return nil, fmt.Errorf("resolve provider for cluster %q: %w", clusterBlock.Name, err)
+				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
 			}
 			if !renderTerraform {
 				templateType = render.Helm
@@ -311,13 +317,13 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		if err != nil {
 			return nil, fmt.Errorf("template files: %w", err)
 		}
-		clusterTplResults = filterDisabledServices(clusterTplResults, clusterBlock, cat)
+		clusterTplResults = filterDisabledServices(clusterTplResults, cluster, cat)
 
 		for i, result := range clusterTplResults {
 			if result.Error != nil {
 				return nil, fmt.Errorf("template error: %w", result.Error)
 			}
-			trimmedPath := o.resolveOutputPath(result, clusterBlock.Name)
+			trimmedPath := o.resolveOutputPath(result, cluster.Name)
 			clusterTplResults[i].Path = trimmedPath
 		}
 		allResults = append(allResults, clusterTplResults...)
