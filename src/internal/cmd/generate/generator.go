@@ -30,8 +30,8 @@ type Options struct {
 	EnvPath            string
 }
 
-// getSpokesFromAllClusters returns a list of all spoke Clusters of a given cluster list
-func getSpokesFromAllClusters(clusters []config.Cluster) ([]map[string]any, error) {
+// getSpokeClusters returns a list of all spoke Clusters of a given cluster list
+func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
 	spokeMaps := make([]map[string]any, 0)
 	for _, cluster := range clusters {
 		if cluster.Type != config.Spoke {
@@ -66,7 +66,7 @@ func buildTemplateContext(cluster config.Cluster, cat catalog.Catalog, em envcon
 		"catalog": resolveCatalog(cat),
 	}
 	if cluster.Type == config.Hub {
-		spokes, err := getSpokesFromAllClusters(allClusters)
+		spokes, err := getSpokeClusters(allClusters)
 		if err != nil {
 			return nil, err
 		}

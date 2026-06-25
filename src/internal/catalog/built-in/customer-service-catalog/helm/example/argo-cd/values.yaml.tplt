@@ -27,8 +27,11 @@ bootstrapValues:
           - kind: Secret
             name: cert-manager-webhook-ca
 {{/*
-Idea: for each spoke cluster we automatically generate/ template an external secret ressource pointing to <cluster-name>/<stage-name>/argocd/<spoke-name>
-TODO: add to docs
+
+For each spoke cluster in the config file a external secret gets created pointing to a secret inside the secret manager
+<cluster-name>/<stage-name>/argocd/<spoke-name>
+
+This is a fixed assumption and needs to be followed for spoke cluster onboarding.
 */}}
 {{- if .spokes }}
   cluster:

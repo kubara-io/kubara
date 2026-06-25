@@ -6,12 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/catalog"
-	internal "github.com/kubara-io/kubara/internal/cmd/cluster"
+	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/urfave/cli/v3"
 )
 
-// Creates the Command for the 'kubara cluster add command
 func CreateAddClusterCommand() *cli.Command {
 	return &cli.Command{
 		Name:        "add",
@@ -52,7 +51,27 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("get config file path: %w", err)
 			}
 
-			return internal.AddCluster(configFilePath, spokeName, catalogOptions)
+			configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
+			err = configStore.Load()
+			if err != nil {
+				return fmt.Errorf("config load: %w", err)
+			}
+			currentConfig := configStore.GetConfig()
+
+			clusters := currentConfig.Clusters
+
+			newCluster := config.CreateSpokeScaffolding(spokeName)
+
+			currentConfig.Clusters = append(clusters, newCluster)
+
+			if err = configStore.ApplyServiceCatalogDefaults(); err != nil {
+				return fmt.Errorf("apply spoke catalog defaults: %w", err)
+			}
+			if err = configStore.SaveToFile(); err != nil {
+				return fmt.Errorf("save config to file: %w", err)
+			}
+
+			return nil
 		},
 	}
 }
