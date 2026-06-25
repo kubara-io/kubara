@@ -24,7 +24,7 @@ Generated OBS buckets use KMS server-side encryption by default. The bootstrap s
 
 ## 1. Review Generated Values
 
-Review `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`. Keep persistent changes in a separate override file as described in [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides).
+Review `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`. Keep persistent changes in a separate override file as described in [Terraform value overrides](../../2_concepts/overview_core_concept.md#terraform-value-overrides).
 
 A few defaults that often need attention before the first apply:
 
@@ -229,7 +229,7 @@ When Velero uses CSI snapshots (`backupMode: csi-snapshot` or `backupMode: csi-d
 
 ### OIDC admin access
 
-The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in `customer-service-catalog/terraform/<cluster-name>/openbao/override.auto.tfvars`, not in the generated `env.auto.tfvars`; see [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides). For example, use the following values for a Keycloak client:
+The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in `customer-service-catalog/terraform/<cluster-name>/openbao/override.auto.tfvars`, not in the generated `env.auto.tfvars`; see [Terraform value overrides](../../2_concepts/overview_core_concept.md#terraform-value-overrides). For example, use the following values for a Keycloak client:
 
 ```hcl
 manage_openbao_oidc_auth_backend = true
