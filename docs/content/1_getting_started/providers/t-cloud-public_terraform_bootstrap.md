@@ -50,7 +50,7 @@ Then navigate to:
 cd bootstrap-tfstate-backend
 ```
 
-For persistent changes to generated Terraform values, use a separate override file as described in [Terraform value overrides](../overview_core_concept.md#terraform-value-overrides).
+For persistent changes to generated Terraform values, use a separate override file as described in [Terraform value overrides](../../2_concepts/overview_core_concept.md#terraform-value-overrides).
 
 ### OBS-to-KMS Agency
 

@@ -221,7 +221,7 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
     Set the value in `customer-service-catalog/helm/<cluster>/traefik/values.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Keep `kubernetes.io/elb.class: "union"`.
 
-    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `customer-service-catalog/terraform/<cluster>/openbao/secrets.tf-example` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](overview_core_concept.md#terraform-value-overrides).
+    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `customer-service-catalog/terraform/<cluster>/openbao/secrets.tf-example` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
 
 !!! warning
     **Don't forget to commit and push your changes to Git!**
