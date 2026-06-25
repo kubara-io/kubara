@@ -17,12 +17,14 @@ const (
 type TerraformProvider string
 
 const (
-	TerraformProviderNone    TerraformProvider = "none"
-	TerraformProviderStackit TerraformProvider = "stackit"
+	TerraformProviderNone         TerraformProvider = "none"
+	TerraformProviderStackit      TerraformProvider = "stackit"
+	TerraformProviderTCloudPublic TerraformProvider = "t-cloud-public"
 )
 
 var supportedTerraformProviders = [...]TerraformProvider{
 	TerraformProviderStackit,
+	TerraformProviderTCloudPublic,
 }
 
 // IsSupported reports whether kubara ships Terraform templates for the provider.
@@ -62,9 +64,9 @@ type Cluster struct {
 }
 
 type Terraform struct {
-	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Use none to skip Terraform generation. Currently supported providers: stackit.,enum=none,enum=stackit,default=none"`
-	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
-	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
+	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Use none to skip Terraform generation. Currently supported providers: stackit and t-cloud-public.,enum=none,enum=stackit,enum=t-cloud-public,default=none"`
+	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The provider-specific project subscription or tenant identifier. For t-cloud-public use the tenant or project name rather than a UUID.,minLength=1"`
+	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,enum=cce,default=ske"`
 	KubernetesVersion string            `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
 	DNS               DNS               `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
 }
