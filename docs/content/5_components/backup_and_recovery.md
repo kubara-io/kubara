@@ -35,15 +35,15 @@ What stays with you as a Platform Operator / Team:
 
 Decide these three things first:
 
-1. **Backup storage**  
-   The most common way to use Velero is with an **S3-compatible** object storage target plus credentials from your secret backend. `backupStorage.create: true` lets kubara create the bucket and credentials where supported. On STACKIT this is the default when Velero is enabled (see below).
-2. **Volume backup mode**  
+1. **Backup storage**
+   The most common way to use Velero is with an **S3-compatible** object storage target plus credentials from your secret backend. `backupStorage.create: true` lets kubara create the bucket and credentials where supported.
+2. **Volume backup mode**
    Choose the mode based on your provider's snapshot durability and your recovery goal:
    - `fs-backup`: Uses the Velero node-agent to back up volume contents to object storage. This is the default.
    - `csi-snapshot`: Uses CSI snapshots. Snapshot durability depends on the provider and CSI driver.
    - `csi-data-mover`: Creates CSI snapshots and moves their data to object storage through the Velero node-agent.
    More about File System Backups can be found in the official [Velero docs](https://velero.io/docs/v1.18/file-system-backup/).
-3. **Recovery goal**  
+3. **Recovery goal**
    Be clear whether you are optimizing for namespace restore, cluster rebuild, disaster recovery, or migration.
 
 !!! warning "File-system backup and CSI snapshots are mutually exclusive"
@@ -96,6 +96,19 @@ aws_secret_access_key = <SECRET_ACCESS_KEY>
 
 So on STACKIT you need `status: enabled` and `backupStorage.s3Url` unless you intentionally change the backup mode, bucket region, or use an existing bucket.
 
+For T Cloud Public CCE, configure the matching OBS endpoint and region:
+
+```yaml
+config:
+  backupMode: csi-data-mover
+  backupStorage:
+    create: true
+    region: eu-de
+    s3Url: https://obs.eu-de.otc.t-systems.com
+```
+
+With `backupStorage.create: true`, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the `velero_credential_access_key` and `velero_credential_secret_access_key` Terraform outputs to the OpenBao layer as `TF_VAR_velero_access_key_id` and `TF_VAR_velero_secret_access_key`. Activate the `velero_credentials` block from `customer-service-catalog/terraform/<cluster-name>/openbao/secrets.tf-example` so OpenBao writes the credential file to `secret/<cluster-name>/<stage>/velero/velero_s3_credentials`.
+
 To use an existing S3-compatible bucket instead, set `backupStorage.create: false` and provide the bucket connection details in the Velero config:
 
 ```yaml
@@ -107,7 +120,7 @@ config:
     s3Url: https://s3.example.com
 ```
 
-With `backupStorage.create: false`, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your secret backend at path `<cluster-name>/<stage>/velero/velero_s3_credentials`, key `cloud`, using the same format shown above.
+With `backupStorage.create: false`, kubara does not generate the Terraform bucket or credentials. Provide the S3-compatible credentials yourself in your provider's expected secret path, using key `cloud` and the same format shown above.
 
 Then:
 
@@ -116,8 +129,8 @@ Then:
      - `customer-service-catalog/helm/<cluster-name>/velero/values.yaml`
      - `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`
 3. Commit and push so Argo CD can deploy Velero
-4. **Test a full backup and restore cycle immediately after setup**  
-   Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).  
+4. **Test a full backup and restore cycle immediately after setup**
+   Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).
    References: [Backup reference](https://velero.io/docs/v1.18/backup-reference/) · [Restore reference](https://velero.io/docs/v1.18/restore-reference/) · [Disaster recovery](https://velero.io/docs/v1.18/disaster-case/)
 
 With a healthy Velero setup, create a backup with:

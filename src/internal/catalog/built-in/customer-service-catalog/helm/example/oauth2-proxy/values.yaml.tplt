@@ -10,19 +10,37 @@ namespace:
     stage: "{{ .cluster.stage }}"
 
 
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
+namespacedSecretStores:
+  {{ .cluster.name }}-{{ .cluster.stage }}:
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+              audiences:
+                - vault
+{{- end }}
+
 externalSecrets:
+{{ if eq .cluster.terraform.provider "t-cloud-public" }}
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ else }}
   secretStoreRef:
     kind: ClusterSecretStore
     name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ end }}
 
   secrets:
     oauth2-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       dataFrom:
         - remoteKey: {{ .cluster.name }}/{{ .cluster.stage }}/oauth2-proxy/oauth2_credentials
 
@@ -35,6 +53,7 @@ oauth2-proxy:
     configFile: |-
       reverse_proxy = true
       redirect_url = "https://{{ .cluster.dnsName }}/oauth2/callback"
+      whitelist_domains = [ "{{ .cluster.dnsName }}" ]
       email_domains = [ "*" ]
       cookie_secure = true
       upstreams = [ "static://200" ]

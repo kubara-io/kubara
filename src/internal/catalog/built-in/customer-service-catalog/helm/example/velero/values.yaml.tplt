@@ -3,19 +3,37 @@ namespace:
     project-name: "{{ .cluster.name }}"
     stage: "{{ .cluster.stage }}"
 
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
+namespacedSecretStores:
+  {{ .cluster.name }}-{{ .cluster.stage }}:
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: k8s-kv-read
+            serviceAccountRef:
+              name: default
+              audiences:
+                - vault
+{{- end }}
+
 externalSecrets:
+{{ if eq .cluster.terraform.provider "t-cloud-public" }}
+  secretStoreRef:
+    kind: SecretStore
+    name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ else }}
   secretStoreRef:
     kind: ClusterSecretStore
     name: {{ .cluster.name }}-{{ .cluster.stage }}
-
-  secretStores:
-    {{ .cluster.name }}-{{ .cluster.stage }}:
-      kind: ClusterSecretStore
-      name: {{ .cluster.name }}-{{ .cluster.stage }}
+{{ end }}
 
   secrets:
     velero-credentials:
-      secretStoreRef: {{ .cluster.name }}-{{ .cluster.stage }}
       # name needs to cloud, as the aws plugin for velero looks at cloud per default
       # other key names need to be specified in the backupStorageLocation
       data:
@@ -45,6 +63,8 @@ velero:
         provider: aws
         {{- if and (eq .cluster.terraform.provider "stackit") (index .cluster.services "velero" "config" "backupStorage" "create") }}
         bucket: bucket-velero-{{ .cluster.name }}-{{ .cluster.stage }}
+        {{- else if and (eq .cluster.terraform.provider "t-cloud-public") (index .cluster.services "velero" "config" "backupStorage" "create") }}
+        bucket: velero-{{ .cluster.name }}-{{ .cluster.stage }}
         {{- else }}
         bucket: {{ (index .cluster.services "velero" "config" "backupStorage" "bucketName") }}
         {{- end }}

@@ -1,4 +1,23 @@
+{{- if eq .cluster.terraform.provider "t-cloud-public" }}
+clusterSecretStores:
+  {{ .cluster.name }}-{{ .cluster.stage }}:
+    provider:
+      vault:
+        server: http://openbao.openbao.svc.cluster.local:8200
+        path: secret
+        version: v2
+        auth:
+          kubernetes:
+            mountPath: k8s-auth
+            role: external-secrets
+            serviceAccountRef:
+              name: external-secrets
+              namespace: external-secrets
+              audiences:
+                - vault
+{{- else }}
 clusterSecretStores: {}
+{{- end }}
 namespace:
   labels:
     project-name: "{{ .cluster.name }}"

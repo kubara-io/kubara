@@ -69,3 +69,6 @@ volumeSnapshotClass:
       parameters:
         force-create: "true"
         type: snapshot
+    t-cloud-public:
+      driver: disk.csi.everest.io
+      deletionPolicy: Retain

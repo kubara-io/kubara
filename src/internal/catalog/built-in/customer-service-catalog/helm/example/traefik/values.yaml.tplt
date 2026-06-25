@@ -1,15 +1,17 @@
+{{- $oauth2ProxyEnabled := eq (index .cluster.services "oauth2-proxy" "status") "enabled" -}}
+{{- $tCloudPublicCCE := and .cluster.terraform (eq .cluster.terraform.provider "t-cloud-public") (eq .cluster.terraform.kubernetesType "cce") -}}
 traefik:
   deployment:
     imagePullSecrets:
       - name: image-pull-secret
   api:
     dashboard: true
-    {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+    {{- if $oauth2ProxyEnabled }}
     basePath: /traefik
     {{- end }}
   ingressRoute:
     dashboard:
-      {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+      {{- if $oauth2ProxyEnabled }}
       enabled: true
       entryPoints:
         - websecure
@@ -21,8 +23,9 @@ traefik:
       {{- else }}
       enabled: false
       {{- end }}
-  {{- if (eq (index .cluster.services "oauth2-proxy" "status") "enabled") }}
+  {{- if or $oauth2ProxyEnabled $tCloudPublicCCE }}
   extraObjects:
+    {{- if $oauth2ProxyEnabled }}
     - apiVersion: traefik.io/v1alpha1
       kind: Middleware
       metadata:
@@ -36,6 +39,34 @@ traefik:
             - X-Auth-Request-User
             - X-Auth-Request-Email
             - Authorization
+    {{- end }}
+    {{- if $tCloudPublicCCE }}
+    - apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: openbao-redirect-noslash
+        namespace: openbao
+      spec:
+        redirectRegex:
+          permanent: true
+          regex: "^(https?://[^/]+/openbao)$"
+          replacement: "${1}/"
+    - apiVersion: traefik.io/v1alpha1
+      kind: Middleware
+      metadata:
+        name: openbao-strip-prefix
+        namespace: openbao
+      spec:
+        replacePathRegex:
+          regex: "^/openbao/(.*)"
+          replacement: "/${1}"
+    {{- end }}
+  {{- end }}
+  {{- if $tCloudPublicCCE }}
+  service:
+    annotations:
+      kubernetes.io/elb.id: "CHANGE_ME_TERRAFORM_OUTPUT_LOAD_BALANCER_ID"
+      kubernetes.io/elb.class: "union"
   {{- end }}
   metrics:
     prometheus:

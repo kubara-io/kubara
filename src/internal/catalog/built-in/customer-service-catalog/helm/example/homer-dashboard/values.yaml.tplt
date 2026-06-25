@@ -5,6 +5,10 @@
 {{- $kubePrometheusStatus := dig "cluster" "services" "kube-prometheus-stack" "status" "disabled" . -}}
 {{- $longhornStatus := dig "cluster" "services" "longhorn" "status" "disabled" . -}}
 {{- $kyvernoStatus := dig "cluster" "services" "kyverno" "status" "disabled" . -}}
+{{- $tCloudPublic := false -}}
+{{- with .cluster.terraform -}}
+{{- $tCloudPublic = eq .provider "t-cloud-public" -}}
+{{- end -}}
 {{- $homerIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
@@ -155,6 +159,14 @@ dashboardConfig:
         {{- end }}
     - name: "DevOps Links"
       items:
+        {{- if $tCloudPublic }}
+        - name: "OTC Console"
+          icon: "fas fa-cloud"
+          url: "https://console.otc.t-systems.com"
+          subtitle: "Open Telekom Cloud Console"
+          target: "_blank"
+        {{- else }}
         - name: "Secretsmanager"
           logo: "/assets/tools/secretsmanager.png"
           url: "https://replace-me-with-your-url"
+        {{- end }}
