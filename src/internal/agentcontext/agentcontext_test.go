@@ -54,6 +54,13 @@ func TestRenderDevFallsBackToMain(t *testing.T) {
 	if !strings.Contains(string(rendered), "raw.githubusercontent.com/kubara-io/kubara/main/docs/content/") {
 		t.Errorf("dev build should pin raw links to main:\n%s", rendered)
 	}
+	// The "pinned to" heading must reflect the resolved ref, not the display version.
+	if strings.Contains(string(rendered), "pinned to `dev`") {
+		t.Errorf("doc heading should pin to the resolved ref (main), not the display version 'dev'")
+	}
+	if !strings.Contains(string(rendered), "pinned to `main`") {
+		t.Errorf("doc heading should state it is pinned to main for dev builds")
+	}
 }
 
 func TestWriteSkipsExistingUnlessOverwrite(t *testing.T) {
