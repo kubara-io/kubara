@@ -211,50 +211,42 @@ func (o *Options) writeTemplateResults(results []render.TemplateResult) error {
 	return nil
 }
 
-// getServiceNameFromPath returns a possible service-name-string from the ChartPath from a given path and catalog
-// If the path does not contain a Service name return the empty String
-func getServiceNameFromPath(catalog catalog.Catalog, path string) string {
-	//replace seperators with '/' to allow for windows usage
-	pathParts := strings.Split(filepath.ToSlash(path), "/")
+func buildChartPathServiceIndex(cat catalog.Catalog) map[string]string {
+	index := make(map[string]string, len(cat.Services))
+	for serviceName, definition := range cat.Services {
+		index[definition.Spec.ChartPath] = serviceName
+	}
+	return index
+}
 
+func serviceNameFromTemplatePath(chartPathServiceIndex map[string]string, path string) string {
+	pathParts := strings.Split(filepath.ToSlash(path), "/")
 	if len(pathParts) < 4 {
 		return ""
 	}
 
-	// managed-service-catalog/helm/<name>
-	possibleName := pathParts[2]
-	if pathParts[0] == render.DefaultOverlayValuesPath {
-		//customer-service-catalog/helm/example/<name>
-		possibleName = pathParts[3]
+	switch {
+	case pathParts[0] == render.DefaultManagedCatalogPath && pathParts[1] == render.Helm.String():
+		return chartPathServiceIndex[pathParts[2]]
+	case len(pathParts) >= 5 && pathParts[0] == render.DefaultOverlayValuesPath && pathParts[1] == render.Helm.String():
+		return chartPathServiceIndex[pathParts[3]]
+	default:
+		return ""
 	}
-	if serviceDefinition, ok := catalog.Services[possibleName]; ok {
-		return serviceDefinition.Spec.ChartPath
-	}
-	fmt.Println("---")
-	fmt.Println(pathParts)
-	fmt.Println(possibleName)
-	return ""
 }
 
-// filterDisabledServices receives a list of rendered Template Results and removes those items where in the config the service is disabled
-// returns a new list of filtered template results
-func filterDisabledServices(templateResults []render.TemplateResult, cluster config.Cluster, catalog catalog.Catalog) []render.TemplateResult {
-	filtered := make([]render.TemplateResult, 0)
-	for _, result := range templateResults {
-		serviceName := getServiceNameFromPath(catalog, result.Path)
-		//probably rendered terraform
+func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalog.Catalog) render.TemplatePathPredicate {
+	chartPathServiceIndex := buildChartPathServiceIndex(cat)
+
+	return func(path string) bool {
+		serviceName := serviceNameFromTemplatePath(chartPathServiceIndex, path)
 		if serviceName == "" {
-			filtered = append(filtered, result)
-			continue
+			return true
 		}
-		svc := cluster.Services[serviceName]
-		if svc.Status == service.StatusEnabled {
-			filtered = append(filtered, result)
-		}
+
+		svc, ok := cluster.Services[serviceName]
+		return ok && svc.Status == service.StatusEnabled
 	}
-	fmt.Println("---")
-	fmt.Printf("Filtering %d for cluster %q\n", len(filtered), cluster.Name)
-	return filtered
 }
 
 // processClusters loads config, validates, and generates template results for all clusters.
@@ -317,17 +309,17 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 
 		clusterTplResults, err := render.TemplateFiles(
 			render.TemplateOptions{
-				Type:        templateType,
-				Provider:    provider,
-				CatalogPath: o.CatalogPath,
-				Overwrite:   o.CatalogOverwrite,
-				Data:        tmplContext,
+				Type:          templateType,
+				Provider:      provider,
+				CatalogPath:   o.CatalogPath,
+				Overwrite:     o.CatalogOverwrite,
+				Data:          tmplContext,
+				PathPredicate: buildEnabledServiceTemplatePathPredicate(cluster, cat),
 			},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("template files: %w", err)
 		}
-		clusterTplResults = filterDisabledServices(clusterTplResults, cluster, cat)
 
 		for i, result := range clusterTplResults {
 			if result.Error != nil {

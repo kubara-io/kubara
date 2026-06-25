@@ -461,7 +461,6 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 func TestDisabledServicesDontGetWritten(t *testing.T) {
 	tempDir := t.TempDir()
 	services := testutil.CreateTestServices()
-	// D'oh!
 	homerName := "homer-dashboard"
 	homer := services[homerName]
 	homer.Status = "disabled"

@@ -214,6 +214,7 @@ func TestTemplateFiles(t *testing.T) {
 						assert.NotEmpty(t, result.Content)
 					}
 				}
+
 				assert.True(t, hasTemplate, "Should have at least one template file")
 				assert.True(t, hasStatic, "Should have at least one static file")
 				assert.True(t, hasValidTemplate, "Should have at least one successfully rendered template")
@@ -240,6 +241,7 @@ func TestTemplateFiles(t *testing.T) {
 							staticSuccess++
 						}
 					}
+
 				}
 				assert.Greater(t, templateFiles, 0, "Should have template files")
 				assert.Greater(t, templateErrors, 0, "Should have template errors with empty context")
