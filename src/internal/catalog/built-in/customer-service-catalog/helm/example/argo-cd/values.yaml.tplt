@@ -84,7 +84,7 @@ externalSecrets:
 {{- $argocdUserIngressAnnotations := dig "cluster" "services" "argocd" "networking" "annotations" (dict) . -}}
 {{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" (index .cluster.services "metallb" "config" "publicLoadbalancerCIDR") -}}
+{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" (index .cluster.services "metallb" "config" "publicLoadBalancerCIDR") -}}
 {{- end -}}
 {{- $argocdIngressGrpcAnnotations = mergeOverwrite $argocdIngressGrpcAnnotations $argocdUserIngressAnnotations -}}
 
@@ -93,7 +93,7 @@ externalSecrets:
 {{- $_ := set $argocdIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" (index .cluster.services "metallb" "config" "publicLoadbalancerCIDR") -}}
+{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" (index .cluster.services "metallb" "config" "publicLoadBalancerCIDR") -}}
 {{- end -}}
 {{- $argocdIngressAnnotations = mergeOverwrite $argocdIngressAnnotations $argocdUserIngressAnnotations -}}
 
