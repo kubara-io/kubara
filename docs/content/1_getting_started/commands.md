@@ -293,7 +293,7 @@ Manage your kubara cluster configurations
 
 ### list, ls
 
-List all the cluster in the config file
+List all clusters in the config file
 
 >kubara cluster ls
 
