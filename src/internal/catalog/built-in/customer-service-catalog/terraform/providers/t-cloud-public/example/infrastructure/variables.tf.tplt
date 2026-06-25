@@ -235,7 +235,7 @@ variable "cluster_description" {
 
 ### CCE public endpoint
 variable "enable_cluster_public_endpoint" {
-  description = "Bind an EIP to the CCE master so the Kubernetes API is reachable from outside the VPC. Required when Terraform runs the Kubernetes provider against the cluster from a machine outside the VPC."
+  description = "Bind an EIP to the CCE master so the Kubernetes API is reachable from outside the VPC. Required when Terraform runs the Helm/Kubernetes providers against the cluster from a machine outside the VPC."
   type        = bool
   default     = true
 }
@@ -467,6 +467,110 @@ variable "storage_classes" {
   }
 }
 
+variable "enable_openbao" {
+  description = "Deploy OpenBao with Helm after the CCE cluster is available."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_release_name" {
+  description = "OpenBao Helm release name."
+  type        = string
+  default     = "openbao"
+}
+
+variable "openbao_namespace" {
+  description = "Kubernetes namespace for OpenBao."
+  type        = string
+  default     = "openbao"
+}
+
+variable "openbao_chart_version" {
+  description = "OpenBao Helm chart version."
+  type        = string
+  default     = "0.28.3"
+}
+
+variable "openbao_replicas" {
+  description = "OpenBao HA replica count."
+  type        = number
+  default     = 3
+}
+
+variable "openbao_image_pull_secrets" {
+  description = "Image pull secrets for OpenBao pods."
+  type        = list(string)
+  default     = ["image-pull-secret"]
+}
+
+variable "openbao_injector_enabled" {
+  description = "Enable the OpenBao agent injector."
+  type        = bool
+  default     = false
+}
+
+variable "openbao_data_storage_size" {
+  description = "OpenBao raft PVC size. OpenBao only persists Raft state and KV data."
+  type        = string
+  default     = "1Gi"
+}
+
+variable "openbao_data_storage_class" {
+  description = "OpenBao raft PVC storage class. Leave empty to use the cluster default."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_seal_config" {
+  description = "Optional OpenBao seal stanza appended to the HA raft config. T Cloud Public KMS is not a native OpenBao seal; use this for a supported seal or an installed KMS plugin."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_extra_environment_vars" {
+  description = "Extra environment variables for the OpenBao server pods, for example credentials required by a seal plugin."
+  type        = map(string)
+  default     = {}
+}
+
+variable "openbao_ingress_enabled" {
+  description = "Expose OpenBao through the cluster ingress."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_ingress_host" {
+  description = "OpenBao ingress host."
+  type        = string
+  default     = "{{ .cluster.dnsName }}"
+}
+
+variable "openbao_ingress_path" {
+  description = "OpenBao ingress path prefix."
+  type        = string
+  default     = "/openbao"
+}
+
+variable "openbao_ingress_class_name" {
+  description = "IngressClass name used for the OpenBao ingress."
+  type        = string
+  default     = "{{ .cluster.ingressClassName | default "traefik" }}"
+}
+
+variable "openbao_ingress_annotations" {
+  description = "Additional OpenBao ingress annotations."
+  type        = map(string)
+  default = {
+    "cert-manager.io/cluster-issuer" = "{{ dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . }}"
+  }
+}
+
+variable "openbao_ingress_tls_secret_name" {
+  description = "TLS secret name for the OpenBao ingress."
+  type        = string
+  default     = "tls-openbao"
+}
+
 variable "create_kubeconfig_local" {
   type        = bool
   default     = false
@@ -484,4 +588,35 @@ variable "kubeconfig_duration" {
   type        = number
   default     = -1
 }
+
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
+### Velero
+variable "velero_bucket_name" {
+  description = "OBS bucket name for Velero backups."
+  type        = string
+}
+
+variable "velero_bucket_user_name" {
+  description = "Identity user name for Velero OBS access."
+  type        = string
+}
+
+variable "velero_bucket_versioning" {
+  description = "Enable OBS bucket versioning for Velero backups."
+  type        = bool
+  default     = true
+}
+
+variable "velero_bucket_enable_server_side_encryption" {
+  description = "Enable OBS server-side encryption with KMS for the Velero backup bucket."
+  type        = bool
+  default     = true
+}
+
+variable "velero_bucket_kms_pending_days" {
+  description = "Pending deletion days for the Velero bucket KMS key."
+  type        = number
+  default     = 7
+}
+{{ end }}
 {{ end }}

@@ -1,0 +1,259 @@
+variable "openbao_address" {
+  description = "OpenBao API address used by the Terraform Vault provider. Use a local port-forward for the default value."
+  type        = string
+  default     = "http://127.0.0.1:8200"
+}
+
+variable "openbao_token" {
+  description = "OpenBao token. Leave null to use VAULT_TOKEN from the environment."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "openbao_kv_mount_path" {
+  description = "KV v2 secrets engine mount path used by kubara ExternalSecrets."
+  type        = string
+  default     = "secret"
+}
+
+variable "manage_openbao_kv_mount" {
+  description = "Create the KV v2 secrets engine mount."
+  type        = bool
+  default     = true
+}
+
+variable "manage_openbao_oidc_auth_backend" {
+  description = "Create the OpenBao OIDC auth backend and admin role."
+  type        = bool
+  default     = false
+}
+
+variable "openbao_oidc_auth_path" {
+  description = "OpenBao OIDC auth backend path."
+  type        = string
+  default     = "oidc"
+}
+
+variable "openbao_oidc_discovery_url" {
+  description = "OIDC discovery URL used by OpenBao."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_oidc_client_id" {
+  description = "OIDC client ID used by OpenBao."
+  type        = string
+  default     = ""
+}
+
+variable "openbao_oidc_client_secret" {
+  description = "OIDC client secret used by OpenBao."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "openbao_oidc_client_secret_version" {
+  description = "Version counter for the write-only OIDC client secret. Increment to rotate."
+  type        = number
+  default     = 1
+}
+
+variable "openbao_oidc_admin_role_name" {
+  description = "OIDC role name for OpenBao admins."
+  type        = string
+  default     = "admin"
+}
+
+variable "openbao_oidc_admin_policy_name" {
+  description = "OpenBao ACL policy name for OIDC admins."
+  type        = string
+  default     = "admin"
+}
+
+variable "openbao_oidc_admin_allowed_redirect_uris" {
+  description = "Allowed OIDC redirect URIs for the OpenBao admin role."
+  type        = list(string)
+  default = [
+    "https://{{ .cluster.dnsName }}/openbao/ui/vault/auth/oidc/oidc/callback",
+    "https://{{ .cluster.dnsName }}/ui/vault/auth/oidc/oidc/callback",
+    "http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback",
+  ]
+}
+
+variable "openbao_oidc_user_claim" {
+  description = "OIDC claim used as the OpenBao display name."
+  type        = string
+  default     = "name"
+}
+
+variable "openbao_oidc_groups_claim" {
+  description = "OIDC claim used for group names."
+  type        = string
+  default     = "groups"
+}
+
+variable "openbao_oidc_scopes" {
+  description = "OIDC scopes requested by OpenBao when authenticating an admin. Matches the legacy Vault setup, which requested openid/email/profile to get group claims."
+  type        = list(string)
+  default     = ["openid", "email", "profile"]
+}
+
+variable "openbao_oidc_admin_token_ttl" {
+  description = "Token TTL in seconds for the OpenBao OIDC admin role. Default is 7 days, matching the legacy Vault setup."
+  type        = number
+  default     = 604800
+}
+
+variable "manage_openbao_kubernetes_auth_backend" {
+  description = "Create the OpenBao Kubernetes auth backend."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_kubernetes_auth_path" {
+  description = "OpenBao Kubernetes auth backend path."
+  type        = string
+  default     = "k8s-auth"
+}
+
+variable "openbao_kubernetes_host" {
+  description = "Kubernetes API server URL configured in the OpenBao Kubernetes auth backend."
+  type        = string
+  default     = "https://kubernetes.default.svc"
+}
+
+variable "openbao_kubernetes_auth_disable_iss_validation" {
+  description = "Disable Kubernetes JWT issuer validation in the OpenBao Kubernetes auth backend."
+  type        = bool
+  default     = false
+}
+
+variable "manage_external_secrets_kubernetes_auth_role" {
+  description = "Create the OpenBao Kubernetes auth role used by the cluster-wide External Secrets store for the image pull secret."
+  type        = bool
+  default     = true
+}
+
+variable "external_secrets_kubernetes_auth_role_name" {
+  description = "OpenBao Kubernetes auth role name used by External Secrets."
+  type        = string
+  default     = "external-secrets"
+}
+
+variable "external_secrets_service_account_name" {
+  description = "Kubernetes service account name used by External Secrets for OpenBao authentication."
+  type        = string
+  default     = "external-secrets"
+}
+
+variable "external_secrets_service_account_namespace" {
+  description = "Kubernetes service account namespace used by External Secrets for OpenBao authentication."
+  type        = string
+  default     = "external-secrets"
+}
+
+variable "external_secrets_auth_audience" {
+  description = "Kubernetes service account token audience requested by External Secrets for OpenBao authentication."
+  type        = string
+  default     = "vault"
+}
+
+variable "manage_openbao_namespace_kv_read_role" {
+  description = "Create the namespace-scoped Kubernetes auth role and templated policy from the legacy Vault setup."
+  type        = bool
+  default     = true
+}
+
+variable "openbao_namespace_kv_read_role_name" {
+  description = "OpenBao Kubernetes auth role name for namespace-scoped KV reads."
+  type        = string
+  default     = "k8s-kv-read"
+}
+
+variable "openbao_namespace_kv_read_policy_name" {
+  description = "OpenBao policy name for namespace-scoped KV reads."
+  type        = string
+  default     = "k8s-kv-read"
+}
+
+variable "openbao_namespace_kv_read_bound_service_account_names" {
+  description = "Kubernetes service account names allowed to use the namespace-scoped KV read role."
+  type        = list(string)
+  default     = ["default", "external-secrets"]
+}
+
+variable "openbao_namespace_kv_read_bound_service_account_namespaces" {
+  description = "Kubernetes namespaces allowed to use the namespace-scoped KV read role."
+  type        = list(string)
+  default     = ["*"]
+}
+
+variable "openbao_namespace_kv_read_auth_audience" {
+  description = "Kubernetes service account token audience for the namespace-scoped KV read role."
+  type        = string
+  default     = "vault"
+}
+
+variable "openbao_namespace_kv_read_token_ttl" {
+  description = "Token TTL in seconds for the namespace-scoped KV read role. Default is 24 hours, matching the legacy Vault setup."
+  type        = number
+  default     = 86400
+}
+
+variable "manage_openbao_userpass_auth_backend" {
+  description = "Create the optional userpass auth backend for External Secrets fallback setups."
+  type        = bool
+  default     = false
+}
+
+variable "manage_external_secrets_user" {
+  description = "Create the optional read-only OpenBao userpass user for External Secrets fallback setups."
+  type        = bool
+  default     = false
+}
+
+variable "external_secrets_username" {
+  description = "OpenBao userpass username used by External Secrets."
+  type        = string
+  default     = "{{ .cluster.name }}-{{ .cluster.stage }}-external-secrets"
+}
+
+variable "external_secrets_password" {
+  description = "OpenBao userpass password used by External Secrets. If empty, Terraform generates one."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "external_secrets_policy_name" {
+  description = "OpenBao policy name for the cluster-wide External Secrets image pull secret read access."
+  type        = string
+  default     = "{{ .cluster.name }}-{{ .cluster.stage }}-external-secrets-read"
+}
+
+variable "openbao_userpass_auth_path" {
+  description = "OpenBao userpass auth backend path."
+  type        = string
+  default     = "userpass"
+}
+
+variable "manage_grafana_admin_credentials" {
+  description = "Write grafana_credentials for the Grafana admin user."
+  type        = bool
+  default     = true
+}
+
+variable "grafana_admin_user" {
+  description = "Grafana admin username. If empty, Terraform generates one."
+  type        = string
+  default     = ""
+}
+
+variable "grafana_admin_password" {
+  description = "Grafana admin password. If empty, Terraform generates one."
+  type        = string
+  sensitive   = true
+  default     = ""
+}

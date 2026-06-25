@@ -55,7 +55,7 @@ variable "container_network_type" {
 }
 
 variable "enable_public_endpoint" {
-  description = "Create an EIP and bind it to the CCE master so the API server is reachable from outside the VPC. Required for running the Terraform Kubernetes provider against the cluster from an external machine."
+  description = "Create an EIP and bind it to the CCE master so the API server is reachable from outside the VPC. Required for running Terraform Helm/Kubernetes providers against the cluster from an external machine."
   type        = bool
   default     = true
 }

@@ -35,6 +35,18 @@ If you want to understand how catalogs work internally or create your own extern
 
 kubara keeps reusable generated artifacts separate from cluster-specific overlays so the platform stays maintainable across multiple clusters.
 
+#### Terraform value overrides
+
+In generated Terraform directories, `env.auto.tfvars` is owned by kubara. `kubara generate --terraform` rewrites that file, so do not use it for persistent manual changes.
+
+For local Terraform value overrides, create a separate `*.auto.tfvars` file in the same directory, for example:
+
+```text
+override.auto.tfvars
+```
+
+Terraform automatically loads all `*.auto.tfvars` files in lexical order. Because `override.auto.tfvars` sorts after `env.auto.tfvars`, values in `override.auto.tfvars` override the generated defaults. Only put values in the override file that should differ from `env.auto.tfvars`.
+
 ### 4. Bootstrap is only the beginning
 
 `kubara bootstrap` installs Argo CD and required CRDs, but the long-term operating model is still GitOps: Argo CD manages itself and then rolls out the generated platform charts.
