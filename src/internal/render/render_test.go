@@ -166,6 +166,7 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 
 	paths := make([]string, 0, len(results))
 	var cceClusterModule string
+	var infrastructureMain string
 	var openBaoMain string
 	var openBaoSecretsExample string
 	for _, result := range results {
@@ -174,6 +175,8 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 		switch result.Path {
 		case "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf":
 			cceClusterModule = result.Content
+		case "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt":
+			infrastructureMain = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt":
 			openBaoMain = result.Content
 		case "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/secrets.tf-example.tplt":
@@ -183,11 +186,14 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/cce-cluster/main.tf")
 	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/network/main.tf")
+	assert.Contains(t, paths, "managed-service-catalog/terraform/providers/t-cloud-public/modules/storage-classes/main.tf")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/infrastructure/main.tf.tplt")
 	assert.Contains(t, paths, "customer-service-catalog/terraform/providers/t-cloud-public/example/openbao/main.tf.tplt")
 	assert.NotContains(t, paths, "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf")
 	require.NotEmpty(t, cceClusterModule)
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
+	require.NotEmpty(t, infrastructureMain)
+	assert.Contains(t, infrastructureMain, `source = "../../../../managed-service-catalog/terraform/modules/cce-cluster"`)
 	require.NotEmpty(t, openBaoMain)
 	assert.Contains(t, openBaoMain, "data/test-cluster/dev/cluster_secrets/docker_config")
 	assert.Contains(t, openBaoMain, "data/+/+/{{identity.entity.aliases.")

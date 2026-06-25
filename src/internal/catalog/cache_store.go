@@ -199,12 +199,17 @@ func readArtifactMetadata(artifactDir string) (CachedArtifact, bool, error) {
 	return artifact, true, nil
 }
 
-func writeLocalReference(ref OCIReference, artifact CachedArtifact) error {
-	refPath, err := tagReferencePath(ref)
+func writeCachedReference(ref OCIReference, artifact CachedArtifact) error {
+	refPath, err := referencePath(ref)
 	if err != nil {
 		return err
 	}
-	return writeReferenceFile(refPath, cachedReference{
+	previousRef, found, err := readCachedReferenceFile(refPath)
+	if err != nil {
+		return err
+	}
+
+	if err := writeReferenceFile(refPath, cachedReference{
 		SchemaVersion:  cacheSchemaVersion,
 		ManifestDigest: artifact.ManifestDigest,
 		CatalogName:    artifact.CatalogName,
@@ -214,7 +219,14 @@ func writeLocalReference(ref OCIReference, artifact CachedArtifact) error {
 		Repository:     ref.Repository,
 		Tag:            ref.Tag,
 		UpdatedAt:      time.Now().UTC().Format(time.RFC3339),
-	})
+	}); err != nil {
+		return err
+	}
+
+	if !found || previousRef.ManifestDigest == "" || previousRef.ManifestDigest == artifact.ManifestDigest {
+		return nil
+	}
+	return pruneArtifactIfUnreferenced(previousRef.ManifestDigest)
 }
 
 func writeReferenceFile(path string, ref cachedReference) error {
@@ -237,6 +249,28 @@ func tagReferencePath(ref OCIReference) (string, error) {
 	}
 	pathParts = append(pathParts, "tags", ref.Tag+".json")
 	return filepath.Join(pathParts...), nil
+}
+
+func digestReferencePath(ref OCIReference) (string, error) {
+	cacheRoot, err := defaultCatalogCacheRoot()
+	if err != nil {
+		return "", err
+	}
+
+	repositoryParts := strings.Split(ref.Repository, "/")
+	pathParts := []string{cacheRoot, "refs", sanitizePathComponent(ref.Registry)}
+	for _, part := range repositoryParts {
+		pathParts = append(pathParts, sanitizePathComponent(part))
+	}
+	pathParts = append(pathParts, "digests", sanitizePathComponent(ref.Digest.String())+".json")
+	return filepath.Join(pathParts...), nil
+}
+
+func referencePath(ref OCIReference) (string, error) {
+	if ref.IsDigest {
+		return digestReferencePath(ref)
+	}
+	return tagReferencePath(ref)
 }
 
 func sanitizePathComponent(value string) string {

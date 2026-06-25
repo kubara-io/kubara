@@ -14,7 +14,7 @@
 {{- $_ := set $homerIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadbalancerIP -}}
+{{- $_ := set $homerIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadBalancerIP -}}
 {{- end -}}
 {{- $homerIngressAnnotations = mergeOverwrite $homerIngressAnnotations (dig "cluster" "services" "homer-dashboard" "networking" "annotations" (dict) .) -}}
 

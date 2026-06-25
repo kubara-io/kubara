@@ -84,6 +84,7 @@ func TestGenerateCmd(t *testing.T) {
 		flags       []string
 		wantErr     bool
 		errContains string
+		cluster     *config.Cluster // overrides the default SKE test cluster when set
 		setup       func(t *testing.T, tempDir string)
 		validate    func(t *testing.T, tempDir string)
 	}{
@@ -206,6 +207,51 @@ func TestGenerateCmd(t *testing.T) {
 				assert.NotEmpty(t, entries)
 			},
 		},
+		{
+			name:    "successful edge terraform file generation",
+			flags:   []string{"--terraform"},
+			wantErr: false,
+			cluster: &config.Cluster{
+				Name:    "edge-cluster",
+				Stage:   "dev",
+				Type:    "hub",
+				DNSName: "edge.example.com",
+				Terraform: &config.Terraform{
+					Provider:          "stackit",
+					ProjectID:         "00000000-0000-0000-0000-000000000000",
+					KubernetesType:    "edge",
+					KubernetesVersion: "1.34.0",
+					DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+				},
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						HTTPS: &config.RepoType{
+							Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+							Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+						},
+					},
+				},
+				Services: createTestServices(),
+			},
+			validate: func(t *testing.T, tempDir string) {
+				// Edge renders the example infrastructure under the cluster name.
+				// Assert the artifact set is produced, not its rendered content.
+				infrastructureDir := filepath.Join(tempDir, "customer-service-catalog", "terraform", "edge-cluster", "infrastructure")
+
+				entries, err := os.ReadDir(infrastructureDir)
+				require.NoError(t, err)
+				assert.NotEmpty(t, entries)
+
+				for _, name := range []string{"main.tf", "outputs.tf", "variables.tf", "env.auto.tfvars"} {
+					_, statErr := os.Stat(filepath.Join(infrastructureDir, name))
+					require.NoErrorf(t, statErr, "expected generated edge artifact %q", name)
+				}
+
+				// Provider selector folders must not leak into output paths.
+				_, err = os.Stat(filepath.Join(tempDir, "customer-service-catalog", "terraform", "providers"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
+			},
+		},
 	}
 
 	for _, tt := range tests {
@@ -215,7 +261,7 @@ func TestGenerateCmd(t *testing.T) {
 
 			// Create config file if not testing error case
 			if !tt.wantErr || tt.errContains != "load config" {
-				configPath := createTestConfig(t, tempDir, config.Cluster{
+				cluster := config.Cluster{
 					Name:             "test-cluster",
 					Stage:            "dev",
 					IngressClassName: "traefik",
@@ -246,7 +292,11 @@ func TestGenerateCmd(t *testing.T) {
 						},
 					},
 					Services: createTestServices(),
-				})
+				}
+				if tt.cluster != nil {
+					cluster = *tt.cluster
+				}
+				configPath := createTestConfig(t, tempDir, cluster)
 
 				//dummy values
 				envPath := createDefaultGenerateTestEnv(t, tempDir)
