@@ -36,6 +36,14 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
     * An `.env` file that serves as a template for your environment configuration.
       Fill all placeholders (`<...>`) before running `kubara init`.
 
+    !!! tip "Working with coding agents"
+        Run `kubara agents` to scaffold an `AGENTS.md` into your repository so tools like Claude
+        Code or Codex get a compact, token-lean entry point instead of crawling the full docs site.
+        It points at `kubara --help` and `kubara schema` as the source of truth and links the
+        **raw Markdown** documentation pinned to your installed kubara version. Commit it so it
+        travels with the repository, and re-run `kubara agents --overwrite` to refresh it after
+        upgrading kubara.
+
 2. Update the values inside `.env`
 
     !!! danger "Handling .env Files"

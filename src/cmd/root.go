@@ -66,6 +66,7 @@ func NewRootCmd(ver string) *cli.Command {
 			NewGenerateCmd(),
 			NewBootstrapCmd(),
 			NewSchemaCmd(),
+			NewAgentsCmd(),
 			catalog.NewCatalogCommand(),
 		},
 		Before: func(ctx context.Context, _ *cli.Command) (context.Context, error) {

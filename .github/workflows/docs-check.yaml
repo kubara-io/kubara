@@ -50,6 +50,9 @@ jobs:
       - name: Validate docs build (strict)
         run: make docs-build
 
+      - name: Check agent onboarding doc links resolve
+        run: go -C src test ./internal/agentcontext/ -run '^TestRenderedDocLinksExist$'
+
       - name: Check command docs is up to date
         run: |
           if ! git diff --exit-code -- docs; then
