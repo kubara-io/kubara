@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/providers/stackit/">
+        <link rel="canonical" href="https://docs.kubara.io/next/1_getting_started/providers/t-cloud-public_terraform_bootstrap/">
       
       
-        <link rel="prev" href="../../bootstrapping/">
+        <link rel="prev" href="../t-cloud-public/">
       
       
-        <link rel="next" href="../stackit_terraform_bootstrap/">
+        <link rel="next" href="../t-cloud-public_provisioning_cce/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Overview - kubara - Docs</title>
+        <title>Terraform Bootstrap - kubara - Docs</title>
       
     
     
@@ -72,7 +72,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#stackit-cloud-and-edge-setup" class="md-skip">
+        <a href="#t-cloud-public-terraform-bootstrap" class="md-skip">
           Skip to content
         </a>
       
@@ -123,7 +123,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Overview
+              Terraform Bootstrap
             
           </span>
         </div>
@@ -549,8 +549,6 @@ You're not viewing the latest stable version.
                 
   
   
-    
-  
   
   
     
@@ -560,11 +558,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_1" >
         
           
           <label class="md-nav__link" for="__nav_2_6_1" id="__nav_2_6_1_label" tabindex="0">
@@ -585,7 +583,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_2_6_1">
             <span class="md-nav__icon md-icon"></span>
             
@@ -600,19 +598,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../stackit/" class="md-nav__link">
         
   
   
@@ -628,7 +617,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
     </li>
   
 
@@ -787,6 +775,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -796,11 +786,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" checked>
         
           
           <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
@@ -821,7 +811,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_2_6_2">
             <span class="md-nav__icon md-icon"></span>
             
@@ -864,10 +854,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../t-cloud-public_terraform_bootstrap/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -883,6 +900,87 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-prepare-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-terraform-backend-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create Terraform Backend State
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Create Terraform Backend State">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obs-to-kms-agency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OBS-to-KMS Agency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-continue-with-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Continue With Provisioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -2693,6 +2791,75 @@ You're not viewing the latest stable version.
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-prepare-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Prepare Environment Variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-create-terraform-backend-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create Terraform Backend State
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="2. Create Terraform Backend State">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#obs-to-kms-agency" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        OBS-to-KMS Agency
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#apply" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Apply
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-continue-with-provisioning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Continue With Provisioning
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -2711,23 +2878,82 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="stackit-cloud-and-edge-setup">STACKIT Cloud and Edge setup</h1>
-<p>For STACKIT-based setups, kubara provides Terraform configuration and modules to provision Kubernetes and additional infrastructure like a Secret Manager instance.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>In kubara version <code>0.2.0</code>, Terraform generation does not merge user-customized Terraform values and will overwrite existing Terraform files.</p>
+<h1 id="t-cloud-public-terraform-bootstrap">T Cloud Public Terraform Bootstrap</h1>
+<p>For T Cloud Public setups, kubara generates a Terraform bootstrap stack that creates the OBS bucket and S3-compatible credentials for the main Terraform state backend.</p>
+<p>Generate Terraform modules:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
+</code></pre></div>
+<p>Commit and push the generated files to your Git repository.</p>
+<h2 id="1-prepare-environment-variables">1. Prepare Environment Variables</h2>
+<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
+cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
+</code></pre></div>
+<p>Set the T Cloud Public provider variables in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_region</span><span class="o">=</span><span class="s2">&quot;eu-de&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_domain_name</span><span class="o">=</span><span class="s2">&quot;&lt;domain-name&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_tenant_name</span><span class="o">=</span><span class="s2">&quot;&lt;tenant-name&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_access_key</span><span class="o">=</span><span class="s2">&quot;&lt;access-key&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_secret_key</span><span class="o">=</span><span class="s2">&quot;&lt;secret-key&gt;&quot;</span>
+</code></pre></div>
+<p><code>TF_VAR_t_cloud_public_tenant_name</code> must be the T Cloud Public tenant/project name. This is the same value kubara reads from <code>terraform.projectId</code> in <code>config.yaml</code> for T Cloud Public, and it is not a UUID.</p>
+<p>Then load the file:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
+<span class="c1"># . .\set-env.ps1</span>
+</code></pre></div>
+<p>The generated environment file also sets <code>AWS_REQUEST_CHECKSUM_CALCULATION=when_required</code> and <code>AWS_RESPONSE_CHECKSUM_VALIDATION=when_required</code>. Keep these values for the T Cloud Public OBS backend. Terraform's <code>s3</code> backend only supports S3-compatible APIs on a best-effort basis, and recent AWS SDK checksum behavior can otherwise produce unreadable state objects against some S3-compatible backends.</p>
+<h2 id="2-create-terraform-backend-state">2. Create Terraform Backend State</h2>
+<p>Then navigate to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
+</code></pre></div>
+<p>For persistent changes to generated Terraform values, use a separate override file as described in <a href="../../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
+<h3 id="obs-to-kms-agency">OBS-to-KMS Agency</h3>
+<p>The bootstrap stack creates an IAM agency named <code>OBSAccessKMS</code> (delegated to the <code>op_svc_obs</code> service principal) so that OBS can use the generated KMS key for server-side bucket encryption. Without this agency, the bucket creation fails with <code>Status=403 Forbidden, Code=AccessDenied</code> the moment <code>server_side_encryption</code> is set.</p>
+<p>The agency is tenant-scoped and only needs to exist once per T Cloud Public tenant. If your tenant already has it (for example created out-of-band or from a previous bootstrap of another cluster), disable the in-stack creation:</p>
+<div class="highlight"><pre><span></span><code><span class="na">create_obs_kms_agency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">false</span>
+</code></pre></div>
+<p>If you do not need server-side encryption at all for the state bucket, set:</p>
+<div class="highlight"><pre><span></span><code><span class="na">enable_bucket_server_side_encryption</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">false</span>
+</code></pre></div>
+<p>The agency module is then skipped entirely.</p>
+<h3 id="apply">Apply</h3>
+<p>Run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>plan
+terraform<span class="w"> </span>apply
+</code></pre></div>
 </div>
-<div class="admonition info">
-<p class="admonition-title">Info</p>
-<p>You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener">Terraform provider documentation</a> and <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener">STACKIT Docs</a>.
-Make sure your created Service Account has Project Owner permissions.</p>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>plan
+tofu<span class="w"> </span>apply
+</code></pre></div>
 </div>
-<p>Follow this order:</p>
-<ol>
-<li>Start with <a href="../stackit_terraform_bootstrap/">Terraform Bootstrap</a>.</li>
-<li>Choose exactly one provisioning path for your cluster type: <a href="../stackit_provisioning_ske/">SKE</a> or <a href="../stackit_provisioning_edgecloud/">Edge Cloud</a>.</li>
-<li>Continue with the generic <a href="../../bootstrapping/">Bootstrap Your Own Platform</a> guide.</li>
-</ol>
+</div>
+</div>
+<p>Use the output to configure Terraform backend credentials:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>You can also persist these values in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again before running the main infrastructure stack.</p>
+<h2 id="3-continue-with-provisioning">3. Continue With Provisioning</h2>
+<p>Next, continue with <a href="../t-cloud-public_provisioning_cce/">Provisioning Infrastructure (CCE)</a> for <code>terraform.kubernetesType: cce</code>.</p>
 
 
 

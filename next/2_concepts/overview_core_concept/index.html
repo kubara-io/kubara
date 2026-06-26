@@ -6,7 +6,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
 <link href="https://docs.kubara.io/next/2_concepts/overview_core_concept/" rel="canonical">
-<link href="../../1_getting_started/providers/t-cloud-public/" rel="prev"/>
+<link href="../../1_getting_started/providers/t-cloud-public_provisioning_cce/" rel="prev"/>
 <link href="../gitops_platform_engineering_idp/" rel="next"/>
 <link href="../../images/favicon.ico" rel="icon"/>
 <meta content="mkdocs-1.6.1, mkdocs-material-9.7.6" name="generator"/>
@@ -363,8 +363,9 @@ You're not viewing the latest stable version.
 </ul>
 </nav>
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../1_getting_started/providers/t-cloud-public/">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2_6_2" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
 <span class="md-ellipsis">
     
   
@@ -373,7 +374,82 @@ You're not viewing the latest stable version.
 
     
   </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_6_2_label" class="md-nav" data-md-level="3">
+<label class="md-nav__title" for="__nav_2_6_2">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    T Cloud Public (Community)
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../1_getting_started/providers/t-cloud-public/">
+<span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
 </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../1_getting_started/providers/t-cloud-public_terraform_bootstrap/">
+<span class="md-ellipsis">
+    
+  
+    Terraform Bootstrap
+  
+
+    
+  </span>
+</a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" id="__nav_2_6_2_3" type="checkbox"/>
+<label class="md-nav__link" for="__nav_2_6_2_3" id="__nav_2_6_2_3_label" tabindex="0">
+<span class="md-ellipsis">
+    
+  
+    Provisioning Infrastructure
+  
+
+    
+  </span>
+<span class="md-nav__icon md-icon"></span>
+</label>
+<nav aria-expanded="false" aria-labelledby="__nav_2_6_2_3_label" class="md-nav" data-md-level="4">
+<label class="md-nav__title" for="__nav_2_6_2_3">
+<span class="md-nav__icon md-icon"></span>
+            
+  
+    Provisioning Infrastructure
+  
+
+          </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../1_getting_started/providers/t-cloud-public_provisioning_cce/">
+<span class="md-ellipsis">
+    
+  
+    CCE
+  
+
+    
+  </span>
+</a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -469,6 +545,19 @@ You're not viewing the latest stable version.
       
     </span>
 </a>
+<nav aria-label="3. Generated output is separated from cluster-specific customization" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#terraform-value-overrides">
+<span class="md-ellipsis">
+      
+        Terraform value overrides
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#4-bootstrap-is-only-the-beginning">
@@ -1275,6 +1364,19 @@ You're not viewing the latest stable version.
       
     </span>
 </a>
+<nav aria-label="3. Generated output is separated from cluster-specific customization" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#terraform-value-overrides">
+<span class="md-ellipsis">
+      
+        Terraform value overrides
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="#4-bootstrap-is-only-the-beginning">
@@ -1364,6 +1466,12 @@ You're not viewing the latest stable version.
 <p>If you want to understand how catalogs work internally or create your own external catalog, see <a href="../catalogs/">Catalogs</a>.</p>
 <h3 id="3-generated-output-is-separated-from-cluster-specific-customization">3. Generated output is separated from cluster-specific customization</h3>
 <p>kubara keeps reusable generated artifacts separate from cluster-specific overlays so the platform stays maintainable across multiple clusters.</p>
+<h4 id="terraform-value-overrides">Terraform value overrides</h4>
+<p>In generated Terraform directories, <code>env.auto.tfvars</code> is owned by kubara. <code>kubara generate --terraform</code> rewrites that file, so do not use it for persistent manual changes.</p>
+<p>For local Terraform value overrides, create a separate <code>*.auto.tfvars</code> file in the same directory, for example:</p>
+<div class="highlight"><pre><span></span><code>override.auto.tfvars
+</code></pre></div>
+<p>Terraform automatically loads all <code>*.auto.tfvars</code> files in lexical order. Because <code>override.auto.tfvars</code> sorts after <code>env.auto.tfvars</code>, values in <code>override.auto.tfvars</code> override the generated defaults. Only put values in the override file that should differ from <code>env.auto.tfvars</code>.</p>
 <h3 id="4-bootstrap-is-only-the-beginning">4. Bootstrap is only the beginning</h3>
 <p><code>kubara bootstrap</code> installs Argo CD and required CRDs, but the long-term operating model is still GitOps: Argo CD manages itself and then rolls out the generated platform charts.</p>
 <h2 id="directory-structure">Directory structure</h2>

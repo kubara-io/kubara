@@ -1022,9 +1022,22 @@ You're not viewing the latest stable version.
   
   
   
-    <li class="md-nav__item">
-      <a href="../providers/t-cloud-public/" class="md-nav__link">
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
         
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
+            
   
   
   <span class="md-ellipsis">
@@ -1038,7 +1051,164 @@ You're not viewing the latest stable version.
   
   
 
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    T Cloud Public (Community)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/t-cloud-public/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
       </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/t-cloud-public_terraform_bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2_3" id="__nav_2_6_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provisioning Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_6_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Provisioning Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../providers/t-cloud-public_provisioning_cce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CCE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
     </li>
   
 
@@ -3172,6 +3342,15 @@ During bootstrap kubara uses <code>additional-values.yaml</code> files when they
 <li>lists/arrays replace previous values completely</li>
 </ul>
 <p>CI-specific values can be stored in chart-local CI files (for example <code>ci/ci-values.yaml</code>) to keep pipeline-only settings out of runtime overlays.</p>
+<div class="admonition info">
+<p class="admonition-title">T Cloud Public CCE: provider-specific Helm adjustments</p>
+<p>After <code>kubara generate --helm</code> and before <code>kubara bootstrap</code>, replace the Traefik service annotation placeholder with the shared load balancer ID from Terraform:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster&gt;/infrastructure
+terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>load_balancer_id
+</code></pre></div>
+<p>Set the value in <code>customer-service-catalog/helm/&lt;cluster&gt;/traefik/values.yaml</code> under <code>traefik.service.annotations["kubernetes.io/elb.id"]</code>. Keep <code>kubernetes.io/elb.class: "union"</code>.</p>
+<p>ExternalDNS also needs a Kubernetes Secret named <code>tcloudpubliccloudsyaml</code> with a <code>clouds.yaml</code> key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from <code>customer-service-catalog/terraform/&lt;cluster&gt;/openbao/secrets.tf-example</code> to <code>secrets.tf</code>, set <code>TF_VAR_external_dns_os_username</code> and <code>TF_VAR_external_dns_os_password</code> in <code>set-env.sh</code>, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>Don't forget to commit and push your changes to Git!</strong></p>
@@ -3184,9 +3363,9 @@ During bootstrap kubara uses <code>additional-values.yaml</code> files when they
 <p>This command requires access to a Kubernetes cluster and, by default, uses <code>~/.kube/config</code>.
 To target a specific cluster, provide your own config with <code>--kubeconfig your-kubeconfig</code></p>
 </div>
-<p>For external-secrets, create provider credential secret(s) first (for example via <code>kubectl create secret ...</code>), then:</p>
-<p>A) <strong>recommended for first bootstrap:</strong> pass a <code>ClusterSecretStore</code> manifest to bootstrap with <code>--with-es-css-file</code> together with <code>--with-es-crds</code>, </p>
-<p>or B) apply your <code>ClusterSecretStore</code> manually (only if external-secrets CRDs are already installed on the cluster).</p>
+<p>External Secrets needs a <code>ClusterSecretStore</code>.</p>
+<p>For T Cloud Public CCE, kubara already renders the OpenBao-backed <code>ClusterSecretStore</code> into <code>external-secrets/values.yaml</code>. Use <code>--with-es-crds</code>; do not pass <code>--with-es-css-file</code> and do not create a separate provider credential secret.</p>
+<p>For other providers, create the provider credential secret first and either pass a <code>ClusterSecretStore</code> manifest during bootstrap with <code>--with-es-css-file</code> and <code>--with-es-crds</code>, or apply the <code>ClusterSecretStore</code> manually if the External Secrets CRDs already exist.</p>
 <p>If the namespace does not exist yet, create it once before creating the provider credential secret(s):</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>external-secrets
 </code></pre></div>
@@ -3226,10 +3405,11 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <code>&lt;cluster-name&gt;/&lt;stage&gt;/&lt;namespace&gt;/&lt;secret&gt;</code>, while cluster-wide secrets use
 <code>&lt;cluster-name&gt;/&lt;stage&gt;/cluster_secrets/&lt;secret&gt;</code>. For example, Grafana credentials for the
 <code>controlplane</code> production cluster live at
-<code>controlplane/production/kube-prometheus-stack/grafana_credentials</code>.</p>
+<code>controlplane/production/kube-prometheus-stack/grafana_credentials</code>.
+This path layout is the same for every provider and secret backend, including the local OpenBao setup.</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
 </code></pre></div>
-<p>Recommended for the first bootstrap with external-secrets: let kubara apply a templated <code>ClusterSecretStore</code> manifest during bootstrap:</p>
+<p>For providers that need an external <code>ClusterSecretStore</code> manifest, pass it during bootstrap:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--kubeconfig<span class="w"> </span>k8s.yaml<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml<span class="w"> </span><span class="se">\</span>

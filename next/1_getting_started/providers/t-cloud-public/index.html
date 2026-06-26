@@ -14,7 +14,7 @@
         <link rel="prev" href="../stackit_provisioning_edgecloud/">
       
       
-        <link rel="next" href="../../../2_concepts/overview_core_concept/">
+        <link rel="next" href="../t-cloud-public_terraform_bootstrap/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>T Cloud Public (Community) - kubara - Docs</title>
+        <title>Overview - kubara - Docs</title>
       
     
     
@@ -123,7 +123,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              T Cloud Public (Community)
+              Overview
             
           </span>
         </div>
@@ -779,6 +779,57 @@ You're not viewing the latest stable version.
   
   
   
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2" id="__nav_2_6_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    T Cloud Public (Community)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="3" aria-labelledby="__nav_2_6_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2_6_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    T Cloud Public (Community)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
     <li class="md-nav__item md-nav__item--active">
       
       <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
@@ -794,7 +845,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    T Cloud Public (Community)
+    Overview
   
 
     
@@ -812,7 +863,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    T Cloud Public (Community)
+    Overview
   
 
     
@@ -849,10 +900,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#generated-terraform" class="md-nav__link">
+  <a href="#provider-references" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generated Terraform
+        Provider References
       
     </span>
   </a>
@@ -862,6 +913,127 @@ You're not viewing the latest stable version.
     </ul>
   
 </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../t-cloud-public_terraform_bootstrap/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Terraform Bootstrap
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2_6_2_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_2_6_2_3" id="__nav_2_6_2_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Provisioning Infrastructure
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="4" aria-labelledby="__nav_2_6_2_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2_6_2_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Provisioning Infrastructure
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../t-cloud-public_provisioning_cce/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    CCE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
       
     </li>
   
@@ -2598,10 +2770,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#generated-terraform" class="md-nav__link">
+  <a href="#provider-references" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Generated Terraform
+        Provider References
       
     </span>
   </a>
@@ -2643,14 +2815,18 @@ You're not viewing the latest stable version.
 <span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 </code></pre></div>
 <p>For T Cloud Public, set <code>projectId</code> to the tenant/project name used as <code>tenant_name</code>, not to a UUID.</p>
-<h2 id="generated-terraform">Generated Terraform</h2>
-<p>Running <code>kubara generate --terraform</code> creates a T Cloud Public Terraform layout with:</p>
+<p>Follow this order:</p>
+<ol>
+<li>Start with <a href="../t-cloud-public_terraform_bootstrap/">Terraform Bootstrap</a>.</li>
+<li>Continue with <a href="../t-cloud-public_provisioning_cce/">Provisioning Infrastructure (CCE)</a>.</li>
+<li>Continue with the generic <a href="../../bootstrapping/">Bootstrap Your Own Platform</a> guide.</li>
+</ol>
+<h2 id="provider-references">Provider References</h2>
 <ul>
-<li><code>bootstrap-tfstate-backend</code>: OBS bucket, backend credentials, and optional OBS KMS agency setup for Terraform state</li>
-<li><code>infrastructure</code>: DNS zone, IAM agencies, VPC/subnet/NAT/load balancer, keypair, KMS key, CCE cluster, and StorageClass resources</li>
-<li>reusable managed modules for OBS buckets, IAM agencies, DNS, network, keypair, KMS, CCE, and StorageClasses</li>
+<li><a href="https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs" target="_blank" rel="noopener">T Cloud Public Terraform provider</a></li>
+<li><a href="https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/resources/cce_cluster_v3" target="_blank" rel="noopener">CCE cluster resource</a></li>
+<li><a href="https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/data-sources/cce_cluster_kubeconfig_v3" target="_blank" rel="noopener">CCE kubeconfig data source</a></li>
 </ul>
-<p>Provider-specific platform wiring is handled separately from these Terraform core templates.</p>
 
 
 
