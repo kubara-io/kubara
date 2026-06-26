@@ -3007,6 +3007,15 @@ The easiest way is to run <code>kubara</code> inside the repository (but do not 
 <li>An <code>.env</code> file that serves as a template for your environment configuration.
   Fill all placeholders (<code>&lt;...&gt;</code>) before running <code>kubara init</code>.</li>
 </ul>
+<div class="admonition tip">
+<p class="admonition-title">Working with coding agents</p>
+<p>Run <code>kubara agents</code> to scaffold an <code>AGENTS.md</code> into your repository so tools like Claude
+Code or Codex get a compact, token-lean entry point instead of crawling the full docs site.
+It points at <code>kubara --help</code> and <code>kubara schema</code> as the source of truth and links the
+<strong>raw Markdown</strong> documentation pinned to your installed kubara version. Commit it so it
+travels with the repository, and re-run <code>kubara agents --overwrite</code> to refresh it after
+upgrading kubara.</p>
+</div>
 </li>
 <li>
 <p>Update the values inside <code>.env</code></p>
@@ -3120,10 +3129,12 @@ continue with the next section.</p>
 </ul>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--helm
 </code></pre></div>
-<p>There are several Helm chart <code>values.yaml</code> files with dummy <code>change-me</code> values that need to be adjusted.
+<p>The generated <code>values.yaml</code> files are pre-filled from your <code>config.yaml</code> and <code>.env</code>. Review them and
+adjust any environment-specific settings; some charts still contain explicit placeholders that you
+must fill in.
 Example:
 <div class="highlight"><pre><span></span><code><span class="c1"># ... previous content of yaml file</span>
-<span class="nt">admin</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">change-me</span>
+<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://replace-me-with-your-url&quot;</span>
 <span class="c1"># ... rest of yaml</span>
 </code></pre></div>
 Edit the generated files in:
