@@ -426,3 +426,31 @@ jobs:
           name: terraform-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.REPORT_DIR }}/terraform
+
+
+  extract-images:
+    needs: run-kubara-init-and-generate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout CI scripts
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: |
+            .scripts
+            .github/helm-profiles
+
+      - name: Download generated kubara artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+
+      - name: Verify Helm
+        run: helm version --short
+
+      - name: Extract container images
+        run: |
+          mkdir -p reports
+          OUTPUT_FILE=reports/images.txt .scripts/image-version.sh
