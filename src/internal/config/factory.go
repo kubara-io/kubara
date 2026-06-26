@@ -93,3 +93,33 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 
 	return services, nil
 }
+
+func CreateSpokeScaffolding(name string) Cluster {
+	return Cluster{
+		Name:    name,
+		Stage:   "<stage>",
+		Type:    "spoke",
+		DNSName: "<dns-name>",
+		SSOOrg:  "<my-org>",
+		SSOTeam: "<my-team>",
+		Terraform: &Terraform{
+			Provider:          "<provider>",
+			ProjectID:         "<project-id>",
+			KubernetesType:    "<edge or ske>",
+			KubernetesVersion: "<version>",
+			DNS: DNS{
+				Name:  "<dns-name>",
+				Email: "<dns-mail>",
+			},
+		},
+		ArgoCD: ArgoCD{
+			Repo: RepoProto{
+				HTTPS: &RepoType{
+					Customer: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+					Managed:  Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: nil,
+	}
+}

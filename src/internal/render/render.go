@@ -51,7 +51,24 @@ func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
 		return nil, fmt.Errorf("select templates for provider %q: %w", options.Provider, err)
 	}
 
+	selected = filterTemplateFiles(selected, options.PathPredicate)
+
 	return templateResultsFromFiles(selected, options.Data)
+}
+
+func filterTemplateFiles(files []templateFile, predicate TemplatePathPredicate) []templateFile {
+	if predicate == nil {
+		return files
+	}
+
+	filtered := make([]templateFile, 0, len(files))
+	for _, file := range files {
+		if predicate(StripProviderPath(file.sourcePath)) {
+			filtered = append(filtered, file)
+		}
+	}
+
+	return filtered
 }
 
 func validateTemplateType(tplType TemplateType) error {
@@ -80,12 +97,15 @@ type TemplateResult struct {
 	Error   error  // Any error that occurred during templating
 }
 
+type TemplatePathPredicate func(path string) bool
+
 type TemplateOptions struct {
-	Type        TemplateType
-	Provider    string
-	CatalogPath string
-	Overwrite   bool
-	Data        any
+	Type          TemplateType
+	Provider      string
+	CatalogPath   string
+	Overwrite     bool
+	Data          any
+	PathPredicate TemplatePathPredicate
 }
 
 type templateSource struct {

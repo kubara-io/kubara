@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha1,
+		Version: ConfigVersionV1Alpha2,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -65,8 +65,14 @@ func newValidTestConfig() *Config {
 					"homer-dashboard":         {Status: service.StatusEnabled},
 					"oauth2-proxy":            {Status: service.StatusEnabled},
 					"metrics-server":          {Status: service.StatusEnabled},
-					"metallb":                 {Status: service.StatusEnabled},
-					"longhorn":                {Status: service.StatusEnabled},
+					"metallb": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"publicLoadBalancerIPs":   "127.0.0.1",
+							"loadBalancerAddressPool": []any{"127.0.0.2/32"},
+						},
+					},
+					"longhorn": {Status: service.StatusEnabled},
 					"velero": {
 						Status: service.StatusEnabled,
 						Config: service.Config{
@@ -242,7 +248,7 @@ clusters:
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha1, loaded.Version)
+	require.Equal(t, ConfigVersionV1Alpha2, loaded.Version)
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
@@ -267,7 +273,7 @@ clusters:
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha1")
+	assert.Contains(t, savedContent, "version: v1alpha2")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
 	assert.NotContains(t, savedContent, "certManager:")
@@ -406,17 +412,6 @@ func TestConfigStore_Validate(t *testing.T) {
 	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
 
-	// Test optional IP address fields
-	validConfigWithLoadBalancerIPs := deepCopyConfig(validConfig)
-	validConfigWithLoadBalancerIPs.Clusters[0].PrivateLoadBalancerIP = "192.168.1.10"
-	validConfigWithLoadBalancerIPs.Clusters[0].PublicLoadBalancerIP = "203.0.113.10"
-
-	invalidConfigInvalidPrivateIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPrivateIP.Clusters[0].PrivateLoadBalancerIP = "not-an-ip"
-
-	invalidConfigInvalidPublicIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPublicIP.Clusters[0].PublicLoadBalancerIP = "999.999.999.999"
-
 	tests := []struct {
 		name    string
 		config  *Config
@@ -460,21 +455,6 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_missing_terraform_required_field",
 			config:  invalidConfigMissingTerraformField,
-			wantErr: true,
-		},
-		{
-			name:    "valid_config_with_loadbalancer_ips_should_pass_validation",
-			config:  validConfigWithLoadBalancerIPs,
-			wantErr: false,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_private_loadbalancer_ip",
-			config:  invalidConfigInvalidPrivateIP,
-			wantErr: true,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_public_loadbalancer_ip",
-			config:  invalidConfigInvalidPublicIP,
 			wantErr: true,
 		},
 	}

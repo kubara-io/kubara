@@ -6,7 +6,15 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 )
 
-const ConfigVersionV1Alpha1 = "v1alpha1"
+const (
+	ConfigVersionV1Alpha1 = "v1alpha1"
+	ConfigVersionV1Alpha2 = "v1alpha2"
+)
+
+const (
+	Hub   string = "hub"
+	Spoke string = "spoke"
+)
 
 // TerraformProvider identifies an infrastructure provider with embedded Terraform templates.
 type TerraformProvider string
@@ -34,7 +42,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha1,default=v1alpha1"`
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha2,default=v1alpha2"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
 
@@ -49,9 +57,6 @@ type Cluster struct {
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
 	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
-
-	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
-	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
 
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`

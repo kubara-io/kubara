@@ -11,76 +11,12 @@ The Argo CD integration flow is the same in both cases.
 
 ## 1. Add spoke cluster to `config.yaml`
 
-Add a new cluster entry:
-
-```yaml
-clusters:
-  - name: workload-0
-    stage: dev
-    type: spoke
-    dnsName: workload-0.dev.example.com
-    ssoOrg: my-org
-    ssoTeam: my-team
-    terraform:
-      provider: stackit # currently supported: stackit
-      projectId: <project-id>
-      kubernetesType: ske
-      kubernetesVersion: 1.34
-      dns:
-        name: workload-0.dev.example.com
-        email: platform@example.com
-    argocd:
-      repo:
-        https:
-          customer:
-            url: https://git.example.com/platform/repo.git
-            targetRevision: main
-          managed:
-            url: https://git.example.com/platform/repo.git
-            targetRevision: main
-    services:
-      argo-cd:
-        status: enabled
-      cert-manager:
-        status: enabled
-        config:
-          clusterIssuer:
-            name: letsencrypt-staging
-            email: platform@example.com
-            server: https://acme-staging-v02.api.letsencrypt.org/directory
-      external-dns:
-        status: enabled
-      external-secrets:
-        status: enabled
-      kube-prometheus-stack:
-        status: enabled
-        config:
-            storageClassName: standard-rwo # optional
-      traefik:
-        status: enabled
-      kyverno:
-        status: enabled
-      kyverno-policies:
-        status: enabled
-      kyverno-policy-reporter:
-        status: enabled
-      loki:
-        status: enabled
-        config:
-            storageClassName: standard-rwo # optional
-      homer-dashboard:
-        status: enabled
-      oauth2-proxy:
-        status: enabled
-      metrics-server:
-        status: disabled
-      metallb:
-        status: disabled
-      longhorn:
-        status: disabled
-      velero:
-        status: disabled
+To add a new cluster to your `config.yaml` simply type:
+```bash
+kubara cluster add <spoke-name> --catalog /path/to/catalog
 ```
+
+This will create a new cluster in the config.yaml that will respect your catalog choices.
 
 ### Optional: Ingress annotation overrides
 
@@ -111,6 +47,8 @@ This creates/updates the spoke cluster overlays in:
 * `customer-service-catalog/terraform/<spoke-cluster-name>/...`
 * `customer-service-catalog/helm/<spoke-cluster-name>/...`
 
+This also registers the spokes in the ArgoCD `values.yaml`.
+
 ## 3. Prepare the spoke cluster
 
 If this is a new cluster, apply Terraform for the spoke entry.
@@ -118,14 +56,10 @@ If the cluster already exists, skip Terraform and continue.
 
 You need the spoke cluster kubeconfig for registration in Argo CD.
 Store it in your secret backend (Vault/Secret Manager), for example:
+The config expects the kubeconfig to be reachable under:
+<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>
+And the secret itself simply be named `kubeconfig`.
 
-```json
-{
-  "my_clusters": {
-    "k8s-spoke-0": "<spoke kubeconfig yaml>"
-  }
-}
-```
 
 ## 4. Prepare external-secrets credentials on the spoke cluster
 
@@ -166,37 +100,6 @@ clusterSecretStores:
         server: "https://vault.example.com"
         version: v2
 ```
-
-## 5. Register spoke cluster in Argo CD
-
-Update the hub cluster overlay:
-`customer-service-catalog/helm/<hub-cluster-name>/argo-cd/values.yaml`
-
-```yaml
-bootstrapValues:
-  cluster:
-    - name: my-new-spoke-0
-      project: hub-production
-      remoteRef:
-        remoteKey: <hub-cluster-name>/<stage>/my_clusters
-        remoteKeyProperty: k8s-spoke-0
-      secretStoreRef:
-        kind: ClusterSecretStore
-        name: <hub-cluster-name>-<stage>
-      additionalLabels:
-        cert-manager: enabled
-        external-dns: enabled
-        external-secrets: enabled
-        traefik: enabled
-        kube-prometheus-stack: enabled
-        kyverno: enabled
-        kyverno-policies: enabled
-        kyverno-policy-reporter: enabled
-        loki: enabled
-        oauth2-proxy: enabled
-```
-
-The `remoteRef` points to the spoke kubeconfig secret in your secret backend.
 
 ![Hub_n_Spoke](../assets/diagrams.drawio)
 

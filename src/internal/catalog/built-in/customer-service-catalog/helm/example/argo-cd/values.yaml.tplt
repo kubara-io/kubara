@@ -26,6 +26,31 @@ bootstrapValues:
         ignore:
           - kind: Secret
             name: cert-manager-webhook-ca
+{{/*
+
+For each spoke cluster in the config file a external secret gets created pointing to a secret inside the secret manager
+<cluster-name>/<stage-name>/argocd/<spoke-name>
+
+This is a fixed assumption and needs to be followed for spoke cluster onboarding.
+*/}}
+{{- if .spokes }}
+  cluster:
+{{- range .spokes }}
+    - name: {{ .name }}
+      project: {{ $.cluster.name }}-{{ $.cluster.stage }}
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: {{ $.cluster.name }}-{{ $.cluster.stage }}
+      remoteRef:
+        remoteKey: {{ $.cluster.name }}/{{ $.cluster.stage }}/argocd/{{ .name }}-{{ .stage }}
+        remoteKeyProperty: kubeconfig
+      additionalLabels:
+{{- range $svcName, $svc := .services }}
+        {{ $svcName }}: "{{ index $svc "status" | default "disabled" }}"
+{{- end }}
+{{- end }}
+{{- end }}
+
 
   applicationSets:
     {{ .cluster.name }}-{{ .cluster.stage }}:
@@ -105,7 +130,7 @@ externalSecrets:
 {{- $argocdUserIngressAnnotations := dig "cluster" "services" "argocd" "networking" "annotations" (dict) . -}}
 {{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadBalancerIP -}}
+{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) -}}
 {{- end -}}
 {{- $argocdIngressGrpcAnnotations = mergeOverwrite $argocdIngressGrpcAnnotations $argocdUserIngressAnnotations -}}
 
@@ -114,7 +139,7 @@ externalSecrets:
 {{- $_ := set $argocdIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
 {{- end -}}
 {{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" .cluster.publicLoadBalancerIP -}}
+{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) -}}
 {{- end -}}
 {{- $argocdIngressAnnotations = mergeOverwrite $argocdIngressAnnotations $argocdUserIngressAnnotations -}}
 

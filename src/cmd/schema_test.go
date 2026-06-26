@@ -184,7 +184,7 @@ spec:
 				tt.setup(t, tempDir)
 			}
 
-			app := createTestApp(NewSchemaCmd())
+			app := CreateTestApp(NewSchemaCmd())
 
 			// Run: kubara schema [flags]
 			args := append([]string{"kubara", "schema"}, tt.flags...)
