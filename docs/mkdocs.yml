@@ -8,72 +8,65 @@ nav:
   - Getting Started:
       - Quick Start: 1_getting_started/quick_start.md
       - Installation: 1_getting_started/installation.md
-      - Commands: 1_getting_started/commands.md
       - Prerequisites: 1_getting_started/prerequisites.md
       - Bootstrapping: 1_getting_started/bootstrapping.md
-      - Providers:
-          - STACKIT:
-              - Overview: 1_getting_started/providers/stackit.md
-              - Terraform Bootstrap: 1_getting_started/providers/stackit_terraform_bootstrap.md
-              - Provisioning Infrastructure:
-                  - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
-                  - Edge Cloud (Beta): 1_getting_started/providers/stackit_provisioning_edgecloud.md
-          - T Cloud Public (Community):
-              - Overview: 1_getting_started/providers/t-cloud-public.md
-              - Terraform Bootstrap: 1_getting_started/providers/t-cloud-public_terraform_bootstrap.md
-              - Provisioning Infrastructure:
-                  - CCE: 1_getting_started/providers/t-cloud-public_provisioning_cce.md
   - Concepts:
       - Overview: 2_concepts/overview_core_concept.md
       - Platform Engineering: 2_concepts/gitops_platform_engineering_idp.md
       - Catalogs: 2_concepts/catalogs.md
       - Catalog Distribution: 2_concepts/catalog_distribution.md
       - Catalog Templating: 2_concepts/catalog_templating.md
+  - Infrastructure Presets:
+      - Overview: 3_infrastructure/overview.md
+      - kind (local): 3_infrastructure/kind.md
+      - STACKIT SKE: 3_infrastructure/stackit_ske.md
+      - STACKIT Edge Cloud: 3_infrastructure/stackit_edge_cloud.md
+      - T Cloud Public (Community): 3_infrastructure/t-cloud-public.md
   - Building Your Platform:
-      - How to add a Spoke Cluster: 3_building_your_platform/add_spoke_cluster.md
-      - How to create a Catalog: 3_building_your_platform/create_catalog.md
+      - How to add a Spoke Cluster: 4_building_your_platform/add_spoke_cluster.md
+      - How to create a Catalog: 4_building_your_platform/create_catalog.md
       - SSO:
-          - How to add SSO: 3_building_your_platform/sso/add_sso.md
-          - SSO Examples: 3_building_your_platform/sso/add_sso_examples.md
+          - How to add SSO: 4_building_your_platform/sso/add_sso.md
+          - SSO Examples: 4_building_your_platform/sso/add_sso_examples.md
   - Workload Onboarding:
-      - Overview: 4_workload_onboarding/overview.md
-      - How to add a Project: 4_workload_onboarding/add_app_project.md
-      - How to add a Repository: 4_workload_onboarding/add_app_repository.md
-      - How to add an AppSet: 4_workload_onboarding/add_appset.md
-      - How to add an Application: 4_workload_onboarding/add_application.md
+      - Overview: 5_workload_onboarding/overview.md
+      - How to add a Project: 5_workload_onboarding/add_app_project.md
+      - How to add a Repository: 5_workload_onboarding/add_app_repository.md
+      - How to add an AppSet: 5_workload_onboarding/add_appset.md
+      - How to add an Application: 5_workload_onboarding/add_application.md
   - Components (Built-in):
-      - Overview: 5_components/components_overview.md
-      - Best Practices: 5_components/best_practices.md
-      - Backup & Recovery: 5_components/backup_and_recovery.md
+      - Overview: 6_components/components_overview.md
+      - Best Practices: 6_components/best_practices.md
+      - Backup & Recovery: 6_components/backup_and_recovery.md
       - Network:
-          - ExternalDNS: 5_components/network_external_dns.md
+          - ExternalDNS: 6_components/network_external_dns.md
       - Security:
-          - Certificates: 5_components/security_certificates.md
+          - Certificates: 6_components/security_certificates.md
       - Observability:
-          - Dashboards: 5_components/observability_dashboards.md
-          - Metrics: 5_components/observability_metrics.md
-          - Alerts: 5_components/observability_alerts.md
-          - Logs: 5_components/observability_logs.md
+          - Dashboards: 6_components/observability_dashboards.md
+          - Metrics: 6_components/observability_metrics.md
+          - Alerts: 6_components/observability_alerts.md
+          - Logs: 6_components/observability_logs.md
   - Architecture:
-      - Architecture overview: 6_architecture/architecture_overview.md
-      - ADR: 9_decisions/ADR.md
-      - ADR-Index: 9_decisions/ADR-index.md
+      - Architecture overview: 7_architecture/architecture_overview.md
+      - ADR: 10_decisions/ADR.md
+      - ADR-Index: 10_decisions/ADR-index.md
   - Community:
-      - "Community & Support": 7_community/community-n-support.md
+      - "Community & Support": 8_community/community-n-support.md
       - Contributing: https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md
-      - Maintainers: 7_community/maintainers.md
+      - Maintainers: 8_community/maintainers.md
   - Reference:
       - Commands: 1_getting_started/commands.md
-      - Release Cycle & Updates: 8_reference/release_cycle_and_updates.md
-      - Known Issues: 8_reference/known_issues.md
-      - FAQ: 8_reference/faq.md
+      - Release Cycle & Updates: 9_reference/release_cycle_and_updates.md
+      - Known Issues: 9_reference/known_issues.md
+      - FAQ: 9_reference/faq.md
       - Code of Conduct: https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md
       - Security: https://github.com/kubara-io/kubara/blob/main/SECURITY.md
       - Docs License (CC BY 4.0): https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license
       - Software License (Apache 2.0): https://github.com/kubara-io/kubara/blob/main/LICENSE
 not_in_nav: |
-  9_decisions/ADR-template.md
-  9_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
+  10_decisions/ADR-template.md
+  10_decisions/ADR-[0-9][0-9][0-9][0-9]-*.md
 plugins:
   - search
   - privacy:

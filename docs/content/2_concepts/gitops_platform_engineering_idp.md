@@ -101,4 +101,4 @@ kubara sits mainly on the platform side:
 - For the overall kubara model: [Overview](overview_core_concept.md)
 - For the catalog model: [Catalogs](catalogs.md)
 - For catalog distribution: [Catalog distribution](catalog_distribution.md)
-- For workload onboarding on top of the platform: [Workload Onboarding with Argo CD](../4_workload_onboarding/overview.md)
+- For workload onboarding on top of the platform: [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md)

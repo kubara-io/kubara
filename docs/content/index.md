@@ -11,7 +11,7 @@
 
 You can think of kubara as a package manager for platform architecture: it helps you define a reusable platform setup, generate the needed artifacts, and package that setup for reuse across many clusters.  
 
-It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party tooling in one reusable [GitOps](6_architecture/architecture_overview.md#gitops) workflow.  
+It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party tooling in one reusable [GitOps](7_architecture/architecture_overview.md#gitops) workflow.  
 
 
 ![Overview](assets/diagrams.drawio)

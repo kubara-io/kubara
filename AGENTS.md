@@ -20,7 +20,7 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 ## Reference Map
 - Product setup and bootstrap flow: `docs/content/1_getting_started/bootstrap_process.md`
 - Runtime prerequisites: `docs/content/1_getting_started/prerequisites.md`
-- Architecture context: `docs/content/4_architecture/architecture_overview.md`
+- Architecture context: `docs/content/7_architecture/architecture_overview.md`
 - Contributor and PR workflow: `CONTRIBUTING.md`
 - Config schema and template keys: `src/internal/config/types.go` (use `kubara schema` when needed)
 
@@ -61,7 +61,7 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Docs live under `docs/content/`.
 - Keep changes aligned with `docs/mkdocs.yml` navigation.
 - Preserve relative paths under `docs/content/images/` and `docs/content/assets/`.
-- Significant technical or architectural decisions may require an ADR in `docs/content/7_decisions/`.
+- Significant technical or architectural decisions may require an ADR in `docs/content/10_decisions/`.
 
 ## Avoid
 - Do not introduce new tooling/dependencies without clear need.
