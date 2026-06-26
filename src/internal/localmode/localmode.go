@@ -63,8 +63,6 @@ func ApplyClusterProfile(cluster *config.Cluster, dnsName string) {
 	cluster.SSOOrg = DefaultSSOOrg
 	cluster.SSOTeam = DefaultSSOTeam
 	cluster.IngressClassName = "traefik"
-	cluster.PrivateLoadBalancerIP = ""
-	cluster.PublicLoadBalancerIP = ""
 	cluster.Terraform = nil
 
 	for serviceName, serviceConfig := range cluster.Services {
