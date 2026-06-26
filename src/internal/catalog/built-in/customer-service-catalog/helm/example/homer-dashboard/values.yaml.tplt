@@ -160,7 +160,7 @@ dashboardConfig:
         {{- if $tCloudPublic }}
         - name: "OpenBao"
           logo: "/assets/tools/openbao.png"
-          url: "/openbao/"
+          url: "/ui/"
           subtitle: "Secrets Management"
           target: "_blank"
         {{- end }}
