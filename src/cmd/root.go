@@ -67,6 +67,7 @@ func NewRootCmd(ver string) *cli.Command {
 			NewGenerateCmd(),
 			NewBootstrapCmd(),
 			NewSchemaCmd(),
+			NewAgentsCmd(),
 			catalog.NewCatalogCommand(),
 			cluster.NewClusterCommand(),
 		},

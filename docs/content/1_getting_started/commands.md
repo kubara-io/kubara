@@ -157,6 +157,20 @@ Generate a JSON schema for the config yaml structure
 
 Shows a list of commands or help for one command
 
+## agents
+
+Scaffold an onboarding file for AI coding assistants (AGENTS.md)
+
+>kubara agents [--overwrite]
+
+**--help, -h**: show help
+
+**--overwrite**: Overwrite an existing AGENTS.md
+
+### help, h
+
+Shows a list of commands or help for one command
+
 ## catalog
 
 Manage platform catalogs
