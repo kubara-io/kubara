@@ -160,6 +160,11 @@ dashboardConfig:
     - name: "DevOps Links"
       items:
         {{- if $tCloudPublic }}
+        - name: "OpenBao"
+          logo: "/assets/tools/openbao.png"
+          url: "https://{{ .cluster.dnsName }}/openbao/"
+          subtitle: "Secrets Management"
+          target: "_blank"
         - name: "OTC Console"
           icon: "fas fa-cloud"
           url: "https://console.otc.t-systems.com"
