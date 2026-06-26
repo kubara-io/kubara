@@ -22,7 +22,7 @@ output "load_balancer_public_ip" {
 }
 
 output "load_balancer_id" {
-  description = "Shared load balancer ID for Kubernetes Service annotations."
+  description = "Shared load balancer ID for the Traefik CCE Service annotation."
   value       = module.network.load_balancer_id
 }
 
@@ -56,6 +56,21 @@ output "storage_classes" {
   value       = var.create_storage_classes ? module.storage_classes[0].names : []
 }
 
+output "openbao_release_name" {
+  description = "OpenBao Helm release name, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].release_name : null
+}
+
+output "openbao_namespace" {
+  description = "OpenBao namespace, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].namespace : null
+}
+
+output "openbao_ingress_url" {
+  description = "OpenBao ingress URL, if enabled."
+  value       = var.enable_openbao ? module.openbao[0].ingress_url : null
+}
+
 output "dns_zone_id" {
   description = "DNS zone ID."
   value       = var.create_dns_zone ? module.dns_zone[0].id : null
@@ -70,4 +85,23 @@ output "dns_zone_masters" {
   description = "DNS zone master name servers."
   value       = var.create_dns_zone ? module.dns_zone[0].masters : null
 }
+
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
+output "velero_bucket_name" {
+  description = "OBS bucket name for Velero backups."
+  value       = module.velero_bucket.bucket_name
+}
+
+output "velero_credential_access_key" {
+  description = "Access key for Velero OBS access."
+  value       = module.velero_bucket.credential_access_key
+  sensitive   = true
+}
+
+output "velero_credential_secret_access_key" {
+  description = "Secret key for Velero OBS access."
+  value       = module.velero_bucket.credential_secret_access_key
+  sensitive   = true
+}
+{{ end }}
 {{ end }}

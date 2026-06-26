@@ -21,12 +21,14 @@ terraform:
 
 For T Cloud Public, set `projectId` to the tenant/project name used as `tenant_name`, not to a UUID.
 
-## Generated Terraform
+Follow this order:
 
-Running `kubara generate --terraform` creates a T Cloud Public Terraform layout with:
+1. Start with [Terraform Bootstrap](t-cloud-public_terraform_bootstrap.md).
+2. Continue with [Provisioning Infrastructure (CCE)](t-cloud-public_provisioning_cce.md).
+3. Continue with the generic [Bootstrap Your Own Platform](../bootstrapping.md) guide.
 
-- `bootstrap-tfstate-backend`: OBS bucket, backend credentials, and optional OBS KMS agency setup for Terraform state
-- `infrastructure`: DNS zone, IAM agencies, VPC/subnet/NAT/load balancer, keypair, KMS key, CCE cluster, and StorageClass resources
-- reusable managed modules for OBS buckets, IAM agencies, DNS, network, keypair, KMS, CCE, and StorageClasses
+## Provider References
 
-Provider-specific platform wiring is handled separately from these Terraform core templates.
+- [T Cloud Public Terraform provider](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs)
+- [CCE cluster resource](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/resources/cce_cluster_v3)
+- [CCE kubeconfig data source](https://registry.terraform.io/providers/opentelekomcloud/opentelekomcloud/latest/docs/data-sources/cce_cluster_kubeconfig_v3)

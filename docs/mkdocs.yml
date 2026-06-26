@@ -18,7 +18,11 @@ nav:
               - Provisioning Infrastructure:
                   - SKE: 1_getting_started/providers/stackit_provisioning_ske.md
                   - Edge Cloud (Beta): 1_getting_started/providers/stackit_provisioning_edgecloud.md
-          - T Cloud Public (Community): 1_getting_started/providers/t-cloud-public.md
+          - T Cloud Public (Community):
+              - Overview: 1_getting_started/providers/t-cloud-public.md
+              - Terraform Bootstrap: 1_getting_started/providers/t-cloud-public_terraform_bootstrap.md
+              - Provisioning Infrastructure:
+                  - CCE: 1_getting_started/providers/t-cloud-public_provisioning_cce.md
   - Concepts:
       - Overview: 2_concepts/overview_core_concept.md
       - Platform Engineering: 2_concepts/gitops_platform_engineering_idp.md
