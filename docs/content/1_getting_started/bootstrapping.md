@@ -36,6 +36,14 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
     * An `.env` file that serves as a template for your environment configuration.
       Fill all placeholders (`<...>`) before running `kubara init`.
 
+    !!! tip "Working with coding agents"
+        Run `kubara agents` to scaffold an `AGENTS.md` into your repository so tools like Claude
+        Code or Codex get a compact, token-lean entry point instead of crawling the full docs site.
+        It points at `kubara --help` and `kubara schema` as the source of truth and links the
+        **raw Markdown** documentation pinned to your installed kubara version. Commit it so it
+        travels with the repository, and re-run `kubara agents --overwrite` to refresh it after
+        upgrading kubara.
+
 2. Update the values inside `.env`
 
     !!! danger "Handling .env Files"
@@ -171,11 +179,13 @@ kubara generate --helm
 ```
 
 
-There are several Helm chart `values.yaml` files with dummy `change-me` values that need to be adjusted.
+The generated `values.yaml` files are pre-filled from your `config.yaml` and `.env`. Review them and
+adjust any environment-specific settings; some charts still contain explicit placeholders that you
+must fill in.
 Example:
 ```yaml
 # ... previous content of yaml file
-admin: change-me
+url: "https://replace-me-with-your-url"
 # ... rest of yaml
 ```
 Edit the generated files in:
