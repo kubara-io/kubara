@@ -57,6 +57,52 @@ jobs:
       - name: Install go-licenses
         run: go install github.com/google/go-licenses/v2@3e084b0caf710f7bfead967567539214f598c0a2 #v2.0.1
 
+      - name: Verify preinstalled Helm
+        run: |
+          set -euo pipefail
+          helm version --short
+
+      - name: Run kubara generate
+        env:
+          KUBARA_PROJECT_NAME: kubara
+          KUBARA_PROJECT_STAGE: tst
+          KUBARA_DOCKERCONFIG_BASE64: "000000"
+          KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD: "000000"
+          KUBARA_ARGOCD_HELM_REPO_USERNAME: git
+          KUBARA_ARGOCD_HELM_REPO_PASSWORD: "000000"
+          KUBARA_ARGOCD_HELM_REPO_URL: "https://kubara.io/kubara.git"
+          KUBARA_ARGOCD_GIT_HTTPS_URL: "https://kubara.io/kubara.git"
+          KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
+          KUBARA_ARGOCD_GIT_USERNAME: git
+          KUBARA_DOMAIN_NAME: stackit.run
+          KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
+          KUBARA_TERRAFORM_PROVIDER: stackit
+          KUBARA_CLUSTER_TYPE: hub
+          KUBARA_SSO_ORG: Kubara
+          KUBARA_SSO_TEAM: Test
+          KUBARA_KUBERNETES_TYPE: ske
+          KUBARA_KUBERNETES_VERSION: "1.35.0"
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/gen
+          (cd src && go run main.go --work-dir /tmp/gen init --prep)
+          .scripts/kubara-env-update.sh /tmp/gen/.env
+          (cd src && go run main.go --work-dir /tmp/gen init)
+          .scripts/kubara-config-update.sh /tmp/gen/config.yaml
+          (cd src && go run main.go --work-dir /tmp/gen generate)
+
+      - name: Extract images and set goreleaser header
+        run: |
+          MANAGED=/tmp/gen/managed-service-catalog/helm \
+          OUTPUT_FILE=/tmp/images.txt \
+            .scripts/image-version.sh
+          {
+            echo "IMAGE_LIST<<EOF"
+            sed 's/^/- `/' /tmp/images.txt | sed 's/$/ `/'
+            echo "EOF"
+          } >> "$GITHUB_ENV"
+
+
       - name: Run GoReleaser
         if: github.event_name == 'push'
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94  # v7.2.3

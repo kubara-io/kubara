@@ -454,3 +454,20 @@ jobs:
         run: |
           mkdir -p reports
           OUTPUT_FILE=reports/images.txt .scripts/image-version.sh
+
+      - name: Write image summary
+        if: always()
+        run: |
+          [[ -f reports/images.txt ]] || exit 0
+          echo "### Container Images" >> "$GITHUB_STEP_SUMMARY"
+          while read -r img; do
+            echo "- $img" >> "$GITHUB_STEP_SUMMARY"
+          done < reports/images.txt
+
+      - name: Upload image list
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: container-images-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: reports/images.txt
