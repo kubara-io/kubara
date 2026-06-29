@@ -52,7 +52,7 @@ provider "opentelekomcloud" {
 
 {{ if (eq .cluster.terraform.kubernetesType "cce") }}
 locals {
-  cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig_raw)
+  cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig)
 
   # OTC CCE returns three cluster entries in the generated kubeconfig when
   # an EIP is bound to the master:
