@@ -3,10 +3,10 @@ apiVersion: v2
 name: velero
 description: Umbrella Chart for Velero Config
 type: application
-version: 0.1.3
+version: 0.2.0
 dependencies:
   - name: velero
-    version: "12.0.3"
+    version: "12.1.0"
     repository: https://vmware-tanzu.github.io/helm-charts
   - name: template-library
     repository: file://../template-library
