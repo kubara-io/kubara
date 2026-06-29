@@ -3,8 +3,8 @@ apiVersion: v2
 name: kyverno-policies
 description: Umbrella Chart for kyverno-policies
 type: application
-version: 0.4.0
+version: 0.4.1
 dependencies:
   - name: kyverno-policies
     repository: https://kyverno.github.io/kyverno
-    version: 3.8.0
+    version: 3.8.1
