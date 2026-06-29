@@ -23,7 +23,7 @@ output "addons" {
   value       = opentelekomcloud_cce_addon_v3.this
 }
 
-output "kubeconfig_raw" {
+output "kubeconfig" {
   description = "Raw admin kubeconfig."
   value       = data.opentelekomcloud_cce_cluster_kubeconfig_v3.this.kubeconfig
   sensitive   = true

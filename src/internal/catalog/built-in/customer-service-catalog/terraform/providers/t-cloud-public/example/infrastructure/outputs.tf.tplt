@@ -1,8 +1,8 @@
 {{ if (eq .cluster.terraform.kubernetesType "cce") }}
 ### Kubernetes Instance
-output "kubeconfig_raw" {
+output "kubeconfig" {
   description = "Raw admin kubeconfig."
-  value       = module.cce_cluster.kubeconfig_raw
+  value       = module.cce_cluster.kubeconfig
   sensitive   = true
 }
 

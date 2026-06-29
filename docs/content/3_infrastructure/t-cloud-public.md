@@ -387,13 +387,13 @@ Export the kubeconfig:
 === "Terraform"
 
     ```bash
-    terraform output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
+    terraform output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
 === "Tofu"
 
     ```bash
-    tofu output -raw kubeconfig_raw > $HOME/.kube/kubara.yaml
+    tofu output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
 Keep this `kubara.yaml` local and do not commit it to Git.
