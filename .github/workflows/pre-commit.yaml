@@ -24,7 +24,7 @@ jobs:
       # Cache terraform-docs binary to avoid downloading it every run
       - name: Cache terraform-docs
         id: cache-terraform-docs
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
         with:
           path: ~/.local/bin/terraform-docs
           key: terraform-docs-${{ env.TERRAFORM_DOCS_VERSION }}-${{ env.TERRAFORM_DOCS_OS_ARCH }}
