@@ -110,7 +110,7 @@ jobs:
       - name: Cache gosec
         if: always()
         id: cache-gosec
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/bin/gosec
           key: ${{ runner.os }}-${{ runner.arch }}-gosec-${{ env.GOSEC_VERSION }}
@@ -350,7 +350,7 @@ jobs:
 
       - name: Cache kubeconform
         id: cache-kubeconform
-        uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.local/bin/kubeconform
           key: tools-kubeconform-${{ env.KUBECONFORM_VERSION }}-${{ runner.os }}-${{ runner.arch }}
