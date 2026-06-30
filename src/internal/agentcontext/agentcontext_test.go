@@ -31,6 +31,27 @@ func TestDocsRef(t *testing.T) {
 	}
 }
 
+func TestDocsVersion(t *testing.T) {
+	tests := []struct {
+		name    string
+		version string
+		want    string
+	}{
+		{name: "release tag with v prefix", version: "v0.11.0", want: "v0.11.0"},
+		{name: "release tag without v prefix", version: "0.11.0", want: "v0.11.0"},
+		{name: "empty maps to latest-dev", version: "", want: "latest-dev"},
+		{name: "dev maps to latest-dev", version: "dev", want: "latest-dev"},
+		{name: "pre-release maps to latest-dev", version: "v1.2.3-rc1", want: "latest-dev"},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := DocsVersion(tt.version); got != tt.want {
+				t.Errorf("DocsVersion(%q) = %q, want %q", tt.version, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestRenderPinsVersion(t *testing.T) {
 	rendered, err := Render("v0.10.0")
 	if err != nil {
@@ -43,6 +64,10 @@ func TestRenderPinsVersion(t *testing.T) {
 	}
 	if !strings.Contains(content, "v0.10.0") {
 		t.Errorf("AGENTS.md does not mention the installed version")
+	}
+	// The docs index pointer must target this version's hosted llms.txt.
+	if !strings.Contains(content, "https://docs.kubara.io/v0.10.0/llms.txt") {
+		t.Errorf("AGENTS.md does not link the version's llms.txt index:\n%s", content)
 	}
 }
 
@@ -60,6 +85,10 @@ func TestRenderDevFallsBackToMain(t *testing.T) {
 	}
 	if !strings.Contains(string(rendered), "pinned to `main`") {
 		t.Errorf("doc heading should state it is pinned to main for dev builds")
+	}
+	// The hosted docs index has no "main" version; dev builds point at latest-dev.
+	if !strings.Contains(string(rendered), "https://docs.kubara.io/latest-dev/llms.txt") {
+		t.Errorf("dev build should link the latest-dev llms.txt index:\n%s", rendered)
 	}
 }
 

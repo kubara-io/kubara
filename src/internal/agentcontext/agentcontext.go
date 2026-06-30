@@ -53,11 +53,23 @@ func DocsRef(version string) string {
 	return v
 }
 
+// DocsVersion resolves the hosted (mike) docs version segment used to link the
+// published llms.txt index. Release builds map to the git tag (vX.Y.Z, the
+// directory mike deploys under); everything else maps to the "latest-dev"
+// alias, since "main" is a git ref but not a published docs version.
+func DocsVersion(version string) string {
+	if ref := DocsRef(version); ref != "main" {
+		return ref
+	}
+	return "latest-dev"
+}
+
 type templateData struct {
 	Version  string
 	DocsRef  string
 	RawBase  string
 	DocsSite string
+	LlmsTxt  string
 }
 
 func newTemplateData(version string) templateData {
@@ -71,6 +83,7 @@ func newTemplateData(version string) templateData {
 		DocsRef:  ref,
 		RawBase:  fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", githubOwner, githubRepo, ref),
 		DocsSite: docsSiteURL,
+		LlmsTxt:  fmt.Sprintf("%s/%s/llms.txt", docsSiteURL, DocsVersion(version)),
 	}
 }
 
