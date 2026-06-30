@@ -73,3 +73,22 @@ jobs:
             --push \
             --branch gh-pages \
             latest-stable
+
+      - name: Generate site-root llms.txt
+        run: |
+          git fetch origin gh-pages
+          GHP="${RUNNER_TEMP}/gh-pages"
+          git worktree add --detach "$GHP" origin/gh-pages
+          uv run python scripts/build_root_llms.py "$GHP"
+          if [ -f "$GHP/llms.txt" ]; then
+            git -C "$GHP" add llms.txt
+            if git -C "$GHP" diff --cached --quiet; then
+              echo "site-root llms.txt unchanged"
+            else
+              git -C "$GHP" commit -m "docs: regenerate site-root llms.txt"
+              git -C "$GHP" push origin HEAD:gh-pages
+            fi
+          else
+            echo "no site-root llms.txt generated; skipping"
+          fi
+          git worktree remove --force "$GHP"

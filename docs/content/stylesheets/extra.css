@@ -47,14 +47,3 @@
 .mermaid {
     text-align: center;
 }
-blockquote[data-agent-docs-index="true"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  white-space: nowrap;
-  clip: rect(0, 0, 0, 0);
-  border: 0;
-}
