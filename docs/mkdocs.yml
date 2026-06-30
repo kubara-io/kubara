@@ -130,3 +130,5 @@ extra:
 copyright: Copyright &copy; kubara &middot; <a href="https://stackit.com/de/impressum?hidebanner=true">Imprint</a> &middot;
   <a href="https://kubara.io/privacy/">Privacy</a>
 strict: true
+hooks:
+  - hooks/agent_docs.py
