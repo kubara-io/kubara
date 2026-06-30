@@ -1,0 +1,67 @@
+# kubara - Docs
+
+- [Home](index.md)
+
+## Getting Started
+- [Quick Start](1_getting_started/quick_start/index.md)
+- [Installation](1_getting_started/installation/index.md)
+- [Prerequisites](1_getting_started/prerequisites/index.md)
+- [Bootstrapping](1_getting_started/bootstrapping/index.md)
+
+## Concepts
+- [Overview](2_concepts/overview_core_concept/index.md)
+- [Platform Engineering](2_concepts/gitops_platform_engineering_idp/index.md)
+- [Catalogs](2_concepts/catalogs/index.md)
+- [Catalog Distribution](2_concepts/catalog_distribution/index.md)
+- [Catalog Templating](2_concepts/catalog_templating/index.md)
+
+## Infrastructure Presets
+- [Overview](3_infrastructure/overview/index.md)
+- [kind (local)](3_infrastructure/kind/index.md)
+- [STACKIT SKE](3_infrastructure/stackit_ske/index.md)
+- [STACKIT Edge Cloud](3_infrastructure/stackit_edge_cloud/index.md)
+- [T Cloud Public (Community)](3_infrastructure/t-cloud-public/index.md)
+
+## Building Your Platform
+- [How to add a Spoke Cluster](4_building_your_platform/add_spoke_cluster/index.md)
+- [How to create a Catalog](4_building_your_platform/create_catalog/index.md)
+- [SSO > How to add SSO](4_building_your_platform/sso/add_sso/index.md)
+- [SSO > SSO Examples](4_building_your_platform/sso/add_sso_examples/index.md)
+
+## Workload Onboarding
+- [Overview](5_workload_onboarding/overview/index.md)
+- [How to add a Project](5_workload_onboarding/add_app_project/index.md)
+- [How to add a Repository](5_workload_onboarding/add_app_repository/index.md)
+- [How to add an AppSet](5_workload_onboarding/add_appset/index.md)
+- [How to add an Application](5_workload_onboarding/add_application/index.md)
+
+## Components (Built-in)
+- [Overview](6_components/components_overview/index.md)
+- [Best Practices](6_components/best_practices/index.md)
+- [Backup & Recovery](6_components/backup_and_recovery/index.md)
+- [Network > ExternalDNS](6_components/network_external_dns/index.md)
+- [Security > Certificates](6_components/security_certificates/index.md)
+- [Observability > Dashboards](6_components/observability_dashboards/index.md)
+- [Observability > Metrics](6_components/observability_metrics/index.md)
+- [Observability > Alerts](6_components/observability_alerts/index.md)
+- [Observability > Logs](6_components/observability_logs/index.md)
+
+## Architecture
+- [Architecture overview](7_architecture/architecture_overview/index.md)
+- [ADR](10_decisions/ADR/index.md)
+- [ADR-Index](10_decisions/ADR-index/index.md)
+
+## Community
+- [Community & Support](8_community/community-n-support/index.md)
+- [Contributing](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md)
+- [Maintainers](8_community/maintainers/index.md)
+
+## Reference
+- [Commands](1_getting_started/commands/index.md)
+- [Release Cycle & Updates](9_reference/release_cycle_and_updates/index.md)
+- [Known Issues](9_reference/known_issues/index.md)
+- [FAQ](9_reference/faq/index.md)
+- [Code of Conduct](https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md)
+- [Security](https://github.com/kubara-io/kubara/blob/main/SECURITY.md)
+- [Docs License (CC BY 4.0)](https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license)
+- [Software License (Apache 2.0)](https://github.com/kubara-io/kubara/blob/main/LICENSE)
