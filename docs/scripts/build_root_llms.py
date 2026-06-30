@@ -54,6 +54,16 @@ _REL_LINK_RE = re.compile(
 )
 
 
+class DefaultIndexUnavailable(Exception):
+    """The default version's llms.txt index is not published yet — either no
+    version carries the default alias, or the resolved version has no llms.txt
+    (e.g. it was deployed before this hook existed). Expected during the dev
+    rollout before the first stable release that publishes the index, so the dev
+    pipeline skips on it (``--allow-missing-default``); the stable pipeline, which
+    generates the index right after deploying it, treats it as fatal.
+    """
+
+
 def build_root_llms(gh_pages: Path, site_url: str, alias: str) -> str:
     site_url = site_url.rstrip("/")
     versions = _load_versions(gh_pages)
@@ -61,14 +71,12 @@ def build_root_llms(gh_pages: Path, site_url: str, alias: str) -> str:
 
     src = gh_pages / version / "llms.txt"
     if not src.exists():
-        # Fail closed: this runs right after `mike set-default <alias>`, so the
-        # default version's llms.txt must exist. A missing file means the hook
-        # did not run or mike's layout changed — surface it instead of silently
-        # leaving a stale site-root index in place.
-        raise FileNotFoundError(
-            f"{src} not found; expected default version '{version}' (alias "
-            f"'{alias}') and its llms.txt to be deployed before generating the "
-            "site-root index"
+        # The default version exists but has no published index yet (e.g. it was
+        # deployed before this hook). Treated like a missing alias: skippable in
+        # the dev pipeline, fatal in stable (which just deployed it).
+        raise DefaultIndexUnavailable(
+            f"{src} not found; default version '{version}' (alias '{alias}') "
+            "has no published llms.txt yet"
         )
 
     base = f"{site_url}/{version}"
@@ -102,7 +110,7 @@ def _resolve_alias(versions: list, alias: str) -> str:
             version = entry.get("version")
             if version:
                 return version
-    raise LookupError(f"no version in versions.json carries alias '{alias}'")
+    raise DefaultIndexUnavailable(f"no version in versions.json carries alias '{alias}'")
 
 
 def _version_links(versions: list, site_url: str) -> list:
@@ -127,24 +135,25 @@ def main(argv=None) -> int:
     parser.add_argument(
         "--allow-missing-default",
         action="store_true",
-        help="skip (exit 0) instead of failing when no version carries the "
-        "default alias yet — e.g. when run from the dev pipeline before the "
-        "first stable release",
+        help="skip (exit 0) instead of failing when the default version's index "
+        "is not published yet (no alias, or the resolved version has no "
+        "llms.txt) — e.g. the dev pipeline before the first stable release",
     )
     args = parser.parse_args(argv)
 
     gh_pages = Path(args.gh_pages)
     try:
         content = build_root_llms(gh_pages, args.site_url, args.alias)
-    except LookupError as exc:
-        # The default alias is not published yet (e.g. dev deploy before the
-        # first stable release). Skipping is fine; failing is not.
+    except DefaultIndexUnavailable as exc:
+        # Default version's index not published yet (dev rollout before the first
+        # stable release publishes it). Skipping is fine there; failing is not.
         if args.allow_missing_default:
             print(f"note: {exc}; skipping site-root llms.txt", file=sys.stderr)
             return 0
         print(f"error: {exc}", file=sys.stderr)
         return 1
     except FileNotFoundError as exc:
+        # Structural problem (e.g. no versions.json) — always fatal.
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

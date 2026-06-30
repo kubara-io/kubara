@@ -1,11 +1,12 @@
 // Package agentcontext renders and writes the coding-agent onboarding file
 // (AGENTS.md) into a kubara GitOps repository.
 //
-// The file gives AI coding agents (Claude Code, Codex, …) a compact,
-// version-pinned entry point into kubara: it delegates command and config
-// details to the self-describing CLI (`kubara --help`, `kubara schema`) and links
-// the raw Markdown documentation sources on GitHub for the installed binary
-// version, which is far cheaper for an agent to read than rendered HTML.
+// The file gives AI coding agents (Claude Code, Codex, …) a compact entry point
+// into kubara: it delegates command and config details to the self-describing
+// CLI (`kubara --help`, `kubara schema`) and links the published Markdown
+// documentation for the installed binary's version on the docs site, which is
+// far cheaper for an agent to read than rendered HTML and not rate-limited like
+// raw GitHub.
 package agentcontext
 
 import (

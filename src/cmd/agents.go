@@ -29,7 +29,7 @@ func NewAgentsCmd() *cli.Command {
 		Name:        "agents",
 		Usage:       "Scaffold an onboarding file for AI coding assistants (AGENTS.md)",
 		UsageText:   "kubara agents [--overwrite]",
-		Description: "Writes AGENTS.md into the working directory so AI coding assistants (Claude Code, Codex, …) have a compact, token-lean entry point into kubara. It delegates command and config details to the self-describing CLI (kubara --help, kubara schema) and links the raw Markdown documentation pinned to the installed kubara version. The existing file is left untouched unless --overwrite is set. Commit it so it travels with the repository.",
+		Description: "Writes AGENTS.md into the working directory so AI coding assistants (Claude Code, Codex, …) have a compact, token-lean entry point into kubara. It delegates command and config details to the self-describing CLI (kubara --help, kubara schema) and links the published Markdown documentation for the installed kubara version on the docs site. The existing file is left untouched unless --overwrite is set. Commit it so it travels with the repository.",
 		Action: func(_ context.Context, cmd *cli.Command) error {
 			cwd, err := filepath.Abs(cmd.String("work-dir"))
 			if err != nil {
