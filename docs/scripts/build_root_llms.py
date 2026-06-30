@@ -15,14 +15,10 @@ permalinks (``/<version>/...``), which stay valid. The live ``/llms.txt`` is
 regenerated on every stable release, so it always advertises the newest
 version.
 
-Concretely it:
-
-* resolves the alias to a concrete version, reads that version's per-version
-  ``llms.txt`` (which has root-relative links),
-* rewrites those links to absolute URLs into ``/<version>/`` so they resolve
-  from the site root, and
-* appends an ``## Other versions`` section listing every version's
-  ``llms.txt``, read from ``versions.json``.
+Concretely it resolves the alias to a concrete version, reads that version's
+per-version ``llms.txt`` (which has root-relative links), and rewrites those
+links to absolute URLs into ``/<version>/`` so they resolve from the site root.
+(Version enumeration is left to mike's ``versions.json``, served at the root.)
 
 It is meant to run against a checked-out ``gh-pages`` worktree, after
 ``mike set-default``. Uses only the standard library.
@@ -84,11 +80,6 @@ def build_root_llms(gh_pages: Path, site_url: str, alias: str) -> str:
         _REL_LINK_RE.sub(lambda m: f"]({base}/{m.group(1)})", line)
         for line in src.read_text(encoding="utf-8").splitlines()
     ]
-
-    version_links = _version_links(versions, site_url)
-    if version_links:
-        lines += ["", "## Other versions", *version_links]
-
     return "\n".join(lines).rstrip("\n") + "\n"
 
 
@@ -111,20 +102,6 @@ def _resolve_alias(versions: list, alias: str) -> str:
             if version:
                 return version
     raise DefaultIndexUnavailable(f"no version in versions.json carries alias '{alias}'")
-
-
-def _version_links(versions: list, site_url: str) -> list:
-    links = []
-    for entry in versions:
-        version = entry.get("version")
-        if not version:
-            continue
-        title = entry.get("title") or version
-        aliases = entry.get("aliases") or []
-        if aliases:
-            title = f"{title} ({', '.join(aliases)})"
-        links.append(f"- [{title}]({site_url}/{version}/llms.txt)")
-    return links
 
 
 def main(argv=None) -> int:
