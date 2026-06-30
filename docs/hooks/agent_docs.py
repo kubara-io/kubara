@@ -51,13 +51,15 @@ def on_post_page(output, page, config):
 
     # In-body hint for coding agents: they fetch the page and read the body
     # text, dropping <head> — so the discovery pointer must live in the body to
-    # be found. Visually hidden (not display:none, so it stays in the extracted
-    # text); no aria-hidden, so the link isn't an unannounced keyboard tab stop.
-    # href is relative, so it resolves under mike's /<version>/ deploys.
+    # be found. This is machine-only content, so it is inert for humans:
+    # visually hidden (not display:none, so it stays in the extracted text),
+    # aria-hidden from assistive tech, and the link is tabindex="-1" so it is
+    # not a keyboard tab stop. href is relative, so it resolves under mike's
+    # /<version>/ deploys.
     block = (
-        '<blockquote class="sr-only" data-agent-docs-index="true">\n'
+        '<blockquote data-agent-docs-index="true" aria-hidden="true">\n'
         "  <h2>Documentation Index</h2>\n"
-        f'  <p>Fetch the complete documentation index at: <a href="{href}">{href}</a></p>\n'
+        f'  <p>Fetch the complete documentation index at: <a href="{href}" tabindex="-1">{href}</a></p>\n'
         "  <p>Use this file to discover all available pages before exploring further.</p>\n"
         "</blockquote>"
     )
