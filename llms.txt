@@ -1,0 +1,67 @@
+# kubara - Docs
+
+- [Home](https://docs.kubara.io/v0.11.0/index.md)
+
+## Getting Started
+- [Quick Start](https://docs.kubara.io/v0.11.0/1_getting_started/quick_start/index.md)
+- [Installation](https://docs.kubara.io/v0.11.0/1_getting_started/installation/index.md)
+- [Prerequisites](https://docs.kubara.io/v0.11.0/1_getting_started/prerequisites/index.md)
+- [Bootstrapping](https://docs.kubara.io/v0.11.0/1_getting_started/bootstrapping/index.md)
+
+## Concepts
+- [Overview](https://docs.kubara.io/v0.11.0/2_concepts/overview_core_concept/index.md)
+- [Platform Engineering](https://docs.kubara.io/v0.11.0/2_concepts/gitops_platform_engineering_idp/index.md)
+- [Catalogs](https://docs.kubara.io/v0.11.0/2_concepts/catalogs/index.md)
+- [Catalog Distribution](https://docs.kubara.io/v0.11.0/2_concepts/catalog_distribution/index.md)
+- [Catalog Templating](https://docs.kubara.io/v0.11.0/2_concepts/catalog_templating/index.md)
+
+## Infrastructure Presets
+- [Overview](https://docs.kubara.io/v0.11.0/3_infrastructure/overview/index.md)
+- [kind (local)](https://docs.kubara.io/v0.11.0/3_infrastructure/kind/index.md)
+- [STACKIT SKE](https://docs.kubara.io/v0.11.0/3_infrastructure/stackit_ske/index.md)
+- [STACKIT Edge Cloud](https://docs.kubara.io/v0.11.0/3_infrastructure/stackit_edge_cloud/index.md)
+- [T Cloud Public (Community)](https://docs.kubara.io/v0.11.0/3_infrastructure/t-cloud-public/index.md)
+
+## Building Your Platform
+- [How to add a Spoke Cluster](https://docs.kubara.io/v0.11.0/4_building_your_platform/add_spoke_cluster/index.md)
+- [How to create a Catalog](https://docs.kubara.io/v0.11.0/4_building_your_platform/create_catalog/index.md)
+- [SSO > How to add SSO](https://docs.kubara.io/v0.11.0/4_building_your_platform/sso/add_sso/index.md)
+- [SSO > SSO Examples](https://docs.kubara.io/v0.11.0/4_building_your_platform/sso/add_sso_examples/index.md)
+
+## Workload Onboarding
+- [Overview](https://docs.kubara.io/v0.11.0/5_workload_onboarding/overview/index.md)
+- [How to add a Project](https://docs.kubara.io/v0.11.0/5_workload_onboarding/add_app_project/index.md)
+- [How to add a Repository](https://docs.kubara.io/v0.11.0/5_workload_onboarding/add_app_repository/index.md)
+- [How to add an AppSet](https://docs.kubara.io/v0.11.0/5_workload_onboarding/add_appset/index.md)
+- [How to add an Application](https://docs.kubara.io/v0.11.0/5_workload_onboarding/add_application/index.md)
+
+## Components (Built-in)
+- [Overview](https://docs.kubara.io/v0.11.0/6_components/components_overview/index.md)
+- [Best Practices](https://docs.kubara.io/v0.11.0/6_components/best_practices/index.md)
+- [Backup & Recovery](https://docs.kubara.io/v0.11.0/6_components/backup_and_recovery/index.md)
+- [Network > ExternalDNS](https://docs.kubara.io/v0.11.0/6_components/network_external_dns/index.md)
+- [Security > Certificates](https://docs.kubara.io/v0.11.0/6_components/security_certificates/index.md)
+- [Observability > Dashboards](https://docs.kubara.io/v0.11.0/6_components/observability_dashboards/index.md)
+- [Observability > Metrics](https://docs.kubara.io/v0.11.0/6_components/observability_metrics/index.md)
+- [Observability > Alerts](https://docs.kubara.io/v0.11.0/6_components/observability_alerts/index.md)
+- [Observability > Logs](https://docs.kubara.io/v0.11.0/6_components/observability_logs/index.md)
+
+## Architecture
+- [Architecture overview](https://docs.kubara.io/v0.11.0/7_architecture/architecture_overview/index.md)
+- [ADR](https://docs.kubara.io/v0.11.0/10_decisions/ADR/index.md)
+- [ADR-Index](https://docs.kubara.io/v0.11.0/10_decisions/ADR-index/index.md)
+
+## Community
+- [Community & Support](https://docs.kubara.io/v0.11.0/8_community/community-n-support/index.md)
+- [Contributing](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md)
+- [Maintainers](https://docs.kubara.io/v0.11.0/8_community/maintainers/index.md)
+
+## Reference
+- [Commands](https://docs.kubara.io/v0.11.0/1_getting_started/commands/index.md)
+- [Release Cycle & Updates](https://docs.kubara.io/v0.11.0/9_reference/release_cycle_and_updates/index.md)
+- [Known Issues](https://docs.kubara.io/v0.11.0/9_reference/known_issues/index.md)
+- [FAQ](https://docs.kubara.io/v0.11.0/9_reference/faq/index.md)
+- [Code of Conduct](https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md)
+- [Security](https://github.com/kubara-io/kubara/blob/main/SECURITY.md)
+- [Docs License (CC BY 4.0)](https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license)
+- [Software License (Apache 2.0)](https://github.com/kubara-io/kubara/blob/main/LICENSE)
