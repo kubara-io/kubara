@@ -22,8 +22,6 @@ import (
 )
 
 const (
-	githubOwner = "kubara-io"
-	githubRepo  = "kubara"
 	docsSiteURL = "https://docs.kubara.io"
 
 	// AgentsFileName is the cross-agent onboarding file (read automatically by
@@ -35,13 +33,13 @@ const (
 var agentsTemplate string
 
 // releaseTagPattern matches a clean semver release tag (optionally prefixed with
-// "v"). Pre-release and snapshot versions deliberately do not match, so that raw
-// documentation links fall back to a ref that is guaranteed to resolve.
+// "v"). Pre-release and snapshot versions deliberately do not match, so that
+// documentation links fall back to a docs version that is guaranteed to resolve.
 var releaseTagPattern = regexp.MustCompile(`^v?\d+\.\d+\.\d+$`)
 
-// DocsRef resolves the git ref used to pin raw documentation links. Release builds
-// inject the git tag (e.g. "v0.10.0") via ldflags; anything else ("dev", empty or
-// snapshot builds) falls back to "main".
+// DocsRef resolves a clean release tag (e.g. "v0.10.0", normalised with a "v"
+// prefix) or "main" for dev/snapshot/empty builds. Release builds inject the git
+// tag via ldflags. It is the basis for DocsVersion.
 func DocsRef(version string) string {
 	v := strings.TrimSpace(version)
 	if !releaseTagPattern.MatchString(v) {
@@ -66,9 +64,8 @@ func DocsVersion(version string) string {
 
 type templateData struct {
 	Version  string
-	DocsRef  string
-	RawBase  string
 	DocsSite string
+	DocsBase string // docs site root for this version, e.g. https://docs.kubara.io/v0.10.0
 	LlmsTxt  string
 }
 
@@ -77,13 +74,12 @@ func newTemplateData(version string) templateData {
 	if display == "" {
 		display = "dev"
 	}
-	ref := DocsRef(version)
+	docsBase := fmt.Sprintf("%s/%s", docsSiteURL, DocsVersion(version))
 	return templateData{
 		Version:  display,
-		DocsRef:  ref,
-		RawBase:  fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s", githubOwner, githubRepo, ref),
 		DocsSite: docsSiteURL,
-		LlmsTxt:  fmt.Sprintf("%s/%s/llms.txt", docsSiteURL, DocsVersion(version)),
+		DocsBase: docsBase,
+		LlmsTxt:  docsBase + "/llms.txt",
 	}
 }
 
