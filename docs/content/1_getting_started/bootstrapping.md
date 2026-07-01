@@ -106,8 +106,11 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 
 !!! info
     What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../7_architecture/architecture_overview.md#hubnspoke)
+
+    If you don't 
 !!! tip
     Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
+    Not using OAuth2Proxy? Just set some placeholder value like "none" for ssoOrg and ssoTeam
 
 Example:
 
@@ -117,8 +120,8 @@ clusters:
     stage: project-stage-something-like-dev
     type: <hub or spoke>
     dnsName: <cp.demo-42.stackit.run>
-    ssoOrg: <oidc-org>
-    ssoTeam: <org-team>
+    ssoOrg: <oidc-org> # If you don't use OAuth2Proxy, you can set this and ssoTeam value (below this line) to any placeholder like "none"
+    ssoTeam: <org-team> # see above
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
