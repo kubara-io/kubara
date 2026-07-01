@@ -40,10 +40,13 @@ type EnvMap struct {
 	_                           struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
 	DomainName                  string   `default:"<...>" koanf:"DOMAIN_NAME"`
 	_                           struct{} `doc:"\n# Argo CD related values"`
+	_                           struct{} `doc:"# Initial Admin Account Password for Argo CD."`
 	ArgocdWizardAccountPassword string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
 	_                           struct{} `doc:"\n# Git repository values"`
+	_                           struct{} `doc:"# The HTTPS URL of the git repository that Argo CD will use to pull the kubara generated manifests from."`
 	ArgocdGitHttpsUrl           string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL"`
 	_                           struct{} `doc:"\n# Optional: Git repository credentials for Argo to pull your kubara manifests from."`
+	_                           struct{} `doc:"# Necessary if your repository isn't public."`
 	ArgocdGitUsername           string   `default:"" koanf:"ARGOCD_GIT_USERNAME" optional:"true"`
 	ArgocdGitPatOrPassword      string   `default:"" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD" optional:"true"`
 	_                           struct{} `doc:"\n# Optional: Helm repository values (leave empty to disable)."`
