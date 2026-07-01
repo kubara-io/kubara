@@ -433,6 +433,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       images: ${{ steps.matrix.outputs.images }}
+      has_images: ${{ steps.matrix.outputs.has_images }}
     defaults:
       run:
         shell: bash
@@ -494,23 +495,22 @@ jobs:
       fail-fast: false
       max-parallel: 10
       matrix:
-        image: ${{ fromJSON(needs.extract0images.outputs.images) }}
-      steps:
-        - name: Scan ${{ matrix.image }}
-          uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
-          with:
-            image-ref: ${{ matrix.image }}
-            version: ${{ env.TRIVY_VERSION }}
-            scanners: vuln
-            severity: CRITICAL # high as well?
-            ignore-unfixed: true
-            format: SARIF
-            output: trivy-results.sarif
-            exit-code: '0'
+        image: ${{ fromJSON(needs.extract-images.outputs.images) }}
+    steps:
+      - name: Scan ${{ matrix.image }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          scanners: vuln
+          severity: CRITICAL # high as well?
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: '0'
 
-        - name: Upload SARIF
-          if: always()
-          uses: github/codeql-action/upload-sarif@c35d1b164463ee62a100735382aaaa525c5d3496 # v2.25.6
-          with:
-            sarif_file: trivy-results.sarif
-            category: trivy-${{ matrix.image }}
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.image }}
