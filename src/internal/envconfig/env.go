@@ -30,7 +30,7 @@ type EnvMap struct {
 	_                           struct{} `doc:"# ✅ These values MUST be known BEFORE running Terraform."`
 	_                           struct{} `doc:"# 🔁 Everything in <angle brackets> MUST be replaced."`
 	_                           struct{} `doc:"# 💡 Values without <> are optional and can be left as-is if not needed (e.g. no private image registry)."`
-	_                           struct{} `doc:"#    It will still create a secret, but it will be not valid."`
+	_                           struct{} `doc:"#    It will still create a secret, but it won't be valid."`
 	_                           struct{} `doc:"\n# Project related values"`
 	ProjectName                 string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                string   `default:"<...>" koanf:"PROJECT_STAGE"`
