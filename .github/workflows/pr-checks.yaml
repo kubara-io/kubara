@@ -426,3 +426,91 @@ jobs:
           name: terraform-validation-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: ${{ env.REPORT_DIR }}/terraform
+
+
+  extract-images:
+    needs: run-kubara-init-and-generate
+    runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.matrix.outputs.images }}
+      has_images: ${{ steps.matrix.outputs.has_images }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout CI scripts
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: |
+            .scripts
+            .github/helm-profiles
+
+      - name: Download generated kubara artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: kubara-generated-files-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+
+      - name: Verify Helm
+        run: helm version --short
+
+      - name: Extract container images
+        run: |
+          mkdir -p reports
+          OUTPUT_FILE=reports/images.txt .scripts/image-version.sh
+
+      - name: Write image summary
+        if: always()
+        run: |
+          [[ -f reports/images.txt ]] || exit 0
+          echo "### Container Images" >> "$GITHUB_STEP_SUMMARY"
+          while read -r img; do
+            echo "- $img" >> "$GITHUB_STEP_SUMMARY"
+          done < reports/images.txt
+
+      - name: Upload image list
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        if: always()
+        with:
+          name: container-images-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
+          retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
+          path: reports/images.txt
+    
+      - name: Build image matrix
+        id: matrix
+        run: |
+          set -euo pipefail
+          images=$(jq -R -s -c 'split("\n") | map(select(length > 0))' reports/images.txt)
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+          if [[ "$images" == "[]" ]]; then
+            echo "has_images=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_images=true" >> "$GITHUB_OUTPUT"
+          fi
+    
+  trivy-scan:
+    needs: extract-images
+    if: needs.extract-images.outputs.has_images == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        image: ${{ fromJSON(needs.extract-images.outputs.images) }}
+    steps:
+      - name: Scan ${{ matrix.image }}
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ matrix.image }}
+          scanners: vuln
+          severity: CRITICAL # high as well?
+          ignore-unfixed: true
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: '0'
+
+      - name: Upload SARIF
+        if: always()
+        uses: github/codeql-action/upload-sarif@8aad20d150bbac5944a9f9d289da16a4b0d87c1e # v4.36.2
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy-${{ matrix.image }}
