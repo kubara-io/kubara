@@ -431,6 +431,8 @@ jobs:
   extract-images:
     needs: run-kubara-init-and-generate
     runs-on: ubuntu-latest
+    outputs:
+      images: ${{ steps.matrix.outputs.images }}
     defaults:
       run:
         shell: bash
@@ -471,3 +473,44 @@ jobs:
           name: container-images-${{ github.run_attempt }}-${{ github.sha }}-${{ github.run_number }}
           retention-days: ${{ env.ARTIFACT_RETENTION_DAYS }}
           path: reports/images.txt
+    
+      - name: Build image matrix
+        id: matrix
+        run: |
+          set -euo pipefail
+          images=$(jq -R -s -c 'split("\n") | map(select(length > 0))' reports/images.txt)
+          echo "images=$images" >> "$GITHUB_OUTPUT"
+          if [[ "$images" == "[]" ]]; then
+            echo "has_images=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "has_images=true" >> "$GITHUB_OUTPUT"
+          fi
+    
+  trivy-scan:
+    needs: extract-images
+    if: needs.extract-images.outputs.has_images == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        image: ${{ fromJSON(needs.extract0images.outputs.images) }}
+      steps:
+        - name: Scan ${{ matrix.image }}
+          uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+          with:
+            image-ref: ${{ matrix.image }}
+            version: ${{ env.TRIVY_VERSION }}
+            scanners: vuln
+            severity: CRITICAL # high as well?
+            ignore-unfixed: true
+            format: SARIF
+            output: trivy-results.sarif
+            exit-code: '0'
+
+        - name: Upload SARIF
+          if: always()
+          uses: github/codeql-action/upload-sarif@c35d1b164463ee62a100735382aaaa525c5d3496 # v2.25.6
+          with:
+            sarif_file: trivy-results.sarif
+            category: trivy-${{ matrix.image }}
