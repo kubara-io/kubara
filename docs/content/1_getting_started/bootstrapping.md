@@ -109,8 +109,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 
 !!! tip
     **Not using STACKIT Edge?** Just remove the load balancer IPs from your `config.yaml`.  
-    **Not using OAuth2Proxy?** Just set some placeholder value like "none" for ssoOrg and ssoTeam
-
+    **Not using an SSO provider?** Just set the ssoOrg and ssoTeam to "none"
 
 
 Example:
@@ -121,8 +120,9 @@ clusters:
     stage: project-stage-something-like-dev
     type: <hub or spoke>
     dnsName: <cp.demo-42.stackit.run>
-    ssoOrg: <oidc-org> # If you don't use OAuth2Proxy, you can set this and ssoTeam value (below this line) to any placeholder like "none"
-    ssoTeam: <org-team> # see above
+    # Hint: If you don't use an SSO provider, you can set ssoOrg and ssoTeam to "none"
+    ssoOrg: <oidc-org> 
+    ssoTeam: <org-team>
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
