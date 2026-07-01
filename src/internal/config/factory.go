@@ -17,11 +17,11 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 	argoCD := ArgoCD{
 		Repo: RepoProto{
 			HTTPS: &RepoType{
-				Customer: Repository{
+				Configs: Repository{
 					URL:            e.ArgocdGitHttpsUrl,
 					TargetRevision: "main",
 				},
-				Managed: Repository{
+				Components: Repository{
 					URL:            e.ArgocdGitHttpsUrl,
 					TargetRevision: "main",
 				},
@@ -114,8 +114,8 @@ func CreateSpokeScaffolding(name string) Cluster {
 		ArgoCD: ArgoCD{
 			Repo: RepoProto{
 				HTTPS: &RepoType{
-					Customer: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
-					Managed:  Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+					Configs:    Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+					Components: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
 				},
 			},
 		},

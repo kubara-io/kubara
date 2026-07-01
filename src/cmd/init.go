@@ -129,7 +129,7 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 
 func (o *InitOptions) Run() error {
 	es := envconfig.NewEnvStore(o.dotEnvFilePath, ".", o.envVarPrefix)
-	cs := config.NewConfigStoreWithCatalog(o.configFilePath, o.catalogLoadOptions())
+	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogLoadOptions())
 
 	envLoadErr := es.Load()
 	configLoadErr := cs.Load()
@@ -208,15 +208,15 @@ func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
 		return err
 	}
 
-	exampleEnvMap, err := es.GenerateEnvExample()
+	initialEnvs, err := es.GenerateInitialEnvs()
 	if err != nil {
 		return err
 	}
-	if err := os.WriteFile(o.dotEnvFilePath, exampleEnvMap, 0600); err != nil {
+	if err := os.WriteFile(o.dotEnvFilePath, initialEnvs, 0600); err != nil {
 		return err
 	}
 
-	log.Info().Msgf("Generated dotenv in path: %v", es.GetFilepath())
+	log.Info().Msgf("Generated .env in path: %s", es.GetFilepath())
 	return nil
 }
 
@@ -271,7 +271,7 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 	}
 
 	if envValidateErr != nil {
-		log.Info().Msgf("Env validation error. If you want to generate an example dotenv, pass the \"--prep\" flag.")
+		log.Info().Msgf("Env validation error. If you want to generate an initial .env file, pass the \"--prep\" flag.")
 		return fmt.Errorf("validate env: %w", envValidateErr)
 	}
 

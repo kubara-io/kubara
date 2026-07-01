@@ -16,7 +16,7 @@ terraform {
 }
 
 module "objectstorage-bucket" {
-  source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
+  source = "../../../../platform-components/terraform/modules/objectstorage-bucket"
 
   project_id             = var.project_id
   credentials_group_name = var.credentials_group_name

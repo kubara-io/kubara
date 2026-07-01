@@ -27,11 +27,11 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
 						HTTPS: &config.RepoType{
-							Customer: config.Repository{
+							Configs: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},
-							Managed: config.Repository{
+							Components: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},
@@ -56,8 +56,8 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	assert.Equal(t, "dev", updated.Stage)
 	assert.Equal(t, "kubara-test-stage.example.com", updated.DNSName)
 	assert.Equal(t, "kubara-test-stage.example.com", updated.Terraform.DNS.Name)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Managed.URL)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Customer.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Components.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Configs.URL)
 	require.NotNil(t, updated.ArgoCD.HelmRepo)
 	assert.Equal(t, "https://charts.example.com", updated.ArgoCD.HelmRepo.URL)
 }
@@ -73,11 +73,11 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
 						HTTPS: &config.RepoType{
-							Customer: config.Repository{
+							Configs: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},
-							Managed: config.Repository{
+							Components: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},
@@ -101,8 +101,8 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 	assert.Equal(t, "dev", updated.Stage)
 	assert.Equal(t, "kubara-test-stage.example.com", updated.DNSName)
 	assert.Nil(t, updated.Terraform)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Managed.URL)
-	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Customer.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Components.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Configs.URL)
 }
 
 func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T) {
@@ -119,8 +119,8 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
-	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Managed.URL)
-	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Customer.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Components.URL)
+	assert.Equal(t, "https://github.com/new/repo.git", cluster.ArgoCD.Repo.HTTPS.Configs.URL)
 	require.NotNil(t, cluster.ArgoCD.HelmRepo)
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.URL)
 }
@@ -140,11 +140,11 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
 						HTTPS: &config.RepoType{
-							Customer: config.Repository{
+							Configs: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},
-							Managed: config.Repository{
+							Components: config.Repository{
 								URL:            "https://github.com/old/repo.git",
 								TargetRevision: "main",
 							},

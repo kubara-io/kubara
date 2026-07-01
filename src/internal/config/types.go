@@ -9,6 +9,7 @@ import (
 const (
 	ConfigVersionV1Alpha1 = "v1alpha1"
 	ConfigVersionV1Alpha2 = "v1alpha2"
+	ConfigVersionV1Alpha3 = "v1alpha3"
 )
 
 const (
@@ -42,7 +43,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha2,default=v1alpha2"`
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha3,default=v1alpha3"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
 
@@ -88,8 +89,8 @@ type RepoProto struct {
 }
 
 type RepoType struct {
-	Customer Repository `json:"customer" yaml:"customer" jsonschema:"required,title=Customer Repository"`
-	Managed  Repository `json:"managed" yaml:"managed" jsonschema:"required,title=Managed Repository"`
+	Configs    Repository `json:"configs" yaml:"configs" jsonschema:"required,title=Platform Configs Repository"`
+	Components Repository `json:"components" yaml:"components" jsonschema:"required,title=Platform Components Repository"`
 }
 
 type Repository struct {

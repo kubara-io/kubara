@@ -18,7 +18,7 @@ func NewCatalogCreate() *cli.Command {
 		Name:        "create",
 		Usage:       "Create a custom catalog directory skeleton",
 		UsageText:   "kubara catalog create CATALOG_NAME",
-		Description: "Scaffolds a custom catalog directory with Catalog.yaml plus customer-service-catalog, managed-service-catalog, and services directories.",
+		Description: "Scaffolds a custom catalog directory with Catalog.yaml plus platform-configs, platform-components, and services directories.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name: "catalog-name",
@@ -104,20 +104,20 @@ func createDirectories(base string) (bool, error) {
 		return false, fmt.Errorf("cannot create catalog directory: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(base, "customer-service-catalog", "helm", "example"), 0o755); err != nil {
-		return true, fmt.Errorf("cannot create customer-service-catalog helm directory: %w", err)
+	if err := os.MkdirAll(filepath.Join(base, "platform-configs", "helm"), 0o755); err != nil {
+		return true, fmt.Errorf("cannot create platform-configs helm directory: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(base, "customer-service-catalog", "terraform", "example"), 0o755); err != nil {
-		return true, fmt.Errorf("cannot create customer-service-catalog terraform directory: %w", err)
+	if err := os.MkdirAll(filepath.Join(base, "platform-configs", "terraform"), 0o755); err != nil {
+		return true, fmt.Errorf("cannot create platform-configs terraform directory: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(base, "managed-service-catalog", "helm"), 0o755); err != nil {
-		return true, fmt.Errorf("cannot create managed-service-catalog helm directory: %w", err)
+	if err := os.MkdirAll(filepath.Join(base, "platform-components", "helm"), 0o755); err != nil {
+		return true, fmt.Errorf("cannot create platform-components helm directory: %w", err)
 	}
 
-	if err := os.MkdirAll(filepath.Join(base, "managed-service-catalog", "terraform"), 0o755); err != nil {
-		return true, fmt.Errorf("cannot create managed-service-catalog terraform directory: %w", err)
+	if err := os.MkdirAll(filepath.Join(base, "platform-components", "terraform"), 0o755); err != nil {
+		return true, fmt.Errorf("cannot create platform-components terraform directory: %w", err)
 	}
 
 	if err := os.MkdirAll(filepath.Join(base, "services"), 0o755); err != nil {

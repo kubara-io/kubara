@@ -110,8 +110,8 @@ func writeCatalogFixture(t *testing.T, root, name, version string) {
 	t.Helper()
 
 	require.NoError(t, os.MkdirAll(filepath.Join(root, "services"), 0o755))
-	require.NoError(t, os.MkdirAll(filepath.Join(root, "managed-service-catalog", "helm"), 0o755))
-	require.NoError(t, os.MkdirAll(filepath.Join(root, "customer-service-catalog", "helm"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "platform-components", "helm"), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Join(root, "platform-configs", "helm"), 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(root, "Catalog.yaml"), []byte(`
 apiVersion: kubara.io/v1alpha1
 kind: Catalog

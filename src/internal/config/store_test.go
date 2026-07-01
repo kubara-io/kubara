@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha2,
+		Version: ConfigVersionV1Alpha3,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -40,12 +40,12 @@ func newValidTestConfig() *Config {
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
 						HTTPS: &RepoType{
-							Customer: Repository{
-								URL:            "https://github.com/customer/repo.git",
+							Configs: Repository{
+								URL:            "https://github.com/example/configs.git",
 								TargetRevision: "main",
 							},
-							Managed: Repository{
-								URL:            "https://github.com/managed/repo.git",
+							Components: Repository{
+								URL:            "https://github.com/example/components.git",
 								TargetRevision: "main",
 							},
 						},
@@ -192,7 +192,7 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := NewConfigStoreWithCatalog(tt.filepath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", tt.filepath, catalog.LoadOptions{})
 			err := cs.Load()
 
 			if tt.wantErr {
@@ -244,11 +244,11 @@ clusters:
 	configPath := filepath.Join(tempDir, "legacy-config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha2, loaded.Version)
+	require.Equal(t, ConfigVersionV1Alpha3, loaded.Version)
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
@@ -273,7 +273,7 @@ clusters:
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha2")
+	assert.Contains(t, savedContent, "version: v1alpha3")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
 	assert.NotContains(t, savedContent, "certManager:")
@@ -355,16 +355,16 @@ clusters:
     argocd:
       repo:
         https:
-          customer:
+          configs:
             url: "https://github.com/customer/repo.git"
-          managed:
+          components:
             url: "https://github.com/managed/repo.git"
     services:%s`, tt.servicesYML)
 
 			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
 			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-			cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 			err := cs.Load()
 			require.Error(t, err)
 			for _, wantErr := range tt.wantErrs {
@@ -728,9 +728,9 @@ clusters:
     argocd:
       repo:
         https:
-          customer:
+          configs:
             url: "https://github.com/customer/repo.git"
-          managed:
+          components:
             url: "https://github.com/managed/repo.git"
     services:
       argocd: {}
@@ -757,7 +757,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load(), "Load should succeed")
 
 	c := cs.GetConfig().Clusters[0]
@@ -778,9 +778,9 @@ clusters:
     argocd:
       repo:
         https:
-          customer:
+          configs:
             url: "https://github.com/customer/repo.git"
-          managed:
+          components:
             url: "https://github.com/managed/repo.git"
 `
 
@@ -788,7 +788,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
 
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
 	require.Len(t, cs.GetConfig().Clusters, 1)

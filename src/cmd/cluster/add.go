@@ -48,7 +48,7 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("get config file path: %w", err)
 			}
 
-			configStore := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
+			configStore := config.NewConfigStore(cwd, configFilePath, catalogOptions)
 			err = configStore.Load()
 			if err != nil {
 				return fmt.Errorf("config load: %w", err)

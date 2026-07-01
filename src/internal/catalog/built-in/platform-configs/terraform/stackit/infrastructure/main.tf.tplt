@@ -1,5 +1,5 @@
 module "iam" {
-  source = "../../../../managed-service-catalog/terraform/modules/iam"
+  source = "../../../../platform-components/terraform/modules/iam"
 
   project_id = var.project_id
   name       = "sa-${substr(var.name, 0, 8)}-${substr(var.stage, 0, 8)}" # iam only allows for 20 characters
@@ -11,7 +11,7 @@ module "iam" {
 }
 
 module "dns_zone" {
-  source = "../../../../managed-service-catalog/terraform/modules/dns-zone"
+  source = "../../../../platform-components/terraform/modules/dns-zone"
 
   project_id    = var.project_id
   name          = "${var.name}-${var.stage}"
@@ -21,7 +21,7 @@ module "dns_zone" {
 
 
 module "secretsmanager" {
-  source = "../../../../managed-service-catalog/terraform/modules/secretsmanager"
+  source = "../../../../platform-components/terraform/modules/secretsmanager"
 
   project_id = var.project_id
   name       = "${var.name}-${var.stage}"
@@ -32,7 +32,7 @@ module "secretsmanager" {
 
 {{ if (and (eq (index .cluster.services "velero" "status") "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) -}}
 module "velero_bucket" {
-  source = "../../../../managed-service-catalog/terraform/modules/objectstorage-bucket"
+  source = "../../../../platform-components/terraform/modules/objectstorage-bucket"
 
   project_id             = var.project_id
   region                 = var.velero_bucket_region
@@ -43,7 +43,7 @@ module "velero_bucket" {
 {{ end -}}
 {{ if (eq .cluster.terraform.kubernetesType "ske") }}
 module "ske_cluster" {
-  source = "../../../../managed-service-catalog/terraform/modules/ske-cluster"
+  source = "../../../../platform-components/terraform/modules/ske-cluster"
 
   project_id             = var.project_id
   name                   = "${local.ske_name_prefix}-${random_string.ske_name_suffix.result}"
@@ -74,7 +74,7 @@ resource "random_string" "ske_name_suffix" {
 
 {{ if (eq .cluster.terraform.kubernetesType "edge") }}
 module "edge_instance" {
-  source = "../../../../managed-service-catalog/terraform/modules/edge-instance"
+  source = "../../../../platform-components/terraform/modules/edge-instance"
 
   project_id   = var.project_id
   display_name = "${local.edge_name_prefix}-${random_string.edge_name_suffix.result}"
@@ -96,7 +96,7 @@ resource "random_string" "edge_name_suffix" {
 }
 
 module "edge_image" {
-  source = "../../../../managed-service-catalog/terraform/modules/edge-image"
+  source = "../../../../platform-components/terraform/modules/edge-image"
 
   project_id      = var.project_id
   name            = var.edge_image.name
@@ -111,7 +111,7 @@ module "edge_image" {
 }
 
 module "edge_hosts" {
-  source = "../../../../managed-service-catalog/terraform/modules/edge-hosts"
+  source = "../../../../platform-components/terraform/modules/edge-hosts"
 
   name                = var.edge_hosts.name_prefix
   project_id          = var.project_id

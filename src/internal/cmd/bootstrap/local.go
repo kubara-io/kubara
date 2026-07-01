@@ -200,15 +200,15 @@ func newLocalState(opts *Options) *LocalState {
 		RuntimeDir:             repoLocalRuntime,
 		KubeconfigPath:         filepath.Join(repoLocalRuntime, "kind.kubeconfig"),
 		KindConfigPath:         filepath.Join(repoLocalRuntime, localKindConfigName),
-		TraefikOverlayPath:     filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "traefik", "additional-values.yaml"),
-		CertManagerValuesPath:  filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "cert-manager", "additional-values.yaml"),
+		TraefikOverlayPath:     filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "traefik", "values-additional.yaml"),
+		CertManagerValuesPath:  filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "cert-manager", "values-additional.yaml"),
 		OpenBaoValuesPath:      filepath.Join(repoLocalRuntime, "openbao", "values.yaml"),
-		ArgocdValuesPath:       filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "argo-cd", "additional-values.yaml"),
-		HomerValuesPath:        filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "homer-dashboard", "additional-values.yaml"),
-		PrometheusValuesPath:   filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "kube-prometheus-stack", "additional-values.yaml"),
-		KyvernoValuesPath:      filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "kyverno-policy-reporter", "additional-values.yaml"),
-		LonghornValuesPath:     filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "longhorn", "additional-values.yaml"),
-		OAuth2ProxyValuesPath:  filepath.Join(opts.OverlayValues, "helm", opts.ClusterName, "oauth2-proxy", "additional-values.yaml"),
+		ArgocdValuesPath:       filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "argo-cd", "values-additional.yaml"),
+		HomerValuesPath:        filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "homer-dashboard", "values-additional.yaml"),
+		PrometheusValuesPath:   filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "kube-prometheus-stack", "values-additional.yaml"),
+		KyvernoValuesPath:      filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "kyverno-policy-reporter", "values-additional.yaml"),
+		LonghornValuesPath:     filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "longhorn", "values-additional.yaml"),
+		OAuth2ProxyValuesPath:  filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, "oauth2-proxy", "values-additional.yaml"),
 		ClusterSecretStorePath: filepath.Join(repoLocalRuntime, "external-secrets", "clustersecretstore.yaml"),
 		GenerateEnvPath:        filepath.Join(repoLocalRuntime, "generate.env"),
 	}
@@ -439,7 +439,7 @@ func waitForTraefikLoadBalancer(ctx context.Context, client *k8s.Client) (string
 }
 
 func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error {
-	configStore := config.NewConfigStoreWithCatalog(opts.ConfigFilePath, catalog.LoadOptions{
+	configStore := config.NewConfigStore(opts.WorkDir, opts.ConfigFilePath, catalog.LoadOptions{
 		CatalogPath: opts.CatalogPath,
 		Overwrite:   opts.CatalogOverwrite,
 	})
@@ -479,8 +479,8 @@ func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error
 		ConfigFilePath:     opts.ConfigFilePath,
 		CatalogPath:        opts.CatalogPath,
 		CatalogOverwrite:   opts.CatalogOverwrite,
-		ManagedCatalogPath: opts.ManagedCatalog,
-		OverlayValuesPath:  opts.OverlayValues,
+		PlatformComponents: opts.PlatformComponents,
+		PlatformConfigs:    opts.PlatformConfigs,
 		EnvPath:            localEnvPath,
 	}
 	if err := generateOptions.Run(); err != nil {
@@ -931,8 +931,8 @@ middleware:
 
 func localProjectSourceRepos(opts *Options) []string {
 	repos := []string{
-		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Managed.URL,
-		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Customer.URL,
+		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Components.URL,
+		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Configs.URL,
 		"https://charts.external-secrets.io/",
 		"https://charts.jetstack.io",
 		"https://prometheus-community.github.io/helm-charts",

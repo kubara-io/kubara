@@ -18,8 +18,9 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 
 			// Apply the new values from the environment to the found cluster.
 			cfg.Clusters[i].Stage = e.ProjectStage
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Configs.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Components.URL = e.ArgocdGitHttpsUrl
+
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{

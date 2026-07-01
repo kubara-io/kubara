@@ -81,7 +81,7 @@ func (em *EnvStore) Validate() error {
 	return nil
 }
 
-func (em *EnvStore) GenerateEnvExample() ([]byte, error) {
+func (em *EnvStore) GenerateInitialEnvs() ([]byte, error) {
 	var b strings.Builder
 
 	envMap := em.GetConfig() // Use the existing config for default values
