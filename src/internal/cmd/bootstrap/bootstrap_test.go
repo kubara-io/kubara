@@ -77,8 +77,8 @@ func TestBuildLocalTraefikBootstrapServiceMatchesHelmOwnershipMetadata(t *testin
 func TestOverlayValuesForChartIncludesValuesYaml(t *testing.T) {
 	tempDir := t.TempDir()
 	opts := &Options{
-		OverlayValues: tempDir,
-		ClusterName:   "test-cluster",
+		PlatformConfigs: tempDir,
+		ClusterName:     "test-cluster",
 	}
 
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")
@@ -95,8 +95,8 @@ func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) 
 	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "additional-values.yaml"), []byte("argo-cd: {}\n"), 0o644))
 
 	opts := &Options{
-		OverlayValues: tempDir,
-		ClusterName:   "test-cluster",
+		PlatformConfigs: tempDir,
+		ClusterName:     "test-cluster",
 	}
 
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")

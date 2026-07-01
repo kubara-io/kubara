@@ -22,8 +22,8 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			if cfg.Clusters[i].Terraform != nil {
 				cfg.Clusters[i].Terraform.DNS.Name = dnsName
 			}
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Managed.URL = e.ArgocdGitHttpsUrl
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Customer.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Configs.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Components.URL = e.ArgocdGitHttpsUrl
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
 				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{

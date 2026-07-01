@@ -26,8 +26,8 @@ type Options struct {
 	ConfigFilePath     string
 	CatalogPath        string
 	CatalogOverwrite   bool
-	ManagedCatalogPath string
-	OverlayValuesPath  string
+	PlatformComponents string
+	PlatformConfigs    string
 	EnvPath            string
 }
 
@@ -86,10 +86,9 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 
 func (o *Options) resolveOutputPath(result render.TemplateResult, clusterName string) string {
 	trimmedPath := render.StripProviderPath(result.Path)
-	trimmedPath = strings.ReplaceAll(trimmedPath, "example", clusterName)
 	trimmedPath = strings.TrimSuffix(trimmedPath, ".tplt")
-	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultManagedCatalogPath, o.ManagedCatalogPath)
-	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultOverlayValuesPath, o.OverlayValuesPath)
+	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultPlatformComponentsPath, o.PlatformComponents)
+	trimmedPath = strings.ReplaceAll(trimmedPath, render.DefaultPlatformConfigsPath, fmt.Sprintf("%s/%s", o.PlatformConfigs, clusterName))
 	return trimmedPath
 }
 
@@ -177,13 +176,13 @@ func (o *Options) cleanupOldFiles(results []render.TemplateResult) error {
 	}
 
 	if cleanupTerraform {
-		deletePath := filepath.Join(o.ManagedCatalogPath, render.Terraform.String())
+		deletePath := filepath.Join(o.PlatformComponents, render.Terraform.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
 	}
 	if cleanupHelm {
-		deletePath := filepath.Join(o.ManagedCatalogPath, render.Helm.String())
+		deletePath := filepath.Join(o.PlatformComponents, render.Helm.String())
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
@@ -226,9 +225,9 @@ func serviceNameFromTemplatePath(chartPathServiceIndex map[string]string, path s
 	}
 
 	switch {
-	case pathParts[0] == render.DefaultManagedCatalogPath && pathParts[1] == render.Helm.String():
+	case pathParts[0] == render.DefaultPlatformComponentsPath && pathParts[1] == render.Helm.String():
 		return chartPathServiceIndex[pathParts[2]]
-	case len(pathParts) >= 5 && pathParts[0] == render.DefaultOverlayValuesPath && pathParts[1] == render.Helm.String():
+	case len(pathParts) >= 5 && pathParts[0] == render.DefaultPlatformConfigsPath && pathParts[1] == render.Helm.String():
 		return chartPathServiceIndex[pathParts[3]]
 	default:
 		return ""
@@ -261,7 +260,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		Overwrite:   o.CatalogOverwrite,
 	}
 
-	cs := config.NewConfigStoreWithCatalog(o.ConfigFilePath, catalogOptions)
+	cs := config.NewConfigStore(o.CWD, o.ConfigFilePath, catalogOptions)
 	if CnfLoadErr := cs.Load(); CnfLoadErr != nil {
 		return nil, fmt.Errorf("load config: %w", CnfLoadErr)
 	}

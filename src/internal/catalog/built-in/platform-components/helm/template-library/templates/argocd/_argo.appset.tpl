@@ -26,21 +26,21 @@ spec:
         {{- if $app.sources }}
         {{- toYaml $app.sources | nindent 8 }}
         {{- else }}
-        {{- with $localCtx.customerServices }}
+        {{- with $localCtx.platformConfigs }}
         - repoURL: {{ .repoURL }}
           targetRevision: "{{ .targetRevision }}"
           ref: valuesRepo
         {{- end }}
-        - repoURL: {{ $localCtx.managedServices.repoURL }}
-          path: "{{ $localCtx.managedServices.path }}/{{$app.path}}"
-          targetRevision: "{{ $localCtx.managedServices.targetRevision }}"
+        - repoURL: {{ $localCtx.platformComponents.repoURL }}
+          path: "{{ $localCtx.platformComponents.path }}/{{$app.path}}"
+          targetRevision: "{{ $localCtx.platformComponents.targetRevision }}"
           helm:
             ignoreMissingValueFiles: true
             releaseName: {{ $app.name }}
             valueFiles:
               - "values.yaml"
-              - "$valuesRepo/{{ $localCtx.customerServices.path }}/{{ `{{name}}` }}/{{ $app.path }}/values.yaml"
-              - "$valuesRepo/{{ $localCtx.customerServices.path }}/{{ `{{name}}` }}/{{ $app.path }}/additional-values.yaml"
+              - "$valuesRepo/{{ $localCtx.platformConfigs.path }}/{{ `{{name}}` }}/{{ $app.path }}/values.yaml"
+              - "$valuesRepo/{{ $localCtx.platformConfigs.path }}/{{ `{{name}}` }}/{{ $app.path }}/values-*.yaml"
         {{- end }}
       destination:
         name: "{{ `{{name}}` }}"

@@ -23,14 +23,16 @@ import (
 
 // ConfigStore handles reading and writing configuration
 type ConfigStore struct {
+	cwd            string
 	filepath       string
 	config         *Config
 	catalog        *catalog.Catalog
 	catalogOptions catalog.LoadOptions
 }
 
-func NewConfigStoreWithCatalog(filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
+func NewConfigStore(cwd string, filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
 	return &ConfigStore{
+		cwd:            cwd,
 		filepath:       filePath,
 		config:         &Config{},
 		catalogOptions: catalogOptions,
@@ -49,7 +51,7 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("parse YAML config: %w", err)
 	}
 
-	migrated, err := applyMigrations(raw)
+	migrated, err := applyMigrations(cs.cwd, raw)
 	if err != nil {
 		return fmt.Errorf("migration of config failed: %w", err)
 	}

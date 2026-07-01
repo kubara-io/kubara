@@ -24,8 +24,8 @@ type BootstrapFlags struct {
 	WithProm               bool
 	Local                  bool
 	ClusterSecretStorePath string
-	ManagedCatalogPath     string
-	OverlayValuesPath      string
+	PlatformComponentsPath string
+	PlatformConfigsPath    string
 	EnvFile                string
 	EnvPrefixFlag          string
 	DryRun                 bool
@@ -90,19 +90,19 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
 
-	managedAbsPath := flags.ManagedCatalogPath
-	if !filepath.IsAbs(managedAbsPath) {
-		managedAbsPath = filepath.Join(cwd, managedAbsPath)
-		managedAbsPath, err = filepath.Abs(managedAbsPath)
+	componentsAbsPath := flags.PlatformComponentsPath
+	if !filepath.IsAbs(componentsAbsPath) {
+		componentsAbsPath = filepath.Join(cwd, componentsAbsPath)
+		componentsAbsPath, err = filepath.Abs(componentsAbsPath)
 		if err != nil {
 			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
 	}
 
-	customerAbsPath := flags.OverlayValuesPath
-	if !filepath.IsAbs(customerAbsPath) {
-		customerAbsPath = filepath.Join(cwd, customerAbsPath)
-		customerAbsPath, err = filepath.Abs(customerAbsPath)
+	configsAbsPath := flags.PlatformConfigsPath
+	if !filepath.IsAbs(configsAbsPath) {
+		configsAbsPath = filepath.Join(cwd, configsAbsPath)
+		configsAbsPath, err = filepath.Abs(configsAbsPath)
 		if err != nil {
 			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
@@ -119,7 +119,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 
-	cs := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
+	cs := config.NewConfigStore(cwd, configFilePath, catalogOptions)
 	if err := cs.Load(); err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
@@ -177,23 +177,23 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	return &bootstrap.Options{
-		Kubeconfig:       kubeconf,
-		ManagedCatalog:   managedAbsPath,
-		OverlayValues:    customerAbsPath,
-		WithES:           flags.WithES,
-		WithProm:         flags.WithProm,
-		Local:            flags.Local,
-		WithESCSSPath:    cssAbsPath,
-		EnvMap:           envMap,
-		Catalog:          catalog,
-		ClusterConfig:    clusterConfig,
-		DryRun:           flags.DryRun,
-		Timeout:          timeout,
-		ClusterName:      clusterName,
-		WorkDir:          cwd,
-		ConfigFilePath:   configFilePath,
-		CatalogPath:      catalogOptions.CatalogPath,
-		CatalogOverwrite: catalogOptions.Overwrite,
+		Kubeconfig:         kubeconf,
+		PlatformComponents: componentsAbsPath,
+		PlatformConfigs:    configsAbsPath,
+		WithES:             flags.WithES,
+		WithProm:           flags.WithProm,
+		Local:              flags.Local,
+		WithESCSSPath:      cssAbsPath,
+		EnvMap:             envMap,
+		Catalog:            catalog,
+		ClusterConfig:      clusterConfig,
+		DryRun:             flags.DryRun,
+		Timeout:            timeout,
+		ClusterName:        clusterName,
+		WorkDir:            cwd,
+		ConfigFilePath:     configFilePath,
+		CatalogPath:        catalogOptions.CatalogPath,
+		CatalogOverwrite:   catalogOptions.Overwrite,
 	}, nil
 }
 
@@ -227,16 +227,16 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Destination: &flags.ClusterSecretStorePath,
 		},
 		&cli.StringFlag{
-			Name:        "managed-catalog",
-			Value:       render.DefaultManagedCatalogPath,
-			Usage:       "Path to the managed catalog directory",
-			Destination: &flags.ManagedCatalogPath,
+			Name:        "platform-components",
+			Value:       render.DefaultPlatformComponentsPath,
+			Usage:       "Path to the platform-components directory",
+			Destination: &flags.PlatformComponentsPath,
 		},
 		&cli.StringFlag{
-			Name:        "overlay-values",
-			Value:       render.DefaultOverlayValuesPath,
-			Usage:       "Path to overlay values directory",
-			Destination: &flags.OverlayValuesPath,
+			Name:        "platform-configs",
+			Value:       render.DefaultPlatformConfigsPath,
+			Usage:       "Path to platform-configs directory",
+			Destination: &flags.PlatformConfigsPath,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",

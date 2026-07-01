@@ -60,11 +60,11 @@ func TestNewClusterFromEnv(t *testing.T) {
 		ArgoCD: ArgoCD{
 			Repo: RepoProto{
 				HTTPS: &RepoType{
-					Customer: Repository{
+					Configs: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",
 					},
-					Managed: Repository{
+					Components: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",
 					},

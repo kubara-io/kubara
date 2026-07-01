@@ -273,14 +273,14 @@ func TestEnvStore_Validate(t *testing.T) {
 	}
 }
 
-func TestEnvStore_GenerateEnvExample(t *testing.T) {
+func TestEnvStore_GenerateInitialEnvs(t *testing.T) {
 	tests := []struct {
 		name      string
 		envMap    *EnvMap
 		checkFunc func(*testing.T, []byte)
 	}{
 		{
-			name:   "Generates env example with defaults",
+			name:   "Generates initial envs with defaults",
 			envMap: &EnvMap{},
 			checkFunc: func(t *testing.T, output []byte) {
 				outputStr := string(output)
@@ -303,7 +303,7 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 			},
 		},
 		{
-			name: "Generates env example with existing values",
+			name: "Generates initial envs with existing values",
 			envMap: &EnvMap{
 				ProjectName:  "existing-project",
 				ProjectStage: "production",
@@ -324,7 +324,7 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 				envMap: tt.envMap,
 			}
 
-			output, err := m.GenerateEnvExample()
+			output, err := m.GenerateInitialEnvs()
 			require.NoError(t, err)
 			require.NotEmpty(t, output)
 
@@ -335,11 +335,11 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 	}
 }
 
-func TestEnvStore_GenerateEnvExample_Format(t *testing.T) {
-	t.Run("Generated env example has proper format", func(t *testing.T) {
+func TestEnvStore_GenerateInitialEnvs_Format(t *testing.T) {
+	t.Run("Generated initial envs has proper format", func(t *testing.T) {
 		es := NewEnvStore("/tmp/test.env", ".", "")
 
-		output, err := es.GenerateEnvExample()
+		output, err := es.GenerateInitialEnvs()
 		require.NoError(t, err)
 
 		lines := strings.Split(string(output), "\n")
