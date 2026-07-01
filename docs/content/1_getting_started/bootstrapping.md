@@ -107,10 +107,11 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 !!! info
     What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../7_architecture/architecture_overview.md#hubnspoke)
 
-    If you don't 
 !!! tip
-    Not using STACKIT Edge? Just remove the load balancer IPs from your `config.yaml`.
-    Not using OAuth2Proxy? Just set some placeholder value like "none" for ssoOrg and ssoTeam
+    **Not using STACKIT Edge?** Just remove the load balancer IPs from your `config.yaml`.  
+    **Not using OAuth2Proxy?** Just set some placeholder value like "none" for ssoOrg and ssoTeam
+
+
 
 Example:
 
