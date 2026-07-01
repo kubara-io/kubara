@@ -17,6 +17,7 @@ stub, so it is generated in CI after ``mike set-default`` — see
 ``docs/scripts/build_root_llms.py``.
 """
 
+import re
 import shutil
 from pathlib import Path, PurePosixPath
 from urllib.parse import quote
@@ -24,6 +25,7 @@ from urllib.parse import quote
 from mkdocs.utils import get_relative_url
 
 LLMS_TXT = "llms.txt"
+_BODY_RE = re.compile(r"(<body\b[^>]*>)", re.IGNORECASE)
 
 # Key under which the rendered llms.txt is stashed on the config between the
 # on_nav (where the nav tree is available) and on_post_build (where the site
@@ -39,11 +41,29 @@ def on_nav(nav, config, files):
 
 def on_post_page(output, page, config):
     href = get_relative_url(LLMS_TXT, page.url)
+
+    # <head> hint for structured crawlers that parse alternate representations.
     link = (
         '<link rel="alternate" type="text/plain" '
         f'title="LLM-friendly documentation index" href="{href}">'
     )
-    return output.replace("</head>", f"{link}\n</head>", 1)
+    output = output.replace("</head>", f"{link}\n</head>", 1)
+
+    # In-body hint for coding agents: they fetch the page and read the body
+    # text, dropping <head> — so the discovery pointer must live in the body to
+    # be found. This is machine-only content, so it is inert for humans:
+    # visually hidden (not display:none, so it stays in the extracted text),
+    # aria-hidden from assistive tech, and the link is tabindex="-1" so it is
+    # not a keyboard tab stop. href is relative, so it resolves under mike's
+    # /<version>/ deploys.
+    block = (
+        '<blockquote data-agent-docs-index="true" aria-hidden="true">\n'
+        "  <h2>Documentation Index</h2>\n"
+        f'  <p>Fetch the complete documentation index at: <a href="{href}" tabindex="-1">{href}</a></p>\n'
+        "  <p>Use this file to discover all available pages before exploring further.</p>\n"
+        "</blockquote>"
+    )
+    return _BODY_RE.sub(lambda m: f"{m.group(1)}\n{block}", output, count=1)
 
 
 def on_post_build(config):
