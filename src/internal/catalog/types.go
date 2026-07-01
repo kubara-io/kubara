@@ -23,10 +23,10 @@ var StrictCatalogVersion = regexp.MustCompile(`^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)
 type CatalogArtifactElement string
 
 const (
-	CatalogDefinition               CatalogArtifactElement = "Catalog.yaml"
-	ServicesDirectory               CatalogArtifactElement = "services"
-	ManagedServiceCatalogDirectory  CatalogArtifactElement = "managed-service-catalog"
-	CustomerServiceCatalogDirectory CatalogArtifactElement = "customer-service-catalog"
+	CatalogDefinition           CatalogArtifactElement = "Catalog.yaml"
+	ServicesDirectory           CatalogArtifactElement = "services"
+	PlatformComponentsDirectory CatalogArtifactElement = "platform-components"
+	PlatformConfigsDirectory    CatalogArtifactElement = "platform-configs"
 )
 
 // Support APIVersion for CatalogManifest
@@ -59,7 +59,7 @@ type Metadata struct {
 
 // ServiceSpec contains the desired behavior and schema of a service.
 type ServiceSpec struct {
-	// ChartPath points to the immutable Helm chart path under managed catalog.
+	// ChartPath points to the immutable Helm chart path under platform-components/helm/.
 	ChartPath string `json:"chartPath"`
 	// Status defines the default status for the service and may be overridden per cluster.
 	Status service.Status `json:"status"`

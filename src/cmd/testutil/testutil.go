@@ -63,8 +63,8 @@ func CreateTestCluster(t *testing.T) config.Cluster {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},

@@ -55,14 +55,14 @@ This is a fixed assumption and needs to be followed for spoke cluster onboarding
   applicationSets:
     {{ .cluster.name }}-{{ .cluster.stage }}:
       projectName: "{{ .cluster.name }}-{{ .cluster.stage }}"
-      managedServices:
-        repoURL: "{{ .cluster.argocd.repo.https.managed.url }}"
-        path: "{{ .cluster.argocd.repo.https.managed.path | default "managed-service-catalog/helm" }}"
-        targetRevision: "{{ .cluster.argocd.repo.https.managed.targetRevision }}"
-      customerServices:
-        repoURL: "{{ .cluster.argocd.repo.https.customer.url }}"
-        path: "{{ .cluster.argocd.repo.https.customer.path | default "customer-service-catalog/helm" }}"
-        targetRevision: "{{ .cluster.argocd.repo.https.customer.targetRevision }}"
+      platformComponents:
+        repoURL: "{{ .cluster.argocd.repo.https.components.url }}"
+        path: "{{ .cluster.argocd.repo.https.components.path | default "platform-components/helm" }}"
+        targetRevision: "{{ .cluster.argocd.repo.https.components.targetRevision }}"
+      platformConfigs:
+        repoURL: "{{ .cluster.argocd.repo.https.configs.url }}"
+        path: "{{ .cluster.argocd.repo.https.configs.path | default "platform-configs/helm" }}"
+        targetRevision: "{{ .cluster.argocd.repo.https.configs.targetRevision }}"
       apps:
 {{- range $serviceName := keys .cluster.services | sortAlpha }}
         {{ $serviceName }}:

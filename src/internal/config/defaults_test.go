@@ -90,8 +90,8 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
 						HTTPS: &RepoType{
-							Customer: Repository{URL: "https://github.com/customer/repo.git"},
-							Managed:  Repository{URL: "https://github.com/managed/repo.git", TargetRevision: "release"},
+							Configs:    Repository{URL: "https://github.com/customer/repo.git"},
+							Components: Repository{URL: "https://github.com/managed/repo.git", TargetRevision: "release"},
 						},
 					},
 				},
@@ -102,8 +102,8 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 	applyDefaults(cfg)
 
 	https := cfg.Clusters[0].ArgoCD.Repo.HTTPS
-	assert.Equal(t, "main", https.Customer.TargetRevision, "empty TargetRevision should default to main")
-	assert.Equal(t, "release", https.Managed.TargetRevision, "explicit TargetRevision should not be overwritten")
+	assert.Equal(t, "main", https.Configs.TargetRevision, "empty TargetRevision should default to main")
+	assert.Equal(t, "release", https.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
 }
 
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {

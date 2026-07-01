@@ -23,8 +23,8 @@ func TestNewGenerateFlags(t *testing.T) {
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
 	assert.False(t, flags.DryRun)
-	assert.Equal(t, render.DefaultManagedCatalogPath, flags.ManagedCatalogPath)
-	assert.Equal(t, render.DefaultOverlayValuesPath, flags.OverlayValuesPath)
+	assert.Equal(t, render.DefaultPlatformComponentsPath, flags.PlatformComponents)
+	assert.Equal(t, render.DefaultPlatformConfigsPath, flags.PlatformConfigs)
 }
 
 func TestNewGenerateCmd(t *testing.T) {
@@ -34,7 +34,7 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
-	assert.Equal(t, "kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "kubara generate [--terraform|--helm] [--platform-components PATH --platform-configs PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
@@ -48,8 +48,8 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["terraform"])
 	assert.True(t, flagNames["helm"])
 	assert.True(t, flagNames["dry-run"])
-	assert.True(t, flagNames["managed-catalog"])
-	assert.True(t, flagNames["overlay-values"])
+	assert.True(t, flagNames["platform-components"])
+	assert.True(t, flagNames["platform-configs"])
 }
 
 func TestGenerateCmd(t *testing.T) {
@@ -111,13 +111,13 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			wantErr: false,
 			setup: func(t *testing.T, tempDir string) {
-				// Create managed catalog directory
-				err := os.MkdirAll(filepath.Join(tempDir, "managed-service-catalog"), 0750)
+				// Create platform-components directory
+				err := os.MkdirAll(filepath.Join(tempDir, "platform-components"), 0750)
 				require.NoError(t, err)
 			},
 			validate: func(t *testing.T, tempDir string) {
 				// Check that terraform files were generated
-				terraformDir := filepath.Join(tempDir, "managed-service-catalog", "terraform")
+				terraformDir := filepath.Join(tempDir, "platform-components", "terraform")
 				entries, err := os.ReadDir(terraformDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
@@ -137,13 +137,13 @@ func TestGenerateCmd(t *testing.T) {
 			},
 			wantErr: false,
 			setup: func(t *testing.T, tempDir string) {
-				// Create managed catalog directory
-				err := os.MkdirAll(filepath.Join(tempDir, "managed-service-catalog"), 0750)
+				// Create platform-components directory
+				err := os.MkdirAll(filepath.Join(tempDir, "platform-components"), 0750)
 				require.NoError(t, err)
 			},
 			validate: func(t *testing.T, tempDir string) {
 				// Check that helm files were generated
-				helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+				helmDir := filepath.Join(tempDir, "platform-components", "helm")
 				entries, err := os.ReadDir(helmDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
@@ -153,20 +153,20 @@ func TestGenerateCmd(t *testing.T) {
 			name: "successful file generation with custom paths",
 			flags: []string{
 				"--terraform",
-				"--managed-catalog", "custom-managed",
-				"--overlay-values", "custom-overlay",
+				"--platform-components", "custom-managed",
+				"--platform-configs", "custom-overlay",
 			},
 			wantErr: false,
 			setup: func(t *testing.T, tempDir string) {
 				// Create custom directories
-				err := os.MkdirAll(filepath.Join(tempDir, "custom-managed"), 0750)
+				err := os.MkdirAll(filepath.Join(tempDir, "platform-components"), 0750)
 				require.NoError(t, err)
-				err = os.MkdirAll(filepath.Join(tempDir, "custom-overlay"), 0750)
+				err = os.MkdirAll(filepath.Join(tempDir, "platform-configs"), 0750)
 				require.NoError(t, err)
 			},
 			validate: func(t *testing.T, tempDir string) {
 				// Check that files were generated in custom paths
-				terraformDir := filepath.Join(tempDir, "custom-managed", "terraform")
+				terraformDir := filepath.Join(tempDir, "platform-components", "terraform")
 				entries, err := os.ReadDir(terraformDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
@@ -201,8 +201,8 @@ func TestGenerateCmd(t *testing.T) {
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
 						HTTPS: &config.RepoType{
-							Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-							Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+							Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+							Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 						},
 					},
 				},
