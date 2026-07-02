@@ -2936,7 +2936,8 @@ You can set a custom output file:</p>
 </div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>Not using STACKIT Edge? Just remove the load balancer IPs from your <code>config.yaml</code>.</p>
+<p><strong>Not using STACKIT Edge?</strong> Just remove the load balancer IPs from your <code>config.yaml</code>.<br />
+<strong>Not using an SSO provider?</strong> Just set the ssoOrg and ssoTeam to "none"</p>
 </div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
@@ -2944,7 +2945,8 @@ You can set a custom output file:</p>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub or spoke&gt;</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cp.demo-42.stackit.run&gt;</span>
-<span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span>
+<span class="w">    </span><span class="c1"># Hint: If you don&#39;t use an SSO provider, you can set ssoOrg and ssoTeam to &quot;none&quot;</span>
+<span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span><span class="w"> </span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;org-team&gt;</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit, t-cloud-public</span>
