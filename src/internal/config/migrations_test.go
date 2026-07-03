@@ -21,12 +21,14 @@ func TestMigrateV1Alpha2FilesCleansUpEmptyLegacyCategoryDirs(t *testing.T) {
 	require.NoError(t, os.MkdirAll(otherTerraformSource, 0o755))
 
 	require.NoError(t, os.WriteFile(filepath.Join(helmSource, "values.yaml"), []byte("kind: values"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(helmSource, "additional-values.yaml"), []byte("additional"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(terraformSource, "main.tf"), []byte("resource {}"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(otherTerraformSource, "keep.tf"), []byte("keep"), 0o644))
 
 	require.NoError(t, migrateV1Alpha2Files(tempDir, "test-cluster"))
 
 	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "values.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "values-additional.yaml"))
 	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "terraform", "main.tf"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog", "helm"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog", "terraform", "test-cluster"))

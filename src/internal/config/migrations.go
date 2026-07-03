@@ -239,6 +239,19 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 		return fmt.Errorf("clusterName is empty")
 	}
 
+	// Rename any additional-values.yaml to values-additional.yaml
+	_ = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if !info.IsDir() && filepath.Base(path) == "additional-values.yaml" {
+			dir := filepath.Dir(path)
+			newPath := filepath.Join(dir, "values-additional.yaml")
+			_ = os.Rename(path, newPath)
+		}
+		return nil
+	})
+
 	pattern := filepath.Join(cwd, "*", "*", clusterName)
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
