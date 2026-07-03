@@ -393,7 +393,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        shell: bash
+        shell: bashan
     steps:
       - name: Checkout CI scripts
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -497,12 +497,19 @@ jobs:
       matrix:
         image: ${{ fromJSON(needs.extract-images.outputs.images) }}
     steps:
+      - name: Checkout
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          sparse-checkout: .github
+          fetch-depth: 1
+
       - name: Scan ${{ matrix.image }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           image-ref: ${{ matrix.image }}
           scanners: vuln
           severity: CRITICAL # high as well?
+          limit-severities-for-sarif: true
           ignore-unfixed: true
           format: sarif
           output: trivy-results.sarif
