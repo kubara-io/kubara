@@ -124,7 +124,7 @@ func TestGenerateCmd(t *testing.T) {
 
 				// Provider selector folders are internal to embedded templates
 				// and must not leak into generated output paths.
-				_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
+				_, err = os.Stat(filepath.Join(terraformDir, "stackit", "modules", "ske-cluster", "main.tf"))
 				require.NoError(t, err)
 				_, err = os.Stat(filepath.Join(terraformDir, "providers"))
 				assert.ErrorIs(t, err, os.ErrNotExist)
@@ -159,21 +159,19 @@ func TestGenerateCmd(t *testing.T) {
 			wantErr: false,
 			setup: func(t *testing.T, tempDir string) {
 				// Create custom directories
-				err := os.MkdirAll(filepath.Join(tempDir, "platform-components"), 0750)
+				err := os.MkdirAll(filepath.Join(tempDir, "custom-managed"), 0750)
 				require.NoError(t, err)
-				err = os.MkdirAll(filepath.Join(tempDir, "platform-configs"), 0750)
+				err = os.MkdirAll(filepath.Join(tempDir, "custom-overlay"), 0750)
 				require.NoError(t, err)
 			},
 			validate: func(t *testing.T, tempDir string) {
 				// Check that files were generated in custom paths
-				terraformDir := filepath.Join(tempDir, "platform-components", "terraform")
+				terraformDir := filepath.Join(tempDir, "custom-managed", "terraform")
 				entries, err := os.ReadDir(terraformDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
-				_, err = os.Stat(filepath.Join(terraformDir, "modules", "ske-cluster", "main.tf"))
+				_, err = os.Stat(filepath.Join(terraformDir, "stackit", "modules", "ske-cluster", "main.tf"))
 				require.NoError(t, err)
-				_, err = os.Stat(filepath.Join(terraformDir, "providers"))
-				assert.ErrorIs(t, err, os.ErrNotExist)
 
 				// Check overlay files were generated with cluster name
 				overlayDir := filepath.Join(tempDir, "custom-overlay")
@@ -211,7 +209,7 @@ func TestGenerateCmd(t *testing.T) {
 			validate: func(t *testing.T, tempDir string) {
 				// Edge renders the example infrastructure under the cluster name.
 				// Assert the artifact set is produced, not its rendered content.
-				infrastructureDir := filepath.Join(tempDir, "customer-service-catalog", "terraform", "edge-cluster", "infrastructure")
+				infrastructureDir := filepath.Join(tempDir, "platform-configs", "edge-cluster", "terraform", "infrastructure")
 
 				entries, err := os.ReadDir(infrastructureDir)
 				require.NoError(t, err)
@@ -222,8 +220,14 @@ func TestGenerateCmd(t *testing.T) {
 					require.NoErrorf(t, statErr, "expected generated edge artifact %q", name)
 				}
 
-				// Provider selector folders must not leak into output paths.
-				_, err = os.Stat(filepath.Join(tempDir, "customer-service-catalog", "terraform", "providers"))
+				// Provider selector folders does not exist anymore
+				_, err = os.Stat(filepath.Join(tempDir, "platform-configs", "terraform", "providers"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
+
+				// Provider folders must not leak into output paths.
+				_, err = os.Stat(filepath.Join(tempDir, "platform-configs", "terraform", "stackit"))
+				assert.ErrorIs(t, err, os.ErrNotExist)
+				_, err = os.Stat(filepath.Join(tempDir, "platform-configs", "edge-cluster", "terraform", "stackit"))
 				assert.ErrorIs(t, err, os.ErrNotExist)
 			},
 		},
@@ -255,11 +259,11 @@ func TestGenerateCmd(t *testing.T) {
 					ArgoCD: config.ArgoCD{
 						Repo: config.RepoProto{
 							HTTPS: &config.RepoType{
-								Customer: config.Repository{
+								Configs: config.Repository{
 									URL:            "https://github.com/example/customer",
 									TargetRevision: "main",
 								},
-								Managed: config.Repository{
+								Components: config.Repository{
 									URL:            "https://github.com/example/managed",
 									TargetRevision: "main",
 								},
@@ -332,8 +336,8 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
 			},
 		},
@@ -368,8 +372,8 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
 			},
 		},
@@ -384,12 +388,12 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
-	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	helmDir := filepath.Join(tempDir, "platform-components", "helm")
 	entries, err := os.ReadDir(helmDir)
 	require.NoError(t, err)
 	assert.NotEmpty(t, entries)
 
-	_, err = os.Stat(filepath.Join(tempDir, "managed-service-catalog", "terraform"))
+	_, err = os.Stat(filepath.Join(tempDir, "platform-components", "terraform"))
 	assert.ErrorIs(t, err, os.ErrNotExist)
 }
 
@@ -404,8 +408,8 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
 			},
 		},
@@ -420,12 +424,12 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
-	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	helmDir := filepath.Join(tempDir, "platform-components", "helm")
 	entries, err := os.ReadDir(helmDir)
 	require.NoError(t, err)
 	assert.NotEmpty(t, entries)
 
-	_, err = os.Stat(filepath.Join(tempDir, "managed-service-catalog", "terraform"))
+	_, err = os.Stat(filepath.Join(tempDir, "platform-components", "terraform"))
 	assert.ErrorIs(t, err, os.ErrNotExist)
 }
 
@@ -440,8 +444,8 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
 			},
 		},
@@ -474,8 +478,8 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
-					Customer: config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Managed:  config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
 				},
 			},
 		},
@@ -489,7 +493,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
-	helmDir := filepath.Join(tempDir, "managed-service-catalog", "helm")
+	helmDir := filepath.Join(tempDir, "platform-components", "helm")
 	entries, err := os.ReadDir(helmDir)
 	names := make([]string, 0)
 	for _, entry := range entries {

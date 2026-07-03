@@ -92,7 +92,7 @@ func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) 
 	tempDir := t.TempDir()
 	chartDir := filepath.Join(tempDir, "helm", "test-cluster", "argo-cd")
 	require.NoError(t, os.MkdirAll(chartDir, 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "additional-values.yaml"), []byte("argo-cd: {}\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-additional.yaml"), []byte("argo-cd: {}\n"), 0o644))
 
 	opts := &Options{
 		PlatformConfigs: tempDir,
@@ -103,6 +103,6 @@ func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) 
 
 	assert.Equal(t, []string{
 		filepath.Join(chartDir, "values.yaml"),
-		filepath.Join(chartDir, "additional-values.yaml"),
+		filepath.Join(chartDir, "values-additional.yaml"),
 	}, valuesPaths)
 }

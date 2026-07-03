@@ -29,7 +29,7 @@ func TestTemplateFiles_PathPredicateUsesProviderStrippedPath(t *testing.T) {
 			"catalog": fullCatalogContext(),
 		},
 		PathPredicate: func(path string) bool {
-			return strings.HasPrefix(path, "customer-service-catalog/terraform/example/")
+			return strings.HasPrefix(path, "platform-configs/terraform/")
 		},
 	})
 
