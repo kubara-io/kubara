@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/config/migrations"
 	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/go-viper/mapstructure/v2"
@@ -51,7 +52,7 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("parse YAML config: %w", err)
 	}
 
-	migrated, err := applyMigrations(cs.cwd, raw)
+	migrated, err := migrations.Apply(cs.cwd, raw)
 	if err != nil {
 		return fmt.Errorf("migration of config failed: %w", err)
 	}
