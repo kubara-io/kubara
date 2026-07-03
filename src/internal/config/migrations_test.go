@@ -12,23 +12,32 @@ import (
 func TestMigrateV1Alpha2FilesCleansUpEmptyLegacyCategoryDirs(t *testing.T) {
 	tempDir := t.TempDir()
 
-	helmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster")
+	helmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster", "argo-cd")
+	customHelmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster", "custom-app")
 	terraformSource := filepath.Join(tempDir, "customer-service-catalog", "terraform", "test-cluster")
 	otherTerraformSource := filepath.Join(tempDir, "customer-service-catalog", "terraform", "other-cluster")
 
 	require.NoError(t, os.MkdirAll(helmSource, 0o755))
+	require.NoError(t, os.MkdirAll(customHelmSource, 0o755))
 	require.NoError(t, os.MkdirAll(terraformSource, 0o755))
 	require.NoError(t, os.MkdirAll(otherTerraformSource, 0o755))
 
 	require.NoError(t, os.WriteFile(filepath.Join(helmSource, "values.yaml"), []byte("kind: values"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(helmSource, "values.generated.yaml"), []byte("generated"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(helmSource, "additional-values.yaml"), []byte("additional"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(customHelmSource, "values.yaml"), []byte("custom: true"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(customHelmSource, "additional-values.yaml"), []byte("custom: additional"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(terraformSource, "main.tf"), []byte("resource {}"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(otherTerraformSource, "keep.tf"), []byte("keep"), 0o644))
 
 	require.NoError(t, migrateV1Alpha2Files(tempDir, "test-cluster"))
 
-	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "values.yaml"))
-	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "values-additional.yaml"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "argo-cd", "values.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "argo-cd", "values.generated.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "argo-cd", "values-additional.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "custom-app", "values.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "custom-app", "additional-values.yaml"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "helm", "custom-app", "values-additional.yaml"))
 	assert.FileExists(t, filepath.Join(tempDir, "customer-service-catalog", "test-cluster", "terraform", "main.tf"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog", "helm"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog", "terraform", "test-cluster"))
@@ -39,11 +48,12 @@ func TestMigrateV1Alpha2FilesCleansUpEmptyLegacyCategoryDirs(t *testing.T) {
 func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 	tempDir := t.TempDir()
 
-	customerHelmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster")
+	customerHelmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster", "argo-cd")
 	managedTerraformSource := filepath.Join(tempDir, "managed-service-catalog", "terraform", "test-cluster")
 	require.NoError(t, os.MkdirAll(customerHelmSource, 0o755))
 	require.NoError(t, os.MkdirAll(managedTerraformSource, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(customerHelmSource, "values.yaml"), []byte("kind: values"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(customerHelmSource, "values.generated.yaml"), []byte("generated"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(managedTerraformSource, "main.tf"), []byte("resource {}"), 0o644))
 
 	config := map[string]any{
@@ -55,11 +65,11 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 					"repo": map[string]any{
 						"https": map[string]any{
 							"customer": map[string]any{"url": "https://github.com/example/configs.git"},
-							"managed": map[string]any{"url": "https://github.com/example/components.git"},
+							"managed":  map[string]any{"url": "https://github.com/example/components.git"},
 						},
 						"oci": map[string]any{
 							"customer": map[string]any{"url": "ghcr.io/example/configs"},
-							"managed": map[string]any{"url": "ghcr.io/example/components"},
+							"managed":  map[string]any{"url": "ghcr.io/example/components"},
 						},
 					},
 				},
@@ -81,7 +91,8 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 		assert.NotContains(t, repoConfig, "managed")
 	}
 
-	assert.FileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "values.yaml"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "argo-cd", "values.yaml"))
+	assert.FileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "argo-cd", "values.generated.yaml"))
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "test-cluster", "terraform", "main.tf"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "managed-service-catalog"))

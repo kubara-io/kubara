@@ -3,13 +3,16 @@ package config
 import (
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
 	"syscall"
 
 	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/rs/zerolog/log"
 )
 
 func applyMigrations(cwd string, config map[string]any) (bool, error) {
@@ -53,7 +56,10 @@ func isV1Alpha2Config(raw map[string]any) bool {
 	return version == ConfigVersionV1Alpha2 && hasVersion
 }
 
+// migrateLegacyConfig migrates configurations without an explicit version field (the legacy config)
+// to the ConfigVersionV1Alpha1 schema format.
 func migrateLegacyConfig(raw map[string]any) error {
+	log.Info().Msg("migrating config from legacy format to v1alpha1")
 	clustersRaw, ok := raw["clusters"]
 	if !ok {
 		raw["version"] = ConfigVersionV1Alpha1
@@ -83,7 +89,9 @@ func migrateLegacyConfig(raw map[string]any) error {
 	return nil
 }
 
+// migrateV1Alpha1Config migrates configurations with version ConfigVersionV1Alpha1 to the ConfigVersionV1Alpha2 schema format.
 func migrateV1Alpha1Config(config map[string]any) error {
+	log.Info().Msg("migrating config from v1alpha1 format to v1alpha2")
 	config["version"] = ConfigVersionV1Alpha2
 	clustersRaw, ok := config["clusters"]
 	if !ok {
@@ -112,7 +120,16 @@ func migrateV1Alpha1Config(config map[string]any) error {
 	return nil
 }
 
+// migrateV1Alpha2Config migrates configurations with version ConfigVersionV1Alpha2 to the ConfigVersionV1Alpha3 schema format,
+// moving service catalog directories and renaming additional-values files.
 func migrateV1Alpha2Config(cwd string, config map[string]any) error {
+	log.Info().Msg("migrating config from v1alpha2 format to v1alpha3")
+	log.Info().Msg(`
+This migration restructures your repository layout:
+  - 'managed-service-catalog' becomes 'platform-components'
+  - 'customer-service-catalog' becomes 'platform-configs'
+  - The internal directories are refactored from '<tool>/<cluster>' to '<cluster>/<tool>' (e.g. 'helm/my-cluster' -> 'my-cluster/helm')
+As a result, your subsequent git changes will look exceptionally large.`)
 	config["version"] = ConfigVersionV1Alpha3
 	clustersRaw, ok := config["clusters"]
 	if !ok {
@@ -234,23 +251,23 @@ type foundDir struct {
 	Src        string // cwd/customer-service-catalog/<category>/<clusterName>
 }
 
+const (
+	legacyAdditionalValuesFileName  = "additional-values.yaml"
+	additionalValuesFileName        = "values-additional.yaml"
+	legacyValuesFileName            = "values.yaml"
+	generatedValuesTemplateFileName = "values.generated.yaml.tplt"
+	builtInPlatformConfigsHelmDir   = "built-in/platform-configs/helm"
+)
+
 func migrateV1Alpha2Files(cwd string, clusterName string) error {
 	if clusterName == "" {
 		return fmt.Errorf("clusterName is empty")
 	}
 
-	// Rename any additional-values.yaml to values-additional.yaml
-	_ = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-		if !info.IsDir() && filepath.Base(path) == "additional-values.yaml" {
-			dir := filepath.Dir(path)
-			newPath := filepath.Join(dir, "values-additional.yaml")
-			_ = os.Rename(path, newPath)
-		}
-		return nil
-	})
+	generatedValuesCharts, err := builtInGeneratedValuesCharts()
+	if err != nil {
+		return fmt.Errorf("discover built-in generated values templates: %w", err)
+	}
 
 	pattern := filepath.Join(cwd, "*", "*", clusterName)
 	matches, err := filepath.Glob(pattern)
@@ -293,6 +310,11 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 		if err := moveDirContents(item.Src, dstDir); err != nil {
 			return err
 		}
+		if item.SubDir == "helm" {
+			if err := migrateV1Alpha2HelmValues(dstDir, generatedValuesCharts); err != nil {
+				return fmt.Errorf("migrate helm values in %q: %w", dstDir, err)
+			}
+		}
 
 		if err := os.Remove(item.Src); err != nil {
 			return fmt.Errorf("remove empty dir %q: %w", item.Src, err)
@@ -304,6 +326,66 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 	}
 
 	return nil
+}
+
+func builtInGeneratedValuesCharts() (map[string]struct{}, error) {
+	charts := make(map[string]struct{})
+	if err := fs.WalkDir(catalog.BuiltInFS(), builtInPlatformConfigsHelmDir, func(pathValue string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() || path.Base(pathValue) != generatedValuesTemplateFileName {
+			return nil
+		}
+
+		charts[path.Base(path.Dir(pathValue))] = struct{}{}
+		return nil
+	}); err != nil {
+		return nil, err
+	}
+
+	return charts, nil
+}
+
+func migrateV1Alpha2HelmValues(root string, generatedValuesCharts map[string]struct{}) error {
+	return filepath.WalkDir(root, func(filePath string, entry os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return nil
+		}
+
+		switch filepath.Base(filePath) {
+		case legacyAdditionalValuesFileName:
+			chartName := filepath.Base(filepath.Dir(filePath))
+			if _, exists := generatedValuesCharts[chartName]; !exists {
+				return nil
+			}
+
+			targetPath := filepath.Join(filepath.Dir(filePath), additionalValuesFileName)
+			if _, err := os.Stat(targetPath); err == nil {
+				return fmt.Errorf("destination already exists: %q", targetPath)
+			} else if !errors.Is(err, os.ErrNotExist) {
+				return fmt.Errorf("stat %q: %w", targetPath, err)
+			}
+
+			if err := os.Rename(filePath, targetPath); err != nil {
+				return fmt.Errorf("rename %q -> %q: %w", filePath, targetPath, err)
+			}
+		case legacyValuesFileName:
+			chartName := filepath.Base(filepath.Dir(filePath))
+			if _, exists := generatedValuesCharts[chartName]; !exists {
+				return nil
+			}
+
+			if err := os.Remove(filePath); err != nil {
+				return fmt.Errorf("remove %q: %w", filePath, err)
+			}
+		}
+
+		return nil
+	})
 }
 
 func removeDirIfEmpty(dir string) error {
