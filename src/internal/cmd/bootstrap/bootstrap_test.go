@@ -74,7 +74,7 @@ func TestBuildLocalTraefikBootstrapServiceMatchesHelmOwnershipMetadata(t *testin
 	assert.Equal(t, localTraefikNamespace, service.Annotations["meta.helm.sh/release-namespace"])
 }
 
-func TestOverlayValuesForChartIncludesValuesYaml(t *testing.T) {
+func TestOverlayValuesForChartIncludesGeneratedValuesYaml(t *testing.T) {
 	tempDir := t.TempDir()
 	opts := &Options{
 		PlatformConfigs: tempDir,
@@ -84,15 +84,17 @@ func TestOverlayValuesForChartIncludesValuesYaml(t *testing.T) {
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")
 
 	assert.Equal(t, []string{
-		filepath.Join(tempDir, "helm", "test-cluster", "argo-cd", "values.yaml"),
+		filepath.Join(tempDir, "test-cluster", "helm", "argo-cd", "values.generated.yaml"),
 	}, valuesPaths)
 }
 
-func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) {
+func TestOverlayValuesForChartIncludesExtraValuesFilesInLexicalOrder(t *testing.T) {
 	tempDir := t.TempDir()
-	chartDir := filepath.Join(tempDir, "helm", "test-cluster", "argo-cd")
+	chartDir := filepath.Join(tempDir, "test-cluster", "helm", "argo-cd")
 	require.NoError(t, os.MkdirAll(chartDir, 0o755))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-z.yaml"), []byte("z: true\n"), 0o644))
 	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-additional.yaml"), []byte("argo-cd: {}\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-a.yaml"), []byte("a: true\n"), 0o644))
 
 	opts := &Options{
 		PlatformConfigs: tempDir,
@@ -102,7 +104,9 @@ func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) 
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")
 
 	assert.Equal(t, []string{
-		filepath.Join(chartDir, "values.yaml"),
+		filepath.Join(chartDir, "values.generated.yaml"),
+		filepath.Join(chartDir, "values-a.yaml"),
 		filepath.Join(chartDir, "values-additional.yaml"),
+		filepath.Join(chartDir, "values-z.yaml"),
 	}, valuesPaths)
 }

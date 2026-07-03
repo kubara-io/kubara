@@ -65,7 +65,7 @@ This is a fixed assumption and needs to be followed for spoke cluster onboarding
         targetRevision: "{{ .cluster.argocd.repo.https.components.targetRevision }}"
       platformConfigs:
         repoURL: "{{ .cluster.argocd.repo.https.configs.url }}"
-        path: "{{ .cluster.argocd.repo.https.configs.path | default "platform-configs/helm" }}"
+        path: "{{ .cluster.argocd.repo.https.configs.path | default "platform-configs" }}"
         targetRevision: "{{ .cluster.argocd.repo.https.configs.targetRevision }}"
       apps:
 {{- range $serviceName := keys .cluster.services | sortAlpha }}

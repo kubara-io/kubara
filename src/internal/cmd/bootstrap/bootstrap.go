@@ -3,8 +3,8 @@ package bootstrap
 import (
 	"context"
 	"fmt"
-	"os"
 	"path/filepath"
+	"sort"
 	"time"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -220,14 +220,14 @@ func chartPathForService(cat catalog.Catalog, serviceName string) (string, error
 }
 
 func overlayValuesForChart(opts *Options, chartPath string) []string {
-	chartOverlayPath := filepath.Join(opts.PlatformConfigs, "helm", opts.ClusterName, chartPath)
-	valuesPaths := []string{filepath.Join(chartOverlayPath, "values.yaml")}
+	chartOverlayPath := filepath.Join(opts.PlatformConfigs, opts.ClusterName, "helm", chartPath)
+	valuesPaths := []string{filepath.Join(chartOverlayPath, "values.generated.yaml")}
 
-	additionalValuesPath := filepath.Join(chartOverlayPath, "values-additional.yaml")
-	if _, err := os.Stat(additionalValuesPath); err == nil {
-		valuesPaths = append(valuesPaths, additionalValuesPath)
+	extraValues, err := filepath.Glob(filepath.Join(chartOverlayPath, "values-*.yaml"))
+	if err == nil {
+		sort.Strings(extraValues)
+		valuesPaths = append(valuesPaths, extraValues...)
 	}
-
 	return valuesPaths
 }
 

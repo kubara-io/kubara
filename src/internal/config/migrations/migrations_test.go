@@ -57,12 +57,12 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 				"argocd": map[string]any{
 					"repo": map[string]any{
 						"https": map[string]any{
-							"customer": map[string]any{"url": "https://github.com/example/configs.git"},
-							"managed": map[string]any{"url": "https://github.com/example/components.git"},
+							"customer": map[string]any{"url": "https://github.com/example/configs.git", "path": "customer-service-catalog/helm"},
+							"managed":  map[string]any{"url": "https://github.com/example/components.git"},
 						},
 						"oci": map[string]any{
-							"customer": map[string]any{"url": "ghcr.io/example/configs"},
-							"managed": map[string]any{"url": "ghcr.io/example/components"},
+							"customer": map[string]any{"url": "ghcr.io/example/configs", "path": "platform-configs/helm"},
+							"managed":  map[string]any{"url": "ghcr.io/example/components"},
 						},
 					},
 				},
@@ -82,6 +82,7 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 		assert.Contains(t, repoConfig, "components")
 		assert.NotContains(t, repoConfig, "customer")
 		assert.NotContains(t, repoConfig, "managed")
+		assert.Equal(t, "platform-configs", repoConfig["configs"].(map[string]any)["path"])
 	}
 
 	assert.NoFileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "argo-cd", "values.yaml"))

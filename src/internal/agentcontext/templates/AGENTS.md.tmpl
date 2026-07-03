@@ -27,7 +27,7 @@ Use `kubara generate --dry-run` to preview without writing.
 - `config.yaml` — the platform definition (clusters, stages, services). Run `kubara schema` for its
   JSON Schema instead of guessing field names.
 - `.env` — inputs/credentials consumed by `kubara init`. Git-ignored; never commit it.
-- `customer-service-catalog/` — generated Helm values and Terraform overlays. Review them and fill
+- `platform-configs/` — generated Helm values and Terraform overlays. Review them and fill
   in any environment-specific values before bootstrapping.
 
 ## Conventions for agents

@@ -230,7 +230,7 @@ func TestTemplateFiles(t *testing.T) {
 								},
 								"configs": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "platform-configs/helm",
+									"path":           "platform-configs",
 									"targetRevision": "main",
 								},
 							},
@@ -346,7 +346,7 @@ func TestTemplateFiles(t *testing.T) {
 								},
 								"configs": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "platform-configs/helm",
+									"path":           "platform-configs",
 									"targetRevision": "main",
 								},
 							},

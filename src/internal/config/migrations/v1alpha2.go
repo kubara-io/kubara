@@ -2,11 +2,13 @@ package migrations
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -132,7 +134,26 @@ func migrateV1Alpha2Repo(repo any) error {
 		repoMap["components"] = managed
 		delete(repoMap, "managed")
 	}
+	if configs, exists := repoMap["configs"]; exists {
+		normalizeRepoPath(configs, "customer-service-catalog/helm", "platform-configs")
+		normalizeRepoPath(configs, "platform-configs/helm", "platform-configs")
+	}
+	if components, exists := repoMap["components"]; exists {
+		normalizeRepoPath(components, "managed-service-catalog/helm", "platform-components/helm")
+	}
 	return nil
+}
+
+func normalizeRepoPath(repo any, from, to string) {
+	repoMap, ok := repo.(map[string]any)
+	if !ok {
+		return
+	}
+	pathValue, ok := repoMap["path"].(string)
+	if !ok || pathValue != from {
+		return
+	}
+	repoMap["path"] = to
 }
 
 type foundDir struct {
@@ -146,38 +167,9 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 		return fmt.Errorf("clusterName is empty")
 	}
 
-	// Rename any additional-values.yaml to values-additional.yaml, and remove old values.yaml if a matching template was migrated to values.generated.yaml.tplt
-	_ = filepath.Walk(cwd, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return nil
-		}
-		if !info.IsDir() {
-			base := filepath.Base(path)
-			if base == "additional-values.yaml" {
-				dir := filepath.Dir(path)
-				newPath := filepath.Join(dir, "values-additional.yaml")
-				_ = os.Rename(path, newPath)
-			} else if base == "values.yaml" {
-				dir := filepath.Dir(path)
-				serviceDir := filepath.Base(dir) // e.g., argo-cd, loki
-				// Find the values.generated.yaml.tplt dynamically relative to go.mod or catalog assets
-				// without absolute fallback paths
-				for _, rootDir := range []string{cwd, "/workspace", ".", "../.."} {
-					for _, relativeSub := range []string{
-						"internal/catalog/built-in/platform-configs/helm",
-						"catalog/built-in/platform-configs/helm",
-					} {
-						tpltPath := filepath.Join(rootDir, relativeSub, serviceDir, "values.generated.yaml.tplt")
-						if _, statErr := os.Stat(tpltPath); statErr == nil {
-							_ = os.Remove(path)
-							return nil
-						}
-					}
-				}
-			}
-		}
-		return nil
-	})
+	if err := migrateLegacyValuesFiles(cwd); err != nil {
+		return err
+	}
 
 	pattern := filepath.Join(cwd, "*", "*", clusterName)
 	matches, err := filepath.Glob(pattern)
@@ -231,4 +223,61 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 	}
 
 	return nil
+}
+
+func migrateLegacyValuesFiles(cwd string) (err error) {
+	root, err := os.OpenRoot(cwd)
+	if err != nil {
+		return fmt.Errorf("open root %q: %w", cwd, err)
+	}
+	defer func() {
+		closeErr := root.Close()
+		if err == nil && closeErr != nil {
+			err = fmt.Errorf("close root %q: %w", cwd, closeErr)
+		}
+	}()
+
+	var renameAdditional []string
+	var removeLegacyValues []string
+
+	if err := fs.WalkDir(root.FS(), ".", func(path string, entry fs.DirEntry, walkErr error) error {
+		if walkErr != nil || entry.IsDir() {
+			return nil
+		}
+
+		switch filepath.Base(path) {
+		case "additional-values.yaml":
+			renameAdditional = append(renameAdditional, path)
+		case "values.yaml":
+			serviceDir := filepath.Base(filepath.Dir(path))
+			if hasGeneratedValuesTemplate(cwd, serviceDir) {
+				removeLegacyValues = append(removeLegacyValues, path)
+			}
+		}
+
+		return nil
+	}); err != nil {
+		return fmt.Errorf("walk %q: %w", cwd, err)
+	}
+
+	for _, path := range renameAdditional {
+		newPath := filepath.Join(filepath.Dir(path), "values-additional.yaml")
+		if err := root.Rename(path, newPath); err != nil {
+			return fmt.Errorf("rename %q to %q: %w", path, newPath, err)
+		}
+	}
+
+	for _, path := range removeLegacyValues {
+		if err := root.Remove(path); err != nil {
+			return fmt.Errorf("remove %q: %w", path, err)
+		}
+	}
+
+	return nil
+}
+
+func hasGeneratedValuesTemplate(_ string, serviceDir string) bool {
+	tpltPath := filepath.ToSlash(filepath.Join("built-in", "platform-configs", "helm", serviceDir, "values.generated.yaml.tplt"))
+	_, err := fs.Stat(catalog.BuiltInFS(), tpltPath)
+	return err == nil
 }
