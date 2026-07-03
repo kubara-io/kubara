@@ -32,6 +32,8 @@ env:
   # renovate: datasource=github-releases depName=terraform-linters/tflint
   TFLINT_VERSION: "v0.63.1"
   ARTIFACT_RETENTION_DAYS: "15"
+  # renovate: datasource=github-releases depName=aquasecurity/trivy
+  TRIVY_VERSION: "v0.70.0"
 
 permissions:
   contents: read
@@ -487,26 +489,64 @@ jobs:
             echo "has_images=true" >> "$GITHUB_OUTPUT"
           fi
     
-  trivy-scan:
+  trivy-db:
     needs: extract-images
     if: needs.extract-images.outputs.has_images == 'true'
     runs-on: ubuntu-latest
+    steps:
+      - name: Cache Trivy DB
+        id: cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: trivy-db-${{ github.run_id }}
+          restore-keys: trivy-db-
+      
+      - name: Setup Trivy
+        if: steps.cache.outputs.cache-hit != 'true'
+        uses: aquasecurity/setup-trivy@81e514348e19b6112ce2a7e3ecbafe19c1e1f567 # v0.3.1
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Download DB only
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: trivy image --download-db-only --cache-dir "${{ github.workspace }}"/.cache/trivy
+
+  trivy-scan:
+    needs: [extract-images, trivy-db]
+    if: needs.extract-images.outputs.has_images == 'true'
+    runs-on: ubuntu-latest
+    env:
+      TRIVY_CACHE_DIR: ${{ github.workspace }}/.cache/trivy
+      TRIVY_SKIP_DB_UPDATE: true # assumes db is present, can't silently redownload db
+      TRIVY_SKIP_JAVA_DB_UPDATE: true
+
     strategy:
       fail-fast: false
       max-parallel: 10
       matrix:
         image: ${{ fromJSON(needs.extract-images.outputs.images) }}
     steps:
-      - name: Checkout
+      - name: Checkout # for fetching .git to upload sarif
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: .github
           fetch-depth: 1
+        
+      - name: Restore Trivy DB
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ${{ github.workspace }}/.cache/trivy
+          key: trivy-db-${{ github.run_id }}
+          restore-keys: trivy-db-
+
 
       - name: Scan ${{ matrix.image }}
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
+          cache: false # uses restored db
           image-ref: ${{ matrix.image }}
+          version: ${{ env.TRIVY_VERSION }}
           scanners: vuln
           severity: CRITICAL # high as well?
           limit-severities-for-sarif: true
