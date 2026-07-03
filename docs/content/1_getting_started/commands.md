@@ -95,7 +95,7 @@ Shows a list of commands or help for one command
 
 Generate files from catalog templates
 
->kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
+>kubara generate [--terraform|--helm] [--platform-components PATH --platform-configs PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
 
 **--dry-run**: Preview generation without creating files
 
@@ -103,9 +103,9 @@ Generate files from catalog templates
 
 **--help, -h**: show help
 
-**--managed-catalog**="": Path to the managed catalog directory. (default: "managed-service-catalog")
+**--platform-components**="": Path to the platform components directory. (default: "platform-components")
 
-**--overlay-values**="": Path to overlay values directory. (default: "customer-service-catalog")
+**--platform-configs**="": Path to platform configs directory. (default: "platform-configs")
 
 **--terraform**: Only generate Terraform files
 
@@ -127,9 +127,9 @@ Bootstrap Argo CD onto a cluster
 
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
-**--managed-catalog**="": Path to the managed catalog directory (default: "managed-service-catalog")
+**--platform-components**="": Path to the platform-components directory (default: "platform-components")
 
-**--overlay-values**="": Path to overlay values directory (default: "customer-service-catalog")
+**--platform-configs**="": Path to platform-configs directory (default: "platform-configs")
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 

@@ -37,14 +37,12 @@ Generated structure:
 my-catalog/
 ├── Catalog.yaml
 ├── services/
-├── managed-service-catalog/
+├── platform-components/
 │   ├── helm/
 │   └── terraform/
-└── customer-service-catalog/
+└── platform-configs/
     ├── helm/
-    │   └── example/
     └── terraform/
-        └── example/
 ```
 
 The generated `Catalog.yaml` looks like this:
@@ -99,7 +97,7 @@ spec:
 Key fields:
 
 - `metadata.name`: stable service key used in `config.yaml`
-- `spec.chartPath`: chart directory name under `managed-service-catalog/helm/`
+- `spec.chartPath`: chart directory name under `platform-components/helm/`
 - `spec.status`: default status
 - `spec.clusterTypes`: optional hub/spoke limit
 - `spec.configSchema`: optional schema for service-specific config
@@ -110,13 +108,13 @@ A service definition alone is not enough. kubara also needs the files it should 
 
 Common places:
 
-- `managed-service-catalog/helm/<chart>/`
-- `managed-service-catalog/terraform/...`
-- `customer-service-catalog/helm/example/<chart>/`
-- `customer-service-catalog/terraform/example/...`
+- `platform-components/helm/<chart>/`
+- `platform-components/terraform/...`
+- `platform-configs/helm/<chart>/`
+- `platform-configs/terraform/...`
 
-Use `managed-service-catalog/` for reusable source content.  
-Use `customer-service-catalog/` for cluster-specific overlays.
+Use `platform-components/` for reusable source content.  
+Use `platform-configs/` for cluster-specific overlays.
 
 If you want to learn how `.tplt` files work, read [Catalog templating](../2_concepts/catalog_templating.md).
 
@@ -184,7 +182,7 @@ terraform/providers/<provider>/
 Example:
 
 ```text
-customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt
+platform-configs/terraform/stackit/infrastructure/main.tf.tplt
 ```
 
 When the cluster Terraform provider matches the directory name, kubara uses that provider-specific file for the generated output path.

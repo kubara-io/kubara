@@ -31,7 +31,7 @@ you finally apply your SSO config.
 
 ### Forgejo SSO config for oauth2-proxy:
 
-Change values in: **"kubara/customer-service-catalog/helm/your-cluster/oauth2-proxy/values.yaml"**
+Change values in: **"kubara/platform-configs/your-cluster/helm/oauth2-proxy/values.generated.yaml"**
 ```yaml
 oauth2-proxy:
 
@@ -76,7 +76,7 @@ which otherwise could lead to escaping-issues with special Characters, like back
 
 The below example includes the YAML identation-levels ("kube-prometheus-stack: grafana:") for reference.  
 
-Change values in: **"kubara/customer-service-catalog/helm/your-cluster/kube-prometheus-stack/values.yaml"**
+Change values in: **"kubara/platform-configs/your-cluster/helm/kube-prometheus-stack/values.generated.yaml"**
 
 ```yaml
 kube-prometheus-stack:
@@ -123,7 +123,7 @@ Replace "your-forgejo.domain" in the following variables and keep the trailing p
 
 ### Forgejo SSO config for Argo:
 
-Change values in: **"kubara/customer-service-catalog/helm/your-cluster/argo-cd/values.yaml"**
+Change values in: **"kubara/platform-configs/your-cluster/helm/argo-cd/values.generated.yaml"**
 
 ```yaml
   configs:

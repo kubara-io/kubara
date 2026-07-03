@@ -17,7 +17,7 @@ Add the repository credentials to your vault at
 }
 ```
 ## **Modify Argo CD overlays**
-Add the following to your `argo-cd/additional-values.yaml`.
+Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 repositories:
     - name: user-repo-mock

@@ -22,8 +22,8 @@ ExternalDNS ensures that DNS records are automatically created and updated as so
    - In `config.yaml` you enable the service `external-dns`.  
    - Then you must **rerun kubara** (`kubara generate`) so that Terraform files and Helm values are re-rendered with the new settings.  
    - Configure provider-specific values in:
-     - `customer-service-catalog/helm/<cluster-name>/external-dns/values.yaml`
-     - optional `customer-service-catalog/helm/<cluster-name>/external-dns/additional-values.yaml`
+     - `platform-configs/<cluster-name>/helm/external-dns/values.generated.yaml`
+     - optional extra `platform-configs/<cluster-name>/helm/external-dns/values-*.yaml` files, for example `values-additional.yaml`
    - Next steps:  
      - run `terraform apply` to provision DNS resources,  
      - **git commit & push** the Helm chart changes so that Argo CD/Flux deploys them to the cluster.  
@@ -63,7 +63,7 @@ clusters:
 - **`dnsName`** → base domain for the cluster  
 - **`terraform.dns`** → defines the zone for which kubara generates Terraform code (name and contact email).
 - **`services.external-dns.status`** → when set to `enabled`, ExternalDNS is templated into the Helm charts for deployment via Argo CD.
-- **provider-specific settings** → configure them in the chart overlay values (`values.yaml` / `additional-values.yaml`).
+- **provider-specific settings** → configure them in the chart overlay values (`values.generated.yaml` plus any extra `values-*.yaml` files you add).
 
 ---
 

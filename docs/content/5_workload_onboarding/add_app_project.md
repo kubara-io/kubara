@@ -9,7 +9,7 @@ For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 
 ## **Modify Argo CD overlays**
-Add the following to your `argo-cd/additional-values.yaml`.
+Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 projects:
   - description: k8s-ske-spoke-0 project
@@ -28,4 +28,3 @@ That whats happening behind the scenes:
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that is connected to your Argo CD instance.
 If you let Argo CD manage itself, it will rollout the configured apps to your cluster
-

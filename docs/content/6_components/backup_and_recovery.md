@@ -107,7 +107,7 @@ config:
     s3Url: https://obs.eu-de.otc.t-systems.com
 ```
 
-With `backupStorage.create: true`, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the `velero_credential_access_key` and `velero_credential_secret_access_key` Terraform outputs to the OpenBao layer as `TF_VAR_velero_access_key_id` and `TF_VAR_velero_secret_access_key`. Activate the `velero_credentials` block from `customer-service-catalog/terraform/<cluster-name>/openbao/secrets.tf-example` so OpenBao writes the credential file to `secret/<cluster-name>/<stage>/velero/velero_s3_credentials`.
+With `backupStorage.create: true`, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the `velero_credential_access_key` and `velero_credential_secret_access_key` Terraform outputs to the OpenBao layer as `TF_VAR_velero_access_key_id` and `TF_VAR_velero_secret_access_key`. Activate the `velero_credentials` block from `platform-configs/<cluster-name>/terraform/openbao/secrets.tf-example` so OpenBao writes the credential file to `secret/<cluster-name>/<stage>/velero/velero_s3_credentials`.
 
 To use an existing S3-compatible bucket instead, set `backupStorage.create: false` and provide the bucket connection details in the Velero config:
 
@@ -126,8 +126,8 @@ Then:
 
 1. Run `kubara generate`
 2. Review:
-     - `customer-service-catalog/helm/<cluster-name>/velero/values.yaml`
-     - `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`
+     - `platform-configs/<cluster-name>/helm/velero/values.generated.yaml`
+     - optional extra `platform-configs/<cluster-name>/helm/velero/values-*.yaml` files, for example `values-additional.yaml`
 3. Commit and push so Argo CD can deploy Velero
 4. **Test a full backup and restore cycle immediately after setup**
    Do not consider Velero operational until you have verified that backups actually work end-to-end. A misconfigured node-agent, CSI driver integration, or S3 endpoint can silently produce incomplete or empty backups with no visible error during backup creation. Restore to a test namespace and confirm that data is intact. Repeat this test after major changes (Velero upgrades, CSI driver updates, storage migrations).
@@ -149,16 +149,16 @@ velero restore create --from-backup my-backup --wait
 
 These are the most simple commands Velero offers for backup. For production we advice you to create automated backups.
 For more information on that have a look at the [official documentation](https://velero.io/docs/main/backup-reference/).
-You can also create a cronjob via the `values.yaml` setting, with the help of the `additional-values.yaml` file. You can look [here](https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762), how this might look like.
+You can also create a cronjob via the `values.generated.yaml` setting, with the help of an extra `values-*.yaml` overlay file. `values-additional.yaml` is one common choice. You can look [here](https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762), how this might look like.
 
-Use `additional-values.yaml` for environment-specific overrides you want to keep next to the generated baseline.
+Use an extra `values-*.yaml` overlay file for environment-specific overrides you want to keep next to the generated baseline. `values-additional.yaml` is one convenient example name.
 
-### Custom `VolumeSnapshotClass` via `additional-values.yaml`
+### Custom `VolumeSnapshotClass` via an extra `values-*.yaml` file
 
 When you use `backupMode: csi-snapshot` or `backupMode: csi-data-mover`, Velero uses **CSI snapshots** instead of file-system backups.
 
 kubara writes `volumeSnapshotClass.k8sProvider` into the generated Velero values based on `terraform.provider`.
-If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own `VolumeSnapshotClass` in `customer-service-catalog/helm/<cluster-name>/velero/additional-values.yaml`.
+If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own `VolumeSnapshotClass` in an extra overlay file such as `platform-configs/<cluster-name>/helm/velero/values-additional.yaml`.
 When `terraform.provider` is `none`, kubara does not select a built-in `VolumeSnapshotClass` provider.
 
 `volumeSnapshotClass.customDefinition` takes precedence over the provider mapping, so this is the recommended way to supply a fully custom snapshot class.
@@ -183,7 +183,7 @@ volumeSnapshotClass:
 Important notes:
 
 - Keep `name: velero-csi` and the label `velero.io/csi-volumesnapshot-class: "true"` unless you intentionally want Velero to use a different class selection setup.
-- Put this override into `additional-values.yaml`, not the generated `values.yaml`, because `values.yaml` is regenerated by kubara.
+- Put this override into an extra `values-*.yaml` file, not the generated `values.generated.yaml`, because `values.generated.yaml` is regenerated by kubara. `values-additional.yaml` is a common choice.
 - If the built-in provider mapping already matches your environment, you usually do not need a custom definition.
 
 ---
@@ -213,7 +213,7 @@ For most teams, the best first test is restoring one non-critical namespace or w
 ## Misc.
 
 ### Other Storage Providers
-Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in `managed-service-catalog/helm/velero/values.yaml`. A list of available plugins can be found [here](https://velero.io/docs/v1.18/supported-providers/).
+Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in `platform-components/helm/velero/values.yaml`. A list of available plugins can be found [here](https://velero.io/docs/v1.18/supported-providers/).
 
 ### Crash Consistency
 If you use file based backup, to backup a deployed database, please refer to the backup tools of choice for your database. File based backup is not crash-consistent. E.g use `pg_dump` or `mysqldump` instead.

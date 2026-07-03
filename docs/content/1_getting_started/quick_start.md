@@ -158,8 +158,8 @@ If Argo CD cannot fetch your repository, double-check the repository URL and cre
 
 After the bootstrap finished, you will usually see three important areas in your repository:
 
-- `managed-service-catalog/`: the generated Helm charts and shared templates Argo CD uses for deployments
-- `customer-service-catalog/`: the cluster-specific values that describe what should run on `test-cluster`
+- `platform-components/`: the generated Helm charts and shared templates Argo CD uses for deployments
+- `platform-configs/`: the cluster-specific values that describe what should run on `test-cluster`
 - `.local/`: local runtime artifacts used only for the evaluation environment
 
 The `.local/` directory is **not** part of your GitOps state. It only contains helper files for your local machine, for example:

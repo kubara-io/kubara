@@ -12,13 +12,13 @@ before you will feel right at home.
 Example:
 
 ```text
-customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 ```
 
 becomes a generated file such as:
 
 ```text
-customer-service-catalog/helm/my-hub-dev/homer-dashboard/values.yaml
+platform-configs/my-hub-dev/helm/homer-dashboard/values.generated.yaml
 ```
 
 Files without the `.tplt` suffix are copied as-is.
@@ -81,7 +81,7 @@ The Homer example shows the main idea well: one service template can react to se
 From:
 
 ```text
-src/internal/catalog/built-in/customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+src/internal/catalog/built-in/platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 ```
 
 kubara reads values such as:
