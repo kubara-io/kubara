@@ -11,7 +11,9 @@ To make this easier to understand, we created the simplified view below. kubara 
 
 ## Overview
 
-*Note: These tests were performed with kubara versions `0.7.0` and `0.8.0`, Argo CD versions `v3.3.7` and `v3.3.9`, and STACKIT Kubernetes Engine (SKE) version `1.35.4` between May and June 2026.*
+!!! note
+
+    These tests were performed with kubara versions `0.7.0` and `0.8.0`, Argo CD versions `v3.3.7` and `v3.3.9`, and STACKIT Kubernetes Engine (SKE) version `1.35.4` between May and June 2026.
 
 ![image](../images/kubara-t-shirt-sizes.png)
 
