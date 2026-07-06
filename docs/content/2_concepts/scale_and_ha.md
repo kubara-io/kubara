@@ -84,7 +84,7 @@ After this baseline is understood, Argo CD can be tuned further. The options bel
 
 **Raise Kubernetes client limits deliberately:** tune `ARGOCD_K8S_CLIENT_QPS` and `ARGOCD_K8S_CLIENT_BURST` as described in the Argo CD [application-controller scaling guidance](https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/#argocd-application-controller). Otherwise, controller shards managing many clusters can be throttled by their own Kubernetes client.
 
-**Smooth cluster-cache rebuilds:** tune `ARGOCD_CLUSTER_CACHE_LIST_PAGE_SIZE` and `ARGOCD_CLUSTER_CACHE_LIST_SEMAPHORE` using the Argo CD [cluster-cache recommendations](https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/#argocd-application-controller) to reduce memory spikes during startup and cache resyncs across many vClusters.
+**Smooth cluster-cache rebuilds:** tune `ARGOCD_CLUSTER_CACHE_LIST_PAGE_SIZE` and `ARGOCD_CLUSTER_CACHE_LIST_SEMAPHORE` using the Argo CD [cluster-cache recommendations](https://argo-cd.readthedocs.io/en/stable/operator-manual/high_availability/#argocd-application-controller) to reduce memory spikes during startup and cache resyncs across many clusters.
 
 **Prefer [server-side diff](https://argo-cd.readthedocs.io/en/stable/user-guide/diff-strategies/) for diff-heavy workloads:** offload diff calculation to the target cluster's API server where it helps, especially when mutating webhooks create noisy diffs.
 
