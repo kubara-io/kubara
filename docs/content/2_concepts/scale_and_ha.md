@@ -18,7 +18,7 @@ To make this easier to understand, we created the simplified view below. kubara 
 ![image](../images/kubara-t-shirt-sizes.png)
 
 
-As the test results show, the limiting factor is not the number of vclusters or applications by itself. vclusters alone do not add much weight to Argo CD, as they are represented as Secrets and do not create significant load on their own. Applications, however, can vary significantly in size. A small nginx deployment creates very little load, while something like `kube-prometheus-stack` creates many Kubernetes objects. For that reason, judging scalability only by the number of vclusters or applications is misleading.
+As the test results show, the limiting factor is not the number of vclusters or applications by itself. vclusters or k8s clusters in general do not add much weight to Argo CD, as they are represented as Secrets and do not create significant load on their own. Applications, however, can vary significantly in size. A small nginx deployment creates very little load, while something like `kube-prometheus-stack` creates many Kubernetes objects. For that reason, judging scalability only by the number of clusters or applications is misleading.
 
 The relationship between vclusters and applications is important, and it is not linear. Running 50 applications on one vcluster is not the same as running 50 applications across 50 vclusters, because more metadata and more live-state data need to be cached. For our tests, we used six applications per vcluster to create a balanced and realistic weighting.
 
