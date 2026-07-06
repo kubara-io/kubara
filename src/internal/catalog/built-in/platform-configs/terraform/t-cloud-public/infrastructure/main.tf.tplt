@@ -44,14 +44,14 @@ locals {
 
 module "t_cloud_public_agencies" {
   count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0
-  source = "../../../../platform-components/terraform/modules/identity-agencies"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/identity-agencies"
 
   agencies = local.t_cloud_public_agencies
 }
 
 module "dns_zone" {
   count  = var.create_dns_zone ? 1 : 0
-  source = "../../../../platform-components/terraform/modules/dns-zone"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/dns-zone"
 
   name        = var.dns_zone_name
   email       = var.dns_zone_email
@@ -62,7 +62,7 @@ module "dns_zone" {
 }
 
 module "network" {
-  source = "../../../../platform-components/terraform/modules/network"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/network"
 
   name = local.cluster_name
 
@@ -88,13 +88,13 @@ module "network" {
 }
 
 module "cluster_keypair" {
-  source = "../../../../platform-components/terraform/modules/keypair"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/keypair"
 
   name = "${local.cluster_name}-cluster-keypair"
 }
 
 module "node_storage_kms_key" {
-  source = "../../../../platform-components/terraform/modules/kms-key"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/kms-key"
 
   name         = "${local.cluster_name}-node-pool"
   description  = "${local.cluster_name} CCE node pool volume encryption key"
@@ -102,7 +102,7 @@ module "node_storage_kms_key" {
 }
 
 module "cce_cluster" {
-  source = "../../../../platform-components/terraform/modules/cce-cluster"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"
 
   name                   = local.cluster_name
   kubernetes_version_min = var.kubernetes_version_min
@@ -151,7 +151,7 @@ locals {
 
 module "storage_classes" {
   count  = var.create_storage_classes ? 1 : 0
-  source = "../../../../platform-components/terraform/modules/storage-classes"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/storage-classes"
 
   storage_classes = local.storage_classes
 
@@ -160,7 +160,7 @@ module "storage_classes" {
 
 module "openbao" {
   count  = var.enable_openbao ? 1 : 0
-  source = "../../../../platform-components/terraform/modules/openbao-helm"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/openbao-helm"
 
   release_name       = var.openbao_release_name
   namespace          = var.openbao_namespace
@@ -186,7 +186,7 @@ module "openbao" {
 {{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
 module "velero_bucket_kms_key" {
   count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0
-  source = "../../../../platform-components/terraform/modules/kms-key"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/kms-key"
 
   providers = {
     opentelekomcloud = opentelekomcloud.global-region
@@ -198,7 +198,7 @@ module "velero_bucket_kms_key" {
 }
 
 module "velero_bucket" {
-  source = "../../../../platform-components/terraform/modules/objectstorage-bucket"
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/objectstorage-bucket"
 
   providers = {
     opentelekomcloud               = opentelekomcloud

@@ -28,7 +28,7 @@ tflint --version
 
 FAILED_DIRS=()
 TARGET_DIRS=(
-  "platform-components/terraform/modules"
+  "platform-components/terraform/stackit/modules"
   "platform-configs/kubara/terraform"
 )
 

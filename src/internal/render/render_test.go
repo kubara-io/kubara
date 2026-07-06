@@ -189,7 +189,7 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	require.NotEmpty(t, cceClusterModule)
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
 	require.NotEmpty(t, infrastructureMain)
-	assert.Contains(t, infrastructureMain, `source = "../../../../platform-components/terraform/modules/cce-cluster"`)
+	assert.Contains(t, infrastructureMain, `source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"`)
 }
 
 func TestTemplateFiles(t *testing.T) {
