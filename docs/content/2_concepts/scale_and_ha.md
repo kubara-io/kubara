@@ -55,7 +55,9 @@ This sizing is the no-fine-tuning baseline. It should make clear which resources
 
 After this baseline is understood, Argo CD can be tuned further. The options below are the most important levers we used to improve scaling behavior and reduce avoidable pressure on the controller, repo-server, Redis, and Kubernetes API.
 
-*Note: HA is not just about replicas; it also requires anti-affinity, PodDisruptionBudgets, topology spread constraints, and failure-domain aware placement.*
+!!! note
+
+    HA is not just about replicas; it also requires anti-affinity, PodDisruptionBudgets, topology spread constraints, and failure-domain aware placement.*
 
 
 ---
