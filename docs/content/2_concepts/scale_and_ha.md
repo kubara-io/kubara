@@ -25,7 +25,7 @@ The relationship between clusters and applications is important, and it is not l
 Based on this assumption, we found that the number of cached objects in the Argo CD Application Controller matters more than the number of clusters or applications alone. This document does not refer to Kubernetes objects stored in etcd, but to objects cached by the Argo CD Application Controller. The following three t-shirt sizes should give you a sense of kubara’s scaling boundaries and when resource limits or HA mode should be considered.
 
 
-### Argo CD Sizing – Component Configuration per Tier
+### Argo CD Sizing – Component Configuration per T-Shirt size
 
 *Note: Baseline sizing without hydration and without fine-tuning.*
 
