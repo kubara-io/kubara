@@ -334,10 +334,10 @@ Then apply the OpenBao Terraform layer:
 
 The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role used only for the cluster-wide image pull secret, and the generated Grafana admin credentials.
 
-User-provided secrets, the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials, are written through a separate `secrets.tf-example` file. Copy it to activate the blocks you need:
+User-provided secrets, the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials, are written through a separate `secrets.tf-oauth2` file. Copy it to activate the blocks you need:
 
 ```bash
-cp secrets.tf-example secrets.tf
+cp secrets.tf-oauth2 secrets.tf
 ```
 
 Each block declares a `variable` and the matching `vault_kv_secret_v2` resource. The values come from `TF_VAR_*` environment variables in your sourced `set-env.sh`, which already has commented-out templates for each one, so no secret is ever written into a committed file. Delete the blocks you do not use before applying.
