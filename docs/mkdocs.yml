@@ -16,6 +16,7 @@ nav:
       - Catalogs: 2_concepts/catalogs.md
       - Catalog Distribution: 2_concepts/catalog_distribution.md
       - Catalog Templating: 2_concepts/catalog_templating.md
+      - Scale and High Availability: 2_concepts/scale_and_ha.md
   - Infrastructure Presets:
       - Overview: 3_infrastructure/overview.md
       - kind (local): 3_infrastructure/kind.md
