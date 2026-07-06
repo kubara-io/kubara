@@ -15,8 +15,6 @@ To make this easier to understand, we created the simplified view below. kubara 
 
     These tests were performed with kubara versions `0.7.0` and `0.8.0`, Argo CD versions `v3.3.7` and `v3.3.9`, and STACKIT Kubernetes Engine (SKE) version `1.35.4` between May and June 2026.
 
-![image](../images/kubara-t-shirt-sizes.png)
-
 
 As the test results show, the limiting factor is not the number of vclusters or applications by itself. vclusters or k8s clusters in general do not add much weight to Argo CD, as they are represented as Secrets and do not create significant load on their own. Applications, however, can vary significantly in size. A small nginx deployment creates very little load, while something like `kube-prometheus-stack` creates many Kubernetes objects. For that reason, judging scalability only by the number of clusters or applications is misleading.
 
@@ -26,6 +24,8 @@ Based on this assumption, we found that the number of cached objects in the Argo
 
 
 ### Argo CD Sizing – Component Configuration per T-Shirt size
+
+![image](../images/kubara-t-shirt-sizes.png)
 
 *Note: Baseline sizing without hydration and without fine-tuning.*
 
