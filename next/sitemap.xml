@@ -2,182 +2,186 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://docs.kubara.io/next/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR-0001-replace-deprecated-nginx-ingress/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR-0002-declarative-service-catalogs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR-index/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR-template/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/bootstrapping/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/commands/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/installation/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/prerequisites/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/1_getting_started/quick_start/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_concepts/catalog_distribution/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_concepts/catalog_templating/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_concepts/catalogs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_concepts/gitops_platform_engineering_idp/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/2_concepts/overview_core_concept/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
+    </url>
+    <url>
+         <loc>https://docs.kubara.io/next/2_concepts/scale_and_ha/</loc>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_infrastructure/kind/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_infrastructure/overview/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_infrastructure/stackit_edge_cloud/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_infrastructure/stackit_ske/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/3_infrastructure/t-cloud-public/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/4_building_your_platform/add_spoke_cluster/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/4_building_your_platform/create_catalog/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/4_building_your_platform/sso/add_sso/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/4_building_your_platform/sso/add_sso_examples/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_workload_onboarding/add_app_project/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_workload_onboarding/add_app_repository/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_workload_onboarding/add_application/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_workload_onboarding/add_appset/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/5_workload_onboarding/overview/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/backup_and_recovery/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/best_practices/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/components_overview/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/network_external_dns/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/observability_alerts/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/observability_dashboards/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/observability_logs/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/observability_metrics/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/6_components/security_certificates/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/7_architecture/architecture_overview/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/8_community/community-n-support/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/8_community/maintainers/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/9_reference/faq/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/9_reference/known_issues/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
     <url>
          <loc>https://docs.kubara.io/next/9_reference/release_cycle_and_updates/</loc>
-         <lastmod>2026-07-02</lastmod>
+         <lastmod>2026-07-06</lastmod>
     </url>
 </urlset>

@@ -14,6 +14,7 @@
 - [Catalogs](2_concepts/catalogs/index.md)
 - [Catalog Distribution](2_concepts/catalog_distribution/index.md)
 - [Catalog Templating](2_concepts/catalog_templating/index.md)
+- [Scale and High Availability](2_concepts/scale_and_ha/index.md)
 
 ## Infrastructure Presets
 - [Overview](3_infrastructure/overview/index.md)
