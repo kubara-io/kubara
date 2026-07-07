@@ -34,9 +34,7 @@ type EnvMap struct {
 	_                           struct{} `doc:"\n# Project related values"`
 	ProjectName                 string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                string   `default:"<...>" koanf:"PROJECT_STAGE"`
-	_                           struct{} `doc:"\n# DNS Name/Zones related values"`
-	_                           struct{} `doc:"# The Domain name under which your dns-entries will be added."`
-	_                           struct{} `doc:"# The resulting dnsName name will be a concatenation of <PROJECT_NAME>.<DOMAIN_NAME> and will be used in clusters[].dnsName and clusters[].terraform.dns.name in config.yaml"`
+	_                           struct{} `doc:"\n# DNS Name/Zones related value"`
 	_                           struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
 	DomainName                  string   `default:"<...>" koanf:"DOMAIN_NAME"`
 	_                           struct{} `doc:"\n# Argo CD related values"`
