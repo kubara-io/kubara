@@ -9,7 +9,7 @@ import (
 )
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
-	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
+	dnsName := e.ProjectName + "." + e.DomainName
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
