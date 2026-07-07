@@ -266,6 +266,7 @@ jobs:
       KUBARA_DOMAIN_NAME: "stackit.run"
 
       # config.yaml updates
+      KUBARA_DNS_NAME: "kubara-tst.stackit.run"
       KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
       KUBARA_TERRAFORM_PROVIDER: "stackit"
       KUBARA_CLUSTER_TYPE: "hub"
