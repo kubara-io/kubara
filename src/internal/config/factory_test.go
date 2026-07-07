@@ -38,7 +38,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
-	expectedDNSName := "kubara-test-dev.example.com"
+	expectedDNSName := "<subdomain.my-domain.com>"
 	expectedCluster := Cluster{
 		Name:             "kubara-test",
 		Stage:            "dev",

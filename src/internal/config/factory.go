@@ -39,7 +39,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 		Name:             e.ProjectName,
 		Stage:            e.ProjectStage,
 		Type:             "<hub or spoke>",
-		DNSName:          "<for example project.my-domain.com>",
+		DNSName:          "<subdomain.my-domain.com>",
 		SSOOrg:           "<my-org>",
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
@@ -49,7 +49,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{
-				Name:  "<same as DNSName above>",
+				Name:  "<subdomain.my-domain.com>",
 				Email: "my-test@nowhere.com",
 			},
 		},

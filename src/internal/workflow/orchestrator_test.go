@@ -55,8 +55,8 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	require.Len(t, cfg.Clusters, 1)
 	updated := cfg.Clusters[0]
 	assert.Equal(t, "dev", updated.Stage)
-	assert.Equal(t, "kubara-test-dev.example.com", updated.DNSName)
-	assert.Equal(t, "kubara-test-dev.example.com", updated.Terraform.DNS.Name)
+	assert.Equal(t, "kubara-test-stage.example.com", updated.DNSName)
+	assert.Equal(t, "kubara-test-stage.example.com", updated.Terraform.DNS.Name)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Managed.URL)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Customer.URL)
 	require.NotNil(t, updated.ArgoCD.HelmRepo)
@@ -101,7 +101,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 	require.Len(t, cfg.Clusters, 1)
 	updated := cfg.Clusters[0]
 	assert.Equal(t, "dev", updated.Stage)
-	assert.Equal(t, "kubara-test-dev.example.com", updated.DNSName)
+	assert.Equal(t, "kubara-test-stage.example.com", updated.DNSName)
 	assert.Nil(t, updated.Terraform)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Managed.URL)
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Customer.URL)
