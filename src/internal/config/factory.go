@@ -49,7 +49,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
 			DNS: DNS{
-				Name:  dnsName,
+				Name:  "<same as DNSName above>",
 				Email: "my-test@nowhere.com",
 			},
 		},
