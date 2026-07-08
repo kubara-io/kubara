@@ -91,7 +91,6 @@ func TestEnvMap_Validate(t *testing.T) {
 			ArgocdHelmRepoPassword:      "helm-pass",
 			ArgocdHelmRepoUrl:           "https://helm.example.com",
 			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			DomainName:                  "example.com",
 		}
 	}
 
@@ -146,7 +145,6 @@ func TestEnvMap_Validate(t *testing.T) {
 				em := validEnvMap()
 				em.ProjectName = ""
 				em.ProjectStage = ""
-				em.DomainName = ""
 				return em
 			}(),
 			wantErr: true,
@@ -187,15 +185,6 @@ func TestEnvMap_setDefaults(t *testing.T) {
 			fieldName:     "ProjectName",
 		},
 		{
-			name:   "Sets default for DomainName when empty",
-			envMap: &EnvMap{},
-			checkField: func(em *EnvMap) string {
-				return em.DomainName
-			},
-			expectedValue: "<...>",
-			fieldName:     "DomainName",
-		},
-		{
 			name: "Does not overwrite existing value",
 			envMap: &EnvMap{
 				ProjectName: "existing-project",
@@ -233,7 +222,6 @@ func TestEnvMap_setDefaults_AllFields(t *testing.T) {
 		assert.Equal(t, "<...>", em.ArgocdGitHttpsUrl)
 		assert.Equal(t, "", em.ArgocdGitPatOrPassword)
 		assert.Equal(t, "", em.ArgocdGitUsername)
-		assert.Equal(t, "<...>", em.DomainName)
 	})
 }
 
@@ -266,7 +254,7 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 			// Only set some required fields, leave others empty
 			ProjectName:  "test",
 			ProjectStage: "dev",
-			// Leave DomainName and others empty
+			// Leave others empty
 		}
 
 		err := em.Validate()
@@ -275,7 +263,7 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 		var envMapErr *ErrorEnvMap
 		require.True(t, errors.As(err, &envMapErr))
 		assert.Contains(t, envMapErr.Message, "Vars not set:")
-		assert.Contains(t, envMapErr.Message, "DOMAIN_NAME")
+		assert.Contains(t, envMapErr.Message, "ARGOCD_GIT_HTTPS_URL")
 	})
 
 	t.Run("Error message contains field names for default values", func(t *testing.T) {
@@ -287,7 +275,6 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 			ArgocdHelmRepoPassword:      "test",
 			ArgocdHelmRepoUrl:           "test",
 			ArgocdGitHttpsUrl:           "test",
-			DomainName:                  "test",
 		}
 
 		err := em.Validate()

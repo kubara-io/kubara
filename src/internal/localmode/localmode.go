@@ -40,9 +40,6 @@ func PopulateInitEnv(env *envconfig.EnvMap) {
 	if !envconfig.IsConfiguredEnvValue(env.ProjectStage) {
 		env.ProjectStage = DefaultProjectStage
 	}
-	if !envconfig.IsConfiguredEnvValue(env.DomainName) {
-		env.DomainName = DomainName
-	}
 	if !envconfig.IsConfiguredEnvValue(env.ArgocdGitHttpsUrl) {
 		env.ArgocdGitHttpsUrl = ExampleGitRepoURL
 	}

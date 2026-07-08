@@ -12,7 +12,6 @@ import (
 	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
-	"github.com/kubara-io/kubara/internal/localmode"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
 
@@ -282,9 +281,6 @@ func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, loca
 	}
 	if !envconfig.IsConfiguredEnvValue(prepared.ProjectStage) {
 		prepared.ProjectStage = cluster.Stage
-	}
-	if !envconfig.IsConfiguredEnvValue(prepared.DomainName) {
-		prepared.DomainName = localmode.DomainName
 	}
 
 	return &prepared, nil

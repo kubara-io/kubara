@@ -94,7 +94,6 @@ func TestEnvStore_SetDefaults(t *testing.T) {
 		// Verify that defaults were set
 		assert.Equal(t, "<...>", es.envMap.ProjectName)
 		assert.Equal(t, "<...>", es.envMap.ProjectStage)
-		assert.Equal(t, "<...>", es.envMap.DomainName)
 	})
 }
 
@@ -112,7 +111,6 @@ ARGOCD_HELM_REPO_URL='https://helm.example.com'
 ARGOCD_GIT_HTTPS_URL='https://github.com/example/repo.git'
 ARGOCD_GIT_PAT_OR_PASSWORD='github-token'
 ARGOCD_GIT_USERNAME='git-user'
-DOMAIN_NAME='example.com'
 `
 
 	validFilepath := filepath.Join(tempDir, "valid.env")
@@ -138,7 +136,6 @@ PROJECT_STAGE='dev'`
 			checkFunc: func(t *testing.T, em *EnvMap) {
 				assert.Equal(t, "test-project", em.ProjectName)
 				assert.Equal(t, "dev", em.ProjectStage)
-				assert.Equal(t, "example.com", em.DomainName)
 			},
 		},
 		{
@@ -189,8 +186,7 @@ func TestEnvStore_Load_EnvironmentOverride(t *testing.T) {
 
 		// Create a file with initial values
 		fileContent := `PROJECT_NAME='file-project'
-PROJECT_STAGE='dev'
-DOMAIN_NAME='file-domain.com'`
+PROJECT_STAGE='dev'`
 		filepath := filepath.Join(tempDir, "test.env")
 		require.NoError(t, os.WriteFile(filepath, []byte(fileContent), 0644))
 
@@ -245,7 +241,6 @@ func TestEnvStore_Validate(t *testing.T) {
 				ArgocdGitHttpsUrl:           "url",
 				ArgocdGitPatOrPassword:      "token",
 				ArgocdGitUsername:           "user",
-				DomainName:                  "example.com",
 			},
 			wantErr: false,
 		},
@@ -292,7 +287,6 @@ func TestEnvStore_GenerateEnvExample(t *testing.T) {
 				// Check that all required fields are present with default values
 				assert.Contains(t, outputStr, "PROJECT_NAME='<...>'")
 				assert.Contains(t, outputStr, "PROJECT_STAGE='<...>'")
-				assert.Contains(t, outputStr, "DOMAIN_NAME='<...>'")
 				assert.Contains(t, outputStr, "DOCKERCONFIG_BASE64=''")
 				assert.Contains(t, outputStr, "ARGOCD_WIZARD_ACCOUNT_PASSWORD='<...>'")
 				assert.Contains(t, outputStr, "ARGOCD_GIT_PAT_OR_PASSWORD=''")

@@ -44,7 +44,6 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
@@ -91,7 +90,6 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
@@ -112,7 +110,6 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
@@ -163,7 +160,6 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
@@ -181,7 +177,6 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
@@ -198,7 +193,6 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
@@ -217,7 +211,6 @@ func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFail
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 

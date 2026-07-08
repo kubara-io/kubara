@@ -86,7 +86,6 @@ func CreateDefaultGenerateTestEnv(t *testing.T, dir string) string {
 		ArgocdHelmRepoUrl:           "https://example.com",
 		ArgocdHelmRepoUsername:      "CoolCapybara",
 		ArgocdHelmRepoPassword:      "password",
-		DomainName:                  "example.com",
 	})
 }
 

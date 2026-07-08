@@ -263,7 +263,6 @@ jobs:
       KUBARA_ARGOCD_GIT_HTTPS_URL: "https://kubara.io/kubara.git"
       KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
       KUBARA_ARGOCD_GIT_USERNAME: "git"
-      KUBARA_DOMAIN_NAME: "stackit.run"
 
       # config.yaml updates
       KUBARA_DNS_NAME: "kubara-tst.stackit.run"

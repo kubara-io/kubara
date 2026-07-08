@@ -18,20 +18,17 @@ func TestNewClusterFromEnv(t *testing.T) {
 	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 	sampleEnvMapWithoutHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 	sampleEnvMapWithOCIHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
@@ -162,7 +159,6 @@ func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testin
 	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 
