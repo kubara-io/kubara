@@ -103,7 +103,7 @@ for chart in $CHARTS; do
   chart_index=$((chart_index + 1))
   echo "::group::[render $chart_index/$TOTAL_CHARTS] $chart"
   chart_path="$MANAGED/$chart"
-  values_file="$CONFIGS/$chart/values.yaml"
+  values_file="$CONFIGS/$chart/values.generated.yaml"
   out_dir="$RENDER_DIR/$chart"
   mkdir -p "$out_dir"
 
@@ -208,7 +208,7 @@ for chart in $CHARTS; do
 
   echo "::group::[lint $chart_index/$TOTAL_CHARTS] $chart"
   chart_path="$MANAGED/$chart"
-  values_file="$CONFIGS/$chart/values.yaml"
+  values_file="$CONFIGS/$chart/values.generated.yaml"
 
   base_values=()
   lint_ref="$chart_path/Chart.yaml"
