@@ -7,7 +7,7 @@ version: 0.1.1
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.7
+    version: 0.1.0
   # https://artifacthub.io/packages/helm/argo/argo-cd
   - name: metallb
     repository: https://metallb.github.io/metallb

@@ -10,4 +10,4 @@ dependencies:
     repository: https://vmware-tanzu.github.io/helm-charts
   - name: template-library
     repository: file://../template-library
-    version: 0.0.7
+    version: 0.1.0

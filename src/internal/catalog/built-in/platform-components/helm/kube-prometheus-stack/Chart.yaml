@@ -7,7 +7,7 @@ version: 2.0.0
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.7
+    version: 0.1.0
   - name: kube-prometheus-stack
     repository: https://prometheus-community.github.io/helm-charts
     version: 87.3.0

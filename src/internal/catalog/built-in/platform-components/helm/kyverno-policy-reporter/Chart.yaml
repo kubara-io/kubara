@@ -7,7 +7,7 @@ version: 0.2.6
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.0.7
+    version: 0.1.0
   - name: policy-reporter
     repository: https://kyverno.github.io/policy-reporter
     version: 3.7.4
