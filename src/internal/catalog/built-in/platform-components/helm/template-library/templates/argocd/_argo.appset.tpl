@@ -40,6 +40,7 @@ spec:
             valueFiles:
               - "values.yaml"
               - "$valuesRepo/{{ $localCtx.platformConfigs.path }}/{{ `{{name}}` }}/helm/{{ $app.path }}/values.generated.yaml"
+              - "$valuesRepo/{{ $localCtx.platformConfigs.path }}/{{ `{{name}}` }}/helm/{{ $app.path }}/additional-values.yaml"
               - "$valuesRepo/{{ $localCtx.platformConfigs.path }}/{{ `{{name}}` }}/helm/{{ $app.path }}/values-*.yaml"
         {{- end }}
       destination:
