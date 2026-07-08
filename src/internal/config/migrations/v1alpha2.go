@@ -238,7 +238,7 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 	}()
 
 	var renameAdditional []string
-	var removeLegacyValues []string
+	var renameLegacyValues []string
 
 	if err := fs.WalkDir(root.FS(), ".", func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil || entry.IsDir() {
@@ -251,7 +251,7 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 		case "values.yaml":
 			serviceDir := filepath.Base(filepath.Dir(path))
 			if hasGeneratedValuesTemplate(cwd, serviceDir) {
-				removeLegacyValues = append(removeLegacyValues, path)
+				renameLegacyValues = append(renameLegacyValues, path)
 			}
 		}
 
@@ -267,8 +267,9 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 		}
 	}
 
-	for _, path := range removeLegacyValues {
-		if err := root.Remove(path); err != nil {
+	for _, path := range renameLegacyValues {
+		newPath := filepath.Join(filepath.Dir(path), "values.generated.yaml")
+		if err := root.Rename(path, newPath); err != nil {
 			return fmt.Errorf("remove %q: %w", path, err)
 		}
 	}
