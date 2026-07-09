@@ -227,8 +227,8 @@ func serviceNameFromTemplatePath(chartPathServiceIndex map[string]string, path s
 	switch {
 	case pathParts[0] == render.DefaultPlatformComponentsPath && pathParts[1] == render.Helm.String():
 		return chartPathServiceIndex[pathParts[2]]
-	case len(pathParts) >= 5 && pathParts[0] == render.DefaultPlatformConfigsPath && pathParts[1] == render.Helm.String():
-		return chartPathServiceIndex[pathParts[3]]
+	case len(pathParts) >= 4 && pathParts[0] == render.DefaultPlatformConfigsPath && pathParts[1] == render.Helm.String():
+		return chartPathServiceIndex[pathParts[2]]
 	default:
 		return ""
 	}
