@@ -225,7 +225,7 @@ func ensureLocalPrerequisites() error {
 			return nil
 		}
 	}
-	return fmt.Errorf("Either podman or docker is required for --local and must be available on PATH")
+	return fmt.Errorf("either podman or docker is required for --local and must be available on PATH")
 }
 
 func ensureKindCluster(ctx context.Context, clusterName, kubeconfigPath, kindConfigPath string) error {
