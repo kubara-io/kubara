@@ -3,11 +3,11 @@ apiVersion: v2
 name: argocd
 description: Umbrella Chart for argo-cd
 type: application
-version: 1.1.0
+version: 1.2.0
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.1.0
+    version: 0.2.0
   # https://artifacthub.io/packages/helm/argo/argo-cd
   - name: argo-cd
     repository: https://argoproj.github.io/argo-helm

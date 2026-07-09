@@ -7,7 +7,7 @@ version: 1.4.0
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.1.0
+    version: 0.2.0
   - name: loki
     repository: https://grafana.github.io/helm-charts
     version: 7.0.0

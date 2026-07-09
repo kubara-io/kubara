@@ -60,6 +60,22 @@ The config expects the kubeconfig to be reachable under:
 <cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>
 And the secret itself simply be named `kubeconfig`.
 
+By default kubara keeps the original client-certificate based Argo CD cluster config.
+If your kubeconfig should be used with bearer token auth in addition to the certificates, set
+`bootstrapValues.cluster[].authMethod: token` in your Argo CD values. Note that `authMethod` must be exactly `token` or `clientCertificate` (defaults to `clientCertificate`); any other value will trigger a template rendering error.
+
+If Argo CD should only manage selected namespaces on the spoke cluster, set `bootstrapValues.cluster[].namespaces` to the allowed list of namespaces in your Argo CD values (as a YAML list):
+
+```yaml
+bootstrapValues:
+  cluster:
+    - name: spoke-dev
+      namespaces:
+        - team-a
+        - team-b
+```
+
+
 
 ## 4. Prepare external-secrets credentials on the spoke cluster
 
