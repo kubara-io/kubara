@@ -215,12 +215,17 @@ func newLocalState(opts *Options) *LocalState {
 }
 
 func ensureLocalPrerequisites() error {
-	for _, command := range []string{"kind", "docker", "kubectl", "helm", "cloud-provider-kind"} {
+	for _, command := range []string{"kind", "kubectl", "helm", "cloud-provider-kind"} {
 		if _, err := exec.LookPath(command); err != nil {
 			return fmt.Errorf("%q is required for --local and must be available on PATH", command)
 		}
 	}
-	return nil
+	for _, command := range []string{"podman", "docker"} {
+		if _, err := exec.LookPath(command); err == nil {
+			return nil
+		}
+	}
+	return fmt.Errorf("either podman or docker is required for --local and must be available on PATH")
 }
 
 func ensureKindCluster(ctx context.Context, clusterName, kubeconfigPath, kindConfigPath string) error {
