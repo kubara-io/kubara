@@ -220,16 +220,12 @@ func ensureLocalPrerequisites() error {
 			return fmt.Errorf("%q is required for --local and must be available on PATH", command)
 		}
 	}
-	runtimeAvailable := false
 	for _, command := range []string{"podman", "docker"} {
 		if _, err := exec.LookPath(command); err == nil {
-			runtimeAvailable = true
+			return nil
 		}
 	}
-	if !runtimeAvailable {
-			return fmt.Errorf("Either podman or docker is required for --local and must be available on PATH")
-	}
-	return nil
+	return fmt.Errorf("Either podman or docker is required for --local and must be available on PATH")
 }
 
 func ensureKindCluster(ctx context.Context, clusterName, kubeconfigPath, kindConfigPath string) error {
