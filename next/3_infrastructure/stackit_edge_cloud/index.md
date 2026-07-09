@@ -147,10 +147,23 @@ terraform output edge_host_metadata
 
 Use the selected host public IP for DNS `A` records (for example your ingress hostname).
 
-For the STACKIT VM-based single-node example, set these values in your `config.yaml` before running `kubara generate --helm`:
+For the STACKIT VM-based single-node example, set these values in the `metallb` service config in your `config.yaml` before running `kubara generate --helm`:
 
-* `clusters[].publicLoadBalancerIP`: the STACKIT public IP assigned to the VM. Generated ingress annotations use this as `external-dns` target.
-* `clusters[].privateLoadBalancerIP`: the private IP of the same VM on the STACKIT network. Generated MetalLB customer values use this as pool address (`/32`).
+```yaml
+clusters:
+  - # ...
+    services:
+      metallb:
+        status: enabled
+        config:
+          # the STACKIT public IP assigned to the VM; generated ingress
+          # annotations use this as external-dns target
+          publicLoadBalancerIPs: "<public-ip>"
+          # the private IP of the same VM on the STACKIT network; MetalLB
+          # allocates from this pool
+          loadBalancerAddressPool:
+            - "<private-ip>/32"
+```
 
 This works because the STACKIT public IP is routed/NATed to the selected VM, while MetalLB exposes the Kubernetes `LoadBalancer` service on the VM's private network address.
 Do not use this as a production multi-node ingress design. For multi-node setups, plan a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.
@@ -254,11 +267,14 @@ Read more in the official STACKIT guide: [Using extensions](https://docs.stackit
       talosVersion: v1.12.5-stackit.v1.7.1
     ```
 
-    Apply it and wait until STEC has generated the artifacts:
+    Apply it and wait until STEC has generated the artifacts.
+    The `EdgeImage` reports readiness through the boolean `status.ready`
+    field (it does not set a `Ready` condition, so `--for=condition=Ready`
+    would never complete):
 
     ```bash
     kubectl apply -f edge-image.yaml
-    kubectl wait EdgeImage/kubara-edge-image --namespace default --for=condition=Ready --timeout=60m
+    kubectl wait EdgeImage/kubara-edge-image --namespace default --for=jsonpath='{.status.ready}'=true --timeout=60m
     ```
 
     If you are not using Longhorn, keep only the extensions you actually need.

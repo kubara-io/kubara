@@ -2910,11 +2910,21 @@ You do not need to pre-enter a public IP for that path.</p>
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>edge_host_metadata
 </code></pre></div>
 <p>Use the selected host public IP for DNS <code>A</code> records (for example your ingress hostname).</p>
-<p>For the STACKIT VM-based single-node example, set these values in your <code>config.yaml</code> before running <code>kubara generate --helm</code>:</p>
-<ul>
-<li><code>clusters[].publicLoadBalancerIP</code>: the STACKIT public IP assigned to the VM. Generated ingress annotations use this as <code>external-dns</code> target.</li>
-<li><code>clusters[].privateLoadBalancerIP</code>: the private IP of the same VM on the STACKIT network. Generated MetalLB customer values use this as pool address (<code>/32</code>).</li>
-</ul>
+<p>For the STACKIT VM-based single-node example, set these values in the <code>metallb</code> service config in your <code>config.yaml</code> before running <code>kubara generate --helm</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="c1"># ...</span>
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">metallb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># the STACKIT public IP assigned to the VM; generated ingress</span>
+<span class="w">          </span><span class="c1"># annotations use this as external-dns target</span>
+<span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;public-ip&gt;&quot;</span>
+<span class="w">          </span><span class="c1"># the private IP of the same VM on the STACKIT network; MetalLB</span>
+<span class="w">          </span><span class="c1"># allocates from this pool</span>
+<span class="w">          </span><span class="nt">loadBalancerAddressPool</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;&lt;private-ip&gt;/32&quot;</span>
+</code></pre></div>
 <p>This works because the STACKIT public IP is routed/NATed to the selected VM, while MetalLB exposes the Kubernetes <code>LoadBalancer</code> service on the VM's private network address.
 Do not use this as a production multi-node ingress design. For multi-node setups, plan a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.</p>
 <h2 id="step-by-step-sequence">Step-by-step sequence</h2>
@@ -3006,9 +3016,12 @@ Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/pro
 <span class="w">    </span><span class="no">overlay: {}</span>
 <span class="w">  </span><span class="nt">talosVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.12.5-stackit.v1.7.1</span>
 </code></pre></div>
-<p>Apply it and wait until STEC has generated the artifacts:</p>
+<p>Apply it and wait until STEC has generated the artifacts.
+The <code>EdgeImage</code> reports readiness through the boolean <code>status.ready</code>
+field (it does not set a <code>Ready</code> condition, so <code>--for=condition=Ready</code>
+would never complete):</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>edge-image.yaml
-kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>EdgeImage/kubara-edge-image<span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>--for<span class="o">=</span><span class="nv">condition</span><span class="o">=</span>Ready<span class="w"> </span>--timeout<span class="o">=</span>60m
+kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>EdgeImage/kubara-edge-image<span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.ready}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>--timeout<span class="o">=</span>60m
 </code></pre></div>
 <p>If you are not using Longhorn, keep only the extensions you actually need.</p>
 </div>
