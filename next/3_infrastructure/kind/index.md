@@ -26,7 +26,7 @@ Instead, kubara builds a small local setup around:
 `kubara bootstrap --local` checks for these binaries on your host:
 
 - `kind`
-- `docker`
+- `docker` or `podman`
 - `kubectl`
 - `helm`
 - `cloud-provider-kind`

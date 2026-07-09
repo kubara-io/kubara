@@ -11,7 +11,7 @@ This guide supports Linux, macOS and WSL on Windows.
 Install kubara first via the [installation guide](installation.md), then make sure these tools are available on your host:
 
 - `sudo` privileges for cloud-provider-kind
-- [Docker](https://docs.docker.com/get-docker/)
+- [Docker](https://docs.docker.com/get-docker/) or [Podman](https://podman.io/docs/installation)
 - [helm](https://helm.sh/docs/intro/install/)
 - [kind](https://kind.sigs.k8s.io/docs/user/quick-start/#installation)
 - [cloud-provider-kind](https://kubernetes-sigs.github.io/cloud-provider-kind/#/user/install/install_go) installed as a **binary on your host**, **not** as a container image
