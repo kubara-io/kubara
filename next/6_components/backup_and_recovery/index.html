@@ -1558,10 +1558,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#custom-volumesnapshotclass-via-additional-valuesyaml" class="md-nav__link">
+  <a href="#custom-volumesnapshotclass-via-an-extra-values-yaml-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom VolumeSnapshotClass via additional-values.yaml
+        Custom VolumeSnapshotClass via an extra values-*.yaml file
       
     </span>
   </a>
@@ -2647,10 +2647,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#custom-volumesnapshotclass-via-additional-valuesyaml" class="md-nav__link">
+  <a href="#custom-volumesnapshotclass-via-an-extra-values-yaml-file" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Custom VolumeSnapshotClass via additional-values.yaml
+        Custom VolumeSnapshotClass via an extra values-*.yaml file
       
     </span>
   </a>
@@ -2839,7 +2839,7 @@ on Velero for dynamic data that gets generated in runtime like the contents of P
 <span class="w">    </span><span class="nt">region</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">eu-de</span>
 <span class="w">    </span><span class="nt">s3Url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://obs.eu-de.otc.t-systems.com</span>
 </code></pre></div>
-<p>With <code>backupStorage.create: true</code>, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the <code>velero_credential_access_key</code> and <code>velero_credential_secret_access_key</code> Terraform outputs to the OpenBao layer as <code>TF_VAR_velero_access_key_id</code> and <code>TF_VAR_velero_secret_access_key</code>. Activate the <code>velero_credentials</code> block from <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/openbao/secrets.tf-example</code> so OpenBao writes the credential file to <code>secret/&lt;cluster-name&gt;/&lt;stage&gt;/velero/velero_s3_credentials</code>.</p>
+<p>With <code>backupStorage.create: true</code>, the generated infrastructure layer creates the OBS bucket and access credentials. Pass the <code>velero_credential_access_key</code> and <code>velero_credential_secret_access_key</code> Terraform outputs to the OpenBao layer as <code>TF_VAR_velero_access_key_id</code> and <code>TF_VAR_velero_secret_access_key</code>. Activate the <code>velero_credentials</code> block from <code>platform-configs/&lt;cluster-name&gt;/terraform/openbao/secrets.tf-oauth2</code> so OpenBao writes the credential file to <code>secret/&lt;cluster-name&gt;/&lt;stage&gt;/velero/velero_s3_credentials</code>.</p>
 <p>To use an existing S3-compatible bucket instead, set <code>backupStorage.create: false</code> and provide the bucket connection details in the Velero config:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">config</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">backupStorage</span><span class="p">:</span>
@@ -2853,8 +2853,8 @@ on Velero for dynamic data that gets generated in runtime like the contents of P
 <ol>
 <li>Run <code>kubara generate</code></li>
 <li>Review:<ul>
-<li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/values.yaml</code></li>
-<li><code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code></li>
+<li><code>platform-configs/&lt;cluster-name&gt;/helm/velero/values.generated.yaml</code></li>
+<li>optional extra <code>platform-configs/&lt;cluster-name&gt;/helm/velero/values-*.yaml</code> files, for example <code>values-additional.yaml</code></li>
 </ul>
 </li>
 <li>Commit and push so Argo CD can deploy Velero</li>
@@ -2873,12 +2873,12 @@ To restore from a backup:
 </code></pre></div></p>
 <p>These are the most simple commands Velero offers for backup. For production we advice you to create automated backups.
 For more information on that have a look at the <a href="https://velero.io/docs/main/backup-reference/" target="_blank" rel="noopener">official documentation</a>.
-You can also create a cronjob via the <code>values.yaml</code> setting, with the help of the <code>additional-values.yaml</code> file. You can look <a href="https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762" target="_blank" rel="noopener">here</a>, how this might look like.</p>
-<p>Use <code>additional-values.yaml</code> for environment-specific overrides you want to keep next to the generated baseline.</p>
-<h3 id="custom-volumesnapshotclass-via-additional-valuesyaml">Custom <code>VolumeSnapshotClass</code> via <code>additional-values.yaml</code></h3>
+You can also create a cronjob via the <code>values.generated.yaml</code> setting, with the help of an extra <code>values-*.yaml</code> overlay file. <code>values-additional.yaml</code> is one common choice. You can look <a href="https://github.com/vmware-tanzu/helm-charts/blob/beb24e2081a90f19949630e001cc37c760281c40/charts/velero/values.yaml#L762" target="_blank" rel="noopener">here</a>, how this might look like.</p>
+<p>Use an extra <code>values-*.yaml</code> overlay file for environment-specific overrides you want to keep next to the generated baseline. <code>values-additional.yaml</code> is one convenient example name.</p>
+<h3 id="custom-volumesnapshotclass-via-an-extra-values-yaml-file">Custom <code>VolumeSnapshotClass</code> via an extra <code>values-*.yaml</code> file</h3>
 <p>When you use <code>backupMode: csi-snapshot</code> or <code>backupMode: csi-data-mover</code>, Velero uses <strong>CSI snapshots</strong> instead of file-system backups.</p>
 <p>kubara writes <code>volumeSnapshotClass.k8sProvider</code> into the generated Velero values based on <code>terraform.provider</code>.
-If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own <code>VolumeSnapshotClass</code> in <code>customer-service-catalog/helm/&lt;cluster-name&gt;/velero/additional-values.yaml</code>.
+If your environment is not covered by one of the built-in provider mappings, or if you need provider-specific fields that differ from the default, define your own <code>VolumeSnapshotClass</code> in an extra overlay file such as <code>platform-configs/&lt;cluster-name&gt;/helm/velero/values-additional.yaml</code>.
 When <code>terraform.provider</code> is <code>none</code>, kubara does not select a built-in <code>VolumeSnapshotClass</code> provider.</p>
 <p><code>volumeSnapshotClass.customDefinition</code> takes precedence over the provider mapping, so this is the recommended way to supply a fully custom snapshot class.</p>
 <p>Example:</p>
@@ -2898,7 +2898,7 @@ When <code>terraform.provider</code> is <code>none</code>, kubara does not selec
 <p>Important notes:</p>
 <ul>
 <li>Keep <code>name: velero-csi</code> and the label <code>velero.io/csi-volumesnapshot-class: "true"</code> unless you intentionally want Velero to use a different class selection setup.</li>
-<li>Put this override into <code>additional-values.yaml</code>, not the generated <code>values.yaml</code>, because <code>values.yaml</code> is regenerated by kubara.</li>
+<li>Put this override into an extra <code>values-*.yaml</code> file, not the generated <code>values.generated.yaml</code>, because <code>values.generated.yaml</code> is regenerated by kubara. <code>values-additional.yaml</code> is a common choice.</li>
 <li>If the built-in provider mapping already matches your environment, you usually do not need a custom definition.</li>
 </ul>
 <hr />
@@ -2938,7 +2938,7 @@ When <code>terraform.provider</code> is <code>none</code>, kubara does not selec
 <hr />
 <h2 id="misc">Misc.</h2>
 <h3 id="other-storage-providers">Other Storage Providers</h3>
-<p>Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in <code>managed-service-catalog/helm/velero/values.yaml</code>. A list of available plugins can be found <a href="https://velero.io/docs/v1.18/supported-providers/" target="_blank" rel="noopener">here</a>.</p>
+<p>Should you use a provider who does not support the S3 API, you can change the provider by replacing the plugin in <code>platform-components/helm/velero/values.yaml</code>. A list of available plugins can be found <a href="https://velero.io/docs/v1.18/supported-providers/" target="_blank" rel="noopener">here</a>.</p>
 <h3 id="crash-consistency">Crash Consistency</h3>
 <p>If you use file based backup, to backup a deployed database, please refer to the backup tools of choice for your database. File based backup is not crash-consistent. E.g use <code>pg_dump</code> or <code>mysqldump</code> instead.</p>
 <hr />

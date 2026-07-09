@@ -2646,7 +2646,7 @@ Sometimes you use Gitea Providers and sometimes its GitHub - <strong>Keep that i
 <p>We recommend to take a look at them to make sure everything is configured as intended before<br />
 you finally apply your SSO config.</p>
 <h3 id="forgejo-sso-config-for-oauth2-proxy">Forgejo SSO config for oauth2-proxy:</h3>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/oauth2-proxy/values.yaml"</strong>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/oauth2-proxy/values.generated.yaml"</strong>
 <div class="highlight"><pre><span></span><code><span class="nt">oauth2-proxy</span><span class="p">:</span>
 
 <span class="w">    </span><span class="nt">configFile</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
@@ -2680,7 +2680,7 @@ you finally apply your SSO config.</p>
 Secret  into your Container as an Environment-Variable. Env-Variables won't be touched in the rendering process 
 which otherwise could lead to escaping-issues with special Characters, like backslashes, Dollarsign, Asterisk, Quotes, etc.</p>
 <p>The below example includes the YAML identation-levels ("kube-prometheus-stack: grafana:") for reference.  </p>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/kube-prometheus-stack/values.yaml"</strong></p>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/kube-prometheus-stack/values.generated.yaml"</strong></p>
 <p><div class="highlight"><pre><span></span><code><span class="nt">kube-prometheus-stack</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">grafana</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">envFromSecrets</span><span class="p">:</span>
@@ -2720,7 +2720,7 @@ which otherwise could lead to escaping-issues with special Characters, like back
 </ul>
 <hr />
 <h3 id="forgejo-sso-config-for-argo">Forgejo SSO config for Argo:</h3>
-<p>Change values in: <strong>"kubara/customer-service-catalog/helm/your-cluster/argo-cd/values.yaml"</strong></p>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/argo-cd/values.generated.yaml"</strong></p>
 <p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">configs</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">cm</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">dex.config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>

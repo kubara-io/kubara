@@ -2724,14 +2724,12 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code>my-catalog/
 ├── Catalog.yaml
 ├── services/
-├── managed-service-catalog/
+├── platform-components/
 │   ├── helm/
 │   └── terraform/
-└── customer-service-catalog/
+└── platform-configs/
     ├── helm/
-    │   └── example/
     └── terraform/
-        └── example/
 </code></pre></div>
 <p>The generated <code>Catalog.yaml</code> looks like this:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
@@ -2772,7 +2770,7 @@ kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w">
 <p>Key fields:</p>
 <ul>
 <li><code>metadata.name</code>: stable service key used in <code>config.yaml</code></li>
-<li><code>spec.chartPath</code>: chart directory name under <code>managed-service-catalog/helm/</code></li>
+<li><code>spec.chartPath</code>: chart directory name under <code>platform-components/helm/</code></li>
 <li><code>spec.status</code>: default status</li>
 <li><code>spec.clusterTypes</code>: optional hub/spoke limit</li>
 <li><code>spec.configSchema</code>: optional schema for service-specific config</li>
@@ -2781,13 +2779,13 @@ kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w">
 <p>A service definition alone is not enough. kubara also needs the files it should render or copy.</p>
 <p>Common places:</p>
 <ul>
-<li><code>managed-service-catalog/helm/&lt;chart&gt;/</code></li>
-<li><code>managed-service-catalog/terraform/...</code></li>
-<li><code>customer-service-catalog/helm/example/&lt;chart&gt;/</code></li>
-<li><code>customer-service-catalog/terraform/example/...</code></li>
+<li><code>platform-components/helm/&lt;chart&gt;/</code></li>
+<li><code>platform-components/terraform/...</code></li>
+<li><code>platform-configs/helm/&lt;chart&gt;/</code></li>
+<li><code>platform-configs/terraform/...</code></li>
 </ul>
-<p>Use <code>managed-service-catalog/</code> for reusable source content.<br />
-Use <code>customer-service-catalog/</code> for cluster-specific overlays.</p>
+<p>Use <code>platform-components/</code> for reusable source content.<br />
+Use <code>platform-configs/</code> for cluster-specific overlays.</p>
 <p>If you want to learn how <code>.tplt</code> files work, read <a href="../../2_concepts/catalog_templating/">Catalog templating</a>.</p>
 <h2 id="step-4-use-the-catalog-with-kubara">Step 4: use the catalog with kubara</h2>
 <p>Point kubara at the catalog root:</p>
@@ -2832,7 +2830,7 @@ With <code>--catalog-overwrite</code>, your external definition replaces the bui
 <div class="highlight"><pre><span></span><code>terraform/providers/&lt;provider&gt;/
 </code></pre></div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt
+<div class="highlight"><pre><span></span><code>platform-configs/terraform/stackit/infrastructure/main.tf.tplt
 </code></pre></div>
 <p>When the cluster Terraform provider matches the directory name, kubara uses that provider-specific file for the generated output path.</p>
 <p>Provider-specific directories below Helm paths are <strong>not</strong> treated as provider overrides.</p>

@@ -2558,7 +2558,7 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <span class="p">}</span>
 </code></pre></div></p>
 <h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>Add the following to your <code>argo-cd/additional-values.yaml</code>.
+<p>Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
 <div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
 <span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-mock</span>
 <span class="w">      </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>

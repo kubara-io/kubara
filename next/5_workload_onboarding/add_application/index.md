@@ -19,7 +19,7 @@ https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#
 ## **Modify Argo CD overlays**
 This is an example on how to add a simple application to a spoke-cluster.
 Usually you want to add a repository that serves an app-of-apps pattern.
-Add the following to your `argo-cd/additional-values.yaml`.
+Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 bootstrapValues:
     applications:

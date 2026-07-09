@@ -1150,7 +1150,7 @@ management and handles the Continuous Deployment of other applications (includin
 For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/projects/</p>
 <h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>Add the following to your <code>argo-cd/additional-values.yaml</code>.
+<p>Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
 <div class="highlight"><pre><span></span><code><span class="nt">projects</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">description</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-ske-spoke-0 project</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>

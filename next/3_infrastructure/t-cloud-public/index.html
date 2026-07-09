@@ -2950,7 +2950,7 @@ You're not viewing the latest stable version.
 <p>Generated OBS buckets use KMS server-side encryption by default. The bootstrap state backend stack normally creates the required tenant-wide OBS KMS agency. If you skipped that stack, enable <code>create_obs_kms_agency</code> before creating encrypted buckets. Set <code>create_t_cloud_public_agencies = false</code> if all required IAM agencies already exist.</p>
 <h2 id="2-prepare-environment-variables">2. Prepare environment variables</h2>
 <p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster-name&gt;/terraform
 cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
 </code></pre></div>
 <p>Set the T Cloud Public provider variables in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing:</p>
@@ -3016,7 +3016,7 @@ tofu<span class="w"> </span>apply
 </div>
 <p>You can also persist these values in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again before running the main infrastructure stack.</p>
 <h2 id="4-review-generated-infrastructure-values">4. Review generated infrastructure values</h2>
-<p>Review <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/infrastructure/env.auto.tfvars</code>. Keep persistent changes in a separate override file as described in <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
+<p>Review <code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure/env.auto.tfvars</code>. Keep persistent changes in a separate override file as described in <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
 <p>A few defaults that often need attention before the first apply:</p>
 <ul>
 <li><strong><code>enable_cluster_public_endpoint = true</code></strong> binds a small EIP (<code>5_bgp</code>, 5 Mbit/s, traffic-charged) to the CCE master so the API server is reachable from the machine that runs Terraform. This is required for the in-stack Helm provider, for example the OpenBao Helm release, when applying from outside the VPC. After apply, the public IP is exposed as the <code>cluster_public_endpoint_ip</code> output. Set to <code>false</code> if you only run Terraform from inside the VPC, for example from a CI runner inside OTC, a bastion, or a VPN.</li>
@@ -3102,7 +3102,7 @@ Active Node    true
 <h3 id="5-make-the-root-token-available-for-the-openbao-terraform-layer">5. Make the root token available for the OpenBao Terraform layer</h3>
 <p>The Initial Root Token from step 2 is what the next stack, <code>openbao/</code>, uses to authenticate against OpenBao through the local port-forward. There is intentionally no Terraform output for it, so it is not stored in Terraform state.</p>
 <p>The set-env script already contains commented-out lines for it. Uncomment them and fill in the token you saved:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># customer-service-catalog/terraform/&lt;cluster-name&gt;/set-env.sh</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># platform-configs/&lt;cluster-name&gt;/terraform/set-env.sh</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_ADDR</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8200&quot;</span>
 <span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="s2">&quot;hvb.AAAAAQ...&quot;</span>
 </code></pre></div>
@@ -3114,7 +3114,7 @@ Active Node    true
 <p>Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao configuration and secrets in a separate step after OpenBao is initialized, unsealed, and a valid OpenBao token is available.</p>
 <h2 id="7-openbao-configuration-and-secrets">7. OpenBao configuration and secrets</h2>
 <p>kubara also renders a separate OpenBao Terraform layer:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/terraform/&lt;cluster-name&gt;/openbao
+<div class="highlight"><pre><span></span><code>platform-configs/&lt;cluster-name&gt;/terraform/openbao
 </code></pre></div>
 <p>This layer uses the same OBS backend bucket as the infrastructure layer, but stores state under a separate key:</p>
 <div class="highlight"><pre><span></span><code><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tf-state-&lt;cluster-name&gt;-&lt;stage&gt;-openbao&quot;</span>
@@ -3140,8 +3140,8 @@ tofu<span class="w"> </span>apply
 </div>
 </div>
 <p>The layer configures a KV v2 mount, Kubernetes auth at <code>k8s-auth</code>, the namespace-scoped <code>k8s-kv-read</code> role and templated policy, the <code>external-secrets</code> role used only for the cluster-wide image pull secret, and the generated Grafana admin credentials.</p>
-<p>User-provided secrets, the OAuth2 client credentials, <code>t-cloud-public-clouds-yaml</code> for ExternalDNS, and the Velero S3 credentials, are written through a separate <code>secrets.tf-example</code> file. Copy it to activate the blocks you need:</p>
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-example<span class="w"> </span>secrets.tf
+<p>User-provided secrets, the OAuth2 client credentials, <code>t-cloud-public-clouds-yaml</code> for ExternalDNS, and the Velero S3 credentials, are written through a separate <code>secrets.tf-oauth2</code> file. Copy it to activate the blocks you need:</p>
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-oauth2<span class="w"> </span>secrets.tf
 </code></pre></div>
 <p>Each block declares a <code>variable</code> and the matching <code>vault_kv_secret_v2</code> resource. The values come from <code>TF_VAR_*</code> environment variables in your sourced <code>set-env.sh</code>, which already has commented-out templates for each one, so no secret is ever written into a committed file. Delete the blocks you do not use before applying.</p>
 <h3 id="namespace-isolated-secret-access">Namespace-isolated secret access</h3>
@@ -3192,7 +3192,7 @@ tofu<span class="w"> </span>apply
 <p>With <code>services.velero.config.backupStorage.create: true</code>, the generated Velero values point at the Terraform-managed bucket name <code>velero-&lt;cluster-name&gt;-&lt;stage&gt;</code>. Set the matching <code>backupStorage.region</code> and <code>backupStorage.s3Url</code> values in the cluster config. If you use an existing OBS or S3-compatible bucket instead, set <code>backupStorage.create: false</code> and provide <code>backupStorage.bucketName</code>.</p>
 <p>When Velero uses CSI snapshots, <code>backupMode: csi-snapshot</code> or <code>backupMode: csi-data-mover</code>, the generated values select the <code>t-cloud-public</code> <code>VolumeSnapshotClass</code> mapping for the CCE Everest CSI disk driver.</p>
 <h3 id="oidc-admin-access">OIDC admin access</h3>
-<p>The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/openbao/override.auto.tfvars</code>, not in the generated <code>env.auto.tfvars</code>; see <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>. For example, use the following values for a Keycloak client:</p>
+<p>The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in <code>platform-configs/&lt;cluster-name&gt;/terraform/openbao/override.auto.tfvars</code>, not in the generated <code>env.auto.tfvars</code>; see <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>. For example, use the following values for a Keycloak client:</p>
 <div class="highlight"><pre><span></span><code><span class="na">manage_openbao_oidc_auth_backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
 <span class="na">openbao_oidc_discovery_url</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://&lt;keycloak-host&gt;/realms/&lt;realm&gt;&quot;</span>
 <span class="na">openbao_oidc_client_id</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;openbao-client-id&gt;&quot;</span>

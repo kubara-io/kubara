@@ -50,7 +50,7 @@ Commit and push the generated files to your Git repository.
 Before the first `terraform init`, prepare and load your environment variables:
 
 ```bash
-cd customer-service-catalog/terraform/<cluster-name>
+cd platform-configs/<cluster-name>/terraform
 cp set-env-changeme.sh set-env.sh
 ```
 
@@ -207,19 +207,19 @@ If you use OAuth2, create a GitHub application as shown [here](../4_building_you
 
 If you want Terraform to create OAuth2-related Vault entries:
 
-* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `customer-service-catalog/terraform/<cluster-name>/`
+* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `platform-configs/<cluster-name>/terraform/`
 * `TF_Var_image_pull_secret` will already be set by kubara with what is present in the `.env`
-* In `customer-service-catalog/terraform/<cluster-name>/infrastructure`, copy `secrets.tf-example` to `oauth2-secrets.tf` and adjust values if needed
+* In `platform-configs/<cluster-name>/terraform/infrastructure`, copy `secrets.tf-oauth2` to `oauth2-secrets.tf` and adjust values if needed
 
 Load the variables and apply:
 
 === "Terraform"
 
     ```bash
-    cp secrets.tf-example oauth2-secrets.tf
+    cp secrets.tf-oauth2 oauth2-secrets.tf
     source ../set-env.sh
     # or for PowerShell
-    # Copy-Item secrets.tf-example oauth2-secrets.tf
+    # Copy-Item secrets.tf-oauth2 oauth2-secrets.tf
     . ..\set-env.ps1
     terraform apply
     ```
@@ -227,10 +227,10 @@ Load the variables and apply:
 === "Tofu"
 
     ```bash
-    cp secrets.tf-example oauth2-secrets.tf
+    cp secrets.tf-oauth2 oauth2-secrets.tf
     source ../set-env.sh
     # or for PowerShell
-    # Copy-Item secrets.tf-example oauth2-secrets.tf
+    # Copy-Item secrets.tf-oauth2 oauth2-secrets.tf
     . ..\set-env.ps1
     tofu apply
     ```

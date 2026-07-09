@@ -175,25 +175,19 @@ If you already have an existing Kubernetes cluster and a secret manager supporte
 
 This step extends the service catalog:
 
-* Generates an umbrella Helm chart in `managed-service-catalog/`
-* Creates cluster-specific overlays in `customer-service-catalog/`
+* Generates an umbrella Helm chart in `platform-components/`
+* Creates cluster-specific overlays in `platform-configs/`
 
 ```bash
 kubara generate --helm
 ```
 
 
-The generated `values.yaml` files are pre-filled from your `config.yaml` and `.env`. Review them and
-adjust any environment-specific settings; some charts still contain explicit placeholders that you
-must fill in.
-Example:
-```yaml
-# ... previous content of yaml file
-url: "https://replace-me-with-your-url"
-# ... rest of yaml
-```
-Edit the generated files in:
-`customer-service-catalog/helm/<cluster>/<chart>/values.yaml`
+The generated `values.generated.yaml` files are pre-filled from your `config.yaml` and `.env`. Review them if you 
+want to understand more details about the predefined settings but DO NOT edit those files as they will be regenerated
+with future updates. If you need customization you can add as many files to the charts with the pattern `values-*.yaml`.
+Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
+overwritten by the last file that includes the list.
 
 Source templates are embedded in the binary under `src/internal/catalog/built-in/...`, but you should only edit generated files in your repository.
 
@@ -219,11 +213,8 @@ The chart directories where values usually need review are:
 
 Every generated app supports:
 
-* `values.yaml` as the main customer overlay file
-* optional `additional-values.yaml` for overrides/extra values
-
-kubara's generated ApplicationSet already references both files and ignores missing files, so you can add `additional-values.yaml` only when needed.
-During bootstrap kubara uses `additional-values.yaml` files when they exist as well.
+* `values.generated.yaml` as the main generated overlay file
+* optional `values-*.yaml` for overrides/extra values (merged in lexical order)
 
 Merge behavior reminder:
 
@@ -236,13 +227,13 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
     After `kubara generate --helm` and before `kubara bootstrap`, replace the Traefik service annotation placeholder with the shared load balancer ID from Terraform:
 
     ```bash
-    cd customer-service-catalog/terraform/<cluster>/infrastructure
+    cd platform-configs/<cluster>/terraform/infrastructure
     terraform output -raw load_balancer_id
     ```
 
-    Set the value in `customer-service-catalog/helm/<cluster>/traefik/values.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Keep `kubernetes.io/elb.class: "union"`.
+    Set the value in `platform-configs/<cluster>/helm/traefik/values.generated.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Keep `kubernetes.io/elb.class: "union"`.
 
-    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `customer-service-catalog/terraform/<cluster>/openbao/secrets.tf-example` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
+    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `platform-configs/<cluster>/terraform/openbao/secrets.tf-oauth2` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
 
 !!! warning
     **Don't forget to commit and push your changes to Git!**

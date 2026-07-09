@@ -1271,10 +1271,10 @@ kubara<span class="w"> </span>generate
 </code></pre></div>
 <p>This creates/updates the spoke cluster overlays in:</p>
 <ul>
-<li><code>customer-service-catalog/terraform/&lt;spoke-cluster-name&gt;/...</code></li>
-<li><code>customer-service-catalog/helm/&lt;spoke-cluster-name&gt;/...</code></li>
+<li><code>platform-configs/&lt;spoke-cluster-name&gt;/terraform/...</code></li>
+<li><code>platform-configs/&lt;spoke-cluster-name&gt;/helm/...</code></li>
 </ul>
-<p>This also registers the spokes in the ArgoCD <code>values.yaml</code>.</p>
+<p>This also registers the spokes in the Argo CD <code>values.generated.yaml</code>.</p>
 <h2 id="3-prepare-the-spoke-cluster">3. Prepare the spoke cluster</h2>
 <p>If this is a new cluster, apply Terraform for the spoke entry.
 If the cluster already exists, skip Terraform and continue.</p>
@@ -1294,8 +1294,8 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span><span class="s2">"&lt;USERNAME&gt;"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span><span class="s2">"&lt;PASSWORD&gt;"</span>
 </code></pre></div>
-<p>Then configure the spoke ClusterSecretStore in:
-<code>customer-service-catalog/helm/&lt;spoke-cluster-name&gt;/external-secrets/additional-values.yaml</code></p>
+<p>Then configure the spoke ClusterSecretStore in a chart overlay file, for example:
+<code>platform-configs/&lt;spoke-cluster-name&gt;/helm/external-secrets/values-additional.yaml</code></p>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">clusterSecretStores</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">workload-0-dev</span><span class="p">:</span>
@@ -1325,7 +1325,7 @@ If not, run bootstrap again for your hub cluster:</p>
 <h2 id="additional-notes">Additional notes</h2>
 <ul>
 <li>If you enable <code>oauth2-proxy</code>, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.</li>
-<li><code>additional-values.yaml</code> is optional but recommended for provider-specific overrides, because generated <code>values.yaml</code> can be re-rendered by kubara.</li>
+<li>Extra overlay files can use any <code>values-*.yaml</code> name. <code>values-additional.yaml</code> is a common choice, and it keeps provider-specific overrides separate from the generated <code>values.generated.yaml</code>.</li>
 </ul>
 </article>
 </div>

@@ -55,10 +55,10 @@ Terraform automatically loads all `*.auto.tfvars` files in lexical order. Becaus
 
 kubara generates a specific directory structure in your Git repository to separate concerns:
 
-- **`managed-service-catalog/`**
+- **`platform-components/`**
   This directory contains the reusable generated components such as Terraform modules and Helm charts. In normal usage, this is generated output, not hand-maintained source.
 
-- **`customer-service-catalog/`**
+- **`platform-configs/`**
   It contains cluster-specific overlays and values for the kubara setup.
 
 The naming can be a little confusing at first:

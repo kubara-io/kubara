@@ -3020,21 +3020,16 @@ For some environments we provide ready-made infrastructure presets and generated
 <h2 id="3-helm">3. Helm</h2>
 <p>This step extends the service catalog:</p>
 <ul>
-<li>Generates an umbrella Helm chart in <code>managed-service-catalog/</code></li>
-<li>Creates cluster-specific overlays in <code>customer-service-catalog/</code></li>
+<li>Generates an umbrella Helm chart in <code>platform-components/</code></li>
+<li>Creates cluster-specific overlays in <code>platform-configs/</code></li>
 </ul>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--helm
 </code></pre></div>
-<p>The generated <code>values.yaml</code> files are pre-filled from your <code>config.yaml</code> and <code>.env</code>. Review them and
-adjust any environment-specific settings; some charts still contain explicit placeholders that you
-must fill in.
-Example:
-<div class="highlight"><pre><span></span><code><span class="c1"># ... previous content of yaml file</span>
-<span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://replace-me-with-your-url&quot;</span>
-<span class="c1"># ... rest of yaml</span>
-</code></pre></div>
-Edit the generated files in:
-<code>customer-service-catalog/helm/&lt;cluster&gt;/&lt;chart&gt;/values.yaml</code></p>
+<p>The generated <code>values.generated.yaml</code> files are pre-filled from your <code>config.yaml</code> and <code>.env</code>. Review them if you 
+want to understand more details about the predefined settings but DO NOT edit those files as they will be regenerated
+with future updates. If you need customization you can add as many files to the charts with the pattern <code>values-*.yaml</code>.
+Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
+overwritten by the last file that includes the list.</p>
 <p>Source templates are embedded in the binary under <code>src/internal/catalog/built-in/...</code>, but you should only edit generated files in your repository.</p>
 <p>The chart directories where values usually need review are:</p>
 <ul>
@@ -3057,11 +3052,9 @@ Edit the generated files in:
 <h3 id="31-additional-value-files-and-ci-value-files">3.1 Additional value files and CI value files</h3>
 <p>Every generated app supports:</p>
 <ul>
-<li><code>values.yaml</code> as the main customer overlay file</li>
-<li>optional <code>additional-values.yaml</code> for overrides/extra values</li>
+<li><code>values.generated.yaml</code> as the main generated overlay file</li>
+<li>optional <code>values-*.yaml</code> for overrides/extra values (merged in lexical order)</li>
 </ul>
-<p>kubara's generated ApplicationSet already references both files and ignores missing files, so you can add <code>additional-values.yaml</code> only when needed.
-During bootstrap kubara uses <code>additional-values.yaml</code> files when they exist as well.</p>
 <p>Merge behavior reminder:</p>
 <ul>
 <li>maps/dictionaries are merged recursively</li>
@@ -3071,11 +3064,11 @@ During bootstrap kubara uses <code>additional-values.yaml</code> files when they
 <div class="admonition info">
 <p class="admonition-title">T Cloud Public CCE: provider-specific Helm adjustments</p>
 <p>After <code>kubara generate --helm</code> and before <code>kubara bootstrap</code>, replace the Traefik service annotation placeholder with the shared load balancer ID from Terraform:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster&gt;/infrastructure
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster&gt;/terraform/infrastructure
 terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>load_balancer_id
 </code></pre></div>
-<p>Set the value in <code>customer-service-catalog/helm/&lt;cluster&gt;/traefik/values.yaml</code> under <code>traefik.service.annotations["kubernetes.io/elb.id"]</code>. Keep <code>kubernetes.io/elb.class: "union"</code>.</p>
-<p>ExternalDNS also needs a Kubernetes Secret named <code>tcloudpubliccloudsyaml</code> with a <code>clouds.yaml</code> key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from <code>customer-service-catalog/terraform/&lt;cluster&gt;/openbao/secrets.tf-example</code> to <code>secrets.tf</code>, set <code>TF_VAR_external_dns_os_username</code> and <code>TF_VAR_external_dns_os_password</code> in <code>set-env.sh</code>, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
+<p>Set the value in <code>platform-configs/&lt;cluster&gt;/helm/traefik/values.generated.yaml</code> under <code>traefik.service.annotations["kubernetes.io/elb.id"]</code>. Keep <code>kubernetes.io/elb.class: "union"</code>.</p>
+<p>ExternalDNS also needs a Kubernetes Secret named <code>tcloudpubliccloudsyaml</code> with a <code>clouds.yaml</code> key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from <code>platform-configs/&lt;cluster&gt;/terraform/openbao/secrets.tf-oauth2</code> to <code>secrets.tf</code>, set <code>TF_VAR_external_dns_os_username</code> and <code>TF_VAR_external_dns_os_password</code> in <code>set-env.sh</code>, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
 </div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>

@@ -732,10 +732,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#managed-service-catalog" class="md-nav__link">
+  <a href="#platform-components" class="md-nav__link">
     <span class="md-ellipsis">
       
-        managed-service-catalog/
+        platform-components/
       
     </span>
   </a>
@@ -743,10 +743,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#customer-service-catalog" class="md-nav__link">
+  <a href="#platform-configs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        customer-service-catalog/
+        platform-configs/
       
     </span>
   </a>
@@ -2695,10 +2695,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#managed-service-catalog" class="md-nav__link">
+  <a href="#platform-components" class="md-nav__link">
     <span class="md-ellipsis">
       
-        managed-service-catalog/
+        platform-components/
       
     </span>
   </a>
@@ -2706,10 +2706,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#customer-service-catalog" class="md-nav__link">
+  <a href="#platform-configs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        customer-service-catalog/
+        platform-configs/
       
     </span>
   </a>
@@ -2867,14 +2867,12 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <div class="highlight"><pre><span></span><code>my-catalog/
 ├── Catalog.yaml
 ├── services/
-├── managed-service-catalog/
+├── platform-components/
 │   ├── helm/
 │   └── terraform/
-└── customer-service-catalog/
+└── platform-configs/
     ├── helm/
-    │   └── example/
     └── terraform/
-        └── example/
 </code></pre></div>
 <h3 id="catalogyaml"><code>Catalog.yaml</code></h3>
 <p>This is the catalog manifest. It identifies the catalog and its version.</p>
@@ -2904,21 +2902,20 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 </li>
 <li>Optional service config schema</li>
 </ul>
-<h3 id="managed-service-catalog"><code>managed-service-catalog/</code></h3>
+<h3 id="platform-components"><code>platform-components/</code></h3>
 <p>This contains reusable generated output sources, for example:</p>
 <ul>
 <li>Helm charts</li>
 <li>Terraform modules</li>
 <li>shared assets</li>
 </ul>
-<h3 id="customer-service-catalog"><code>customer-service-catalog/</code></h3>
+<h3 id="platform-configs"><code>platform-configs/</code></h3>
 <p>This contains cluster-specific overlays and values templates.</p>
-<p>The <code>example/</code> path segment is special. During <code>kubara generate</code>, kubara replaces it with the current cluster name.</p>
 <p>For example:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+<div class="highlight"><pre><span></span><code>platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 </code></pre></div>
 <p>becomes:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/helm/&lt;cluster-name&gt;/homer-dashboard/values.yaml
+<div class="highlight"><pre><span></span><code>platform-configs/&lt;cluster-name&gt;/helm/homer-dashboard/values.generated.yaml
 </code></pre></div>
 <h2 id="what-a-servicedefinition-controls">What a <code>ServiceDefinition</code> controls</h2>
 <p>Each service definition is a YAML document like this:</p>

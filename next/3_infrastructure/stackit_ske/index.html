@@ -2691,7 +2691,7 @@ For more info look at our <a href="../../9_reference/faq/#what-happens-when-oaut
 <p>Commit and push the generated files to your Git repository.</p>
 <h2 id="2-prepare-environment-variables">2. Prepare environment variables</h2>
 <p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>customer-service-catalog/terraform/&lt;cluster-name&gt;
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster-name&gt;/terraform
 cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
 </code></pre></div>
 <p>Set at least <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing.</p>
@@ -2820,27 +2820,27 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 <p>If you use OAuth2, create a GitHub application as shown <a href="../../4_building_your_platform/sso/add_sso/">here</a>.</p>
 <p>If you want Terraform to create OAuth2-related Vault entries:</p>
 <ul>
-<li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/</code></li>
+<li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>platform-configs/&lt;cluster-name&gt;/terraform/</code></li>
 <li><code>TF_Var_image_pull_secret</code> will already be set by kubara with what is present in the <code>.env</code></li>
-<li>In <code>customer-service-catalog/terraform/&lt;cluster-name&gt;/infrastructure</code>, copy <code>secrets.tf-example</code> to <code>oauth2-secrets.tf</code> and adjust values if needed</li>
+<li>In <code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure</code>, copy <code>secrets.tf-oauth2</code> to <code>oauth2-secrets.tf</code> and adjust values if needed</li>
 </ul>
 <p>Load the variables and apply:</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">Terraform</label><label for="__tabbed_8_2">Tofu</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-example<span class="w"> </span>oauth2-secrets.tf
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-oauth2<span class="w"> </span>oauth2-secrets.tf
 <span class="nb">source</span><span class="w"> </span>../set-env.sh
 <span class="c1"># or for PowerShell</span>
-<span class="c1"># Copy-Item secrets.tf-example oauth2-secrets.tf</span>
+<span class="c1"># Copy-Item secrets.tf-oauth2 oauth2-secrets.tf</span>
 .<span class="w"> </span>..<span class="se">\s</span>et-env.ps1
 terraform<span class="w"> </span>apply
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-example<span class="w"> </span>oauth2-secrets.tf
+<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-oauth2<span class="w"> </span>oauth2-secrets.tf
 <span class="nb">source</span><span class="w"> </span>../set-env.sh
 <span class="c1"># or for PowerShell</span>
-<span class="c1"># Copy-Item secrets.tf-example oauth2-secrets.tf</span>
+<span class="c1"># Copy-Item secrets.tf-oauth2 oauth2-secrets.tf</span>
 .<span class="w"> </span>..<span class="se">\s</span>et-env.ps1
 tofu<span class="w"> </span>apply
 </code></pre></div>

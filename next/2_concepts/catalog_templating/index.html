@@ -2716,10 +2716,10 @@ and more. </p>
 Utilizing the power of <a href="https://masterminds.github.io/sprig/" target="_blank" rel="noopener">Sprig template functions</a>. If you authored Helm charts
 before you will feel right at home.</p>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+<div class="highlight"><pre><span></span><code>platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 </code></pre></div>
 <p>becomes a generated file such as:</p>
-<div class="highlight"><pre><span></span><code>customer-service-catalog/helm/my-hub-dev/homer-dashboard/values.yaml
+<div class="highlight"><pre><span></span><code>platform-configs/my-hub-dev/helm/homer-dashboard/values.generated.yaml
 </code></pre></div>
 <p>Files without the <code>.tplt</code> suffix are copied as-is.</p>
 <h2 id="what-data-is-available-in-templates">What data is available in templates?</h2>
@@ -2764,7 +2764,7 @@ before you will feel right at home.</p>
 <h2 id="cross-templating-in-practice">Cross-templating in practice</h2>
 <p>The Homer example shows the main idea well: one service template can react to settings from other services and from the cluster itself.</p>
 <p>From:</p>
-<div class="highlight"><pre><span></span><code>src/internal/catalog/built-in/customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+<div class="highlight"><pre><span></span><code>src/internal/catalog/built-in/platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 </code></pre></div>
 <p>kubara reads values such as:</p>
 <ul>

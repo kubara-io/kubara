@@ -2818,8 +2818,8 @@ Other<span class="w"> </span>useful<span class="w"> </span>links:
 <h2 id="7-understanding-the-generated-files">7. Understanding the generated files</h2>
 <p>After the bootstrap finished, you will usually see three important areas in your repository:</p>
 <ul>
-<li><code>managed-service-catalog/</code>: the generated Helm charts and shared templates Argo CD uses for deployments</li>
-<li><code>customer-service-catalog/</code>: the cluster-specific values that describe what should run on <code>test-cluster</code></li>
+<li><code>platform-components/</code>: the generated Helm charts and shared templates Argo CD uses for deployments</li>
+<li><code>platform-configs/</code>: the cluster-specific values that describe what should run on <code>test-cluster</code></li>
 <li><code>.local/</code>: local runtime artifacts used only for the evaluation environment</li>
 </ul>
 <p>The <code>.local/</code> directory is <strong>not</strong> part of your GitOps state. It only contains helper files for your local machine, for example:</p>

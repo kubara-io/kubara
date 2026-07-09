@@ -90,14 +90,12 @@ A catalog usually has these parts:
 my-catalog/
 ├── Catalog.yaml
 ├── services/
-├── managed-service-catalog/
+├── platform-components/
 │   ├── helm/
 │   └── terraform/
-└── customer-service-catalog/
+└── platform-configs/
     ├── helm/
-    │   └── example/
     └── terraform/
-        └── example/
 ```
 
 ### `Catalog.yaml`
@@ -132,7 +130,7 @@ Each file tells kubara things like:
     - hub & spoke or only one of the two
 - Optional service config schema
 
-### `managed-service-catalog/`
+### `platform-components/`
 
 This contains reusable generated output sources, for example:
 
@@ -140,22 +138,20 @@ This contains reusable generated output sources, for example:
 - Terraform modules
 - shared assets
 
-### `customer-service-catalog/`
+### `platform-configs/`
 
 This contains cluster-specific overlays and values templates.
-
-The `example/` path segment is special. During `kubara generate`, kubara replaces it with the current cluster name.
 
 For example:
 
 ```text
-customer-service-catalog/helm/example/homer-dashboard/values.yaml.tplt
+platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 ```
 
 becomes:
 
 ```text
-customer-service-catalog/helm/<cluster-name>/homer-dashboard/values.yaml
+platform-configs/<cluster-name>/helm/homer-dashboard/values.generated.yaml
 ```
 
 ## What a `ServiceDefinition` controls

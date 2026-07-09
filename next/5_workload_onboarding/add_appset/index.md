@@ -9,13 +9,13 @@ For more information and possible configuration check:<br>
 - https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml
 - https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
 
-## **Add Chart to your managed-service-catalog**
-Add the Chart you want to add to your `managed-service-catalog`:<br>
-managed-service-catalog/helm/my-new-servie-in-a-long-dir-name/
+## **Add Chart to your platform-components**
+Add the Chart you want to add to your `platform-components`:<br>
+platform-components/helm/my-new-servie-in-a-long-dir-name/
 
 ## **Add Templates to your new Chart (optional)**
 To use pre-configured processes (e.g. get secrets from vault) you can leverage the Chart `template-library` inside 
-`managed-service-catalog`.<br>
+`platform-components`.<br>
 Take a look at other chart to find out how to use these templates.<br>
 The general steps are:
 1. Add template-library as a dependency to your Chart.yaml
@@ -23,33 +23,33 @@ The general steps are:
    (check other Chart templates to find out how)
 3. update the new Chart's values and/or override values according to the templates you included
 
-## **Add Override Values to your customer-service-catalog**
-Add Override Values to your `customer-service-catalog`:<br>
-customer-service-catalog/helm/my-cluster/my-new-servie-in-a-long-dir-name/values.yaml
+## **Add Override Values to your platform-configs**
+Add Override Values to your `platform-configs`:<br>
+platform-configs/my-cluster/helm/my-new-servie-in-a-long-dir-name/values.generated.yaml
 
-Optional: Add `additional-values.yaml` in the same chart folder for cluster-specific overrides.
-The generated ApplicationSet already references both `values.yaml` and `additional-values.yaml`.
+Optional: Add one or more `values-*.yaml` files in the same chart folder for cluster-specific overrides.
+For example, you can use `values-additional.yaml`, but the generated ApplicationSet will also pick up other files matching `values-*.yaml`.
 
 ## **Modify Argo CD overlays**
 This is an example on how to add an AppSet to the hub cluster.
-Add the following to your `argo-cd/additional-values.yaml`.
+Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 bootstrapValues:
   applicationSets:  # usually your existing hub cluster key (for example "<cluster>-<stage>")
     my-hub-dev:
       projectName: my-hub-dev
-      managedServices:
+      platformComponents:
         repoURL: https://your-repo.example/managed.git
-        path: managed-service-catalog/helm
+        path: platform-components/helm
         targetRevision: main
-      customerServices:
+      platformConfigs:
         repoURL: https://your-repo.example/customer.git
-        path: customer-service-catalog/helm
+        path: platform-configs
         targetRevision: main
       apps:
         my-new-service:
           name: my-new-service # This will determine the generated AppName
-          path: my-new-servie-in-a-long-dir-name # This points to the directory you created for the chart inside managed-service-catalog
+          path: my-new-servie-in-a-long-dir-name # This points to the directory you created for the chart inside platform-components
 inClusterSecretLabels:
   my-new-service: enabled
     
@@ -87,5 +87,5 @@ bootstrapValues:
               helm:
                 valueFiles:
                   # Keep `{{name}}`: the AppSet controller injects the cluster name
-                  - "$valuesRepo/customer-service-catalog/helm/{{name}}/akv2k8s/values.yaml"
+                  - "$valuesRepo/platform-configs/{{name}}/helm/akv2k8s/values.generated.yaml"
 ```

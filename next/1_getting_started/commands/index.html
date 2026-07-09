@@ -2489,13 +2489,11 @@ You're not viewing the latest stable version.
 <h2 id="generate">generate</h2>
 <p>Generate files from catalog templates</p>
 <blockquote>
-<p>kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]</p>
+<p>kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]</p>
 </blockquote>
 <p><strong>--dry-run</strong>: Preview generation without creating files</p>
 <p><strong>--helm</strong>: Only generate Helm files</p>
 <p><strong>--help, -h</strong>: show help</p>
-<p><strong>--managed-catalog</strong>="": Path to the managed catalog directory. (default: "managed-service-catalog")</p>
-<p><strong>--overlay-values</strong>="": Path to overlay values directory. (default: "customer-service-catalog")</p>
 <p><strong>--terraform</strong>: Only generate Terraform files</p>
 <h3 id="help-h_1">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
@@ -2508,8 +2506,8 @@ You're not viewing the latest stable version.
 <p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
 <p><strong>--help, -h</strong>: show help</p>
 <p><strong>--local</strong>: Provision an isolated local evaluation environment. Local testing only; not for production use.</p>
-<p><strong>--managed-catalog</strong>="": Path to the managed catalog directory (default: "managed-service-catalog")</p>
-<p><strong>--overlay-values</strong>="": Path to overlay values directory (default: "customer-service-catalog")</p>
+<p><strong>--platform-components</strong>="": Path to the platform-components directory (default: "platform-components")</p>
+<p><strong>--platform-configs</strong>="": Path to platform-configs directory (default: "platform-configs")</p>
 <p><strong>--timeout</strong>="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)</p>
 <p><strong>--with-es-crds</strong>: Also install external-secrets</p>
 <p><strong>--with-es-css-file</strong>="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)</p>

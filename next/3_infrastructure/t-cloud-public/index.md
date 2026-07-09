@@ -58,7 +58,7 @@ Generated OBS buckets use KMS server-side encryption by default. The bootstrap s
 Before the first `terraform init`, prepare and load your environment variables:
 
 ```bash
-cd customer-service-catalog/terraform/<cluster-name>
+cd platform-configs/<cluster-name>/terraform
 cp set-env-changeme.sh set-env.sh
 ```
 
@@ -151,7 +151,7 @@ You can also persist these values in `set-env.sh` / `set-env.ps1` and source the
 
 ## 4. Review generated infrastructure values
 
-Review `customer-service-catalog/terraform/<cluster-name>/infrastructure/env.auto.tfvars`. Keep persistent changes in a separate override file as described in [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
+Review `platform-configs/<cluster-name>/terraform/infrastructure/env.auto.tfvars`. Keep persistent changes in a separate override file as described in [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
 
 A few defaults that often need attention before the first apply:
 
@@ -277,7 +277,7 @@ The Initial Root Token from step 2 is what the next stack, `openbao/`, uses to a
 The set-env script already contains commented-out lines for it. Uncomment them and fill in the token you saved:
 
 ```bash
-# customer-service-catalog/terraform/<cluster-name>/set-env.sh
+# platform-configs/<cluster-name>/terraform/set-env.sh
 export VAULT_ADDR="http://127.0.0.1:8200"
 export VAULT_TOKEN="hvb.AAAAAQ..."
 ```
@@ -299,7 +299,7 @@ Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao c
 kubara also renders a separate OpenBao Terraform layer:
 
 ```text
-customer-service-catalog/terraform/<cluster-name>/openbao
+platform-configs/<cluster-name>/terraform/openbao
 ```
 
 This layer uses the same OBS backend bucket as the infrastructure layer, but stores state under a separate key:
@@ -334,10 +334,10 @@ Then apply the OpenBao Terraform layer:
 
 The layer configures a KV v2 mount, Kubernetes auth at `k8s-auth`, the namespace-scoped `k8s-kv-read` role and templated policy, the `external-secrets` role used only for the cluster-wide image pull secret, and the generated Grafana admin credentials.
 
-User-provided secrets, the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials, are written through a separate `secrets.tf-example` file. Copy it to activate the blocks you need:
+User-provided secrets, the OAuth2 client credentials, `t-cloud-public-clouds-yaml` for ExternalDNS, and the Velero S3 credentials, are written through a separate `secrets.tf-oauth2` file. Copy it to activate the blocks you need:
 
 ```bash
-cp secrets.tf-example secrets.tf
+cp secrets.tf-oauth2 secrets.tf
 ```
 
 Each block declares a `variable` and the matching `vault_kv_secret_v2` resource. The values come from `TF_VAR_*` environment variables in your sourced `set-env.sh`, which already has commented-out templates for each one, so no secret is ever written into a committed file. Delete the blocks you do not use before applying.
@@ -365,7 +365,7 @@ When Velero uses CSI snapshots, `backupMode: csi-snapshot` or `backupMode: csi-d
 
 ### OIDC admin access
 
-The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in `customer-service-catalog/terraform/<cluster-name>/openbao/override.auto.tfvars`, not in the generated `env.auto.tfvars`; see [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides). For example, use the following values for a Keycloak client:
+The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in `platform-configs/<cluster-name>/terraform/openbao/override.auto.tfvars`, not in the generated `env.auto.tfvars`; see [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides). For example, use the following values for a Keycloak client:
 
 ```hcl
 manage_openbao_oidc_auth_backend = true

@@ -44,10 +44,10 @@ kubara generate
 
 This creates/updates the spoke cluster overlays in:
 
-* `customer-service-catalog/terraform/<spoke-cluster-name>/...`
-* `customer-service-catalog/helm/<spoke-cluster-name>/...`
+* `platform-configs/<spoke-cluster-name>/terraform/...`
+* `platform-configs/<spoke-cluster-name>/helm/...`
 
-This also registers the spokes in the ArgoCD `values.yaml`.
+This also registers the spokes in the Argo CD `values.generated.yaml`.
 
 ## 3. Prepare the spoke cluster
 
@@ -76,8 +76,8 @@ kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
   --from-literal=password="<PASSWORD>"
 ```
 
-Then configure the spoke ClusterSecretStore in:
-`customer-service-catalog/helm/<spoke-cluster-name>/external-secrets/additional-values.yaml`
+Then configure the spoke ClusterSecretStore in a chart overlay file, for example:
+`platform-configs/<spoke-cluster-name>/helm/external-secrets/values-additional.yaml`
 
 Example:
 
@@ -117,4 +117,4 @@ kubara bootstrap <hub-cluster-name-from-config-yaml>
 ## Additional notes
 
 * If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.
-* `additional-values.yaml` is optional but recommended for provider-specific overrides, because generated `values.yaml` can be re-rendered by kubara.
+* Extra overlay files can use any `values-*.yaml` name. `values-additional.yaml` is a common choice, and it keeps provider-specific overrides separate from the generated `values.generated.yaml`.
