@@ -8,7 +8,6 @@ import (
 
 	"github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/render"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -23,8 +22,6 @@ func TestNewGenerateFlags(t *testing.T) {
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
 	assert.False(t, flags.DryRun)
-	assert.Equal(t, render.DefaultPlatformComponentsPath, flags.PlatformComponents)
-	assert.Equal(t, render.DefaultPlatformConfigsPath, flags.PlatformConfigs)
 }
 
 func TestNewGenerateCmd(t *testing.T) {
@@ -34,11 +31,11 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
-	assert.Equal(t, "kubara generate [--terraform|--helm] [--platform-components PATH --platform-configs PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
-	require.Len(t, command.Flags, 5)
+	require.Len(t, command.Flags, 3)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -48,8 +45,6 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["terraform"])
 	assert.True(t, flagNames["helm"])
 	assert.True(t, flagNames["dry-run"])
-	assert.True(t, flagNames["platform-components"])
-	assert.True(t, flagNames["platform-configs"])
 }
 
 func TestGenerateCmd(t *testing.T) {
@@ -145,37 +140,6 @@ func TestGenerateCmd(t *testing.T) {
 				// Check that helm files were generated
 				helmDir := filepath.Join(tempDir, "platform-components", "helm")
 				entries, err := os.ReadDir(helmDir)
-				require.NoError(t, err)
-				assert.NotEmpty(t, entries)
-			},
-		},
-		{
-			name: "successful file generation with custom paths",
-			flags: []string{
-				"--terraform",
-				"--platform-components", "custom-managed",
-				"--platform-configs", "custom-overlay",
-			},
-			wantErr: false,
-			setup: func(t *testing.T, tempDir string) {
-				// Create custom directories
-				err := os.MkdirAll(filepath.Join(tempDir, "custom-managed"), 0750)
-				require.NoError(t, err)
-				err = os.MkdirAll(filepath.Join(tempDir, "custom-overlay"), 0750)
-				require.NoError(t, err)
-			},
-			validate: func(t *testing.T, tempDir string) {
-				// Check that files were generated in custom paths
-				terraformDir := filepath.Join(tempDir, "custom-managed", "terraform")
-				entries, err := os.ReadDir(terraformDir)
-				require.NoError(t, err)
-				assert.NotEmpty(t, entries)
-				_, err = os.Stat(filepath.Join(terraformDir, "stackit", "modules", "ske-cluster", "main.tf"))
-				require.NoError(t, err)
-
-				// Check overlay files were generated with cluster name
-				overlayDir := filepath.Join(tempDir, "custom-overlay")
-				entries, err = os.ReadDir(overlayDir)
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
 			},

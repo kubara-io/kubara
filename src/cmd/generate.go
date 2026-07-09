@@ -13,20 +13,16 @@ import (
 )
 
 type GenerateFlags struct {
-	Terraform          bool
-	Helm               bool
-	DryRun             bool
-	PlatformComponents string
-	PlatformConfigs    string
+	Terraform bool
+	Helm      bool
+	DryRun    bool
 }
 
 func NewGenerateFlags() *GenerateFlags {
 	return &GenerateFlags{
-		Terraform:          false,
-		Helm:               false,
-		DryRun:             false,
-		PlatformComponents: render.DefaultPlatformComponentsPath,
-		PlatformConfigs:    render.DefaultPlatformConfigsPath,
+		Terraform: false,
+		Helm:      false,
+		DryRun:    false,
 	}
 }
 
@@ -38,7 +34,7 @@ func NewGenerateCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "Generate files from catalog templates",
-		UsageText:   "kubara generate [--terraform|--helm] [--platform-components PATH --platform-configs PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
+		UsageText:   "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
 		Description: "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -63,11 +59,11 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 	if err != nil {
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
-	platformComponents, err := utils.GetFullPath(cmd.String("platform-components"), cwd)
+	platformComponents, err := utils.GetFullPath(render.DefaultPlatformComponentsPath, cwd)
 	if err != nil {
 		return nil, fmt.Errorf("get platform-components path: %w", err)
 	}
-	platformConfigs, err := utils.GetFullPath(cmd.String("platform-configs"), cwd)
+	platformConfigs, err := utils.GetFullPath(render.DefaultPlatformConfigsPath, cwd)
 	if err != nil {
 		return nil, fmt.Errorf("get platform-configs path: %w", err)
 	}
@@ -120,18 +116,6 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Preview generation without creating files",
 			Value:       flags.DryRun,
 			Destination: &flags.DryRun,
-		},
-		&cli.StringFlag{
-			Name:        "platform-components",
-			Usage:       "Path to the platform components directory.",
-			Value:       render.DefaultPlatformComponentsPath,
-			Destination: &flags.PlatformComponents,
-		},
-		&cli.StringFlag{
-			Name:        "platform-configs",
-			Usage:       "Path to platform configs directory.",
-			Value:       render.DefaultPlatformConfigsPath,
-			Destination: &flags.PlatformConfigs,
 		},
 	}
 
