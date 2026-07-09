@@ -171,7 +171,7 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 		return err
 	}
 
-	pattern := filepath.Join(cwd, "*", "*", clusterName)
+	pattern := filepath.Join(cwd, "customer-service-catalog", "*", clusterName)
 	matches, err := filepath.Glob(pattern)
 	if err != nil {
 		return fmt.Errorf("glob %q: %w", pattern, err)
@@ -226,14 +226,43 @@ func migrateV1Alpha2Files(cwd string, clusterName string) error {
 }
 
 func migrateLegacyValuesFiles(cwd string) (err error) {
-	root, err := os.OpenRoot(cwd)
+	for _, root := range []struct {
+		path             string
+		renameLegacyHelm bool
+	}{
+		{path: filepath.Join(cwd, "customer-service-catalog"), renameLegacyHelm: true},
+		{path: filepath.Join(cwd, "platform-configs")},
+		{path: filepath.Join(cwd, "managed-service-catalog")},
+		{path: filepath.Join(cwd, "platform-components")},
+	} {
+		info, statErr := os.Stat(root.path)
+		if os.IsNotExist(statErr) {
+			continue
+		}
+		if statErr != nil {
+			return fmt.Errorf("stat scoped migration root %q: %w", root.path, statErr)
+		}
+		if !info.IsDir() {
+			continue
+		}
+
+		if err := migrateLegacyValuesFilesInRoot(root.path, root.renameLegacyHelm); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func migrateLegacyValuesFilesInRoot(rootPath string, renameLegacyHelm bool) (err error) {
+	root, err := os.OpenRoot(rootPath)
 	if err != nil {
-		return fmt.Errorf("open root %q: %w", cwd, err)
+		return fmt.Errorf("open root %q: %w", rootPath, err)
 	}
 	defer func() {
 		closeErr := root.Close()
 		if err == nil && closeErr != nil {
-			err = fmt.Errorf("close root %q: %w", cwd, closeErr)
+			err = fmt.Errorf("close root %q: %w", rootPath, closeErr)
 		}
 	}()
 
@@ -241,7 +270,10 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 	var renameLegacyValues []string
 
 	if err := fs.WalkDir(root.FS(), ".", func(path string, entry fs.DirEntry, walkErr error) error {
-		if walkErr != nil || entry.IsDir() {
+		if walkErr != nil {
+			return walkErr
+		}
+		if entry.IsDir() {
 			return nil
 		}
 
@@ -249,15 +281,18 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 		case "additional-values.yaml":
 			renameAdditional = append(renameAdditional, path)
 		case "values.yaml":
+			if !renameLegacyHelm || !strings.HasPrefix(filepath.ToSlash(path), "helm/") {
+				return nil
+			}
 			serviceDir := filepath.Base(filepath.Dir(path))
-			if hasGeneratedValuesTemplate(cwd, serviceDir) {
+			if hasGeneratedValuesTemplate(serviceDir) {
 				renameLegacyValues = append(renameLegacyValues, path)
 			}
 		}
 
 		return nil
 	}); err != nil {
-		return fmt.Errorf("walk %q: %w", cwd, err)
+		return fmt.Errorf("walk %q: %w", rootPath, err)
 	}
 
 	for _, path := range renameAdditional {
@@ -270,14 +305,14 @@ func migrateLegacyValuesFiles(cwd string) (err error) {
 	for _, path := range renameLegacyValues {
 		newPath := filepath.Join(filepath.Dir(path), "values.generated.yaml")
 		if err := root.Rename(path, newPath); err != nil {
-			return fmt.Errorf("remove %q: %w", path, err)
+			return fmt.Errorf("rename %q: %w", path, err)
 		}
 	}
 
 	return nil
 }
 
-func hasGeneratedValuesTemplate(_ string, serviceDir string) bool {
+func hasGeneratedValuesTemplate(serviceDir string) bool {
 	tpltPath := filepath.ToSlash(filepath.Join("built-in", "platform-configs", "helm", serviceDir, "values.generated.yaml.tplt"))
 	_, err := fs.Stat(catalog.BuiltInFS(), tpltPath)
 	return err == nil

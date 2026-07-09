@@ -42,7 +42,7 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 	tempDir := t.TempDir()
 
 	customerHelmSource := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster", "argo-cd")
-	managedTerraformSource := filepath.Join(tempDir, "managed-service-catalog", "terraform", "test-cluster")
+	managedTerraformSource := filepath.Join(tempDir, "managed-service-catalog", "terraform", "stackit")
 	require.NoError(t, os.MkdirAll(customerHelmSource, 0o755))
 	require.NoError(t, os.MkdirAll(managedTerraformSource, 0o755))
 	require.NoError(t, os.WriteFile(filepath.Join(customerHelmSource, "values.yaml"), []byte("kind: values"), 0o644))
@@ -87,9 +87,44 @@ func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
 
 	assert.NoFileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "argo-cd", "values.yaml"))
 	assert.FileExists(t, filepath.Join(tempDir, "platform-configs", "test-cluster", "helm", "argo-cd", "values.generated.yaml"))
-	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "test-cluster", "terraform", "main.tf"))
+	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "stackit", "main.tf"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog"))
 	assert.NoDirExists(t, filepath.Join(tempDir, "managed-service-catalog"))
+}
+
+func TestMigrateLegacyValuesFilesScopesToKnownCatalogRoots(t *testing.T) {
+	tempDir := t.TempDir()
+
+	customerLegacyDir := filepath.Join(tempDir, "customer-service-catalog", "helm", "test-cluster", "argo-cd")
+	customerCurrentDir := filepath.Join(tempDir, "platform-configs", "helm", "test-cluster", "argo-cd")
+	managedLegacyDir := filepath.Join(tempDir, "managed-service-catalog", "helm", "argo-cd")
+	managedCurrentDir := filepath.Join(tempDir, "platform-components", "helm", "argo-cd")
+	unrelatedDir := filepath.Join(tempDir, "unrelated-project", "argo-cd")
+
+	require.NoError(t, os.MkdirAll(customerLegacyDir, 0o755))
+	require.NoError(t, os.MkdirAll(customerCurrentDir, 0o755))
+	require.NoError(t, os.MkdirAll(managedLegacyDir, 0o755))
+	require.NoError(t, os.MkdirAll(managedCurrentDir, 0o755))
+	require.NoError(t, os.MkdirAll(unrelatedDir, 0o755))
+
+	require.NoError(t, os.WriteFile(filepath.Join(customerLegacyDir, "values.yaml"), []byte("legacy customer"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(customerCurrentDir, "values.yaml"), []byte("current customer"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(managedLegacyDir, "values.yaml"), []byte("legacy managed"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(managedCurrentDir, "values.yaml"), []byte("current managed"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(unrelatedDir, "values.yaml"), []byte("outside scope"), 0o644))
+
+	require.NoError(t, migrateLegacyValuesFiles(tempDir))
+
+	assert.NoFileExists(t, filepath.Join(customerLegacyDir, "values.yaml"))
+	assert.FileExists(t, filepath.Join(customerLegacyDir, "values.generated.yaml"))
+	assert.FileExists(t, filepath.Join(customerCurrentDir, "values.yaml"))
+	assert.NoFileExists(t, filepath.Join(customerCurrentDir, "values.generated.yaml"))
+	assert.FileExists(t, filepath.Join(managedLegacyDir, "values.yaml"))
+	assert.NoFileExists(t, filepath.Join(managedLegacyDir, "values.generated.yaml"))
+	assert.FileExists(t, filepath.Join(managedCurrentDir, "values.yaml"))
+	assert.NoFileExists(t, filepath.Join(managedCurrentDir, "values.generated.yaml"))
+	assert.FileExists(t, filepath.Join(unrelatedDir, "values.yaml"))
+	assert.NoFileExists(t, filepath.Join(unrelatedDir, "values.generated.yaml"))
 }
 
 func TestMigrateV1Alpha2ClusterRejectsNonObjectRepos(t *testing.T) {
