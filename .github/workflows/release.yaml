@@ -95,7 +95,7 @@ jobs:
         run: |
           MANAGED=/tmp/gen/managed-service-catalog/helm \
           OUTPUT_FILE=/tmp/images.txt \
-            .scripts/image-version.sh
+            "$GITHUB_WORKSPACE"/.scripts/image-version.sh
           {
             echo "IMAGE_LIST<<EOF"
             sed 's/^/- `/' /tmp/images.txt | sed 's/$/ `/'
