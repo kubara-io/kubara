@@ -3,9 +3,6 @@
 # To customize values, you can add additional files named values-*.yaml to this directory.
 
 {{- $oauth2ProxyIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) }}
-{{- if (eq (index .cluster.services "metallb" "status") "enabled") }}
-{{- $_ := set $oauth2ProxyIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) }}
-{{- end }}
 {{- $oauth2ProxyIngressAnnotations = mergeOverwrite $oauth2ProxyIngressAnnotations (dig "cluster" "services" "oauth2-proxy" "networking" "annotations" (dict) .) }}
 
 namespace:

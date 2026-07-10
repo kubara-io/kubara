@@ -129,21 +129,14 @@ externalSecrets:
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
-{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . -}}
 {{- $certManagerIssuer := dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" . -}}
 {{- $argocdUserIngressAnnotations := dig "cluster" "services" "argocd" "networking" "annotations" (dict) . -}}
 {{- $argocdIngressGrpcAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
-{{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressGrpcAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) -}}
-{{- end -}}
 {{- $argocdIngressGrpcAnnotations = mergeOverwrite $argocdIngressGrpcAnnotations $argocdUserIngressAnnotations -}}
 
 {{- $argocdIngressAnnotations := dict "cert-manager.io/cluster-issuer" $certManagerIssuer -}}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) -}}
 {{- $_ := set $argocdIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd" -}}
-{{- end -}}
-{{- if (eq $metallbStatus "enabled") -}}
-{{- $_ := set $argocdIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) -}}
 {{- end -}}
 {{- $argocdIngressAnnotations = mergeOverwrite $argocdIngressAnnotations $argocdUserIngressAnnotations -}}
 

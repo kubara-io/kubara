@@ -4,11 +4,7 @@
 
 {{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . }}
 {{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . }}
-{{- $metallbStatus := dig "cluster" "services" "metallb" "status" "disabled" . }}
 {{- $kyvernoPolicyReporterIngressAnnotations := dict "cert-manager.io/cluster-issuer" (dig "cluster" "services" "cert-manager" "config" "clusterIssuer" "name" "letsencrypt-staging" .) }}
-{{- if (eq $metallbStatus "enabled") }}
-{{- $_ := set $kyvernoPolicyReporterIngressAnnotations "external-dns.alpha.kubernetes.io/target" (dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" .) }}
-{{- end }}
 {{- if (and (eq $oauth2ProxyStatus "enabled") (eq $traefikStatus "enabled")) }}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "traefik.ingress.kubernetes.io/router.middlewares" "oauth2-proxy-oauth-auth@kubernetescrd,\nkyverno-policy-reporter-strip-kyverno-prefix@kubernetescrd" }}
 {{- $_ := set $kyvernoPolicyReporterIngressAnnotations "traefik.ingress.kubernetes.io/app-root" "/kyverno/#/" }}

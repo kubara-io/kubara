@@ -66,6 +66,16 @@ external-dns:
   extraArgs:
     source:
       - traefik-proxy
+    {{- $publicLoadBalancerIP := dig "cluster" "services" "metallb" "config" "publicLoadBalancerIPs" "" . }}
+    {{- if $publicLoadBalancerIP }}
+    # The load balancer service holds a private address (e.g. a MetalLB pool
+    # IP) while the cluster is reached through a routed public IP. Publish that
+    # public IP for every record, overriding the private target the sources
+    # (ingress and traefik-proxy) would otherwise derive from the service.
+    default-targets:
+      - {{ $publicLoadBalancerIP }}
+    force-default-targets: true
+    {{- end }}
     webhook-provider-url: http://localhost:8080
   rbac:
     create: true
