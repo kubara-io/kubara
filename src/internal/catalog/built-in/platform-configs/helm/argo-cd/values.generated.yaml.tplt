@@ -204,7 +204,6 @@ argo-cd:
       rules:
         enabled: false
       serviceMonitor:
-        #  TODO: configmap.reloader.stakater.com/reload: "app-config" -- nur für Dex Server auf OIDC Secret
         {{- if (eq (index .cluster.services "kube-prometheus-stack" "status") "enabled") }}
         enabled: true
         {{- end }}
