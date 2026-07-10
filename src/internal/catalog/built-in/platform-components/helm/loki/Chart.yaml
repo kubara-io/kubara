@@ -3,7 +3,7 @@ apiVersion: v2
 name: loki
 description: Umbrella Chart for loki
 type: application
-version: 1.4.0
+version: 1.5.0
 dependencies:
   - name: template-library
     repository: file://../template-library

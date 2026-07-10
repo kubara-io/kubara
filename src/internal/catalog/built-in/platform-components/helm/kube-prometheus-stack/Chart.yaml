@@ -3,7 +3,7 @@ apiVersion: v2
 name: kube-prometheus-stack
 description: Umbrella Chart for kube-prometheus-stack
 type: application
-version: 2.2.0
+version: 2.3.0
 dependencies:
   - name: template-library
     repository: file://../template-library

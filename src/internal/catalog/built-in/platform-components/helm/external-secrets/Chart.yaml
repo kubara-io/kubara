@@ -3,7 +3,7 @@ apiVersion: v2
 name: externalSecrets
 description: Umbrella Chart for external-secrets
 type: application
-version: 0.12.0
+version: 0.13.0
 dependencies:
   - name: template-library
     repository: file://../template-library
