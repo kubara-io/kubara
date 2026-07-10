@@ -1283,6 +1283,17 @@ Store it in your secret backend (Vault/Secret Manager), for example:
 The config expects the kubeconfig to be reachable under:
 <cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>
 And the secret itself simply be named <code>kubeconfig</code>.</spoke-stage></spoke-name></cluster-stage></cluster-name></p>
+<p>By default kubara keeps the original client-certificate based Argo CD cluster config.
+If your kubeconfig should be used with bearer token auth in addition to the certificates, set
+<code>bootstrapValues.cluster[].authMethod: token</code> in your Argo CD values. Note that <code>authMethod</code> must be exactly <code>token</code> or <code>clientCertificate</code> (defaults to <code>clientCertificate</code>); any other value will trigger a template rendering error.</p>
+<p>If Argo CD should only manage selected namespaces on the spoke cluster, set <code>bootstrapValues.cluster[].namespaces</code> to the allowed list of namespaces in your Argo CD values (as a YAML list):</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">cluster</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">spoke-dev</span>
+<span class="w">      </span><span class="nt">namespaces</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team-a</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">team-b</span>
+</code></pre></div>
 <h2 id="4-prepare-external-secrets-credentials-on-the-spoke-cluster">4. Prepare external-secrets credentials on the spoke cluster</h2>
 <p>Create provider credentials as Kubernetes secret(s), for example:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># Bitwarden</span>
