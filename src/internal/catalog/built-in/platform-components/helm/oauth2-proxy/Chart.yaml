@@ -3,11 +3,11 @@ apiVersion: v2
 name: oauth2-proxy
 description: Umbrella Chart for oauth2-proxy
 type: application
-version: 0.8.0
+version: 0.9.0
 dependencies:
   - name: oauth2-proxy
     repository: https://oauth2-proxy.github.io/manifests
     version: 10.7.0
   - name: template-library
     repository: file://../template-library
-    version: 0.1.0
+    version: 0.2.0

@@ -3,4 +3,4 @@ apiVersion: v2
 name: template-library
 description: A library chart that provides templates for kubernetes resources.
 type: library
-version: 0.1.0
+version: 0.2.0
