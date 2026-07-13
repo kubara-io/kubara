@@ -56,6 +56,11 @@ module "ske_cluster" {
 
   ### kubeconfig
   expiration = var.expiration
+
+  # Destroy the cluster before the IAM service account. In-cluster workloads
+  # (external-dns, cert-manager, ...) keep requesting tokens with the SA key,
+  # so the service account must outlive the cluster on teardown.
+  depends_on = [module.iam]
 }
 
 locals {
@@ -126,5 +131,8 @@ module "edge_hosts" {
 
   nodes = var.edge_hosts.nodes
 
+  # Destroy the hosts (and the workloads they run) before the IAM service
+  # account, so the SA key is not removed while workloads still request tokens.
+  depends_on = [module.iam]
 }
 {{ end }}
