@@ -47,6 +47,7 @@ func fullServiceContext() map[string]any {
 				"backupStorage": map[string]any{"create": true, "region": "eu01"},
 			},
 		},
+		"reloader":                map[string]any{"status": "disabled"},
 	}
 }
 
@@ -69,6 +70,7 @@ func fullCatalogContext() map[string]any {
 			"metallb":                 map[string]any{"chartPath": "metallb"},
 			"longhorn":                map[string]any{"chartPath": "longhorn"},
 			"velero":                  map[string]any{"chartPath": "velero"},
+			"reloader":                  map[string]any{"chartPath": "reloader"},
 		},
 	}
 }

@@ -80,6 +80,7 @@ func newValidTestConfig() *Config {
 							"backupStorage": map[string]any{"create": true, "region": "eu01"},
 						},
 					},
+					"reloader":                {Status: service.StatusDisabled},
 				},
 			},
 		},
