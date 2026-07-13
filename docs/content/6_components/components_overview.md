@@ -16,10 +16,11 @@ More tools will be added in future releases of the kubara framework.
 
 ## 1. Application Management
 
-| Tool                                                                  | Description                                                                                          | Functionality                    | Key Features                                                                                 |
-|-----------------------------------------------------------------------| ---------------------------------------------------------------------------------------------------- | -------------------------------- | -------------------------------------------------------------------------------------------- |
-| <div style="width: 80px;">![Argo CD](../images/argocd-logo.png)</div> | Argo CD. GitOps-based tool for continuous deployment and synchronization of Kubernetes applications. | GitOps-based deployment and sync | - Git integration<br>- Rollbacks<br>- Real-time status monitoring<br>- Multi-cluster support |
-| <div style="width: 80px;">![Homer](../images/homer-dashboard-logo.png)</div> | Homer. Simple static dashboard to manage service links via YAML.                                     | Static link collection           | - Grouped links<br>- Easy configuration<br>- Quick navigation                                |
+| Tool                                                                         | Description                                                                                          | Functionality                        | Key Features                                                                                 |
+|------------------------------------------------------------------------------| ---------------------------------------------------------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------- |
+| <div style="width: 80px;">![Argo CD](../images/argocd-logo.png)</div>        | Argo CD. GitOps-based tool for continuous deployment and synchronization of Kubernetes applications. | GitOps-based deployment and sync     | - Git integration<br>- Rollbacks<br>- Real-time status monitoring<br>- Multi-cluster support |
+| <div style="width: 80px;">![Homer](../images/homer-dashboard-logo.png)</div> | Homer. Simple static dashboard to manage service links via YAML.                                     | Static link collection               | - Grouped links<br>- Easy configuration<br>- Quick navigation                                |
+| <div style="width: 80px;">![Reloader](../images/reloader-logo.png)</div>        | Reloader. A Kubernetes controller to watch changes in ConfigMap and Secrets and do rolling upgrades. | Restart on changed configMap/secret  | - Consistent deployments<br>- Easy configuration<br>                                         |
 
 ---
 
