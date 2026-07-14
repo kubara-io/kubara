@@ -1,0 +1,3266 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+        <link rel="canonical" href="https://docs.kubara.io/v0.12.0/3_infrastructure/stackit_edge_cloud/">
+      
+      
+        <link rel="prev" href="../stackit_ske/">
+      
+      
+        <link rel="next" href="../t-cloud-public/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../images/favicon.ico">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>STACKIT Edge Cloud - kubara - Docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+    
+    
+      <link rel="stylesheet" href="../../stylesheets/extra.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  <link rel="alternate" type="text/plain" title="LLM-friendly documentation index" href="../../llms.txt">
+</head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+<blockquote data-agent-docs-index="true" aria-hidden="true">
+  <h2>Documentation Index</h2>
+  <p>Fetch the complete documentation index at: <a href="../../llms.txt" tabindex="-1">../../llms.txt</a></p>
+  <p>Use this file to discover all available pages before exploring further.</p>
+</blockquote>
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#stackit-edge-cloud" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <div data-md-color-scheme="default" data-md-component="outdated" hidden>
+        
+          <aside class="md-banner md-banner--warning">
+            <div class="md-banner__inner md-grid md-typeset">
+              
+You're not viewing the latest stable version.
+<a href="../../..">
+    <strong>Click here to go to latest-stable.</strong>
+</a>
+
+            </div>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+          </aside>
+        
+      </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+      
+  <img src="../../images/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            kubara - Docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              STACKIT Edge Cloud
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m14.3 16-.7-2h-3.2l-.7 2H7.8L11 7h2l3.2 9zM20 8.69V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12zm-9.15 3.96h2.3L12 9z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: light)" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="(prefers-color-scheme: dark)" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to system preference"  type="radio" name="__palette" id="__palette_2">
+    
+      <label class="md-header__button md-icon" title="Switch to system preference" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kubara-io/kubara" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+      
+  <img src="../../images/logo.svg" alt="logo">
+
+    </a>
+    kubara - Docs
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kubara-io/kubara" title="Go to repository" class="md-source" data-md-component="source" target="_blank" rel="noopener">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M439.6 236.1 244 40.5c-5.4-5.5-12.8-8.5-20.4-8.5s-15 3-20.4 8.4L162.5 81l51.5 51.5c27.1-9.1 52.7 16.8 43.4 43.7l49.7 49.7c34.2-11.8 61.2 31 35.5 56.7-26.5 26.5-70.2-2.9-56-37.3L240.3 199v121.9c25.3 12.5 22.3 41.8 9.1 55-6.4 6.4-15.2 10.1-24.3 10.1s-17.8-3.6-24.3-10.1c-17.6-17.6-11.1-46.9 11.2-56v-123c-20.8-8.5-24.6-30.7-18.6-45L142.6 101 8.5 235.1C3 240.6 0 247.9 0 255.5s3 15 8.5 20.4l195.6 195.7c5.4 5.4 12.7 8.4 20.4 8.4s15-3 20.4-8.4l194.7-194.7c5.4-5.4 8.4-12.8 8.4-20.4s-3-15-8.4-20.4"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/quick_start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Prerequisites
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Bootstrapping
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/overview_core_concept/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Platform Engineering
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/catalogs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalogs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/catalog_distribution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog Distribution
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/catalog_templating/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Catalog Templating
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../2_concepts/scale_and_ha/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Scale and High Availability
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Infrastructure Presets
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Infrastructure Presets
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../kind/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    kind (local)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stackit_ske/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT SKE
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT Edge Cloud
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    STACKIT Edge Cloud
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-generate-terraform-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generate Terraform modules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-prepare-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Prepare environment variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-create-the-terraform-backend-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create the Terraform backend state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terraform-modules-for-the-kubara-edge-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terraform modules for the kubara Edge example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#single-node-bootstrap-and-network-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-node bootstrap and network planning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-ip-and-ip-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public IP and IP fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-step sequence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-step sequence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-create-the-edge-cloud-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Create the Edge Cloud instance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-generate-the-edge-image-artifact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Generate the Edge image artifact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-download-image-upload-it-to-stackit-and-create-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Download image, upload it to STACKIT, and create hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-create-the-edgecluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Create the EdgeCluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-export-the-cluster-kubeconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Export the cluster kubeconfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validate-api-schema-on-your-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate API schema on your instance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this order
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../t-cloud-public/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    T Cloud Public (Community)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Building Your Platform
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Building Your Platform
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../4_building_your_platform/add_spoke_cluster/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Spoke Cluster
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../4_building_your_platform/create_catalog/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to create a Catalog
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    SSO
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../4_building_your_platform/sso/add_sso/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../4_building_your_platform/sso/add_sso_examples/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    SSO Examples
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Workload Onboarding
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Workload Onboarding
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/add_app_project/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Project
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/add_app_repository/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add a Repository
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/add_appset/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an AppSet
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/add_application/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    How to add an Application
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Components (Built-in)
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Components (Built-in)
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/components_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/best_practices/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Best Practices
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/backup_and_recovery/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Backup & Recovery
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_4" id="__nav_7_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Network
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Network
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/network_external_dns/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ExternalDNS
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Security
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/security_certificates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Certificates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+    
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Observability
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_7_6">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Observability
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/observability_dashboards/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Dashboards
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/observability_metrics/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Metrics
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/observability_alerts/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Alerts
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/observability_logs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Logs
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Architecture
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../7_architecture/architecture_overview/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Architecture overview
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10_decisions/ADR/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../10_decisions/ADR-index/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    ADR-Index
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_9" id="__nav_9_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_9">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Community
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../8_community/community-n-support/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Community & Support
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md" class="md-nav__link" target="_blank" rel="noopener">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../8_community/maintainers/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Maintainers
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_10" id="__nav_10_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Reference
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_10">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Reference
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../1_getting_started/commands/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Commands
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../9_reference/release_cycle_and_updates/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Release Cycle & Updates
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../9_reference/known_issues/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Known Issues
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../9_reference/faq/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    FAQ
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md" class="md-nav__link" target="_blank" rel="noopener">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Code of Conduct
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/SECURITY.md" class="md-nav__link" target="_blank" rel="noopener">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Security
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license" class="md-nav__link" target="_blank" rel="noopener">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Docs License (CC BY 4.0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="https://github.com/kubara-io/kubara/blob/main/LICENSE" class="md-nav__link" target="_blank" rel="noopener">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Software License (Apache 2.0)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#1-generate-terraform-modules" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Generate Terraform modules
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#2-prepare-environment-variables" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Prepare environment variables
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#3-create-the-terraform-backend-state" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Create the Terraform backend state
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#terraform-modules-for-the-kubara-edge-example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Terraform modules for the kubara Edge example
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#single-node-bootstrap-and-network-planning" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Single-node bootstrap and network planning
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#public-ip-and-ip-fields" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Public IP and IP fields
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#step-by-step-sequence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Step-by-step sequence
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Step-by-step sequence">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#phase-1-create-the-edge-cloud-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 1: Create the Edge Cloud instance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-2-generate-the-edge-image-artifact" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 2: Generate the Edge image artifact
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-3-download-image-upload-it-to-stackit-and-create-hosts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 3: Download image, upload it to STACKIT, and create hosts
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-4-create-the-edgecluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 4: Create the EdgeCluster
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#phase-5-export-the-cluster-kubeconfig" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Phase 5: Export the cluster kubeconfig
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#validate-api-schema-on-your-instance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Validate API schema on your instance
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why-this-order" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why this order
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="stackit-edge-cloud">STACKIT Edge Cloud</h1>
+<p>This page combines the shared STACKIT Terraform bootstrap steps with the Edge Cloud-specific provisioning flow.</p>
+<div class="admonition warning">
+<p class="admonition-title">Beta support</p>
+<p>kubara's Edge Cloud provisioning path is currently beta and intentionally documents one example integration path.
+STACKIT Edge Cloud itself is also still a beta service and may only be available to selected customers.
+Expect provider APIs, service behavior, and the generated kubara examples to change.</p>
+</div>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>You will need access to the STACKIT API. Setup instructions are available in the <a href="https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs" target="_blank" rel="noopener">Terraform provider documentation</a> and <a href="https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/" target="_blank" rel="noopener">STACKIT Docs</a>.
+Make sure your created Service Account has Project Owner permissions.</p>
+</div>
+<p>Edge Cloud setups are usually highly individual.
+Some teams run only STACKIT VMs, some run only bare metal, and others use mixed environments (VM + bare metal, even across different clouds).</p>
+<p>kubara documents one possible integration path and examples, but your target setup may require different operational steps.</p>
+<p>STEC (STACKIT Edge Cloud) can be operated through UI, CLI, or API.
+All paths are valid:</p>
+<ul>
+<li>UI is often the fastest manual path for image and cluster creation.</li>
+<li>CLI/API with manifests is better for reproducibility and change history (for example in Git).</li>
+</ul>
+<p>For general STEC background, see the official <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/" target="_blank" rel="noopener">Edge Cloud overview</a>, <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/" target="_blank" rel="noopener">Authentication</a>, and <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-the-api/" target="_blank" rel="noopener">Using the API</a> guides.</p>
+<h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
+</code></pre></div>
+<p>Commit and push the generated files to your Git repository.</p>
+<h2 id="2-prepare-environment-variables">2. Prepare environment variables</h2>
+<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster-name&gt;/terraform
+cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
+</code></pre></div>
+<p>Set at least <code>STACKIT_SERVICE_ACCOUNT_KEY_PATH</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing.</p>
+<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
+<span class="c1"># or for PowerShell</span>
+<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
+<span class="c1"># . .\set-env.ps1</span>
+</code></pre></div>
+<h2 id="3-create-the-terraform-backend-state">3. Create the Terraform backend state</h2>
+<p>Then navigate to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
+</code></pre></div>
+<p>Run:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>plan
+terraform<span class="w"> </span>apply
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>plan
+tofu<span class="w"> </span>apply
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Use the output to configure Terraform backend credentials:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>You can set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again, or export them directly:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;&lt;credential_access_key from terraform output&gt;&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;credential_secret_access_key from terraform output&gt;&quot;</span>
+</code></pre></div>
+<h2 id="terraform-modules-for-the-kubara-edge-example">Terraform modules for the kubara Edge example</h2>
+<p>The generated Edge Terraform example intentionally creates only the following resources:</p>
+<ul>
+<li><code>edge_instance</code> creates a new Edge Cloud instance.</li>
+<li><code>edge_image</code> uploads one local image artifact to STACKIT.</li>
+<li><code>edge_hosts</code> creates the example STACKIT VM hosts and the required network resources, using the uploaded image from <code>edge_image</code>.</li>
+</ul>
+<p>If your Edge platform is already provisioned externally, you can skip Terraform Edge modules completely and continue with kubara Helm/GitOps workflows only.
+For example, this is common when you run bare metal, mixed VM/bare-metal environments, or hosts in another cloud.</p>
+<p><code>EdgeImage</code> and <code>EdgeCluster</code> resources are intentionally not part of the Terraform state in this setup.
+The examples use Kubernetes API manifests with <code>kubectl</code> because that is easy to automate and keep in Git, but you can also create and manage them manually through the Edge Cloud UI or with STEC CLI/API workflows.</p>
+<p>Important distinction:</p>
+<ul>
+<li>In STEC, <code>EdgeImage</code> defines how the Talos boot image should be built, including Talos version and system extensions.</li>
+<li>STEC then generates a downloadable image artifact and exposes it through <code>EdgeImage.status.artifactUrl</code>.</li>
+<li>Terraform does not use the <code>EdgeImage</code> object directly. Terraform <code>edge_image.local_file_path</code> must point to the downloaded local artifact file.</li>
+</ul>
+<p>Configure the generated Edge settings in:</p>
+<ul>
+<li><code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure/env.auto.tfvars</code></li>
+</ul>
+<h2 id="single-node-bootstrap-and-network-planning">Single-node bootstrap and network planning</h2>
+<p>The generated <code>edge_hosts.nodes</code> defaults to one control plane node as a bootstrap example.
+This is intentionally simple for initial rollout and troubleshooting.</p>
+<p>For production and multi-node topologies, design networking based on your environment:</p>
+<ul>
+<li>where hosts run (VMs, bare metal, mixed, multi-cloud)</li>
+<li>external reachability strategy (single public node, MetalLB VIP, provider-managed Network Load Balancer in front of the nodes, etc.)</li>
+<li>node-to-node traffic and return paths</li>
+</ul>
+<p>There is no one-size-fits-all edge network design.</p>
+<h2 id="public-ip-and-ip-fields">Public IP and IP fields</h2>
+<p>In this example, Terraform allocates public IPs for hosts when <code>edge_hosts.nodes[*].assign_public_ip = true</code>.
+You do not need to pre-enter a public IP for that path.</p>
+<p>Read assigned host public IPs after apply via:</p>
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>edge_host_metadata
+</code></pre></div>
+<p>Use the selected host public IP for DNS <code>A</code> records (for example your ingress hostname).</p>
+<p>For the STACKIT VM-based single-node example, set these values in the <code>metallb</code> service config in your <code>config.yaml</code> before running <code>kubara generate --helm</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="c1"># ...</span>
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">metallb</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="c1"># the STACKIT public IP assigned to the VM; generated ingress</span>
+<span class="w">          </span><span class="c1"># annotations use this as external-dns target</span>
+<span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;public-ip&gt;&quot;</span>
+<span class="w">          </span><span class="c1"># the private IP of the same VM on the STACKIT network; MetalLB</span>
+<span class="w">          </span><span class="c1"># allocates from this pool</span>
+<span class="w">          </span><span class="nt">loadBalancerAddressPool</span><span class="p">:</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;&lt;private-ip&gt;/32&quot;</span>
+</code></pre></div>
+<p>This works because the STACKIT public IP is routed/NATed to the selected VM, while MetalLB exposes the Kubernetes <code>LoadBalancer</code> service on the VM's private network address.
+Do not use this as a production multi-node ingress design. For multi-node setups, plan a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.</p>
+<h2 id="step-by-step-sequence">Step-by-step sequence</h2>
+<p>This flow cannot be a single normal <code>terraform apply</code> from an empty environment.
+The local image artifact is generated by STEC after the Edge Cloud instance exists, but Terraform needs that local artifact path before it can upload the image and create hosts.</p>
+<p>Before you start, go to:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure
+</code></pre></div>
+<h3 id="phase-1-create-the-edge-cloud-instance">Phase 1: Create the Edge Cloud instance</h3>
+<ol>
+<li>Configure <code>edge_instance</code> in <code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure/env.auto.tfvars</code>.
+   Terraform reads the available Edge Cloud plan from the STACKIT API.
+   STEC is currently beta; the generated module expects exactly one available plan for the project and fails if the API returns zero or multiple plans.</li>
+<li>Run <code>terraform init</code> and create only the Edge Cloud instance:</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Terraform</label><label for="__tabbed_3_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
+terraform<span class="w"> </span>apply<span class="w"> </span>-target<span class="o">=</span>module.edge_instance
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
+tofu<span class="w"> </span>apply<span class="w"> </span>-target<span class="o">=</span>module.edge_instance
+</code></pre></div>
+</div>
+</div>
+</div>
+<ol>
+<li>Save the generated short-lived Edge Cloud kubeconfig for the following <code>kubectl</code> steps:</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Terraform</label><label for="__tabbed_4_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>edge_kubeconfig<span class="w"> </span>&gt;<span class="w"> </span>edge-kubeconfig.yaml
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>edge-kubeconfig.yaml
+<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>edge_kubeconfig<span class="w"> </span>&gt;<span class="w"> </span>edge-kubeconfig.yaml
+chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>edge-kubeconfig.yaml
+<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="phase-2-generate-the-edge-image-artifact">Phase 2: Generate the Edge image artifact</h3>
+<ol>
+<li>Create an <code>EdgeImage</code> in your STEC instance and wait until it is <code>Ready</code>.</li>
+</ol>
+<p><code>EdgeImage</code> is the Kubernetes resource kind. The examples below use the <code>default</code> namespace, matching the STACKIT documentation.
+Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/creating-images/" target="_blank" rel="noopener">Creating images</a>.</p>
+<p>Before applying manifests, verify which Talos image versions are currently available in your STEC region:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">INSTANCE_REGION</span><span class="o">=</span><span class="s2">&quot;eu01&quot;</span>
+curl<span class="w"> </span>https://image-factory.edge.<span class="nv">$INSTANCE_REGION</span>.stackit.cloud/versions
+</code></pre></div>
+<p>Use one of the returned versions in <code>EdgeImage.spec.talosVersion</code>.
+If your kubara cluster will use Longhorn, include <code>siderolabs/iscsi-tools</code> and <code>siderolabs/util-linux-tools</code> in the <code>EdgeImage</code> system extensions.
+Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-extensions/" target="_blank" rel="noopener">Using extensions</a> and the <a href="https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/" target="_blank" rel="noopener">Longhorn Talos Linux support</a> documentation.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">UI</label><label for="__tabbed_5_2">kubectl</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>Open your STEC instance.</li>
+<li>Go to <code>Images</code>.</li>
+<li>Create a new image.</li>
+<li>Select the Talos image version you want to use.</li>
+<li>Add required system extensions, for example Longhorn-related extensions.</li>
+<li>Wait until the image is <code>Ready</code>.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>Save this as <code>edge-image.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge.stackit.cloud/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EdgeImage</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara-edge-image</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">schematic</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">customization:</span>
+<span class="w">      </span><span class="no">extraKernelArgs: []</span>
+<span class="w">      </span><span class="no">systemExtensions:</span>
+<span class="w">        </span><span class="no">officialExtensions:</span>
+<span class="w">          </span><span class="no">- siderolabs/iscsi-tools</span>
+<span class="w">          </span><span class="no">- siderolabs/util-linux-tools</span>
+<span class="w">    </span><span class="no">overlay: {}</span>
+<span class="w">  </span><span class="nt">talosVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.12.5-stackit.v1.7.1</span>
+</code></pre></div>
+<p>Apply it and wait until STEC has generated the artifacts.
+The <code>EdgeImage</code> reports readiness through the boolean <code>status.ready</code>
+field (it does not set a <code>Ready</code> condition, so <code>--for=condition=Ready</code>
+would never complete):</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>edge-image.yaml
+kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>EdgeImage/kubara-edge-image<span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.ready}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>--timeout<span class="o">=</span>60m
+</code></pre></div>
+<p>If you are not using Longhorn, keep only the extensions you actually need.</p>
+</div>
+</div>
+</div>
+<h3 id="phase-3-download-image-upload-it-to-stackit-and-create-hosts">Phase 3: Download image, upload it to STACKIT, and create hosts</h3>
+<p>Before Terraform can upload the image, you need a local raw image file for STACKIT Compute Engine.
+You can get it either through the Edge Cloud UI or through the Kubernetes API.</p>
+<ol>
+<li>Download the OpenStack/amd64 raw image artifact, unpack it locally, and set <code>edge_image.local_file_path</code>.</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">UI</label><label for="__tabbed_6_2">kubectl</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>Open your STEC instance.</li>
+<li>Go to <code>Images</code>.</li>
+<li>Select the Ready image.</li>
+<li>Click <code>Download</code>.</li>
+<li>Select the OpenStack/amd64 raw image artifact.</li>
+<li>Download the <code>.raw.xz</code> file.</li>
+<li>Unpack it locally:</li>
+</ol>
+<div class="highlight"><pre><span></span><code>mkdir<span class="w"> </span>-p<span class="w"> </span>edge-artifacts
+mv<span class="w"> </span>~/Downloads/openstack-amd64.raw.xz<span class="w"> </span>edge-artifacts/
+unxz<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
+ls<span class="w"> </span>edge-artifacts/openstack-amd64.raw
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="s2">&quot;kubara-edge-image&quot;</span>
+
+kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span><span class="s1">&#39;.status.artifacts&#39;</span>
+
+<span class="nv">IMAGE_URL</span><span class="o">=</span><span class="k">$(</span>
+<span class="w">  </span>kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.status.artifacts[] | select(.type == &quot;openstack&quot;) | .artifacts[] | select(.architecture == &quot;amd64&quot;) | .url&#39;</span>
+<span class="k">)</span>
+
+mkdir<span class="w"> </span>-p<span class="w"> </span>edge-artifacts
+curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_URL</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-o<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
+unxz<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
+ls<span class="w"> </span>edge-artifacts/openstack-amd64.raw
+</code></pre></div>
+<p>If the <code>yq</code> query returns an empty URL, inspect <code>.status.artifacts</code> and copy the OpenStack/amd64 <code>.raw.xz</code> URL manually.
+The exact artifact list can differ by STEC version and selected target platform.</p>
+</div>
+</div>
+</div>
+<p>Then set the unpacked path in <code>env.auto.tfvars</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">edge_image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="na">local_file_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;edge-artifacts/openstack-amd64.raw&quot;</span>
+<span class="c1">  # ...</span>
+<span class="p">}</span>
+</code></pre></div>
+<ol>
+<li>Configure <code>edge_hosts.nodes</code>.</li>
+<li>Run full apply. Terraform uploads the image and creates the configured STACKIT VM hosts and their network resources from that uploaded image:</li>
+</ol>
+<div class="tabbed-set tabbed-alternate" data-tabs="7:2"><input checked="checked" id="__tabbed_7_1" name="__tabbed_7" type="radio" /><input id="__tabbed_7_2" name="__tabbed_7" type="radio" /><div class="tabbed-labels"><label for="__tabbed_7_1">Terraform</label><label for="__tabbed_7_2">Tofu</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>apply
+terraform<span class="w"> </span>output<span class="w"> </span>edge_uploaded_image_id
+terraform<span class="w"> </span>output<span class="w"> </span>edge_host_metadata
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>apply
+tofu<span class="w"> </span>output<span class="w"> </span>edge_uploaded_image_id
+tofu<span class="w"> </span>output<span class="w"> </span>edge_host_metadata
+</code></pre></div>
+</div>
+</div>
+</div>
+<ol>
+<li>Wait until the booted hosts are visible as <code>EdgeHost</code> in STEC.</li>
+</ol>
+<h3 id="phase-4-create-the-edgecluster">Phase 4: Create the EdgeCluster</h3>
+<ol>
+<li>Create the <code>EdgeCluster</code> after the hosts are registered as <code>EdgeHost</code>.</li>
+</ol>
+<p>Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/creating-clusters/" target="_blank" rel="noopener">Creating clusters</a>.</p>
+<p><code>EdgeCluster</code> sets the Talos and Kubernetes versions for the cluster.
+Use a Talos version that is available in your STEC region and keep it aligned with <code>EdgeImage.spec.talosVersion</code> unless you intentionally want STEC to upgrade or downgrade during bootstrap.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="8:2"><input checked="checked" id="__tabbed_8_1" name="__tabbed_8" type="radio" /><input id="__tabbed_8_2" name="__tabbed_8" type="radio" /><div class="tabbed-labels"><label for="__tabbed_8_1">UI</label><label for="__tabbed_8_2">kubectl</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>Open your STEC instance.</li>
+<li>Go to <code>Clusters</code>.</li>
+<li>Create a new cluster.</li>
+<li>Select the registered hosts.</li>
+<li>Assign node roles, for example <code>controlplane</code> for the single-node bootstrap example.</li>
+<li>Select the Talos and Kubernetes versions.</li>
+<li>Create the cluster and wait until it is ready.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>First inspect registered hosts:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>EdgeHost<span class="w"> </span>--namespace<span class="w"> </span>default
+</code></pre></div>
+<p>Save this as <code>edge-cluster.yaml</code> and replace <code>&lt;edge-host-id-1&gt;</code> with the host ID from STEC:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge.stackit.cloud/v1alpha1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EdgeCluster</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara-cluster</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">nodes</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">edgeHost</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;edge-host-id-1&gt;</span>
+<span class="w">      </span><span class="nt">installDisk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/vda</span>
+<span class="w">      </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">controlplane</span>
+<span class="w">  </span><span class="nt">talos</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.12.5-stackit.v1.7.1</span>
+<span class="w">    </span><span class="nt">kubernetes</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.30.2</span>
+</code></pre></div>
+<p>Apply it:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>edge-cluster.yaml
+</code></pre></div>
+<p>This minimal example reflects the single-node bootstrap path.
+For production, add more control plane and worker nodes based on your network design.</p>
+</div>
+</div>
+</div>
+<h3 id="phase-5-export-the-cluster-kubeconfig">Phase 5: Export the cluster kubeconfig</h3>
+<ol>
+<li>Export the kubeconfig for the Kubernetes cluster created by <code>EdgeCluster</code>.</li>
+</ol>
+<p>This is not the same file as <code>edge_kubeconfig</code>.
+<code>edge_kubeconfig</code> is the STEC management kubeconfig used for <code>EdgeImage</code>, <code>EdgeHost</code>, and <code>EdgeCluster</code>.
+The cluster kubeconfig is used for the actual Kubernetes cluster and for the next kubara bootstrap steps.</p>
+<p>Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/managing-clusters/" target="_blank" rel="noopener">Managing clusters</a>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="9:2"><input checked="checked" id="__tabbed_9_1" name="__tabbed_9" type="radio" /><input id="__tabbed_9_2" name="__tabbed_9" type="radio" /><div class="tabbed-labels"><label for="__tabbed_9_1">UI</label><label for="__tabbed_9_2">kubectl</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<ol>
+<li>Open your STEC instance.</li>
+<li>Go to <code>Clusters</code>.</li>
+<li>Open the created cluster.</li>
+<li>Download the kubeconfig from the cluster details page.</li>
+<li>Save it locally, for example as <code>edge-cluster.kubeconfig.yaml</code>.</li>
+</ol>
+</div>
+<div class="tabbed-block">
+<p>Use the STEC management kubeconfig from Phase 1 and decode the generated cluster kubeconfig secret:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+
+<span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;kubara-cluster&quot;</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">-kubeconfig&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--namespace<span class="w"> </span>default<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.data.value&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml&quot;</span>
+</code></pre></div>
+<p>Then switch to the cluster kubeconfig and verify Kubernetes access:</p>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml&quot;</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>nodes
+kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--all-namespaces
+</code></pre></div>
+</div>
+</div>
+</div>
+<p>Use this cluster kubeconfig for the generic kubara bootstrap guide.</p>
+<h2 id="validate-api-schema-on-your-instance">Validate API schema on your instance</h2>
+<p><code>EdgeImage</code> and <code>EdgeCluster</code> schemas can evolve. Validate against your STEC instance before applying manifests:</p>
+<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>api-resources<span class="w"> </span>--api-group<span class="o">=</span>edge.stackit.cloud
+kubectl<span class="w"> </span>explain<span class="w"> </span>edgeimages.edge.stackit.cloud.spec
+kubectl<span class="w"> </span>explain<span class="w"> </span>edgeclusters.edge.stackit.cloud.spec
+</code></pre></div>
+<h2 id="why-this-order">Why this order</h2>
+<ul>
+<li>The Edge Cloud instance must exist before you can create <code>EdgeImage</code> in STEC.</li>
+<li>Terraform <code>edge_image</code> upload needs the downloaded local artifact path.</li>
+<li>Terraform <code>edge_hosts</code> uses the image uploaded by <code>edge_image</code>.</li>
+<li><code>EdgeCluster</code> should be created after hosts are registered as <code>EdgeHost</code>.</li>
+<li>The cluster kubeconfig is only available after STEC created the Kubernetes cluster.</li>
+<li>The generated Terraform example does not manage externally existing Edge instances, images, or hosts. If you already have those, skip this example infrastructure path and continue with the kubara Helm/GitOps workflow.</li>
+</ul>
+<p>Now continue with the generic <a href="../../1_getting_started/bootstrapping/#3-helm">Bootstrap Your Own Platform</a> guide, using the cluster kubeconfig from Phase 5.</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; kubara &middot; <a href="https://stackit.com/de/impressum?hidebanner=true" target="_blank" rel="noopener">Imprint</a> &middot; <a href="https://kubara.io/privacy/" target="_blank" rel="noopener">Privacy</a>
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
