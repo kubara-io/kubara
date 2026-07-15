@@ -49,4 +49,14 @@ apply_yaml_if_set KUBARA_KUBERNETES_VERSION  ".clusters[0].terraform.kubernetesV
 apply_yaml_if_set KUBARA_DNS_NAME            ".clusters[0].dnsName"
 apply_yaml_if_set KUBARA_DNS_NAME            ".clusters[0].terraform.dns.name"
 
+# Enable every catalog service to the image/vuln report and the release header cover all charts
+yq eval '(.clusters[0].services[] | .status) = "enabled"' -i "$CFG"
+
+# metalb, loki and velero need custom configs
+yq eval '.clusters[0].services.metallb.config.publicLoadBalancerIPs = "203.0.113.10"' -i "$CFG"
+yq eval '.clusters[0].services.metallb.config.loadBalancerAddressPool = ["203.0.113.0/24"]' -i "$CFG"
+yq eval '.clusters[0].storage.bucketNames.chunks = "loki"' -i "$CFG"
+
+yq eval '.clusters[0].services.velero.config.backupStorage.s3Url = "https://bucket.example.com"' -i "$CFG"
+
 log "✅ config.yaml updated"
