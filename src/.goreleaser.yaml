@@ -13,6 +13,9 @@ release:
   replace_existing_artifacts: true
   extra_files:
     - glob: licenses.csv
+  header: |
+    ## Container Images
+    {{ .Env.IMAGE_LIST }}
 changelog:
   use: git
   sort: asc
