@@ -1,3 +1,0 @@
-{{- range $key, $repo := (.Values.bootstrapValues).repositories }}
-{{- include "templateLibrary.externalSecrets.argocd.repository" $repo }}
-{{- end }}

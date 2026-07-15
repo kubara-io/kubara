@@ -1,3 +1,0 @@
-{{- range $key, $clusterItem := (.Values.bootstrapValues).cluster }}
-{{- include "templateLibrary.argocd.cluster" $clusterItem }}
-{{- end }}
