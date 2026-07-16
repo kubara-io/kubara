@@ -4,7 +4,7 @@ externalSecrets: {}
 dexRestarter:
   image: "alpine/kubectl:1.36.2"
   max_attempts: "20"
-  interval: "10"
+  interval: "10"  # in seconds
   secretName: "oauth2-credentials"
 defaultProject:
   name: default
