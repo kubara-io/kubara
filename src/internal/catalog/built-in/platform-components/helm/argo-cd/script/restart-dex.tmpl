@@ -1,7 +1,7 @@
 #!/bin/sh
 
 CHECK_INTERVAL={{- .Values.dexRestarter.interval }}     # Wait time between checks in seconds
-MAX_ATTEMPTS={{- .Values.dexRestarter.max_attempts }}   # Maximum number of checks before giving up
+MAX_ATTEMPTS={{- .Values.dexRestarter.maxAttempts }}    # Maximum number of checks before giving up
 
 echo "Checking if secret {{ .Values.dexRestarter.secretName }} exists in namespace {{ .Release.Namespace }}"
 

@@ -1,4 +1,4 @@
-{{ if .Values.externalSecrets }}
+{{ if .Values.dexRestarter.enabled }}
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -56,7 +56,7 @@ spec:
     spec:
       containers:
       - name: restart
-        image: "{{ .Values.dexRestarter.image }}"
+        image: "{{ .Values.dexRestarter.image.repository }}:{{ .Values.dexRestarter.image.tag}}"
         command: ["sh", "-c", "/script/restart-dex.sh"]
         volumeMounts:
         - name: config-volume

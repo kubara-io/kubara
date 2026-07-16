@@ -2,8 +2,11 @@
 namespace: {}
 externalSecrets: {}
 dexRestarter:
-  image: "alpine/kubectl:1.36.2"
-  max_attempts: "20"
+  enabled: true
+  image:
+    repository: "alpine/kubectl"
+    tag: "1.36.2"
+  maxAttempts: "30"
   interval: "10"  # in seconds
   secretName: "oauth2-credentials"
 defaultProject:
