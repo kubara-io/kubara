@@ -1,0 +1,34 @@
+#!/bin/sh
+
+CHECK_INTERVAL={{- .Values.dexRestarter.interval }}       # Seconds to wait between checks
+MAX_ATTEMPTS={{- .Values.dexRestarter.max_attempts }}   # Maximum number of checks before giving up
+
+echo "Checking if secret {{ .Values.dexRestarter.secretName }} exists in namespace {{ .Release.Namespace }}"
+
+attempt=1
+while [ $attempt -le $MAX_ATTEMPTS ]; do
+    echo "Attempt $attempt/$MAX_ATTEMPTS..."
+
+    kubectl get secret {{ .Values.dexRestarter.secretName }} -n {{ .Release.Namespace }}
+    READY_STATUS=$?
+    if [ $READY_STATUS -eq 0 ]; then
+        echo "Success: Secret has been created! Restarting dex server..."
+	kubectl rollout restart deployment/argocd-dex-server -n {{ .Release.Namespace }}
+        RESTART_STATUS=$?
+    	if [ $RESTART_STATUS -eq 0 ]; then
+	    echo "Restart successful"
+            exit 0
+        else
+            echo "Error restarting dex"
+            exit 1
+        fi
+    else
+        echo "Waiting for secret..."
+    fi
+
+    attempt=$((attempt + 1))
+    sleep $CHECK_INTERVAL
+done
+
+echo "Error: Timed out waiting for secret {{ .Values.dexRestarter.secretName }}."
+exit 1
