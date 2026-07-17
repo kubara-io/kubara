@@ -7,7 +7,7 @@ version: 1.0.0
 dependencies:
   - name: template-library
     repository: file://../template-library
-    version: 0.1.0
+    version: 0.2.0
   # https://docs.stakater.com/reloader/latest/
   - name: reloader
     repository: https://stakater.github.io/stakater-charts
