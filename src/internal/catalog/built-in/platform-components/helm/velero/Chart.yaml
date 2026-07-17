@@ -6,7 +6,7 @@ type: application
 version: 0.3.0
 dependencies:
   - name: velero
-    version: "12.1.0"
+    version: 12.1.0
     repository: https://vmware-tanzu.github.io/helm-charts
   - name: template-library
     repository: file://../template-library
