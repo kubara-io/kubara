@@ -61,6 +61,7 @@ type Cluster struct {
 
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
+	Catalogs  []string         `json:"catalogs" yaml:"catalogs" jsonschema:"title=Catalogs,description=Catalogs to be used by this cluster"`
 	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }
 

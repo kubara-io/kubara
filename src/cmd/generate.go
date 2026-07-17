@@ -81,7 +81,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 		DryRun:             flags.DryRun,
 		CWD:                cwd,
 		ConfigFilePath:     configFilePath,
-		CatalogPath:        catalogOptions.CatalogPath,
+		Catalogs:           catalogOptions.Catalogs,
 		CatalogOverwrite:   catalogOptions.Overwrite,
 		PlatformComponents: platformComponents,
 		PlatformConfigs:    platformConfigs,

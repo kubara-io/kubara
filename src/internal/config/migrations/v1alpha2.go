@@ -5,10 +5,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
-	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -313,7 +313,24 @@ func migrateLegacyValuesFilesInRoot(rootPath string, renameLegacyHelm bool) (err
 }
 
 func hasGeneratedValuesTemplate(serviceDir string) bool {
-	tpltPath := filepath.ToSlash(filepath.Join("built-in", "platform-configs", "helm", serviceDir, "values.generated.yaml.tplt"))
-	_, err := fs.Stat(catalog.BuiltInFS(), tpltPath)
-	return err == nil
+	legacyBuiltIn := []string{
+		"argocd",
+		"cert-manager",
+		"external-dns",
+		"external-secrets",
+		"kube-prometheus-stack",
+		"traefik",
+		"kyverno",
+		"kyverno-policies",
+		"kyverno-policy-reporter",
+		"loki",
+		"homer-dashboard",
+		"oauth2-proxy",
+		"metrics-server",
+		"metallb",
+		"longhorn",
+		"velero",
+		"reloader",
+	}
+	return slices.Contains(legacyBuiltIn, serviceDir)
 }

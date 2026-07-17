@@ -40,7 +40,7 @@ type Options struct {
 	ClusterName        string
 	WorkDir            string
 	ConfigFilePath     string
-	CatalogPath        string
+	Catalogs           []string
 	CatalogOverwrite   bool
 	LocalState         *LocalState
 }

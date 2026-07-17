@@ -191,7 +191,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		ClusterName:        clusterName,
 		WorkDir:            cwd,
 		ConfigFilePath:     configFilePath,
-		CatalogPath:        catalogOptions.CatalogPath,
+		Catalogs:           catalogOptions.Catalogs,
 		CatalogOverwrite:   catalogOptions.Overwrite,
 	}, nil
 }

@@ -10,43 +10,37 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-const builtInServicesDirectory = builtInRootDirectory + "/" + string(ServicesDirectory)
-
 type LoadOptions struct {
-	CatalogPath string
-	Overwrite   bool
-}
-
-func LoadBuiltIn() (Catalog, error) {
-	return loadFromFS(BuiltInFS(), builtInServicesDirectory)
+	Catalogs  []string
+	Overwrite bool
 }
 
 func Load(options LoadOptions) (Catalog, error) {
-	builtIn, err := LoadBuiltIn()
-	if err != nil {
-		return Catalog{}, fmt.Errorf("load built-in catalog: %w", err)
+	merged := Catalog{
+		Services: make(map[string]ServiceDefinition),
 	}
 
-	if strings.TrimSpace(options.CatalogPath) == "" {
-		return builtIn, nil
-	}
-
-	source, err := ResolveSource(options.CatalogPath)
-	if err != nil {
-		return Catalog{}, fmt.Errorf("resolve catalog source: %w", err)
-	}
-
-	external, err := loadFromFS(os.DirFS(source.ServicesPath), ".")
-	if err != nil {
-		return Catalog{}, fmt.Errorf("load external catalog from %q: %w", source.ServicesPath, err)
-	}
-
-	merged := builtIn.Clone()
-	for name, def := range external.Services {
-		if _, exists := merged.Services[name]; exists && !options.Overwrite {
-			return Catalog{}, fmt.Errorf("service definition %q already exists in built-in catalog", name)
+	for _, cat := range options.Catalogs {
+		if strings.TrimSpace(cat) == "" {
+			return Catalog{}, fmt.Errorf("catalog source is empty")
 		}
-		merged.Services[name] = def
+
+		source, err := ResolveSource(cat)
+		if err != nil {
+			return Catalog{}, fmt.Errorf("resolve catalog source: %w", err)
+		}
+
+		external, err := loadFromFS(os.DirFS(source.ServicesPath), ".")
+		if err != nil {
+			return Catalog{}, fmt.Errorf("load catalog from %q: %w", source.ServicesPath, err)
+		}
+
+		for name, def := range external.Services {
+			if _, exists := merged.Services[name]; exists && !options.Overwrite {
+				return Catalog{}, fmt.Errorf("service definition %q already exists in another catalog", name)
+			}
+			merged.Services[name] = def
+		}
 	}
 
 	return merged, nil

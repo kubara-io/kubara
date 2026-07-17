@@ -10,8 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-var testTemplatesFS = catalog.BuiltInFS()
-
 // helper function to setup test filesystem with correct root path
 func setupTestFS(_ *testing.T) func() {
 	originalFS := templatesFSNew

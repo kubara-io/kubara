@@ -31,8 +31,6 @@ const (
 	DefaultPlatformConfigsPath    string = "platform-configs"
 )
 
-var templatesFSNew fs.FS = catalog.BuiltInFS()
-
 var templateName = map[TemplateType]string{
 	Terraform: "terraform",
 	Helm:      "helm",
@@ -101,7 +99,7 @@ type TemplatePathPredicate func(path string) bool
 type TemplateOptions struct {
 	Type          TemplateType
 	Provider      string
-	CatalogPath   string
+	Catalogs      []string
 	Overwrite     bool
 	Data          any
 	PathPredicate TemplatePathPredicate
@@ -126,55 +124,26 @@ func (tt TemplateType) String() string {
 }
 
 func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
-	sources := []templateSource{{
-		name:     "built-in",
-		fsys:     templatesFSNew,
-		baseRoot: tmplRoot,
-	}}
+	sources := make([]templateSource, 0, len(options.Catalogs))
 
-	if strings.TrimSpace(options.CatalogPath) == "" {
-		return sources, nil
-	}
+	for _, cat := range options.Catalogs {
+		if strings.TrimSpace(cat) == "" {
+			return nil, fmt.Errorf("catalog source is empty")
+		}
 
-	source, err := catalog.ResolveSource(options.CatalogPath)
-	if err != nil {
-		return nil, fmt.Errorf("resolve external catalog source: %w", err)
-	}
-	external := templateSource{
-		name:     "external",
-		fsys:     os.DirFS(source.RootPath),
-		baseRoot: ".",
-		external: true,
-	}
-
-	hasTemplates, err := sourceHasTemplateRoots(external)
-	if err != nil {
-		return nil, err
-	}
-	if !hasTemplates {
-		return sources, nil
-	}
-
-	return append(sources, external), nil
-}
-
-func sourceHasTemplateRoots(source templateSource) (bool, error) {
-	roots := []string{DefaultPlatformConfigsPath, DefaultPlatformComponentsPath}
-	for _, root := range roots {
-		info, err := fs.Stat(source.fsys, root)
+		source, err := catalog.ResolveSource(cat)
 		if err != nil {
-			if errors.Is(err, fs.ErrNotExist) {
-				continue
-			}
-			return false, fmt.Errorf("stat %s template root %q: %w", source.name, root, err)
+			return nil, fmt.Errorf("resolve external catalog source: %w", err)
 		}
-		if !info.IsDir() {
-			return false, fmt.Errorf("%s template root %q is not a directory", source.name, root)
-		}
-		return true, nil
+		sources = append(sources, templateSource{
+			name:     cat,
+			fsys:     os.DirFS(source.RootPath),
+			baseRoot: ".",
+			external: true,
+		})
 	}
 
-	return false, nil
+	return sources, nil
 }
 
 func joinTemplateRoot(baseRoot string, elems ...string) string {

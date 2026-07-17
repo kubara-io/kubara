@@ -2,32 +2,35 @@ package catalog
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/kubara-io/kubara/internal/utils"
 )
 
-func ResolveLoadOptions(cwd, rawCatalogPath string, overwrite bool) (LoadOptions, error) {
-	if rawCatalogPath == "" {
-		return LoadOptions{
-			CatalogPath: "",
-			Overwrite:   overwrite,
-		}, nil
+func ResolveLoadOptions(cwd string, catalogs []string, overwrite bool) (LoadOptions, error) {
+	if len(catalogs) == 0 {
+		return LoadOptions{}, fmt.Errorf("no catalog provided")
 	}
 
-	if IsOCIReference(rawCatalogPath) {
-		return LoadOptions{
-			CatalogPath: rawCatalogPath,
-			Overwrite:   overwrite,
-		}, nil
-	}
+	resolvedCatalogs := make([]string, 0, len(catalogs))
+	for _, cat := range catalogs {
+		if strings.TrimSpace(cat) == "" {
+			return LoadOptions{}, fmt.Errorf("catalog source is empty")
+		}
 
-	absoluteCatalogPath, err := utils.GetFullPath(rawCatalogPath, cwd)
-	if err != nil {
-		return LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
+		if IsOCIReference(cat) {
+			resolvedCatalogs = append(resolvedCatalogs, cat)
+		} else {
+			absolutePath, err := utils.GetFullPath(cat, cwd)
+			if err != nil {
+				return LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
+			}
+			resolvedCatalogs = append(resolvedCatalogs, absolutePath)
+		}
 	}
 
 	return LoadOptions{
-		CatalogPath: absoluteCatalogPath,
-		Overwrite:   overwrite,
+		Catalogs:  resolvedCatalogs,
+		Overwrite: overwrite,
 	}, nil
 }

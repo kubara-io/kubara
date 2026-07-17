@@ -24,7 +24,7 @@ type Options struct {
 	DryRun             bool
 	CWD                string
 	ConfigFilePath     string
-	CatalogPath        string
+	Catalogs           []string
 	CatalogOverwrite   bool
 	PlatformComponents string
 	PlatformConfigs    string
@@ -256,8 +256,8 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	catalogOptions := catalog.LoadOptions{
-		CatalogPath: o.CatalogPath,
-		Overwrite:   o.CatalogOverwrite,
+		Catalogs:  o.Catalogs,
+		Overwrite: o.CatalogOverwrite,
 	}
 
 	cs := config.NewConfigStore(o.CWD, o.ConfigFilePath, catalogOptions)
@@ -315,7 +315,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 			render.TemplateOptions{
 				Type:          templateType,
 				Provider:      provider,
-				CatalogPath:   o.CatalogPath,
+				Catalogs:      o.Catalogs,
 				Overwrite:     o.CatalogOverwrite,
 				Data:          tmplContext,
 				PathPredicate: buildEnabledServiceTemplatePathPredicate(cluster, cat),

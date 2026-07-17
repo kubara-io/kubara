@@ -164,7 +164,7 @@ func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testin
 	}
 
 	_, err := NewClusterFromEnvWithCatalog(sampleEnvMap, catalog.LoadOptions{
-		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
+		Catalogs: []string{filepath.Join(t.TempDir(), "does-not-exist")},
 	})
 	require.Error(t, err)
 }

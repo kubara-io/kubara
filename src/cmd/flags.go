@@ -17,7 +17,7 @@ type GlobalFlags struct {
 	WorkDir            string
 	ConfigFilePath     string
 	EnvFilePath        string
-	CatalogPath        string
+	Catalogs           []string
 	CatalogOverwrite   bool
 	TestK8sConnection  bool
 	DocsOutputPath     string
@@ -118,11 +118,11 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 				TrimSpace: true,
 			},
 		},
-		&cli.StringFlag{
+		&cli.StringSliceFlag{
 			Name:        "catalog",
-			Value:       flags.CatalogPath,
+			Value:       flags.Catalogs,
 			Usage:       "Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
-			Destination: &flags.CatalogPath,
+			Destination: &flags.Catalogs,
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},
@@ -200,5 +200,5 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
-	return catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
+	return catalog.ResolveLoadOptions(cwd, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 }

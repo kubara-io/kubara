@@ -125,7 +125,7 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 // Helper function to deep copy a config
 func deepCopyConfig(c *Config) *Config {
 	newConfig := *c
-	newConfig.Clusters = make([]Cluster, len(c.Clusters))
+	newConfig.Clusters = make([]Cluster, 0, len(c.Clusters))
 	copy(newConfig.Clusters, c.Clusters)
 	return &newConfig
 }
