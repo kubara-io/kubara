@@ -242,13 +242,11 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 		if serviceName == "" {
 			return true
 		}
+		if catalog.IsBootstrapService(serviceName) {
+			return true
+		}
 
 		svc, ok := cluster.Services[serviceName]
-		// TODO(tuunit): ArgoCD should be a fixture of kubara like external-secrets as well and not part of the catalog services
-		// this needs to be refactored in the future
-		if serviceName == "argocd" {
-			return ok
-		}
 		return ok && svc.Status == service.StatusEnabled
 	}
 }

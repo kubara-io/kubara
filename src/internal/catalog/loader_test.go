@@ -24,8 +24,8 @@ func TestLoad_UsesBootstrapCatalogByDefault(t *testing.T) {
 	cat, err := Load(LoadOptions{BootstrapCatalog: bootstrapPath})
 	require.NoError(t, err)
 
-	assert.Contains(t, cat.Services, "argocd")
-	assert.Contains(t, cat.Services, "crds")
+	assert.Contains(t, cat.Services, "argo-cd")
+	assert.Contains(t, cat.Services, "bootstrap-crds")
 }
 
 func TestLoad_MergesGeneralCatalogAfterBootstrap(t *testing.T) {
@@ -37,7 +37,7 @@ func TestLoad_MergesGeneralCatalogAfterBootstrap(t *testing.T) {
 	})
 	require.NoError(t, err)
 
-	assert.Contains(t, cat.Services, "argocd")
-	assert.Contains(t, cat.Services, "crds")
+	assert.Contains(t, cat.Services, "argo-cd")
+	assert.Contains(t, cat.Services, "bootstrap-crds")
 	assert.Contains(t, cat.Services, "cert-manager")
 }

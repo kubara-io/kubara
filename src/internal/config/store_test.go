@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
@@ -53,8 +54,6 @@ func newValidTestConfig() *Config {
 					},
 				},
 				Services: service.Services{
-					"argocd":       {Status: service.StatusEnabled},
-					"crds":         {Status: service.StatusDisabled},
 					"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
 				},
 			},
@@ -610,7 +609,9 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	require.True(t, ok)
 
 	assert.Contains(t, properties, "cert-manager")
-	assert.Contains(t, properties, "argocd")
+	assert.NotContains(t, properties, "argocd")
+	assert.NotContains(t, properties, "argo-cd")
+	assert.NotContains(t, properties, "bootstrap-crds")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
@@ -630,7 +631,6 @@ clusters:
     catalogs:
       - %q
     services:
-      argocd: {}
       cert-manager:
         config:
           clusterIssuer:
@@ -652,11 +652,138 @@ clusters:
 	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
 }
 
+func TestConfigStore_LoadStripsBootstrapServicesFromV1Alpha4Clusters(t *testing.T) {
+	configYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: migrated-cluster
+    stage: dev
+    type: hub
+    dnsName: migrated.example.com
+    ingressClassName: traefik
+    catalogs:
+      - %q
+    argocd:
+      repo:
+        https:
+          configs:
+            url: "https://github.com/example/configs.git"
+            targetRevision: main
+          components:
+            url: "https://github.com/example/components.git"
+            targetRevision: main
+    services:
+      argo-cd:
+        status: enabled
+      bootstrap-crds:
+        status: disabled
+      cert-manager:
+        status: enabled
+        config:
+          clusterIssuer:
+            name: letsencrypt-prod
+            email: cert@example.com
+            server: https://acme-v02.api.letsencrypt.org/directory
+`, ConfigVersionV1Alpha4, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
+	require.NoError(t, cs.Load())
+
+	cluster := cs.GetConfig().Clusters[0]
+	assert.NotContains(t, cluster.Services, "argo-cd")
+	assert.NotContains(t, cluster.Services, "bootstrap-crds")
+	assert.Contains(t, cluster.Services, "cert-manager")
+
+	require.NoError(t, cs.SaveToFile())
+
+	savedBytes, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+
+	var savedConfig Config
+	require.NoError(t, yaml.Unmarshal(savedBytes, &savedConfig))
+	require.Len(t, savedConfig.Clusters, 1)
+	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
+	assert.NotContains(t, savedConfig.Clusters[0].Services, "bootstrap-crds")
+	assert.Contains(t, savedConfig.Clusters[0].Services, "cert-manager")
+}
+
+func TestConfigStore_LoadMigratesV1Alpha3AndPersistsGeneralCatalogAndBootstrapCleanup(t *testing.T) {
+	configYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: migrated-cluster
+    stage: dev
+    type: hub
+    dnsName: migrated.example.com
+    ingressClassName: traefik
+    argocd:
+      repo:
+        https:
+          configs:
+            url: "https://github.com/example/configs.git"
+            targetRevision: main
+          components:
+            url: "https://github.com/example/components.git"
+            targetRevision: main
+    services:
+      argocd:
+        status: enabled
+`, ConfigVersionV1Alpha3, *testBootstrapCatalogPtr())
+
+	configPath := filepath.Join(t.TempDir(), "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0o644))
+
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
+	cs.catalog = &catalog.Catalog{
+		Services: map[string]catalog.ServiceDefinition{
+			catalog.BootstrapServiceArgoCD: {
+				Spec: catalog.ServiceSpec{
+					ChartPath: "argo-cd",
+					Status:    service.StatusEnabled,
+				},
+			},
+			catalog.BootstrapServiceCRDs: {
+				Spec: catalog.ServiceSpec{
+					ChartPath: "bootstrap-crds",
+					Status:    service.StatusEnabled,
+				},
+			},
+		},
+	}
+
+	require.NoError(t, cs.Load())
+
+	cluster := cs.GetConfig().Clusters[0]
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.NotContains(t, cluster.Services, "argocd")
+	assert.NotContains(t, cluster.Services, "argo-cd")
+
+	savedBytes, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+
+	var savedConfig Config
+	require.NoError(t, yaml.Unmarshal(savedBytes, &savedConfig))
+	require.Equal(t, ConfigVersionV1Alpha4, savedConfig.Version)
+	require.Len(t, savedConfig.Clusters, 1)
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, savedConfig.Clusters[0].Catalogs)
+	assert.NotContains(t, savedConfig.Clusters[0].Services, "argocd")
+	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
+}
+
 func TestLoadAndValidate_TerraformProviderNoneDisablesTerraform(t *testing.T) {
-	configYAML := `
+	configYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
 clusters:
   - name: helm-only-cluster
     dnsName: helm-only.example.com
+    catalogs:
+      - %q
     terraform:
       provider: none
     argocd:
@@ -666,7 +793,7 @@ clusters:
             url: "https://github.com/customer/repo.git"
           components:
             url: "https://github.com/managed/repo.git"
-`
+`, ConfigVersionV1Alpha4, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")

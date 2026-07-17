@@ -63,6 +63,7 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 	if err != nil {
 		return nil, fmt.Errorf("load catalog: %w", err)
 	}
+	cat = cat.UserConfigurableServices()
 
 	services := make(service.Services, len(cat.Services))
 	for name, def := range cat.Services {

@@ -33,12 +33,12 @@ func TestBuildEnabledServiceTemplatePathPredicate_SkipsDisabledConfigsService(t 
 	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "loki", "values.generated.yaml.tplt")))
 }
 
-func TestBuildEnabledServiceTemplatePathPredicate_SkipsArgoCDConfigsWhenMissing(t *testing.T) {
+func TestBuildEnabledServiceTemplatePathPredicate_AlwaysIncludesBootstrapServiceTemplates(t *testing.T) {
 	predicate := buildEnabledServiceTemplatePathPredicate(
 		config.Cluster{},
 		catalog.Catalog{
 			Services: map[string]catalog.ServiceDefinition{
-				"argocd": {
+				"argo-cd": {
 					Spec: catalog.ServiceSpec{
 						ChartPath: "argo-cd",
 					},
@@ -47,5 +47,5 @@ func TestBuildEnabledServiceTemplatePathPredicate_SkipsArgoCDConfigsWhenMissing(
 		},
 	)
 
-	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
+	assert.True(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
 }

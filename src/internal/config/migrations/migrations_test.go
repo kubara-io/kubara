@@ -195,8 +195,16 @@ func TestMigrateV1Alpha2RepoKeepsCurrentKeys(t *testing.T) {
 func TestMigrateV1Alpha3Config(t *testing.T) {
 	config := map[string]any{
 		"version": ConfigVersionV1Alpha3,
+		"clusters": []any{
+			map[string]any{
+				"name": "test-cluster",
+			},
+		},
 	}
 
 	require.NoError(t, migrateV1Alpha3Config(config))
 	assert.Equal(t, ConfigVersionV1Alpha4, config["version"])
+
+	cluster := config["clusters"].([]any)[0].(map[string]any)
+	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.0.0"}, cluster["catalogs"])
 }

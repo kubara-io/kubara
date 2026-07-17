@@ -12,6 +12,7 @@ import (
 )
 
 const DefaultBootstrapCatalog = "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0"
+const DefaultGeneralCatalog = "oci://ghcr.io/kubara-io/catalogs/general:1.0.0"
 
 // Adheres to RFC 1123 and kubernetes conventions
 // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/

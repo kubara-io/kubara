@@ -41,7 +41,6 @@ func testTemplateCatalogs() []string {
 
 func fullServiceContext() map[string]any {
 	return map[string]any{
-		"argocd":       map[string]any{"status": "enabled"},
 		"cert-manager": map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 	}
 }
@@ -49,9 +48,9 @@ func fullServiceContext() map[string]any {
 func fullCatalogContext() map[string]any {
 	return map[string]any{
 		"services": map[string]any{
-			"argocd":       map[string]any{"chartPath": "argo-cd"},
-			"cert-manager": map[string]any{"chartPath": "cert-manager"},
-			"crds":         map[string]any{"chartPath": "crds"},
+			"argo-cd":        map[string]any{"chartPath": "argo-cd"},
+			"bootstrap-crds": map[string]any{"chartPath": "bootstrap-crds"},
+			"cert-manager":   map[string]any{"chartPath": "cert-manager"},
 		},
 	}
 }

@@ -102,6 +102,8 @@ func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]a
 }
 
 func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
+	cat = cat.UserConfigurableServices()
+
 	r := jsonschema.Reflector{
 		RequiredFromJSONSchemaTags: true,
 		ExpandedStruct:             true,
@@ -468,8 +470,22 @@ func (cs *ConfigStore) ApplyServiceCatalogDefaults() error {
 	if err != nil {
 		return err
 	}
+	cat = cat.UserConfigurableServices()
 
-	for i, cluster := range cs.config.Clusters {
+	for i := range cs.config.Clusters {
+		normalizedServices, err := normalizeServiceNames(cs.config.Clusters[i].Services)
+		if err != nil {
+			return fmt.Errorf("normalize services for cluster %q: %w", cs.config.Clusters[i].Name, err)
+		}
+		cs.config.Clusters[i].Services = normalizedServices
+
+		for name := range cs.config.Clusters[i].Services {
+			if catalog.IsBootstrapService(name) {
+				delete(cs.config.Clusters[i].Services, name)
+			}
+		}
+
+		cluster := cs.config.Clusters[i]
 		if cluster.Services == nil {
 			cluster.Services = make(service.Services, len(cat.Services))
 		}
@@ -524,4 +540,25 @@ func (cs *ConfigStore) ApplyServiceCatalogDefaults() error {
 	}
 
 	return nil
+}
+
+func normalizeServiceNames(services service.Services) (service.Services, error) {
+	if services == nil {
+		return nil, nil
+	}
+
+	normalized := make(service.Services, len(services))
+	sourceByCanonical := make(map[string]string, len(services))
+
+	for originalName, cfg := range services {
+		canonicalName := catalog.CanonicalServiceName(originalName)
+		if previousName, exists := sourceByCanonical[canonicalName]; exists {
+			return nil, fmt.Errorf("services has conflicting keys %q and %q for canonical service %q", previousName, originalName, canonicalName)
+		}
+
+		normalized[canonicalName] = cfg
+		sourceByCanonical[canonicalName] = originalName
+	}
+
+	return normalized, nil
 }

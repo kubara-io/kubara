@@ -113,11 +113,11 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("resolve bootstrap catalog source: %w", err)
 	}
 
-	argocdChartPath, err := chartPathForService(opts.Catalog, "argocd")
+	argocdChartPath, err := chartPathForService(opts.Catalog, catalog.BootstrapServiceArgoCD)
 	if err != nil {
 		return err
 	}
-	crdsChartPath, err := chartPathForService(opts.Catalog, "crds")
+	crdsChartPath, err := chartPathForService(opts.Catalog, catalog.BootstrapServiceCRDs)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 	// Construct bootstrapCharts structs
 	bootstrapCharts := []BootstrapChart{
 		{
-			Name:            "argocd",
+			Name:            catalog.BootstrapServiceArgoCD,
 			Namespace:       argocdNamespace,
 			Path:            filepath.Join(bootstrapSource.RootPath, "helm", argocdChartPath),
 			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
@@ -135,17 +135,17 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			EnsureCRD:       true,
 		},
 		{
-			Name:            "crds",
-			Path:            filepath.Join(bootstrapSource.RootPath, "helm", crdsChartPath),
-			Enabled:         true,
-			EnsureCRD:       true,
+			Name:      catalog.BootstrapServiceCRDs,
+			Path:      filepath.Join(bootstrapSource.RootPath, "helm", crdsChartPath),
+			Enabled:   true,
+			EnsureCRD: true,
 		},
 	}
 
 	// Locate ArgoChart for later use
 	var argoChart BootstrapChart
 	for _, c := range bootstrapCharts {
-		if c.Name == "argocd" {
+		if c.Name == catalog.BootstrapServiceArgoCD {
 			argoChart = c
 			break
 		}

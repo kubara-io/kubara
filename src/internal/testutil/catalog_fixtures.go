@@ -25,17 +25,17 @@ func CreateCatalogFixtures(root string) (string, string, error) {
 
 func writeBootstrapCatalog(root string) error {
 	files := map[string]string{
-		"Catalog.yaml":         catalogManifestYAML("bootstrap", "1.0.0"),
-		"services/argocd.yaml": serviceDefinitionYAML("argocd", "argo-cd", "disabled", ""),
-		"services/crds.yaml":   serviceDefinitionYAML("crds", "crds", "disabled", ""),
-		"platform-components/helm/argo-cd/Chart.yaml.tplt":         "{{ if not .cluster }}{{ fail \"missing cluster\" }}{{ end }}\napiVersion: v2\nname: argocd\nversion: 0.1.0\n",
-		"platform-components/helm/crds/Chart.yaml.tplt":            "apiVersion: v2\nname: crds\nversion: 0.1.0\n",
-		"platform-components/helm/argo-cd/README.md":               "bootstrap chart\n",
-		"platform-configs/helm/argo-cd/values.generated.yaml.tplt": "server: {}\n",
-		"platform-configs/helm/crds/values.generated.yaml.tplt":    "{}\n",
-		"platform-components/terraform/stackit/.keep.tplt":         "# keep\n",
-		"platform-configs/terraform/stackit/.keep.tplt":            "# keep\n",
-		"platform-components/terraform/images/public-cloud-0.png":  "png\n",
+		"Catalog.yaml":          catalogManifestYAML("bootstrap", "1.0.0"),
+		"services/argo-cd.yaml": serviceDefinitionYAML("argo-cd", "argo-cd", "enabled", ""),
+		"services/crds.yaml":    serviceDefinitionYAML("bootstrap-crds", "bootstrap-crds", "enabled", ""),
+		"platform-components/helm/argo-cd/Chart.yaml.tplt":                "{{ if not .cluster }}{{ fail \"missing cluster\" }}{{ end }}\napiVersion: v2\nname: argocd\nversion: 0.1.0\n",
+		"platform-components/helm/bootstrap-crds/Chart.yaml.tplt":         "apiVersion: v2\nname: crds\nversion: 0.1.0\n",
+		"platform-components/helm/argo-cd/README.md":                      "bootstrap chart\n",
+		"platform-configs/helm/argo-cd/values.generated.yaml.tplt":        "server: {}\n",
+		"platform-configs/helm/bootstrap-crds/values.generated.yaml.tplt": "{}\n",
+		"platform-components/terraform/stackit/.keep.tplt":                "# keep\n",
+		"platform-configs/terraform/stackit/.keep.tplt":                   "# keep\n",
+		"platform-components/terraform/images/public-cloud-0.png":         "png\n",
 	}
 
 	return writeFixtureFiles(root, files)

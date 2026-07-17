@@ -39,7 +39,6 @@ func init() {
 
 func CreateTestServices() service.Services {
 	return service.Services{
-		"argocd":       {Status: service.StatusEnabled},
 		"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 	}
 }
