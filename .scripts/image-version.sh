@@ -11,7 +11,8 @@ MANAGED="${MANAGED:-${PWD}/platform-components/helm}"
 CONFIG_FILE="${CONFIG_FILE:-config.yaml}"
 CLUSTER_NAME="$(yq -r '.clusters[0].name' "$CONFIG_FILE")"
 CONFIGS="${CONFIGS:-platform-configs/${CLUSTER_NAME}/helm}"
-OUTPUT_FILE="${OUTPUT_FILE:-}"
+IMAGE_OUTPUT_FILE="${IMAGE_OUTPUT_FILE:-}"
+HELM_IMAGE_OUTPUT_FILE="${HELM_IMAGE_OUTPUT_FILE:-}"
 
 [[ -f "$CONFIG_FILE" ]] || { echo "::error::Missing $CONFIG_FILE — run 'kubara generate' first (or cd into its output)"; exit 1; }
 [[ -d "$MANAGED" ]]     || { echo "::error::Missing $MANAGED — run 'kubara generate' first"; exit 1; }
@@ -77,8 +78,18 @@ echo "Done Rendering!"
 [[ -n "$IMAGES" ]] || { echo "::warning::No image references found"; exit 0; }
 
 echo "$IMAGES"
+echo "Extracting Helm Dependencies"
+HELM_IMAGES="$(find . -name Chart.yaml -exec yq '.dependencies[] | select(.name != "template-library") | .name + ": " + .version' {} \;)"
+echo "$HELM_IMAGES"
 
-if [[ -n "$OUTPUT_FILE" ]]; then
-    echo "$IMAGES" > "$OUTPUT_FILE"
-    echo "::notice::Image list written to $OUTPUT_FILE"
+[[ -n "$HELM_IMAGES" ]] || { echo "::warning::No helm image references found"; exit 0; }
+
+if [[ -n "$IMAGE_OUTPUT_FILE" ]]; then
+    echo "$IMAGES" > "$IMAGE_OUTPUT_FILE"
+    echo "::notice::Image list written to $IMAGE_OUTPUT_FILE"
+fi
+
+if [[ -n "$HELM_IMAGE_OUTPUT_FILE" ]]; then
+    echo "$HELM_IMAGES" > "$HELM_IMAGE_OUTPUT_FILE"
+    echo "::notice:: Helm Image list written to $HELM_IMAGE_OUTPUT_FILE"
 fi
