@@ -84,27 +84,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 					},
 				},
 			},
-			"external-dns":            {Status: service.StatusEnabled},
-			"external-secrets":        {Status: service.StatusEnabled},
-			"kube-prometheus-stack":   {Status: service.StatusEnabled},
-			"traefik":                 {Status: service.StatusEnabled},
-			"kyverno":                 {Status: service.StatusEnabled},
-			"kyverno-policies":        {Status: service.StatusEnabled},
-			"kyverno-policy-reporter": {Status: service.StatusEnabled},
-			"loki":                    {Status: service.StatusEnabled},
-			"homer-dashboard":         {Status: service.StatusEnabled},
-			"oauth2-proxy":            {Status: service.StatusEnabled},
-			"metrics-server":          {Status: service.StatusDisabled},
-			"metallb":                 {Status: service.StatusDisabled},
-			"longhorn":                {Status: service.StatusDisabled},
-			"velero": {
-				Status: service.StatusDisabled,
-				Config: service.Config{
-					"backupMode":    "fs-backup",
-					"backupStorage": map[string]any{"create": true, "region": "eu01"},
-				},
-			},
-			"reloader": {Status: service.StatusDisabled},
+			"crds": {Status: service.StatusDisabled},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
@@ -149,7 +129,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewClusterFromEnvWithCatalog(tt.args.e, catalog.LoadOptions{})
+			got, err := NewClusterFromEnvWithCatalog(tt.args.e, testCatalogLoadOptions())
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})

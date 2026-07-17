@@ -11,6 +11,8 @@ import (
 	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 )
 
+const DefaultBootstrapCatalog = "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0"
+
 // Adheres to RFC 1123 and kubernetes conventions
 // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
 var RFC1123Label = regexp.MustCompile(

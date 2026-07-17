@@ -28,8 +28,6 @@ type Options struct {
 	Kubeconfig         string
 	PlatformComponents string
 	PlatformConfigs    string
-	WithES             bool
-	WithProm           bool
 	Local              bool
 	WithESCSSPath      string
 	EnvMap             *envconfig.EnvMap
@@ -43,6 +41,7 @@ type Options struct {
 	Catalogs           []string
 	CatalogOverwrite   bool
 	LocalState         *LocalState
+	BootstrapCatalog   string
 }
 
 type BootstrapChart struct {
@@ -109,15 +108,16 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("create kubernetes client: %w", err)
 	}
 
+	bootstrapSource, err := catalog.ResolveSource(opts.BootstrapCatalog)
+	if err != nil {
+		return fmt.Errorf("resolve bootstrap catalog source: %w", err)
+	}
+
 	argocdChartPath, err := chartPathForService(opts.Catalog, "argocd")
 	if err != nil {
 		return err
 	}
-	externalSecretsChartPath, err := chartPathForService(opts.Catalog, "external-secrets")
-	if err != nil {
-		return err
-	}
-	prometheusChartPath, err := chartPathForService(opts.Catalog, "kube-prometheus-stack")
+	crdsChartPath, err := chartPathForService(opts.Catalog, "crds")
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		{
 			Name:            "argocd",
 			Namespace:       argocdNamespace,
-			Path:            filepath.Join(opts.PlatformComponents, "helm", argocdChartPath),
+			Path:            filepath.Join(bootstrapSource.RootPath, "helm", argocdChartPath),
 			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
 			RepoURL:         "https://argoproj.github.io/argo-helm",
 			Enabled:         true,
@@ -135,23 +135,10 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 			EnsureCRD:       true,
 		},
 		{
-			Name:            "external-secrets",
-			Namespace:       externalSecretsNamespace,
-			Path:            filepath.Join(opts.PlatformComponents, "helm", externalSecretsChartPath),
-			OverlayValues:   overlayValuesForChart(opts, externalSecretsChartPath),
-			RepoURL:         "https://charts.external-secrets.io",
-			Enabled:         opts.WithES,
-			EnsureNamespace: opts.WithES,
-			EnsureCRD:       opts.WithES,
-		},
-		{
-			Name:            "kube-prometheus-stack",
-			Path:            filepath.Join(opts.PlatformComponents, "helm", prometheusChartPath),
-			OverlayValues:   overlayValuesForChart(opts, prometheusChartPath),
-			RepoURL:         "https://prometheus-community.github.io/helm-charts",
-			Enabled:         opts.WithProm,
-			EnsureNamespace: false,
-			EnsureCRD:       opts.WithProm,
+			Name:            "crds",
+			Path:            filepath.Join(bootstrapSource.RootPath, "helm", crdsChartPath),
+			Enabled:         true,
+			EnsureCRD:       true,
 		},
 	}
 

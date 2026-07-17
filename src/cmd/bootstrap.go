@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
@@ -19,8 +20,6 @@ import (
 )
 
 type BootstrapFlags struct {
-	WithES                 bool
-	WithProm               bool
 	Local                  bool
 	ClusterSecretStorePath string
 	PlatformComponentsPath string
@@ -33,8 +32,6 @@ type BootstrapFlags struct {
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		WithES:        true,
-		WithProm:      true,
 		EnvFile:       ".env",
 		EnvPrefixFlag: "KUBARA_",
 		Timeout:       2 * time.Minute,
@@ -49,7 +46,7 @@ func NewBootstrapCmd() *cli.Command {
 		Usage:       "Bootstrap Argo CD onto a cluster",
 		UsageText:   "kubara bootstrap CLUSTER_NAME [--local]",
 		ArgsUsage:   "CLUSTER_NAME",
-		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
+		Description: "Bootstraps Argo CD onto the specified cluster. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
@@ -165,9 +162,14 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	catalog, err := cs.GetCatalog()
+	loadedCatalog, err := cs.GetCatalog()
 	if err != nil {
 		return nil, fmt.Errorf("load catalog: %w", err)
+	}
+
+	bootstrapCatalog := catalog.DefaultBootstrapCatalog
+	if cs.GetConfig() != nil && cs.GetConfig().BootstrapCatalog != nil {
+		bootstrapCatalog = *cs.GetConfig().BootstrapCatalog
 	}
 
 	timeout := flags.Timeout
@@ -179,12 +181,10 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		Kubeconfig:         kubeconf,
 		PlatformComponents: componentsAbsPath,
 		PlatformConfigs:    configsAbsPath,
-		WithES:             flags.WithES,
-		WithProm:           flags.WithProm,
 		Local:              flags.Local,
 		WithESCSSPath:      cssAbsPath,
 		EnvMap:             envMap,
-		Catalog:            catalog,
+		Catalog:            loadedCatalog,
 		ClusterConfig:      clusterConfig,
 		DryRun:             flags.DryRun,
 		Timeout:            timeout,
@@ -193,6 +193,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		ConfigFilePath:     configFilePath,
 		Catalogs:           catalogOptions.Catalogs,
 		CatalogOverwrite:   catalogOptions.Overwrite,
+		BootstrapCatalog:   bootstrapCatalog,
 	}, nil
 }
 
@@ -204,16 +205,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Value:       false,
 			Usage:       "Run with dry-run",
 			Destination: &flags.DryRun,
-		},
-		&cli.BoolFlag{
-			Name:        "with-es-crds",
-			Usage:       "Also install external-secrets",
-			Destination: &flags.WithES,
-		},
-		&cli.BoolFlag{
-			Name:        "with-prometheus-crds",
-			Usage:       "Also install kube-prometheus-stack",
-			Destination: &flags.WithProm,
 		},
 		&cli.BoolFlag{
 			Name:        "local",

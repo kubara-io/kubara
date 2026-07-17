@@ -7,9 +7,26 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func seedBootstrapCatalogCache(t *testing.T, tempDir string) {
+	t.Helper()
+
+	t.Setenv("HOME", tempDir)
+
+	bootstrapPath, _, err := internaltestutil.CreateCatalogFixtures(filepath.Join(tempDir, "catalogs"))
+	require.NoError(t, err)
+
+	_, err = catalog.PackageCatalog(catalog.PackageOptions{
+		CatalogRoot:   bootstrapPath,
+		ReferenceBase: "oci://ghcr.io/kubara-io/catalogs/",
+	})
+	require.NoError(t, err)
+}
 
 func TestNewSchemaFlags(t *testing.T) {
 	t.Parallel()
@@ -141,7 +158,7 @@ spec:
 `), 0644))
 			},
 			wantErr:     true,
-			errContains: "already exists in built-in catalog",
+			errContains: "already exists in another catalog",
 		},
 		{
 			name: "catalog collision succeeds with catalog-overwrite",
@@ -174,6 +191,7 @@ spec:
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			seedBootstrapCatalogCache(t, tempDir)
 
 			globalFlags := []string{
 				"--work-dir", tempDir,

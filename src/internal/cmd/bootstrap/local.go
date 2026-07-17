@@ -184,8 +184,6 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 		return err
 	}
 
-	opts.WithES = true
-	opts.WithProm = true
 	opts.WithESCSSPath = state.ClusterSecretStorePath
 	opts.ClusterConfig.DNSName = state.BaseHost
 

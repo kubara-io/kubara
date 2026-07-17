@@ -11,8 +11,9 @@ import (
 )
 
 type LoadOptions struct {
-	Catalogs  []string
-	Overwrite bool
+	BootstrapCatalog string
+	Catalogs         []string
+	Overwrite        bool
 }
 
 func Load(options LoadOptions) (Catalog, error) {
@@ -20,19 +21,28 @@ func Load(options LoadOptions) (Catalog, error) {
 		Services: make(map[string]ServiceDefinition),
 	}
 
+	bootstrapCatalog := strings.TrimSpace(options.BootstrapCatalog)
+	if bootstrapCatalog == "" {
+		bootstrapCatalog = DefaultBootstrapCatalog
+	}
+
+	bootstrap, err := loadCatalogSource(bootstrapCatalog)
+	if err != nil {
+		return Catalog{}, fmt.Errorf("load bootstrap catalog: %w", err)
+	}
+
+	for name, def := range bootstrap.Services {
+		merged.Services[name] = def
+	}
+
 	for _, cat := range options.Catalogs {
 		if strings.TrimSpace(cat) == "" {
 			return Catalog{}, fmt.Errorf("catalog source is empty")
 		}
 
-		source, err := ResolveSource(cat)
+		external, err := loadCatalogSource(cat)
 		if err != nil {
-			return Catalog{}, fmt.Errorf("resolve catalog source: %w", err)
-		}
-
-		external, err := loadFromFS(os.DirFS(source.ServicesPath), ".")
-		if err != nil {
-			return Catalog{}, fmt.Errorf("load catalog from %q: %w", source.ServicesPath, err)
+			return Catalog{}, fmt.Errorf("load catalog %q: %w", cat, err)
 		}
 
 		for name, def := range external.Services {
@@ -44,6 +54,20 @@ func Load(options LoadOptions) (Catalog, error) {
 	}
 
 	return merged, nil
+}
+
+func loadCatalogSource(reference string) (Catalog, error) {
+	source, err := ResolveSource(reference)
+	if err != nil {
+		return Catalog{}, fmt.Errorf("resolve catalog source: %w", err)
+	}
+
+	loaded, err := loadFromFS(os.DirFS(source.ServicesPath), ".")
+	if err != nil {
+		return Catalog{}, fmt.Errorf("load catalog from %q: %w", source.ServicesPath, err)
+	}
+
+	return loaded, nil
 }
 
 func loadFromFS(fsys fs.FS, root string) (Catalog, error) {

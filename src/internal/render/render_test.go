@@ -1,74 +1,57 @@
 package render
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/kubara-io/kubara/internal/catalog"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-// helper function to setup test filesystem with correct root path
-func setupTestFS(_ *testing.T) func() {
-	originalFS := templatesFSNew
-	templatesFSNew = testTemplatesFS
+var (
+	testBootstrapCatalogPath string
+	testGeneralCatalogPath   string
+)
 
-	// Return cleanup function
-	return func() {
-		templatesFSNew = originalFS
+func init() {
+	root, err := os.MkdirTemp("", "kubara-render-catalog-tests-*")
+	if err != nil {
+		panic(err)
+	}
+
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(root, "catalogs"))
+	if err != nil {
+		panic(err)
+	}
+
+	testBootstrapCatalogPath = bootstrapPath
+	testGeneralCatalogPath = generalPath
+}
+
+func testTemplateCatalogs() []string {
+	return []string{
+		testBootstrapCatalogPath,
+		testGeneralCatalogPath,
 	}
 }
 
 func fullServiceContext() map[string]any {
 	return map[string]any{
-		"argocd":                  map[string]any{"status": "enabled"},
-		"cert-manager":            map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            map[string]any{"status": "enabled"},
-		"external-secrets":        map[string]any{"status": "enabled"},
-		"kube-prometheus-stack":   map[string]any{"status": "enabled"},
-		"traefik":                 map[string]any{"status": "enabled"},
-		"kyverno":                 map[string]any{"status": "enabled"},
-		"kyverno-policies":        map[string]any{"status": "enabled"},
-		"kyverno-policy-reporter": map[string]any{"status": "enabled"},
-		"loki":                    map[string]any{"status": "enabled"},
-		"homer-dashboard":         map[string]any{"status": "enabled"},
-		"oauth2-proxy":            map[string]any{"status": "disabled"},
-		"metrics-server":          map[string]any{"status": "disabled"},
-		"metallb":                 map[string]any{"status": "disabled"},
-		"longhorn":                map[string]any{"status": "disabled"},
-		"velero": map[string]any{
-			"status": "disabled",
-			"config": map[string]any{
-				"backupMode":    "fs-backup",
-				"backupStorage": map[string]any{"create": true, "region": "eu01"},
-			},
-		},
-		"reloader": map[string]any{"status": "disabled"},
+		"argocd":       map[string]any{"status": "enabled"},
+		"cert-manager": map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 	}
 }
 
 func fullCatalogContext() map[string]any {
 	return map[string]any{
 		"services": map[string]any{
-			"argocd":                  map[string]any{"chartPath": "argo-cd"},
-			"cert-manager":            map[string]any{"chartPath": "cert-manager"},
-			"external-dns":            map[string]any{"chartPath": "external-dns"},
-			"external-secrets":        map[string]any{"chartPath": "external-secrets"},
-			"kube-prometheus-stack":   map[string]any{"chartPath": "kube-prometheus-stack"},
-			"traefik":                 map[string]any{"chartPath": "traefik"},
-			"kyverno":                 map[string]any{"chartPath": "kyverno"},
-			"kyverno-policies":        map[string]any{"chartPath": "kyverno-policies"},
-			"kyverno-policy-reporter": map[string]any{"chartPath": "kyverno-policy-reporter"},
-			"loki":                    map[string]any{"chartPath": "loki"},
-			"homer-dashboard":         map[string]any{"chartPath": "homer-dashboard"},
-			"oauth2-proxy":            map[string]any{"chartPath": "oauth2-proxy"},
-			"metrics-server":          map[string]any{"chartPath": "metrics-server"},
-			"metallb":                 map[string]any{"chartPath": "metallb"},
-			"longhorn":                map[string]any{"chartPath": "longhorn"},
-			"velero":                  map[string]any{"chartPath": "velero"},
-			"reloader":                map[string]any{"chartPath": "reloader"},
+			"argocd":       map[string]any{"chartPath": "argo-cd"},
+			"cert-manager": map[string]any{"chartPath": "cert-manager"},
+			"crds":         map[string]any{"chartPath": "crds"},
 		},
 	}
 }
@@ -144,12 +127,10 @@ func TestStripProviderPath(t *testing.T) {
 }
 
 func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
-	cleanup := setupTestFS(t)
-	defer cleanup()
-
 	results, err := TemplateFiles(TemplateOptions{
 		Type:     Terraform,
 		Provider: "t-cloud-public",
+		Catalogs: testTemplateCatalogs(),
 		Data: map[string]any{
 			"cluster": map[string]any{
 				"name":    "test-cluster",
@@ -378,9 +359,6 @@ func TestTemplateFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cleanup := setupTestFS(t)
-			defer cleanup()
-
 			provider := ""
 			if tt.tplType == Terraform || tt.tplType == All {
 				provider = "stackit"
@@ -389,6 +367,7 @@ func TestTemplateFiles(t *testing.T) {
 			results, err := TemplateFiles(TemplateOptions{
 				Type:     tt.tplType,
 				Provider: provider,
+				Catalogs: testTemplateCatalogs(),
 				Data:     tt.context,
 			})
 

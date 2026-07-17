@@ -11,28 +11,36 @@ import (
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 	"sigs.k8s.io/yaml"
 )
 
+var (
+	testBootstrapCatalogPath string
+	testGeneralCatalogPath   string
+)
+
+func init() {
+	root, err := os.MkdirTemp("", "kubara-cmd-catalog-tests-*")
+	if err != nil {
+		panic(err)
+	}
+
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(root, "catalogs"))
+	if err != nil {
+		panic(err)
+	}
+
+	testBootstrapCatalogPath = bootstrapPath
+	testGeneralCatalogPath = generalPath
+}
+
 func CreateTestServices() service.Services {
 	return service.Services{
-		"argocd":                  {Status: service.StatusEnabled},
-		"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            {Status: service.StatusEnabled},
-		"external-secrets":        {Status: service.StatusEnabled},
-		"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-		"traefik":                 {Status: service.StatusEnabled},
-		"kyverno":                 {Status: service.StatusEnabled},
-		"kyverno-policies":        {Status: service.StatusEnabled},
-		"kyverno-policy-reporter": {Status: service.StatusEnabled},
-		"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-		"homer-dashboard":         {Status: service.StatusEnabled},
-		"oauth2-proxy":            {Status: service.StatusEnabled},
-		"metrics-server":          {Status: service.StatusEnabled},
-		"metallb":                 {Status: service.StatusEnabled},
-		"longhorn":                {Status: service.StatusEnabled},
+		"argocd":       {Status: service.StatusEnabled},
+		"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-staging", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 	}
 }
 
@@ -41,7 +49,16 @@ func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 
 	configPath := filepath.Join(dir, "config.yaml")
 
-	cfg := config.Config{Clusters: clusters}
+	for i := range clusters {
+		if len(clusters[i].Catalogs) == 0 {
+			clusters[i].Catalogs = []string{testGeneralCatalogPath}
+		}
+	}
+
+	cfg := config.Config{
+		BootstrapCatalog: &testBootstrapCatalogPath,
+		Clusters:         clusters,
+	}
 
 	// Convert to YAML
 	yamlData, err := yaml.Marshal(cfg)
@@ -68,6 +85,7 @@ func CreateTestCluster(t *testing.T) config.Cluster {
 				},
 			},
 		},
+		Catalogs: []string{testGeneralCatalogPath},
 		Services: CreateTestServices(),
 	}
 }

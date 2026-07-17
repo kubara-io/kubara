@@ -14,6 +14,7 @@ const (
 	ConfigVersionV1Alpha1 = "v1alpha1"
 	ConfigVersionV1Alpha2 = "v1alpha2"
 	ConfigVersionV1Alpha3 = "v1alpha3"
+	ConfigVersionV1Alpha4 = "v1alpha4"
 )
 
 // Apply runs all registered schema and repository layout migrations.
@@ -40,6 +41,13 @@ func Apply(cwd string, config map[string]any) (bool, error) {
 		migrated = true
 	}
 
+	if isV1Alpha3Config(config) {
+		if err := migrateV1Alpha3Config(config); err != nil {
+			return false, fmt.Errorf("migrate V1Alpha3 config: %w", err)
+		}
+		migrated = true
+	}
+
 	return migrated, nil
 }
 
@@ -56,6 +64,11 @@ func isV1Alpha1Config(raw map[string]any) bool {
 func isV1Alpha2Config(raw map[string]any) bool {
 	version, hasVersion := raw["version"]
 	return version == ConfigVersionV1Alpha2 && hasVersion
+}
+
+func isV1Alpha3Config(raw map[string]any) bool {
+	version, hasVersion := raw["version"]
+	return version == ConfigVersionV1Alpha3 && hasVersion
 }
 
 func clusterLabel(cluster map[string]any, clusterIndex int) string {

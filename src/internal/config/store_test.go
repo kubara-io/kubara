@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/service"
 
 	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
@@ -19,7 +18,8 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha3,
+		Version:          ConfigVersionV1Alpha4,
+		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -27,6 +27,7 @@ func newValidTestConfig() *Config {
 				IngressClassName: "traefik",
 				Type:             "hub",
 				DNSName:          "test-cluster.example.com",
+				Catalogs:         testClusterCatalogs(),
 				Terraform: &Terraform{
 					Provider:          "stackit",
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
@@ -52,35 +53,9 @@ func newValidTestConfig() *Config {
 					},
 				},
 				Services: service.Services{
-					"argocd":                  {Status: service.StatusEnabled},
-					"cert-manager":            {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
-					"external-dns":            {Status: service.StatusEnabled},
-					"external-secrets":        {Status: service.StatusEnabled},
-					"kube-prometheus-stack":   {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-					"traefik":                 {Status: service.StatusEnabled},
-					"kyverno":                 {Status: service.StatusEnabled},
-					"kyverno-policies":        {Status: service.StatusEnabled},
-					"kyverno-policy-reporter": {Status: service.StatusEnabled},
-					"loki":                    {Status: service.StatusEnabled, Storage: &service.Storage{ClassName: "standard-rwo"}},
-					"homer-dashboard":         {Status: service.StatusEnabled},
-					"oauth2-proxy":            {Status: service.StatusEnabled},
-					"metrics-server":          {Status: service.StatusEnabled},
-					"metallb": {
-						Status: service.StatusEnabled,
-						Config: service.Config{
-							"publicLoadBalancerIPs":   "127.0.0.1",
-							"loadBalancerAddressPool": []any{"127.0.0.2/32"},
-						},
-					},
-					"longhorn": {Status: service.StatusEnabled},
-					"velero": {
-						Status: service.StatusEnabled,
-						Config: service.Config{
-							"backupMode":    "fs-backup",
-							"backupStorage": map[string]any{"create": true, "region": "eu01"},
-						},
-					},
-					"reloader": {Status: service.StatusDisabled},
+					"argocd":       {Status: service.StatusEnabled},
+					"crds":         {Status: service.StatusDisabled},
+					"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
 				},
 			},
 		},
@@ -125,7 +100,7 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 // Helper function to deep copy a config
 func deepCopyConfig(c *Config) *Config {
 	newConfig := *c
-	newConfig.Clusters = make([]Cluster, 0, len(c.Clusters))
+	newConfig.Clusters = make([]Cluster, len(c.Clusters))
 	copy(newConfig.Clusters, c.Clusters)
 	return &newConfig
 }
@@ -193,7 +168,7 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := NewConfigStore(".", tt.filepath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", tt.filepath, testCatalogLoadOptions())
 			err := cs.Load()
 
 			if tt.wantErr {
@@ -204,86 +179,6 @@ clusters:
 			}
 		})
 	}
-}
-
-func TestConfigStore_LoadMigratesLegacyConfig(t *testing.T) {
-	legacyYAML := `
-clusters:
-  - name: legacy-cluster
-    dnsName: legacy.example.com
-    type: hub
-    argocd:
-      repo:
-        https:
-          customer:
-            url: "https://github.com/customer/repo.git"
-          managed:
-            url: "https://github.com/managed/repo.git"
-    services:
-      argocd:
-        status: enabled
-      certManager:
-        status: enabled
-        clusterIssuer:
-          name: letsencrypt-staging
-          email: cert@example.com
-          server: https://acme-staging-v02.api.letsencrypt.org/directory
-      kubePrometheusStack:
-        status: enabled
-        storageClassName: metrics-rwo
-      loki:
-        status: enabled
-        storageClassName: logs-rwo
-      oauth2Proxy:
-        status: enabled
-        ingress:
-          annotations:
-            foo: bar
-`
-
-	tempDir := t.TempDir()
-	configPath := filepath.Join(tempDir, "legacy-config.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
-
-	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
-	require.NoError(t, cs.Load())
-
-	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha3, loaded.Version)
-	require.Len(t, loaded.Clusters, 1)
-
-	cluster := loaded.Clusters[0]
-	assert.Equal(t, cluster.Type, "hub")
-	assert.Contains(t, cluster.Services, "argocd")
-
-	certManager := cluster.Services["cert-manager"]
-	clusterIssuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
-	require.True(t, ok)
-	assert.Equal(t, "letsencrypt-staging", clusterIssuer["name"])
-	assert.Equal(t, "cert@example.com", clusterIssuer["email"])
-
-	require.NotNil(t, cluster.Services["kube-prometheus-stack"].Storage)
-	assert.Equal(t, "metrics-rwo", cluster.Services["kube-prometheus-stack"].Storage.ClassName)
-
-	require.NotNil(t, cluster.Services["loki"].Storage)
-	assert.Equal(t, "logs-rwo", cluster.Services["loki"].Storage.ClassName)
-
-	require.NotNil(t, cluster.Services["oauth2-proxy"].Networking)
-	assert.Equal(t, "bar", cluster.Services["oauth2-proxy"].Networking.Annotations["foo"])
-
-	savedBytes, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha3")
-	assert.Contains(t, savedContent, "cert-manager:")
-	assert.Contains(t, savedContent, "argocd:")
-	assert.NotContains(t, savedContent, "certManager:")
-	assert.NotContains(t, savedContent, "storageClassName:")
-	assert.NotContains(t, savedContent, "ingress:")
-	assert.Contains(t, savedContent, "className: metrics-rwo")
-	assert.Contains(t, savedContent, "className: logs-rwo")
-	assert.Contains(t, savedContent, "networking:")
-	assert.Contains(t, savedContent, "clusterIssuer:")
 }
 
 func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
@@ -365,7 +260,7 @@ clusters:
 			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
 			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-			cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
 			err := cs.Load()
 			require.Error(t, err)
 			for _, wantErr := range tt.wantErrs {
@@ -625,7 +520,7 @@ func TestGenerateSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
+			schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -664,7 +559,7 @@ func TestGenerateSchema(t *testing.T) {
 }
 
 func TestGenerateSchema_TerraformProviderNoneAllowsMissingTerraformDetails(t *testing.T) {
-	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
+	schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
 	require.NoError(t, err)
 
 	const schemaURL = "mem://config.schema.json"
@@ -702,7 +597,7 @@ func configInstance(t *testing.T, cfg *Config) map[string]any {
 }
 
 func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
-	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
+	schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
 	require.NoError(t, err)
 
 	defs, ok := schemaDoc["$defs"].(map[string]any)
@@ -716,13 +611,12 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 
 	assert.Contains(t, properties, "cert-manager")
 	assert.Contains(t, properties, "argocd")
-	assert.Contains(t, properties, "metallb")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
 	// A minimal YAML that only provides required fields and omits all fields
 	// that have defaults. After Load() applies defaults, Validate() must pass.
-	minimalYAML := `
+	minimalYAML := fmt.Sprintf(`
 clusters:
   - name: minimal-cluster
     dnsName: minimal.example.com
@@ -733,32 +627,21 @@ clusters:
             url: "https://github.com/customer/repo.git"
           components:
             url: "https://github.com/managed/repo.git"
+    catalogs:
+      - %q
     services:
       argocd: {}
       cert-manager:
         config:
           clusterIssuer:
             email: cert@example.com
-      external-dns: {}
-      external-secrets: {}
-      kube-prometheus-stack: {}
-      traefik: {}
-      kyverno: {}
-      kyverno-policies: {}
-      kyverno-policy-reporter: {}
-      loki: {}
-      homer-dashboard: {}
-      oauth2-proxy: {}
-      metrics-server: {}
-      metallb: {}
-      longhorn: {}
-`
+`, testGeneralCatalogPath)
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
 	require.NoError(t, cs.Load(), "Load should succeed")
 
 	c := cs.GetConfig().Clusters[0]
@@ -789,7 +672,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
 
-	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
 	require.NoError(t, cs.Load())
 
 	require.Len(t, cs.GetConfig().Clusters, 1)

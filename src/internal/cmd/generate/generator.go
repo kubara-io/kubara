@@ -253,6 +253,29 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 	}
 }
 
+func orderedTemplateCatalogs(cfg *config.Config, cluster config.Cluster, cliCatalogs []string) []string {
+	bootstrapCatalog := catalog.DefaultBootstrapCatalog
+	if cfg != nil && cfg.BootstrapCatalog != nil {
+		bootstrapCatalog = *cfg.BootstrapCatalog
+	}
+
+	ordered := make([]string, 0, 1+len(cluster.Catalogs)+len(cliCatalogs))
+	seen := make(map[string]struct{}, 1+len(cluster.Catalogs)+len(cliCatalogs))
+	for _, source := range append([]string{bootstrapCatalog}, append(cluster.Catalogs, cliCatalogs...)...) {
+		source = strings.TrimSpace(source)
+		if source == "" {
+			continue
+		}
+		if _, exists := seen[source]; exists {
+			continue
+		}
+		seen[source] = struct{}{}
+		ordered = append(ordered, source)
+	}
+
+	return ordered
+}
+
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	catalogOptions := catalog.LoadOptions{
@@ -315,7 +338,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 			render.TemplateOptions{
 				Type:          templateType,
 				Provider:      provider,
-				Catalogs:      o.Catalogs,
+				Catalogs:      orderedTemplateCatalogs(cnf, cluster, o.Catalogs),
 				Overwrite:     o.CatalogOverwrite,
 				Data:          tmplContext,
 				PathPredicate: buildEnabledServiceTemplatePathPredicate(cluster, cat),

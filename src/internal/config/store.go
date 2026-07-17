@@ -286,7 +286,43 @@ func (cs *ConfigStore) GetCatalog() (catalog.Catalog, error) {
 		return *cs.catalog, nil
 	}
 
-	cat, err := catalog.Load(cs.catalogOptions)
+	bootstrapCatalog := catalog.DefaultBootstrapCatalog
+	if strings.TrimSpace(cs.catalogOptions.BootstrapCatalog) != "" {
+		bootstrapCatalog = cs.catalogOptions.BootstrapCatalog
+	}
+	if cs.config != nil && cs.config.BootstrapCatalog != nil {
+		bootstrapCatalog = *cs.config.BootstrapCatalog
+	}
+
+	// Gather all unique catalogs from all clusters
+	allCatalogs := make([]string, 0)
+	seen := make(map[string]bool)
+
+	// Add cluster-specific catalogs in order
+	if cs.config != nil {
+		for _, cluster := range cs.config.Clusters {
+			for _, cat := range cluster.Catalogs {
+				if !seen[cat] {
+					seen[cat] = true
+					allCatalogs = append(allCatalogs, cat)
+				}
+			}
+		}
+	}
+
+	// Add CLI catalogs
+	for _, cat := range cs.catalogOptions.Catalogs {
+		if !seen[cat] {
+			seen[cat] = true
+			allCatalogs = append(allCatalogs, cat)
+		}
+	}
+
+	cat, err := catalog.Load(catalog.LoadOptions{
+		BootstrapCatalog: bootstrapCatalog,
+		Catalogs:         allCatalogs,
+		Overwrite:        cs.catalogOptions.Overwrite,
+	})
 	if err != nil {
 		return catalog.Catalog{}, fmt.Errorf("load catalog: %w", err)
 	}
@@ -303,7 +339,7 @@ func (cs *ConfigStore) GetFilepath() string {
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
-		cs.config.Version = ConfigVersionV1Alpha3
+		cs.config.Version = ConfigVersionV1Alpha4
 	}
 
 	// Ensure directory exists

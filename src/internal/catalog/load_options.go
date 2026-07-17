@@ -8,10 +8,6 @@ import (
 )
 
 func ResolveLoadOptions(cwd string, catalogs []string, overwrite bool) (LoadOptions, error) {
-	if len(catalogs) == 0 {
-		return LoadOptions{}, fmt.Errorf("no catalog provided")
-	}
-
 	resolvedCatalogs := make([]string, 0, len(catalogs))
 	for _, cat := range catalogs {
 		if strings.TrimSpace(cat) == "" {

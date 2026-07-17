@@ -429,10 +429,10 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 func TestDisabledServicesDontGetWritten(t *testing.T) {
 	tempDir := t.TempDir()
 	services := testutil.CreateTestServices()
-	homerName := "homer-dashboard"
-	homer := services[homerName]
-	homer.Status = "disabled"
-	services[homerName] = homer
+	serviceName := "cert-manager"
+	certManager := services[serviceName]
+	certManager.Status = "disabled"
+	services[serviceName] = certManager
 
 	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
@@ -464,7 +464,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		names = append(names, entry.Name())
 	}
 	require.NoError(t, err)
-	assert.NotContains(t, names, homerName)
+	assert.NotContains(t, names, serviceName)
 }
 
 // Helper function

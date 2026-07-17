@@ -191,3 +191,12 @@ func TestMigrateV1Alpha2RepoKeepsCurrentKeys(t *testing.T) {
 	assert.NotContains(t, repo, "customer")
 	assert.NotContains(t, repo, "managed")
 }
+
+func TestMigrateV1Alpha3Config(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha3,
+	}
+
+	require.NoError(t, migrateV1Alpha3Config(config))
+	assert.Equal(t, ConfigVersionV1Alpha4, config["version"])
+}

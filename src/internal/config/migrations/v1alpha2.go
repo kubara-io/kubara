@@ -315,6 +315,7 @@ func migrateLegacyValuesFilesInRoot(rootPath string, renameLegacyHelm bool) (err
 func hasGeneratedValuesTemplate(serviceDir string) bool {
 	legacyBuiltIn := []string{
 		"argocd",
+		"argo-cd",
 		"cert-manager",
 		"external-dns",
 		"external-secrets",
