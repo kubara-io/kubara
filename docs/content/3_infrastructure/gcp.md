@@ -16,7 +16,7 @@ Velero on GCP wasn't tested, we recommend to follow the Guides of the Velero Pro
 
 Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
 
-Obviously you need kubara too. See: [INSTALLATION GUIDE](1_getting_started/installation.md)
+Obviously you need kubara too. See: [INSTALLATION GUIDE](../1_getting_started/installation.md1_getting_started/installation.md)
 
 ## Sneak preview:
 
@@ -44,10 +44,11 @@ gcloud components install gke-gcloud-auth-plugin
 gcloud config set project $YOUR-PROJECT-NAME
 ```
 
-Follow the kubara installation guide, generate your helm charts and stop before bootstrapping. Everything else we be handled in this Guide.
+Follow the kubara bootstrapping guide, generate your helm charts and stop before bootstrapping. Everything else we be handled in this Guide.
+[Bootstrapping Guide](../1_getting_started/bootstrapping.md)
+
 
 ```bash
-
 # pseudo-workflow, please check the official guide LINK
 
 kubara init --prep # generate .env-file & set values
@@ -157,7 +158,7 @@ kubectl get ns                                                     # Lists all n
 
 ### OAuth2 Configuration
 
-How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](https://docs.kubara.io/latest-stable/4_building_your_platform/sso/add_sso/) for details) — regardless of the provider, however, at least the following SSO apps must be created for SSO:
+How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/add_sso.md) for details) — regardless of the provider, however, at least the following SSO apps must be created for SSO:
 
 1. Argo CD SSO
 2. Grafana SSO
@@ -312,7 +313,7 @@ Please refer to the official velero docs, we can only provide you these untested
 
 ### Create Namespace
 
-See [docs.kubara.io](https://docs.kubara.io) for details on the namespace concept.
+See [docs.kubara.io](https://docs.kubara.io).
 
 ```bash
 kubectl create namespace external-secrets
@@ -327,3 +328,7 @@ kubara bootstrap gcp \
   --with-es-css-file secretstore.yaml \
   --with-es-crds --with-prometheus-crds
 ```
+
+Now you should have a successfully deployed kubara installation.
+Wait some minutes and check if all helm charts are synced and green.
+Enjoy!
