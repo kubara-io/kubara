@@ -58,7 +58,7 @@ kubara generate # generate helm charts
 # Stop after generating your Charts and proceed with ## Part 2
 ```
 
-
+## TODO: Example config.yaml
 
 
 ## Part 2: GCP Infrastructure
@@ -306,22 +306,14 @@ printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}
 ```
 
 #### Velero
-#### see: https://velero.io/docs/v1.0.0/gcp-config/
+#### see: https://github.com/velero-io/velero-plugin-for-gcp#setup
 Please refer to the official velero docs, we can only provide you these untested hints - feel free to contribute if you have some proposal to enhance the example.
 
 
 
-### Create Namespace
-
-See [docs.kubara.io](https://docs.kubara.io).
-
-```bash
-kubectl create namespace external-secrets
-```
-
 ### Part 4: Apply the SecretStore & Bootstrap Kubara
 
-The `SecretStore` is no longer applied manually via `kubectl apply`, but passed directly into the bootstrap process (adjust the path/filename in `--with-es-css-file` if it differs):
+The `Secretstore` can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in `--with-es-css-file` if it differs):
 
 ```bash
 kubara bootstrap gcp \
