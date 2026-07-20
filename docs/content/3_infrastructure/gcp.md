@@ -3,7 +3,7 @@
 If you want to run kubara on a hyperscaler like GCP, there are specific configurations to make.
 Here we provide an example which can be conveniently adapted to other major clouds. 
 
-In this example we use Provider native components like the google secretmanager for external-secrets, google dns with a delegated subdomain (from any domain registrar that allows setting NS records). 
+In this example we use Provider native components like the google secretmanager for external-secrets, google dns with a delegated subdomain (from any domain registrar that allows setting NS records). For all other desired setups, please check the according Docs of the components. Also feel free to contribute! :)
 
 We assume, you are starting in an empty project to test kubara.
 Another assumption is that you made your self aware of the kubara deployment guide, so please read this guide and exactly follow the steps.
@@ -24,14 +24,15 @@ We will create an configure a GKE Cluster, Google Secret Manager and use Google 
 
 We will check and adapt the following values files:
 
-gcp-test/platform-configs/gcp/helm/argo-cd/values-gcp.yaml
-gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml
-gcp-test/platform-configs/gcp/helm/external-secrets.yaml
-gcp-test/platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml
-gcp-test/platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml
+- gcp-test/platform-configs/gcp/helm/argo-cd/values-gcp.yaml. 
+- gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml. 
+- gcp-test/platform-configs/gcp/helm/external-secrets.yaml. 
+- gcp-test/platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml. 
+- gcp-test/platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml. 
 
-We will create our necessary secrets manually and deploy kubara on GKE.
+We will then create our necessary secrets and deploy kubara on GKE.
 
+Let's start!
 
 ## Part 1: Preparing kubara
 
