@@ -16,7 +16,7 @@ Velero on GCP wasn't tested, we recommend to follow the Guides of the Velero Pro
 
 Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
 
-Obviously you need kubara too. See: [INSTALLATION GUIDE](../1_getting_started/installation.md1_getting_started/installation.md)
+Obviously you need kubara too. See: [INSTALLATION GUIDE](../1_getting_started/installation.md)
 
 ## Sneak preview:
 
