@@ -3,7 +3,7 @@ terraform {
   required_providers {
     stackit = {
       source  = "stackitcloud/stackit"
-      version = "0.102.0"
+      version = "0.104.0"
     }
     local = {
       source  = "hashicorp/local"
