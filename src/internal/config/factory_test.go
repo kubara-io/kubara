@@ -55,6 +55,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 		ArgoCD: ArgoCD{
+			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
 				HTTPS: &RepoType{
 					Configs: Repository{

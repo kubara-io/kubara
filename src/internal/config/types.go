@@ -80,9 +80,17 @@ type DNS struct {
 	Email string `json:"email" yaml:"email" jsonschema:"required,title=Admin Email,description=Administrative email for the DNS zone.,format=email"`
 }
 
+type ArgoCDSelfManagedStatus string
+
+const (
+	ArgoCDSelfManagedEnabled  ArgoCDSelfManagedStatus = "enabled"
+	ArgoCDSelfManagedDisabled ArgoCDSelfManagedStatus = "disabled"
+)
+
 type ArgoCD struct {
-	Repo     RepoProto       `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	HelmRepo *HelmRepository `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
+	Repo        RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo    *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
 }
 
 type RepoProto struct {

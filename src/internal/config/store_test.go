@@ -40,6 +40,7 @@ func newValidTestConfig() *Config {
 					},
 				},
 				ArgoCD: ArgoCD{
+					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
 						HTTPS: &RepoType{
 							Configs: Repository{
@@ -732,7 +733,7 @@ clusters:
             targetRevision: main
     services:
       argocd:
-        status: enabled
+        status: disabled
 `, ConfigVersionV1Alpha3, *testBootstrapCatalogPtr())
 
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
@@ -760,6 +761,7 @@ clusters:
 
 	cluster := cs.GetConfig().Clusters[0]
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.Equal(t, ArgoCDSelfManagedDisabled, cluster.ArgoCD.SelfManaged)
 	assert.NotContains(t, cluster.Services, "argocd")
 	assert.NotContains(t, cluster.Services, "argo-cd")
 
@@ -771,6 +773,7 @@ clusters:
 	require.Equal(t, ConfigVersionV1Alpha4, savedConfig.Version)
 	require.Len(t, savedConfig.Clusters, 1)
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, savedConfig.Clusters[0].Catalogs)
+	assert.Equal(t, ArgoCDSelfManagedDisabled, savedConfig.Clusters[0].ArgoCD.SelfManaged)
 	assert.NotContains(t, savedConfig.Clusters[0].Services, "argocd")
 	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
 }

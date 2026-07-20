@@ -198,6 +198,11 @@ func TestMigrateV1Alpha3Config(t *testing.T) {
 		"clusters": []any{
 			map[string]any{
 				"name": "test-cluster",
+				"services": map[string]any{
+					"argocd": map[string]any{
+						"status": "disabled",
+					},
+				},
 			},
 		},
 	}
@@ -207,4 +212,6 @@ func TestMigrateV1Alpha3Config(t *testing.T) {
 
 	cluster := config["clusters"].([]any)[0].(map[string]any)
 	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.0.0"}, cluster["catalogs"])
+	assert.Equal(t, "disabled", cluster["argocd"].(map[string]any)["selfManaged"])
+	assert.NotContains(t, cluster["services"], "argocd")
 }

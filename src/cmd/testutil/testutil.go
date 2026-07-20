@@ -77,6 +77,7 @@ func CreateTestCluster(t *testing.T) config.Cluster {
 		Type:    "hub",
 		DNSName: "test.example.com",
 		ArgoCD: config.ArgoCD{
+			SelfManaged: config.ArgoCDSelfManagedEnabled,
 			Repo: config.RepoProto{
 				HTTPS: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
