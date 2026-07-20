@@ -16,7 +16,7 @@ Velero on GCP wasn't tested, we recommend to follow the Guides of the Velero Pro
 
 Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
 
-Obviously you need kubara too. See: INSTALLATION GUIDE
+Obviously you need kubara too. See: [INSTALLATION GUIDE](1_getting_started/installation.md)
 
 ## Sneak preview:
 
@@ -111,7 +111,7 @@ gcloud compute networks list
 
 ```bash
 gcloud container clusters create test-cluster2 \
-    --zone=europe-west3-a \                # Zonal cluster (single availability zone) in Frankfurt
+    --zone=europe-west3-a \                # Zonal cluster (single availability zone for testing)
     --network=test-network \                # VPC network the cluster is deployed into
     --subnetwork=test-subnet \              # Subnet within that network (incl. pod/service ranges)
     --enable-private-nodes \                # Nodes only get internal IPs, no public IP (more secure)
@@ -204,6 +204,7 @@ Next, the `values.yaml` for external-dns needs to be adjusted.
 See: `gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml`
 
 ```yaml
+### set project id in service account annotation
 external-dns:
   provider: google
   google:
@@ -214,7 +215,7 @@ external-dns:
     create: true
     name: external-dns-sa
     annotations:
-      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com"
+      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # here!
 ```
 
 ### External Secrets
@@ -240,6 +241,7 @@ gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud 
 See: `gcp-test/secretstore.yaml`
 
 ```yaml
+# set your projectID and save!
 apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
@@ -251,7 +253,8 @@ spec:
       projectID: $YOUR-GCP-PROJECT-NAME
 ```
 
-Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first — however, this step is later handled automatically by the `kubara bootstrap` command.
+Caution!
+Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first — however, this step is later handled automatically by the `kubara bootstrap` command, so don't try to apply now.
 
 ### Create Secrets
 
