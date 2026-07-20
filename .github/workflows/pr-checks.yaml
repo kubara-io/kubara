@@ -26,7 +26,7 @@ env:
   # renovate: datasource=github-releases depName=golangci/golangci-lint
   GOLANGCI_LINT_VERSION: "v2.12.2"
   # renovate: datasource=github-releases depName=securego/gosec
-  GOSEC_VERSION: "v2.27.1"
+  GOSEC_VERSION: "v2.28.0"
   # renovate: datasource=github-releases depName=yannh/kubeconform
   KUBECONFORM_VERSION: "v0.8.0"
   # renovate: datasource=github-releases depName=terraform-linters/tflint
