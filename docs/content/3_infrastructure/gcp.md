@@ -17,7 +17,7 @@ Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is 
 
 You'll also need kubara installed — see the [Installation guide](../1_getting_started/installation.md).
 
-## Sneak preview:
+### Sneak preview:
 
 1. We will generate a .env-File and fill in all values, after that generate the config.yaml and fill it out too. (kubara init (--prep))
 Then we will generate all the rendered Helm-Charts. (kubara generate)
@@ -38,7 +38,7 @@ All paths below are relative to the `platform-configs` directory that `kubara ge
 
 Let's start!
 
-## Part 1: Preparing kubara
+## Part 1: Preparing for gcp deployment
 
 ```bash
 # Install gke-gcloud-auth-plugin – required so kubectl can authenticate against the GKE cluster
@@ -48,8 +48,8 @@ gcloud components install gke-gcloud-auth-plugin
 gcloud config set project $YOUR-PROJECT-NAME
 ```
 
-Follow the kubara bootstrapping guide, generate your helm charts and stop before bootstrapping. Everything else we be handled in this Guide.
-[Bootstrapping Guide](../1_getting_started/bootstrapping.md)
+Follow the kubara [Bootstrapping Guide](../1_getting_started/bootstrapping.md), generate your helm charts and stop before bootstrapping [Step 4: Bootstrapping](../1_getting_started/bootstrapping/#4-deploying-argo-cd). Everything else we be handled in this Guide.
+
 
 ```bash
 # pseudo-workflow, please check the up2date official guide!
@@ -80,8 +80,10 @@ Deploying Google Kubernetes Engine (GKE) requires a network (VPC). Existing netw
 gcloud compute networks list
 ```
 
-??? note "Optional: Example how to create a new network, router, subnet & Cloud NAT"
-    If no suitable network exists, one can be created from scratch, including a router, a subnet (with secondary ranges for pods/services), and Cloud NAT. 
+If no suitable network exists, one can be created from scratch, including a router, a subnet (with secondary ranges for pods/services), and Cloud NAT. 
+
+!!! note "Optional: Example how to create a new network, router, subnet & Cloud NAT"
+    
     Please be careful and adapt these commands to your needs before applying:
 
     ```bash title="Optional Network component creation"
@@ -128,7 +130,7 @@ gcloud container clusters create test-cluster \
     --async                                 # Command returns immediately without waiting for cluster creation to finish
 ```
 
-### Restrict Control Plane / API Access to Your Own IP
+#### Restrict Control Plane / API Access to Your Own IP
 
 `--enable-master-authorized-networks` only allows explicitly permitted IP ranges to reach the Kubernetes API — following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc. 
 
@@ -140,7 +142,7 @@ gcloud container clusters update test-cluster \
     --master-authorized-networks=$(curl -s ifconfig.me)/32 # Adds only your own public IP (as a /32, so exactly one address) to that allowlist
 ```
 
-### Wait for the Cluster & Check the Connection
+#### Wait for the Cluster & Check the Connection
 
 ```bash
 ## Wait until the cluster is ready (status: RUNNING)
@@ -156,7 +158,7 @@ kubectl get ns                                                     # Lists all n
 
 ## Part 3: The Platform
 
-### OAuth2 Configuration
+#### OAuth2 Configuration
 
 How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/add_sso.md) for details) — regardless of the provider, however, at least the following SSO apps must be created for SSO:
 
@@ -166,9 +168,12 @@ How exactly these configurations are done depends on the chosen SSO provider (ex
 
 The resulting credentials are added manually later, in the [Create Secrets](#create-secrets) section. So save them for later.
 
-### Note: Workload Identity
- We use workload identitys in these examples.
- Workload Identity binds a GCP service account directly and keylessly to a Kubernetes ServiceAccount. Pods then authenticate against GCP APIs transparently through that binding, with finely scoped IAM roles per use case — with no secret material to manage or rotate at all. (See: https://docs.cloud.google.com/iam/docs/workload-identities)
+
+!!! note "Workload Identity"
+    We use workload identitys in these examples.
+    Workload Identity binds a GCP service account directly and keylessly to a Kubernetes ServiceAccount. Pods then authenticate against GCP APIs transparently through that binding, with finely scoped IAM roles per use case — with no secret material to manage or rotate at all. (See: https://docs.cloud.google.com/iam/docs/workload-identities)
+
+
 
 ### external-DNS with Google DNS
 
@@ -197,7 +202,7 @@ gcloud dns managed-zones create kubara-gcp-zone \
 gcloud dns managed-zones describe kubara-gcp-zone --format="value(nameServers)"
 ```
 
-<!-- TODO: add reference to external-dns-values.yaml for the Helm chart -->
+
 <!-- TODO: add example screenshot of a delegated subdomain at the registrar -->
 
 Next, the `values.yaml` for external-dns needs to be adjusted.
@@ -271,7 +276,7 @@ spec:
 !!! warning
     Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first. This is handled automatically by the `kubara bootstrap` command later, so don't try to apply it now.
 
-### Create Secrets
+#### Create Secrets
 
 Now all secrets required by kubara are created. The commands below are just one proven example — secrets can just as well be created another way, as long as the name and content match.
 
@@ -321,7 +326,8 @@ printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}
 !!! warning "Before you copy these over"
     - Place each snippet below at its matching path under `platform-configs/gcp/helm/...`.
     - This example uses `gcp` as the cluster name — double-check your own path if it differs.
-    - Replace every secret name to match the cluster name and stage defined in your `config.yaml` (see the naming convention above).
+    - Replace every secret name to match the cluster name and stage defined in your `config.yaml` 
+    (see the naming convention above).
 
 
 ```yaml title="platform-configs/gcp/helm/argo-cd/values-gcp.yaml"
@@ -360,7 +366,7 @@ externalSecrets:
 
 
 #### Velero
-#### If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup
+If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup  
 Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance the example.
 
 
