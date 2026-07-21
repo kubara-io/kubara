@@ -17,6 +17,8 @@ import (
 
 type SchemaOptions struct {
 	outputFilePath string
+	cwd            string
+	configFilePath string
 	catalogOptions catalog.LoadOptions
 }
 
@@ -60,6 +62,10 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get output file path: %w", err)
 	}
+	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
+	if err != nil {
+		return nil, fmt.Errorf("get config file path: %w", err)
+	}
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
@@ -68,6 +74,8 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 
 	o := &SchemaOptions{
 		outputFilePath: outputFilePath,
+		cwd:            cwd,
+		configFilePath: configFilePath,
 		catalogOptions: catalogOptions,
 	}
 	return o, nil
@@ -88,8 +96,12 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 }
 
 func (o *SchemaOptions) Run() error {
-	// Generate schema
-	schemaDoc, err := config.GenerateSchemaWithCatalog(o.catalogOptions)
+	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogOptions)
+	if err := cs.Load(); err != nil {
+		return fmt.Errorf("load config: %w", err)
+	}
+
+	schemaDoc, err := cs.GenerateSchema()
 	if err != nil {
 		return fmt.Errorf("generate schema: %w", err)
 	}

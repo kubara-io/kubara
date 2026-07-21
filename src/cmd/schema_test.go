@@ -7,25 +7,38 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kubara-io/kubara/internal/catalog"
-	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
+	cmdtestutil "github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func seedBootstrapCatalogCache(t *testing.T, tempDir string) {
+func createSchemaTestConfig(t *testing.T, tempDir string) string {
 	t.Helper()
 
-	t.Setenv("HOME", tempDir)
+	return cmdtestutil.CreateTestConfig(t, tempDir, cmdtestutil.CreateTestCluster(t))
+}
 
-	bootstrapPath, _, err := internaltestutil.CreateCatalogFixtures(filepath.Join(tempDir, "catalogs"))
-	require.NoError(t, err)
+func createSchemaCollisionCatalog(t *testing.T, tempDir string) {
+	t.Helper()
 
-	_, err = catalog.PackageCatalog(catalog.PackageOptions{
-		CatalogRoot:   bootstrapPath,
-		ReferenceBase: "oci://ghcr.io/kubara-io/catalogs/",
-	})
-	require.NoError(t, err)
+	catalogDir := filepath.Join(tempDir, "distribution")
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogDir, "services"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogDir, "Catalog.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: distribution
+spec:
+  version: 1.0.0
+`), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogDir, "services", "argo-cd.yaml"), []byte(`
+apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: argo-cd
+spec:
+  chartPath: custom-argo-cd
+  status: enabled
+`), 0o644))
 }
 
 func TestNewSchemaFlags(t *testing.T) {
@@ -145,17 +158,7 @@ func TestSchemaCmd(t *testing.T) {
 				"--catalog", "distribution",
 			},
 			setup: func(t *testing.T, tempDir string) {
-				servicesDir := filepath.Join(tempDir, "distribution", "services")
-				require.NoError(t, os.MkdirAll(servicesDir, 0750))
-				require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
-apiVersion: kubara.io/v1alpha1
-kind: ServiceDefinition
-metadata:
-  name: argo-cd
-spec:
-  chartPath: custom-argo-cd
-  status: enabled
-`), 0644))
+				createSchemaCollisionCatalog(t, tempDir)
 			},
 			wantErr:     true,
 			errContains: "already exists in another catalog",
@@ -167,17 +170,7 @@ spec:
 				"--catalog-overwrite",
 			},
 			setup: func(t *testing.T, tempDir string) {
-				servicesDir := filepath.Join(tempDir, "distribution", "services")
-				require.NoError(t, os.MkdirAll(servicesDir, 0750))
-				require.NoError(t, os.WriteFile(filepath.Join(servicesDir, "argo-cd.yaml"), []byte(`
-apiVersion: kubara.io/v1alpha1
-kind: ServiceDefinition
-metadata:
-  name: argo-cd
-spec:
-  chartPath: custom-argo-cd
-  status: enabled
-`), 0644))
+				createSchemaCollisionCatalog(t, tempDir)
 			},
 			wantErr: false,
 			validate: func(t *testing.T, tempDir string) {
@@ -191,7 +184,7 @@ spec:
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
-			seedBootstrapCatalogCache(t, tempDir)
+			createSchemaTestConfig(t, tempDir)
 
 			globalFlags := []string{
 				"--work-dir", tempDir,

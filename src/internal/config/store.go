@@ -90,10 +90,10 @@ func (cs *ConfigStore) Load() error {
 	return nil
 }
 
-// GenerateSchemaWithCatalog generates a JSON schema from the Config struct
-// with optional additional catalog service definitions merged into the loaded catalog set.
-func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]any, error) {
-	cat, err := catalog.Load(catalogOptions)
+// GenerateSchema generates a JSON schema from the Config struct using the
+// same resolved catalog view as config validation and generation.
+func (cs *ConfigStore) GenerateSchema() (map[string]any, error) {
+	cat, err := cs.GetCatalog()
 	if err != nil {
 		return nil, fmt.Errorf("load catalog: %w", err)
 	}

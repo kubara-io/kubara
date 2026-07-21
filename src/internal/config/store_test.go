@@ -62,6 +62,21 @@ func newValidTestConfig() *Config {
 	}
 }
 
+func createLoadedConfigStore(t *testing.T, cfg *Config) *ConfigStore {
+	t.Helper()
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	configYAML, err := yaml.Marshal(cfg)
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(configPath, configYAML, 0o644))
+
+	cs := NewConfigStore(tempDir, configPath, catalog.LoadOptions{})
+	require.NoError(t, cs.Load())
+
+	return cs
+}
+
 func TestValidateProviderKubernetesTypes(t *testing.T) {
 	tests := []struct {
 		name           string
@@ -520,7 +535,8 @@ func TestGenerateSchema(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
+			cs := createLoadedConfigStore(t, newValidTestConfig())
+			schemaDoc, err := cs.GenerateSchema()
 			if tt.wantErr {
 				assert.Error(t, err)
 				return
@@ -559,7 +575,8 @@ func TestGenerateSchema(t *testing.T) {
 }
 
 func TestGenerateSchema_TerraformProviderNoneAllowsMissingTerraformDetails(t *testing.T) {
-	schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
+	cs := createLoadedConfigStore(t, newValidTestConfig())
+	schemaDoc, err := cs.GenerateSchema()
 	require.NoError(t, err)
 
 	const schemaURL = "mem://config.schema.json"
@@ -597,7 +614,8 @@ func configInstance(t *testing.T, cfg *Config) map[string]any {
 }
 
 func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
-	schemaDoc, err := GenerateSchemaWithCatalog(testCatalogLoadOptions())
+	cs := createLoadedConfigStore(t, newValidTestConfig())
+	schemaDoc, err := cs.GenerateSchema()
 	require.NoError(t, err)
 
 	defs, ok := schemaDoc["$defs"].(map[string]any)
