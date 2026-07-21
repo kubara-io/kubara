@@ -5,4 +5,4 @@
 global:
   allowedIssuerDomains: "{{ (index .cluster.services "cert-manager" "config" "clusterIssuer" "server") }}"
   allowedImageRegistries: |
-   "${ARGOCD_GIT_HTTPS_URL}/*|${ARGOCD_HELM_REPO_URL}/*"
+   "{{ .cluster.argocd.repo.git.configs.url }}/*|${ARGOCD_HELM_REPO_URL}/*"
