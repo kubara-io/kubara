@@ -28,8 +28,8 @@ tflint --version
 
 FAILED_DIRS=()
 TARGET_DIRS=(
-  "managed-service-catalog/terraform/modules"
-  "customer-service-catalog/terraform/kubara"
+  "platform-components/terraform/stackit/modules"
+  "platform-configs/kubara/terraform"
 )
 
 # ---- Preconditions ----------------------------------------------------------

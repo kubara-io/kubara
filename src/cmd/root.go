@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/kubara-io/kubara/cmd/catalog"
+	"github.com/kubara-io/kubara/cmd/cluster"
 	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/updatecheck"
 	"github.com/rs/zerolog/log"
@@ -66,7 +67,9 @@ func NewRootCmd(ver string) *cli.Command {
 			NewGenerateCmd(),
 			NewBootstrapCmd(),
 			NewSchemaCmd(),
+			NewAgentsCmd(),
 			catalog.NewCatalogCommand(),
+			cluster.NewClusterCommand(),
 		},
 		Before: func(ctx context.Context, _ *cli.Command) (context.Context, error) {
 			if shouldNotifyStartupUpdate(globalFlags.ToRootOptions()) {

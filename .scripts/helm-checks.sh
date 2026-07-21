@@ -48,15 +48,15 @@ set -uo pipefail
 export PATH="$HOME/.local/bin:$PATH"
 
 # ─── Paths ────────────────────────────────────────────────────────────
-# MANAGED/CUSTOMER are resolved against $PWD because that is where
+# MANAGED/CONFIGS are resolved against $PWD because that is where
 # `kubara generate` produces its output — CI and local runs both cd there.
 # PROFILES is resolved against the script location so the same file layout
 # works in both places without symlinks: CI checks out .scripts + .github
 # side by side, locally the repo already has them.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-MANAGED="managed-service-catalog/helm"
-CUSTOMER="customer-service-catalog/helm/kubara"
+MANAGED="platform-components/helm"
+CONFIGS="platform-configs/kubara/helm"
 PROFILES="${PROFILES:-$SCRIPT_DIR/../.github/helm-profiles}"
 REPORT_DIR="${REPORT_DIR:-$PWD/reports}"
 RENDER_DIR="${RENDER_DIR:-$PWD/rendered}"
@@ -103,7 +103,7 @@ for chart in $CHARTS; do
   chart_index=$((chart_index + 1))
   echo "::group::[render $chart_index/$TOTAL_CHARTS] $chart"
   chart_path="$MANAGED/$chart"
-  values_file="$CUSTOMER/$chart/values.yaml"
+  values_file="$CONFIGS/$chart/values.generated.yaml"
   out_dir="$RENDER_DIR/$chart"
   mkdir -p "$out_dir"
 
@@ -208,7 +208,7 @@ for chart in $CHARTS; do
 
   echo "::group::[lint $chart_index/$TOTAL_CHARTS] $chart"
   chart_path="$MANAGED/$chart"
-  values_file="$CUSTOMER/$chart/values.yaml"
+  values_file="$CONFIGS/$chart/values.generated.yaml"
 
   base_values=()
   lint_ref="$chart_path/Chart.yaml"
@@ -267,6 +267,9 @@ while read -r render_file; do
       -schema-location "$SCHEMA_POOL/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json" \
       -schema-location default \
       -schema-location "https://raw.githubusercontent.com/yannh/kubernetes-json-schema/master/{{.NormalizedKubernetesVersion}}/{{.ResourceKind}}.json" \
+      # ignored because not part of baseline k8s schemas
+      # https://github.com/yannh/kubernetes-json-schema/issues/44
+      -skip snapshot.storage.k8s.io/v1/VolumeSnapshotClass \
       "$render_file" \
       | tee "$REPORT_DIR/helm/$chart-$name-kubeconform.log"; then
     echo "::error file=$render_file::kubeconform failed"

@@ -37,52 +37,40 @@ func (e *ErrorEnvMap) Unwrap() error {
 type EnvMap struct {
 	_                                   struct{} `doc:"# ✅ These values MUST be known BEFORE running Terraform."`
 	_                                   struct{} `doc:"# 🔁 Everything in <angle brackets> MUST be replaced."`
-	_                                   struct{} `doc:"# 💡 Dummy values (without <>) are optional and can be left as-is if not needed"`
-	_                                   struct{} `doc:"#    (e.g. no private image registry). It will still create a secret, but it will be not valid."`
-	_                                   struct{} `doc:"\n### Project related values"`
+	_                                   struct{} `doc:"# 💡 Values without <> are optional and can be left as-is if not needed (e.g. no private image registry)."`
+	_                                   struct{} `doc:"#    It will still create a secret, but it won't be valid."`
+	_                                   struct{} `doc:"\n# Project related values"`
 	ProjectName                         string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                        string   `default:"<...>" koanf:"PROJECT_STAGE"`
-	_                                   struct{} `doc:"\n### Container Registry Config"`
-	_                                   struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
-	DockerconfigBase64                  string   `default:"<...>" koanf:"DOCKERCONFIG_BASE64"`
-	_                                   struct{} `doc:"\n### Argo CD related values"`
+	_                                   struct{} `doc:"\n# Argo CD related values"`
+	_                                   struct{} `doc:"# Initial Admin Account Password for Argo CD."`
 	ArgocdWizardAccountPassword         string   `default:"<...>" koanf:"ARGOCD_WIZARD_ACCOUNT_PASSWORD"`
-	_                                   struct{} `doc:"\n### Git repository values"`
+	_                                   struct{} `doc:"\n# Git repository values"`
 	_                                   struct{} `doc:"# ARGOCD_GIT_AUTH_MODE supports: https, ssh, github-app. Empty keeps the legacy https mode."`
 	ArgocdGitAuthMode                   string   `default:"https" koanf:"ARGOCD_GIT_AUTH_MODE" optional:"true"`
+	_                                   struct{} `doc:"# The URL of the git repository that Argo CD will use to pull the kubara generated manifests from."`
 	_                                   struct{} `doc:"# Prefer ARGOCD_GIT_URL for new setups. ARGOCD_GIT_HTTPS_URL is kept for backward compatibility with existing .env files."`
 	ArgocdGitUrl                        string   `default:"" koanf:"ARGOCD_GIT_URL" optional:"true"`
-	ArgocdGitHttpsUrl                   string   `default:"<...>" koanf:"ARGOCD_GIT_HTTPS_URL" optional:"true"`
-	_                                   struct{} `doc:"# HTTPS mode uses username + password/PAT. PAT usually means Personal Access Token; prefer a technical or machine account, not a personal user account."`
-	ArgocdGitPatOrPassword              string   `default:"<...>" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD" optional:"true"`
-	ArgocdGitUsername                   string   `default:"<...>" koanf:"ARGOCD_GIT_USERNAME" optional:"true"`
-	_                                   struct{} `doc:"# SSH mode uses ARGOCD_GIT_SSH_PRIVATE_KEY and requires trusted SSH host keys in Argo CD known_hosts."`
+	ArgocdGitHttpsUrl                   string   `default:"" koanf:"ARGOCD_GIT_HTTPS_URL" optional:"true"`
+	_                                   struct{} `doc:"\n# https mode: username + password/PAT. Necessary if your repository isn't public."`
+	ArgocdGitUsername                   string   `default:"" koanf:"ARGOCD_GIT_USERNAME" optional:"true"`
+	ArgocdGitPatOrPassword              string   `default:"" koanf:"ARGOCD_GIT_PAT_OR_PASSWORD" optional:"true"`
+	_                                   struct{} `doc:"\n# ssh mode: ARGOCD_GIT_SSH_PRIVATE_KEY, and requires trusted SSH host keys in Argo CD known_hosts."`
 	ArgocdGitSshPrivateKey              string   `default:"" koanf:"ARGOCD_GIT_SSH_PRIVATE_KEY" optional:"true"`
-	_                                   struct{} `doc:"# GitHub App mode uses the GitHub App IDs and private key. Enterprise base URL is optional."`
+	_                                   struct{} `doc:"\n# github-app mode: GitHub App IDs and private key. Enterprise base URL is optional."`
 	ArgocdGitGithubAppID                string   `default:"" koanf:"ARGOCD_GIT_GITHUB_APP_ID" optional:"true"`
 	ArgocdGitGithubAppInstallationID    string   `default:"" koanf:"ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID" optional:"true"`
 	ArgocdGitGithubAppPrivateKey        string   `default:"" koanf:"ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY" optional:"true"`
 	ArgocdGitGithubAppEnterpriseBaseUrl string   `default:"" koanf:"ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL" optional:"true"`
-	_                                   struct{} `doc:"\n### DNS Name/Zones related values"`
-	_                                   struct{} `doc:"# The Domain name under which your dns-entries will be added."`
-	_                                   struct{} `doc:"# The resulting dnsZone name will be a concatenation of <PROJECT_NAME>-<PROJECT_STAGE>.<DOMAIN_NAME>"`
-	_                                   struct{} `doc:"# the value should be looking like 'stackit.zone' eg. 'yourDomain.com'"`
-	DomainName                          string   `default:"<...>" koanf:"DOMAIN_NAME"`
-	_                                   struct{} `doc:"\n### Optional values"`
-	_                                   struct{} `doc:"# Helm repository values (leave empty to disable)."`
+	_                                   struct{} `doc:"\n# Optional: Helm repository values (leave empty to disable)."`
 	_                                   struct{} `doc:"# ARGOCD_HELM_REPO_URL supports: https://... (classic Helm repo) or registry.example.com/... (OCI Helm registry)."`
 	_                                   struct{} `doc:"# Compatibility: oci://... is also accepted and normalized automatically."`
 	ArgocdHelmRepoUsername              string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
 	ArgocdHelmRepoPassword              string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
 	ArgocdHelmRepoUrl                   string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
-}
-
-// ValidateAll performs basic validation on the envMap.
-func (em *EnvMap) ValidateAll() error {
-	if err := em.Validate(); err != nil {
-		return err
-	}
-	return nil
+	_                                   struct{} `doc:"\n# Optional: Container Registry Config"`
+	_                                   struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
+	DockerconfigBase64                  string   `default:"" koanf:"DOCKERCONFIG_BASE64" optional:"true"`
 }
 
 // Validate performs basic validation on the envMap.
@@ -138,11 +126,14 @@ func (em *EnvMap) Validate() error {
 func (em *EnvMap) validateGitAuth() error {
 	switch em.GitAuthMode() {
 	case GitAuthModeHTTPS:
-		return validateRequiredEnvValues(map[string]string{
+		// Username/PAT are optional so public repositories keep working;
+		// createGitRepositorySecret only adds basic-auth when both are set.
+		if err := validateRequiredEnvValues(map[string]string{
 			"ARGOCD_GIT_URL or ARGOCD_GIT_HTTPS_URL": em.GitRepositoryURL(),
-			"ARGOCD_GIT_USERNAME":                    em.ArgocdGitUsername,
-			"ARGOCD_GIT_PAT_OR_PASSWORD":             em.ArgocdGitPatOrPassword,
-		})
+		}); err != nil {
+			return err
+		}
+		return validateHTTPGitURL(em.GitRepositoryURL(), GitAuthModeHTTPS)
 	case GitAuthModeSSH:
 		if err := validateRequiredEnvValues(map[string]string{
 			"ARGOCD_GIT_URL":             em.ArgocdGitUrl,

@@ -4,10 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )
@@ -87,6 +85,9 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.KubeconfigFilePath,
 			Usage:       "Path to kubeconfig file",
 			Destination: &flags.KubeconfigFilePath,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "work-dir",
@@ -94,6 +95,9 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.WorkDir,
 			Usage:       "Working directory",
 			Destination: &flags.WorkDir,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "config-file",
@@ -101,23 +105,32 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.ConfigFilePath,
 			Usage:       "Path to the configuration file",
 			Destination: &flags.ConfigFilePath,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "env-file",
 			Value:       flags.EnvFilePath,
 			Usage:       "Path to the .env file",
 			Destination: &flags.EnvFilePath,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "catalog",
 			Value:       flags.CatalogPath,
-			Usage:       "Path to external ServiceDefinition catalog directory.",
+			Usage:       "Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
 			Destination: &flags.CatalogPath,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.BoolFlag{
 			Name:        "catalog-overwrite",
 			Value:       flags.CatalogOverwrite,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.",
+			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions",
 			Destination: &flags.CatalogOverwrite,
 		},
 		&cli.BoolFlag{
@@ -132,6 +145,9 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Usage:       "Output file path for generated command docs",
 			Destination: &flags.DocsOutputPath,
 			Hidden:      true,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.BoolFlag{
 			Name:        "base64",
@@ -156,12 +172,18 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.InputString,
 			Usage:       "Input string for base64 operation",
 			Destination: &flags.InputString,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "file",
 			Value:       flags.InputFile,
 			Usage:       "Input file path for base64 operation",
 			Destination: &flags.InputFile,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.BoolFlag{
 			Name:        "check-update",
@@ -178,21 +200,5 @@ func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error
 		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
-	rawCatalogPath := strings.TrimSpace(cmd.String("catalog"))
-	if rawCatalogPath == "" {
-		return catalog.LoadOptions{
-			CatalogPath: "",
-			Overwrite:   cmd.Bool("catalog-overwrite"),
-		}, nil
-	}
-
-	absoluteCatalogPath, err := utils.GetFullPath(rawCatalogPath, cwd)
-	if err != nil {
-		return catalog.LoadOptions{}, fmt.Errorf("get catalog path: %w", err)
-	}
-
-	return catalog.LoadOptions{
-		CatalogPath: absoluteCatalogPath,
-		Overwrite:   cmd.Bool("catalog-overwrite"),
-	}, nil
+	return catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
 }

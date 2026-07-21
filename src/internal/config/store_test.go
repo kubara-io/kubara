@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version: ConfigVersionV1Alpha1,
+		Version: ConfigVersionV1Alpha4,
 		Clusters: []Cluster{
 			{
 				Name:             "test-cluster",
@@ -32,21 +32,18 @@ func newValidTestConfig() *Config {
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",
-					DNS: DNS{
-						Name:  "example.com",
-						Email: "admin@example.com",
-					},
+					DNSContactEmail:   "admin@example.com",
 				},
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
 						AuthMode: "https",
 						Git: &RepoType{
-							Customer: Repository{
-								URL:            "https://github.com/customer/repo.git",
+							Configs: Repository{
+								URL:            "https://github.com/example/configs.git",
 								TargetRevision: "main",
 							},
-							Managed: Repository{
-								URL:            "https://github.com/managed/repo.git",
+							Components: Repository{
+								URL:            "https://github.com/example/components.git",
 								TargetRevision: "main",
 							},
 						},
@@ -66,11 +63,60 @@ func newValidTestConfig() *Config {
 					"homer-dashboard":         {Status: service.StatusEnabled},
 					"oauth2-proxy":            {Status: service.StatusEnabled},
 					"metrics-server":          {Status: service.StatusEnabled},
-					"metallb":                 {Status: service.StatusEnabled},
-					"longhorn":                {Status: service.StatusEnabled},
+					"metallb": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"publicLoadBalancerIPs":   "127.0.0.1",
+							"loadBalancerAddressPool": []any{"127.0.0.2/32"},
+						},
+					},
+					"longhorn": {Status: service.StatusEnabled},
+					"velero": {
+						Status: service.StatusEnabled,
+						Config: service.Config{
+							"backupMode":    "fs-backup",
+							"backupStorage": map[string]any{"create": true, "region": "eu01"},
+						},
+					},
+					"reloader": {Status: service.StatusDisabled},
 				},
 			},
 		},
+	}
+}
+
+func TestValidateProviderKubernetesTypes(t *testing.T) {
+	tests := []struct {
+		name           string
+		provider       TerraformProvider
+		kubernetesType string
+		wantErr        bool
+	}{
+		{name: "stackit supports ske", provider: TerraformProviderStackit, kubernetesType: "ske"},
+		{name: "stackit supports edge", provider: TerraformProviderStackit, kubernetesType: "edge"},
+		{name: "t-cloud-public supports cce", provider: TerraformProviderTCloudPublic, kubernetesType: "cce"},
+		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true},
+		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true},
+		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true},
+		{name: "unknown provider is ignored by combination validation", provider: TerraformProvider("unknown"), kubernetesType: "ske"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			cfg := newValidTestConfig()
+			cfg.Clusters[0].Terraform.Provider = tt.provider
+			cfg.Clusters[0].Terraform.KubernetesType = tt.kubernetesType
+
+			err := validateProviderKubernetesTypes(cfg)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), "terraform.provider")
+				assert.Contains(t, err.Error(), "terraform.kubernetesType")
+				return
+			}
+
+			assert.NoError(t, err)
+		})
 	}
 }
 
@@ -145,7 +191,7 @@ clusters:
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := NewConfigStoreWithCatalog(tt.filepath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", tt.filepath, catalog.LoadOptions{})
 			err := cs.Load()
 
 			if tt.wantErr {
@@ -166,7 +212,7 @@ clusters:
     type: hub
     argocd:
       repo:
-        git:
+        https:
           customer:
             url: "https://github.com/customer/repo.git"
           managed:
@@ -197,19 +243,16 @@ clusters:
 	configPath := filepath.Join(tempDir, "legacy-config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load())
 
 	loaded := cs.GetConfig()
-	require.Equal(t, ConfigVersionV1Alpha1, loaded.Version)
+	require.Equal(t, ConfigVersionV1Alpha4, loaded.Version)
 	require.Len(t, loaded.Clusters, 1)
 
 	cluster := loaded.Clusters[0]
 	assert.Equal(t, cluster.Type, "hub")
 	assert.Contains(t, cluster.Services, "argocd")
-	require.NotNil(t, cluster.ArgoCD.Repo.Git)
-	assert.Equal(t, "https://github.com/customer/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
-	assert.Equal(t, "https://github.com/managed/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
 
 	certManager := cluster.Services["cert-manager"]
 	clusterIssuer, ok := certManager.Config["clusterIssuer"].(map[string]any)
@@ -229,11 +272,9 @@ clusters:
 	savedBytes, err := os.ReadFile(configPath)
 	require.NoError(t, err)
 	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "version: v1alpha1")
+	assert.Contains(t, savedContent, "version: v1alpha4")
 	assert.Contains(t, savedContent, "cert-manager:")
 	assert.Contains(t, savedContent, "argocd:")
-	assert.Contains(t, savedContent, "git:")
-	assert.NotContains(t, savedContent, "\n        https:")
 	assert.NotContains(t, savedContent, "certManager:")
 	assert.NotContains(t, savedContent, "storageClassName:")
 	assert.NotContains(t, savedContent, "ingress:")
@@ -241,108 +282,6 @@ clusters:
 	assert.Contains(t, savedContent, "className: logs-rwo")
 	assert.Contains(t, savedContent, "networking:")
 	assert.Contains(t, savedContent, "clusterIssuer:")
-}
-
-func TestConfigStore_LoadMigratesRepoHTTPSKeyForVersionedConfig(t *testing.T) {
-	configYAML := `
-version: v1alpha1
-clusters:
-  - name: migrated-cluster
-    dnsName: migrated.example.com
-    type: hub
-    argocd:
-      repo:
-        authMode: ssh
-        https:
-          customer:
-            url: "git@github.com:customer/repo.git"
-          managed:
-            url: "git@github.com:managed/repo.git"
-    services:
-      argocd:
-        status: enabled
-      cert-manager:
-        status: enabled
-        config:
-          clusterIssuer:
-            name: letsencrypt-staging
-            email: cert@example.com
-            server: https://acme-staging-v02.api.letsencrypt.org/directory
-      external-dns:
-        status: enabled
-      external-secrets:
-        status: enabled
-      homer-dashboard:
-        status: enabled
-      kube-prometheus-stack:
-        status: enabled
-      kyverno:
-        status: enabled
-      kyverno-policies:
-        status: enabled
-      kyverno-policy-reporter:
-        status: enabled
-      loki:
-        status: enabled
-      longhorn:
-        status: enabled
-      metallb:
-        status: enabled
-      metrics-server:
-        status: enabled
-      oauth2-proxy:
-        status: enabled
-      traefik:
-        status: enabled
-`
-
-	configPath := filepath.Join(t.TempDir(), "versioned-config.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
-
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
-	require.NoError(t, cs.Load())
-
-	cluster := cs.GetConfig().Clusters[0]
-	assert.Equal(t, "ssh", cluster.ArgoCD.Repo.AuthMode)
-	require.NotNil(t, cluster.ArgoCD.Repo.Git)
-	assert.Equal(t, "git@github.com:customer/repo.git", cluster.ArgoCD.Repo.Git.Customer.URL)
-	assert.Equal(t, "git@github.com:managed/repo.git", cluster.ArgoCD.Repo.Git.Managed.URL)
-
-	savedBytes, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-	savedContent := string(savedBytes)
-	assert.Contains(t, savedContent, "git:")
-	assert.NotContains(t, savedContent, "\n        https:")
-}
-
-func TestConfigStore_LoadRejectsRepoMigrationConflict(t *testing.T) {
-	configYAML := `
-version: v1alpha1
-clusters:
-  - name: conflict-cluster
-    dnsName: conflict.example.com
-    argocd:
-      repo:
-        https:
-          customer:
-            url: "https://github.com/customer/legacy.git"
-          managed:
-            url: "https://github.com/managed/legacy.git"
-        git:
-          customer:
-            url: "https://github.com/customer/current.git"
-          managed:
-            url: "https://github.com/managed/current.git"
-    services: {}
-`
-
-	configPath := filepath.Join(t.TempDir(), "repo-conflict.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
-
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
-	err := cs.Load()
-	require.Error(t, err)
-	assert.ErrorContains(t, err, "both legacy https and git repositories")
 }
 
 func TestConfigStore_LoadRejectsLegacyMigrationConflicts(t *testing.T) {
@@ -414,17 +353,17 @@ clusters:
     dnsName: legacy.example.com
     argocd:
       repo:
-        git:
-          customer:
+        https:
+          configs:
             url: "https://github.com/customer/repo.git"
-          managed:
+          components:
             url: "https://github.com/managed/repo.git"
     services:%s`, tt.servicesYML)
 
 			configPath := filepath.Join(t.TempDir(), "legacy-conflict.yaml")
 			require.NoError(t, os.WriteFile(configPath, []byte(legacyYAML), 0644))
 
-			cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+			cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 			err := cs.Load()
 			require.Error(t, err)
 			for _, wantErr := range tt.wantErrs {
@@ -451,10 +390,15 @@ func TestConfigStore_Validate(t *testing.T) {
 	invalidConfigEnumMismatch := deepCopyConfig(validConfig)
 	invalidConfigEnumMismatch.Clusters[0].Type = "invalid-type"
 
+	invalidConfigProviderEnumMismatch := deepCopyConfig(validConfig)
+	clonedTerraformProvider := *invalidConfigProviderEnumMismatch.Clusters[0].Terraform
+	clonedTerraformProvider.Provider = TerraformProvider("unknown")
+	invalidConfigProviderEnumMismatch.Clusters[0].Terraform = &clonedTerraformProvider
+
 	// Test format validation (email)
 	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
 	clonedTerraform := *invalidConfigFormatMismatch.Clusters[0].Terraform
-	clonedTerraform.DNS.Email = "not-an-email"
+	clonedTerraform.DNSContactEmail = "not-an-email"
 	invalidConfigFormatMismatch.Clusters[0].Terraform = &clonedTerraform
 
 	// Terraform is optional at the cluster level
@@ -466,17 +410,6 @@ func TestConfigStore_Validate(t *testing.T) {
 	clonedTerraformMissing := *invalidConfigMissingTerraformField.Clusters[0].Terraform
 	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
-
-	// Test optional IP address fields
-	validConfigWithLoadBalancerIPs := deepCopyConfig(validConfig)
-	validConfigWithLoadBalancerIPs.Clusters[0].PrivateLoadBalancerIP = "192.168.1.10"
-	validConfigWithLoadBalancerIPs.Clusters[0].PublicLoadBalancerIP = "203.0.113.10"
-
-	invalidConfigInvalidPrivateIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPrivateIP.Clusters[0].PrivateLoadBalancerIP = "not-an-ip"
-
-	invalidConfigInvalidPublicIP := deepCopyConfig(validConfig)
-	invalidConfigInvalidPublicIP.Clusters[0].PublicLoadBalancerIP = "999.999.999.999"
 
 	tests := []struct {
 		name    string
@@ -509,6 +442,11 @@ func TestConfigStore_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
+			name:    "invalid_config_should_fail_on_provider_enum_mismatch",
+			config:  invalidConfigProviderEnumMismatch,
+			wantErr: true,
+		},
+		{
 			name:    "invalid_config_should_fail_on_format_mismatch",
 			config:  invalidConfigFormatMismatch,
 			wantErr: true,
@@ -516,21 +454,6 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_missing_terraform_required_field",
 			config:  invalidConfigMissingTerraformField,
-			wantErr: true,
-		},
-		{
-			name:    "valid_config_with_loadbalancer_ips_should_pass_validation",
-			config:  validConfigWithLoadBalancerIPs,
-			wantErr: false,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_private_loadbalancer_ip",
-			config:  invalidConfigInvalidPrivateIP,
-			wantErr: true,
-		},
-		{
-			name:    "invalid_config_should_fail_on_invalid_public_loadbalancer_ip",
-			config:  invalidConfigInvalidPublicIP,
 			wantErr: true,
 		},
 	}
@@ -738,6 +661,44 @@ func TestGenerateSchema(t *testing.T) {
 	}
 }
 
+func TestGenerateSchema_TerraformProviderNoneAllowsMissingTerraformDetails(t *testing.T) {
+	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
+	require.NoError(t, err)
+
+	const schemaURL = "mem://config.schema.json"
+	c := schemaValidator.NewCompiler()
+	c.AssertFormat()
+	require.NoError(t, c.AddResource(schemaURL, schemaDoc))
+
+	compiled, err := c.Compile(schemaURL)
+	require.NoError(t, err)
+
+	validNoneConfig := configInstance(t, newValidTestConfig())
+	cluster := validNoneConfig["clusters"].([]any)[0].(map[string]any)
+	cluster["terraform"] = map[string]any{
+		"provider": "none",
+	}
+	assert.NoError(t, compiled.Validate(validNoneConfig))
+
+	invalidStackitConfig := configInstance(t, newValidTestConfig())
+	cluster = invalidStackitConfig["clusters"].([]any)[0].(map[string]any)
+	cluster["terraform"] = map[string]any{
+		"provider": "stackit",
+	}
+	assert.Error(t, compiled.Validate(invalidStackitConfig))
+}
+
+func configInstance(t *testing.T, cfg *Config) map[string]any {
+	t.Helper()
+
+	data, err := json.Marshal(cfg)
+	require.NoError(t, err)
+
+	var instance map[string]any
+	require.NoError(t, json.Unmarshal(data, &instance))
+	return instance
+}
+
 func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	schemaDoc, err := GenerateSchemaWithCatalog(catalog.LoadOptions{})
 	require.NoError(t, err)
@@ -766,9 +727,9 @@ clusters:
     argocd:
       repo:
         https:
-          customer:
+          configs:
             url: "https://github.com/customer/repo.git"
-          managed:
+          components:
             url: "https://github.com/managed/repo.git"
     services:
       argocd: {}
@@ -795,7 +756,7 @@ clusters:
 	configPath := filepath.Join(tempDir, "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(minimalYAML), 0644))
 
-	cs := NewConfigStoreWithCatalog(configPath, catalog.LoadOptions{})
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
 	require.NoError(t, cs.Load(), "Load should succeed")
 
 	c := cs.GetConfig().Clusters[0]
@@ -804,4 +765,31 @@ clusters:
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 
 	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
+}
+
+func TestLoadAndValidate_TerraformProviderNoneDisablesTerraform(t *testing.T) {
+	configYAML := `
+clusters:
+  - name: helm-only-cluster
+    dnsName: helm-only.example.com
+    terraform:
+      provider: none
+    argocd:
+      repo:
+        https:
+          configs:
+            url: "https://github.com/customer/repo.git"
+          components:
+            url: "https://github.com/managed/repo.git"
+`
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
+
+	cs := NewConfigStore(".", configPath, catalog.LoadOptions{})
+	require.NoError(t, cs.Load())
+
+	require.Len(t, cs.GetConfig().Clusters, 1)
+	assert.Nil(t, cs.GetConfig().Clusters[0].Terraform)
 }

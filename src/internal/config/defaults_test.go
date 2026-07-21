@@ -54,7 +54,7 @@ func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID:         "some-id",
 					KubernetesVersion: "1.34",
-					DNS:               DNS{Name: "example.com", Email: "admin@example.com"},
+					DNSContactEmail:   "admin@example.com",
 					// Should get defaults for:
 					// Provider and KubernetesType
 				},
@@ -65,7 +65,7 @@ func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {
 	applyDefaults(cfg)
 
 	tf := cfg.Clusters[0].Terraform
-	assert.Equal(t, "stackit", tf.Provider, "Provider should default to stackit")
+	assert.Equal(t, TerraformProviderNone, tf.Provider, "Provider should default to none")
 	assert.Equal(t, "ske", tf.KubernetesType, "KubernetesType should default to ske")
 }
 
@@ -89,9 +89,10 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 			{
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
+						AuthMode: "https",
 						Git: &RepoType{
-							Customer: Repository{URL: "https://github.com/customer/repo.git"},
-							Managed:  Repository{URL: "https://github.com/managed/repo.git", TargetRevision: "release"},
+							Configs:    Repository{URL: "https://github.com/customer/repo.git"},
+							Components: Repository{URL: "https://github.com/managed/repo.git", TargetRevision: "release"},
 						},
 					},
 				},
@@ -101,10 +102,9 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 
 	applyDefaults(cfg)
 
-	gitRepo := cfg.Clusters[0].ArgoCD.Repo.Git
-	assert.Equal(t, "https", cfg.Clusters[0].ArgoCD.Repo.AuthMode, "empty repo AuthMode should default to https")
-	assert.Equal(t, "main", gitRepo.Customer.TargetRevision, "empty TargetRevision should default to main")
-	assert.Equal(t, "release", gitRepo.Managed.TargetRevision, "explicit TargetRevision should not be overwritten")
+	git := cfg.Clusters[0].ArgoCD.Repo.Git
+	assert.Equal(t, "main", git.Configs.TargetRevision, "empty TargetRevision should default to main")
+	assert.Equal(t, "release", git.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
 }
 
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {

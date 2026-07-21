@@ -40,9 +40,9 @@ kubara [command]
 
 **--base64**: Enable base64 encode/decode mode
 
-**--catalog**="": Path to external ServiceDefinition catalog directory.
+**--catalog**="": Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
-**--catalog-overwrite**: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions.
+**--catalog-overwrite**: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions
 
 **--check-update**: Check online for a newer kubara release
 
@@ -75,11 +75,13 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init
+>kubara init [--prep] [--local]
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
+
+**--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use.
 
 **--overwrite**: Overwrite config if exists
 
@@ -93,17 +95,13 @@ Shows a list of commands or help for one command
 
 Generate files from catalog templates
 
->kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]
+>kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
 
 **--dry-run**: Preview generation without creating files
 
 **--helm**: Only generate Helm files
 
 **--help, -h**: show help
-
-**--managed-catalog**="": Path to the managed catalog directory. (default: "managed-service-catalog")
-
-**--overlay-values**="": Path to overlay values directory. (default: "customer-service-catalog")
 
 **--terraform**: Only generate Terraform files
 
@@ -115,7 +113,7 @@ Shows a list of commands or help for one command
 
 Bootstrap Argo CD onto a cluster
 
->kubara bootstrap CLUSTER_NAME
+>kubara bootstrap CLUSTER_NAME [--local]
 
 **--dry-run**: Run with dry-run
 
@@ -123,9 +121,11 @@ Bootstrap Argo CD onto a cluster
 
 **--help, -h**: show help
 
-**--managed-catalog**="": Path to the managed catalog directory (default: "managed-service-catalog")
+**--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
-**--overlay-values**="": Path to overlay values directory (default: "customer-service-catalog")
+**--platform-components**="": Path to the platform-components directory (default: "platform-components")
+
+**--platform-configs**="": Path to platform-configs directory (default: "platform-configs")
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 
@@ -143,7 +143,7 @@ Shows a list of commands or help for one command
 
 Generate a JSON schema for the config yaml structure
 
->kubara schema [--output PATH] [--catalog PATH [--catalog-overwrite]]
+>kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]
 
 **--help, -h**: show help
 
@@ -153,9 +153,23 @@ Generate a JSON schema for the config yaml structure
 
 Shows a list of commands or help for one command
 
+## agents
+
+Scaffold an onboarding file for AI coding assistants (AGENTS.md)
+
+>kubara agents [--overwrite]
+
+**--help, -h**: show help
+
+**--overwrite**: Overwrite an existing AGENTS.md
+
+### help, h
+
+Shows a list of commands or help for one command
+
 ## catalog
 
-Manage custom catalogs and service definitions
+Manage platform catalogs
 
 >kubara catalog [command]
 
@@ -178,6 +192,132 @@ Shows a list of commands or help for one command
 Add a service definition to the current catalog
 
 >kubara catalog add SERVICE_NAME
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### pull
+
+Pull a catalog from a remote registry
+
+>kubara catalog pull [--insecure] oci://registry/repository:x.y.z
+
+**--help, -h**: show help
+
+**--insecure**: Ignore TLS certificate verification issues for the registry connection.
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### push
+
+Push catalog to a remote registry
+
+>kubara catalog push [--from oci://registry-source/repository:x.y.z] [--insecure] oci://registry-target/repository:x.y.z
+
+**--from**="": Push an existing cached catalog reference to another registry.
+
+**--help, -h**: show help
+
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### login
+
+Log into a registry and store credentials
+
+>kubara catalog login [flags] <registry>
+
+**--help, -h**: show help
+
+**--identity-token**: Log in with identity token interactively
+
+**--identity-token-stdin**: Log in with identity token from stdin
+
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
+
+**--password, -p**: Log in with password interactively
+
+**--password-stdin**: Log in with password from stdin
+
+**--username, -u**="": Log in using username and password
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### list, ls
+
+List cached local and OCI-backed catalogs
+
+>kubara catalog list
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### package, pkg
+
+Package the current catalog directory into the local cache
+
+>kubara catalog package [oci://REGISTRY/BASE/PATH/]
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### unpackage, unpkg
+
+Materialize a cached OCI catalog as an editable directory
+
+>kubara catalog unpackage oci://registry/repository:x.y.z [directory]
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### help, h
+
+Shows a list of commands or help for one command
+
+## cluster
+
+Manage your kubara cluster configurations
+
+>kubara cluster [command]
+
+**--help, -h**: show help
+
+### list, ls
+
+List all clusters in the config file
+
+>kubara cluster ls
+
+**--help, -h**: show help
+
+#### help, h
+
+Shows a list of commands or help for one command
+
+### add
+
+Add a new spoke cluster to your config
+
+>kubara cluster add CLUSTER_NAME
 
 **--help, -h**: show help
 

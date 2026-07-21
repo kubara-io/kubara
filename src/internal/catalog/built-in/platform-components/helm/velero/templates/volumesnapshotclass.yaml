@@ -1,0 +1,20 @@
+{{- $volumeSnapshotClass := .Values.volumeSnapshotClass | default dict -}}
+{{- if $volumeSnapshotClass.customDefinition }}
+{{ toYaml $volumeSnapshotClass.customDefinition }}
+{{- else }}
+{{- $providerName := $volumeSnapshotClass.k8sProvider -}}
+{{- if and $providerName (ne $providerName "none") }}
+{{- $providerConfig := index ($volumeSnapshotClass.providers | default dict) $providerName -}}
+{{- if not $providerConfig }}
+{{- fail (printf "volumeSnapshotClass.k8sProvider %q is not configured; define volumeSnapshotClass.providers.%s or volumeSnapshotClass.customDefinition" $providerName $providerName) }}
+{{- end }}
+# required class for the velero snapshots
+apiVersion: snapshot.storage.k8s.io/v1
+kind: VolumeSnapshotClass
+metadata:
+  name: velero-csi
+  labels:
+    velero.io/csi-volumesnapshot-class: "true"
+{{ toYaml $providerConfig }}
+{{- end }}
+{{- end }}

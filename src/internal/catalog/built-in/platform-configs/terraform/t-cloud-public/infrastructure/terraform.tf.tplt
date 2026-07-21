@@ -1,0 +1,92 @@
+terraform {
+  required_version = ">= 1.9.3"
+
+  backend "s3" {
+    bucket = "bucket-tf-{{ .cluster.name }}-{{ .cluster.stage }}"
+    key    = "tf-state-{{ .cluster.name }}-{{ .cluster.stage }}"
+    endpoints = {
+      s3 = "https://obs.eu-de.otc.t-systems.com"
+    }
+    region                      = "eu-de"
+    skip_credentials_validation = true
+    skip_region_validation      = true
+    skip_s3_checksum            = true
+    skip_requesting_account_id  = true
+    skip_metadata_api_check     = true
+  }
+
+  required_providers {
+    opentelekomcloud = {
+      source  = "opentelekomcloud/opentelekomcloud"
+      version = ">= 1.36.64, < 2.0.0"
+    }
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.17.0, < 3.0.0"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = ">= 2.36.0, < 3.0.0"
+    }
+{{ end }}
+  }
+}
+
+provider "opentelekomcloud" {
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_tenant_name
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+provider "opentelekomcloud" {
+  alias       = "global-region"
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_region
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+locals {
+  cce_kubeconfig = yamldecode(module.cce_cluster.kubeconfig)
+
+  # OTC CCE returns three cluster entries in the generated kubeconfig when
+  # an EIP is bound to the master:
+  #   - internalCluster:          VPC-internal API server, has certificate-authority-data
+  #   - externalCluster:          public API server, NO certificate-authority-data,
+  #                               relies on insecure-skip-tls-verify = true
+  #   - externalClusterTLSVerify: public API server, has certificate-authority-data
+  # We pick externalClusterTLSVerify when the public endpoint is bound so the
+  # provider verifies TLS properly. With enable_cluster_public_endpoint = false
+  # only internalCluster is present (Terraform must run inside the VPC then).
+  cce_kubeconfig_clusters = {
+    for entry in local.cce_kubeconfig.clusters : entry.name => entry.cluster
+  }
+  cce_target_cluster_name = var.enable_cluster_public_endpoint ? "externalClusterTLSVerify" : "internalCluster"
+  cce_target_cluster = lookup(
+    local.cce_kubeconfig_clusters,
+    local.cce_target_cluster_name,
+    local.cce_kubeconfig.clusters[0].cluster,
+  )
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = local.cce_target_cluster.server
+    cluster_ca_certificate = base64decode(local.cce_target_cluster["certificate-authority-data"])
+    client_certificate     = base64decode(local.cce_kubeconfig.users[0].user["client-certificate-data"])
+    client_key             = base64decode(local.cce_kubeconfig.users[0].user["client-key-data"])
+  }
+}
+
+provider "kubernetes" {
+  host                   = local.cce_target_cluster.server
+  cluster_ca_certificate = base64decode(local.cce_target_cluster["certificate-authority-data"])
+  client_certificate     = base64decode(local.cce_kubeconfig.users[0].user["client-certificate-data"])
+  client_key             = base64decode(local.cce_kubeconfig.users[0].user["client-key-data"])
+}
+{{ end }}

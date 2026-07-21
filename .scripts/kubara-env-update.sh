@@ -35,7 +35,6 @@ log "Updating .env (strict mode, no secret output): $ENV_FILE"
 # --- KUBARA_* -> .env KEY ---
 apply_if_set KUBARA_PROJECT_NAME           PROJECT_NAME
 apply_if_set KUBARA_PROJECT_STAGE          PROJECT_STAGE
-apply_if_set KUBARA_DOMAIN_NAME            DOMAIN_NAME
 
 apply_if_set KUBARA_DOCKERCONFIG_BASE64    DOCKERCONFIG_BASE64
 

@@ -1,0 +1,102 @@
+terraform {
+  required_version = ">= 1.9.3"
+
+  required_providers {
+    opentelekomcloud = {
+      source  = "opentelekomcloud/opentelekomcloud"
+      version = ">= 1.36.64, < 2.0.0"
+    }
+  }
+}
+
+provider "opentelekomcloud" {
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_tenant_name
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+provider "opentelekomcloud" {
+  alias       = "global-region"
+  auth_url    = "https://iam.${var.t_cloud_public_region}.otc.t-systems.com/v3"
+  domain_name = var.t_cloud_public_domain_name
+  tenant_name = var.t_cloud_public_region
+  access_key  = var.t_cloud_public_access_key
+  secret_key  = var.t_cloud_public_secret_key
+}
+
+# The OBS service needs an IAM agency with KMS permissions before it can
+# enable server-side encryption with a customer KMS key on a bucket. Without
+# this agency, the bucket creation fails with a 403 from KMS the moment
+# server_side_encryption is set.
+#
+# Set create_obs_kms_agency = false if the tenant already has an equivalent
+# agency (for example one named "OBSAccessKMS" delegated to op_svc_obs).
+module "obs_kms_agency" {
+  count  = var.enable_bucket_server_side_encryption && var.create_obs_kms_agency ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/identity-agencies"
+
+  agencies = {
+    obs = {
+      name                  = var.obs_kms_agency_name
+      description           = var.obs_kms_agency_description
+      delegated_domain_name = var.obs_kms_agency_delegated_domain_name
+      project_roles = [
+        {
+          project = var.t_cloud_public_region
+          roles   = var.obs_kms_agency_project_roles
+        }
+      ]
+    }
+  }
+}
+
+module "bucket_kms_key" {
+  count  = var.enable_bucket_server_side_encryption ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/kms-key"
+
+  providers = {
+    opentelekomcloud = opentelekomcloud.global-region
+  }
+
+  name         = "${var.bucket_name}-obs"
+  description  = "KMS key for ${var.bucket_name} OBS bucket encryption"
+  pending_days = var.bucket_kms_pending_days
+}
+
+module "objectstorage_bucket" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/objectstorage-bucket"
+
+  providers = {
+    opentelekomcloud               = opentelekomcloud
+    opentelekomcloud.global-region = opentelekomcloud.global-region
+  }
+
+  bucket_name                   = var.bucket_name
+  user_name                     = var.user_name
+  enable_server_side_encryption = var.enable_bucket_server_side_encryption
+  kms_key_id                    = var.enable_bucket_server_side_encryption ? module.bucket_kms_key[0].id : null
+
+  # The OBS service must have the KMS agency in place before we can ask it to
+  # encrypt a bucket with a customer KMS key. When create_obs_kms_agency is
+  # false we trust that the agency already exists outside this stack.
+  depends_on = [module.obs_kms_agency]
+}
+
+output "bucket_name" {
+  description = "OBS bucket name for Terraform state."
+  value       = module.objectstorage_bucket.bucket_name
+}
+
+output "credential_access_key" {
+  description = "Access key for Terraform S3 backend access."
+  value       = module.objectstorage_bucket.credential_access_key
+  sensitive   = true
+}
+
+output "credential_secret_access_key" {
+  description = "Secret key for Terraform S3 backend access."
+  value       = module.objectstorage_bucket.credential_secret_access_key
+  sensitive   = true
+}

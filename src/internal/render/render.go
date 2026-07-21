@@ -26,19 +26,12 @@ const (
 )
 
 const (
-	tmplRoot                  string = "built-in"
-	DefaultManagedCatalogPath string = "managed-service-catalog"
-	DefaultOverlayValuesPath  string = "customer-service-catalog"
-	providerFolderName        string = "providers"
+	tmplRoot                      string = "built-in"
+	DefaultPlatformComponentsPath string = "platform-components"
+	DefaultPlatformConfigsPath    string = "platform-configs"
 )
 
 var templatesFSNew fs.FS = catalog.BuiltInFS()
-
-// SupportedProviders lists every provider that has embedded templates.
-// Add new entries here when introducing provider-specific template directories.
-var SupportedProviders = map[string]bool{
-	"stackit": true,
-}
 
 var templateName = map[TemplateType]string{
 	Terraform: "terraform",
@@ -57,7 +50,24 @@ func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
 		return nil, fmt.Errorf("select templates for provider %q: %w", options.Provider, err)
 	}
 
+	selected = filterTemplateFiles(selected, options.PathPredicate)
+
 	return templateResultsFromFiles(selected, options.Data)
+}
+
+func filterTemplateFiles(files []templateFile, predicate TemplatePathPredicate) []templateFile {
+	if predicate == nil {
+		return files
+	}
+
+	filtered := make([]templateFile, 0, len(files))
+	for _, file := range files {
+		if predicate(StripProviderPath(file.sourcePath)) {
+			filtered = append(filtered, file)
+		}
+	}
+
+	return filtered
 }
 
 func validateTemplateType(tplType TemplateType) error {
@@ -86,12 +96,15 @@ type TemplateResult struct {
 	Error   error  // Any error that occurred during templating
 }
 
+type TemplatePathPredicate func(path string) bool
+
 type TemplateOptions struct {
-	Type        TemplateType
-	Provider    string
-	CatalogPath string
-	Overwrite   bool
-	Data        any
+	Type          TemplateType
+	Provider      string
+	CatalogPath   string
+	Overwrite     bool
+	Data          any
+	PathPredicate TemplatePathPredicate
 }
 
 type templateSource struct {
@@ -123,9 +136,13 @@ func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
 		return sources, nil
 	}
 
+	source, err := catalog.ResolveSource(options.CatalogPath)
+	if err != nil {
+		return nil, fmt.Errorf("resolve external catalog source: %w", err)
+	}
 	external := templateSource{
 		name:     "external",
-		fsys:     os.DirFS(options.CatalogPath),
+		fsys:     os.DirFS(source.RootPath),
 		baseRoot: ".",
 		external: true,
 	}
@@ -142,7 +159,7 @@ func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
 }
 
 func sourceHasTemplateRoots(source templateSource) (bool, error) {
-	roots := []string{DefaultOverlayValuesPath, DefaultManagedCatalogPath}
+	roots := []string{DefaultPlatformConfigsPath, DefaultPlatformComponentsPath}
 	for _, root := range roots {
 		info, err := fs.Stat(source.fsys, root)
 		if err != nil {
@@ -221,8 +238,8 @@ func getTemplateFiles(options TemplateOptions) ([]templateFile, error) {
 			walkErr = fs.WalkDir(source.fsys, source.baseRoot, walkDirFunc)
 		default:
 			roots := []string{
-				joinTemplateRoot(source.baseRoot, DefaultOverlayValuesPath, options.Type.String()),
-				joinTemplateRoot(source.baseRoot, DefaultManagedCatalogPath, options.Type.String()),
+				joinTemplateRoot(source.baseRoot, DefaultPlatformConfigsPath, options.Type.String()),
+				joinTemplateRoot(source.baseRoot, DefaultPlatformComponentsPath, options.Type.String()),
 			}
 			for _, root := range roots {
 				if err := fs.WalkDir(source.fsys, root, walkDirFunc); err != nil {
@@ -250,33 +267,37 @@ func splitProviderPath(relPath string) (string, string, bool) {
 	normalized := filepath.ToSlash(relPath)
 	parts := strings.Split(normalized, "/")
 	for idx := 0; idx+1 < len(parts); idx++ {
-		if parts[idx] != providerFolderName {
-			continue
-		}
-
 		// Only treat this segment as a provider selector when it appears
-		// directly inside a template-type directory (terraform or helm).
-		// This prevents stripping unrelated "providers/<x>" segments that
-		// may appear elsewhere in the path.
-		if idx == 0 || (parts[idx-1] != "terraform" && parts[idx-1] != "helm") {
+		// directly inside the Terraform template directory.
+		if idx == 0 || parts[idx-1] != Terraform.String() {
 			continue
 		}
 
-		provider := strings.ToLower(parts[idx+1])
+		provider := strings.ToLower(parts[idx])
 		if provider == "" {
-			return normalized, "", false
+			continue
 		}
 
-		stripped := append([]string{}, parts[:idx]...)
-		stripped = append(stripped, parts[idx+2:]...)
-		return strings.Join(stripped, "/"), provider, true
+		// Robustly check that we are strictly within the platform-configs root directory
+		// before stripping the provider segment.
+		if parts[0] == DefaultPlatformConfigsPath {
+			stripped := append([]string{}, parts[:idx]...)
+			stripped = append(stripped, parts[idx+1:]...)
+			return strings.Join(stripped, "/"), provider, true
+		}
+
+		// Under platform-components, we do NOT strip the provider segment from the path,
+		// but we still want to detect the provider name to filter out other providers' assets!
+		if parts[0] == DefaultPlatformComponentsPath {
+			return normalized, provider, true
+		}
 	}
 
 	return normalized, "", false
 }
 
-// StripProviderPath removes a provider selector segment from a relative
-// template path (e.g. ".../providers/stackit/...") if present.
+// StripProviderPath removes a Terraform provider selector segment from a
+// relative template path (e.g. ".../terraform/stackit/...") if present.
 func StripProviderPath(relPath string) string {
 	stripped, _, _ := splitProviderPath(relPath)
 	return stripped

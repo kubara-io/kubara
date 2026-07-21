@@ -86,15 +86,11 @@ func TestEnvMap_Validate(t *testing.T) {
 		return &EnvMap{
 			ProjectName:                 "test-project",
 			ProjectStage:                "dev",
-			DockerconfigBase64:          "dGVzdC1kb2NrZXItY29uZmlnCg==",
 			ArgocdWizardAccountPassword: "password123",
 			ArgocdHelmRepoUsername:      "helm-user",
 			ArgocdHelmRepoPassword:      "helm-pass",
 			ArgocdHelmRepoUrl:           "https://helm.example.com",
 			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			ArgocdGitPatOrPassword:      "github-token",
-			ArgocdGitUsername:           "git-user",
-			DomainName:                  "example.com",
 		}
 	}
 
@@ -130,107 +126,18 @@ func TestEnvMap_Validate(t *testing.T) {
 			errType: ErrDefaultIsSet,
 		},
 		{
-			name: "Missing optional helm repository fields passes validation",
+			name: "Missing optional fields pass validation",
 			envMap: func() *EnvMap {
 				em := validEnvMap()
+				em.DockerconfigBase64 = ""
 				em.ArgocdHelmRepoUsername = ""
 				em.ArgocdHelmRepoPassword = ""
 				em.ArgocdHelmRepoUrl = ""
-				return em
-			}(),
-			wantErr: false,
-		},
-		{
-			name: "Valid SSH git auth passes validation",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeSSH
-				em.ArgocdGitUrl = "git@github.com:example/repo.git"
-				em.ArgocdGitHttpsUrl = ""
 				em.ArgocdGitPatOrPassword = ""
 				em.ArgocdGitUsername = ""
-				em.ArgocdGitSshPrivateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----"
 				return em
 			}(),
 			wantErr: false,
-		},
-		{
-			name: "SSH git auth requires private key",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeSSH
-				em.ArgocdGitUrl = "git@github.com:example/repo.git"
-				em.ArgocdGitSshPrivateKey = ""
-				return em
-			}(),
-			wantErr: true,
-			errType: ErrEnvsNotSet,
-		},
-		{
-			name: "SSH git auth rejects HTTPS URL",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeSSH
-				em.ArgocdGitUrl = "https://github.com/example/repo.git"
-				em.ArgocdGitSshPrivateKey = "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----"
-				return em
-			}(),
-			wantErr: true,
-			errType: ErrInvalidEnvValue,
-		},
-		{
-			name: "Valid GitHub App git auth passes validation",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
-				em.ArgocdGitUrl = "https://github.com/example/repo.git"
-				em.ArgocdGitHttpsUrl = ""
-				em.ArgocdGitPatOrPassword = ""
-				em.ArgocdGitUsername = ""
-				em.ArgocdGitGithubAppID = "123"
-				em.ArgocdGitGithubAppInstallationID = "456"
-				em.ArgocdGitGithubAppPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----"
-				return em
-			}(),
-			wantErr: false,
-		},
-		{
-			name: "GitHub App git auth requires private key",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
-				em.ArgocdGitUrl = "https://github.com/example/repo.git"
-				em.ArgocdGitGithubAppID = "123"
-				em.ArgocdGitGithubAppInstallationID = "456"
-				em.ArgocdGitGithubAppPrivateKey = ""
-				return em
-			}(),
-			wantErr: true,
-			errType: ErrEnvsNotSet,
-		},
-		{
-			name: "GitHub App git auth rejects SSH URL",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = GitAuthModeGitHubApp
-				em.ArgocdGitUrl = "git@github.com:example/repo.git"
-				em.ArgocdGitGithubAppID = "123"
-				em.ArgocdGitGithubAppInstallationID = "456"
-				em.ArgocdGitGithubAppPrivateKey = "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----"
-				return em
-			}(),
-			wantErr: true,
-			errType: ErrInvalidEnvValue,
-		},
-		{
-			name: "Invalid git auth mode fails validation",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ArgocdGitAuthMode = "token"
-				return em
-			}(),
-			wantErr: true,
-			errType: ErrInvalidEnvValue,
 		},
 		{
 			name: "Multiple missing required fields",
@@ -238,7 +145,6 @@ func TestEnvMap_Validate(t *testing.T) {
 				em := validEnvMap()
 				em.ProjectName = ""
 				em.ProjectStage = ""
-				em.DomainName = ""
 				return em
 			}(),
 			wantErr: true,
@@ -254,56 +160,6 @@ func TestEnvMap_Validate(t *testing.T) {
 				if tt.errType != nil {
 					assert.True(t, errors.Is(err, tt.errType), "Expected error type %v, got %v", tt.errType, err)
 				}
-			} else {
-				assert.NoError(t, err)
-			}
-		})
-	}
-}
-
-func TestEnvMap_ValidateAll(t *testing.T) {
-	validEnvMap := func() *EnvMap {
-		return &EnvMap{
-			ProjectName:                 "test-project",
-			ProjectStage:                "dev",
-			DockerconfigBase64:          "dGVzdC1kb2NrZXItY29uZmlnCg==",
-			ArgocdWizardAccountPassword: "password123",
-			ArgocdHelmRepoUsername:      "helm-user",
-			ArgocdHelmRepoPassword:      "helm-pass",
-			ArgocdHelmRepoUrl:           "https://helm.example.com",
-			ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
-			ArgocdGitPatOrPassword:      "github-token",
-			ArgocdGitUsername:           "git-user",
-			DomainName:                  "example.com",
-		}
-	}
-
-	tests := []struct {
-		name    string
-		envMap  *EnvMap
-		wantErr bool
-	}{
-		{
-			name:    "Valid EnvMap passes ValidateAll",
-			envMap:  validEnvMap(),
-			wantErr: false,
-		},
-		{
-			name: "Invalid EnvMap fails ValidateAll",
-			envMap: func() *EnvMap {
-				em := validEnvMap()
-				em.ProjectName = ""
-				return em
-			}(),
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := tt.envMap.ValidateAll()
-			if tt.wantErr {
-				assert.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -327,15 +183,6 @@ func TestEnvMap_setDefaults(t *testing.T) {
 			},
 			expectedValue: "<...>",
 			fieldName:     "ProjectName",
-		},
-		{
-			name:   "Sets default for DomainName when empty",
-			envMap: &EnvMap{},
-			checkField: func(em *EnvMap) string {
-				return em.DomainName
-			},
-			expectedValue: "<...>",
-			fieldName:     "DomainName",
 		},
 		{
 			name: "Does not overwrite existing value",
@@ -367,22 +214,16 @@ func TestEnvMap_setDefaults_AllFields(t *testing.T) {
 		// Verify that all fields with default tags are set
 		assert.Equal(t, "<...>", em.ProjectName)
 		assert.Equal(t, "<...>", em.ProjectStage)
-		assert.Equal(t, "<...>", em.DockerconfigBase64)
+		assert.Equal(t, "", em.DockerconfigBase64)
 		assert.Equal(t, "<...>", em.ArgocdWizardAccountPassword)
 		assert.Equal(t, "", em.ArgocdHelmRepoUsername)
 		assert.Equal(t, "", em.ArgocdHelmRepoPassword)
 		assert.Equal(t, "", em.ArgocdHelmRepoUrl)
 		assert.Equal(t, "https", em.ArgocdGitAuthMode)
 		assert.Equal(t, "", em.ArgocdGitUrl)
-		assert.Equal(t, "<...>", em.ArgocdGitHttpsUrl)
-		assert.Equal(t, "<...>", em.ArgocdGitPatOrPassword)
-		assert.Equal(t, "<...>", em.ArgocdGitUsername)
-		assert.Equal(t, "", em.ArgocdGitSshPrivateKey)
-		assert.Equal(t, "", em.ArgocdGitGithubAppID)
-		assert.Equal(t, "", em.ArgocdGitGithubAppInstallationID)
-		assert.Equal(t, "", em.ArgocdGitGithubAppPrivateKey)
-		assert.Equal(t, "", em.ArgocdGitGithubAppEnterpriseBaseUrl)
-		assert.Equal(t, "<...>", em.DomainName)
+		assert.Equal(t, "", em.ArgocdGitHttpsUrl)
+		assert.Equal(t, "", em.ArgocdGitPatOrPassword)
+		assert.Equal(t, "", em.ArgocdGitUsername)
 	})
 }
 
@@ -415,7 +256,7 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 			// Only set some required fields, leave others empty
 			ProjectName:  "test",
 			ProjectStage: "dev",
-			// Leave DomainName and others empty
+			// Leave others empty
 		}
 
 		err := em.Validate()
@@ -424,22 +265,18 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 		var envMapErr *ErrorEnvMap
 		require.True(t, errors.As(err, &envMapErr))
 		assert.Contains(t, envMapErr.Message, "Vars not set:")
-		assert.Contains(t, envMapErr.Message, "DOMAIN_NAME")
+		assert.Contains(t, envMapErr.Message, "ARGOCD_WIZARD_ACCOUNT_PASSWORD")
 	})
 
 	t.Run("Error message contains field names for default values", func(t *testing.T) {
 		em := &EnvMap{
 			ProjectName:                 "<...>",
 			ProjectStage:                "dev",
-			DockerconfigBase64:          "test",
 			ArgocdWizardAccountPassword: "test",
 			ArgocdHelmRepoUsername:      "test",
 			ArgocdHelmRepoPassword:      "test",
 			ArgocdHelmRepoUrl:           "test",
 			ArgocdGitHttpsUrl:           "test",
-			ArgocdGitPatOrPassword:      "test",
-			ArgocdGitUsername:           "test",
-			DomainName:                  "test",
 		}
 
 		err := em.Validate()
@@ -450,6 +287,123 @@ func TestEnvMap_Validate_ErrorMessages(t *testing.T) {
 		assert.Contains(t, envMapErr.Message, "Vars are set to default:")
 		assert.Contains(t, envMapErr.Message, "PROJECT_NAME")
 	})
+}
+
+func TestEnvMap_GitAuthMode(t *testing.T) {
+	tests := []struct {
+		name string
+		mode string
+		want string
+	}{
+		{name: "empty defaults to https", mode: "", want: GitAuthModeHTTPS},
+		{name: "legacy placeholder defaults to https", mode: "<...>", want: GitAuthModeHTTPS},
+		{name: "uppercase is normalized", mode: "SSH", want: GitAuthModeSSH},
+		{name: "github-app is preserved", mode: "github-app", want: GitAuthModeGitHubApp},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			em := &EnvMap{ArgocdGitAuthMode: tt.mode}
+			assert.Equal(t, tt.want, em.GitAuthMode())
+		})
+	}
+}
+
+func TestEnvMap_GitRepositoryURL_PrefersGitURL(t *testing.T) {
+	em := &EnvMap{ArgocdGitUrl: "https://new.example.com/repo.git", ArgocdGitHttpsUrl: "https://legacy.example.com/repo.git"}
+	assert.Equal(t, "https://new.example.com/repo.git", em.GitRepositoryURL())
+
+	legacy := &EnvMap{ArgocdGitHttpsUrl: "https://legacy.example.com/repo.git"}
+	assert.Equal(t, "https://legacy.example.com/repo.git", legacy.GitRepositoryURL())
+}
+
+func TestEnvMap_ValidateGitAuth(t *testing.T) {
+	base := func() *EnvMap {
+		return &EnvMap{
+			ProjectName:                 "test-project",
+			ProjectStage:                "dev",
+			ArgocdWizardAccountPassword: "password123",
+		}
+	}
+
+	tests := []struct {
+		name    string
+		mutate  func(*EnvMap)
+		wantErr error
+	}{
+		{
+			name: "https without credentials is allowed (public repo)",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "https"
+				em.ArgocdGitHttpsUrl = "https://github.com/example/repo.git"
+			},
+		},
+		{
+			name:    "https without any URL fails",
+			mutate:  func(em *EnvMap) { em.ArgocdGitAuthMode = "https" },
+			wantErr: ErrEnvsNotSet,
+		},
+		{
+			name:    "https with an ssh URL fails",
+			mutate:  func(em *EnvMap) { em.ArgocdGitAuthMode = "https"; em.ArgocdGitUrl = "git@github.com:example/repo.git" },
+			wantErr: ErrInvalidEnvValue,
+		},
+		{
+			name: "ssh with private key and ssh URL passes",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "ssh"
+				em.ArgocdGitUrl = "git@github.com:example/repo.git"
+				em.ArgocdGitSshPrivateKey = "PRIVATE-KEY"
+			},
+		},
+		{
+			name: "ssh with non-ssh URL fails",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "ssh"
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitSshPrivateKey = "PRIVATE-KEY"
+			},
+			wantErr: ErrInvalidEnvValue,
+		},
+		{
+			name: "github-app with all fields passes",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "github-app"
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitGithubAppID = "123"
+				em.ArgocdGitGithubAppInstallationID = "456"
+				em.ArgocdGitGithubAppPrivateKey = "PRIVATE-KEY"
+			},
+		},
+		{
+			name: "github-app missing installation id fails",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "github-app"
+				em.ArgocdGitUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitGithubAppID = "123"
+				em.ArgocdGitGithubAppPrivateKey = "PRIVATE-KEY"
+			},
+			wantErr: ErrEnvsNotSet,
+		},
+		{
+			name:    "unknown auth mode fails",
+			mutate:  func(em *EnvMap) { em.ArgocdGitAuthMode = "totally-unknown" },
+			wantErr: ErrInvalidEnvValue,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			em := base()
+			tt.mutate(em)
+			err := em.Validate()
+			if tt.wantErr == nil {
+				assert.NoError(t, err)
+				return
+			}
+			require.Error(t, err)
+			assert.True(t, errors.Is(err, tt.wantErr), "expected %v, got %v", tt.wantErr, err)
+		})
+	}
 }
 
 func TestIsConfiguredEnvValue(t *testing.T) {

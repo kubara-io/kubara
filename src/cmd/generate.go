@@ -13,20 +13,16 @@ import (
 )
 
 type GenerateFlags struct {
-	Terraform          bool
-	Helm               bool
-	DryRun             bool
-	ManagedCatalogPath string
-	OverlayValuesPath  string
+	Terraform bool
+	Helm      bool
+	DryRun    bool
 }
 
 func NewGenerateFlags() *GenerateFlags {
 	return &GenerateFlags{
-		Terraform:          false,
-		Helm:               false,
-		DryRun:             false,
-		ManagedCatalogPath: render.DefaultManagedCatalogPath,
-		OverlayValuesPath:  render.DefaultOverlayValuesPath,
+		Terraform: false,
+		Helm:      false,
+		DryRun:    false,
 	}
 }
 
@@ -38,7 +34,7 @@ func NewGenerateCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "Generate files from catalog templates",
-		UsageText:   "kubara generate [--terraform|--helm] [--managed-catalog PATH --overlay-values PATH] [--catalog PATH [--catalog-overwrite]] [--dry-run]",
+		UsageText:   "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
 		Description: "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -63,13 +59,13 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 	if err != nil {
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
-	managedCatalogPath, err := utils.GetFullPath(cmd.String("managed-catalog"), cwd)
+	platformComponents, err := utils.GetFullPath(render.DefaultPlatformComponentsPath, cwd)
 	if err != nil {
-		return nil, fmt.Errorf("get managed catalog path: %w", err)
+		return nil, fmt.Errorf("get platform-components path: %w", err)
 	}
-	overlayValuesPath, err := utils.GetFullPath(cmd.String("overlay-values"), cwd)
+	platformConfigs, err := utils.GetFullPath(render.DefaultPlatformConfigsPath, cwd)
 	if err != nil {
-		return nil, fmt.Errorf("get overlay values path: %w", err)
+		return nil, fmt.Errorf("get platform-configs path: %w", err)
 	}
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
 	if err != nil {
@@ -87,8 +83,8 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 		ConfigFilePath:     configFilePath,
 		CatalogPath:        catalogOptions.CatalogPath,
 		CatalogOverwrite:   catalogOptions.Overwrite,
-		ManagedCatalogPath: managedCatalogPath,
-		OverlayValuesPath:  overlayValuesPath,
+		PlatformComponents: platformComponents,
+		PlatformConfigs:    platformConfigs,
 		EnvPath:            envPath,
 	}
 
@@ -120,18 +116,6 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Preview generation without creating files",
 			Value:       flags.DryRun,
 			Destination: &flags.DryRun,
-		},
-		&cli.StringFlag{
-			Name:        "managed-catalog",
-			Usage:       "Path to the managed catalog directory.",
-			Value:       render.DefaultManagedCatalogPath,
-			Destination: &flags.ManagedCatalogPath,
-		},
-		&cli.StringFlag{
-			Name:        "overlay-values",
-			Usage:       "Path to overlay values directory.",
-			Value:       render.DefaultOverlayValuesPath,
-			Destination: &flags.OverlayValuesPath,
 		},
 	}
 

@@ -25,7 +25,7 @@ jobs:
     steps:
       - name: Create GitHub App token for docs publish
         id: docs-app-token
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3
         with:
           app-id: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_ID }}
           private-key: ${{ secrets.DOCS_PUBLISHER_GITHUB_APP_PRIVATE_KEY }}
@@ -34,16 +34,16 @@ jobs:
             ${{ github.event.repository.name }}
 
       - name: Checkout kubara repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ steps.docs-app-token.outputs.token }}
           fetch-depth: 0
           fetch-tags: true
 
       - name: Install and setup uv
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          version: '0.11.17'
+          version: '0.11.28'
           enable-cache: true
           cache-dependency-glob: 'docs/uv.lock'
 
@@ -68,3 +68,24 @@ jobs:
             --push \
             --branch gh-pages \
             next latest-dev
+
+      - name: Refresh site-root llms.txt
+        run: |
+          git fetch origin gh-pages
+          GHP="${RUNNER_TEMP}/gh-pages"
+          git worktree add --detach "$GHP" origin/gh-pages
+          # Keep the index pointed at the stable version; this run only refreshes
+          # the version list. Skip gracefully if no stable release exists yet.
+          uv run python scripts/build_root_llms.py "$GHP" --allow-missing-default
+          if [ -f "$GHP/llms.txt" ]; then
+            git -C "$GHP" add llms.txt
+            if git -C "$GHP" diff --cached --quiet; then
+              echo "site-root llms.txt unchanged"
+            else
+              git -C "$GHP" commit -m "docs: regenerate site-root llms.txt"
+              git -C "$GHP" push origin HEAD:gh-pages
+            fi
+          else
+            echo "no site-root llms.txt generated; skipping"
+          fi
+          git worktree remove --force "$GHP"
