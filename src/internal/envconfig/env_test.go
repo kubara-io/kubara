@@ -338,6 +338,33 @@ func TestEnvMap_ValidateGitAuth(t *testing.T) {
 			},
 		},
 		{
+			name: "https with username and PAT is allowed (private repo)",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "https"
+				em.ArgocdGitHttpsUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitUsername = "git"
+				em.ArgocdGitPatOrPassword = "token"
+			},
+		},
+		{
+			name: "https with only username fails",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "https"
+				em.ArgocdGitHttpsUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitUsername = "git"
+			},
+			wantErr: ErrInvalidEnvValue,
+		},
+		{
+			name: "https with only PAT fails",
+			mutate: func(em *EnvMap) {
+				em.ArgocdGitAuthMode = "https"
+				em.ArgocdGitHttpsUrl = "https://github.com/example/repo.git"
+				em.ArgocdGitPatOrPassword = "token"
+			},
+			wantErr: ErrInvalidEnvValue,
+		},
+		{
 			name:    "https without any URL fails",
 			mutate:  func(em *EnvMap) { em.ArgocdGitAuthMode = "https" },
 			wantErr: ErrEnvsNotSet,
