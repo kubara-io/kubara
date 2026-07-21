@@ -43,6 +43,10 @@ func CreateTestServices() service.Services {
 	}
 }
 
+func GeneralCatalogPath() string {
+	return testGeneralCatalogPath
+}
+
 func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
 	t.Helper()
 
