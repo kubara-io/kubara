@@ -7,25 +7,27 @@
 
 ## 🤔 What is kubara?
 
-**kubara** is a single binary CLI tool written in Go providing a lightweight framework for bootstrapping 
-Kubernetes platforms with production-proven best practices very easily.  
+**kubara** is a single binary CLI tool written in Go to bootstrap, build, and package Kubernetes platforms.
 
-This includes infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party 
-tooling - all in a single reusable [GitOps](4_architecture/architecture_overview.md#gitops) workflow.  
+You can think of kubara as a package manager for platform architecture: it helps you define a reusable platform setup, generate the needed artifacts, and package that setup for reuse across many clusters.
+
+It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party tooling in one reusable [GitOps](7_architecture/architecture_overview.md#gitops) workflow.
 
 
 ![Overview](assets/diagrams.drawio)
 
-kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and maximum 
-consistency whether you're running on Cloud, Edge or Hybrid Setup.
+kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and high consistency whether you run on cloud, edge, or hybrid infrastructure.
 
-kubara provides you with a reusable, extensible structure to build and operate your Kubernetes platform - including Terraform modules, Helm charts, and secrets management - while keeping configuration simple and declarative.  
+kubara also gives you a reusable packaging model for platform architecture: **what Helm charts are for single applications, kubara catalogs are for your platform setup**.
+
+That means you can not only bootstrap a platform with kubara, but also package, distribute, and reuse that platform setup across many clusters.
 
 
 
 ## ⭐ Main Features
 
 - ⚙️ **Full Platform Bootstrap** - From infrastructure to observability, GitOps, and secrets
+- 📦 **Platform Catalog Packaging** - Package, distribute, and reuse platform setups
 - 🧱 **Modular by Design** - Helm and Terraform based components, easily extendable
 - 🔁 **Multi-cluster Support** - Hub + N Spoke clusters, with app targeting
 - 🚀 **Fast Setup** - Ready to go in under 30 minutes
@@ -43,6 +45,7 @@ kubara simplifies this with a single Go binary that:
 - Generates required configuration and secrets
 - Templatizes and deploys pre-vetted infrastructure components
 - Bootstraps your platform using Argo CD and GitOps
+- Packages reusable platform catalogs for repeatable rollout
 - Allows easy onboarding of new clusters and workloads
 
 All based on real-world usage at Schwarz Group and the experience of multiple engineering teams - so you don't have to reinvent the wheel.
@@ -63,7 +66,7 @@ kubara takes care of:
 
 ## 🚀 Getting Started
 
-Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrapping.md) to:  
+Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrapping.md) to:
 
 - Install the CLI
 - Prepare your `.env` and `config.yaml`
@@ -75,15 +78,17 @@ You're done 🎉
 
 ## 🎥/📝/🎙️ Multimedia
 
-
+- [📝 GitOps for 15,000+ Clusters: What Large-Scale Testing with vCluster Taught Us | Blog at Medium and ITNEXT, 2026](https://medium.com/itnext/gitops-for-15-000-clusters-what-large-scale-testing-with-vcluster-taught-us-41e4b0d43e0b)
+- [🎙️ One Platform Could Not Fit Them All | Virtual Talk at WeAreDevelopers, 2026 ](https://www.wearedevelopers.com/en/videos/1919/one-platform-could-not-fit-them-all)
+- [🎙️ When Building One Platform Isn’t Enough | Talk at CloudLand, 2026 ](https://meine.doag.org/events/cloudland/2026/agenda/#agendaId.7200)
 - [🎙️ Kubernetes Platform Blueprint | Co-Located Workshop with vCluster at KubeCon, 2026](https://www.vcluster.com/events/kubernetes-platform-blueprint)
-- [🎥 Free Course based on kubara, 2026 | Course at Platform Engineering University](https://university.platformengineering.org/introduction-to-gitops-for-platform-engineering)
+- [🎥 Free Course based on kubara | GitOps for Platform Engineering at Platform University, 2026 ](https://university.platformengineering.org/introduction-to-gitops-for-platform-engineering)
 - [🎙️ How to build a Multi-Tenancy Internal Developer Platform with GitOps and vCluster | Talk at ContainerDays Hamburg, 2025](https://www.youtube.com/watch?v=yQsnA91Gtcs)
-- [🎥 How to build a multi-tenancy Internal Developer Platform with GitOps and vCluster | PlatformCon 2025 | Virtual Workshop ](https://www.youtube.com/watch?v=2wQ4w1NKfd4)
-- [🎥 Load Testing Argo CD at Scale with vCluster and GitOps | vCluster Labs | Webinar ](https://www.youtube.com/watch?v=0XEWn4VmiDE)
-- [🎙️The GitOps Blueprint: Multi-Tenant Kubernetes with Argo CD in 30 Minutes | Cloud X Summit 2025 | Talk](assets/The_GitOps_Blueprint_Multi-Tenant_Kubernetes_with_Argo_CD_in_30_Minutes.pdf)
-- [📝 How We Load Test Argo CD at Scale: 1,000 vClusters with GitOps on Kubernetes | Medium and ITNEXT | Blog](https://medium.com/itnext/how-we-load-test-argo-cd-at-scale-1-000-vclusters-with-gitops-on-kubernetes-d8ea2a8935b6)
-- [📝 How to Build a Multi-Tenant Kubernetes Platform with GitOps and vCluster | Medium and ITNEXT | Blog](https://medium.com/itnext/from-ci-to-kubernetes-catalog-building-a-composable-platform-with-gitops-and-vcluster-7e1decaa81da)
+- [🎥 How to build a multi-tenancy Internal Developer Platform with GitOps and vCluster | Virtual Workshop at PlatformCon, 2025](https://www.youtube.com/watch?v=2wQ4w1NKfd4)
+- [🎥 Load Testing Argo CD at Scale with vCluster and GitOps | Webinar at vCluster, 2025 ](https://www.youtube.com/watch?v=0XEWn4VmiDE)
+- [🎙️The GitOps Blueprint: Multi-Tenant Kubernetes with Argo CD in 30 Minutes | Talk at Cloud X Summit, 2025 ](assets/The_GitOps_Blueprint_Multi-Tenant_Kubernetes_with_Argo_CD_in_30_Minutes.pdf)
+- [📝 How We Load Test Argo CD at Scale: 1,000 vClusters with GitOps on Kubernetes | Blog at Medium and ITNEXT, 2025 ](https://medium.com/itnext/how-we-load-test-argo-cd-at-scale-1-000-vclusters-with-gitops-on-kubernetes-d8ea2a8935b6)
+- [📝 How to Build a Multi-Tenant Kubernetes Platform with GitOps and vCluster | Blog at Medium and ITNEXT, 2025](https://medium.com/itnext/from-ci-to-kubernetes-catalog-building-a-composable-platform-with-gitops-and-vcluster-7e1decaa81da)
 
 ## 🤝 Contributing
 

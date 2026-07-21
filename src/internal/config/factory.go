@@ -9,7 +9,6 @@ import (
 )
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
-	dnsName := e.ProjectName + "-" + e.ProjectStage + "." + e.DomainName
 	gitRepoURL := e.GitRepositoryURL()
 	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
 	if err != nil {
@@ -20,11 +19,11 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 		Repo: RepoProto{
 			AuthMode: e.GitAuthMode(),
 			Git: &RepoType{
-				Customer: Repository{
+				Configs: Repository{
 					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
-				Managed: Repository{
+				Components: Repository{
 					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
@@ -42,14 +41,14 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 		Name:             e.ProjectName,
 		Stage:            e.ProjectStage,
 		Type:             "<hub or spoke>",
-		DNSName:          dnsName,
+		DNSName:          "<subdomain.my-domain.com>",
 		SSOOrg:           "<my-org>",
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
-			Provider:          "<provider>",
+			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
-			KubernetesType:    "<edge or ske>",
+			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
 			DNSContactEmail:   "my-test@nowhere.com",
 		},
@@ -91,4 +90,32 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 	}
 
 	return services, nil
+}
+
+func CreateSpokeScaffolding(name string) Cluster {
+	return Cluster{
+		Name:    name,
+		Stage:   "<stage>",
+		Type:    "spoke",
+		DNSName: "<dns-name>",
+		SSOOrg:  "<my-org>",
+		SSOTeam: "<my-team>",
+		Terraform: &Terraform{
+			Provider:          "<provider>",
+			ProjectID:         "<project-id>",
+			KubernetesType:    "<edge or ske>",
+			KubernetesVersion: "<version>",
+			DNSContactEmail:   "<dns-mail>",
+		},
+		ArgoCD: ArgoCD{
+			Repo: RepoProto{
+				AuthMode: envconfig.GitAuthModeHTTPS,
+				Git: &RepoType{
+					Configs:    Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+					Components: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: nil,
+	}
 }

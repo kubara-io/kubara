@@ -1,0 +1,217 @@
+{{ if (eq .cluster.terraform.kubernetesType "cce") }}
+locals {
+  cluster_name = "${var.name}-${var.stage}"
+  t_cloud_public_agencies = merge(
+    var.create_t_cloud_public_agencies ? {
+      cce = {
+        name                  = var.cce_agency_name
+        description           = var.cce_agency_description
+        delegated_domain_name = var.cce_agency_delegated_domain_name
+        project_roles = [
+          {
+            project = var.t_cloud_public_tenant_name
+            roles   = var.cce_agency_project_roles
+          }
+        ]
+      }
+      evs = {
+        name                  = var.evs_kms_agency_name
+        description           = var.evs_kms_agency_description
+        delegated_domain_name = var.evs_kms_agency_delegated_domain_name
+        project_roles = [
+          {
+            project = var.t_cloud_public_tenant_name
+            roles   = var.evs_kms_agency_project_roles
+          }
+        ]
+      }
+    } : {},
+    var.create_obs_kms_agency ? {
+      obs_kms = {
+        name                  = var.obs_kms_agency_name
+        description           = var.obs_kms_agency_description
+        delegated_domain_name = var.obs_kms_agency_delegated_domain_name
+        project_roles = [
+          {
+            project = var.t_cloud_public_region
+            roles   = var.obs_kms_agency_project_roles
+          }
+        ]
+      }
+    } : {},
+  )
+}
+
+module "t_cloud_public_agencies" {
+  count  = length(local.t_cloud_public_agencies) > 0 ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/identity-agencies"
+
+  agencies = local.t_cloud_public_agencies
+}
+
+module "dns_zone" {
+  count  = var.create_dns_zone ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/dns-zone"
+
+  name        = var.dns_zone_name
+  email       = var.dns_zone_email
+  type        = var.dns_zone_type
+  ttl         = var.dns_zone_ttl
+  description = var.dns_zone_description
+  tags        = var.dns_zone_tags
+}
+
+module "network" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/network"
+
+  name = local.cluster_name
+
+  vpc_cidr          = var.vpc_cidr
+  subnet_cidr       = var.subnet_cidr
+  subnet_gateway_ip = var.subnet_gateway_ip
+  subnet_dns_list   = var.subnet_dns_list
+
+  enable_nat_gateway                         = var.enable_nat_gateway
+  nat_gateway_spec                           = var.nat_gateway_spec
+  nat_eip_type                               = var.nat_eip_type
+  nat_eip_bandwidth_size                     = var.nat_eip_bandwidth_size
+  enable_shared_load_balancer                = var.enable_shared_load_balancer
+  enable_dedicated_load_balancer             = var.enable_dedicated_load_balancer
+  load_balancer_eip_type                     = var.load_balancer_eip_type
+  load_balancer_eip_bandwidth_size           = var.load_balancer_eip_bandwidth_size
+  dedicated_load_balancer_eip_type           = var.dedicated_load_balancer_eip_type
+  dedicated_load_balancer_eip_bandwidth_size = var.dedicated_load_balancer_eip_bandwidth_size
+
+  dedicated_load_balancer_availability_zones = var.dedicated_load_balancer_availability_zones
+  dedicated_load_balancer_l4_flavor_name     = var.dedicated_load_balancer_l4_flavor_name
+  dedicated_load_balancer_l7_flavor_name     = var.dedicated_load_balancer_l7_flavor_name
+}
+
+module "cluster_keypair" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/keypair"
+
+  name = "${local.cluster_name}-cluster-keypair"
+}
+
+module "node_storage_kms_key" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/kms-key"
+
+  name         = "${local.cluster_name}-node-pool"
+  description  = "${local.cluster_name} CCE node pool volume encryption key"
+  pending_days = var.node_storage_kms_pending_days
+}
+
+module "cce_cluster" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"
+
+  name                   = local.cluster_name
+  kubernetes_version_min = var.kubernetes_version_min
+
+  vpc_id              = module.network.vpc_id
+  subnet_id           = module.network.subnet_id
+  key_pair_name       = module.cluster_keypair.name
+  node_storage_kms_id = module.node_storage_kms_key.id
+
+  cluster_flavor_id = var.cluster_flavor_id
+  cluster_type      = var.cluster_type
+  description       = var.cluster_description
+
+  node_pools = var.node_pools
+  addons     = var.cce_addons
+
+  enable_public_endpoint                    = var.enable_cluster_public_endpoint
+  public_endpoint_eip_type                  = var.cluster_public_endpoint_eip_type
+  public_endpoint_eip_bandwidth_size        = var.cluster_public_endpoint_eip_bandwidth_size
+  public_endpoint_eip_bandwidth_share_type  = var.cluster_public_endpoint_eip_bandwidth_share_type
+  public_endpoint_eip_bandwidth_charge_mode = var.cluster_public_endpoint_eip_bandwidth_charge_mode
+
+  create_kubeconfig_local = var.create_kubeconfig_local
+  kubeconfig_path         = var.kubeconfig_path
+  kubeconfig_duration     = var.kubeconfig_duration
+
+  depends_on = [module.t_cloud_public_agencies]
+}
+
+locals {
+  storage_classes = {
+    for name, storage_class in var.storage_classes : name => {
+      annotations = storage_class.annotations
+      labels      = storage_class.labels
+      parameters = merge(
+        storage_class.parameters,
+        storage_class.use_node_storage_kms_key ? { "everest.io/crypt-key-id" = module.node_storage_kms_key.id } : {},
+      )
+      storage_provisioner    = storage_class.storage_provisioner
+      reclaim_policy         = storage_class.reclaim_policy
+      volume_binding_mode    = storage_class.volume_binding_mode
+      allow_volume_expansion = storage_class.allow_volume_expansion
+    }
+  }
+}
+
+module "storage_classes" {
+  count  = var.create_storage_classes ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/storage-classes"
+
+  storage_classes = local.storage_classes
+
+  depends_on = [module.cce_cluster]
+}
+
+module "openbao" {
+  count  = var.enable_openbao ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/openbao-helm"
+
+  release_name       = var.openbao_release_name
+  namespace          = var.openbao_namespace
+  chart_version      = var.openbao_chart_version
+  replicas           = var.openbao_replicas
+  image_pull_secrets = var.openbao_image_pull_secrets
+
+  injector_enabled        = var.openbao_injector_enabled
+  data_storage_size       = var.openbao_data_storage_size
+  data_storage_class      = var.openbao_data_storage_class
+  seal_config             = var.openbao_seal_config
+  extra_environment_vars  = var.openbao_extra_environment_vars
+  ingress_enabled         = var.openbao_ingress_enabled
+  ingress_host            = var.openbao_ingress_host
+  ingress_path            = var.openbao_ingress_path
+  ingress_class_name      = var.openbao_ingress_class_name
+  ingress_annotations     = var.openbao_ingress_annotations
+  ingress_tls_secret_name = var.openbao_ingress_tls_secret_name
+
+  depends_on = [module.cce_cluster]
+}
+
+{{ if (and (eq .cluster.services.velero.status "enabled") (index .cluster.services "velero" "config" "backupStorage" "create")) }}
+module "velero_bucket_kms_key" {
+  count  = var.velero_bucket_enable_server_side_encryption ? 1 : 0
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/kms-key"
+
+  providers = {
+    opentelekomcloud = opentelekomcloud.global-region
+  }
+
+  name         = "${local.cluster_name}-velero-obs"
+  description  = "${local.cluster_name} Velero OBS bucket encryption key"
+  pending_days = var.velero_bucket_kms_pending_days
+}
+
+module "velero_bucket" {
+  source = "../../../../platform-components/terraform/t-cloud-public/modules/objectstorage-bucket"
+
+  providers = {
+    opentelekomcloud               = opentelekomcloud
+    opentelekomcloud.global-region = opentelekomcloud.global-region
+  }
+
+  bucket_name                   = var.velero_bucket_name
+  user_name                     = var.velero_bucket_user_name
+  versioning                    = var.velero_bucket_versioning
+  enable_server_side_encryption = var.velero_bucket_enable_server_side_encryption
+  kms_key_id                    = var.velero_bucket_enable_server_side_encryption ? module.velero_bucket_kms_key[0].id : null
+
+  depends_on = [module.t_cloud_public_agencies]
+}
+{{ end }}
+{{ end }}

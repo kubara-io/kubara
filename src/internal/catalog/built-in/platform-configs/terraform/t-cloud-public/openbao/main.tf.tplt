@@ -1,0 +1,228 @@
+resource "vault_mount" "kv" {
+  count = var.manage_openbao_kv_mount ? 1 : 0
+
+  path        = var.openbao_kv_mount_path
+  type        = "kv-v2"
+  description = "kubara managed platform secrets"
+}
+
+resource "vault_policy" "admin" {
+  count = var.manage_openbao_oidc_auth_backend ? 1 : 0
+
+  name = var.openbao_oidc_admin_policy_name
+
+  policy = <<-EOT
+    path "${var.openbao_kv_mount_path}/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
+    path "auth/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
+    path "sys/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
+    path "vault_seed/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+
+    path "identity/*" {
+      capabilities = ["create", "read", "update", "delete", "list", "sudo"]
+    }
+  EOT
+
+  depends_on = [vault_mount.kv]
+}
+
+resource "vault_jwt_auth_backend" "oidc" {
+  count = var.manage_openbao_oidc_auth_backend ? 1 : 0
+
+  path                          = var.openbao_oidc_auth_path
+  type                          = "oidc"
+  oidc_discovery_url            = var.openbao_oidc_discovery_url
+  oidc_client_id                = var.openbao_oidc_client_id
+  oidc_client_secret_wo         = var.openbao_oidc_client_secret
+  oidc_client_secret_wo_version = var.openbao_oidc_client_secret_version
+  bound_issuer                  = var.openbao_oidc_discovery_url
+  default_role                  = var.openbao_oidc_admin_role_name
+
+  tune {
+    listing_visibility = "unauth"
+  }
+}
+
+resource "vault_jwt_auth_backend_role" "oidc_admin" {
+  count = var.manage_openbao_oidc_auth_backend ? 1 : 0
+
+  backend               = vault_jwt_auth_backend.oidc[0].path
+  role_name             = var.openbao_oidc_admin_role_name
+  role_type             = "oidc"
+  bound_audiences       = [var.openbao_oidc_client_id]
+  allowed_redirect_uris = var.openbao_oidc_admin_allowed_redirect_uris
+  user_claim            = var.openbao_oidc_user_claim
+  groups_claim          = var.openbao_oidc_groups_claim
+  oidc_scopes           = var.openbao_oidc_scopes
+  token_ttl             = var.openbao_oidc_admin_token_ttl
+  token_policies        = [vault_policy.admin[0].name]
+}
+
+resource "vault_auth_backend" "kubernetes" {
+  count = var.manage_openbao_kubernetes_auth_backend ? 1 : 0
+
+  type = "kubernetes"
+  path = var.openbao_kubernetes_auth_path
+}
+
+resource "vault_kubernetes_auth_backend_config" "kubernetes" {
+  count = var.manage_openbao_kubernetes_auth_backend ? 1 : 0
+
+  backend                = vault_auth_backend.kubernetes[0].path
+  kubernetes_host        = var.openbao_kubernetes_host
+  disable_iss_validation = var.openbao_kubernetes_auth_disable_iss_validation
+}
+
+resource "vault_auth_backend" "userpass" {
+  count = var.manage_openbao_userpass_auth_backend ? 1 : 0
+
+  type = "userpass"
+  path = var.openbao_userpass_auth_path
+}
+
+resource "random_password" "external_secrets_password" {
+  count = local.manage_external_secrets_userpass ? 1 : 0
+
+  length  = 32
+  special = false
+}
+
+resource "random_string" "grafana_admin_user" {
+  count = var.manage_grafana_admin_credentials && var.grafana_admin_user == "" ? 1 : 0
+
+  length  = 8
+  special = false
+}
+
+resource "random_password" "grafana_admin_password" {
+  count = var.manage_grafana_admin_credentials ? 1 : 0
+
+  length = 32
+}
+
+locals {
+  manage_external_secrets_userpass             = var.manage_openbao_userpass_auth_backend && var.manage_external_secrets_user
+  manage_external_secrets_kubernetes_auth_role = var.manage_openbao_kubernetes_auth_backend && var.manage_external_secrets_kubernetes_auth_role
+  manage_external_secrets_policy               = local.manage_external_secrets_userpass || local.manage_external_secrets_kubernetes_auth_role
+  manage_namespace_kv_read_role                = var.manage_openbao_kubernetes_auth_backend && var.manage_openbao_namespace_kv_read_role
+  external_secrets_password                    = local.manage_external_secrets_userpass ? (var.external_secrets_password != "" ? var.external_secrets_password : random_password.external_secrets_password[0].result) : null
+  grafana_admin_user                           = var.manage_grafana_admin_credentials ? (var.grafana_admin_user == "" ? random_string.grafana_admin_user[0].result : var.grafana_admin_user) : null
+  grafana_admin_password                       = var.manage_grafana_admin_credentials ? (var.grafana_admin_password != "" ? var.grafana_admin_password : random_password.grafana_admin_password[0].result) : null
+}
+
+resource "vault_policy" "external_secrets_read" {
+  count = local.manage_external_secrets_policy ? 1 : 0
+
+  name = var.external_secrets_policy_name
+
+  policy = <<-EOT
+    path "${var.openbao_kv_mount_path}/data/{{ .cluster.name }}/{{ .cluster.stage }}/cluster_secrets/docker_config" {
+      capabilities = ["read"]
+    }
+
+    path "${var.openbao_kv_mount_path}/metadata/{{ .cluster.name }}/{{ .cluster.stage }}/cluster_secrets/docker_config" {
+      capabilities = ["read"]
+    }
+  EOT
+
+  depends_on = [vault_mount.kv]
+}
+
+resource "vault_kubernetes_auth_backend_role" "external_secrets" {
+  count = local.manage_external_secrets_kubernetes_auth_role ? 1 : 0
+
+  backend                          = vault_auth_backend.kubernetes[0].path
+  role_name                        = var.external_secrets_kubernetes_auth_role_name
+  bound_service_account_names      = [var.external_secrets_service_account_name]
+  bound_service_account_namespaces = [var.external_secrets_service_account_namespace]
+  audience                         = var.external_secrets_auth_audience
+  token_policies                   = [vault_policy.external_secrets_read[0].name]
+
+  depends_on = [
+    vault_kubernetes_auth_backend_config.kubernetes,
+    vault_policy.external_secrets_read,
+  ]
+}
+
+resource "vault_policy" "kubernetes_namespace_kv_read" {
+  count = local.manage_namespace_kv_read_role ? 1 : 0
+
+  name = var.openbao_namespace_kv_read_policy_name
+
+  policy = <<-EOT
+    path "${var.openbao_kv_mount_path}/data/+/+/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
+      capabilities = ["read"]
+    }
+
+    path "${var.openbao_kv_mount_path}/metadata/+/+/{{ "{{" }}identity.entity.aliases.${vault_auth_backend.kubernetes[0].accessor}.metadata.service_account_namespace{{ "}}" }}/*" {
+      capabilities = ["list", "read"]
+    }
+  EOT
+
+  depends_on = [
+    vault_auth_backend.kubernetes,
+    vault_mount.kv,
+  ]
+}
+
+resource "vault_kubernetes_auth_backend_role" "kubernetes_namespace_kv_read" {
+  count = local.manage_namespace_kv_read_role ? 1 : 0
+
+  backend                          = vault_auth_backend.kubernetes[0].path
+  role_name                        = var.openbao_namespace_kv_read_role_name
+  bound_service_account_names      = var.openbao_namespace_kv_read_bound_service_account_names
+  bound_service_account_namespaces = var.openbao_namespace_kv_read_bound_service_account_namespaces
+  audience                         = var.openbao_namespace_kv_read_auth_audience
+  token_ttl                        = var.openbao_namespace_kv_read_token_ttl
+  token_policies                   = [vault_policy.kubernetes_namespace_kv_read[0].name]
+
+  depends_on = [
+    vault_kubernetes_auth_backend_config.kubernetes,
+    vault_policy.kubernetes_namespace_kv_read,
+  ]
+}
+
+resource "vault_generic_endpoint" "external_secrets_user" {
+  count = local.manage_external_secrets_userpass ? 1 : 0
+
+  path                 = "auth/${var.openbao_userpass_auth_path}/users/${var.external_secrets_username}"
+  ignore_absent_fields = true
+
+  data_json = jsonencode({
+    password = local.external_secrets_password
+    policies = [
+      vault_policy.external_secrets_read[0].name,
+    ]
+  })
+
+  depends_on = [
+    vault_auth_backend.userpass,
+    vault_policy.external_secrets_read,
+  ]
+}
+
+resource "vault_kv_secret_v2" "grafana_admin_credentials" {
+  count = var.manage_grafana_admin_credentials ? 1 : 0
+
+  mount = var.openbao_kv_mount_path
+  # Namespace-isolated under the kube-prometheus-stack namespace, where Grafana
+  # runs and reads it through that namespace's SecretStore.
+  name = "{{ .cluster.name }}/{{ .cluster.stage }}/kube-prometheus-stack/grafana_credentials"
+
+  data_json = jsonencode({
+    "admin-user"     = local.grafana_admin_user
+    "admin-password" = local.grafana_admin_password
+  })
+
+  depends_on = [vault_mount.kv]
+}

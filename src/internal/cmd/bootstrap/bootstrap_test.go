@@ -8,6 +8,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"k8s.io/api/core/v1"
 )
 
 const completionMessageTemplate = `
@@ -46,35 +47,66 @@ func Test_MissingEnvVariableLeadsToURLBeingOmitted(t *testing.T) {
 	assert.Equal(t, expected, actual)
 }
 
-func TestOverlayValuesForChartIncludesValuesYaml(t *testing.T) {
+func TestLocalCompletionMessageUsesWizardLoginOnly(t *testing.T) {
+	config := CompletionLogConfig{
+		Local:          true,
+		ClusterDNSName: "127.0.0.1.traefik.me",
+		WizardPassword: "magic",
+		OpenBaoHost:    "openbao.127.0.0.1.traefik.me",
+	}
+
+	actual := CreateCompletionMessage(config)
+
+	assert.Contains(t, actual, "wizard / magic")
+	assert.NotContains(t, actual, "OpenBao-backed SSO via Dex")
+	assert.Contains(t, actual, "https://openbao.127.0.0.1.traefik.me/ui")
+}
+
+func TestBuildLocalTraefikBootstrapServiceMatchesHelmOwnershipMetadata(t *testing.T) {
+	service := buildLocalTraefikBootstrapService()
+
+	assert.Equal(t, localTraefikReleaseName, service.Name)
+	assert.Equal(t, localTraefikNamespace, service.Namespace)
+	assert.Equal(t, v1.ServiceTypeLoadBalancer, service.Spec.Type)
+	assert.Equal(t, "Helm", service.Labels["app.kubernetes.io/managed-by"])
+	assert.Equal(t, "traefik-traefik", service.Labels["app.kubernetes.io/instance"])
+	assert.Equal(t, localTraefikReleaseName, service.Annotations["meta.helm.sh/release-name"])
+	assert.Equal(t, localTraefikNamespace, service.Annotations["meta.helm.sh/release-namespace"])
+}
+
+func TestOverlayValuesForChartIncludesGeneratedValuesYaml(t *testing.T) {
 	tempDir := t.TempDir()
 	opts := &Options{
-		OverlayValues: tempDir,
-		ClusterName:   "test-cluster",
+		PlatformConfigs: tempDir,
+		ClusterName:     "test-cluster",
 	}
 
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")
 
 	assert.Equal(t, []string{
-		filepath.Join(tempDir, "helm", "test-cluster", "argo-cd", "values.yaml"),
+		filepath.Join(tempDir, "test-cluster", "helm", "argo-cd", "values.generated.yaml"),
 	}, valuesPaths)
 }
 
-func TestOverlayValuesForChartIncludesAdditionalValuesWhenPresent(t *testing.T) {
+func TestOverlayValuesForChartIncludesExtraValuesFilesInLexicalOrder(t *testing.T) {
 	tempDir := t.TempDir()
-	chartDir := filepath.Join(tempDir, "helm", "test-cluster", "argo-cd")
+	chartDir := filepath.Join(tempDir, "test-cluster", "helm", "argo-cd")
 	require.NoError(t, os.MkdirAll(chartDir, 0o755))
-	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "additional-values.yaml"), []byte("argo-cd: {}\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-z.yaml"), []byte("z: true\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-additional.yaml"), []byte("argo-cd: {}\n"), 0o644))
+	require.NoError(t, os.WriteFile(filepath.Join(chartDir, "values-a.yaml"), []byte("a: true\n"), 0o644))
 
 	opts := &Options{
-		OverlayValues: tempDir,
-		ClusterName:   "test-cluster",
+		PlatformConfigs: tempDir,
+		ClusterName:     "test-cluster",
 	}
 
 	valuesPaths := overlayValuesForChart(opts, "argo-cd")
 
 	assert.Equal(t, []string{
-		filepath.Join(chartDir, "values.yaml"),
-		filepath.Join(chartDir, "additional-values.yaml"),
+		filepath.Join(chartDir, "values.generated.yaml"),
+		filepath.Join(chartDir, "values-a.yaml"),
+		filepath.Join(chartDir, "values-additional.yaml"),
+		filepath.Join(chartDir, "values-z.yaml"),
 	}, valuesPaths)
 }

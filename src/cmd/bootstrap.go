@@ -21,9 +21,10 @@ import (
 type BootstrapFlags struct {
 	WithES                 bool
 	WithProm               bool
+	Local                  bool
 	ClusterSecretStorePath string
-	ManagedCatalogPath     string
-	OverlayValuesPath      string
+	PlatformComponentsPath string
+	PlatformConfigsPath    string
 	EnvFile                string
 	EnvPrefixFlag          string
 	DryRun                 bool
@@ -46,9 +47,9 @@ func NewBootstrapCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "bootstrap",
 		Usage:       "Bootstrap Argo CD onto a cluster",
-		UsageText:   "kubara bootstrap CLUSTER_NAME",
+		UsageText:   "kubara bootstrap CLUSTER_NAME [--local]",
 		ArgsUsage:   "CLUSTER_NAME",
-		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs.",
+		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
@@ -88,19 +89,19 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
 
-	managedAbsPath := flags.ManagedCatalogPath
-	if !filepath.IsAbs(managedAbsPath) {
-		managedAbsPath = filepath.Join(cwd, managedAbsPath)
-		managedAbsPath, err = filepath.Abs(managedAbsPath)
+	componentsAbsPath := flags.PlatformComponentsPath
+	if !filepath.IsAbs(componentsAbsPath) {
+		componentsAbsPath = filepath.Join(cwd, componentsAbsPath)
+		componentsAbsPath, err = filepath.Abs(componentsAbsPath)
 		if err != nil {
 			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
 	}
 
-	customerAbsPath := flags.OverlayValuesPath
-	if !filepath.IsAbs(customerAbsPath) {
-		customerAbsPath = filepath.Join(cwd, customerAbsPath)
-		customerAbsPath, err = filepath.Abs(customerAbsPath)
+	configsAbsPath := flags.PlatformConfigsPath
+	if !filepath.IsAbs(configsAbsPath) {
+		configsAbsPath = filepath.Join(cwd, configsAbsPath)
+		configsAbsPath, err = filepath.Abs(configsAbsPath)
 		if err != nil {
 			return nil, fmt.Errorf("resolve absolute path: %w", err)
 		}
@@ -111,24 +112,13 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
-	// Load environment
-	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
-	if err := es.Load(); err != nil {
-		return nil, fmt.Errorf("load env: %w", err)
-	}
-	if err := es.ValidateAll(); err != nil {
-		return nil, fmt.Errorf("validate env: %w", err)
-	}
-
-	envMap := es.GetConfig()
-
 	// Load config file and find cluster by name
 	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
 	if err != nil {
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 
-	cs := config.NewConfigStoreWithCatalog(configFilePath, catalogOptions)
+	cs := config.NewConfigStore(cwd, configFilePath, catalogOptions)
 	if err := cs.Load(); err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
@@ -144,6 +134,16 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 	if clusterConfig == nil {
 		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
+	}
+
+	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
+	if err := es.Load(); err != nil {
+		return nil, fmt.Errorf("load env: %w", err)
+	}
+
+	envMap, err := prepareBootstrapEnv(clusterConfig, es.GetConfig(), flags.Local)
+	if err != nil {
+		return nil, fmt.Errorf("prepare env: %w", err)
 	}
 
 	// Validate and normalize ClusterSecretStore path if provided
@@ -170,19 +170,29 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("load catalog: %w", err)
 	}
 
+	timeout := flags.Timeout
+	if flags.Local && !cmd.IsSet("timeout") && timeout < 20*time.Minute {
+		timeout = 20 * time.Minute
+	}
+
 	return &bootstrap.Options{
-		Kubeconfig:     kubeconf,
-		ManagedCatalog: managedAbsPath,
-		OverlayValues:  customerAbsPath,
-		WithES:         flags.WithES,
-		WithProm:       flags.WithProm,
-		WithESCSSPath:  cssAbsPath,
-		EnvMap:         envMap,
-		Catalog:        catalog,
-		ClusterConfig:  clusterConfig,
-		DryRun:         flags.DryRun,
-		Timeout:        flags.Timeout,
-		ClusterName:    clusterName,
+		Kubeconfig:         kubeconf,
+		PlatformComponents: componentsAbsPath,
+		PlatformConfigs:    configsAbsPath,
+		WithES:             flags.WithES,
+		WithProm:           flags.WithProm,
+		Local:              flags.Local,
+		WithESCSSPath:      cssAbsPath,
+		EnvMap:             envMap,
+		Catalog:            catalog,
+		ClusterConfig:      clusterConfig,
+		DryRun:             flags.DryRun,
+		Timeout:            timeout,
+		ClusterName:        clusterName,
+		WorkDir:            cwd,
+		ConfigFilePath:     configFilePath,
+		CatalogPath:        catalogOptions.CatalogPath,
+		CatalogOverwrite:   catalogOptions.Overwrite,
 	}, nil
 }
 
@@ -205,22 +215,27 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Also install kube-prometheus-stack",
 			Destination: &flags.WithProm,
 		},
+		&cli.BoolFlag{
+			Name:        "local",
+			Usage:       "Provision an isolated local evaluation environment. Local testing only; not for production use.",
+			Destination: &flags.Local,
+		},
 		&cli.StringFlag{
 			Name:        "with-es-css-file",
 			Usage:       "Path to the ClusterSecretStore manifest file (supports go-template + sprig)",
 			Destination: &flags.ClusterSecretStorePath,
 		},
 		&cli.StringFlag{
-			Name:        "managed-catalog",
-			Value:       render.DefaultManagedCatalogPath,
-			Usage:       "Path to the managed catalog directory",
-			Destination: &flags.ManagedCatalogPath,
+			Name:        "platform-components",
+			Value:       render.DefaultPlatformComponentsPath,
+			Usage:       "Path to the platform-components directory",
+			Destination: &flags.PlatformComponentsPath,
 		},
 		&cli.StringFlag{
-			Name:        "overlay-values",
-			Value:       render.DefaultOverlayValuesPath,
-			Usage:       "Path to overlay values directory",
-			Destination: &flags.OverlayValuesPath,
+			Name:        "platform-configs",
+			Value:       render.DefaultPlatformConfigsPath,
+			Usage:       "Path to platform-configs directory",
+			Destination: &flags.PlatformConfigsPath,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",
@@ -244,4 +259,29 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 	defer cancelSignal()
 
 	return bootstrap.Bootstrap(ctx, o)
+}
+
+func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
+	if err := envMap.Validate(); err != nil {
+		return nil, err
+	}
+
+	if (envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && !envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) ||
+		(!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) {
+		return nil, fmt.Errorf("if you are using a private repository you need to configure both ARGOCD_GIT_PAT_OR_PASSWORD and ARGOCD_GIT_USERNAME")
+	}
+
+	if !local {
+		return envMap, nil
+	}
+
+	prepared := *envMap
+	if !envconfig.IsConfiguredEnvValue(prepared.ProjectName) {
+		prepared.ProjectName = cluster.Name
+	}
+	if !envconfig.IsConfiguredEnvValue(prepared.ProjectStage) {
+		prepared.ProjectStage = cluster.Stage
+	}
+
+	return &prepared, nil
 }

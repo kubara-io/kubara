@@ -1,0 +1,72 @@
+{{ if .Values.dexRestarter.enabled }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: dex-restarter
+  namespace: {{ .Release.Namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: dex-restarter
+  namespace: {{ .Release.Namespace }}
+subjects:
+# You can specify more than one "subject"
+- kind: ServiceAccount
+  name: dex-restarter
+  namespace: {{ .Release.Namespace }}
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: dex-restarter
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: dex-restarter
+rules:
+- apiGroups: ["apps"]
+  resources: ["deployments"]
+  verbs: ["get", "patch", "update"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: restart-script
+  namespace: {{ .Release.Namespace }}
+data:
+  restart-dex.sh: |-
+    {{- tpl ($.Files.Get "script/restart-dex.tmpl") . | nindent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: dex-restarter
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": post-install
+spec:
+  template:
+    spec:
+      containers:
+      - name: restart
+        image: "{{ .Values.dexRestarter.image.repository }}:{{ .Values.dexRestarter.image.tag}}"
+        command: ["sh", "-c", "/script/restart-dex.sh"]
+        volumeMounts:
+        - name: config-volume
+          mountPath: "/script"
+      restartPolicy: Never
+      serviceAccountName: dex-restarter
+      volumes:
+        - name: config-volume
+          configMap:
+            name: restart-script
+            defaultMode: 0777
+  backoffLimit: 3
+{{ end }}

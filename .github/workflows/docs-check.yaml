@@ -7,6 +7,9 @@ on:
     paths:
       - 'docs/**'
       - '.github/workflows/docs-check.yaml'
+      # Re-run the agent doc-link guard when the template/package it validates changes.
+      # The normal Go jobs use a sparse `src` checkout where the guard skips (no docs tree).
+      - 'src/internal/agentcontext/**'
   workflow_dispatch:
 
 permissions:
@@ -21,19 +24,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout kubara repo
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
       - name: Setup Go
-        uses: actions/setup-go@v6
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: src/go.mod
           cache: true
           cache-dependency-path: src/go.sum
 
       - name: Install and setup uv
-        uses: astral-sh/setup-uv@v8.1.0
+        uses: astral-sh/setup-uv@11f9893b081a58869d3b5fccaea48c9e9e46f990 # v8.3.2
         with:
-          version: '0.11.17'
+          version: '0.11.28'
           enable-cache: true
           cache-dependency-glob: 'docs/uv.lock'
 
@@ -49,6 +52,9 @@ jobs:
 
       - name: Validate docs build (strict)
         run: make docs-build
+
+      - name: Check agent onboarding doc links resolve
+        run: go -C src test ./internal/agentcontext/ -run '^TestRenderedDocLinksExist$'
 
       - name: Check command docs is up to date
         run: |

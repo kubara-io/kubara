@@ -7,6 +7,7 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var testTemplatesFS = catalog.BuiltInFS()
@@ -39,6 +40,14 @@ func fullServiceContext() map[string]any {
 		"metrics-server":          map[string]any{"status": "disabled"},
 		"metallb":                 map[string]any{"status": "disabled"},
 		"longhorn":                map[string]any{"status": "disabled"},
+		"velero": map[string]any{
+			"status": "disabled",
+			"config": map[string]any{
+				"backupMode":    "fs-backup",
+				"backupStorage": map[string]any{"create": true, "region": "eu01"},
+			},
+		},
+		"reloader": map[string]any{"status": "disabled"},
 	}
 }
 
@@ -60,6 +69,8 @@ func fullCatalogContext() map[string]any {
 			"metrics-server":          map[string]any{"chartPath": "metrics-server"},
 			"metallb":                 map[string]any{"chartPath": "metallb"},
 			"longhorn":                map[string]any{"chartPath": "longhorn"},
+			"velero":                  map[string]any{"chartPath": "velero"},
+			"reloader":                map[string]any{"chartPath": "reloader"},
 		},
 	}
 }
@@ -106,22 +117,22 @@ func TestStripProviderPath(t *testing.T) {
 		want  string
 	}{
 		{
-			name:  "strips providers/stackit under terraform",
-			input: "customer-service-catalog/terraform/providers/stackit/example/infrastructure/main.tf.tplt",
-			want:  "customer-service-catalog/terraform/example/infrastructure/main.tf.tplt",
+			name:  "strips stackit under terraform",
+			input: "platform-configs/terraform/stackit/example/infrastructure/main.tf.tplt",
+			want:  "platform-configs/terraform/example/infrastructure/main.tf.tplt",
 		},
 		{
-			name:  "strips providers/stackit under managed terraform",
-			input: "managed-service-catalog/terraform/providers/stackit/modules/ske-cluster/main.tf",
-			want:  "managed-service-catalog/terraform/modules/ske-cluster/main.tf",
+			name:  "leaves platform-components terraform path unchanged",
+			input: "platform-components/terraform/stackit/modules/ske-cluster/main.tf",
+			want:  "platform-components/terraform/stackit/modules/ske-cluster/main.tf",
 		},
 		{
 			name:  "leaves non-provider terraform path unchanged",
-			input: "managed-service-catalog/terraform/images/public-cloud-0.png",
-			want:  "managed-service-catalog/terraform/images/public-cloud-0.png",
+			input: "platform-components/terraform/images/public-cloud-0.png",
+			want:  "platform-components/terraform/images/public-cloud-0.png",
 		},
 		{
-			name:  "does not strip providers/<name> outside terraform or helm context",
+			name:  "does not strip providers/<name> outside terraform context",
 			input: "some-catalog/providers/stackit/file.txt",
 			want:  "some-catalog/providers/stackit/file.txt",
 		},
@@ -132,6 +143,55 @@ func TestStripProviderPath(t *testing.T) {
 			assert.Equal(t, tt.want, StripProviderPath(tt.input))
 		})
 	}
+}
+
+func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
+	cleanup := setupTestFS(t)
+	defer cleanup()
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:     Terraform,
+		Provider: "t-cloud-public",
+		Data: map[string]any{
+			"cluster": map[string]any{
+				"name":    "test-cluster",
+				"stage":   "dev",
+				"dnsName": "test.example.com",
+				"terraform": map[string]any{
+					"projectId":         "test-tenant",
+					"kubernetesType":    "cce",
+					"kubernetesVersion": "1.29",
+					"dns":               map[string]any{"name": "example.com", "email": "admin@example.com"},
+				},
+				"services": map[string]any{},
+			},
+		},
+	})
+	require.NoError(t, err)
+
+	paths := make([]string, 0, len(results))
+	var cceClusterModule string
+	var infrastructureMain string
+	for _, result := range results {
+		require.NoError(t, result.Error)
+		paths = append(paths, result.Path)
+		switch result.Path {
+		case "platform-components/terraform/t-cloud-public/modules/cce-cluster/main.tf":
+			cceClusterModule = result.Content
+		case "platform-configs/terraform/t-cloud-public/infrastructure/main.tf.tplt":
+			infrastructureMain = result.Content
+		}
+	}
+
+	assert.Contains(t, paths, "platform-components/terraform/t-cloud-public/modules/cce-cluster/main.tf")
+	assert.Contains(t, paths, "platform-components/terraform/t-cloud-public/modules/network/main.tf")
+	assert.Contains(t, paths, "platform-components/terraform/t-cloud-public/modules/storage-classes/main.tf")
+	assert.Contains(t, paths, "platform-configs/terraform/t-cloud-public/infrastructure/main.tf.tplt")
+	assert.NotContains(t, paths, "platform-components/terraform/stackit/modules/ske-cluster/main.tf")
+	require.NotEmpty(t, cceClusterModule)
+	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
+	require.NotEmpty(t, infrastructureMain)
+	assert.Contains(t, infrastructureMain, `source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"`)
 }
 
 func TestTemplateFiles(t *testing.T) {
@@ -164,15 +224,15 @@ func TestTemplateFiles(t *testing.T) {
 					},
 					"argocd": map[string]any{
 						"repo": map[string]any{
-							"git": map[string]any{
-								"managed": map[string]any{
+							"https": map[string]any{
+								"components": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "managed-service-catalog/helm",
+									"path":           "platform-components/helm",
 									"targetRevision": "main",
 								},
-								"customer": map[string]any{
+								"configs": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "customer-service-catalog/helm",
+									"path":           "platform-configs",
 									"targetRevision": "main",
 								},
 							},
@@ -206,6 +266,7 @@ func TestTemplateFiles(t *testing.T) {
 						assert.NotEmpty(t, result.Content)
 					}
 				}
+
 				assert.True(t, hasTemplate, "Should have at least one template file")
 				assert.True(t, hasStatic, "Should have at least one static file")
 				assert.True(t, hasValidTemplate, "Should have at least one successfully rendered template")
@@ -232,6 +293,7 @@ func TestTemplateFiles(t *testing.T) {
 							staticSuccess++
 						}
 					}
+
 				}
 				assert.Greater(t, templateFiles, 0, "Should have template files")
 				assert.Greater(t, templateErrors, 0, "Should have template errors with empty context")
@@ -251,13 +313,15 @@ func TestTemplateFiles(t *testing.T) {
 					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
+					"services": fullServiceContext(),
 				},
+				"catalog": fullCatalogContext(),
 			},
 			wantErr: false, // Changed to false with proper context
 			validate: func(t *testing.T, results []TemplateResult) {
 				assert.NotEmpty(t, results)
 				for _, result := range results {
-					assert.Contains(t, result.Path, "terraform")
+					assert.True(t, strings.Contains(result.Path, "terraform"), "Path %q should contain 'terraform'", result.Path)
 					assert.False(t, strings.Contains(result.Path, "helm"), "Should not include helm files")
 				}
 			},
@@ -276,15 +340,15 @@ func TestTemplateFiles(t *testing.T) {
 					"ssoTeam":          "myteam",
 					"argocd": map[string]any{
 						"repo": map[string]any{
-							"git": map[string]any{
-								"managed": map[string]any{
+							"https": map[string]any{
+								"components": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "managed-service-catalog/helm",
+									"path":           "platform-components/helm",
 									"targetRevision": "main",
 								},
-								"customer": map[string]any{
+								"configs": map[string]any{
 									"url":            "https://github.com/example/repo",
-									"path":           "customer-service-catalog/helm",
+									"path":           "platform-configs",
 									"targetRevision": "main",
 								},
 							},
@@ -319,9 +383,15 @@ func TestTemplateFiles(t *testing.T) {
 			cleanup := setupTestFS(t)
 			defer cleanup()
 
+			provider := ""
+			if tt.tplType == Terraform || tt.tplType == All {
+				provider = "stackit"
+			}
+
 			results, err := TemplateFiles(TemplateOptions{
-				Type: tt.tplType,
-				Data: tt.context,
+				Type:     tt.tplType,
+				Provider: provider,
+				Data:     tt.context,
 			})
 
 			if tt.wantErr {

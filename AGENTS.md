@@ -20,7 +20,7 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 ## Reference Map
 - Product setup and bootstrap flow: `docs/content/1_getting_started/bootstrap_process.md`
 - Runtime prerequisites: `docs/content/1_getting_started/prerequisites.md`
-- Architecture context: `docs/content/4_architecture/architecture_overview.md`
+- Architecture context: `docs/content/7_architecture/architecture_overview.md`
 - Contributor and PR workflow: `CONTRIBUTING.md`
 - Config schema and template keys: `src/internal/config/types.go` (use `kubara schema` when needed)
 
@@ -51,11 +51,17 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Prefer table-driven tests when extending test coverage.
 - Reuse existing structure under `src/cmd/` and `src/internal/`.
 
+## Catalog Boundary
+- Treat the catalog feature as the boundary between generic CLI logic and app-specific platform components.
+- Do not hard-code Helm application behavior, chart values, provider webhook details, or built-in app names in Go code unless the code is explicitly testing catalog loading, service aliases, or schema composition where those names are the behavior under test.
+- Keep app-specific behavior in catalog data, Helm/Terraform templates, service definitions, and docs. Go code should operate on generic catalog metadata, provider selectors, template paths, and service definitions.
+- When testing renderer or generator behavior, assert on generator behavior — which files are selected, their output paths, provider-folder stripping, and error handling (e.g. via `os.Stat`/`os.ReadDir` and error-message checks) — not on the rendered content of Helm or Terraform templates. App- and template-specific output belongs in catalog/template fixtures, not in Go string assertions. This applies equally to Helm and Terraform.
+
 ## Documentation
 - Docs live under `docs/content/`.
 - Keep changes aligned with `docs/mkdocs.yml` navigation.
 - Preserve relative paths under `docs/content/images/` and `docs/content/assets/`.
-- Significant technical or architectural decisions may require an ADR in `docs/content/7_decisions/`.
+- Significant technical or architectural decisions may require an ADR in `docs/content/10_decisions/`.
 
 ## Avoid
 - Do not introduce new tooling/dependencies without clear need.

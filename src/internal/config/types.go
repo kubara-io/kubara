@@ -1,15 +1,50 @@
 package config
 
-import "github.com/kubara-io/kubara/internal/service"
+import (
+	"slices"
+
+	"github.com/kubara-io/kubara/internal/service"
+)
 
 const (
 	ConfigVersionV1Alpha1 = "v1alpha1"
 	ConfigVersionV1Alpha2 = "v1alpha2"
+	ConfigVersionV1Alpha3 = "v1alpha3"
+	ConfigVersionV1Alpha4 = "v1alpha4"
 )
+
+const (
+	Hub   string = "hub"
+	Spoke string = "spoke"
+)
+
+// TerraformProvider identifies an infrastructure provider with embedded Terraform templates.
+type TerraformProvider string
+
+const (
+	TerraformProviderNone         TerraformProvider = "none"
+	TerraformProviderStackit      TerraformProvider = "stackit"
+	TerraformProviderTCloudPublic TerraformProvider = "t-cloud-public"
+)
+
+var supportedTerraformProviders = [...]TerraformProvider{
+	TerraformProviderStackit,
+	TerraformProviderTCloudPublic,
+}
+
+// IsSupported reports whether kubara ships Terraform templates for the provider.
+func (p TerraformProvider) IsSupported() bool {
+	return slices.Contains(supportedTerraformProviders[:], p)
+}
+
+// SupportedTerraformProviders returns the providers with embedded Terraform templates.
+func SupportedTerraformProviders() []TerraformProvider {
+	return append([]TerraformProvider(nil), supportedTerraformProviders[:]...)
+}
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha2,default=v1alpha2"`
+	Version  string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha4,default=v1alpha4"`
 	Clusters []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
 
@@ -25,20 +60,17 @@ type Cluster struct {
 
 	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
 
-	PrivateLoadBalancerIP string `json:"privateLoadBalancerIP,omitempty" yaml:"privateLoadBalancerIP,omitempty" jsonschema:"title=Private Load Balancer IP,description=The static IP for the private ingress controller load balancer.,format=ipv4"`
-	PublicLoadBalancerIP  string `json:"publicLoadBalancerIP,omitempty" yaml:"publicLoadBalancerIP,omitempty" jsonschema:"title=Public Load Balancer IP,description=The static IP for the public ingress controller load balancer.,format=ipv4"`
-
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
 	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }
 
 type Terraform struct {
-	Provider          string `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Currently supported providers: stackit.,minLength=1,default=stackit"`
-	ProjectID         string `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The cloud provider project or subscription identifier. Accepts various formats depending on the provider.,minLength=1"`
-	KubernetesType    string `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,default=ske"`
-	KubernetesVersion string `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
-	DNSContactEmail   string `json:"dnsContactEmail" yaml:"dnsContactEmail" jsonschema:"required,title=DNS Zone Contact Email,description=Administrative contact email for the managed DNS zone. The zone name itself is derived from the cluster dnsName.,format=email"`
+	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Use none to skip Terraform generation. Currently supported providers: stackit and t-cloud-public.,enum=none,enum=stackit,enum=t-cloud-public,default=none"`
+	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The provider-specific project subscription or tenant identifier. For t-cloud-public use the tenant or project name rather than a UUID.,minLength=1"`
+	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,enum=cce,default=ske"`
+	KubernetesVersion string            `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
+	DNSContactEmail   string            `json:"dnsContactEmail" yaml:"dnsContactEmail" jsonschema:"required,title=DNS Zone Contact Email,description=Administrative contact email for the managed DNS zone. The zone name itself is derived from the cluster dnsName.,format=email"`
 }
 
 type ArgoCD struct {
@@ -54,8 +86,8 @@ type RepoProto struct {
 }
 
 type RepoType struct {
-	Customer Repository `json:"customer" yaml:"customer" jsonschema:"required,title=Customer Repository"`
-	Managed  Repository `json:"managed" yaml:"managed" jsonschema:"required,title=Managed Repository"`
+	Configs    Repository `json:"configs" yaml:"configs" jsonschema:"required,title=Platform Configs Repository"`
+	Components Repository `json:"components" yaml:"components" jsonschema:"required,title=Platform Components Repository"`
 }
 
 type Repository struct {

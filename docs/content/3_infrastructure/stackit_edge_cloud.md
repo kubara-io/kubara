@@ -1,0 +1,474 @@
+# STACKIT Edge Cloud
+
+This page combines the shared STACKIT Terraform bootstrap steps with the Edge Cloud-specific provisioning flow.
+
+!!! warning "Beta support"
+    kubara's Edge Cloud provisioning path is currently beta and intentionally documents one example integration path.
+    STACKIT Edge Cloud itself is also still a beta service and may only be available to selected customers.
+    Expect provider APIs, service behavior, and the generated kubara examples to change.
+
+!!! info
+    You will need access to the STACKIT API. Setup instructions are available in the [Terraform provider documentation](https://registry.terraform.io/providers/stackitcloud/stackit/latest/docs) and [STACKIT Docs](https://docs.stackit.cloud/platform/access-and-identity/service-accounts/how-tos/manage-service-accounts/).
+    Make sure your created Service Account has Project Owner permissions.
+
+Edge Cloud setups are usually highly individual.
+Some teams run only STACKIT VMs, some run only bare metal, and others use mixed environments (VM + bare metal, even across different clouds).
+
+kubara documents one possible integration path and examples, but your target setup may require different operational steps.
+
+STEC (STACKIT Edge Cloud) can be operated through UI, CLI, or API.
+All paths are valid:
+
+- UI is often the fastest manual path for image and cluster creation.
+- CLI/API with manifests is better for reproducibility and change history (for example in Git).
+
+For general STEC background, see the official [Edge Cloud overview](https://docs.stackit.cloud/products/runtime/edge-cloud/), [Authentication](https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/), and [Using the API](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-the-api/) guides.
+
+## 1. Generate Terraform modules
+
+```bash
+kubara generate --terraform
+```
+
+Commit and push the generated files to your Git repository.
+
+## 2. Prepare environment variables
+
+Before the first `terraform init`, prepare and load your environment variables:
+
+```bash
+cd platform-configs/<cluster-name>/terraform
+cp set-env-changeme.sh set-env.sh
+```
+
+Set at least `STACKIT_SERVICE_ACCOUNT_KEY_PATH` in `set-env.sh` / `set-env.ps1` before sourcing.
+
+```bash
+source set-env.sh
+# or for PowerShell
+# cp set-env-changeme.ps1 set-env.ps1
+# . .\set-env.ps1
+```
+
+## 3. Create the Terraform backend state
+
+Then navigate to:
+
+```bash
+cd bootstrap-tfstate-backend
+```
+
+Run:
+
+=== "Terraform"
+
+    ```bash
+    terraform init
+    terraform plan
+    terraform apply
+    ```
+
+=== "Tofu"
+
+    ```bash
+    tofu init
+    tofu plan
+    tofu apply
+    ```
+
+Use the output to configure Terraform backend credentials:
+
+=== "Terraform"
+
+    ```bash
+    terraform output debug | grep -E "credential_access_key|credential_secret_access_key"
+    ```
+
+=== "Tofu"
+
+    ```bash
+    tofu output debug | grep -E "credential_access_key|credential_secret_access_key"
+    ```
+
+You can set `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` in `set-env.sh` / `set-env.ps1` and source the file again, or export them directly:
+
+```bash
+export AWS_ACCESS_KEY_ID="<credential_access_key from terraform output>"
+export AWS_SECRET_ACCESS_KEY="<credential_secret_access_key from terraform output>"
+```
+
+## Terraform modules for the kubara Edge example
+
+The generated Edge Terraform example intentionally creates only the following resources:
+
+* `edge_instance` creates a new Edge Cloud instance.
+* `edge_image` uploads one local image artifact to STACKIT.
+* `edge_hosts` creates the example STACKIT VM hosts and the required network resources, using the uploaded image from `edge_image`.
+
+If your Edge platform is already provisioned externally, you can skip Terraform Edge modules completely and continue with kubara Helm/GitOps workflows only.
+For example, this is common when you run bare metal, mixed VM/bare-metal environments, or hosts in another cloud.
+
+`EdgeImage` and `EdgeCluster` resources are intentionally not part of the Terraform state in this setup.
+The examples use Kubernetes API manifests with `kubectl` because that is easy to automate and keep in Git, but you can also create and manage them manually through the Edge Cloud UI or with STEC CLI/API workflows.
+
+Important distinction:
+
+* In STEC, `EdgeImage` defines how the Talos boot image should be built, including Talos version and system extensions.
+* STEC then generates a downloadable image artifact and exposes it through `EdgeImage.status.artifactUrl`.
+* Terraform does not use the `EdgeImage` object directly. Terraform `edge_image.local_file_path` must point to the downloaded local artifact file.
+
+Configure the generated Edge settings in:
+
+- `platform-configs/<cluster-name>/terraform/infrastructure/env.auto.tfvars`
+
+## Single-node bootstrap and network planning
+
+The generated `edge_hosts.nodes` defaults to one control plane node as a bootstrap example.
+This is intentionally simple for initial rollout and troubleshooting.
+
+For production and multi-node topologies, design networking based on your environment:
+
+* where hosts run (VMs, bare metal, mixed, multi-cloud)
+* external reachability strategy (single public node, MetalLB VIP, provider-managed Network Load Balancer in front of the nodes, etc.)
+* node-to-node traffic and return paths
+
+There is no one-size-fits-all edge network design.
+
+## Public IP and IP fields
+
+In this example, Terraform allocates public IPs for hosts when `edge_hosts.nodes[*].assign_public_ip = true`.
+You do not need to pre-enter a public IP for that path.
+
+Read assigned host public IPs after apply via:
+
+```bash
+terraform output edge_host_metadata
+```
+
+Use the selected host public IP for DNS `A` records (for example your ingress hostname).
+
+For the STACKIT VM-based single-node example, set these values in the `metallb` service config in your `config.yaml` before running `kubara generate --helm`:
+
+```yaml
+clusters:
+  - # ...
+    services:
+      metallb:
+        status: enabled
+        config:
+          # the STACKIT public IP assigned to the VM; generated ingress
+          # annotations use this as external-dns target
+          publicLoadBalancerIPs: "<public-ip>"
+          # the private IP of the same VM on the STACKIT network; MetalLB
+          # allocates from this pool
+          loadBalancerAddressPool:
+            - "<private-ip>/32"
+```
+
+This works because the STACKIT public IP is routed/NATed to the selected VM, while MetalLB exposes the Kubernetes `LoadBalancer` service on the VM's private network address.
+Do not use this as a production multi-node ingress design. For multi-node setups, plan a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.
+
+## Step-by-step sequence
+
+This flow cannot be a single normal `terraform apply` from an empty environment.
+The local image artifact is generated by STEC after the Edge Cloud instance exists, but Terraform needs that local artifact path before it can upload the image and create hosts.
+
+Before you start, go to:
+
+```bash
+cd platform-configs/<cluster-name>/terraform/infrastructure
+```
+
+### Phase 1: Create the Edge Cloud instance
+
+1. Configure `edge_instance` in `platform-configs/<cluster-name>/terraform/infrastructure/env.auto.tfvars`.
+   Terraform reads the available Edge Cloud plan from the STACKIT API.
+   STEC is currently beta; the generated module expects exactly one available plan for the project and fails if the API returns zero or multiple plans.
+2. Run `terraform init` and create only the Edge Cloud instance:
+
+===  "Terraform"
+
+    ```bash
+    terraform init
+    terraform apply -target=module.edge_instance
+    ```
+
+===  "Tofu"
+
+    ```bash
+    tofu init
+    tofu apply -target=module.edge_instance
+    ```
+
+3. Save the generated short-lived Edge Cloud kubeconfig for the following `kubectl` steps:
+
+===  "Terraform"
+
+    ```bash
+    terraform output -raw edge_kubeconfig > edge-kubeconfig.yaml
+    chmod 600 edge-kubeconfig.yaml
+    export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
+    ```
+
+===  "Tofu"
+
+    ```bash
+    tofu output -raw edge_kubeconfig > edge-kubeconfig.yaml
+    chmod 600 edge-kubeconfig.yaml
+    export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
+    ```
+
+### Phase 2: Generate the Edge image artifact
+
+4. Create an `EdgeImage` in your STEC instance and wait until it is `Ready`.
+
+`EdgeImage` is the Kubernetes resource kind. The examples below use the `default` namespace, matching the STACKIT documentation.
+Read more in the official STACKIT guide: [Creating images](https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/creating-images/).
+
+Before applying manifests, verify which Talos image versions are currently available in your STEC region:
+
+```bash
+INSTANCE_REGION="eu01"
+curl https://image-factory.edge.$INSTANCE_REGION.stackit.cloud/versions
+```
+
+Use one of the returned versions in `EdgeImage.spec.talosVersion`.
+If your kubara cluster will use Longhorn, include `siderolabs/iscsi-tools` and `siderolabs/util-linux-tools` in the `EdgeImage` system extensions.
+Read more in the official STACKIT guide: [Using extensions](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-extensions/) and the [Longhorn Talos Linux support](https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/) documentation.
+
+=== "UI"
+
+    1. Open your STEC instance.
+    2. Go to `Images`.
+    3. Create a new image.
+    4. Select the Talos image version you want to use.
+    5. Add required system extensions, for example Longhorn-related extensions.
+    6. Wait until the image is `Ready`.
+
+=== "kubectl"
+
+    Save this as `edge-image.yaml`:
+
+    ```yaml
+    apiVersion: edge.stackit.cloud/v1alpha1
+    kind: EdgeImage
+    metadata:
+      name: kubara-edge-image
+      namespace: default
+    spec:
+      schematic: |
+        customization:
+          extraKernelArgs: []
+          systemExtensions:
+            officialExtensions:
+              - siderolabs/iscsi-tools
+              - siderolabs/util-linux-tools
+        overlay: {}
+      talosVersion: v1.12.5-stackit.v1.7.1
+    ```
+
+    Apply it and wait until STEC has generated the artifacts.
+    The `EdgeImage` reports readiness through the boolean `status.ready`
+    field (it does not set a `Ready` condition, so `--for=condition=Ready`
+    would never complete):
+
+    ```bash
+    kubectl apply -f edge-image.yaml
+    kubectl wait EdgeImage/kubara-edge-image --namespace default --for=jsonpath='{.status.ready}'=true --timeout=60m
+    ```
+
+    If you are not using Longhorn, keep only the extensions you actually need.
+
+### Phase 3: Download image, upload it to STACKIT, and create hosts
+
+Before Terraform can upload the image, you need a local raw image file for STACKIT Compute Engine.
+You can get it either through the Edge Cloud UI or through the Kubernetes API.
+
+5. Download the OpenStack/amd64 raw image artifact, unpack it locally, and set `edge_image.local_file_path`.
+
+=== "UI"
+
+    1. Open your STEC instance.
+    2. Go to `Images`.
+    3. Select the Ready image.
+    4. Click `Download`.
+    5. Select the OpenStack/amd64 raw image artifact.
+    6. Download the `.raw.xz` file.
+    7. Unpack it locally:
+
+    ```bash
+    mkdir -p edge-artifacts
+    mv ~/Downloads/openstack-amd64.raw.xz edge-artifacts/
+    unxz edge-artifacts/openstack-amd64.raw.xz
+    ls edge-artifacts/openstack-amd64.raw
+    ```
+
+=== "kubectl"
+
+    ```bash
+    IMAGE_NAME="kubara-edge-image"
+
+    kubectl get EdgeImage "${IMAGE_NAME}" --namespace default -o yaml | yq '.status.artifacts'
+
+    IMAGE_URL=$(
+      kubectl get EdgeImage "${IMAGE_NAME}" --namespace default -o yaml \
+        | yq -r '.status.artifacts[] | select(.type == "openstack") | .artifacts[] | select(.architecture == "amd64") | .url'
+    )
+
+    mkdir -p edge-artifacts
+    curl -L "${IMAGE_URL}" -o edge-artifacts/openstack-amd64.raw.xz
+    unxz edge-artifacts/openstack-amd64.raw.xz
+    ls edge-artifacts/openstack-amd64.raw
+    ```
+
+    If the `yq` query returns an empty URL, inspect `.status.artifacts` and copy the OpenStack/amd64 `.raw.xz` URL manually.
+    The exact artifact list can differ by STEC version and selected target platform.
+
+Then set the unpacked path in `env.auto.tfvars`:
+
+```hcl
+edge_image = {
+  local_file_path = "edge-artifacts/openstack-amd64.raw"
+  # ...
+}
+```
+
+6. Configure `edge_hosts.nodes`.
+7. Run full apply. Terraform uploads the image and creates the configured STACKIT VM hosts and their network resources from that uploaded image:
+
+===  "Terraform"
+
+    ```bash
+    terraform apply
+    terraform output edge_uploaded_image_id
+    terraform output edge_host_metadata
+    ```
+
+===  "Tofu"
+
+    ```bash
+    tofu apply
+    tofu output edge_uploaded_image_id
+    tofu output edge_host_metadata
+    ```
+
+8. Wait until the booted hosts are visible as `EdgeHost` in STEC.
+
+### Phase 4: Create the EdgeCluster
+
+9. Create the `EdgeCluster` after the hosts are registered as `EdgeHost`.
+
+Read more in the official STACKIT guide: [Creating clusters](https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/creating-clusters/).
+
+`EdgeCluster` sets the Talos and Kubernetes versions for the cluster.
+Use a Talos version that is available in your STEC region and keep it aligned with `EdgeImage.spec.talosVersion` unless you intentionally want STEC to upgrade or downgrade during bootstrap.
+
+=== "UI"
+
+    1. Open your STEC instance.
+    2. Go to `Clusters`.
+    3. Create a new cluster.
+    4. Select the registered hosts.
+    5. Assign node roles, for example `controlplane` for the single-node bootstrap example.
+    6. Select the Talos and Kubernetes versions.
+    7. Create the cluster and wait until it is ready.
+
+=== "kubectl"
+
+    First inspect registered hosts:
+
+    ```bash
+    kubectl get EdgeHost --namespace default
+    ```
+
+    Save this as `edge-cluster.yaml` and replace `<edge-host-id-1>` with the host ID from STEC:
+
+    ```yaml
+    apiVersion: edge.stackit.cloud/v1alpha1
+    kind: EdgeCluster
+    metadata:
+      name: kubara-cluster
+      namespace: default
+    spec:
+      nodes:
+        - edgeHost: <edge-host-id-1>
+          installDisk: /dev/vda
+          role: controlplane
+      talos:
+        version: v1.12.5-stackit.v1.7.1
+        kubernetes:
+          version: v1.30.2
+    ```
+
+    Apply it:
+
+    ```bash
+    kubectl apply -f edge-cluster.yaml
+    ```
+
+    This minimal example reflects the single-node bootstrap path.
+    For production, add more control plane and worker nodes based on your network design.
+
+### Phase 5: Export the cluster kubeconfig
+
+10. Export the kubeconfig for the Kubernetes cluster created by `EdgeCluster`.
+
+This is not the same file as `edge_kubeconfig`.
+`edge_kubeconfig` is the STEC management kubeconfig used for `EdgeImage`, `EdgeHost`, and `EdgeCluster`.
+The cluster kubeconfig is used for the actual Kubernetes cluster and for the next kubara bootstrap steps.
+
+Read more in the official STACKIT guide: [Managing clusters](https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/managing-clusters/).
+
+=== "UI"
+
+    1. Open your STEC instance.
+    2. Go to `Clusters`.
+    3. Open the created cluster.
+    4. Download the kubeconfig from the cluster details page.
+    5. Save it locally, for example as `edge-cluster.kubeconfig.yaml`.
+
+=== "kubectl"
+
+    Use the STEC management kubeconfig from Phase 1 and decode the generated cluster kubeconfig secret:
+
+    ```bash
+    export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
+
+    CLUSTER_NAME="kubara-cluster"
+    kubectl get secret "${CLUSTER_NAME}-kubeconfig" \
+      --namespace default \
+      -o yaml \
+      | yq -r '.data.value' \
+      | base64 --decode > "${CLUSTER_NAME}.kubeconfig.yaml"
+    ```
+
+    Then switch to the cluster kubeconfig and verify Kubernetes access:
+
+    ```bash
+    export KUBECONFIG="$PWD/${CLUSTER_NAME}.kubeconfig.yaml"
+    kubectl get nodes
+    kubectl get pods --all-namespaces
+    ```
+
+Use this cluster kubeconfig for the generic kubara bootstrap guide.
+
+## Validate API schema on your instance
+
+`EdgeImage` and `EdgeCluster` schemas can evolve. Validate against your STEC instance before applying manifests:
+
+```bash
+kubectl api-resources --api-group=edge.stackit.cloud
+kubectl explain edgeimages.edge.stackit.cloud.spec
+kubectl explain edgeclusters.edge.stackit.cloud.spec
+```
+
+## Why this order
+
+- The Edge Cloud instance must exist before you can create `EdgeImage` in STEC.
+- Terraform `edge_image` upload needs the downloaded local artifact path.
+- Terraform `edge_hosts` uses the image uploaded by `edge_image`.
+- `EdgeCluster` should be created after hosts are registered as `EdgeHost`.
+- The cluster kubeconfig is only available after STEC created the Kubernetes cluster.
+- The generated Terraform example does not manage externally existing Edge instances, images, or hosts. If you already have those, skip this example infrastructure path and continue with the kubara Helm/GitOps workflow.
+
+Now continue with the generic [Bootstrap Your Own Platform](../1_getting_started/bootstrapping.md#3-helm) guide, using the cluster kubeconfig from Phase 5.

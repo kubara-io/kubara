@@ -1,11 +1,12 @@
 package config
 
 import (
+	"path/filepath"
+	"testing"
+
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
-	"path/filepath"
-	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -17,34 +18,24 @@ func TestNewClusterFromEnv(t *testing.T) {
 	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 	sampleEnvMapWithoutHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 	sampleEnvMapWithOCIHelmRepo := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
-	}
-	sampleEnvMapWithGenericGitURL := &envconfig.EnvMap{
-		ProjectName:       "kubara-test",
-		ProjectStage:      "dev",
-		DomainName:        "example.com",
-		ArgocdGitUrl:      "git@github.com:org/repo.git",
-		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 
 	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
 	// This is what we expect the function to return.
-	expectedDNSName := "kubara-test-dev.example.com"
+	expectedDNSName := "<subdomain.my-domain.com>"
 	expectedCluster := Cluster{
 		Name:             "kubara-test",
 		Stage:            "dev",
@@ -54,9 +45,9 @@ func TestNewClusterFromEnv(t *testing.T) {
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
-			Provider:          "<provider>",
+			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
-			KubernetesType:    "<edge or ske>",
+			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
 			DNSContactEmail:   "my-test@nowhere.com",
 		},
@@ -64,11 +55,11 @@ func TestNewClusterFromEnv(t *testing.T) {
 			Repo: RepoProto{
 				AuthMode: envconfig.GitAuthModeHTTPS,
 				Git: &RepoType{
-					Customer: Repository{
+					Configs: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",
 					},
-					Managed: Repository{
+					Components: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",
 					},
@@ -104,6 +95,14 @@ func TestNewClusterFromEnv(t *testing.T) {
 			"metrics-server":          {Status: service.StatusDisabled},
 			"metallb":                 {Status: service.StatusDisabled},
 			"longhorn":                {Status: service.StatusDisabled},
+			"velero": {
+				Status: service.StatusDisabled,
+				Config: service.Config{
+					"backupMode":    "fs-backup",
+					"backupStorage": map[string]any{"create": true, "region": "eu01"},
+				},
+			},
+			"reloader": {Status: service.StatusDisabled},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
@@ -112,11 +111,6 @@ func TestNewClusterFromEnv(t *testing.T) {
 	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
 		URL: "registry-1.docker.io/bitnamicharts",
 	}
-	expectedClusterWithGenericGitURL := expectedClusterWithoutHelmRepo
-	genericGitRepo := *expectedClusterWithoutHelmRepo.ArgoCD.Repo.Git
-	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git = &genericGitRepo
-	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git.Customer.URL = "git@github.com:org/repo.git"
-	expectedClusterWithGenericGitURL.ArgoCD.Repo.Git.Managed.URL = "git@github.com:org/repo.git"
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -148,13 +142,6 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 			want: expectedClusterWithOCIHelmRepo,
 		},
-		{
-			name: "should prefer generic git repo URL over legacy HTTPS URL",
-			args: args{
-				e: sampleEnvMapWithGenericGitURL,
-			},
-			want: expectedClusterWithGenericGitURL,
-		},
 	}
 
 	// --- Test Execution ---
@@ -171,7 +158,6 @@ func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testin
 	sampleEnvMap := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
 		ProjectStage:      "dev",
-		DomainName:        "example.com",
 		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
 	}
 
