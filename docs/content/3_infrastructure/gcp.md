@@ -51,12 +51,11 @@ gcloud config set project $YOUR-PROJECT-NAME
 Follow the kubara bootstrapping guide, generate your helm charts and stop before bootstrapping. Everything else we be handled in this Guide.
 [Bootstrapping Guide](../1_getting_started/bootstrapping.md)
 
-
 ```bash
-# pseudo-workflow, please check the official guide LINK
+# pseudo-workflow, please check the up2date official guide!
 
-kubara init --prep # generate .env-file & set values
-kubara init # generate config.yaml & set values
+kubara init --prep # generate .env-file & set values accordingly
+kubara init # generate config.yaml & set values accordingly
 kubara generate # generate helm charts
 
 # Stop after generating your Charts and proceed with ## Part 2
@@ -112,7 +111,7 @@ gcloud compute networks list
 ### Create the GKE Cluster
 
 ```bash
-gcloud container clusters create test-cluster2 \
+gcloud container clusters create test-cluster \
     --zone=europe-west3-a \                # Zonal cluster (single availability zone for testing)
     --network=test-network \                # VPC network the cluster is deployed into
     --subnetwork=test-subnet \              # Subnet within that network (incl. pod/service ranges)
@@ -131,14 +130,14 @@ gcloud container clusters create test-cluster2 \
 
 ### Restrict Control Plane / API Access to Your Own IP
 
-`--enable-master-authorized-networks` adds a network-level layer that only allows explicitly permitted IP ranges to reach the API — following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc..
+`--enable-master-authorized-networks` only allows explicitly permitted IP ranges to reach the Kubernetes API — following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc. 
 
 ```bash
 ## Restrict control plane / API access to your own IP:
-gcloud container clusters update test-cluster2 \
+gcloud container clusters update test-cluster \
     --zone=europe-west3-a \
     --enable-master-authorized-networks \                  # Restricts access to the control plane API to an allowlist of IP ranges
-    --master-authorized-networks=$(curl -s ifconfig.me)/32 # Adds only your own public IP (as a /32, i.e. exactly one address) to that allowlist
+    --master-authorized-networks=$(curl -s ifconfig.me)/32 # Adds only your own public IP (as a /32, so exactly one address) to that allowlist
 ```
 
 ### Wait for the Cluster & Check the Connection
@@ -148,8 +147,8 @@ gcloud container clusters update test-cluster2 \
 gcloud container clusters list                                    # Lists all clusters in the project including their current status
 
 ## Generate credentials (kubeconfig) for the cluster
-gcloud container clusters get-credentials test-cluster2 \
-    --region=europe-west3-a                                       # Writes connection details for test-cluster2 into the local kubeconfig, so kubectl can access it
+gcloud container clusters get-credentials test-cluster \
+    --region=europe-west3-a                                       # Writes connection details for test-cluster into the local kubeconfig, so kubectl can access it
 
 ## Check the connection
 kubectl get ns                                                     # Lists all namespaces in the cluster – fails if the connection/auth is broken
@@ -272,23 +271,22 @@ spec:
       projectID: $YOUR-GCP-PROJECT-NAME
 ```
 
-Caution!
-Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first — however, this step is later handled automatically by the `kubara bootstrap` command, so don't try to apply now.
+!!! warning
+    Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first. This is handled automatically by the `kubara bootstrap` command later, so don't try to apply it now.
 
 ### Create Secrets
 
-Now all secrets required by kubara are created. The following commands are just one proven example — secrets can just as well be created another way, as long as the name and content match.
+Now all secrets required by kubara are created. The commands below are just one proven example — secrets can just as well be created another way, as long as the name and content match.
 
-IMPORTANT: Replace all the secret names, according to your clustername and stage in config.
-Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called
-cthulhu-dev-cluster-secrets-docker-config. 
-
-In this example it is called gcp-dev, so be careful to replace all names.
+!!! warning "Naming convention"
+    Replace every secret name below to match your cluster name and stage from `config.yaml`, using the pattern `<cluster>-<stage>-...`. Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called cthulhu-dev-cluster-secrets-docker-config. 
+    
+    In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names.
 
 #### Docker Config
 
 ```bash
-gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
+gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager
 printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
@@ -296,44 +294,46 @@ printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' 
 #### Grafana Admin Secret
 
 ```bash
-gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
+gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
+printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### Grafana SSO Secret
 
 ```bash
-gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
+gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
+printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### OAuth2 Proxy Secret
 
 ```bash
-gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
+gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
 # Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)
 dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
 
-printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
+printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### Argo CD SSO Secret
 
 ```bash
-gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
+gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
+printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-## Copy contents of these values.yaml-files and place them according to their path.
-## Careful: Your in this example the cluster is called "gcp", so check your path.
-## Also replace the names of the Secrets, according to clustername and stage defined in config.yaml 
+
+!!! warning "Before you copy these in"
+    - Place each snippet below at its matching path under `platform-configs/gcp/helm/...`.
+    - This example uses `gcp` as the cluster name — double-check your own path if it differs.
+    - Replace every secret name to match the cluster name and stage defined in your `config.yaml` (see the naming convention above).
 
 - ../platform-configs/gcp/helm/argo-cd/values-gcp.yaml
-```yaml
+```yaml title="platform-configs/gcp/helm/argo-cd/values-gcp.yaml"
 argo-cd:  
   bootstrapValues:
     dockerPullSecrets:
