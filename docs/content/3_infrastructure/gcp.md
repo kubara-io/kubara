@@ -1,36 +1,40 @@
 # Kubara on GCP
 
-If you want to run kubara on a hyperscaler like GCP, there are specific configurations to make.
-Here we provide an example which can be conveniently adapted to other major clouds. 
+If you want to run kubara on a hyperscaler like GCP, there are specific configurations to make. Here we provide an example that can be conveniently adapted to other major clouds.
 
-In this example we use Provider native components like the google secretmanager for external-secrets, google dns with a delegated subdomain (from any domain registrar that allows setting NS records). For all other desired setups, please check the according Docs of the components. Also feel free to contribute! :)
+In this example we use provider-native components — Google Secret Manager for External Secrets, and Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records). For any other setup, please check the corresponding component's own documentation. And feel free to contribute! :)
 
-We assume, you are starting in an empty project to test kubara.
-Another assumption is that you made your self aware of the kubara deployment guide, so please read this guide and exactly follow the steps.
+We assume you're starting from an empty GCP project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md) — please do that first if you haven't.
 
-Please Note:
-Velero on GCP wasn't tested, we recommend to follow the Guides of the Velero Project.
+!!! note "Before you start"
+    1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead — see the cluster-creation parameters below.
+    2. Velero on GCP hasn't been tested as part of this guide — please follow the [official Velero project docs](https://github.com/velero-io/velero-plugin-for-gcp#setup) instead.
 
 
 ## Local Prerequisites
 
 Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
 
-Obviously you need kubara too. See: [INSTALLATION GUIDE](../1_getting_started/installation.md)
+You'll also need kubara installed — see the [Installation guide](../1_getting_started/installation.md).
 
 ## Sneak preview:
 
-We will create an configure a GKE Cluster, Google Secret Manager and use Google DNS with an existing domain, delegating a subdomain for External DNS and set up SSO.
+1. We will generate a .env-File and fill in all values, after that generate the config.yaml and fill it out too. (kubara init (--prep))
+Then we will generate all the rendered Helm-Charts. (kubara generate)
 
-We will check and adapt the following values files:
+2. We will create and configure a GKE Cluster, set up Google Secret Manager, configure Google DNS with an existing domain by delegating a subdomain for ExternalDNS and set up SSO.
 
-- gcp-test/platform-configs/gcp/helm/argo-cd/values-gcp.yaml. 
-- gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml. 
-- gcp-test/platform-configs/gcp/helm/external-secrets.yaml. 
-- gcp-test/platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml. 
-- gcp-test/platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml. 
+3. We will create, check and adapt the following values files:
 
-We will then create our necessary secrets and deploy kubara on GKE.
+All paths below are relative to the `platform-configs` directory that `kubara generate` writes for you. We'll check and adapt the following Helm values files:
+
+- `platform-configs/gcp/helm/argo-cd/values-gcp.yaml`
+- `platform-configs/gcp/helm/external-dns/values-gcp.yaml`
+- `platform-configs/gcp/helm/external-secrets/values-gcp.yaml`
+- `platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml`
+- `platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml`
+
+4. We will then create our necessary secrets and deploy kubara on GKE. (kubara bootstrap)
 
 Let's start!
 
@@ -57,9 +61,6 @@ kubara generate # generate helm charts
 
 # Stop after generating your Charts and proceed with ## Part 2
 ```
-
-## TODO: Example config.yaml
-
 
 ## Part 2: GCP Infrastructure
 
@@ -204,8 +205,10 @@ Next, the `values.yaml` for external-dns needs to be adjusted.
 
 See: `gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml`
 
+
+- ../platform-configs/gcp/helm/external-dns/values-gcp.yaml. 
 ```yaml
-### set project id in service account annotation
+# set project id in service account annotation
 external-dns:
   provider: google
   google:
@@ -218,6 +221,8 @@ external-dns:
     annotations:
       iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # here!
 ```
+
+
 
 ### External Secrets
 
@@ -236,6 +241,19 @@ gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud 
     --role="roles/iam.workloadIdentityUser" \
     --member="serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]"
 ```
+
+- ../platform-configs/gcp/helm/external-secrets/values-gcp.yaml 
+```yaml
+external-secrets:
+  serviceAccount:
+    create: true
+    # exact same name as the GCP service account you created in the previous step
+    name: "external-secrets-sa"
+    annotations:
+      # associate the Kubernetes service account with the GCP service account
+      iam.gke.io/gcp-service-account: "external-secrets-sa@google-project-xyz-xyz-0abc.iam.gserviceaccount.com" # replace with your service account
+```
+
 
 #### SecretStore
 
@@ -261,53 +279,100 @@ Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs ne
 
 Now all secrets required by kubara are created. The following commands are just one proven example — secrets can just as well be created another way, as long as the name and content match.
 
+IMPORTANT: Replace all the secret names, according to your clustername and stage in config.
+Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called
+cthulhu-dev-cluster-secrets-docker-config. 
+
+In this example it is called gcp-dev, so be careful to replace all names.
+
 #### Docker Config
 
 ```bash
-gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic
-
+gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager
-printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=-
+printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### Grafana Admin Secret
 
 ```bash
-gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic
+gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=-
+printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### Grafana SSO Secret
 
 ```bash
-gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic
+gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=-
+printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### OAuth2 Proxy Secret
 
 ```bash
-gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-policy=automatic
+gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
 
 # Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)
 dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
 
-printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=-
+printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
 #### Argo CD SSO Secret
 
 ```bash
-gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic
+gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic # change name of the secret according to your name and stage / replace "gcp-dev"
 
-printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=-
+printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
+## Copy contents of these values.yaml-files and place them according to their path.
+## Careful: Your in this example the cluster is called "gcp", so check your path.
+## Also replace the names of the Secrets, according to clustername and stage defined in config.yaml 
+
+- ../platform-configs/gcp/helm/argo-cd/values-gcp.yaml
+```yaml
+argo-cd:  
+  bootstrapValues:
+    dockerPullSecrets:
+      image-pull-secret:
+        remoteRef:
+          remoteKey: gcp-dev-cluster-secrets-docker-config # change name according to your config.yaml (format: $clustername-$stage)
+
+externalSecrets:
+  secrets:
+    oauth2-credentials:
+      dataFrom:
+        - remoteKey: gcp-dev-argocd-argo-oauth2-credentials
+```
+
+- ../platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml. 
+```yaml
+externalSecrets:
+  secrets:
+    grafana-admin-credentials:
+      dataFrom:
+        - remoteKey: gcp-dev-kube-prometheus-stack-grafana-credentials # change name of the secret according to your name and stage / replace "gcp-dev"
+    oauth2-credentials:
+      dataFrom:
+        - remoteKey: gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials # change name of the secret according to your name and stage / replace "gcp-dev"
+```
+
+- ../platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml. 
+```yaml
+externalSecrets:
+  secrets:
+    oauth2-credentials:
+      dataFrom:
+        - remoteKey: gcp-dev-oauth2-proxy-oauth2-credentials # change name of the secret according to your name and stage / replace "gcp-dev"
+```
+
+
 #### Velero
-#### see: https://github.com/velero-io/velero-plugin-for-gcp#setup
-Please refer to the official velero docs, we can only provide you these untested hints - feel free to contribute if you have some proposal to enhance the example.
+#### If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup
+Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance the example.
 
 
 
