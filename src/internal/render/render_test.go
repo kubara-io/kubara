@@ -55,6 +55,29 @@ func fullCatalogContext() map[string]any {
 	}
 }
 
+func createRenderTestCatalog(t *testing.T, root string, name string, files map[string]string) string {
+	t.Helper()
+
+	catalogPath := filepath.Join(root, name)
+	require.NoError(t, os.MkdirAll(catalogPath, 0o750))
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "services"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "Catalog.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: `+name+`
+spec:
+  version: 1.0.0
+`), 0o600))
+
+	for relPath, content := range files {
+		targetPath := filepath.Join(catalogPath, filepath.FromSlash(relPath))
+		require.NoError(t, os.MkdirAll(filepath.Dir(targetPath), 0o750))
+		require.NoError(t, os.WriteFile(targetPath, []byte(content), 0o600))
+	}
+
+	return catalogPath
+}
+
 func TestTemplateType_String(t *testing.T) {
 	tests := []struct {
 		name string
@@ -170,6 +193,52 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
 	require.NotEmpty(t, infrastructureMain)
 	assert.Contains(t, infrastructureMain, `source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"`)
+}
+
+func TestTemplateFiles_PathCollisionsAcrossCatalogsRequireOverwrite(t *testing.T) {
+	root := t.TempDir()
+	firstCatalog := createRenderTestCatalog(t, root, "first", map[string]string{
+		"platform-components/helm/shared/README.md": "first\n",
+	})
+	secondCatalog := createRenderTestCatalog(t, root, "second", map[string]string{
+		"platform-components/helm/shared/README.md": "second\n",
+	})
+
+	_, err := TemplateFiles(TemplateOptions{
+		Type:     All,
+		Catalogs: []string{firstCatalog, secondCatalog},
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `template "platform-components/helm/shared/README.md" already exists in both`)
+}
+
+func TestTemplateFiles_CatalogOverwritePrefersLaterCatalog(t *testing.T) {
+	root := t.TempDir()
+	firstCatalog := createRenderTestCatalog(t, root, "first", map[string]string{
+		"platform-components/helm/shared/README.md": "first\n",
+	})
+	secondCatalog := createRenderTestCatalog(t, root, "second", map[string]string{
+		"platform-components/helm/shared/README.md": "second\n",
+	})
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type:      All,
+		Catalogs:  []string{firstCatalog, secondCatalog},
+		Overwrite: true,
+	})
+	require.NoError(t, err)
+
+	var readme string
+	for _, result := range results {
+		if result.Path == "platform-components/helm/shared/README.md" {
+			readme = result.Content
+			break
+		}
+	}
+
+	require.NotEmpty(t, readme)
+	assert.Equal(t, "second\n", readme)
 }
 
 func TestTemplateFiles(t *testing.T) {

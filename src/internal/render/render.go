@@ -109,14 +109,15 @@ type templateSource struct {
 	name     string
 	fsys     fs.FS
 	baseRoot string
-	external bool
+	order    int
 }
 
 type templateFile struct {
-	sourcePath string
-	readPath   string
-	fsys       fs.FS
-	external   bool
+	sourcePath  string
+	readPath    string
+	fsys        fs.FS
+	sourceName  string
+	sourceOrder int
 }
 
 func (tt TemplateType) String() string {
@@ -133,13 +134,13 @@ func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
 
 		source, err := catalog.ResolveSource(cat)
 		if err != nil {
-			return nil, fmt.Errorf("resolve external catalog source: %w", err)
+			return nil, fmt.Errorf("resolve catalog source: %w", err)
 		}
 		sources = append(sources, templateSource{
 			name:     cat,
 			fsys:     os.DirFS(source.RootPath),
 			baseRoot: ".",
-			external: true,
+			order:    len(sources),
 		})
 	}
 
@@ -193,10 +194,11 @@ func makeTemplateFileWalkDirFunc(source templateSource, out *[]templateFile) fs.
 		}
 
 		*out = append(*out, templateFile{
-			sourcePath: normalized,
-			readPath:   filepath.ToSlash(path),
-			fsys:       source.fsys,
-			external:   source.external,
+			sourcePath:  normalized,
+			readPath:    filepath.ToSlash(path),
+			fsys:        source.fsys,
+			sourceName:  source.name,
+			sourceOrder: source.order,
 		})
 		return nil
 	}
@@ -219,7 +221,7 @@ func getTemplateFiles(options TemplateOptions) ([]templateFile, error) {
 
 		for _, root := range templateRootsForType(source.baseRoot, options.Type) {
 			if err := fs.WalkDir(source.fsys, root, walkDirFunc); err != nil {
-				if source.external && errors.Is(err, fs.ErrNotExist) {
+				if errors.Is(err, fs.ErrNotExist) {
 					continue
 				}
 				walkErr = errors.Join(walkErr, err)
@@ -279,11 +281,11 @@ func StripProviderPath(relPath string) string {
 }
 
 func shouldPreferTemplateFile(current templateFile, next templateFile, currentProviderSpecific bool, nextProviderSpecific bool, overwrite bool, strippedPath string) (bool, error) {
-	if current.external != next.external {
+	if current.sourceOrder != next.sourceOrder {
 		if !overwrite {
-			return false, fmt.Errorf("template %q already exists in built-in catalog", strippedPath)
+			return false, fmt.Errorf("template %q already exists in both %q and %q", strippedPath, current.sourceName, next.sourceName)
 		}
-		return next.external, nil
+		return next.sourceOrder > current.sourceOrder, nil
 	}
 
 	if currentProviderSpecific != nextProviderSpecific {
@@ -298,10 +300,10 @@ func selectTemplateFilesForProvider(files []templateFile, provider string, overw
 	sortedFiles := append([]templateFile(nil), files...)
 	sort.Slice(sortedFiles, func(i, j int) bool {
 		if sortedFiles[i].sourcePath == sortedFiles[j].sourcePath {
-			if sortedFiles[i].external == sortedFiles[j].external {
+			if sortedFiles[i].sourceOrder == sortedFiles[j].sourceOrder {
 				return sortedFiles[i].readPath < sortedFiles[j].readPath
 			}
-			return !sortedFiles[i].external && sortedFiles[j].external
+			return sortedFiles[i].sourceOrder < sortedFiles[j].sourceOrder
 		}
 		return sortedFiles[i].sourcePath < sortedFiles[j].sourcePath
 	})

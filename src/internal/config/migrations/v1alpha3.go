@@ -41,14 +41,14 @@ func migrateV1Alpha3Config(config map[string]any) error {
 }
 
 func migrateV1Alpha3Cluster(cluster map[string]any, clusterIndex int) error {
-	if err := ensureV1Alpha3GeneralCatalog(cluster, clusterIndex); err != nil {
+	if err := ensureV1Alpha3GeneralCatalog(cluster); err != nil {
 		return err
 	}
 
 	return migrateV1Alpha3ArgoCDSelfManaged(cluster, clusterIndex)
 }
 
-func ensureV1Alpha3GeneralCatalog(cluster map[string]any, clusterIndex int) error {
+func ensureV1Alpha3GeneralCatalog(cluster map[string]any) error {
 	catalogsRaw, exists := cluster["catalogs"]
 	if !exists || catalogsRaw == nil {
 		cluster["catalogs"] = []any{catalog.DefaultGeneralCatalog}

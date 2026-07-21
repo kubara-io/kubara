@@ -121,7 +121,7 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 		&cli.StringSliceFlag{
 			Name:        "catalog",
 			Value:       flags.Catalogs,
-			Usage:       "Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
+			Usage:       "Path to a catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
 			Destination: &flags.Catalogs,
 			Config: cli.StringConfig{
 				TrimSpace: true,
@@ -130,7 +130,7 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 		&cli.BoolFlag{
 			Name:        "catalog-overwrite",
 			Value:       flags.CatalogOverwrite,
-			Usage:       "Allow external service definitions from --catalog to overwrite built-in definitions on name collisions",
+			Usage:       "Allow later catalogs from --catalog to overwrite earlier definitions on name collisions",
 			Destination: &flags.CatalogOverwrite,
 		},
 		&cli.BoolFlag{

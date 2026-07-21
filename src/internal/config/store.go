@@ -91,7 +91,7 @@ func (cs *ConfigStore) Load() error {
 }
 
 // GenerateSchemaWithCatalog generates a JSON schema from the Config struct
-// with optional external service definitions merged into the built-in catalog.
+// with optional additional catalog service definitions merged into the loaded catalog set.
 func GenerateSchemaWithCatalog(catalogOptions catalog.LoadOptions) (map[string]any, error) {
 	cat, err := catalog.Load(catalogOptions)
 	if err != nil {
