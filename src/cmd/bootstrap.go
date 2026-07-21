@@ -162,9 +162,9 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	loadedCatalog, err := cs.GetCatalog()
+	loadedCatalog, err := cs.GetCatalogForCluster(*clusterConfig)
 	if err != nil {
-		return nil, fmt.Errorf("load catalog: %w", err)
+		return nil, fmt.Errorf("load catalog for cluster %q: %w", clusterConfig.Name, err)
 	}
 
 	bootstrapCatalog := catalog.DefaultBootstrapCatalog

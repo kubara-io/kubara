@@ -633,6 +633,79 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	assert.NotContains(t, properties, "bootstrap-crds")
 }
 
+func TestConfigStore_LoadAppliesDefaultsPerClusterCatalog(t *testing.T) {
+	cfg := newValidTestConfig()
+	cfg.Clusters[0].Catalogs = []string{testGeneralCatalogPath}
+	cfg.Clusters[0].Services = service.Services{}
+
+	secondCluster := cfg.Clusters[0]
+	secondCluster.Name = "logging-cluster"
+	secondCluster.DNSName = "logging.example.com"
+	secondCluster.Catalogs = []string{testCustomCatalogPath}
+	secondCluster.Services = service.Services{}
+	cfg.Clusters = append(cfg.Clusters, secondCluster)
+
+	cs := createLoadedConfigStore(t, cfg)
+
+	require.Len(t, cs.GetConfig().Clusters, 2)
+	assert.Contains(t, cs.GetConfig().Clusters[0].Services, "cert-manager")
+	assert.NotContains(t, cs.GetConfig().Clusters[0].Services, "loki")
+	assert.Contains(t, cs.GetConfig().Clusters[1].Services, "loki")
+	assert.NotContains(t, cs.GetConfig().Clusters[1].Services, "cert-manager")
+}
+
+func TestGenerateSchema_UsesClusterSpecificServiceBranches(t *testing.T) {
+	cfg := newValidTestConfig()
+	cfg.Clusters[0].Catalogs = []string{testGeneralCatalogPath}
+	cfg.Clusters[0].Services = service.Services{}
+
+	secondCluster := cfg.Clusters[0]
+	secondCluster.Name = "logging-cluster"
+	secondCluster.DNSName = "logging.example.com"
+	secondCluster.Catalogs = []string{testCustomCatalogPath}
+	secondCluster.Services = service.Services{}
+	cfg.Clusters = append(cfg.Clusters, secondCluster)
+
+	cs := createLoadedConfigStore(t, cfg)
+	schemaDoc, err := cs.GenerateSchema()
+	require.NoError(t, err)
+
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	require.True(t, ok)
+	clusterDef, ok := defs["Cluster"].(map[string]any)
+	require.True(t, ok)
+	branches, ok := clusterDef["oneOf"].([]any)
+	require.True(t, ok)
+	require.Len(t, branches, 2)
+
+	branchByName := make(map[string]map[string]any, len(branches))
+	for _, rawBranch := range branches {
+		branch, ok := rawBranch.(map[string]any)
+		require.True(t, ok)
+		properties, ok := branch["properties"].(map[string]any)
+		require.True(t, ok)
+		nameSchema, ok := properties["name"].(map[string]any)
+		require.True(t, ok)
+		name, ok := nameSchema["const"].(string)
+		require.True(t, ok)
+		branchByName[name] = properties
+	}
+
+	generalServices, ok := branchByName["test-cluster"]["services"].(map[string]any)
+	require.True(t, ok)
+	generalProperties, ok := generalServices["properties"].(map[string]any)
+	require.True(t, ok)
+	assert.Contains(t, generalProperties, "cert-manager")
+	assert.NotContains(t, generalProperties, "loki")
+
+	customServices, ok := branchByName["logging-cluster"]["services"].(map[string]any)
+	require.True(t, ok)
+	customProperties, ok := customServices["properties"].(map[string]any)
+	require.True(t, ok)
+	assert.Contains(t, customProperties, "loki")
+	assert.NotContains(t, customProperties, "cert-manager")
+}
+
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
 	// A minimal YAML that only provides required fields and omits all fields
 	// that have defaults. After Load() applies defaults, Validate() must pass.
@@ -758,22 +831,26 @@ clusters:
 	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0o644))
 
 	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
-	cs.catalog = &catalog.Catalog{
-		Services: map[string]catalog.ServiceDefinition{
-			catalog.BootstrapServiceArgoCD: {
-				Spec: catalog.ServiceSpec{
-					ChartPath: "argo-cd",
-					Status:    service.StatusEnabled,
+	cs.catalogCache = map[string]catalog.Catalog{
+		catalogCacheKey(catalog.LoadOptions{
+			BootstrapCatalog: testBootstrapCatalogPath,
+			Catalogs:         []string{catalog.DefaultGeneralCatalog, testGeneralCatalogPath},
+		}): {
+			Services: map[string]catalog.ServiceDefinition{
+				catalog.BootstrapServiceArgoCD: {
+					Spec: catalog.ServiceSpec{
+						ChartPath: "argo-cd",
+						Status:    service.StatusEnabled,
+					},
+				},
+				catalog.BootstrapServiceCRDs: {
+					Spec: catalog.ServiceSpec{
+						ChartPath: "bootstrap-crds",
+						Status:    service.StatusEnabled,
+					},
 				},
 			},
-			catalog.BootstrapServiceCRDs: {
-				Spec: catalog.ServiceSpec{
-					ChartPath: "bootstrap-crds",
-					Status:    service.StatusEnabled,
-				},
-			},
-		},
-	}
+		}}
 
 	require.NoError(t, cs.Load())
 

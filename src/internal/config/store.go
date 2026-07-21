@@ -27,7 +27,7 @@ type ConfigStore struct {
 	cwd            string
 	filepath       string
 	config         *Config
-	catalog        *catalog.Catalog
+	catalogCache   map[string]catalog.Catalog
 	catalogOptions catalog.LoadOptions
 }
 
@@ -91,14 +91,36 @@ func (cs *ConfigStore) Load() error {
 }
 
 // GenerateSchema generates a JSON schema from the Config struct using the
-// same resolved catalog view as config validation and generation.
+// same per-cluster catalog resolution as config validation and generation.
 func (cs *ConfigStore) GenerateSchema() (map[string]any, error) {
-	cat, err := cs.GetCatalog()
-	if err != nil {
-		return nil, fmt.Errorf("load catalog: %w", err)
+	if len(cs.config.Clusters) == 0 {
+		return generateSchemaWithCatalog(catalog.Catalog{Services: map[string]catalog.ServiceDefinition{}})
 	}
 
-	return generateSchemaWithCatalog(cat)
+	clusterCatalogs := make([]catalog.Catalog, 0, len(cs.config.Clusters))
+	unionCatalog := catalog.Catalog{Services: map[string]catalog.ServiceDefinition{}}
+	for _, cluster := range cs.config.Clusters {
+		cat, err := cs.GetCatalogForCluster(cluster)
+		if err != nil {
+			return nil, fmt.Errorf("load catalog for cluster %q: %w", cluster.Name, err)
+		}
+		clusterCatalogs = append(clusterCatalogs, cat)
+		for name, def := range cat.Services {
+			if _, exists := unionCatalog.Services[name]; !exists {
+				unionCatalog.Services[name] = def
+			}
+		}
+	}
+
+	schemaDoc, err := generateSchemaWithCatalog(unionCatalog)
+	if err != nil {
+		return nil, err
+	}
+	if err := applyClusterSpecificSchemaBranches(schemaDoc, cs.config.Clusters, clusterCatalogs); err != nil {
+		return nil, err
+	}
+
+	return schemaDoc, nil
 }
 
 func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
@@ -194,12 +216,7 @@ func ensureServiceConfigDefinition(schemaDoc map[string]any) {
 }
 
 func (cs *ConfigStore) validate() error {
-	cat, err := cs.GetCatalog()
-	if err != nil {
-		return fmt.Errorf("load catalog: %w", err)
-	}
-
-	schemaDoc, err := generateSchemaWithCatalog(cat)
+	schemaDoc, err := cs.GenerateSchema()
 	if err != nil {
 		return fmt.Errorf("generate schema: %w", err)
 	}
@@ -235,7 +252,70 @@ func (cs *ConfigStore) validate() error {
 		return fmt.Errorf("validate provider kubernetes types: %w", err)
 	}
 	return nil
+}
 
+func applyClusterSpecificSchemaBranches(schemaDoc map[string]any, clusters []Cluster, catalogs []catalog.Catalog) error {
+	defs, ok := schemaDoc["$defs"].(map[string]any)
+	if !ok {
+		return fmt.Errorf("catalog schema is missing $defs")
+	}
+
+	clusterDef, ok := defs["Cluster"].(map[string]any)
+	if !ok || len(clusters) == 0 {
+		return nil
+	}
+
+	branches := make([]any, 0, len(clusters))
+	for i, cluster := range clusters {
+		branch, err := deepCopySchemaMap(clusterDef)
+		if err != nil {
+			return fmt.Errorf("clone cluster schema for %q: %w", cluster.Name, err)
+		}
+
+		properties, ok := branch["properties"].(map[string]any)
+		if !ok {
+			return fmt.Errorf("cluster schema is missing properties")
+		}
+
+		nameSchema, ok := properties["name"].(map[string]any)
+		if !ok {
+			return fmt.Errorf("cluster schema is missing name property")
+		}
+		nameBranch, err := deepCopySchemaMap(nameSchema)
+		if err != nil {
+			return fmt.Errorf("clone name schema for %q: %w", cluster.Name, err)
+		}
+		nameBranch["const"] = cluster.Name
+		properties["name"] = nameBranch
+
+		clusterServices := catalogs[i].UserConfigurableServices()
+		servicesSchema, err := buildServicesSchema(clusterServices)
+		if err != nil {
+			return fmt.Errorf("build service schema for cluster %q: %w", cluster.Name, err)
+		}
+		properties["services"] = servicesSchema
+
+		branches = append(branches, branch)
+	}
+
+	defs["Cluster"] = map[string]any{
+		"oneOf": branches,
+	}
+	return nil
+}
+
+func deepCopySchemaMap(input map[string]any) (map[string]any, error) {
+	raw, err := json.Marshal(input)
+	if err != nil {
+		return nil, err
+	}
+
+	var output map[string]any
+	if err := json.Unmarshal(raw, &output); err != nil {
+		return nil, err
+	}
+
+	return output, nil
 }
 
 func validateProviderKubernetesTypes(cfg *Config) error {
@@ -282,55 +362,28 @@ func (cs *ConfigStore) GetConfig() *Config {
 	return cs.config
 }
 
-// GetCatalog returns the catalog for this config store, loading it on first use.
-func (cs *ConfigStore) GetCatalog() (catalog.Catalog, error) {
-	if cs.catalog != nil {
-		return *cs.catalog, nil
-	}
-
-	bootstrapCatalog := catalog.DefaultBootstrapCatalog
-	if strings.TrimSpace(cs.catalogOptions.BootstrapCatalog) != "" {
-		bootstrapCatalog = cs.catalogOptions.BootstrapCatalog
-	}
-	if cs.config != nil && cs.config.BootstrapCatalog != nil {
-		bootstrapCatalog = *cs.config.BootstrapCatalog
-	}
-
-	// Gather all unique catalogs from all clusters
-	allCatalogs := make([]string, 0)
-	seen := make(map[string]bool)
-
-	// Add cluster-specific catalogs in order
-	if cs.config != nil {
-		for _, cluster := range cs.config.Clusters {
-			for _, cat := range cluster.Catalogs {
-				if !seen[cat] {
-					seen[cat] = true
-					allCatalogs = append(allCatalogs, cat)
-				}
-			}
+// GetCatalogForCluster returns the effective catalog for one cluster using the
+// shared per-cluster precedence rules.
+func (cs *ConfigStore) GetCatalogForCluster(cluster Cluster) (catalog.Catalog, error) {
+	loadOptions := EffectiveCatalogLoadOptionsForCluster(cs.config, cluster, cs.catalogOptions)
+	cacheKey := catalogCacheKey(loadOptions)
+	if cs.catalogCache != nil {
+		if cat, exists := cs.catalogCache[cacheKey]; exists {
+			return cat, nil
 		}
 	}
 
-	// Add CLI catalogs
-	for _, cat := range cs.catalogOptions.Catalogs {
-		if !seen[cat] {
-			seen[cat] = true
-			allCatalogs = append(allCatalogs, cat)
-		}
-	}
-
-	cat, err := catalog.Load(catalog.LoadOptions{
-		BootstrapCatalog: bootstrapCatalog,
-		Catalogs:         allCatalogs,
-		Overwrite:        cs.catalogOptions.Overwrite,
-	})
+	cat, err := catalog.Load(loadOptions)
 	if err != nil {
 		return catalog.Catalog{}, fmt.Errorf("load catalog: %w", err)
 	}
 
-	cs.catalog = &cat
-	return *cs.catalog, nil
+	if cs.catalogCache == nil {
+		cs.catalogCache = make(map[string]catalog.Catalog)
+	}
+	cs.catalogCache[cacheKey] = cat
+
+	return cat, nil
 }
 
 // GetFilepath returns the filepath for the config.
@@ -466,13 +519,13 @@ func buildServiceNetworkingSchema() map[string]any {
 }
 
 func (cs *ConfigStore) ApplyServiceCatalogDefaults() error {
-	cat, err := cs.GetCatalog()
-	if err != nil {
-		return err
-	}
-	cat = cat.UserConfigurableServices()
-
 	for i := range cs.config.Clusters {
+		cat, err := cs.GetCatalogForCluster(cs.config.Clusters[i])
+		if err != nil {
+			return fmt.Errorf("load catalog for cluster %q: %w", cs.config.Clusters[i].Name, err)
+		}
+		cat = cat.UserConfigurableServices()
+
 		normalizedServices, err := normalizeServiceNames(cs.config.Clusters[i].Services)
 		if err != nil {
 			return fmt.Errorf("normalize services for cluster %q: %w", cs.config.Clusters[i].Name, err)
