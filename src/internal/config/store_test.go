@@ -678,32 +678,17 @@ func TestGenerateSchema_UsesClusterSpecificServiceBranches(t *testing.T) {
 	require.True(t, ok)
 	require.Len(t, branches, 2)
 
-	branchByName := make(map[string]map[string]any, len(branches))
+	servicesByCluster := make(map[string]map[string]any, len(branches))
 	for _, rawBranch := range branches {
-		branch, ok := rawBranch.(map[string]any)
-		require.True(t, ok)
-		properties, ok := branch["properties"].(map[string]any)
-		require.True(t, ok)
-		nameSchema, ok := properties["name"].(map[string]any)
-		require.True(t, ok)
-		name, ok := nameSchema["const"].(string)
-		require.True(t, ok)
-		branchByName[name] = properties
+		properties := rawBranch.(map[string]any)["properties"].(map[string]any)
+		name := properties["name"].(map[string]any)["const"].(string)
+		services := properties["services"].(map[string]any)["properties"].(map[string]any)
+		servicesByCluster[name] = services
 	}
-
-	generalServices, ok := branchByName["test-cluster"]["services"].(map[string]any)
-	require.True(t, ok)
-	generalProperties, ok := generalServices["properties"].(map[string]any)
-	require.True(t, ok)
-	assert.Contains(t, generalProperties, "cert-manager")
-	assert.NotContains(t, generalProperties, "loki")
-
-	customServices, ok := branchByName["logging-cluster"]["services"].(map[string]any)
-	require.True(t, ok)
-	customProperties, ok := customServices["properties"].(map[string]any)
-	require.True(t, ok)
-	assert.Contains(t, customProperties, "loki")
-	assert.NotContains(t, customProperties, "cert-manager")
+	assert.Contains(t, servicesByCluster["test-cluster"], "cert-manager")
+	assert.NotContains(t, servicesByCluster["test-cluster"], "loki")
+	assert.Contains(t, servicesByCluster["logging-cluster"], "loki")
+	assert.NotContains(t, servicesByCluster["logging-cluster"], "cert-manager")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
@@ -801,76 +786,6 @@ clusters:
 	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
 	assert.NotContains(t, savedConfig.Clusters[0].Services, "bootstrap-crds")
 	assert.Contains(t, savedConfig.Clusters[0].Services, "cert-manager")
-}
-
-func TestConfigStore_LoadMigratesV1Alpha3AndPersistsGeneralCatalogAndBootstrapCleanup(t *testing.T) {
-	configYAML := fmt.Sprintf(`
-version: %s
-bootstrapCatalog: %q
-clusters:
-  - name: migrated-cluster
-    stage: dev
-    type: hub
-    dnsName: migrated.example.com
-    ingressClassName: traefik
-    argocd:
-      repo:
-        https:
-          configs:
-            url: "https://github.com/example/configs.git"
-            targetRevision: main
-          components:
-            url: "https://github.com/example/components.git"
-            targetRevision: main
-    services:
-      argocd:
-        status: disabled
-`, ConfigVersionV1Alpha3, *testBootstrapCatalogPtr())
-
-	configPath := filepath.Join(t.TempDir(), "config.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0o644))
-
-	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
-	cs.catalogCache = map[string]catalog.Catalog{
-		catalogCacheKey(catalog.LoadOptions{
-			BootstrapCatalog: testBootstrapCatalogPath,
-			Catalogs:         []string{catalog.DefaultGeneralCatalog, testGeneralCatalogPath},
-		}): {
-			Services: map[string]catalog.ServiceDefinition{
-				catalog.BootstrapServiceArgoCD: {
-					Spec: catalog.ServiceSpec{
-						ChartPath: "argo-cd",
-						Status:    service.StatusEnabled,
-					},
-				},
-				catalog.BootstrapServiceCRDs: {
-					Spec: catalog.ServiceSpec{
-						ChartPath: "bootstrap-crds",
-						Status:    service.StatusEnabled,
-					},
-				},
-			},
-		}}
-
-	require.NoError(t, cs.Load())
-
-	cluster := cs.GetConfig().Clusters[0]
-	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
-	assert.Equal(t, ArgoCDSelfManagedDisabled, cluster.ArgoCD.SelfManaged)
-	assert.NotContains(t, cluster.Services, "argocd")
-	assert.NotContains(t, cluster.Services, "argo-cd")
-
-	savedBytes, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-
-	var savedConfig Config
-	require.NoError(t, yaml.Unmarshal(savedBytes, &savedConfig))
-	require.Equal(t, ConfigVersionV1Alpha4, savedConfig.Version)
-	require.Len(t, savedConfig.Clusters, 1)
-	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, savedConfig.Clusters[0].Catalogs)
-	assert.Equal(t, ArgoCDSelfManagedDisabled, savedConfig.Clusters[0].ArgoCD.SelfManaged)
-	assert.NotContains(t, savedConfig.Clusters[0].Services, "argocd")
-	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
 }
 
 func TestLoadAndValidate_TerraformProviderNoneDisablesTerraform(t *testing.T) {

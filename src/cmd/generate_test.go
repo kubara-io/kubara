@@ -21,6 +21,7 @@ func createHelperCatalog(t *testing.T, root string) string {
 	catalogPath := filepath.Join(root, "helper-catalog")
 	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "services"), 0o750))
 	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "platform-components", "helpers"), 0o750))
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "platform-components", "terraform"), 0o750))
 	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "Catalog.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
 kind: Catalog
 metadata:
@@ -37,6 +38,7 @@ spec:
   status: enabled
 `), 0o600))
 	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "platform-components", "helpers", "readme.txt"), []byte("helper asset\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "platform-components", "terraform", "disabled.txt"), []byte("terraform asset\n"), 0o600))
 
 	return catalogPath
 }
@@ -382,6 +384,7 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
 }
 
 func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
@@ -407,6 +410,9 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 	//dummy values
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
+	staleTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "stale.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(staleTerraform), 0o750))
+	require.NoError(t, os.WriteFile(staleTerraform, []byte("stale\n"), 0o600))
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -414,6 +420,8 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
+	assert.NoFileExists(t, staleTerraform)
 }
 
 func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
@@ -448,6 +456,7 @@ func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
 }
 
 func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {

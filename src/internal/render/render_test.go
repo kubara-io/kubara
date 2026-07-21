@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 
 	"github.com/stretchr/testify/assert"
@@ -32,10 +33,10 @@ func init() {
 	testGeneralCatalogPath = generalPath
 }
 
-func testTemplateCatalogs() []string {
-	return []string{
-		testBootstrapCatalogPath,
-		testGeneralCatalogPath,
+func testTemplateCatalogOptions() catalog.LoadOptions {
+	return catalog.LoadOptions{
+		BootstrapCatalog: testBootstrapCatalogPath,
+		Catalogs:         []string{testGeneralCatalogPath},
 	}
 }
 
@@ -150,9 +151,9 @@ func TestStripProviderPath(t *testing.T) {
 
 func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	results, err := TemplateFiles(TemplateOptions{
-		Type:     Terraform,
-		Provider: "t-cloud-public",
-		Catalogs: testTemplateCatalogs(),
+		Type:           Terraform,
+		Provider:       "t-cloud-public",
+		CatalogOptions: testTemplateCatalogOptions(),
 		Data: map[string]any{
 			"cluster": map[string]any{
 				"name":    "test-cluster",
@@ -205,8 +206,11 @@ func TestTemplateFiles_PathCollisionsAcrossCatalogsRequireOverwrite(t *testing.T
 	})
 
 	_, err := TemplateFiles(TemplateOptions{
-		Type:     All,
-		Catalogs: []string{firstCatalog, secondCatalog},
+		Type: All,
+		CatalogOptions: catalog.LoadOptions{
+			BootstrapCatalog: firstCatalog,
+			Catalogs:         []string{secondCatalog},
+		},
 	})
 
 	require.Error(t, err)
@@ -223,9 +227,12 @@ func TestTemplateFiles_CatalogOverwritePrefersLaterCatalog(t *testing.T) {
 	})
 
 	results, err := TemplateFiles(TemplateOptions{
-		Type:      All,
-		Catalogs:  []string{firstCatalog, secondCatalog},
-		Overwrite: true,
+		Type: All,
+		CatalogOptions: catalog.LoadOptions{
+			BootstrapCatalog: firstCatalog,
+			Catalogs:         []string{secondCatalog},
+			Overwrite:        true,
+		},
 	})
 	require.NoError(t, err)
 
@@ -438,10 +445,10 @@ func TestTemplateFiles(t *testing.T) {
 			}
 
 			results, err := TemplateFiles(TemplateOptions{
-				Type:     tt.tplType,
-				Provider: provider,
-				Catalogs: testTemplateCatalogs(),
-				Data:     tt.context,
+				Type:           tt.tplType,
+				Provider:       provider,
+				CatalogOptions: testTemplateCatalogOptions(),
+				Data:           tt.context,
 			})
 
 			if tt.wantErr {

@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -97,7 +98,7 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 
 func (o *SchemaOptions) Run() error {
 	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogOptions)
-	if err := cs.Load(); err != nil {
+	if err := cs.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
 		return fmt.Errorf("load config: %w", err)
 	}
 

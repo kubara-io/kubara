@@ -23,7 +23,7 @@ type RepoOptions struct {
 
 // AddRepository adds a helm repository
 func AddRepository(ctx context.Context, opts RepoOptions) error {
-	if !(strings.HasPrefix(opts.URL, "http") || strings.HasPrefix(opts.URL, "oci")) {
+	if !strings.HasPrefix(opts.URL, "http") && !strings.HasPrefix(opts.URL, "oci") {
 		return nil
 	}
 

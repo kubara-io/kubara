@@ -41,3 +41,12 @@ func TestLoad_MergesGeneralCatalogAfterBootstrap(t *testing.T) {
 	assert.Contains(t, cat.Services, "bootstrap-crds")
 	assert.Contains(t, cat.Services, "cert-manager")
 }
+
+func TestResolveLoadOptions_PreservesPortableReferences(t *testing.T) {
+	options, err := ResolveLoadOptions("/workspace", []string{"./catalog", DefaultGeneralCatalog}, true)
+	require.NoError(t, err)
+
+	assert.Equal(t, "/workspace", options.CWD)
+	assert.Equal(t, []string{"./catalog", DefaultGeneralCatalog}, options.Catalogs)
+	assert.True(t, options.Overwrite)
+}

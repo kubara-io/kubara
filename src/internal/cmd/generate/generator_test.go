@@ -13,7 +13,7 @@ import (
 )
 
 func TestBuildEnabledServiceTemplatePathPredicate_SkipsDisabledConfigsService(t *testing.T) {
-	predicate := buildEnabledServiceTemplatePathPredicate(
+	predicate := buildServiceTemplateFilter(
 		config.Cluster{
 			Services: service.Services{
 				"loki": {Status: service.StatusDisabled},
@@ -34,7 +34,7 @@ func TestBuildEnabledServiceTemplatePathPredicate_SkipsDisabledConfigsService(t 
 }
 
 func TestBuildEnabledServiceTemplatePathPredicate_AlwaysIncludesBootstrapServiceTemplates(t *testing.T) {
-	predicate := buildEnabledServiceTemplatePathPredicate(
+	predicate := buildServiceTemplateFilter(
 		config.Cluster{},
 		catalog.Catalog{
 			Services: map[string]catalog.ServiceDefinition{

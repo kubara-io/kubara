@@ -11,6 +11,7 @@ import (
 )
 
 type LoadOptions struct {
+	CWD              string
 	BootstrapCatalog string
 	Catalogs         []string
 	Overwrite        bool
@@ -21,12 +22,12 @@ func Load(options LoadOptions) (Catalog, error) {
 		Services: make(map[string]ServiceDefinition),
 	}
 
-	bootstrapCatalog := strings.TrimSpace(options.BootstrapCatalog)
-	if bootstrapCatalog == "" {
-		bootstrapCatalog = DefaultBootstrapCatalog
+	sources, err := ResolveSources(options)
+	if err != nil {
+		return Catalog{}, err
 	}
 
-	bootstrap, err := loadCatalogSource(bootstrapCatalog)
+	bootstrap, err := loadCatalogSource(sources[0])
 	if err != nil {
 		return Catalog{}, fmt.Errorf("load bootstrap catalog: %w", err)
 	}
@@ -35,11 +36,7 @@ func Load(options LoadOptions) (Catalog, error) {
 		merged.Services[name] = def
 	}
 
-	for _, cat := range options.Catalogs {
-		if strings.TrimSpace(cat) == "" {
-			return Catalog{}, fmt.Errorf("catalog source is empty")
-		}
-
+	for _, cat := range sources[1:] {
 		external, err := loadCatalogSource(cat)
 		if err != nil {
 			return Catalog{}, fmt.Errorf("load catalog %q: %w", cat, err)

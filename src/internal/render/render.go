@@ -43,7 +43,7 @@ func TemplateFiles(options TemplateOptions) ([]TemplateResult, error) {
 		return nil, fmt.Errorf("get template files for provider %q: %w", options.Provider, err)
 	}
 
-	selected, err := selectTemplateFilesForProvider(fileList, options.Provider, options.Overwrite)
+	selected, err := selectTemplateFilesForProvider(fileList, options.Provider, options.CatalogOptions.Overwrite)
 	if err != nil {
 		return nil, fmt.Errorf("select templates for provider %q: %w", options.Provider, err)
 	}
@@ -97,12 +97,11 @@ type TemplateResult struct {
 type TemplatePathPredicate func(path string) bool
 
 type TemplateOptions struct {
-	Type          TemplateType
-	Provider      string
-	Catalogs      []string
-	Overwrite     bool
-	Data          any
-	PathPredicate TemplatePathPredicate
+	Type           TemplateType
+	Provider       string
+	CatalogOptions catalog.LoadOptions
+	Data           any
+	PathPredicate  TemplatePathPredicate
 }
 
 type templateSource struct {
@@ -125,13 +124,13 @@ func (tt TemplateType) String() string {
 }
 
 func loadTemplateSources(options TemplateOptions) ([]templateSource, error) {
-	sources := make([]templateSource, 0, len(options.Catalogs))
+	catalogSources, err := catalog.ResolveSources(options.CatalogOptions)
+	if err != nil {
+		return nil, err
+	}
+	sources := make([]templateSource, 0, len(catalogSources))
 
-	for _, cat := range options.Catalogs {
-		if strings.TrimSpace(cat) == "" {
-			return nil, fmt.Errorf("catalog source is empty")
-		}
-
+	for _, cat := range catalogSources {
 		source, err := catalog.ResolveSource(cat)
 		if err != nil {
 			return nil, fmt.Errorf("resolve catalog source: %w", err)

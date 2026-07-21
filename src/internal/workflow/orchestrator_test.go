@@ -29,7 +29,7 @@ func testCatalogLoadOptions(t *testing.T) catalog.LoadOptions {
 	}
 }
 
-func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t *testing.T) {
+func TestCreateOrUpdateCluster_UpdatesExistingClusterIncludingHelmRepo(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -65,7 +65,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -79,7 +79,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	assert.Equal(t, "https://charts.example.com", updated.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *testing.T) {
+func TestCreateOrUpdateCluster_UpdatesExistingClusterWithoutTerraform(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -110,7 +110,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -122,7 +122,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.HTTPS.Configs.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T) {
+func TestCreateOrUpdateCluster_CreatesNewClusterWithHelmRepo(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -131,7 +131,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -142,7 +142,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
+func TestCreateOrUpdateCluster_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -180,7 +180,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -189,7 +189,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 	assert.Equal(t, "https://charts.old.example.com", updated.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
+func TestCreateOrUpdateCluster_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -197,7 +197,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -205,7 +205,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 	assert.Nil(t, cluster.ArgoCD.HelmRepo)
 }
 
-func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
+func TestCreateOrUpdateCluster_NormalizesOCIHelmRepoURL(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -214,7 +214,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, testCatalogLoadOptions(t))
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -223,7 +223,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 	assert.Equal(t, "registry-1.docker.io/bitnamicharts", cluster.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+func TestCreateOrUpdateCluster_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -234,7 +234,7 @@ func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFail
 	loadOptions := testCatalogLoadOptions(t)
 	loadOptions.Catalogs = []string{filepath.Join(t.TempDir(), "does-not-exist")}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, loadOptions)
+	err := CreateOrUpdateCluster(cfg, e, loadOptions)
 	require.Error(t, err)
 	require.Empty(t, cfg.Clusters)
 }

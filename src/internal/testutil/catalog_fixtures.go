@@ -130,19 +130,6 @@ func certManagerSchemaYAML() string {
 `
 }
 
-func metallbSchemaYAML() string {
-	return `  type: object
-  additionalProperties: false
-  properties:
-    publicLoadBalancerIPs:
-      type: string
-    loadBalancerAddressPool:
-      type: array
-      items:
-        type: string
-`
-}
-
 func indentYAML(value string, spaces int) string {
 	prefix := strings.Repeat(" ", spaces)
 	lines := strings.Split(strings.TrimRight(value, "\n"), "\n")

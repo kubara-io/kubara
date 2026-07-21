@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -162,30 +161,29 @@ func toJSONMap(value any) (map[string]any, error) {
 	return out, nil
 }
 
-func pathHasSegment(path, segment string) bool {
-	return slices.Contains(strings.Split(filepath.ToSlash(path), "/"), segment)
-}
-
-func (o *Options) cleanupOldFiles(results []render.TemplateResult) error {
+func (o *Options) cleanupOldFiles() error {
 	if o.DryRun {
 		return nil
 	}
 
-	cleanupTerraform := false
-	cleanupHelm := false
-	for _, result := range results {
-		cleanupTerraform = cleanupTerraform || pathHasSegment(result.Path, render.Terraform.String())
-		cleanupHelm = cleanupHelm || pathHasSegment(result.Path, render.Helm.String())
-	}
-
-	if cleanupTerraform {
-		deletePath := filepath.Join(o.PlatformComponents, render.Terraform.String())
-		if err := os.RemoveAll(deletePath); err != nil {
-			return fmt.Errorf("removing directory %q: %w", deletePath, err)
+	var deletePaths []string
+	if o.TemplateType != render.Helm {
+		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Terraform.String()))
+		clusterDirs, err := os.ReadDir(o.PlatformConfigs)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("read platform config directories: %w", err)
+		}
+		for _, clusterDir := range clusterDirs {
+			if !clusterDir.IsDir() {
+				continue
+			}
+			deletePaths = append(deletePaths, filepath.Join(o.PlatformConfigs, clusterDir.Name(), render.Terraform.String()))
 		}
 	}
-	if cleanupHelm {
-		deletePath := filepath.Join(o.PlatformComponents, render.Helm.String())
+	if o.TemplateType != render.Terraform {
+		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Helm.String()))
+	}
+	for _, deletePath := range deletePaths {
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
@@ -237,7 +235,7 @@ func serviceNameFromTemplatePath(chartPathServiceIndex map[string]string, path s
 	}
 }
 
-func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalog.Catalog) render.TemplatePathPredicate {
+func buildServiceTemplateFilter(cluster config.Cluster, cat catalog.Catalog) render.TemplatePathPredicate {
 	chartPathServiceIndex := buildChartPathServiceIndex(cat)
 
 	return func(path string) bool {
@@ -257,6 +255,7 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	catalogOptions := catalog.LoadOptions{
+		CWD:       o.CWD,
 		Catalogs:  o.Catalogs,
 		Overwrite: o.CatalogOverwrite,
 	}
@@ -268,6 +267,8 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 
 	cnf := cs.GetConfig()
 	var allResults []render.TemplateResult
+	resultIndex := make(map[string]int)
+	resultCluster := make(map[string]string)
 
 	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
@@ -275,6 +276,9 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	}
 
 	for _, cluster := range cnf.Clusters {
+		if cluster.Name != filepath.Base(cluster.Name) || cluster.Name == "." || cluster.Name == ".." {
+			return nil, fmt.Errorf("cluster name %q must be a path-safe name", cluster.Name)
+		}
 		cat, err := cs.GetCatalogForCluster(cluster)
 		if err != nil {
 			return nil, fmt.Errorf("load catalog for cluster %q: %w", cluster.Name, err)
@@ -303,29 +307,51 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
 			}
 		}
+		pathPredicate := buildServiceTemplateFilter(cluster, cat)
+		if o.TemplateType == render.All && provider == "" {
+			enabledPath := pathPredicate
+			pathPredicate = func(path string) bool {
+				parts := strings.Split(filepath.ToSlash(path), "/")
+				if len(parts) > 1 && parts[1] == render.Terraform.String() {
+					return false
+				}
+				return enabledPath(path)
+			}
+		}
 
 		clusterTplResults, err := render.TemplateFiles(
 			render.TemplateOptions{
-				Type:          templateType,
-				Provider:      provider,
-				Catalogs:      config.OrderedCatalogSourcesForCluster(cnf, cluster, catalogOptions),
-				Overwrite:     o.CatalogOverwrite,
-				Data:          tmplContext,
-				PathPredicate: buildEnabledServiceTemplatePathPredicate(cluster, cat),
+				Type:           templateType,
+				Provider:       provider,
+				CatalogOptions: config.CatalogLoadOptions(cnf, cluster, catalogOptions),
+				Data:           tmplContext,
+				PathPredicate:  pathPredicate,
 			},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("template files: %w", err)
 		}
 
-		for i, result := range clusterTplResults {
+		for _, result := range clusterTplResults {
 			if result.Error != nil {
 				return nil, fmt.Errorf("template error: %w", result.Error)
 			}
-			trimmedPath := o.resolveOutputPath(result, cluster.Name)
-			clusterTplResults[i].Path = trimmedPath
+			result.Path = filepath.Clean(o.resolveOutputPath(result, cluster.Name))
+			if index, exists := resultIndex[result.Path]; exists {
+				if allResults[index].Content != result.Content {
+					return nil, fmt.Errorf(
+						"clusters %q and %q generate conflicting content for %q",
+						resultCluster[result.Path],
+						cluster.Name,
+						result.Path,
+					)
+				}
+				continue
+			}
+			resultIndex[result.Path] = len(allResults)
+			resultCluster[result.Path] = cluster.Name
+			allResults = append(allResults, result)
 		}
-		allResults = append(allResults, clusterTplResults...)
 	}
 
 	return allResults, nil
@@ -337,7 +363,7 @@ func (o *Options) Run() error {
 		return errProcess
 	}
 
-	if errCleanup := o.cleanupOldFiles(allResults); errCleanup != nil {
+	if errCleanup := o.cleanupOldFiles(); errCleanup != nil {
 		return fmt.Errorf("cleanup old files: %w", errCleanup)
 	}
 
