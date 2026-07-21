@@ -84,7 +84,7 @@ gcloud compute networks list
     If no suitable network exists, one can be created from scratch, including a router, a subnet (with secondary ranges for pods/services), and Cloud NAT. 
     Please be careful and adapt these commands to your needs before applying:
 
-    ```bash
+    ```bash title="Optional Network component creation"
     ## OPTIONAL: create network & nat router
     gcloud compute networks create test-network --subnet-mode=auto
 
@@ -110,7 +110,7 @@ gcloud compute networks list
 
 ### Create the GKE Cluster
 
-```bash
+```bash title="GCP Cluster creation"
 gcloud container clusters create test-cluster \
     --zone=europe-west3-a \                # Zonal cluster (single availability zone for testing)
     --network=test-network \                # VPC network the cluster is deployed into
@@ -172,7 +172,7 @@ The resulting credentials are added manually later, in the [Create Secrets](#cre
 
 ### external-DNS with Google DNS
 
-```bash
+```bash title="External DNS Configuration for GCP"
 # Create a service account for ExternalDNS
 gcloud iam service-accounts create external-dns-sa \
     --display-name="SA for GKE ExternalDNS"
@@ -204,9 +204,7 @@ Next, the `values.yaml` for external-dns needs to be adjusted.
 
 See: `gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml`
 
-
-- ../platform-configs/gcp/helm/external-dns/values-gcp.yaml. 
-```yaml
+```yaml title="../platform-configs/gcp/helm/external-dns/values-gcp.yaml"
 # set project id in service account annotation
 external-dns:
   provider: google
@@ -225,7 +223,7 @@ external-dns:
 
 ### External Secrets
 
-```bash
+```bash title="Ext. Secret GCP Configuration"
 # 1. Create a Google service account
 gcloud iam service-accounts create external-secrets-sa \
     --display-name="GKE Kubara External Secrets SA"
@@ -240,9 +238,8 @@ gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud 
     --role="roles/iam.workloadIdentityUser" \
     --member="serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]"
 ```
-
-- ../platform-configs/gcp/helm/external-secrets/values-gcp.yaml 
-```yaml
+ 
+```yaml title="../platform-configs/gcp/helm/external-secrets/values-gcp.yaml"
 external-secrets:
   serviceAccount:
     create: true
@@ -256,9 +253,9 @@ external-secrets:
 
 #### SecretStore
 
-See: `gcp-test/secretstore.yaml`
+Create a secretstore.yaml and use this template:
 
-```yaml
+```yaml title="Secretstore Template"
 # set your projectID and save!
 apiVersion: external-secrets.io/v1
 kind: SecretStore
@@ -268,7 +265,7 @@ metadata:
 spec:
   provider:
     gcpsm:
-      projectID: $YOUR-GCP-PROJECT-NAME
+      projectID: $YOUR-GCP-PROJECT-ID # replace with your project ID
 ```
 
 !!! warning
@@ -283,33 +280,29 @@ Now all secrets required by kubara are created. The commands below are just one 
     
     In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names.
 
-#### Docker Config
 
-```bash
+```bash title="Docker Pull Secret"
 gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager
 printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=- # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-#### Grafana Admin Secret
 
-```bash
+```bash title="Grafana Admin Secret"
 gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
 printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-#### Grafana SSO Secret
 
-```bash
+```bash title="Grafana SSO Secret"
 gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
 printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-#### OAuth2 Proxy Secret
 
-```bash
+```bash title="OAuth2 Proxy Secret"
 gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
 # Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)
@@ -318,21 +311,19 @@ dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+
 printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-#### Argo CD SSO Secret
 
-```bash
+```bash title="ArgoCD SSO Secret"
 gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 
 printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=- # replace name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-
-!!! warning "Before you copy these in"
+!!! warning "Before you copy these over"
     - Place each snippet below at its matching path under `platform-configs/gcp/helm/...`.
     - This example uses `gcp` as the cluster name — double-check your own path if it differs.
     - Replace every secret name to match the cluster name and stage defined in your `config.yaml` (see the naming convention above).
 
-- ../platform-configs/gcp/helm/argo-cd/values-gcp.yaml
+
 ```yaml title="platform-configs/gcp/helm/argo-cd/values-gcp.yaml"
 argo-cd:  
   bootstrapValues:
@@ -345,11 +336,10 @@ externalSecrets:
   secrets:
     oauth2-credentials:
       dataFrom:
-        - remoteKey: gcp-dev-argocd-argo-oauth2-credentials
+        - remoteKey: gcp-dev-argocd-argo-oauth2-credentials # change name according to your config.yaml (format: $clustername-$stage)
 ```
 
-- ../platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml. 
-```yaml
+```yaml title="platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml" 
 externalSecrets:
   secrets:
     grafana-admin-credentials:
@@ -360,8 +350,7 @@ externalSecrets:
         - remoteKey: gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-- ../platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml. 
-```yaml
+```yaml title="platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml"
 externalSecrets:
   secrets:
     oauth2-credentials:
@@ -380,7 +369,7 @@ Please refer to the official velero docs - feel free to contribute if you have s
 
 The `Secretstore` can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in `--with-es-css-file` if it differs):
 
-```bash
+```bash title="kubara bootstrap"
 kubara bootstrap gcp \
   --with-es-css-file secretstore.yaml \
   --with-es-crds --with-prometheus-crds
