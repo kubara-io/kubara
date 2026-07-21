@@ -47,6 +47,5 @@ apply_yaml_if_set KUBARA_STACKIT_PROJECT_ID  ".clusters[0].terraform.projectId"
 apply_yaml_if_set KUBARA_KUBERNETES_TYPE     ".clusters[0].terraform.kubernetesType"
 apply_yaml_if_set KUBARA_KUBERNETES_VERSION  ".clusters[0].terraform.kubernetesVersion"
 apply_yaml_if_set KUBARA_DNS_NAME            ".clusters[0].dnsName"
-apply_yaml_if_set KUBARA_DNS_NAME            ".clusters[0].terraform.dns.name"
 
 log "✅ config.yaml updated"
