@@ -101,27 +101,30 @@ func supportedProviderList() string {
 	return strings.Join(providers, ", ")
 }
 
-func resolveProvider(clusterBlock config.Cluster, requireTerraform bool) (string, bool, error) {
+func resolveProvider(clusterBlock config.Cluster, requireTerraform bool) (string, error) {
 	if clusterBlock.Terraform == nil {
 		if requireTerraform {
-			return "", false, fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
+			return "", fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
 		}
-		return "", false, nil
+		return "", nil
 	}
 	provider := clusterBlock.Terraform.Provider
 	if provider == config.TerraformProviderNone {
 		if requireTerraform {
-			return "", false, fmt.Errorf("cluster %q has terraform provider %q; configure one of: %q", clusterBlock.Name, provider, supportedProviderList())
+			return "", fmt.Errorf("cluster %q has terraform provider %q; configure one of: %q", clusterBlock.Name, provider, supportedProviderList())
 		}
-		return "", false, nil
+		return "", nil
 	}
 	if provider == "" {
-		return "", false, fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+		if requireTerraform {
+			return "", fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+		}
+		return "", nil
 	}
 	if !provider.IsSupported() {
-		return "", false, fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
+		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
 	}
-	return string(provider), true, nil
+	return string(provider), nil
 }
 
 func resolveCatalog(cat catalog.Catalog) map[string]any {
@@ -312,23 +315,15 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		provider := ""
 		templateType := o.TemplateType
 		if o.TemplateType == render.Terraform {
-			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(cluster, true)
+			provider, err = resolveProvider(cluster, true)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
-			}
-			if !renderTerraform {
-				continue
 			}
 		}
 		if o.TemplateType == render.All {
-			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(cluster, false)
+			provider, err = resolveProvider(cluster, false)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
-			}
-			if !renderTerraform {
-				templateType = render.Helm
 			}
 		}
 

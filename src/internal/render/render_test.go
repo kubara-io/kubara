@@ -230,8 +230,10 @@ func TestTemplateFiles(t *testing.T) {
 				hasTemplate := false
 				hasStatic := false
 				hasValidTemplate := false
+				paths := make([]string, 0, len(results))
 
 				for _, result := range results {
+					paths = append(paths, result.Path)
 					if strings.HasSuffix(result.Path, ".tplt") {
 						hasTemplate = true
 						if result.Error == nil {
@@ -248,6 +250,9 @@ func TestTemplateFiles(t *testing.T) {
 				assert.True(t, hasTemplate, "Should have at least one template file")
 				assert.True(t, hasStatic, "Should have at least one static file")
 				assert.True(t, hasValidTemplate, "Should have at least one successfully rendered template")
+				assert.NotContains(t, paths, "Catalog.yaml")
+				assert.Contains(t, paths, "platform-components/helm/argo-cd/README.md")
+				assert.Contains(t, paths, "platform-components/terraform/stackit/.keep.tplt")
 			},
 		},
 		{

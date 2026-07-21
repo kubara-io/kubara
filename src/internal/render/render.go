@@ -158,6 +158,21 @@ func joinTemplateRoot(baseRoot string, elems ...string) string {
 	return filepath.Join(parts...)
 }
 
+func templateRootsForType(baseRoot string, templateType TemplateType) []string {
+	switch templateType {
+	case All:
+		return []string{
+			joinTemplateRoot(baseRoot, DefaultPlatformConfigsPath),
+			joinTemplateRoot(baseRoot, DefaultPlatformComponentsPath),
+		}
+	default:
+		return []string{
+			joinTemplateRoot(baseRoot, DefaultPlatformConfigsPath, templateType.String()),
+			joinTemplateRoot(baseRoot, DefaultPlatformComponentsPath, templateType.String()),
+		}
+	}
+}
+
 func makeTemplateFileWalkDirFunc(source templateSource, out *[]templateFile) fs.WalkDirFunc {
 	return func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
@@ -202,21 +217,12 @@ func getTemplateFiles(options TemplateOptions) ([]templateFile, error) {
 		walkDirFunc := makeTemplateFileWalkDirFunc(source, &out)
 		var walkErr error
 
-		switch options.Type {
-		case All:
-			walkErr = fs.WalkDir(source.fsys, source.baseRoot, walkDirFunc)
-		default:
-			roots := []string{
-				joinTemplateRoot(source.baseRoot, DefaultPlatformConfigsPath, options.Type.String()),
-				joinTemplateRoot(source.baseRoot, DefaultPlatformComponentsPath, options.Type.String()),
-			}
-			for _, root := range roots {
-				if err := fs.WalkDir(source.fsys, root, walkDirFunc); err != nil {
-					if source.external && errors.Is(err, fs.ErrNotExist) {
-						continue
-					}
-					walkErr = errors.Join(walkErr, err)
+		for _, root := range templateRootsForType(source.baseRoot, options.Type) {
+			if err := fs.WalkDir(source.fsys, root, walkDirFunc); err != nil {
+				if source.external && errors.Is(err, fs.ErrNotExist) {
+					continue
 				}
+				walkErr = errors.Join(walkErr, err)
 			}
 		}
 
