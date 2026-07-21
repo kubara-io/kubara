@@ -716,6 +716,8 @@ func writeLocalArgocdValues(opts *Options, state *LocalState) error {
     %s-%s:
       sourceRepos:
 %s
+dexRestarter:
+  enabled: false
 argo-cd:
   dex:
     enabled: false
