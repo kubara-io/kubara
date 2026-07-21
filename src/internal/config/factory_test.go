@@ -72,6 +72,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 				URL: "https://charts.example.com",
 			},
 		},
+		Catalogs: testClusterCatalogs(),
 		// The service defaults are catalog-driven; mirror expected built-in values.
 		Services: service.Services{
 			"cert-manager": {
@@ -146,4 +147,37 @@ func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testin
 		Catalogs: []string{filepath.Join(t.TempDir(), "does-not-exist")},
 	})
 	require.Error(t, err)
+}
+
+func TestClusterCatalogLoadOptions_DefaultsToGeneralCatalog(t *testing.T) {
+	got := clusterCatalogLoadOptions(catalog.LoadOptions{})
+
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, got.Catalogs)
+}
+
+func TestClusterCatalogLoadOptions_PreservesExplicitCatalogs(t *testing.T) {
+	loadOptions := catalog.LoadOptions{
+		BootstrapCatalog: testBootstrapCatalogPath,
+		Catalogs:         testClusterCatalogs(),
+		Overwrite:        true,
+	}
+
+	got := clusterCatalogLoadOptions(loadOptions)
+
+	assert.Equal(t, loadOptions.BootstrapCatalog, got.BootstrapCatalog)
+	assert.Equal(t, loadOptions.Catalogs, got.Catalogs)
+	assert.Equal(t, loadOptions.Overwrite, got.Overwrite)
+	assert.NotSame(t, &loadOptions.Catalogs[0], &got.Catalogs[0])
+}
+
+func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
+	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
+
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+}
+
+func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {
+	cluster := CreateSpokeScaffolding("spoke-a", testCatalogLoadOptions())
+
+	assert.Equal(t, testClusterCatalogs(), cluster.Catalogs)
 }

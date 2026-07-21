@@ -9,7 +9,9 @@ import (
 )
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
-	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
+	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
+
+	services, err := createServicesFromCatalogWithOptions(effectiveCatalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
 	}
@@ -55,8 +57,20 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			},
 		},
 		ArgoCD:   argoCD,
+		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: services,
 	}, nil
+}
+
+func clusterCatalogLoadOptions(catalogOptions catalog.LoadOptions) catalog.LoadOptions {
+	effective := catalogOptions
+	if len(effective.Catalogs) == 0 {
+		effective.Catalogs = []string{catalog.DefaultGeneralCatalog}
+		return effective
+	}
+
+	effective.Catalogs = append([]string(nil), effective.Catalogs...)
+	return effective
 }
 
 func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, clusterType string) (service.Services, error) {
@@ -95,7 +109,9 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 	return services, nil
 }
 
-func CreateSpokeScaffolding(name string) Cluster {
+func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Cluster {
+	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
+
 	return Cluster{
 		Name:    name,
 		Stage:   "<stage>",
@@ -122,6 +138,7 @@ func CreateSpokeScaffolding(name string) Cluster {
 				},
 			},
 		},
+		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: nil,
 	}
 }

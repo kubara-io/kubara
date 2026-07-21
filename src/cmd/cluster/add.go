@@ -62,7 +62,7 @@ func CreateAddClusterCommand() *cli.Command {
 				}
 			}
 
-			newCluster := config.CreateSpokeScaffolding(spokeName)
+			newCluster := config.CreateSpokeScaffolding(spokeName, catalogOptions)
 
 			currentConfig.Clusters = append(clusters, newCluster)
 
