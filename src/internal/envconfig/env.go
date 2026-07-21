@@ -126,12 +126,18 @@ func (em *EnvMap) Validate() error {
 func (em *EnvMap) validateGitAuth() error {
 	switch em.GitAuthMode() {
 	case GitAuthModeHTTPS:
-		// Username/PAT are optional so public repositories keep working;
-		// createGitRepositorySecret only adds basic-auth when both are set.
 		if err := validateRequiredEnvValues(map[string]string{
 			"ARGOCD_GIT_URL or ARGOCD_GIT_HTTPS_URL": em.GitRepositoryURL(),
 		}); err != nil {
 			return err
+		}
+		usernameConfigured := IsConfiguredEnvValue(em.ArgocdGitUsername)
+		passwordConfigured := IsConfiguredEnvValue(em.ArgocdGitPatOrPassword)
+		if usernameConfigured != passwordConfigured {
+			return &ErrorEnvMap{
+				Message: "ARGOCD_GIT_USERNAME and ARGOCD_GIT_PAT_OR_PASSWORD must either both be set for a private repository or both be omitted for a public repository",
+				Err:     ErrInvalidEnvValue,
+			}
 		}
 		return validateHTTPGitURL(em.GitRepositoryURL(), GitAuthModeHTTPS)
 	case GitAuthModeSSH:
