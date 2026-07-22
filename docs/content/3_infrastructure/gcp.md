@@ -19,8 +19,8 @@ You'll also need kubara installed. See the [Installation guide](../1_getting_sta
 
 ### Sneak preview:
 
-1. We will generate a .env-File and fill in all values, after that generate the config.yaml and fill it out too. (kubara init (--prep))
-Then we will generate all the rendered Helm-Charts. (kubara generate)
+1. We will generate an `.env` file and configure all necessary values, after that generate the config.yaml and fill it out too. `kubara init (--prep)`
+Then we will generate all the rendered Helm-Charts: `kubara generate`
 
 2. We will create and configure a GKE Cluster, set up Google Secret Manager, configure Google DNS with an existing domain by delegating a subdomain for ExternalDNS and set up SSO.
 
@@ -34,21 +34,21 @@ All paths below are relative to the `platform-configs` directory that `kubara ge
 - `platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml`
 - `platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml`
 
-4. We will then create our necessary secrets and deploy kubara on GKE. (kubara bootstrap)
+4. We will then create our necessary secrets and deploy kubara on GKE. `kubara bootstrap <my-cluster>`
 
-Let's start!
+## Part 1: Preparing the Google Cloud deployment
 
-## Part 1: Preparing for gcp deployment
+Let's get started with the actual setup!
 
 ```bash
 # Install gke-gcloud-auth-plugin – required so kubectl can authenticate against the GKE cluster
 gcloud components install gke-gcloud-auth-plugin
 
 # Set the project
-gcloud config set project $YOUR-PROJECT-NAME
+gcloud config set project [YOUR-PROJECT-NAME]
 ```
 
-Follow the kubara [Bootstrapping Guide](../1_getting_started/bootstrapping.md), generate your helm charts and stop before bootstrapping [Step 4: Bootstrapping](../1_getting_started/bootstrapping/#4-deploying-argo-cd). Everything else we be handled in this Guide.
+Follow the kubara [Bootstrapping Guide](../1_getting_started/bootstrapping.md), generate your helm charts and stop before bootstrapping [Step 4: Bootstrapping](../1_getting_started/bootstrapping/#4-deploying-argo-cd). The bootstrapping will be handled as part of this page.
 
 
 ```bash
@@ -61,7 +61,7 @@ kubara generate # generate helm charts
 # Stop after generating your Charts and proceed with ## Part 2
 ```
 
-## Part 2: GCP Infrastructure
+## Part 2: Google Cloud Infrastructure
 
 ### Enable Secret Manager
 
@@ -112,7 +112,6 @@ If no suitable network exists, one can be created from scratch, including a rout
 
 ### Create the GKE Cluster
 
-```bash title="GCP Cluster creation"
 gcloud container clusters create test-cluster \
     --zone=europe-west3-a \                # Zonal cluster (single availability zone for testing)
     --network=test-network \                # VPC network the cluster is deployed into
@@ -132,7 +131,7 @@ gcloud container clusters create test-cluster \
 
 #### Restrict Control Plane / API Access to Your Own IP
 
-`--enable-master-authorized-networks` only allows explicitly permitted IP ranges to reach the Kubernetes API — following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc. 
+`--enable-master-authorized-networks` only allows explicitly permitted IP ranges to reach the Kubernetes API. Following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc. 
 
 ```bash
 ## Restrict control plane / API access to your own IP:
@@ -160,7 +159,7 @@ kubectl get ns                                                     # Lists all n
 
 #### OAuth2 Configuration
 
-How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/add_sso.md) for details) — regardless of the provider, however, at least the following SSO apps must be created for SSO:
+How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/add_sso.md) for details). Regardless of the provider, however, at least the following SSO apps must be created for SSO:
 
 1. Argo CD SSO
 2. Grafana SSO
@@ -228,7 +227,6 @@ external-dns:
 
 ### External Secrets
 
-```bash title="Ext. Secret GCP Configuration"
 # 1. Create a Google service account
 gcloud iam service-accounts create external-secrets-sa \
     --display-name="GKE Kubara External Secrets SA"
