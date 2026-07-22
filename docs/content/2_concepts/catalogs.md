@@ -2,7 +2,7 @@
 
 This page explains what a catalog is, when to use one, and how catalogs fit into kubara's platform workflow.
 
-For the built-in services that ship with kubara, see [Components Overview](../6_components/components_overview.md). This page is about the **catalog model itself**.
+For the general services the kubara team ships, see [Components Overview](../6_components/components_overview.md). This page is about the **catalog model itself**.
 
 ## What is a catalog?
 

@@ -2,7 +2,11 @@
 
 This section documents kubara's versioned **general catalog**.
 
-It answers the question **"Which platform components are included by default?"** It does **not** describe how the catalog mechanism itself works or how to create your own catalog.
+Retrievable via: https://github.com/orgs/kubara-io/packages?repo_name=catalogs  
+Source Code: https://github.com/kubara-io/catalogs
+
+It answers the question **"Which platform components are included by default?"**  
+It does **not** describe how the catalog mechanism itself works or how to create your own catalog.
 
 For that, see:
 
@@ -94,4 +98,4 @@ For kubara-specific backup and recovery guidance, see [Backup & Recovery](backup
 If the general catalog does not meet your needs or is missing key features, you can either:
 
 - create your own catalog as described in [Catalogs](../2_concepts/catalogs.md)
-- propose new built-in tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue)
+- propose new general tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue)

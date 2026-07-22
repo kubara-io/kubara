@@ -8,10 +8,10 @@ If you are new to the idea itself, read [Catalogs](../2_concepts/catalogs.md) fi
 
 You usually need a custom catalog when you want to:
 
-- add a platform service that kubara does not ship
-- replace a built-in chart or module with your own
-- change platform defaults across many clusters
-- package and distribute a reusable platform setup outside the kubara source tree
+- Add a platform service that kubara does not ship
+- Replace a chart or module provided in another catalog with your own
+- Change platform defaults across many clusters
+- Package and distribute a reusable platform setup outside the kubara source tree
 
 If you only need to add a simpler workload to one cluster or one team space, use the Argo CD guides in [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md) instead.
 
@@ -144,16 +144,16 @@ Catalog order is significant. Cluster catalogs are loaded first in the listed or
 
 `kubara schema` automatically discovers cluster catalogs when `config.yaml` exists. Before creating a configuration, pass the catalog explicitly as shown above.
 
-## Step 5: override built-in services when needed
+## Step 5: override services when needed
 
-You can override a built-in service by reusing the same `metadata.name`.
+You can override a service defined with the same `metadata.name` from a previous catalog.
 
 Typical reasons:
 
-- change the default `status`
-- change the `chartPath`
-- provide a different `configSchema`
-- replace built-in templates with internal ones
+- Change the default `status`
+- Change the `chartPath`
+- Provide a different `configSchema`
+- Replace templates completely with your own
 
 Without `--catalog-overwrite`, kubara rejects the collision.  
 With `--catalog-overwrite`, the later catalog replaces the earlier definition for that service name. The replacement is complete rather than a deep merge.

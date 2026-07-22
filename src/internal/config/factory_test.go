@@ -73,7 +73,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 		Catalogs: testClusterCatalogs(),
-		// The service defaults are catalog-driven; mirror expected built-in values.
+		// The service defaults are catalog-driven; mirror expected default values.
 		Services: service.Services{
 			"cert-manager": {
 				Status: service.StatusEnabled,
