@@ -4,7 +4,7 @@ If you want to run kubara on a hyperscaler like GCP, there are specific configur
 
 In this example we use provider-native components — Google Secret Manager for External Secrets, and Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records). For any other setup, please check the corresponding component's own documentation. And feel free to contribute! :)
 
-We assume you're starting from an empty GCP project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md) — please do that first if you haven't.
+We assume you're starting from an empty GCP project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md). Please do that first if you haven't.
 
 !!! note "Before you start"
     1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead — see the cluster-creation parameters below.
