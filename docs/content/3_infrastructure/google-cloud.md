@@ -248,7 +248,7 @@ gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud 
     --member="serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]"
 ```
  
-```yaml title="../platform-configs/gcp/helm/external-secrets/values-gcp.yaml"
+```yaml title="../platform-configs/<my-cluster>/helm/external-secrets/values-gcp.yaml"
 external-secrets:
   serviceAccount:
     create: true
