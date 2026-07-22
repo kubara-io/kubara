@@ -129,7 +129,11 @@ Bootstrap Argo CD onto a cluster
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 
+**--with-es-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
+
 **--with-es-css-file**="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)
+
+**--with-prometheus-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
 
 ### help, h
 

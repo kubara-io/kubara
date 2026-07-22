@@ -15,6 +15,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
+	"github.com/rs/zerolog/log"
 
 	"github.com/urfave/cli/v3"
 )
@@ -28,6 +29,11 @@ type BootstrapFlags struct {
 	EnvPrefixFlag          string
 	DryRun                 bool
 	Timeout                time.Duration
+}
+
+var deprecatedBootstrapCRDFlags = []string{
+	"with-es-crds",
+	"with-prometheus-crds",
 }
 
 func NewBootstrapFlags() *BootstrapFlags {
@@ -54,6 +60,8 @@ func NewBootstrapCmd() *cli.Command {
 			},
 		},
 		Action: func(c context.Context, cmd *cli.Command) error {
+			printDeprecatedBootstrapCRDFlagNotice(cmd)
+
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
 				return fmt.Errorf("convert flags to options: %w", err)
@@ -216,6 +224,14 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Path to the ClusterSecretStore manifest file (supports go-template + sprig)",
 			Destination: &flags.ClusterSecretStorePath,
 		},
+		&cli.BoolFlag{
+			Name:  "with-es-crds",
+			Usage: "Deprecated: ignored because CRDs are applied automatically during bootstrap.",
+		},
+		&cli.BoolFlag{
+			Name:  "with-prometheus-crds",
+			Usage: "Deprecated: ignored because CRDs are applied automatically during bootstrap.",
+		},
 		&cli.StringFlag{
 			Name:        "platform-components",
 			Value:       render.DefaultPlatformComponentsPath,
@@ -250,6 +266,14 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 	defer cancelSignal()
 
 	return bootstrap.Bootstrap(ctx, o)
+}
+
+func printDeprecatedBootstrapCRDFlagNotice(cmd *cli.Command) {
+	for _, flagName := range deprecatedBootstrapCRDFlags {
+		if cmd.IsSet(flagName) {
+			log.Warn().Msgf("--%s is deprecated and ignored; CRDs are applied automatically during bootstrap.\n", flagName)
+		}
+	}
 }
 
 func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
