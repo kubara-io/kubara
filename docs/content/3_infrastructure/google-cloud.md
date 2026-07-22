@@ -63,7 +63,7 @@ Follow the kubara [Bootstrapping Guide](../1_getting_started/bootstrapping.md), 
 ```bash
 # pseudo-workflow, please check the up2date official guide!
 
-kubara init --prep # generate .env-file & set values accordingly
+kubara init --prep # generate .env file & set values accordingly
 kubara init # generate config.yaml & set values accordingly
 kubara generate # generate helm charts
 
