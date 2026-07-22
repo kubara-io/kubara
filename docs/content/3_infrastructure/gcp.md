@@ -15,7 +15,7 @@ We assume you're starting from an empty GCP project to test kubara, and that you
 
 Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
 
-You'll also need kubara installed — see the [Installation guide](../1_getting_started/installation.md).
+You'll also need kubara installed. See the [Installation guide](../1_getting_started/installation.md).
 
 ### Sneak preview:
 
