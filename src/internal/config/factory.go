@@ -9,13 +9,15 @@ import (
 )
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
+	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
 	gitRepoURL := e.GitRepositoryURL()
-	services, err := createServicesFromCatalogWithOptions(catalogOptions, "")
+	services, err := createServicesFromCatalogWithOptions(effectiveCatalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
 	}
 
 	argoCD := ArgoCD{
+		SelfManaged: ArgoCDSelfManagedEnabled,
 		Repo: RepoProto{
 			AuthMode: e.GitAuthMode(),
 			Git: &RepoType{
@@ -53,8 +55,20 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD:   argoCD,
+		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: services,
 	}, nil
+}
+
+func clusterCatalogLoadOptions(catalogOptions catalog.LoadOptions) catalog.LoadOptions {
+	effective := catalogOptions
+	if len(effective.Catalogs) == 0 {
+		effective.Catalogs = []string{catalog.DefaultGeneralCatalog}
+		return effective
+	}
+
+	effective.Catalogs = append([]string(nil), effective.Catalogs...)
+	return effective
 }
 
 func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, clusterType string) (service.Services, error) {
@@ -62,6 +76,7 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 	if err != nil {
 		return nil, fmt.Errorf("load catalog: %w", err)
 	}
+	cat = cat.UserConfigurableServices()
 
 	services := make(service.Services, len(cat.Services))
 	for name, def := range cat.Services {
@@ -92,7 +107,9 @@ func createServicesFromCatalogWithOptions(catalogOptions catalog.LoadOptions, cl
 	return services, nil
 }
 
-func CreateSpokeScaffolding(name string) Cluster {
+func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Cluster {
+	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
+
 	return Cluster{
 		Name:    name,
 		Stage:   "<stage>",
@@ -108,6 +125,7 @@ func CreateSpokeScaffolding(name string) Cluster {
 			DNSContactEmail:   "<dns-mail>",
 		},
 		ArgoCD: ArgoCD{
+			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
 				AuthMode: envconfig.GitAuthModeHTTPS,
 				Git: &RepoType{
@@ -116,6 +134,7 @@ func CreateSpokeScaffolding(name string) Cluster {
 				},
 			},
 		},
+		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: nil,
 	}
 }

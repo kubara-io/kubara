@@ -230,7 +230,7 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 		return fmt.Errorf("load config file: %w", configLoadErr)
 	}
 
-	if err := workflow.CreateOrUpdateClusterFromEnvWithCatalog(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
+	if err := workflow.CreateOrUpdateCluster(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
 		return fmt.Errorf("create or update cluster from env: %w", err)
 	}
 	if o.local {

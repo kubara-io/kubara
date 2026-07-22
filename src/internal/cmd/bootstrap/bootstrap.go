@@ -3,6 +3,7 @@ package bootstrap
 import (
 	"context"
 	"fmt"
+	"os"
 	"path/filepath"
 	"sort"
 	"time"
@@ -12,15 +13,15 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
 	"github.com/kubara-io/kubara/internal/k8s"
+	"sigs.k8s.io/yaml"
 
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/bcrypt"
 )
 
 const (
-	prometheusAPIVersion     = "monitoring.coreos.com/v1"
-	argocdNamespace          = "argocd"
-	externalSecretsNamespace = "external-secrets"
+	prometheusAPIVersion = "monitoring.coreos.com/v1"
+	argocdNamespace      = "argocd"
 )
 
 // Options for bootstrap operations
@@ -28,8 +29,6 @@ type Options struct {
 	Kubeconfig         string
 	PlatformComponents string
 	PlatformConfigs    string
-	WithES             bool
-	WithProm           bool
 	Local              bool
 	WithESCSSPath      string
 	EnvMap             *envconfig.EnvMap
@@ -40,9 +39,10 @@ type Options struct {
 	ClusterName        string
 	WorkDir            string
 	ConfigFilePath     string
-	CatalogPath        string
+	Catalogs           []string
 	CatalogOverwrite   bool
 	LocalState         *LocalState
+	BootstrapCatalog   string
 }
 
 type BootstrapChart struct {
@@ -50,7 +50,6 @@ type BootstrapChart struct {
 	Namespace       string
 	Path            string
 	OverlayValues   []string
-	RepoURL         string
 	Enabled         bool
 	EnsureNamespace bool
 	EnsureCRD       bool
@@ -109,15 +108,11 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("create kubernetes client: %w", err)
 	}
 
-	argocdChartPath, err := chartPathForService(opts.Catalog, "argocd")
+	argocdChartPath, err := chartPathForService(opts.Catalog, catalog.BootstrapServiceArgoCD)
 	if err != nil {
 		return err
 	}
-	externalSecretsChartPath, err := chartPathForService(opts.Catalog, "external-secrets")
-	if err != nil {
-		return err
-	}
-	prometheusChartPath, err := chartPathForService(opts.Catalog, "kube-prometheus-stack")
+	crdsChartPath, err := chartPathForService(opts.Catalog, catalog.BootstrapServiceCRDs)
 	if err != nil {
 		return err
 	}
@@ -125,40 +120,26 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 	// Construct bootstrapCharts structs
 	bootstrapCharts := []BootstrapChart{
 		{
-			Name:            "argocd",
+			Name:            catalog.BootstrapServiceArgoCD,
 			Namespace:       argocdNamespace,
 			Path:            filepath.Join(opts.PlatformComponents, "helm", argocdChartPath),
 			OverlayValues:   overlayValuesForChart(opts, argocdChartPath),
-			RepoURL:         "https://argoproj.github.io/argo-helm",
 			Enabled:         true,
 			EnsureNamespace: true,
 			EnsureCRD:       true,
 		},
 		{
-			Name:            "external-secrets",
-			Namespace:       externalSecretsNamespace,
-			Path:            filepath.Join(opts.PlatformComponents, "helm", externalSecretsChartPath),
-			OverlayValues:   overlayValuesForChart(opts, externalSecretsChartPath),
-			RepoURL:         "https://charts.external-secrets.io",
-			Enabled:         opts.WithES,
-			EnsureNamespace: opts.WithES,
-			EnsureCRD:       opts.WithES,
-		},
-		{
-			Name:            "kube-prometheus-stack",
-			Path:            filepath.Join(opts.PlatformComponents, "helm", prometheusChartPath),
-			OverlayValues:   overlayValuesForChart(opts, prometheusChartPath),
-			RepoURL:         "https://prometheus-community.github.io/helm-charts",
-			Enabled:         opts.WithProm,
-			EnsureNamespace: false,
-			EnsureCRD:       opts.WithProm,
+			Name:      catalog.BootstrapServiceCRDs,
+			Path:      filepath.Join(opts.PlatformComponents, "helm", crdsChartPath),
+			Enabled:   true,
+			EnsureCRD: true,
 		},
 	}
 
 	// Locate ArgoChart for later use
 	var argoChart BootstrapChart
 	for _, c := range bootstrapCharts {
-		if c.Name == "argocd" {
+		if c.Name == catalog.BootstrapServiceArgoCD {
 			argoChart = c
 			break
 		}
@@ -246,18 +227,44 @@ func ensureNamespaces(ctx context.Context, client *k8s.Client, opts *Options, ch
 	return nil
 }
 
+type Chart struct {
+	Name         string            `yaml:"name"`
+	Version      string            `yaml:"version"`
+	Dependencies []ChartDependency `yaml:"dependencies"`
+}
+
+type ChartDependency struct {
+	Name       string `yaml:"name"`
+	Version    string `yaml:"version"`
+	Repository string `yaml:"repository"`
+}
+
 // addHelmRepositories adds required helm repositories
 func addHelmRepositories(ctx context.Context, charts []BootstrapChart) error {
 	log.Info().Msg("Adding helm repositories")
 
 	for _, chart := range charts {
 		if chart.Enabled {
-			repo := helm.RepoOptions{Name: chart.Name, URL: chart.RepoURL}
-			if err := helm.AddRepository(ctx, repo); err != nil {
-				return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
+			chartPath := filepath.Join(chart.Path, "Chart.yaml")
+			chartFile, err := os.ReadFile(chartPath)
+			if err != nil {
+				return fmt.Errorf("cannot open Chart.yaml for chart %q: %w", chart.Name, err)
 			}
 
-			log.Info().Msgf("Added helm repository: %q", repo.Name)
+			chartSpec := Chart{}
+			err = yaml.Unmarshal(chartFile, &chartSpec)
+			if err != nil {
+				return fmt.Errorf("cannot load Chart.yaml for chart %q: %w", chart.Name, err)
+			}
+
+			for _, dependency := range chartSpec.Dependencies {
+				repo := helm.RepoOptions{Name: dependency.Name, URL: dependency.Repository}
+				if err := helm.AddRepository(ctx, repo); err != nil {
+					return fmt.Errorf("add helm repository %q: %w", repo.Name, err)
+				}
+
+				log.Info().Msgf("Added helm repository: %q", dependency.Name)
+			}
 		}
 	}
 

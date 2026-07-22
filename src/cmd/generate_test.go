@@ -8,11 +8,40 @@ import (
 
 	"github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/urfave/cli/v3"
 )
+
+func createHelperCatalog(t *testing.T, root string) string {
+	t.Helper()
+
+	catalogPath := filepath.Join(root, "helper-catalog")
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "services"), 0o750))
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "platform-components", "helpers"), 0o750))
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "platform-components", "terraform"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "Catalog.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: helper
+spec:
+  version: 1.0.0
+`), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "services", "cert-manager.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
+kind: ServiceDefinition
+metadata:
+  name: cert-manager
+spec:
+  chartPath: cert-manager
+  status: enabled
+`), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "platform-components", "helpers", "readme.txt"), []byte("helper asset\n"), 0o600))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "platform-components", "terraform", "disabled.txt"), []byte("terraform asset\n"), 0o600))
+
+	return catalogPath
+}
 
 func TestNewGenerateFlags(t *testing.T) {
 	t.Parallel()
@@ -163,12 +192,12 @@ func TestGenerateCmd(t *testing.T) {
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
-							Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-							Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+							Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+							Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 						},
 					},
 				},
-				Services: testutil.CreateTestServices(),
+				Services: service.Services{},
 			},
 			validate: func(t *testing.T, tempDir string) {
 				// Edge renders the example infrastructure under the cluster name.
@@ -221,17 +250,17 @@ func TestGenerateCmd(t *testing.T) {
 						Repo: config.RepoProto{
 							Git: &config.RepoType{
 								Configs: config.Repository{
-									URL:            "https://github.com/example/customer",
+									URL:            "https://github.com/example/configs",
 									TargetRevision: "main",
 								},
 								Components: config.Repository{
-									URL:            "https://github.com/example/managed",
+									URL:            "https://github.com/example/components",
 									TargetRevision: "main",
 								},
 							},
 						},
 					},
-					Services: testutil.CreateTestServices(),
+					Services: service.Services{},
 				}
 				if tt.cluster != nil {
 					cluster = *tt.cluster
@@ -279,7 +308,7 @@ func TestGenerateCmd(t *testing.T) {
 	}
 }
 
-func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testing.T) {
+func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
 
 	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
@@ -297,12 +326,12 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
-					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},
-		Services: testutil.CreateTestServices(),
+		Services: service.Services{},
 	})
 
 	//dummy values
@@ -315,14 +344,16 @@ func TestGenerateCmd_MissingProviderDefaultsToNoneAndFailsForTerraform(t *testin
 	assert.Contains(t, err.Error(), "missing terraform configuration")
 }
 
-func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
+func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 	tempDir := t.TempDir()
+	helperCatalogPath := createHelperCatalog(t, tempDir)
 
 	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
-		Name:    "no-provider-cluster",
-		Stage:   "dev",
-		Type:    "hub",
-		DNSName: "test.example.com",
+		Name:     "no-provider-cluster",
+		Stage:    "dev",
+		Type:     "hub",
+		DNSName:  "test.example.com",
+		Catalogs: []string{helperCatalogPath},
 		Terraform: &config.Terraform{
 			Provider:          "",
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
@@ -333,12 +364,12 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
-					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},
-		Services: testutil.CreateTestServices(),
+		Services: service.Services{},
 	})
 
 	//dummy values
@@ -349,35 +380,71 @@ func TestGenerateCmd_MissingProviderGeneratesOnlyHelmByDefault(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
-	helmDir := filepath.Join(tempDir, "platform-components", "helm")
-	entries, err := os.ReadDir(helmDir)
-	require.NoError(t, err)
-	assert.NotEmpty(t, entries)
-
-	_, err = os.Stat(filepath.Join(tempDir, "platform-components", "terraform"))
-	assert.ErrorIs(t, err, os.ErrNotExist)
+	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
 }
 
-func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
+func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 	tempDir := t.TempDir()
+	helperCatalogPath := createHelperCatalog(t, tempDir)
 
 	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
-		Name:    "helm-only-cluster",
-		Stage:   "dev",
-		Type:    "hub",
-		DNSName: "test.example.com",
+		Name:     "helm-only-cluster",
+		Stage:    "dev",
+		Type:     "hub",
+		DNSName:  "test.example.com",
+		Catalogs: []string{helperCatalogPath},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
-					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},
-		Services: testutil.CreateTestServices(),
+		Services: service.Services{},
 	})
 
 	//dummy values
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
+	staleTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "stale.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(staleTerraform), 0o750))
+	require.NoError(t, os.WriteFile(staleTerraform, []byte("stale\n"), 0o600))
+
+	app := CreateTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
+	assert.NoFileExists(t, staleTerraform)
+}
+
+func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
+	tempDir := t.TempDir()
+	helperCatalogPath := createHelperCatalog(t, tempDir)
+
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+		Name:     "provider-none-cluster",
+		Stage:    "dev",
+		Type:     "hub",
+		DNSName:  "test.example.com",
+		Catalogs: []string{helperCatalogPath},
+		Terraform: &config.Terraform{
+			Provider: config.TerraformProviderNone,
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	})
+
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
@@ -385,13 +452,8 @@ func TestGenerateCmd_MissingTerraformGeneratesOnlyHelmByDefault(t *testing.T) {
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
-	helmDir := filepath.Join(tempDir, "platform-components", "helm")
-	entries, err := os.ReadDir(helmDir)
-	require.NoError(t, err)
-	assert.NotEmpty(t, entries)
-
-	_, err = os.Stat(filepath.Join(tempDir, "platform-components", "terraform"))
-	assert.ErrorIs(t, err, os.ErrNotExist)
+	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
+	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
 }
 
 func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
@@ -405,8 +467,8 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
-					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},
@@ -426,10 +488,10 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 func TestDisabledServicesDontGetWritten(t *testing.T) {
 	tempDir := t.TempDir()
 	services := testutil.CreateTestServices()
-	homerName := "homer-dashboard"
-	homer := services[homerName]
-	homer.Status = "disabled"
-	services[homerName] = homer
+	serviceName := "cert-manager"
+	certManager := services[serviceName]
+	certManager.Status = "disabled"
+	services[serviceName] = certManager
 
 	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
@@ -439,8 +501,8 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
-					Configs:    config.Repository{URL: "https://github.com/example/customer", TargetRevision: "main"},
-					Components: config.Repository{URL: "https://github.com/example/managed", TargetRevision: "main"},
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
 			},
 		},
@@ -461,7 +523,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		names = append(names, entry.Name())
 	}
 	require.NoError(t, err)
-	assert.NotContains(t, names, homerName)
+	assert.NotContains(t, names, serviceName)
 }
 
 // Helper function

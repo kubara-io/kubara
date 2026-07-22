@@ -102,7 +102,9 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 
 	applyDefaults(cfg)
 
+	argocd := cfg.Clusters[0].ArgoCD
 	git := cfg.Clusters[0].ArgoCD.Repo.Git
+	assert.Equal(t, ArgoCDSelfManagedEnabled, argocd.SelfManaged, "empty SelfManaged should default to enabled")
 	assert.Equal(t, "main", git.Configs.TargetRevision, "empty TargetRevision should default to main")
 	assert.Equal(t, "release", git.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
 }

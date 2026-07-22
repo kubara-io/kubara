@@ -38,7 +38,7 @@ func CreateAddClusterCommand() *cli.Command {
 				return fmt.Errorf("get working directory: %w", err)
 			}
 
-			catalogOptions, err := catalog.ResolveLoadOptions(cwd, cmd.String("catalog"), cmd.Bool("catalog-overwrite"))
+			catalogOptions, err := catalog.ResolveLoadOptions(cwd, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 			if err != nil {
 				return fmt.Errorf("could not resolve catalog options: %w", err)
 			}
@@ -62,7 +62,7 @@ func CreateAddClusterCommand() *cli.Command {
 				}
 			}
 
-			newCluster := config.CreateSpokeScaffolding(spokeName)
+			newCluster := config.CreateSpokeScaffolding(spokeName, catalogOptions)
 
 			currentConfig.Clusters = append(clusters, newCluster)
 

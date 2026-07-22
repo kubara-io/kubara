@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"slices"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -24,7 +23,7 @@ type Options struct {
 	DryRun             bool
 	CWD                string
 	ConfigFilePath     string
-	CatalogPath        string
+	Catalogs           []string
 	CatalogOverwrite   bool
 	PlatformComponents string
 	PlatformConfigs    string
@@ -101,27 +100,30 @@ func supportedProviderList() string {
 	return strings.Join(providers, ", ")
 }
 
-func resolveProvider(clusterBlock config.Cluster, requireTerraform bool) (string, bool, error) {
+func resolveProvider(clusterBlock config.Cluster, requireTerraform bool) (string, error) {
 	if clusterBlock.Terraform == nil {
 		if requireTerraform {
-			return "", false, fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
+			return "", fmt.Errorf("cluster %q is missing terraform configuration", clusterBlock.Name)
 		}
-		return "", false, nil
+		return "", nil
 	}
 	provider := clusterBlock.Terraform.Provider
 	if provider == config.TerraformProviderNone {
 		if requireTerraform {
-			return "", false, fmt.Errorf("cluster %q has terraform provider %q; configure one of: %q", clusterBlock.Name, provider, supportedProviderList())
+			return "", fmt.Errorf("cluster %q has terraform provider %q; configure one of: %q", clusterBlock.Name, provider, supportedProviderList())
 		}
-		return "", false, nil
+		return "", nil
 	}
 	if provider == "" {
-		return "", false, fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+		if requireTerraform {
+			return "", fmt.Errorf("cluster %q has a terraform block but no provider specified", clusterBlock.Name)
+		}
+		return "", nil
 	}
 	if !provider.IsSupported() {
-		return "", false, fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
+		return "", fmt.Errorf("unsupported provider %q for cluster %q; supported providers: %q", provider, clusterBlock.Name, supportedProviderList())
 	}
-	return string(provider), true, nil
+	return string(provider), nil
 }
 
 func resolveCatalog(cat catalog.Catalog) map[string]any {
@@ -159,30 +161,29 @@ func toJSONMap(value any) (map[string]any, error) {
 	return out, nil
 }
 
-func pathHasSegment(path, segment string) bool {
-	return slices.Contains(strings.Split(filepath.ToSlash(path), "/"), segment)
-}
-
-func (o *Options) cleanupOldFiles(results []render.TemplateResult) error {
+func (o *Options) cleanupOldFiles() error {
 	if o.DryRun {
 		return nil
 	}
 
-	cleanupTerraform := false
-	cleanupHelm := false
-	for _, result := range results {
-		cleanupTerraform = cleanupTerraform || pathHasSegment(result.Path, render.Terraform.String())
-		cleanupHelm = cleanupHelm || pathHasSegment(result.Path, render.Helm.String())
-	}
-
-	if cleanupTerraform {
-		deletePath := filepath.Join(o.PlatformComponents, render.Terraform.String())
-		if err := os.RemoveAll(deletePath); err != nil {
-			return fmt.Errorf("removing directory %q: %w", deletePath, err)
+	var deletePaths []string
+	if o.TemplateType != render.Helm {
+		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Terraform.String()))
+		clusterDirs, err := os.ReadDir(o.PlatformConfigs)
+		if err != nil && !errors.Is(err, os.ErrNotExist) {
+			return fmt.Errorf("read platform config directories: %w", err)
+		}
+		for _, clusterDir := range clusterDirs {
+			if !clusterDir.IsDir() {
+				continue
+			}
+			deletePaths = append(deletePaths, filepath.Join(o.PlatformConfigs, clusterDir.Name(), render.Terraform.String()))
 		}
 	}
-	if cleanupHelm {
-		deletePath := filepath.Join(o.PlatformComponents, render.Helm.String())
+	if o.TemplateType != render.Terraform {
+		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Helm.String()))
+	}
+	for _, deletePath := range deletePaths {
 		if err := os.RemoveAll(deletePath); err != nil {
 			return fmt.Errorf("removing directory %q: %w", deletePath, err)
 		}
@@ -234,7 +235,7 @@ func serviceNameFromTemplatePath(chartPathServiceIndex map[string]string, path s
 	}
 }
 
-func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalog.Catalog) render.TemplatePathPredicate {
+func buildServiceTemplateFilter(cluster config.Cluster, cat catalog.Catalog) render.TemplatePathPredicate {
 	chartPathServiceIndex := buildChartPathServiceIndex(cat)
 
 	return func(path string) bool {
@@ -242,13 +243,11 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 		if serviceName == "" {
 			return true
 		}
+		if catalog.IsBootstrapService(serviceName) {
+			return true
+		}
 
 		svc, ok := cluster.Services[serviceName]
-		// TODO(tuunit): ArgoCD should be a fixture of kubara like external-secrets as well and not part of the catalog services
-		// this needs to be refactored in the future
-		if serviceName == "argocd" {
-			return ok
-		}
 		return ok && svc.Status == service.StatusEnabled
 	}
 }
@@ -256,8 +255,9 @@ func buildEnabledServiceTemplatePathPredicate(cluster config.Cluster, cat catalo
 // processClusters loads config, validates, and generates template results for all clusters.
 func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	catalogOptions := catalog.LoadOptions{
-		CatalogPath: o.CatalogPath,
-		Overwrite:   o.CatalogOverwrite,
+		CWD:       o.CWD,
+		Catalogs:  o.Catalogs,
+		Overwrite: o.CatalogOverwrite,
 	}
 
 	cs := config.NewConfigStore(o.CWD, o.ConfigFilePath, catalogOptions)
@@ -267,11 +267,8 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 
 	cnf := cs.GetConfig()
 	var allResults []render.TemplateResult
-
-	cat, err := cs.GetCatalog()
-	if err != nil {
-		return nil, fmt.Errorf("load catalog: %w", err)
-	}
+	resultIndex := make(map[string]int)
+	resultCluster := make(map[string]string)
 
 	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
 	if err != nil {
@@ -279,6 +276,14 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	}
 
 	for _, cluster := range cnf.Clusters {
+		if cluster.Name != filepath.Base(cluster.Name) || cluster.Name == "." || cluster.Name == ".." {
+			return nil, fmt.Errorf("cluster name %q must be a path-safe name", cluster.Name)
+		}
+		cat, err := cs.GetCatalogForCluster(cluster)
+		if err != nil {
+			return nil, fmt.Errorf("load catalog for cluster %q: %w", cluster.Name, err)
+		}
+
 		tmplContext, err := buildTemplateContext(cluster, buildContext{
 			Catalog:  cat,
 			EnvMap:   dotEnvMap,
@@ -291,48 +296,62 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		provider := ""
 		templateType := o.TemplateType
 		if o.TemplateType == render.Terraform {
-			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(cluster, true)
+			provider, err = resolveProvider(cluster, true)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
-			}
-			if !renderTerraform {
-				continue
 			}
 		}
 		if o.TemplateType == render.All {
-			var renderTerraform bool
-			provider, renderTerraform, err = resolveProvider(cluster, false)
+			provider, err = resolveProvider(cluster, false)
 			if err != nil {
 				return nil, fmt.Errorf("resolve provider for cluster %q: %w", cluster.Name, err)
 			}
-			if !renderTerraform {
-				templateType = render.Helm
+		}
+		pathPredicate := buildServiceTemplateFilter(cluster, cat)
+		if o.TemplateType == render.All && provider == "" {
+			enabledPath := pathPredicate
+			pathPredicate = func(path string) bool {
+				parts := strings.Split(filepath.ToSlash(path), "/")
+				if len(parts) > 1 && parts[1] == render.Terraform.String() {
+					return false
+				}
+				return enabledPath(path)
 			}
 		}
 
 		clusterTplResults, err := render.TemplateFiles(
 			render.TemplateOptions{
-				Type:          templateType,
-				Provider:      provider,
-				CatalogPath:   o.CatalogPath,
-				Overwrite:     o.CatalogOverwrite,
-				Data:          tmplContext,
-				PathPredicate: buildEnabledServiceTemplatePathPredicate(cluster, cat),
+				Type:           templateType,
+				Provider:       provider,
+				CatalogOptions: config.CatalogLoadOptions(cnf, cluster, catalogOptions),
+				Data:           tmplContext,
+				PathPredicate:  pathPredicate,
 			},
 		)
 		if err != nil {
 			return nil, fmt.Errorf("template files: %w", err)
 		}
 
-		for i, result := range clusterTplResults {
+		for _, result := range clusterTplResults {
 			if result.Error != nil {
 				return nil, fmt.Errorf("template error: %w", result.Error)
 			}
-			trimmedPath := o.resolveOutputPath(result, cluster.Name)
-			clusterTplResults[i].Path = trimmedPath
+			result.Path = filepath.Clean(o.resolveOutputPath(result, cluster.Name))
+			if index, exists := resultIndex[result.Path]; exists {
+				if allResults[index].Content != result.Content {
+					return nil, fmt.Errorf(
+						"clusters %q and %q generate conflicting content for %q",
+						resultCluster[result.Path],
+						cluster.Name,
+						result.Path,
+					)
+				}
+				continue
+			}
+			resultIndex[result.Path] = len(allResults)
+			resultCluster[result.Path] = cluster.Name
+			allResults = append(allResults, result)
 		}
-		allResults = append(allResults, clusterTplResults...)
 	}
 
 	return allResults, nil
@@ -344,7 +363,7 @@ func (o *Options) Run() error {
 		return errProcess
 	}
 
-	if errCleanup := o.cleanupOldFiles(allResults); errCleanup != nil {
+	if errCleanup := o.cleanupOldFiles(); errCleanup != nil {
 		return fmt.Errorf("cleanup old files: %w", errCleanup)
 	}
 

@@ -40,9 +40,9 @@ kubara [command]
 
 **--base64**: Enable base64 encode/decode mode
 
-**--catalog**="": Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
+**--catalog**="": Path to a catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
-**--catalog-overwrite**: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions
+**--catalog-overwrite**: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions
 
 **--check-update**: Check online for a newer kubara release
 
@@ -129,11 +129,11 @@ Bootstrap Argo CD onto a cluster
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 
-**--with-es-crds**: Also install external-secrets
+**--with-es-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
 
 **--with-es-css-file**="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)
 
-**--with-prometheus-crds**: Also install kube-prometheus-stack
+**--with-prometheus-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
 
 ### help, h
 

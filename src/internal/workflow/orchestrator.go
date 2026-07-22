@@ -8,7 +8,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
-func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
+func CreateOrUpdateCluster(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 
 	// Attempt to find the cluster to update
@@ -20,6 +20,9 @@ func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.En
 			gitRepoURL := e.GitRepositoryURL()
 			cfg.Clusters[i].Stage = e.ProjectStage
 			cfg.Clusters[i].ArgoCD.Repo.AuthMode = e.GitAuthMode()
+			if cfg.Clusters[i].ArgoCD.Repo.Git == nil {
+				cfg.Clusters[i].ArgoCD.Repo.Git = &config.RepoType{}
+			}
 			cfg.Clusters[i].ArgoCD.Repo.Git.Configs.URL = gitRepoURL
 			cfg.Clusters[i].ArgoCD.Repo.Git.Components.URL = gitRepoURL
 

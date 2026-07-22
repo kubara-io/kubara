@@ -2,7 +2,7 @@
 
 This page combines the shared STACKIT Terraform bootstrap steps with the SKE-specific provisioning flow.
 
-kubara's built-in STACKIT SKE preset creates the infrastructure pieces that kubara expects later during bootstrap:
+kubara's provided STACKIT SKE preset creates the infrastructure pieces that kubara expects later during bootstrap:
 
 - a DNS zone for `external-dns`
 - a Secrets Manager instance for `external-secrets`

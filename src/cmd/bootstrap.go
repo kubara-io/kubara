@@ -9,18 +9,18 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
+	"github.com/rs/zerolog/log"
 
 	"github.com/urfave/cli/v3"
 )
 
 type BootstrapFlags struct {
-	WithES                 bool
-	WithProm               bool
 	Local                  bool
 	ClusterSecretStorePath string
 	PlatformComponentsPath string
@@ -31,10 +31,13 @@ type BootstrapFlags struct {
 	Timeout                time.Duration
 }
 
+var deprecatedBootstrapCRDFlags = []string{
+	"with-es-crds",
+	"with-prometheus-crds",
+}
+
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		WithES:        true,
-		WithProm:      true,
 		EnvFile:       ".env",
 		EnvPrefixFlag: "KUBARA_",
 		Timeout:       2 * time.Minute,
@@ -49,7 +52,7 @@ func NewBootstrapCmd() *cli.Command {
 		Usage:       "Bootstrap Argo CD onto a cluster",
 		UsageText:   "kubara bootstrap CLUSTER_NAME [--local]",
 		ArgsUsage:   "CLUSTER_NAME",
-		Description: "Bootstraps Argo CD onto the specified cluster and can also install external-secrets and kube-prometheus-stack CRDs. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
+		Description: "Bootstraps Argo CD onto the specified cluster. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
@@ -57,6 +60,8 @@ func NewBootstrapCmd() *cli.Command {
 			},
 		},
 		Action: func(c context.Context, cmd *cli.Command) error {
+			printDeprecatedBootstrapCRDFlagNotice(cmd)
+
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
 				return fmt.Errorf("convert flags to options: %w", err)
@@ -165,9 +170,14 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	catalog, err := cs.GetCatalog()
+	loadedCatalog, err := cs.GetCatalogForCluster(*clusterConfig)
 	if err != nil {
-		return nil, fmt.Errorf("load catalog: %w", err)
+		return nil, fmt.Errorf("load catalog for cluster %q: %w", clusterConfig.Name, err)
+	}
+
+	bootstrapCatalog := catalog.DefaultBootstrapCatalog
+	if cs.GetConfig() != nil && cs.GetConfig().BootstrapCatalog != nil {
+		bootstrapCatalog = *cs.GetConfig().BootstrapCatalog
 	}
 
 	timeout := flags.Timeout
@@ -179,20 +189,19 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		Kubeconfig:         kubeconf,
 		PlatformComponents: componentsAbsPath,
 		PlatformConfigs:    configsAbsPath,
-		WithES:             flags.WithES,
-		WithProm:           flags.WithProm,
 		Local:              flags.Local,
 		WithESCSSPath:      cssAbsPath,
 		EnvMap:             envMap,
-		Catalog:            catalog,
+		Catalog:            loadedCatalog,
 		ClusterConfig:      clusterConfig,
 		DryRun:             flags.DryRun,
 		Timeout:            timeout,
 		ClusterName:        clusterName,
 		WorkDir:            cwd,
 		ConfigFilePath:     configFilePath,
-		CatalogPath:        catalogOptions.CatalogPath,
+		Catalogs:           catalogOptions.Catalogs,
 		CatalogOverwrite:   catalogOptions.Overwrite,
+		BootstrapCatalog:   bootstrapCatalog,
 	}, nil
 }
 
@@ -206,16 +215,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Destination: &flags.DryRun,
 		},
 		&cli.BoolFlag{
-			Name:        "with-es-crds",
-			Usage:       "Also install external-secrets",
-			Destination: &flags.WithES,
-		},
-		&cli.BoolFlag{
-			Name:        "with-prometheus-crds",
-			Usage:       "Also install kube-prometheus-stack",
-			Destination: &flags.WithProm,
-		},
-		&cli.BoolFlag{
 			Name:        "local",
 			Usage:       "Provision an isolated local evaluation environment. Local testing only; not for production use.",
 			Destination: &flags.Local,
@@ -224,6 +223,14 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Name:        "with-es-css-file",
 			Usage:       "Path to the ClusterSecretStore manifest file (supports go-template + sprig)",
 			Destination: &flags.ClusterSecretStorePath,
+		},
+		&cli.BoolFlag{
+			Name:  "with-es-crds",
+			Usage: "Deprecated: ignored because CRDs are applied automatically during bootstrap.",
+		},
+		&cli.BoolFlag{
+			Name:  "with-prometheus-crds",
+			Usage: "Deprecated: ignored because CRDs are applied automatically during bootstrap.",
 		},
 		&cli.StringFlag{
 			Name:        "platform-components",
@@ -259,6 +266,14 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 	defer cancelSignal()
 
 	return bootstrap.Bootstrap(ctx, o)
+}
+
+func printDeprecatedBootstrapCRDFlagNotice(cmd *cli.Command) {
+	for _, flagName := range deprecatedBootstrapCRDFlags {
+		if cmd.IsSet(flagName) {
+			log.Warn().Msgf("--%s is deprecated and ignored; CRDs are applied automatically during bootstrap.\n", flagName)
+		}
+	}
 }
 
 func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
