@@ -1,11 +1,11 @@
 module github.com/kubara-io/kubara
 
-go 1.26.4
+go 1.26.5
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260710155933-68826f87b4ff
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260722121823-c43575ca7cbd
 	github.com/fatih/color v1.19.0
 	github.com/go-git/go-git/v5 v5.19.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
