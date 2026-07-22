@@ -58,7 +58,13 @@ func TestAddNewSpokesCluster(t *testing.T) {
 
 	cliFlags := flags.NewGlobalFlags().CLIFlags()
 	app := testutil.CreateTestAppWithFlags(cliFlags, cluster.NewClusterCommand())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", dir, "cluster", "add", spokeName}
+	args := []string{
+		"kubara",
+		"--config-file", configPath,
+		"--work-dir", dir,
+		"--catalog", testutil.GeneralCatalogPath(),
+		"cluster", "add", spokeName,
+	}
 	err := app.Run(context.Background(), args)
 
 	require.NoError(t, err)

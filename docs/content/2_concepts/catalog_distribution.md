@@ -28,7 +28,7 @@ If you want the deeper OCI background, read:
 - [ORAS: OCI artifacts](https://oras.land/docs/concepts/artifact)
 - [ORAS: reference types](https://oras.land/docs/concepts/reftypes)
 
-## Important model: local cache first
+## Important model: OCI references use a local cache
 
 kubara works with a **local catalog cache**.
 
@@ -37,14 +37,14 @@ That means:
 - `kubara catalog package` creates a cached catalog artifact from a local directory
 - `kubara catalog pull` downloads a catalog artifact into that cache
 - `kubara catalog push` uploads a catalog artifact that is already in that cache
-- `--catalog oci://...` resolves an OCI reference from that cache
+- `--catalog oci://...` resolves an OCI reference through that cache and pulls it when missing
 
 In other words:
 
 - **push does not package**
-- **generate does not auto-pull**
+- catalog-consuming commands auto-pull an OCI reference when it is not cached
 
-Package or pull first, then use the cached artifact.
+`push` still requires a previously packaged or pulled artifact and never packages implicitly. An explicit `pull` is useful to prefetch a catalog or refresh a cached tag before running another command.
 
 ## Step 1: Create or update the catalog
 
@@ -159,9 +159,9 @@ kubara catalog pull oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 
 If the cached version already exists and the remote digest changed, kubara updates the cached entry.
 
-## Step 6: Use the pulled catalog with kubara
+## Step 6: Use the OCI catalog with kubara
 
-After the catalog is cached locally, you can use the same OCI reference in kubara commands:
+Use the same OCI reference in configuration or kubara commands:
 
 ```bash
 kubara schema --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
@@ -169,7 +169,7 @@ kubara init --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 kubara generate --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 ```
 
-If the catalog is not cached yet, pull it first.
+If the reference is not cached, kubara pulls it automatically. Registry authentication still needs to be configured first for private artifacts. Run `kubara catalog pull` explicitly when you want to prefetch or refresh the cached tag.
 
 ## Useful supporting commands
 

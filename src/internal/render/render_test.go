@@ -1,78 +1,82 @@
 package render
 
 import (
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/catalog"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-var testTemplatesFS = catalog.BuiltInFS()
+var (
+	testBootstrapCatalogPath string
+	testGeneralCatalogPath   string
+)
 
-// helper function to setup test filesystem with correct root path
-func setupTestFS(_ *testing.T) func() {
-	originalFS := templatesFSNew
-	templatesFSNew = testTemplatesFS
+func init() {
+	root, err := os.MkdirTemp("", "kubara-render-catalog-tests-*")
+	if err != nil {
+		panic(err)
+	}
 
-	// Return cleanup function
-	return func() {
-		templatesFSNew = originalFS
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(root, "catalogs"))
+	if err != nil {
+		panic(err)
+	}
+
+	testBootstrapCatalogPath = bootstrapPath
+	testGeneralCatalogPath = generalPath
+}
+
+func testTemplateCatalogOptions() catalog.LoadOptions {
+	return catalog.LoadOptions{
+		BootstrapCatalog: testBootstrapCatalogPath,
+		Catalogs:         []string{testGeneralCatalogPath},
 	}
 }
 
 func fullServiceContext() map[string]any {
 	return map[string]any{
-		"argocd":                  map[string]any{"status": "enabled"},
-		"cert-manager":            map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
-		"external-dns":            map[string]any{"status": "enabled"},
-		"external-secrets":        map[string]any{"status": "enabled"},
-		"kube-prometheus-stack":   map[string]any{"status": "enabled"},
-		"traefik":                 map[string]any{"status": "enabled"},
-		"kyverno":                 map[string]any{"status": "enabled"},
-		"kyverno-policies":        map[string]any{"status": "enabled"},
-		"kyverno-policy-reporter": map[string]any{"status": "enabled"},
-		"loki":                    map[string]any{"status": "enabled"},
-		"homer-dashboard":         map[string]any{"status": "enabled"},
-		"oauth2-proxy":            map[string]any{"status": "disabled"},
-		"metrics-server":          map[string]any{"status": "disabled"},
-		"metallb":                 map[string]any{"status": "disabled"},
-		"longhorn":                map[string]any{"status": "disabled"},
-		"velero": map[string]any{
-			"status": "disabled",
-			"config": map[string]any{
-				"backupMode":    "fs-backup",
-				"backupStorage": map[string]any{"create": true, "region": "eu01"},
-			},
-		},
-		"reloader": map[string]any{"status": "disabled"},
+		"cert-manager": map[string]any{"status": "enabled", "config": map[string]any{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "admin@example.com", "server": "https://acme-staging-v02.api.letsencrypt.org/directory"}}},
 	}
 }
 
 func fullCatalogContext() map[string]any {
 	return map[string]any{
 		"services": map[string]any{
-			"argocd":                  map[string]any{"chartPath": "argo-cd"},
-			"cert-manager":            map[string]any{"chartPath": "cert-manager"},
-			"external-dns":            map[string]any{"chartPath": "external-dns"},
-			"external-secrets":        map[string]any{"chartPath": "external-secrets"},
-			"kube-prometheus-stack":   map[string]any{"chartPath": "kube-prometheus-stack"},
-			"traefik":                 map[string]any{"chartPath": "traefik"},
-			"kyverno":                 map[string]any{"chartPath": "kyverno"},
-			"kyverno-policies":        map[string]any{"chartPath": "kyverno-policies"},
-			"kyverno-policy-reporter": map[string]any{"chartPath": "kyverno-policy-reporter"},
-			"loki":                    map[string]any{"chartPath": "loki"},
-			"homer-dashboard":         map[string]any{"chartPath": "homer-dashboard"},
-			"oauth2-proxy":            map[string]any{"chartPath": "oauth2-proxy"},
-			"metrics-server":          map[string]any{"chartPath": "metrics-server"},
-			"metallb":                 map[string]any{"chartPath": "metallb"},
-			"longhorn":                map[string]any{"chartPath": "longhorn"},
-			"velero":                  map[string]any{"chartPath": "velero"},
-			"reloader":                map[string]any{"chartPath": "reloader"},
+			"argo-cd":        map[string]any{"chartPath": "argo-cd"},
+			"bootstrap-crds": map[string]any{"chartPath": "bootstrap-crds"},
+			"cert-manager":   map[string]any{"chartPath": "cert-manager"},
 		},
 	}
+}
+
+func createRenderTestCatalog(t *testing.T, root string, name string, files map[string]string) string {
+	t.Helper()
+
+	catalogPath := filepath.Join(root, name)
+	require.NoError(t, os.MkdirAll(catalogPath, 0o750))
+	require.NoError(t, os.MkdirAll(filepath.Join(catalogPath, "services"), 0o750))
+	require.NoError(t, os.WriteFile(filepath.Join(catalogPath, "Catalog.yaml"), []byte(`apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: `+name+`
+spec:
+  version: 1.0.0
+`), 0o600))
+
+	for relPath, content := range files {
+		targetPath := filepath.Join(catalogPath, filepath.FromSlash(relPath))
+		require.NoError(t, os.MkdirAll(filepath.Dir(targetPath), 0o750))
+		require.NoError(t, os.WriteFile(targetPath, []byte(content), 0o600))
+	}
+
+	return catalogPath
 }
 
 func TestTemplateType_String(t *testing.T) {
@@ -146,12 +150,10 @@ func TestStripProviderPath(t *testing.T) {
 }
 
 func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
-	cleanup := setupTestFS(t)
-	defer cleanup()
-
 	results, err := TemplateFiles(TemplateOptions{
-		Type:     Terraform,
-		Provider: "t-cloud-public",
+		Type:           Terraform,
+		Provider:       "t-cloud-public",
+		CatalogOptions: testTemplateCatalogOptions(),
 		Data: map[string]any{
 			"cluster": map[string]any{
 				"name":    "test-cluster",
@@ -192,6 +194,58 @@ func TestTemplateFiles_TCloudPublicProviderSelectsCCEArtifacts(t *testing.T) {
 	assert.Contains(t, cceClusterModule, `file_permission = "0600"`)
 	require.NotEmpty(t, infrastructureMain)
 	assert.Contains(t, infrastructureMain, `source = "../../../../platform-components/terraform/t-cloud-public/modules/cce-cluster"`)
+}
+
+func TestTemplateFiles_PathCollisionsAcrossCatalogsRequireOverwrite(t *testing.T) {
+	root := t.TempDir()
+	firstCatalog := createRenderTestCatalog(t, root, "first", map[string]string{
+		"platform-components/helm/shared/README.md": "first\n",
+	})
+	secondCatalog := createRenderTestCatalog(t, root, "second", map[string]string{
+		"platform-components/helm/shared/README.md": "second\n",
+	})
+
+	_, err := TemplateFiles(TemplateOptions{
+		Type: All,
+		CatalogOptions: catalog.LoadOptions{
+			BootstrapCatalog: firstCatalog,
+			Catalogs:         []string{secondCatalog},
+		},
+	})
+
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `template "platform-components/helm/shared/README.md" already exists in both`)
+}
+
+func TestTemplateFiles_CatalogOverwritePrefersLaterCatalog(t *testing.T) {
+	root := t.TempDir()
+	firstCatalog := createRenderTestCatalog(t, root, "first", map[string]string{
+		"platform-components/helm/shared/README.md": "first\n",
+	})
+	secondCatalog := createRenderTestCatalog(t, root, "second", map[string]string{
+		"platform-components/helm/shared/README.md": "second\n",
+	})
+
+	results, err := TemplateFiles(TemplateOptions{
+		Type: All,
+		CatalogOptions: catalog.LoadOptions{
+			BootstrapCatalog: firstCatalog,
+			Catalogs:         []string{secondCatalog},
+			Overwrite:        true,
+		},
+	})
+	require.NoError(t, err)
+
+	var readme string
+	for _, result := range results {
+		if result.Path == "platform-components/helm/shared/README.md" {
+			readme = result.Content
+			break
+		}
+	}
+
+	require.NotEmpty(t, readme)
+	assert.Equal(t, "second\n", readme)
 }
 
 func TestTemplateFiles(t *testing.T) {
@@ -252,8 +306,10 @@ func TestTemplateFiles(t *testing.T) {
 				hasTemplate := false
 				hasStatic := false
 				hasValidTemplate := false
+				paths := make([]string, 0, len(results))
 
 				for _, result := range results {
+					paths = append(paths, result.Path)
 					if strings.HasSuffix(result.Path, ".tplt") {
 						hasTemplate = true
 						if result.Error == nil {
@@ -270,6 +326,9 @@ func TestTemplateFiles(t *testing.T) {
 				assert.True(t, hasTemplate, "Should have at least one template file")
 				assert.True(t, hasStatic, "Should have at least one static file")
 				assert.True(t, hasValidTemplate, "Should have at least one successfully rendered template")
+				assert.NotContains(t, paths, "Catalog.yaml")
+				assert.Contains(t, paths, "platform-components/helm/argo-cd/README.md")
+				assert.Contains(t, paths, "platform-components/terraform/stackit/.keep.tplt")
 			},
 		},
 		{
@@ -380,18 +439,16 @@ func TestTemplateFiles(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cleanup := setupTestFS(t)
-			defer cleanup()
-
 			provider := ""
 			if tt.tplType == Terraform || tt.tplType == All {
 				provider = "stackit"
 			}
 
 			results, err := TemplateFiles(TemplateOptions{
-				Type:     tt.tplType,
-				Provider: provider,
-				Data:     tt.context,
+				Type:           tt.tplType,
+				Provider:       provider,
+				CatalogOptions: testTemplateCatalogOptions(),
+				Data:           tt.context,
 			})
 
 			if tt.wantErr {

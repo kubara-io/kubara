@@ -16,7 +16,9 @@ To add a new cluster to your `config.yaml` simply type:
 kubara cluster add <spoke-name> --catalog /path/to/catalog
 ```
 
-This will create a new cluster in the config.yaml that will respect your catalog choices.
+Repeat `--catalog` to assign multiple ordered catalogs. The command stores those references in the new cluster's `catalogs` list. Without `--catalog`, it assigns kubara's general catalog.
+
+Later `schema`, `generate`, and `bootstrap` runs automatically resolve the catalogs configured for that spoke. Additional `--catalog` values are appended temporarily and are not persisted.
 
 ### Optional: Ingress annotation overrides
 

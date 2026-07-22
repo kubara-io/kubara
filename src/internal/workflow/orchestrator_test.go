@@ -1,18 +1,35 @@
 package workflow
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t *testing.T) {
+func testCatalogLoadOptions(t *testing.T) catalog.LoadOptions {
+	t.Helper()
+
+	root, err := os.MkdirTemp("", "kubara-workflow-catalog-tests-*")
+	require.NoError(t, err)
+
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(root, "catalogs"))
+	require.NoError(t, err)
+
+	return catalog.LoadOptions{
+		BootstrapCatalog: bootstrapPath,
+		Catalogs:         []string{generalPath},
+	}
+}
+
+func TestCreateOrUpdateCluster_UpdatesExistingClusterIncludingHelmRepo(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -46,7 +63,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -60,7 +77,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterIncludingHelmRepo(t 
 	assert.Equal(t, "https://charts.example.com", updated.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *testing.T) {
+func TestCreateOrUpdateCluster_UpdatesExistingClusterWithoutTerraform(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -91,7 +108,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -103,7 +120,7 @@ func TestCreateOrUpdateClusterFromEnv_UpdatesExistingClusterWithoutTerraform(t *
 	assert.Equal(t, "https://github.com/new/repo.git", updated.ArgoCD.Repo.Git.Configs.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T) {
+func TestCreateOrUpdateCluster_CreatesNewClusterWithHelmRepo(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -112,7 +129,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 		ArgocdHelmRepoUrl: "https://charts.example.com",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -123,7 +140,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithHelmRepo(t *testing.T
 	assert.Equal(t, "https://charts.example.com", cluster.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
+func TestCreateOrUpdateCluster_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.T) {
 	cfg := &config.Config{
 		Clusters: []config.Cluster{
 			{
@@ -159,7 +176,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -168,7 +185,7 @@ func TestCreateOrUpdateClusterFromEnv_DoesNotOverrideHelmRepoWhenEnvMissing(t *t
 	assert.Equal(t, "https://charts.old.example.com", updated.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
+func TestCreateOrUpdateCluster_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -176,7 +193,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -184,7 +201,7 @@ func TestCreateOrUpdateClusterFromEnv_CreatesNewClusterWithoutHelmRepoWhenEnvMis
 	assert.Nil(t, cluster.ArgoCD.HelmRepo)
 }
 
-func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
+func TestCreateOrUpdateCluster_NormalizesOCIHelmRepoURL(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -193,7 +210,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{})
+	err := CreateOrUpdateCluster(cfg, e, testCatalogLoadOptions(t))
 	require.NoError(t, err)
 
 	require.Len(t, cfg.Clusters, 1)
@@ -202,7 +219,7 @@ func TestCreateOrUpdateClusterFromEnv_NormalizesOCIHelmRepoURL(t *testing.T) {
 	assert.Equal(t, "registry-1.docker.io/bitnamicharts", cluster.ArgoCD.HelmRepo.URL)
 }
 
-func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+func TestCreateOrUpdateCluster_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
 	cfg := &config.Config{}
 	e := &envconfig.EnvMap{
 		ProjectName:       "kubara-test",
@@ -210,9 +227,10 @@ func TestCreateOrUpdateClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFail
 		ArgocdGitHttpsUrl: "https://github.com/new/repo.git",
 	}
 
-	err := CreateOrUpdateClusterFromEnvWithCatalog(cfg, e, catalog.LoadOptions{
-		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
-	})
+	loadOptions := testCatalogLoadOptions(t)
+	loadOptions.Catalogs = []string{filepath.Join(t.TempDir(), "does-not-exist")}
+
+	err := CreateOrUpdateCluster(cfg, e, loadOptions)
 	require.Error(t, err)
 	require.Empty(t, cfg.Clusters)
 }
