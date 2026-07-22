@@ -2,7 +2,7 @@
 
 `kubara` is an opinionated, GitOps-first framework and bootstrap tool for building and operating a production-grade Kubernetes platform.
 
-It is designed as a reusable platform foundation: kubara ships a default built-in catalog of platform components, generates reproducible Terraform and Helm artifacts, and expects ongoing operations to happen through Git instead of manual cluster changes.
+It is designed as a reusable platform foundation: kubara resolves versioned bootstrap and cluster catalogs, generates reproducible Terraform and Helm artifacts, and expects ongoing operations to happen through Git instead of manual cluster changes.
 
 ![Overview](../assets/diagrams.drawio)
 
@@ -20,11 +20,11 @@ That gives you:
 
 If you want a short introduction to the bigger ideas around GitOps, Platform Engineering, and Internal Developer Platforms, see [GitOps, Platform Engineering, and IDPs](gitops_platform_engineering_idp.md).
 
-### 2. kubara ships a default built-in catalog
+### 2. kubara uses versioned catalogs
 
-kubara comes with a built-in catalog of services and templates for common platform capabilities such as ingress, certificates, policies, observability, storage, and authentication.
+kubara uses a fixed bootstrap catalog for Argo CD and bootstrap CRDs, plus one or more ordered catalogs selected by each cluster. New configurations reference kubara's general catalog for common platform capabilities such as ingress, certificates, policies, observability, storage, and authentication.
 
-The **Components** section documents that default built-in catalog:
+The **Components** section documents the services in that general catalog:
 
 - [Components Overview](../6_components/components_overview.md)
 - [Best Practices](../6_components/best_practices.md)

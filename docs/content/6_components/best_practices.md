@@ -24,7 +24,7 @@ kubara does not rely on floating `latest` chart dependencies for its built-in pl
 
 ### 3. Opinionated default service set
 
-In the built-in catalog, several platform services are enabled by default for hub/spoke clusters, including:
+In the general catalog, several platform services are enabled by default for hub/spoke clusters, including:
 
 - **cert-manager**
 - **external-secrets**

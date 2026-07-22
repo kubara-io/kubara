@@ -1,15 +1,15 @@
 # Component Overview
 
-This section documents the **default built-in catalog** kubara ships out of the box.
+This section documents kubara's versioned **general catalog**.
 
-It answers the question **"Which platform components are included by default?"** It does **not** describe how the catalog mechanism itself works or how to create your own external catalog.
+It answers the question **"Which platform components are included by default?"** It does **not** describe how the catalog mechanism itself works or how to create your own catalog.
 
 For that, see:
 
 - [Core Concepts](../2_concepts/overview_core_concept.md)
 - [Catalogs](../2_concepts/catalogs.md)
 
-This document provides an overview of the tools included in the kubara built-in catalog, along with their functionality and key features.
+This document provides an overview of the tools included in kubara's general catalog, along with their functionality and key features.
 More tools will be added in future releases of the kubara framework.
 
 ---
@@ -91,7 +91,7 @@ If you deactivate or replace applications (Y-axis) with others not part of the k
 
 For kubara-specific backup and recovery guidance, see [Backup & Recovery](backup_and_recovery.md).
 
-If the built-in catalog does not meet your needs or is missing key features, you can either:
+If the general catalog does not meet your needs or is missing key features, you can either:
 
-- create your own external catalog as described in [Catalogs](../2_concepts/catalogs.md)
+- create your own catalog as described in [Catalogs](../2_concepts/catalogs.md)
 - propose new built-in tools [here](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#integration-requirements-catalogue)

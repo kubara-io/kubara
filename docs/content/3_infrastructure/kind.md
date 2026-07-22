@@ -97,13 +97,14 @@ The local profile does all of the following:
 - Sets `ssoOrg` and `ssoTeam` to `local`
 - Forces `ingressClassName: traefik`
 - Only enables a minimal set of services:
-  - `argocd`
   - `cert-manager`
   - `external-secrets`
   - `homer-dashboard`
   - `kube-prometheus-stack`
   - `metrics-server`
   - `traefik`
+
+Argo CD is installed from the bootstrap catalog and is therefore not part of the configurable service list.
 
 After changing the cluster profile, kubara writes `.local/generate.env` and reruns `kubara generate --helm` so the rendered Helm artifacts match the local profile.
 

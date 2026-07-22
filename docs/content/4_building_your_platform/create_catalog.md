@@ -130,6 +130,20 @@ kubara generate --catalog ./my-catalog
 
 Pass the **catalog root**, not only `services/`, when you also want kubara to load templates.
 
+You can also assign catalogs directly to a cluster:
+
+```yaml
+clusters:
+  - name: production
+    catalogs:
+      - ./my-catalog
+      - oci://ghcr.io/acme/platform-catalogs/security:1.4.0
+```
+
+Catalog order is significant. Cluster catalogs are loaded first in the listed order, followed by repeated `--catalog` values. Local references are resolved relative to `--work-dir`.
+
+`kubara schema` automatically discovers cluster catalogs when `config.yaml` exists. Before creating a configuration, pass the catalog explicitly as shown above.
+
 ## Step 5: override built-in services when needed
 
 You can override a built-in service by reusing the same `metadata.name`.
@@ -142,7 +156,7 @@ Typical reasons:
 - replace built-in templates with internal ones
 
 Without `--catalog-overwrite`, kubara rejects the collision.  
-With `--catalog-overwrite`, your external definition replaces the built-in definition for that service name.
+With `--catalog-overwrite`, the later catalog replaces the earlier definition for that service name. The replacement is complete rather than a deep merge.
 
 ## Step 6: package the catalog
 
@@ -173,10 +187,11 @@ See [Catalog distribution](../2_concepts/catalog_distribution.md) for the full w
 
 ## Provider-specific Terraform templates
 
-Provider-specific template variants are supported only below:
+Provider-specific template variants are supported directly below a Terraform directory:
 
 ```text
-terraform/providers/<provider>/
+platform-configs/terraform/<provider>/
+platform-components/terraform/<provider>/
 ```
 
 Example:
@@ -185,7 +200,7 @@ Example:
 platform-configs/terraform/stackit/infrastructure/main.tf.tplt
 ```
 
-When the cluster Terraform provider matches the directory name, kubara uses that provider-specific file for the generated output path.
+When the cluster Terraform provider matches the directory name, kubara selects that provider's files. The provider directory is stripped from generated `platform-configs` paths but retained under `platform-components`.
 
 Provider-specific directories below Helm paths are **not** treated as provider overrides.
 

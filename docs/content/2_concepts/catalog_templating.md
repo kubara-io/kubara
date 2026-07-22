@@ -81,7 +81,7 @@ The Homer example shows the main idea well: one service template can react to se
 From:
 
 ```text
-src/internal/catalog/built-in/platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
+platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 ```
 
 kubara reads values such as:
@@ -136,13 +136,16 @@ charts, custom scripts or others.
 
 ## Terraform-specific note
 
-Provider-specific Terraform template variants are supported below:
+Provider-specific Terraform template variants are selected from a directory directly below `terraform`:
 
 ```text
-terraform/providers/<provider>/
+platform-configs/terraform/<provider>/
+platform-components/terraform/<provider>/
 ```
 
-kubara strips that provider path segment in the final output and picks the provider-specific file when the cluster provider matches.
+kubara selects only the matching provider. It removes the provider selector from generated `platform-configs` paths and retains it in reusable `platform-components` module paths.
+
+When a cluster omits Terraform or uses `provider: none`, the default `kubara generate` run skips its Terraform templates and removes stale generated Terraform output for that cluster. Non-Terraform catalog assets are still copied.
 
 ## Where to go next
 
