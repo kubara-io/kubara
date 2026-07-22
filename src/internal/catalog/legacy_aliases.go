@@ -6,7 +6,6 @@ var legacyToCanonicalServiceName = map[string]string{
 	// canonical keys
 	"argo-cd":                 "argo-cd",
 	"argocd":                  "argo-cd",
-	"bootstrap-crds":          "bootstrap-crds",
 	"cert-manager":            "cert-manager",
 	"external-dns":            "external-dns",
 	"external-secrets":        "external-secrets",

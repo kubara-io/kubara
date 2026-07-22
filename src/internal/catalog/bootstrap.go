@@ -1,5 +1,11 @@
 package catalog
 
+// TODO: renovate automatically upgrade / open PRs for releases of our catalogs
+const (
+	DefaultBootstrapCatalog = "oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0"
+	DefaultGeneralCatalog   = "oci://ghcr.io/kubara-io/catalogs/general:1.0.0"
+)
+
 const (
 	BootstrapServiceArgoCD = "argo-cd"
 	BootstrapServiceCRDs   = "bootstrap-crds"

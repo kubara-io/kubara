@@ -26,7 +26,6 @@ const (
 )
 
 const (
-	tmplRoot                      string = "built-in"
 	DefaultPlatformComponentsPath string = "platform-components"
 	DefaultPlatformConfigsPath    string = "platform-configs"
 )
