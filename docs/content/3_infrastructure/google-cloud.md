@@ -124,6 +124,7 @@ If no suitable network exists, one can be created from scratch, including a rout
 
 ### Create the GKE Cluster
 
+```bash
 gcloud container clusters create test-cluster \
     --zone=europe-west3-a \                # Zonal cluster (single availability zone for testing)
     --network=test-network \                # VPC network the cluster is deployed into
@@ -214,8 +215,10 @@ gcloud dns managed-zones create kubara-gcp-zone \
 gcloud dns managed-zones describe kubara-gcp-zone --format="value(nameServers)"
 ```
 
+DNS example:
 
-<!-- TODO: add example screenshot of a delegated subdomain at the registrar -->
+![Registrar Screenshot](../images/gcp-dns.jpg)
+
 
 Next, the `values.yaml` for external-dns needs to be adjusted.
 
@@ -237,10 +240,11 @@ external-dns:
 
 ### External Secrets
 
+```yaml title="Configure GCP for External Secrets"
 # 1. Create a Google service account
 gcloud iam service-accounts create external-secrets-sa \
     --display-name="GKE Kubara External Secrets SA"
-
+  
 # 2. Grant the service account permission to read secrets (Secret Accessor)
 gcloud projects add-iam-policy-binding $(gcloud config get-value project) \
     --member="serviceAccount:external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com" \
@@ -266,10 +270,9 @@ external-secrets:
 
 #### SecretStore
 
-Create a secretstore.yaml and use this template:
+Create a secretstore.yaml, use this template and change your Project ID:
 
-```yaml title="Secretstore Template"
-# set your projectID and save!
+```yaml title="secretstore.yaml"
 apiVersion: external-secrets.io/v1
 kind: SecretStore
 metadata:
@@ -290,14 +293,16 @@ Now all secrets required by kubara are created. The commands below are just one 
 
 !!! warning "Naming convention"
     Replace every secret name below to match your cluster name and stage from `config.yaml`, using the pattern `<cluster>-<stage>-...`. Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called cthulhu-dev-cluster-secrets-docker-config. 
+
+    Also don't forget to replace the values in the secret command, like for example "$YOUR_COOKIE_SECRET_CREATED_ABOVE".
     
-    In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names.
+    In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names and set the values!
 
 
 ```bash title="Docker Pull Secret"
 gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager
-# change name of the secret according to your name and stage / replace "gcp-dev"
+# change name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
 printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=- 
 
 ```
@@ -305,8 +310,8 @@ printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' 
 
 ```bash title="Grafana Admin Secret"
 gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-credentials --replication-policy=automatic # replace name of the secret according to your name and stage / replace "gcp-dev"
-# replace name of the secret according to your name and stage / replace "gcp-dev"
-printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- 
+# replace name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
+printf '%s' '{"admin-user":"admin","admin-password":"$YOUR_PASSWORD"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-credentials --data-file=- 
 ```
 
 
@@ -314,7 +319,7 @@ printf '%s' '{"admin-user":"admin","admin-password":"YOUR_PASSWORD"}' | gcloud s
 # replace name of the secret according to your name and stage / replace "gcp-dev"
 gcloud secrets create gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --replication-policy=automatic 
 
- # replace name of the secret according to your name and stage / replace "gcp-dev"
+ # replace name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
 printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials --data-file=-
 ```
 
@@ -326,7 +331,7 @@ gcloud secrets create gcp-dev-oauth2-proxy-oauth2-credentials --replication-poli
 # Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)
 dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
 
-# replace name of the secret according to your name and stage / replace "gcp-dev"
+# replace name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
 printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}' | gcloud secrets versions add gcp-dev-oauth2-proxy-oauth2-credentials --data-file=- 
 ```
 
@@ -335,7 +340,7 @@ printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET
 # replace name of the secret according to your name and stage / replace "gcp-dev"
 gcloud secrets create gcp-dev-argocd-argo-oauth2-credentials --replication-policy=automatic 
 
-# replace name of the secret according to your name and stage / replace "gcp-dev"
+# replace name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
 printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}' | gcloud secrets versions add gcp-dev-argocd-argo-oauth2-credentials --data-file=- 
 ```
 
