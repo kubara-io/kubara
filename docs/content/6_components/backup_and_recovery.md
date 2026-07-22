@@ -15,7 +15,7 @@ on Velero for dynamic data that gets generated in runtime like the contents of P
 
 ## Velero & kubara
 
-kubara supports **Velero** as a built-in component for backup, restore, disaster recovery, and migration.
+kubara supports **Velero** as a general component for backup, restore, disaster recovery, and migration.
 
 What kubara covers:
 

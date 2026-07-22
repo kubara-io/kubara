@@ -101,7 +101,9 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 
 	applyDefaults(cfg)
 
-	https := cfg.Clusters[0].ArgoCD.Repo.HTTPS
+	argocd := cfg.Clusters[0].ArgoCD
+	https := argocd.Repo.HTTPS
+	assert.Equal(t, ArgoCDSelfManagedEnabled, argocd.SelfManaged, "empty SelfManaged should default to enabled")
 	assert.Equal(t, "main", https.Configs.TargetRevision, "empty TargetRevision should default to main")
 	assert.Equal(t, "release", https.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
 }

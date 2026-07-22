@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -44,7 +45,18 @@ func ResolveSource(catalogPath string) (ResolvedSource, error) {
 	// TODO ensure we pull missing catalogs from remote
 	artifact, err := GetCachedArtifact(raw)
 	if err != nil {
-		return ResolvedSource{}, err
+		ref, parseErr := ParseOCIReference(raw)
+		if parseErr != nil {
+			return ResolvedSource{}, err
+		}
+		pulled, pullErr := pullRemoteCatalog(context.Background(), ref, false)
+		if pullErr != nil {
+			return ResolvedSource{}, fmt.Errorf("auto-pull catalog %q: %w", raw, pullErr)
+		}
+		if err := writeCachedReference(ref, pulled); err != nil {
+			return ResolvedSource{}, err
+		}
+		artifact = pulled
 	}
 
 	return resolvedSourceFromArtifact(artifact)

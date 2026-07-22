@@ -19,7 +19,6 @@ const (
 
 var (
 	enabledServices = map[string]struct{}{
-		"argocd":                {},
 		"cert-manager":          {},
 		"external-secrets":      {},
 		"homer-dashboard":       {},

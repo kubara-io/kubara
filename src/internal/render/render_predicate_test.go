@@ -8,12 +8,10 @@ import (
 )
 
 func TestTemplateFiles_PathPredicateUsesProviderStrippedPath(t *testing.T) {
-	cleanup := setupTestFS(t)
-	defer cleanup()
-
 	results, err := TemplateFiles(TemplateOptions{
-		Type:     Terraform,
-		Provider: "stackit",
+		Type:           Terraform,
+		Provider:       "stackit",
+		CatalogOptions: testTemplateCatalogOptions(),
 		Data: map[string]any{
 			"var": map[string]any{
 				"project_id": "12345",

@@ -20,11 +20,11 @@ That gives you a few concrete guarantees:
 
 ### 2. Pinned component versions
 
-kubara does not rely on floating `latest` chart dependencies for its built-in platform components. The managed catalog pins explicit chart versions, which improves reproducibility and reduces surprise upgrades.
+kubara does not rely on floating `latest` chart dependencies for its general platform components. The managed catalog pins explicit chart versions, which improves reproducibility and reduces surprise upgrades.
 
 ### 3. Opinionated default service set
 
-In the built-in catalog, several platform services are enabled by default for hub/spoke clusters, including:
+In the general catalog, several platform services are enabled by default for hub/spoke clusters, including:
 
 - **cert-manager**
 - **external-secrets**
@@ -73,7 +73,7 @@ You can already see these defaults in bundled components such as **ExternalDNS**
 
 ### Secret handling prefers external backends
 
-kubara ships **External Secrets Operator** as a default component and built-in charts consume Kubernetes `Secret` references for sensitive values instead of hardcoding credentials into manifests where possible.
+kubara ships **External Secrets Operator** as a default component and our charts consume Kubernetes `Secret` references for sensitive values instead of hardcoding credentials into manifests where possible.
 
 That does not prevent you from creating plain Kubernetes `Secret` objects yourself, but the default platform path is to **sync secrets from an external backend**.
 
@@ -146,6 +146,6 @@ If you use kubara as intended, you get a platform that is:
 - **version-pinned**
 - **observable by default**
 - **guarded by policy by default**
-- **already hardened in many of its built-in components**
+- **already hardened in many of its general components**
 
 If you need **strict enforcement**, **cluster-wide default-deny networking**, or **image verification**, kubara gives you a starting point, but you still need to turn those controls on and validate them in your own environment.

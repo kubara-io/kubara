@@ -8,7 +8,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 )
 
-func CreateOrUpdateClusterFromEnvWithCatalog(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
+func CreateOrUpdateCluster(cfg *config.Config, e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) error {
 	clusterName := e.ProjectName
 
 	// Attempt to find the cluster to update

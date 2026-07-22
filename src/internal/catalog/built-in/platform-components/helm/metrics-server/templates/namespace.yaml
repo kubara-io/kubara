@@ -1,2 +1,0 @@
-
-{{- include "templateLibrary.k8s.namespace" . }}

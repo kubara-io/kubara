@@ -191,3 +191,27 @@ func TestMigrateV1Alpha2RepoKeepsCurrentKeys(t *testing.T) {
 	assert.NotContains(t, repo, "customer")
 	assert.NotContains(t, repo, "managed")
 }
+
+func TestMigrateV1Alpha3Config(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha3,
+		"clusters": []any{
+			map[string]any{
+				"name": "test-cluster",
+				"services": map[string]any{
+					"argocd": map[string]any{
+						"status": "disabled",
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha3Config(config))
+	assert.Equal(t, ConfigVersionV1Alpha4, config["version"])
+
+	cluster := config["clusters"].([]any)[0].(map[string]any)
+	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.0.0"}, cluster["catalogs"])
+	assert.Equal(t, "disabled", cluster["argocd"].(map[string]any)["selfManaged"])
+	assert.NotContains(t, cluster["services"], "argocd")
+}

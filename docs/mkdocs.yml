@@ -35,7 +35,7 @@ nav:
       - How to add a Repository: 5_workload_onboarding/add_app_repository.md
       - How to add an AppSet: 5_workload_onboarding/add_appset.md
       - How to add an Application: 5_workload_onboarding/add_application.md
-  - Components (Built-in):
+  - Components (Default):
       - Overview: 6_components/components_overview.md
       - Best Practices: 6_components/best_practices.md
       - Backup & Recovery: 6_components/backup_and_recovery.md

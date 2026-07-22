@@ -63,7 +63,7 @@ Do not forget to push your changes to the git repository that serves your Argo C
 If you let Argo CD manage itself, it will add the configured application to the cluster.
 
 ## **Run kubara bootstrap again (if Argo CD is not managing itself )**
-If Argo CD is not managing itself (default, see `config.yaml` with `services.argocd.status: disabled`) altering Argo CD values will have no effect until you run the following again:
+If Argo CD is not managing itself (see `config.yaml` with `argocd.selfManaged: disabled`), altering Argo CD values will have no effect until you run the following again:
 ```bash
 kubara bootstrap <hub-cluster-name-from-config-yaml>
 ```

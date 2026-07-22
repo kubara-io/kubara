@@ -4,7 +4,8 @@ import "strings"
 
 var legacyToCanonicalServiceName = map[string]string{
 	// canonical keys
-	"argocd":                  "argocd",
+	"argo-cd":                 "argo-cd",
+	"argocd":                  "argo-cd",
 	"cert-manager":            "cert-manager",
 	"external-dns":            "external-dns",
 	"external-secrets":        "external-secrets",

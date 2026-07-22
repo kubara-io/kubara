@@ -184,8 +184,6 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 		return err
 	}
 
-	opts.WithES = true
-	opts.WithProm = true
 	opts.WithESCSSPath = state.ClusterSecretStorePath
 	opts.ClusterConfig.DNSName = state.BaseHost
 
@@ -440,8 +438,8 @@ func waitForTraefikLoadBalancer(ctx context.Context, client *k8s.Client) (string
 
 func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error {
 	configStore := config.NewConfigStore(opts.WorkDir, opts.ConfigFilePath, catalog.LoadOptions{
-		CatalogPath: opts.CatalogPath,
-		Overwrite:   opts.CatalogOverwrite,
+		Catalogs:  opts.Catalogs,
+		Overwrite: opts.CatalogOverwrite,
 	})
 	if err := configStore.Load(); err != nil {
 		return fmt.Errorf("load config for local profile update: %w", err)
@@ -477,7 +475,7 @@ func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error
 		DryRun:             false,
 		CWD:                opts.WorkDir,
 		ConfigFilePath:     opts.ConfigFilePath,
-		CatalogPath:        opts.CatalogPath,
+		Catalogs:           opts.Catalogs,
 		CatalogOverwrite:   opts.CatalogOverwrite,
 		PlatformComponents: opts.PlatformComponents,
 		PlatformConfigs:    opts.PlatformConfigs,
@@ -718,6 +716,8 @@ func writeLocalArgocdValues(opts *Options, state *LocalState) error {
     %s-%s:
       sourceRepos:
 %s
+dexRestarter:
+  enabled: false
 argo-cd:
   dex:
     enabled: false

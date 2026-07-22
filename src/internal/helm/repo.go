@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os/exec"
+	"strings"
 	"time"
 )
 
@@ -22,6 +23,10 @@ type RepoOptions struct {
 
 // AddRepository adds a helm repository
 func AddRepository(ctx context.Context, opts RepoOptions) error {
+	if !strings.HasPrefix(opts.URL, "http") && !strings.HasPrefix(opts.URL, "oci") {
+		return nil
+	}
+
 	args := []string{"repo", "add", opts.Name, opts.URL}
 
 	if opts.Username != "" && opts.Password != "" {

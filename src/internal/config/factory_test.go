@@ -55,6 +55,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 		ArgoCD: ArgoCD{
+			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
 				HTTPS: &RepoType{
 					Configs: Repository{
@@ -71,9 +72,9 @@ func TestNewClusterFromEnv(t *testing.T) {
 				URL: "https://charts.example.com",
 			},
 		},
-		// The service defaults are catalog-driven; mirror expected built-in values.
+		Catalogs: testClusterCatalogs(),
+		// The service defaults are catalog-driven; mirror expected default values.
 		Services: service.Services{
-			"argocd": {Status: service.StatusDisabled},
 			"cert-manager": {
 				Status: service.StatusEnabled,
 				Config: service.Config{
@@ -84,27 +85,6 @@ func TestNewClusterFromEnv(t *testing.T) {
 					},
 				},
 			},
-			"external-dns":            {Status: service.StatusEnabled},
-			"external-secrets":        {Status: service.StatusEnabled},
-			"kube-prometheus-stack":   {Status: service.StatusEnabled},
-			"traefik":                 {Status: service.StatusEnabled},
-			"kyverno":                 {Status: service.StatusEnabled},
-			"kyverno-policies":        {Status: service.StatusEnabled},
-			"kyverno-policy-reporter": {Status: service.StatusEnabled},
-			"loki":                    {Status: service.StatusEnabled},
-			"homer-dashboard":         {Status: service.StatusEnabled},
-			"oauth2-proxy":            {Status: service.StatusEnabled},
-			"metrics-server":          {Status: service.StatusDisabled},
-			"metallb":                 {Status: service.StatusDisabled},
-			"longhorn":                {Status: service.StatusDisabled},
-			"velero": {
-				Status: service.StatusDisabled,
-				Config: service.Config{
-					"backupMode":    "fs-backup",
-					"backupStorage": map[string]any{"create": true, "region": "eu01"},
-				},
-			},
-			"reloader": {Status: service.StatusDisabled},
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
@@ -149,7 +129,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// --- Test Execution ---
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewClusterFromEnvWithCatalog(tt.args.e, catalog.LoadOptions{})
+			got, err := NewClusterFromEnvWithCatalog(tt.args.e, testCatalogLoadOptions())
 			require.NoError(t, err)
 			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
 		})
@@ -164,7 +144,40 @@ func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testin
 	}
 
 	_, err := NewClusterFromEnvWithCatalog(sampleEnvMap, catalog.LoadOptions{
-		CatalogPath: filepath.Join(t.TempDir(), "does-not-exist"),
+		Catalogs: []string{filepath.Join(t.TempDir(), "does-not-exist")},
 	})
 	require.Error(t, err)
+}
+
+func TestClusterCatalogLoadOptions_DefaultsToGeneralCatalog(t *testing.T) {
+	got := clusterCatalogLoadOptions(catalog.LoadOptions{})
+
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, got.Catalogs)
+}
+
+func TestClusterCatalogLoadOptions_PreservesExplicitCatalogs(t *testing.T) {
+	loadOptions := catalog.LoadOptions{
+		BootstrapCatalog: testBootstrapCatalogPath,
+		Catalogs:         testClusterCatalogs(),
+		Overwrite:        true,
+	}
+
+	got := clusterCatalogLoadOptions(loadOptions)
+
+	assert.Equal(t, loadOptions.BootstrapCatalog, got.BootstrapCatalog)
+	assert.Equal(t, loadOptions.Catalogs, got.Catalogs)
+	assert.Equal(t, loadOptions.Overwrite, got.Overwrite)
+	assert.NotSame(t, &loadOptions.Catalogs[0], &got.Catalogs[0])
+}
+
+func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
+	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
+
+	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+}
+
+func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {
+	cluster := CreateSpokeScaffolding("spoke-a", testCatalogLoadOptions())
+
+	assert.Equal(t, testClusterCatalogs(), cluster.Catalogs)
 }
