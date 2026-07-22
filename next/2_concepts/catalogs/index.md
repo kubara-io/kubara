@@ -2,7 +2,7 @@
 
 This page explains what a catalog is, when to use one, and how catalogs fit into kubara's platform workflow.
 
-For the built-in services that ship with kubara, see [Components Overview](../6_components/components_overview.md). This page is about the **catalog model itself**.
+For the general services the kubara team ships, see [Components Overview](../6_components/components_overview.md). This page is about the **catalog model itself**.
 
 ## What is a catalog?
 
@@ -55,17 +55,28 @@ Hint:
 - Use Argo CD workload onboarding when the service you are adding is a **cluster-specific or team-specific workload**.
 - Use a catalog only when the service you are describing is part of the **reusable platform architecture**.  
 
-## Built-in and external catalogs
+## Bootstrap and cluster catalogs
 
-kubara always ships with a **built-in catalog**:
+kubara resolves catalogs in layers:
 
-That built-in catalog contains:
+1. The global **bootstrap catalog** provides the fixed Argo CD and bootstrap CRD foundation.
+2. Each cluster selects one or more ordered catalogs through its `catalogs` list.
+3. Repeated `--catalog` flags append command-specific catalogs after the cluster catalogs.
 
-- built-in service definitions
-- built-in template content
-- the default platform stack documented in the Components section
+New configurations use kubara's general catalog unless catalogs are supplied during `init`. The selected catalog references are stored on the cluster:
 
-You can extend or replace parts of it with an **external catalog** by using `--catalog`.
+```yaml
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0
+clusters:
+  - name: production
+    catalogs:
+      - oci://ghcr.io/kubara-io/catalogs/general:1.0.0
+      - oci://ghcr.io/acme/platform-catalogs/security:2.1.0
+```
+
+`bootstrapCatalog` is optional. When omitted or empty, kubara uses its versioned default bootstrap catalog. The bootstrap services `argo-cd` and `bootstrap-crds` are always part of the foundation and are not configurable entries under `clusters[].services`.
+
+Use `--catalog` to add catalogs for a command:
 
 Examples:
 
@@ -80,7 +91,9 @@ kubara generate --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 - a local catalog directory
 - an OCI reference such as `oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3`
 
-Important: OCI-backed catalogs are resolved from the **local kubara cache**. If the catalog is not cached yet, pull it first with `kubara catalog pull`. See [Catalog distribution](catalog_distribution.md).
+Local paths are resolved relative to `--work-dir`. OCI-backed catalogs use the local kubara cache and are pulled automatically when the requested reference is not cached. See [Catalog distribution](catalog_distribution.md).
+
+`init` and `cluster add` persist their `--catalog` references in the new cluster entry. Commands such as `schema`, `generate`, and `bootstrap` use CLI catalogs as temporary additions and do not rewrite `config.yaml`.
 
 ## What is inside a catalog?
 
@@ -185,35 +198,45 @@ Important fields:
 - `spec.clusterTypes`: optional hub/spoke filtering
 - `spec.configSchema`: optional OpenAPI schema for defaults and validation
 
-Without `--catalog-overwrite`, kubara rejects collisions between built-in and external service definitions with the same name.
+Without `--catalog-overwrite`, kubara rejects collisions between service definitions with the same name.
 
 ## How catalog loading works
 
-When kubara loads catalogs, it:
+For each cluster, kubara:
 
-1. Loads the built-in service definitions
-2. Loads external service definitions when `--catalog` is set
-3. Merges both sets by `metadata.name`
-4. Rejects collisions unless `--catalog-overwrite` is set
+1. Loads the bootstrap catalog.
+2. Loads `clusters[].catalogs` in their listed order.
+3. Appends repeated `--catalog` values in command-line order.
+4. Removes duplicate references while preserving the first occurrence.
+5. Merges service definitions by `metadata.name`.
+6. Rejects collisions unless `--catalog-overwrite` is set.
+
+With overwrite enabled, the later catalog replaces the complete earlier definition; definitions are not deep-merged.
 
 ## How template loading works
 
-During `kubara generate`, kubara loads templates from:
-
-- The built-in catalog
-- Your external catalog, if present
+During `kubara generate`, kubara loads templates from the same effective catalog order used for service defaults and validation.
 
 Files ending in `.tplt` are rendered as Go templates. Files without `.tplt` are copied as-is.
 
 For Terraform, kubara also supports provider-specific template variants below:
 
 ```text
-terraform/providers/<provider>/
+platform-configs/terraform/<provider>/
+platform-components/terraform/<provider>/
 ```
 
-If a provider-specific file and a common file map to the same output path, the provider-specific file wins.
+If a provider-specific file and a common file map to the same output path, the provider-specific file wins. The selector is removed from generated `platform-configs` paths and retained in `platform-components` module paths.
 
 If a cluster has no Terraform block or uses `terraform.provider: none`, the default `kubara generate` run skips Terraform templates for that cluster.
+
+Shared output paths must also be deterministic across clusters. Identical content is written once; conflicting content for the same final path causes generation to fail before files are changed.
+
+## Schema generation
+
+When `config.yaml` exists, `kubara schema` resolves catalogs per cluster and emits cluster-specific service branches. This keeps editor completion and validation aligned with the services available to each cluster.
+
+Without a configuration file, `kubara schema` uses the general catalog plus any repeated `--catalog` values. If an existing configuration is malformed or references an invalid catalog, schema generation fails instead of silently falling back.
 
 ## OCI-backed distribution
 

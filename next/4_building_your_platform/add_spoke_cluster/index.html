@@ -700,7 +700,7 @@ You're not viewing the latest stable version.
 <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -712,7 +712,7 @@ You're not viewing the latest stable version.
 <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -1252,7 +1252,8 @@ You're not viewing the latest stable version.
 <p>To add a new cluster to your <code>config.yaml</code> simply type:
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>cluster<span class="w"> </span>add<span class="w"> </span>&lt;spoke-name&gt;<span class="w"> </span>--catalog<span class="w"> </span>/path/to/catalog
 </code></pre></div></p>
-<p>This will create a new cluster in the config.yaml that will respect your catalog choices.</p>
+<p>Repeat <code>--catalog</code> to assign multiple ordered catalogs. The command stores those references in the new cluster's <code>catalogs</code> list. Without <code>--catalog</code>, it assigns kubara's general catalog.</p>
+<p>Later <code>schema</code>, <code>generate</code>, and <code>bootstrap</code> runs automatically resolve the catalogs configured for that spoke. Additional <code>--catalog</code> values are appended temporarily and are not persisted.</p>
 <h3 id="optional-ingress-annotation-overrides">Optional: Ingress annotation overrides</h3>
 <p>Each service supports an optional <code>ingress.annotations</code> map that is merged with kubara's default annotations when rendering the service values files.
 This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.</p>

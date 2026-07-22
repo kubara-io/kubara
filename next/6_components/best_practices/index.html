@@ -1362,7 +1362,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1378,7 +1378,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2900,9 +2900,9 @@ You're not viewing the latest stable version.
 <li>drift is detected by the GitOps controller instead of being silently accepted</li>
 </ul>
 <h3 id="2-pinned-component-versions">2. Pinned component versions</h3>
-<p>kubara does not rely on floating <code>latest</code> chart dependencies for its built-in platform components. The managed catalog pins explicit chart versions, which improves reproducibility and reduces surprise upgrades.</p>
+<p>kubara does not rely on floating <code>latest</code> chart dependencies for its general platform components. The managed catalog pins explicit chart versions, which improves reproducibility and reduces surprise upgrades.</p>
 <h3 id="3-opinionated-default-service-set">3. Opinionated default service set</h3>
-<p>In the built-in catalog, several platform services are enabled by default for hub/spoke clusters, including:</p>
+<p>In the general catalog, several platform services are enabled by default for hub/spoke clusters, including:</p>
 <ul>
 <li><strong>cert-manager</strong></li>
 <li><strong>external-secrets</strong></li>
@@ -2942,7 +2942,7 @@ You're not viewing the latest stable version.
 </ul>
 <p>You can already see these defaults in bundled components such as <strong>ExternalDNS</strong>, <strong>Loki</strong>, and large parts of <strong>kube-prometheus-stack</strong>.</p>
 <h3 id="secret-handling-prefers-external-backends">Secret handling prefers external backends</h3>
-<p>kubara ships <strong>External Secrets Operator</strong> as a default component and built-in charts consume Kubernetes <code>Secret</code> references for sensitive values instead of hardcoding credentials into manifests where possible.</p>
+<p>kubara ships <strong>External Secrets Operator</strong> as a default component and our charts consume Kubernetes <code>Secret</code> references for sensitive values instead of hardcoding credentials into manifests where possible.</p>
 <p>That does not prevent you from creating plain Kubernetes <code>Secret</code> objects yourself, but the default platform path is to <strong>sync secrets from an external backend</strong>.</p>
 <h3 id="tls-automation-is-part-of-the-default-platform-story">TLS automation is part of the default platform story</h3>
 <p>kubara enables <strong>cert-manager</strong> by default and generates a <code>ClusterIssuer</code> configuration path for automated certificate issuance and renewal.</p>
@@ -2994,7 +2994,7 @@ You're not viewing the latest stable version.
 <li><strong>version-pinned</strong></li>
 <li><strong>observable by default</strong></li>
 <li><strong>guarded by policy by default</strong></li>
-<li><strong>already hardened in many of its built-in components</strong></li>
+<li><strong>already hardened in many of its general components</strong></li>
 </ul>
 <p>If you need <strong>strict enforcement</strong>, <strong>cluster-wide default-deny networking</strong>, or <strong>image verification</strong>, kubara gives you a starting point, but you still need to turn those controls on and validate them in your own environment.</p>
 

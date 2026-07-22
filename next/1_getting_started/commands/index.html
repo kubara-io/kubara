@@ -1360,7 +1360,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1376,7 +1376,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2459,8 +2459,8 @@ You're not viewing the latest stable version.
 </code></pre></div>
 <h1 id="global-options">GLOBAL OPTIONS</h1>
 <p><strong>--base64</strong>: Enable base64 encode/decode mode</p>
-<p><strong>--catalog</strong>="": Path to an external catalog directory or an OCI reference in the form oci://registry/repository:x.y.z</p>
-<p><strong>--catalog-overwrite</strong>: Allow external service definitions from --catalog to overwrite built-in definitions on name collisions</p>
+<p><strong>--catalog</strong>="": Path to a catalog directory or an OCI reference in the form oci://registry/repository:x.y.z</p>
+<p><strong>--catalog-overwrite</strong>: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions</p>
 <p><strong>--check-update</strong>: Check online for a newer kubara release</p>
 <p><strong>--config-file, -c</strong>="": Path to the configuration file (default: "config.yaml")</p>
 <p><strong>--decode</strong>: Base64 decode input</p>
@@ -2509,9 +2509,9 @@ You're not viewing the latest stable version.
 <p><strong>--platform-components</strong>="": Path to the platform-components directory (default: "platform-components")</p>
 <p><strong>--platform-configs</strong>="": Path to platform-configs directory (default: "platform-configs")</p>
 <p><strong>--timeout</strong>="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)</p>
-<p><strong>--with-es-crds</strong>: Also install external-secrets</p>
+<p><strong>--with-es-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap.</p>
 <p><strong>--with-es-css-file</strong>="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)</p>
-<p><strong>--with-prometheus-crds</strong>: Also install kube-prometheus-stack</p>
+<p><strong>--with-prometheus-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap.</p>
 <h3 id="help-h_2">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="schema">schema</h2>

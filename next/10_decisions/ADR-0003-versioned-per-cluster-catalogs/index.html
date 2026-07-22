@@ -8,13 +8,9 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/5_workload_onboarding/add_appset/">
+        <link rel="canonical" href="https://docs.kubara.io/next/10_decisions/ADR-0003-versioned-per-cluster-catalogs/">
       
       
-        <link rel="prev" href="../add_app_repository/">
-      
-      
-        <link rel="next" href="../add_application/">
       
       
         
@@ -25,7 +21,7 @@
     
     
       
-        <title>How to add an AppSet - kubara - Docs</title>
+        <title>ADR 0003 versioned per cluster catalogs - kubara - Docs</title>
       
     
     
@@ -78,7 +74,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-add-an-appset-to-argo-cd" class="md-skip">
+        <a href="#versioned-per-cluster-catalog" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +125,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              How to add an AppSet
+              ADR 0003 versioned per cluster catalogs
             
           </span>
         </div>
@@ -1135,8 +1131,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -1149,11 +1143,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
@@ -1174,7 +1168,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1192,7 +1186,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../overview/" class="md-nav__link">
+      <a href="../../5_workload_onboarding/overview/" class="md-nav__link">
         
   
   
@@ -1220,7 +1214,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_project/" class="md-nav__link">
+      <a href="../../5_workload_onboarding/add_app_project/" class="md-nav__link">
         
   
   
@@ -1248,7 +1242,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_app_repository/" class="md-nav__link">
+      <a href="../../5_workload_onboarding/add_app_repository/" class="md-nav__link">
         
   
   
@@ -1273,37 +1267,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    How to add an AppSet
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../5_workload_onboarding/add_appset/" class="md-nav__link">
         
   
   
@@ -1319,103 +1286,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#add-chart-to-your-platform-components" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add Chart to your platform-components
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add Templates to your new Chart (optional)
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-override-values-to-your-platform-configs" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add Override Values to your platform-configs
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#modify-argo-cd-overlays" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Modify Argo CD overlays
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#push-your-changes-to-git" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Push your changes to git
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Run kubara bootstrap again (if Argo CD is not managing itself )
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#add-app-from-another-repository" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Add App from another repository
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1428,7 +1298,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../add_application/" class="md-nav__link">
+      <a href="../../5_workload_onboarding/add_application/" class="md-nav__link">
         
   
   
@@ -2025,7 +1895,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../10_decisions/ADR/" class="md-nav__link">
+      <a href="../ADR/" class="md-nav__link">
         
   
   
@@ -2053,7 +1923,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../10_decisions/ADR-index/" class="md-nav__link">
+      <a href="../ADR-index/" class="md-nav__link">
         
   
   
@@ -2534,10 +2404,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#add-chart-to-your-platform-components" class="md-nav__link">
+  <a href="#context-and-problem-statement" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add Chart to your platform-components
+        Context and Problem Statement
       
     </span>
   </a>
@@ -2545,10 +2415,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-templates-to-your-new-chart-optional" class="md-nav__link">
+  <a href="#decision-drivers" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add Templates to your new Chart (optional)
+        Decision Drivers
       
     </span>
   </a>
@@ -2556,10 +2426,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#add-override-values-to-your-platform-configs" class="md-nav__link">
+  <a href="#considered-options" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add Override Values to your platform-configs
+        Considered Options
       
     </span>
   </a>
@@ -2567,43 +2437,82 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#modify-argo-cd-overlays" class="md-nav__link">
+  <a href="#decision-outcome" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Modify Argo CD overlays
+        Decision Outcome
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Decision Outcome">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#bootstrap-boundary" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Bootstrap boundary
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#push-your-changes-to-git" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#collision-and-precedence-semantics" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Push your changes to git
+        Collision and precedence semantics
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#schema-and-validation" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Run kubara bootstrap again (if Argo CD is not managing itself )
+        Schema and validation
       
     </span>
   </a>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#add-app-from-another-repository" class="md-nav__link">
+        
+          <li class="md-nav__item">
+  <a href="#terraform-disabled-clusters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Add App from another repository
+        Terraform-disabled clusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#consequences" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Consequences
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#non-goals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Non-Goals
       
     </span>
   </a>
@@ -2630,84 +2539,96 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="how-to-add-an-appset-to-argo-cd">How to add an AppSet to Argo CD</h1>
-<p>Make sure you added the needed Project and Repositories. You should also think about setting appropriate RBAC on the
-Project.</p>
-<p>An Argo CD AppSet is a logical concept to create many Argo CD applications with just one manifest.<br>
-This allows Users to spawn one service with different configurations on many namespaces and clusters.
-For more information and possible configuration check:<br></p>
+<table>
+<thead>
+<tr>
+<th>status</th>
+<th>date</th>
+<th>decision-makers</th>
+<th>consulted</th>
+<th>informed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>accepted</strong></td>
+<td>2026-07-21</td>
+<td>kubara-Team</td>
+<td>Internal community</td>
+<td>Internal community</td>
+</tr>
+</tbody>
+</table>
+<h1 id="versioned-per-cluster-catalog">Versioned Per-Cluster Catalog</h1>
+<h2 id="context-and-problem-statement">Context and Problem Statement</h2>
+<p>ADR-0002 established declarative <code>ServiceDefinition</code> documents and an embedded catalog with one optional external catalog. That made services extensible, but catalog selection remained global:</p>
 <ul>
-<li>https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/applicationset.yaml</li>
-<li>https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/</li>
+<li>The default platform catalog was compiled/embedded into the CLI</li>
+<li>Every cluster in one configuration saw the same merged service set</li>
+<li>Adding more than one external catalog was not supported</li>
+<li>Bootstrap, schema generation, validation, and rendering could resolve different catalog inputs</li>
+<li>Distributing an updated default catalog required a new CLI release</li>
 </ul>
-<h2 id="add-chart-to-your-platform-components"><strong>Add Chart to your platform-components</strong></h2>
-<p>Add the Chart you want to add to your <code>platform-components</code>:<br>
-platform-components/helm/my-new-servie-in-a-long-dir-name/</p>
-<h2 id="add-templates-to-your-new-chart-optional"><strong>Add Templates to your new Chart (optional)</strong></h2>
-<p>To use pre-configured processes (e.g. get secrets from vault) you can leverage the Chart <code>template-library</code> inside 
-<code>platform-components</code>.<br>
-Take a look at other chart to find out how to use these templates.<br>
-The general steps are:
-1. Add template-library as a dependency to your Chart.yaml
-2. add a template to your new Chart's "templates/" directory and include the templates you need from <code>template-libary</code> Chart
-   (check other Chart templates to find out how)
-3. update the new Chart's values and/or override values according to the templates you included</p>
-<h2 id="add-override-values-to-your-platform-configs"><strong>Add Override Values to your platform-configs</strong></h2>
-<p>Add Override Values to your <code>platform-configs</code>:<br>
-platform-configs/my-cluster/helm/my-new-servie-in-a-long-dir-name/values.generated.yaml</p>
-<p>Optional: Add one or more <code>values-*.yaml</code> files in the same chart folder for cluster-specific overrides.
-For example, you can use <code>values-additional.yaml</code>, but the generated ApplicationSet will also pick up other files matching <code>values-*.yaml</code>.</p>
-<h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>This is an example on how to add an AppSet to the hub cluster.
-Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
-<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span><span class="w">  </span><span class="c1"># usually your existing hub cluster key (for example &quot;&lt;cluster&gt;-&lt;stage&gt;&quot;)</span>
-<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-hub-dev</span>
-<span class="w">      </span><span class="nt">platformComponents</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/managed.git</span>
-<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform-components/helm</span>
-<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">      </span><span class="nt">platformConfigs</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-repo.example/customer.git</span>
-<span class="w">        </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform-configs</span>
-<span class="w">        </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">main</span>
-<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">my-new-service</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-service</span><span class="w"> </span><span class="c1"># This will determine the generated AppName</span>
-<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-new-servie-in-a-long-dir-name</span><span class="w"> </span><span class="c1"># This points to the directory you created for the chart inside platform-components</span>
-<span class="nt">inClusterSecretLabels</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">my-new-service</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
-</code></pre></div></p>
-<p>This is meant to be added to the same directive where all pre-configured appSets are defined.
-It will deploy the app to all Argo CD clusters that have the label <code>my-new-service: enabled</code> set </p>
-<h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
-<p>Do not forget to push your changes to the git repository that serves your Argo CD application.
-If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
-<h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
-<p>If Argo CD is not managing itself (see <code>config.yaml</code> with <code>argocd.selfManaged: disabled</code>), altering Argo CD values will have no effect until you run the following again:
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
-</code></pre></div></p>
-<h2 id="add-app-from-another-repository"><strong>Add App from another repository</strong></h2>
-<p>If you want to add an application that is stored in another repository you can use the <code>sources:</code> directive. It supports all the fields Argo CD supports. Do not forget to add the repository to the allowed repositories in your project. Also check the docs: https://argo-cd.readthedocs.io/en/stable/user-guide/multiple_sources/#multiple-sources-for-an-application
-<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">apps</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">akv2k8s</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
-<span class="w">          </span><span class="nt">sources</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://your-repo.de/with-overlay-values&quot;</span>
-<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
-<span class="w">              </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valuesRepo</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://charts.spvapi.no</span>
-<span class="w">              </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
-<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2.7.3&quot;</span>
-<span class="w">              </span><span class="nt">helm</span><span class="p">:</span>
-<span class="w">                </span><span class="nt">valueFiles</span><span class="p">:</span>
-<span class="w">                  </span><span class="c1"># Keep `{{name}}`: the AppSet controller injects the cluster name</span>
-<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;$valuesRepo/platform-configs/{{name}}/helm/akv2k8s/values.generated.yaml&quot;</span>
-</code></pre></div></p>
+<p>Kubara needs versioned catalogs that can evolve independently from the binary while preserving deterministic generation and strict per-cluster validation.</p>
+<p>This ADR extends ADR-0002. It retains the <code>ServiceDefinition</code> contract and replaces only its embedded and single external catalog loading model.</p>
+<h2 id="decision-drivers">Decision Drivers</h2>
+<ul>
+<li>Different clusters may require different platform stacks</li>
+<li>Default catalog content should be versioned independently from the CLI</li>
+<li>Bootstrap needs a small, stable foundation separate from configurable platform services</li>
+<li>Service defaults, schema generation, validation, bootstrap, and rendering must use the same catalog order</li>
+<li>Catalog composition must remain deterministic and explicit</li>
+</ul>
+<h2 id="considered-options">Considered Options</h2>
+<ul>
+<li>Keep one embedded catalog plus one optional external catalog</li>
+<li>Resolve one global ordered catalog list for the entire configuration</li>
+<li>Resolve a bootstrap catalog plus ordered catalogs per cluster</li>
+</ul>
+<h2 id="decision-outcome">Decision Outcome</h2>
+<p>Chosen option: <strong>resolve a bootstrap catalog plus ordered catalogs per cluster</strong>.</p>
+<p>Kubara uses:</p>
+<ol>
+<li>A global bootstrap catalog, configured through <code>bootstrapCatalog</code> or the versioned default</li>
+<li>The target cluster's ordered <code>catalogs</code> list</li>
+<li>Repeated <code>--catalog</code> values appended in command-line order</li>
+</ol>
+<p>Duplicate references are removed while preserving the first occurrence. Local references resolve relative to <code>--work-dir</code>. OCI references resolve through kubara's local cache and are pulled when missing.</p>
+<p>New clusters use the versioned general catalog unless catalogs are supplied during <code>init</code> or <code>cluster add</code>. Those commands persist their catalog references. Other commands use <code>--catalog</code> as temporary additions and do not rewrite configuration.</p>
+<h3 id="bootstrap-boundary">Bootstrap boundary</h3>
+<p>The bootstrap catalog contains <code>argo-cd</code> and <code>bootstrap-crds</code>. These services establish the GitOps foundation and are always available, but excluded from <code>clusters[].services</code>, generated service defaults, and user-facing service schemas.</p>
+<p>The <code>argocd.selfManaged</code> field controls whether a cluster manages its own bootstrap Argo CD installation. </p>
+<h3 id="collision-and-precedence-semantics">Collision and precedence semantics</h3>
+<p>Catalog order is significant:</p>
+<ul>
+<li>Service and template collisions fail by default</li>
+<li>Using <code>--catalog-overwrite</code> permits a later catalog to replace an earlier item</li>
+<li>Replacement is complete, not a deep merge</li>
+<li>Catalog files and selected output are processed deterministically</li>
+</ul>
+<p>When multiple clusters generate the same shared output path, identical content is emitted once. Conflicting content causes generation to fail before existing output is cleaned or rewritten.</p>
+<h3 id="schema-and-validation">Schema and validation</h3>
+<p>When a configuration exists, <code>kubara schema</code> resolves catalogs per cluster and emits cluster-specific service schema branches. Runtime defaulting and validation use the same per-cluster resolution.</p>
+<p>Without a configuration file, schema generation uses the general catalog plus explicit CLI catalogs. An invalid existing configuration remains an error and does not trigger fallback behavior.</p>
+<h3 id="terraform-disabled-clusters">Terraform-disabled clusters</h3>
+<p>The default <code>kubara generate</code> command still copies non-Terraform catalog assets, but skips Terraform templates for clusters with no Terraform configuration or <code>terraform.provider: none</code>. Stale generated Terraform output is removed according to the requested generation scope.</p>
+<h3 id="consequences">Consequences</h3>
+<ul>
+<li><strong>Good</strong>, because clusters can select different catalog compositions in one configuration</li>
+<li><strong>Good</strong>, because default catalogs can be released independently from the CLI</li>
+<li><strong>Good</strong>, because schema, validation, bootstrap, and rendering share per-cluster resolution</li>
+<li><strong>Good</strong>, because bootstrap-only services have an explicit and narrow boundary</li>
+<li><strong>Neutral</strong>, because catalog order becomes part of the configuration contract</li>
+<li><strong>Bad</strong>, because commands may need registry access when an OCI catalog is not cached</li>
+<li><strong>Bad</strong>, because conflicting shared output across clusters is now a configuration error that users must resolve</li>
+</ul>
+<h2 id="non-goals">Non-Goals</h2>
+<ul>
+<li>Deep-merging conflicting service definitions or templates</li>
+<li>Automatically selecting compatible catalog versions</li>
+<li>Signing, policy enforcement, or other catalog supply-chain controls</li>
+<li>A general executable plugin system</li>
+</ul>
 
 
 

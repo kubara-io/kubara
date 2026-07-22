@@ -1525,7 +1525,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1541,7 +1541,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2764,7 +2764,7 @@ before you will feel right at home.</p>
 <h2 id="cross-templating-in-practice">Cross-templating in practice</h2>
 <p>The Homer example shows the main idea well: one service template can react to settings from other services and from the cluster itself.</p>
 <p>From:</p>
-<div class="highlight"><pre><span></span><code>src/internal/catalog/built-in/platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
+<div class="highlight"><pre><span></span><code>platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
 </code></pre></div>
 <p>kubara reads values such as:</p>
 <ul>
@@ -2812,10 +2812,12 @@ charts, custom scripts or others.</p>
 <li>Keep chart structure and template path names predictable.</li>
 </ul>
 <h2 id="terraform-specific-note">Terraform-specific note</h2>
-<p>Provider-specific Terraform template variants are supported below:</p>
-<div class="highlight"><pre><span></span><code>terraform/providers/&lt;provider&gt;/
+<p>Provider-specific Terraform template variants are selected from a directory directly below <code>terraform</code>:</p>
+<div class="highlight"><pre><span></span><code>platform-configs/terraform/&lt;provider&gt;/
+platform-components/terraform/&lt;provider&gt;/
 </code></pre></div>
-<p>kubara strips that provider path segment in the final output and picks the provider-specific file when the cluster provider matches.</p>
+<p>kubara selects only the matching provider. It removes the provider selector from generated <code>platform-configs</code> paths and retains it in reusable <code>platform-components</code> module paths.</p>
+<p>When a cluster omits Terraform or uses <code>provider: none</code>, the default <code>kubara generate</code> run skips its Terraform templates and removes stale generated Terraform output for that cluster. Non-Terraform catalog assets are still copied.</p>
 <h2 id="where-to-go-next">Where to go next</h2>
 <ul>
 <li>To understand the catalog model: <a href="../catalogs/">Catalogs</a></li>

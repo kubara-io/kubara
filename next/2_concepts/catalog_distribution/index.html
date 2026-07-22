@@ -693,10 +693,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#important-model-local-cache-first" class="md-nav__link">
+  <a href="#important-model-oci-references-use-a-local-cache" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Important model: local cache first
+        Important model: OCI references use a local cache
       
     </span>
   </a>
@@ -759,10 +759,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-use-the-pulled-catalog-with-kubara" class="md-nav__link">
+  <a href="#step-6-use-the-oci-catalog-with-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 6: Use the pulled catalog with kubara
+        Step 6: Use the OCI catalog with kubara
       
     </span>
   </a>
@@ -1508,7 +1508,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1524,7 +1524,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2567,10 +2567,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#important-model-local-cache-first" class="md-nav__link">
+  <a href="#important-model-oci-references-use-a-local-cache" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Important model: local cache first
+        Important model: OCI references use a local cache
       
     </span>
   </a>
@@ -2633,10 +2633,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-6-use-the-pulled-catalog-with-kubara" class="md-nav__link">
+  <a href="#step-6-use-the-oci-catalog-with-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 6: Use the pulled catalog with kubara
+        Step 6: Use the OCI catalog with kubara
       
     </span>
   </a>
@@ -2700,21 +2700,21 @@ You're not viewing the latest stable version.
 <li><a href="https://oras.land/docs/concepts/artifact" target="_blank" rel="noopener">ORAS: OCI artifacts</a></li>
 <li><a href="https://oras.land/docs/concepts/reftypes" target="_blank" rel="noopener">ORAS: reference types</a></li>
 </ul>
-<h2 id="important-model-local-cache-first">Important model: local cache first</h2>
+<h2 id="important-model-oci-references-use-a-local-cache">Important model: OCI references use a local cache</h2>
 <p>kubara works with a <strong>local catalog cache</strong>.</p>
 <p>That means:</p>
 <ul>
 <li><code>kubara catalog package</code> creates a cached catalog artifact from a local directory</li>
 <li><code>kubara catalog pull</code> downloads a catalog artifact into that cache</li>
 <li><code>kubara catalog push</code> uploads a catalog artifact that is already in that cache</li>
-<li><code>--catalog oci://...</code> resolves an OCI reference from that cache</li>
+<li><code>--catalog oci://...</code> resolves an OCI reference through that cache and pulls it when missing</li>
 </ul>
 <p>In other words:</p>
 <ul>
 <li><strong>push does not package</strong></li>
-<li><strong>generate does not auto-pull</strong></li>
+<li>catalog-consuming commands auto-pull an OCI reference when it is not cached</li>
 </ul>
-<p>Package or pull first, then use the cached artifact.</p>
+<p><code>push</code> still requires a previously packaged or pulled artifact and never packages implicitly. An explicit <code>pull</code> is useful to prefetch a catalog or refresh a cached tag before running another command.</p>
 <h2 id="step-1-create-or-update-the-catalog">Step 1: Create or update the catalog</h2>
 <p>Start with a normal catalog directory:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>create<span class="w"> </span>my-catalog
@@ -2789,13 +2789,13 @@ kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w">
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>pull<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 </code></pre></div>
 <p>If the cached version already exists and the remote digest changed, kubara updates the cached entry.</p>
-<h2 id="step-6-use-the-pulled-catalog-with-kubara">Step 6: Use the pulled catalog with kubara</h2>
-<p>After the catalog is cached locally, you can use the same OCI reference in kubara commands:</p>
+<h2 id="step-6-use-the-oci-catalog-with-kubara">Step 6: Use the OCI catalog with kubara</h2>
+<p>Use the same OCI reference in configuration or kubara commands:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>schema<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 </code></pre></div>
-<p>If the catalog is not cached yet, pull it first.</p>
+<p>If the reference is not cached, kubara pulls it automatically. Registry authentication still needs to be configured first for private artifacts. Run <code>kubara catalog pull</code> explicitly when you want to prefetch or refresh the cached tag.</p>
 <h2 id="useful-supporting-commands">Useful supporting commands</h2>
 <p>List cached artifacts:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>list

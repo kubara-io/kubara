@@ -687,10 +687,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-and-external-catalogs" class="md-nav__link">
+  <a href="#bootstrap-and-cluster-catalogs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-in and external catalogs
+        Bootstrap and cluster catalogs
       
     </span>
   </a>
@@ -785,6 +785,17 @@ You're not viewing the latest stable version.
     <span class="md-ellipsis">
       
         How template loading works
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#schema-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema generation
       
     </span>
   </a>
@@ -1569,7 +1580,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1585,7 +1596,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2650,10 +2661,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#built-in-and-external-catalogs" class="md-nav__link">
+  <a href="#bootstrap-and-cluster-catalogs" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Built-in and external catalogs
+        Bootstrap and cluster catalogs
       
     </span>
   </a>
@@ -2755,6 +2766,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#schema-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Schema generation
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#oci-backed-distribution" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2798,7 +2820,7 @@ You're not viewing the latest stable version.
 
 <h1 id="catalogs">Catalogs</h1>
 <p>This page explains what a catalog is, when to use one, and how catalogs fit into kubara's platform workflow.</p>
-<p>For the built-in services that ship with kubara, see <a href="../../6_components/components_overview/">Components Overview</a>. This page is about the <strong>catalog model itself</strong>.</p>
+<p>For the general services the kubara team ships, see <a href="../../6_components/components_overview/">Components Overview</a>. This page is about the <strong>catalog model itself</strong>.</p>
 <h2 id="what-is-a-catalog">What is a catalog?</h2>
 <p>In kubara, a <strong>catalog</strong> is a packaged and templateable platform setup.</p>
 <p>It is the input that kubara uses to generate your platform artifacts. A catalog can define:</p>
@@ -2842,15 +2864,23 @@ You're not viewing the latest stable version.
 <li>Use Argo CD workload onboarding when the service you are adding is a <strong>cluster-specific or team-specific workload</strong>.</li>
 <li>Use a catalog only when the service you are describing is part of the <strong>reusable platform architecture</strong>.  </li>
 </ul>
-<h2 id="built-in-and-external-catalogs">Built-in and external catalogs</h2>
-<p>kubara always ships with a <strong>built-in catalog</strong>:</p>
-<p>That built-in catalog contains:</p>
-<ul>
-<li>built-in service definitions</li>
-<li>built-in template content</li>
-<li>the default platform stack documented in the Components section</li>
-</ul>
-<p>You can extend or replace parts of it with an <strong>external catalog</strong> by using <code>--catalog</code>.</p>
+<h2 id="bootstrap-and-cluster-catalogs">Bootstrap and cluster catalogs</h2>
+<p>kubara resolves catalogs in layers:</p>
+<ol>
+<li>The global <strong>bootstrap catalog</strong> provides the fixed Argo CD and bootstrap CRD foundation.</li>
+<li>Each cluster selects one or more ordered catalogs through its <code>catalogs</code> list.</li>
+<li>Repeated <code>--catalog</code> flags append command-specific catalogs after the cluster catalogs.</li>
+</ol>
+<p>New configurations use kubara's general catalog unless catalogs are supplied during <code>init</code>. The selected catalog references are stored on the cluster:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapCatalog</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0</span>
+<span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">    </span><span class="nt">catalogs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/general:1.0.0</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/acme/platform-catalogs/security:2.1.0</span>
+</code></pre></div>
+<p><code>bootstrapCatalog</code> is optional. When omitted or empty, kubara uses its versioned default bootstrap catalog. The bootstrap services <code>argo-cd</code> and <code>bootstrap-crds</code> are always part of the foundation and are not configurable entries under <code>clusters[].services</code>.</p>
+<p>Use <code>--catalog</code> to add catalogs for a command:</p>
 <p>Examples:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>schema<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
@@ -2861,7 +2891,8 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <li>a local catalog directory</li>
 <li>an OCI reference such as <code>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3</code></li>
 </ul>
-<p>Important: OCI-backed catalogs are resolved from the <strong>local kubara cache</strong>. If the catalog is not cached yet, pull it first with <code>kubara catalog pull</code>. See <a href="../catalog_distribution/">Catalog distribution</a>.</p>
+<p>Local paths are resolved relative to <code>--work-dir</code>. OCI-backed catalogs use the local kubara cache and are pulled automatically when the requested reference is not cached. See <a href="../catalog_distribution/">Catalog distribution</a>.</p>
+<p><code>init</code> and <code>cluster add</code> persist their <code>--catalog</code> references in the new cluster entry. Commands such as <code>schema</code>, <code>generate</code>, and <code>bootstrap</code> use CLI catalogs as temporary additions and do not rewrite <code>config.yaml</code>.</p>
 <h2 id="what-is-inside-a-catalog">What is inside a catalog?</h2>
 <p>A catalog usually has these parts:</p>
 <div class="highlight"><pre><span></span><code>my-catalog/
@@ -2944,27 +2975,31 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <li><code>spec.clusterTypes</code>: optional hub/spoke filtering</li>
 <li><code>spec.configSchema</code>: optional OpenAPI schema for defaults and validation</li>
 </ul>
-<p>Without <code>--catalog-overwrite</code>, kubara rejects collisions between built-in and external service definitions with the same name.</p>
+<p>Without <code>--catalog-overwrite</code>, kubara rejects collisions between service definitions with the same name.</p>
 <h2 id="how-catalog-loading-works">How catalog loading works</h2>
-<p>When kubara loads catalogs, it:</p>
+<p>For each cluster, kubara:</p>
 <ol>
-<li>Loads the built-in service definitions</li>
-<li>Loads external service definitions when <code>--catalog</code> is set</li>
-<li>Merges both sets by <code>metadata.name</code></li>
-<li>Rejects collisions unless <code>--catalog-overwrite</code> is set</li>
+<li>Loads the bootstrap catalog.</li>
+<li>Loads <code>clusters[].catalogs</code> in their listed order.</li>
+<li>Appends repeated <code>--catalog</code> values in command-line order.</li>
+<li>Removes duplicate references while preserving the first occurrence.</li>
+<li>Merges service definitions by <code>metadata.name</code>.</li>
+<li>Rejects collisions unless <code>--catalog-overwrite</code> is set.</li>
 </ol>
+<p>With overwrite enabled, the later catalog replaces the complete earlier definition; definitions are not deep-merged.</p>
 <h2 id="how-template-loading-works">How template loading works</h2>
-<p>During <code>kubara generate</code>, kubara loads templates from:</p>
-<ul>
-<li>The built-in catalog</li>
-<li>Your external catalog, if present</li>
-</ul>
+<p>During <code>kubara generate</code>, kubara loads templates from the same effective catalog order used for service defaults and validation.</p>
 <p>Files ending in <code>.tplt</code> are rendered as Go templates. Files without <code>.tplt</code> are copied as-is.</p>
 <p>For Terraform, kubara also supports provider-specific template variants below:</p>
-<div class="highlight"><pre><span></span><code>terraform/providers/&lt;provider&gt;/
+<div class="highlight"><pre><span></span><code>platform-configs/terraform/&lt;provider&gt;/
+platform-components/terraform/&lt;provider&gt;/
 </code></pre></div>
-<p>If a provider-specific file and a common file map to the same output path, the provider-specific file wins.</p>
+<p>If a provider-specific file and a common file map to the same output path, the provider-specific file wins. The selector is removed from generated <code>platform-configs</code> paths and retained in <code>platform-components</code> module paths.</p>
 <p>If a cluster has no Terraform block or uses <code>terraform.provider: none</code>, the default <code>kubara generate</code> run skips Terraform templates for that cluster.</p>
+<p>Shared output paths must also be deterministic across clusters. Identical content is written once; conflicting content for the same final path causes generation to fail before files are changed.</p>
+<h2 id="schema-generation">Schema generation</h2>
+<p>When <code>config.yaml</code> exists, <code>kubara schema</code> resolves catalogs per cluster and emits cluster-specific service branches. This keeps editor completion and validation aligned with the services available to each cluster.</p>
+<p>Without a configuration file, <code>kubara schema</code> uses the general catalog plus any repeated <code>--catalog</code> values. If an existing configuration is malformed or references an invalid catalog, schema generation fails instead of silently falling back.</p>
 <h2 id="oci-backed-distribution">OCI-backed distribution</h2>
 <p>Catalogs can be packaged and distributed as OCI artifacts.</p>
 <p>For the full workflow, see <a href="../catalog_distribution/">Catalog distribution</a>.</p>

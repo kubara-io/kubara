@@ -1107,10 +1107,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-override-built-in-services-when-needed" class="md-nav__link">
+  <a href="#step-5-override-services-when-needed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 5: override built-in services when needed
+        Step 5: override services when needed
       
     </span>
   </a>
@@ -1519,7 +1519,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1535,7 +1535,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2622,10 +2622,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-5-override-built-in-services-when-needed" class="md-nav__link">
+  <a href="#step-5-override-services-when-needed" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 5: override built-in services when needed
+        Step 5: override services when needed
       
     </span>
   </a>
@@ -2702,10 +2702,10 @@ You're not viewing the latest stable version.
 <h2 id="when-you-need-a-custom-catalog">When you need a custom catalog</h2>
 <p>You usually need a custom catalog when you want to:</p>
 <ul>
-<li>add a platform service that kubara does not ship</li>
-<li>replace a built-in chart or module with your own</li>
-<li>change platform defaults across many clusters</li>
-<li>package and distribute a reusable platform setup outside the kubara source tree</li>
+<li>Add a platform service that kubara does not ship</li>
+<li>Replace a chart or module provided in another catalog with your own</li>
+<li>Change platform defaults across many clusters</li>
+<li>Package and distribute a reusable platform setup outside the kubara source tree</li>
 </ul>
 <p>If you only need to add a simpler workload to one cluster or one team space, use the Argo CD guides in <a href="../../5_workload_onboarding/overview/">Workload Onboarding with Argo CD</a> instead.</p>
 <h2 id="step-1-scaffold-the-catalog">Step 1: scaffold the catalog</h2>
@@ -2794,17 +2794,26 @@ kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="
 kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span class="w"> </span>./my-catalog
 </code></pre></div>
 <p>Pass the <strong>catalog root</strong>, not only <code>services/</code>, when you also want kubara to load templates.</p>
-<h2 id="step-5-override-built-in-services-when-needed">Step 5: override built-in services when needed</h2>
-<p>You can override a built-in service by reusing the same <code>metadata.name</code>.</p>
+<p>You can also assign catalogs directly to a cluster:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">production</span>
+<span class="w">    </span><span class="nt">catalogs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./my-catalog</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/acme/platform-catalogs/security:1.4.0</span>
+</code></pre></div>
+<p>Catalog order is significant. Cluster catalogs are loaded first in the listed order, followed by repeated <code>--catalog</code> values. Local references are resolved relative to <code>--work-dir</code>.</p>
+<p><code>kubara schema</code> automatically discovers cluster catalogs when <code>config.yaml</code> exists. Before creating a configuration, pass the catalog explicitly as shown above.</p>
+<h2 id="step-5-override-services-when-needed">Step 5: override services when needed</h2>
+<p>You can override a service defined with the same <code>metadata.name</code> from a previous catalog.</p>
 <p>Typical reasons:</p>
 <ul>
-<li>change the default <code>status</code></li>
-<li>change the <code>chartPath</code></li>
-<li>provide a different <code>configSchema</code></li>
-<li>replace built-in templates with internal ones</li>
+<li>Change the default <code>status</code></li>
+<li>Change the <code>chartPath</code></li>
+<li>Provide a different <code>configSchema</code></li>
+<li>Replace templates completely with your own</li>
 </ul>
 <p>Without <code>--catalog-overwrite</code>, kubara rejects the collision.<br />
-With <code>--catalog-overwrite</code>, your external definition replaces the built-in definition for that service name.</p>
+With <code>--catalog-overwrite</code>, the later catalog replaces the earlier definition for that service name. The replacement is complete rather than a deep merge.</p>
 <h2 id="step-6-package-the-catalog">Step 6: package the catalog</h2>
 <p>When the catalog is ready, package it into the local cache:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>package<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/
@@ -2826,13 +2835,14 @@ With <code>--catalog-overwrite</code>, your external definition replaces the bui
 </ul>
 <p>See <a href="../../2_concepts/catalog_distribution/">Catalog distribution</a> for the full workflow.</p>
 <h2 id="provider-specific-terraform-templates">Provider-specific Terraform templates</h2>
-<p>Provider-specific template variants are supported only below:</p>
-<div class="highlight"><pre><span></span><code>terraform/providers/&lt;provider&gt;/
+<p>Provider-specific template variants are supported directly below a Terraform directory:</p>
+<div class="highlight"><pre><span></span><code>platform-configs/terraform/&lt;provider&gt;/
+platform-components/terraform/&lt;provider&gt;/
 </code></pre></div>
 <p>Example:</p>
 <div class="highlight"><pre><span></span><code>platform-configs/terraform/stackit/infrastructure/main.tf.tplt
 </code></pre></div>
-<p>When the cluster Terraform provider matches the directory name, kubara uses that provider-specific file for the generated output path.</p>
+<p>When the cluster Terraform provider matches the directory name, kubara selects that provider's files. The provider directory is stripped from generated <code>platform-configs</code> paths but retained under <code>platform-components</code>.</p>
 <p>Provider-specific directories below Helm paths are <strong>not</strong> treated as provider overrides.</p>
 <h2 id="practical-guidance">Practical guidance</h2>
 <ul>

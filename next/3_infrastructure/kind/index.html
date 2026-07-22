@@ -1558,7 +1558,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1574,7 +1574,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2851,7 +2851,6 @@ That is done so workloads inside the cluster can trust the same CA bundle when t
 <li>Sets <code>ssoOrg</code> and <code>ssoTeam</code> to <code>local</code></li>
 <li>Forces <code>ingressClassName: traefik</code></li>
 <li>Only enables a minimal set of services:</li>
-<li><code>argocd</code></li>
 <li><code>cert-manager</code></li>
 <li><code>external-secrets</code></li>
 <li><code>homer-dashboard</code></li>
@@ -2859,6 +2858,7 @@ That is done so workloads inside the cluster can trust the same CA bundle when t
 <li><code>metrics-server</code></li>
 <li><code>traefik</code></li>
 </ul>
+<p>Argo CD is installed from the bootstrap catalog and is therefore not part of the configurable service list.</p>
 <p>After changing the cluster profile, kubara writes <code>.local/generate.env</code> and reruns <code>kubara generate --helm</code> so the rendered Helm artifacts match the local profile.</p>
 <h3 id="5-install-and-configure-openbao">5. Install and configure OpenBao</h3>
 <p>kubara installs the OpenBao Helm chart with local values that:</p>

@@ -1609,7 +1609,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1625,7 +1625,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2939,6 +2939,11 @@ platform will be publicly available by default via your DNS zone.</p>
 </code></pre></div>
 <p>This command creates a <code>config.yaml</code> file based on the values from your <code>.env</code>.
 If you make changes to <code>.env</code> later, you can re-run the command with <code>--overwrite</code> to update the configuration.</p>
+<p>By default, the generated cluster references kubara's versioned general catalog. Use repeated <code>--catalog</code> flags to initialize it with a different ordered catalog set:</p>
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--catalog<span class="w"> </span>./company-platform<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/security:1.4.0
+</code></pre></div>
 <p>When using <code>--overwrite</code>, only values from <code>.env</code> are replaced.
 Additional settings in your existing <code>config.yaml</code> are preserved and merged.
 This currently applies <strong>only to the first cluster entry</strong>.</p>
@@ -2968,7 +2973,8 @@ You can set a custom output file:</p>
 <strong>Not using an SSO provider?</strong> Just set the ssoOrg and ssoTeam to "none"</p>
 </div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapCatalog</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0</span>
+<span class="nt">clusters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-name-from-env-file</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub or spoke&gt;</span>
@@ -2976,6 +2982,8 @@ You can set a custom output file:</p>
 <span class="w">    </span><span class="c1"># Hint: If you don&#39;t use an SSO provider, you can set ssoOrg and ssoTeam to &quot;none&quot;</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span><span class="w"> </span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;org-team&gt;</span>
+<span class="w">    </span><span class="nt">catalogs</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/general:1.0.0</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit, t-cloud-public</span>
 <span class="w">      </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id-or-tenant-name&gt;</span>
@@ -2996,6 +3004,7 @@ You can set a custom output file:</p>
 <span class="nn">...</span>
 </code></pre></div>
 <p><code>terraform.projectId</code> is provider-specific. For <code>t-cloud-public</code>, use the T Cloud Public tenant/project name that the Terraform provider expects as <code>tenant_name</code>, not a UUID.</p>
+<p><code>bootstrapCatalog</code> is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed <code>argo-cd</code> and <code>bootstrap-crds</code> services, which do not appear under the configurable <code>services</code> map. Each cluster's ordered <code>catalogs</code> list provides its configurable platform services and templates.</p>
 <p><code>ingressClassName</code> defaults to <code>traefik</code>. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional <code>ingress.annotations</code> map under <code>services.&lt;service&gt;.ingress.annotations</code> that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
 User-provided annotations are merged on top using <code>mergeOverwrite</code>: equal keys are overwritten, while kubara default keys that are not present in the override remain.</p>
@@ -3030,7 +3039,7 @@ want to understand more details about the predefined settings but DO NOT edit th
 with future updates. If you need customization you can add as many files to the charts with the pattern <code>values-*.yaml</code>.
 Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
 overwritten by the last file that includes the list.</p>
-<p>Source templates are embedded in the binary under <code>src/internal/catalog/built-in/...</code>, but you should only edit generated files in your repository.</p>
+<p>Source templates come from the bootstrap catalog and the catalogs selected by each cluster. Treat generated files in your repository as output; customize the catalog source or add supported overlay files instead of editing generated files directly.</p>
 <p>The chart directories where values usually need review are:</p>
 <ul>
 <li>argo-cd</li>
@@ -3083,8 +3092,9 @@ terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="
 To target a specific cluster, provide your own config with <code>--kubeconfig your-kubeconfig</code></p>
 </div>
 <p>External Secrets needs a <code>ClusterSecretStore</code>.</p>
-<p>For T Cloud Public CCE, kubara already renders the OpenBao-backed <code>ClusterSecretStore</code> into <code>external-secrets/values.yaml</code>. Use <code>--with-es-crds</code>; do not pass <code>--with-es-css-file</code> and do not create a separate provider credential secret.</p>
-<p>For other providers, create the provider credential secret first and either pass a <code>ClusterSecretStore</code> manifest during bootstrap with <code>--with-es-css-file</code> and <code>--with-es-crds</code>, or apply the <code>ClusterSecretStore</code> manually if the External Secrets CRDs already exist.</p>
+<p>For T Cloud Public CCE, kubara already renders the OpenBao-backed <code>ClusterSecretStore</code> into <code>external-secrets/values.yaml</code>. Do not pass <code>--with-es-css-file</code> and do not create a separate provider credential secret.</p>
+<p>For other providers, create the provider credential secret first and either pass a <code>ClusterSecretStore</code> manifest during bootstrap with <code>--with-es-css-file</code>, or apply the <code>ClusterSecretStore</code> manually after bootstrap.</p>
+<p>Bootstrap always installs the required CRDs from the bootstrap catalog's <code>bootstrap-crds</code> service. Separate External Secrets and Prometheus CRD flags are no longer required.</p>
 <p>If the namespace does not exist yet, create it once before creating the provider credential secret(s):</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>create<span class="w"> </span>namespace<span class="w"> </span>external-secrets
 </code></pre></div>
@@ -3126,13 +3136,12 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <code>controlplane</code> production cluster live at
 <code>controlplane/production/kube-prometheus-stack/grafana_credentials</code>.
 This path layout is the same for every provider and secret backend, including the local OpenBao setup.</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;
 </code></pre></div>
 <p>For providers that need an external <code>ClusterSecretStore</code> manifest, pass it during bootstrap:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;cluster-name-from-config-yaml&gt;<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--kubeconfig<span class="w"> </span>k8s.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
+<span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml
 </code></pre></div>
 <p>After a successful bootstrap run, your platform should be operational.</p>
 <hr />
@@ -3179,7 +3188,7 @@ Fill out <code>.another-env</code> with the required values. Generate a new conf
 ./kubara<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>generate
 </code></pre></div>
 <p>Finally, bootstrap your additional Hub cluster:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>--env-file<span class="w"> </span>.another-env<span class="w"> </span>&lt;cluster<span class="w"> </span>name<span class="w"> </span>from<span class="w"> </span>another-config.yaml&gt;<span class="w"> </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
+<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>--config-file<span class="w"> </span>another-config.yaml<span class="w"> </span>--env-file<span class="w"> </span>.another-env<span class="w"> </span>&lt;cluster<span class="w"> </span>name<span class="w"> </span>from<span class="w"> </span>another-config.yaml&gt;
 </code></pre></div>
 <h2 id="whats-next">What's Next?</h2>
 <p>After bootstrapping your platform, you can:</p>

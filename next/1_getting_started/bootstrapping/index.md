@@ -74,6 +74,14 @@ kubara init
 This command creates a `config.yaml` file based on the values from your `.env`.
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
 
+By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:
+
+```bash
+kubara init \
+  --catalog ./company-platform \
+  --catalog oci://ghcr.io/acme/platform-catalogs/security:1.4.0
+```
+
 When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.
@@ -115,6 +123,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
@@ -123,6 +132,8 @@ clusters:
     # Hint: If you don't use an SSO provider, you can set ssoOrg and ssoTeam to "none"
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
+    catalogs:
+      - oci://ghcr.io/kubara-io/catalogs/general:1.0.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
@@ -144,6 +155,8 @@ clusters:
 ```
 
 `terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
+
+`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd` and `bootstrap-crds` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
 
 `ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `ingress.annotations` map under `services.<service>.ingress.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
@@ -189,7 +202,7 @@ with future updates. If you need customization you can add as many files to the 
 Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
 overwritten by the last file that includes the list.
 
-Source templates are embedded in the binary under `src/internal/catalog/built-in/...`, but you should only edit generated files in your repository.
+Source templates come from the bootstrap catalog and the catalogs selected by each cluster. Treat generated files in your repository as output; customize the catalog source or add supported overlay files instead of editing generated files directly.
 
 The chart directories where values usually need review are:
 
@@ -250,9 +263,11 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 External Secrets needs a `ClusterSecretStore`.
 
-For T Cloud Public CCE, kubara already renders the OpenBao-backed `ClusterSecretStore` into `external-secrets/values.yaml`. Use `--with-es-crds`; do not pass `--with-es-css-file` and do not create a separate provider credential secret.
+For T Cloud Public CCE, kubara already renders the OpenBao-backed `ClusterSecretStore` into `external-secrets/values.yaml`. Do not pass `--with-es-css-file` and do not create a separate provider credential secret.
 
-For other providers, create the provider credential secret first and either pass a `ClusterSecretStore` manifest during bootstrap with `--with-es-css-file` and `--with-es-crds`, or apply the `ClusterSecretStore` manually if the External Secrets CRDs already exist.
+For other providers, create the provider credential secret first and either pass a `ClusterSecretStore` manifest during bootstrap with `--with-es-css-file`, or apply the `ClusterSecretStore` manually after bootstrap.
+
+Bootstrap always installs the required CRDs from the bootstrap catalog's `bootstrap-crds` service. Separate External Secrets and Prometheus CRD flags are no longer required.
 
 If the namespace does not exist yet, create it once before creating the provider credential secret(s):
 
@@ -306,7 +321,7 @@ kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
 This path layout is the same for every provider and secret backend, including the local OpenBao setup.
 
 ```bash
-kubara bootstrap <cluster-name-from-config-yaml> --with-es-crds --with-prometheus-crds
+kubara bootstrap <cluster-name-from-config-yaml>
 ```
 
 For providers that need an external `ClusterSecretStore` manifest, pass it during bootstrap:
@@ -314,8 +329,7 @@ For providers that need an external `ClusterSecretStore` manifest, pass it durin
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> \
   --kubeconfig k8s.yaml \
-  --with-es-css-file clustersecretstore.yaml \
-  --with-es-crds --with-prometheus-crds
+  --with-es-css-file clustersecretstore.yaml
 ```
 
 After a successful bootstrap run, your platform should be operational.
@@ -380,7 +394,7 @@ Render Terraform modules and Helm charts for the new Hub cluster:
 Finally, bootstrap your additional Hub cluster:
 
 ```bash
-kubara bootstrap --config-file another-config.yaml --env-file .another-env <cluster name from another-config.yaml> --with-es-crds --with-prometheus-crds
+kubara bootstrap --config-file another-config.yaml --env-file .another-env <cluster name from another-config.yaml>
 ```
 
 ## What's Next?

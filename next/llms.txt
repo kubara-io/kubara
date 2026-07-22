@@ -36,7 +36,7 @@
 - [How to add an AppSet](5_workload_onboarding/add_appset/index.md)
 - [How to add an Application](5_workload_onboarding/add_application/index.md)
 
-## Components (Built-in)
+## Components (Default)
 - [Overview](6_components/components_overview/index.md)
 - [Best Practices](6_components/best_practices/index.md)
 - [Backup & Recovery](6_components/backup_and_recovery/index.md)

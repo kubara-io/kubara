@@ -1442,7 +1442,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    Components (Built-in)
+    Components (Default)
   
 
     
@@ -1458,7 +1458,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
             
   
-    Components (Built-in)
+    Components (Default)
   
 
           </label>
@@ -2580,7 +2580,7 @@ Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;
 <p>Do not forget to push your changes to the git repository that serves your Argo CD application.
 If you let Argo CD manage itself, it will add the configured application to the cluster.</p>
 <h2 id="run-kubara-bootstrap-again-if-argo-cd-is-not-managing-itself"><strong>Run kubara bootstrap again (if Argo CD is not managing itself )</strong></h2>
-<p>If Argo CD is not managing itself (default, see <code>config.yaml</code> with <code>services.argocd.status: disabled</code>) altering Argo CD values will have no effect until you run the following again:
+<p>If Argo CD is not managing itself (see <code>config.yaml</code> with <code>argocd.selfManaged: disabled</code>), altering Argo CD values will have no effect until you run the following again:
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>&lt;hub-cluster-name-from-config-yaml&gt;
 </code></pre></div></p>
 
