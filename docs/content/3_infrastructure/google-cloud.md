@@ -1,23 +1,31 @@
-# Kubara on GCP
+# Kubara on Google Cloud
 
-If you want to run kubara on a hyperscaler like GCP, there are specific configurations to make. Here we provide an example that can be conveniently adapted to other major clouds.
+If you want to run kubara on a hyperscaler like Google Cloud, there are specific configurations to apply. Here we provide an example that can be conveniently adapted to other major cloud providers.
 
-In this example we use provider-native components — Google Secret Manager for External Secrets, and Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records). For any other setup, please check the corresponding component's own documentation. And feel free to contribute! :)
+In this example we use provider-native components: 
+* Google Secret Manager for External Secrets
+* Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records).
+* Google Kubernetes Engine (GKE) as managed Kubernetes
 
-We assume you're starting from an empty GCP project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md). Please do that first if you haven't.
+For any other setup, please check the corresponding component's own documentation.
+
+And feel free to contribute! :)  
+
+We assume you're starting from an empty Google Cloud Project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md). Please do that first if you haven't yet.
 
 !!! note "Before you start"
-    1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead. See the cluster-creation parameters below.
-    2. Velero on GCP hasn't been tested as part of this guide. Please follow the [official Velero project docs](https://github.com/velero-io/velero-plugin-for-gcp#setup) instead.
+    1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead — see the cluster-creation parameters below.
+    2. Velero on GCP hasn't been tested as part of this guide — please follow the [official Velero project docs](https://github.com/velero-io/velero-plugin-for-gcp#setup) instead.
+    3. Google Cloud was formerly known as GCP "Google Cloud Platform", so this term will be seen often in this guide because of the former name.
 
 
 ## Local Prerequisites
 
-Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target GCP project.
+Before starting, the [gcloud CLI](https://cloud.google.com/sdk/docs/install) is required, along with an already authenticated account (`gcloud auth login`) with access to the target Google Cloud Project.
 
 You'll also need kubara installed. See the [Installation guide](../1_getting_started/installation.md).
 
-### Sneak preview:
+## TL;DR / Sneak preview:
 
 1. We will generate an `.env` file and configure all necessary values, after that generate the config.yaml and fill it out too. `kubara init (--prep)`
 Then we will generate all the rendered Helm-Charts: `kubara generate`
@@ -28,11 +36,11 @@ Then we will generate all the rendered Helm-Charts: `kubara generate`
 
 All paths below are relative to the `platform-configs` directory that `kubara generate` writes for you. We'll check and adapt the following Helm values files:
 
-- `platform-configs/gcp/helm/argo-cd/values-gcp.yaml`
-- `platform-configs/gcp/helm/external-dns/values-gcp.yaml`
-- `platform-configs/gcp/helm/external-secrets/values-gcp.yaml`
-- `platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml`
-- `platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml`
+- `platform-configs/<my-cluster>/helm/argo-cd/values-gcp.yaml`
+- `platform-configs/<my-cluster>/helm/external-dns/values-gcp.yaml`
+- `platform-configs/<my-cluster>/helm/external-secrets/values-gcp.yaml`
+- `platform-configs/<my-cluster>/helm/kube-prometheus-stack/values-gcp.yaml`
+- `platform-configs/<my-cluster>/helm/oauth2-proxy/values-gcp.yaml`
 
 4. We will then create our necessary secrets and deploy kubara on GKE. `kubara bootstrap <my-cluster>`
 
@@ -176,7 +184,7 @@ The resulting credentials are added manually later, in the [Create Secrets](#cre
 
 ### external-DNS with Google DNS
 
-```bash title="External DNS Configuration for GCP"
+```bash title="External DNS Configuration for Google Cloud"
 # Create a service account for ExternalDNS
 gcloud iam service-accounts create external-dns-sa \
     --display-name="SA for GKE ExternalDNS"
@@ -191,7 +199,7 @@ gcloud iam service-accounts add-iam-policy-binding external-dns-sa@$(gcloud conf
     --role="roles/iam.workloadIdentityUser" \
     --member="serviceAccount:$(gcloud config get-value project).svc.id.goog[external-dns/external-dns-sa]"
 
-# Create the GCP managed zone
+# Create the Google Cloud managed DNS zone
 gcloud dns managed-zones create kubara-gcp-zone \
     --dns-name="subdomain.your-domain.com." \
     --description="Subdomain Zone for GKE kubara" \
@@ -206,21 +214,19 @@ gcloud dns managed-zones describe kubara-gcp-zone --format="value(nameServers)"
 
 Next, the `values.yaml` for external-dns needs to be adjusted.
 
-See: `gcp-test/platform-configs/gcp/helm/external-dns/values-gcp.yaml`
-
-```yaml title="../platform-configs/gcp/helm/external-dns/values-gcp.yaml"
+```yaml title="../platform-configs/<my-cluster>/helm/external-dns/values-gcp.yaml"
 # set project id in service account annotation
 external-dns:
   provider: google
   google:
-    project: "<your-gcp-project-id>" # your project
+    project: "<your-google-cloud-project-id>" # your project
   domainFilters:
     - "subdomain.your-domain.com" # your zone
   serviceAccount:
     create: true
     name: external-dns-sa
     annotations:
-      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # here!
+      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # replace with your project ID
 ```
 
 
@@ -250,7 +256,7 @@ external-secrets:
     name: "external-secrets-sa"
     annotations:
       # associate the Kubernetes service account with the GCP service account
-      iam.gke.io/gcp-service-account: "external-secrets-sa@google-project-xyz-xyz-0abc.iam.gserviceaccount.com" # replace with your service account
+      iam.gke.io/gcp-service-account: "external-secrets-sa@google-project-xyz-0abc.iam.gserviceaccount.com" # replace with your service account
 ```
 
 
@@ -268,7 +274,7 @@ metadata:
 spec:
   provider:
     gcpsm:
-      projectID: $YOUR-GCP-PROJECT-ID # replace with your project ID
+      projectID: $YOUR-GOOGLE-CLOUD-PROJECT-ID # replace with your project ID
 ```
 
 !!! warning
@@ -322,13 +328,13 @@ printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}
 ```
 
 !!! warning "Before you copy these over"
-    - Place each snippet below at its matching path under `platform-configs/gcp/helm/...`.
+    - Place each snippet below at its matching path under `platform-configs/<my-cluster>/helm/...`.
     - This example uses `gcp` as the cluster name — double-check your own path if it differs.
     - Replace every secret name to match the cluster name and stage defined in your `config.yaml` 
     (see the naming convention above).
 
 
-```yaml title="platform-configs/gcp/helm/argo-cd/values-gcp.yaml"
+```yaml title="platform-configs/<my-cluster>/helm/argo-cd/values-gcp.yaml"
 argo-cd:  
   bootstrapValues:
     dockerPullSecrets:
@@ -343,7 +349,7 @@ externalSecrets:
         - remoteKey: gcp-dev-argocd-argo-oauth2-credentials # change name according to your config.yaml (format: $clustername-$stage)
 ```
 
-```yaml title="platform-configs/gcp/helm/kube-prometheus-stack/values-gcp.yaml" 
+```yaml title="platform-configs/<my-cluster>/helm/kube-prometheus-stack/values-gcp.yaml" 
 externalSecrets:
   secrets:
     grafana-admin-credentials:
@@ -354,7 +360,7 @@ externalSecrets:
         - remoteKey: gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials # change name of the secret according to your name and stage / replace "gcp-dev"
 ```
 
-```yaml title="platform-configs/gcp/helm/oauth2-proxy/values-gcp.yaml"
+```yaml title="platform-configs/<my-cluster>/helm/oauth2-proxy/values-gcp.yaml"
 externalSecrets:
   secrets:
     oauth2-credentials:
@@ -365,7 +371,7 @@ externalSecrets:
 
 #### Velero
 If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup  
-Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance the example.
+Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance this Google Cloud example.
 
 
 
