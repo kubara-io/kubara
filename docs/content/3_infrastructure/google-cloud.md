@@ -234,7 +234,7 @@ external-dns:
     create: true
     name: external-dns-sa
     annotations:
-      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # replace with your project ID
+      iam.gke.io/gcp-service-account: "external-dns-sa@<your-gcp-project-id>.iam.gserviceaccount.com" # replace with your service account
 ```
   
 
