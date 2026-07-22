@@ -7,8 +7,8 @@ In this example we use provider-native components — Google Secret Manager for 
 We assume you're starting from an empty GCP project to test kubara, and that you've already made yourself familiar with the [kubara deployment guide](../1_getting_started/bootstrapping.md). Please do that first if you haven't.
 
 !!! note "Before you start"
-    1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead — see the cluster-creation parameters below.
-    2. Velero on GCP hasn't been tested as part of this guide — please follow the [official Velero project docs](https://github.com/velero-io/velero-plugin-for-gcp#setup) instead.
+    1. GKE **Autopilot** isn't compatible with the privileges `kube-prometheus-stack` needs (its `node-exporter` requires host access that Autopilot blocks), so this guide uses **Standard** mode instead. See the cluster-creation parameters below.
+    2. Velero on GCP hasn't been tested as part of this guide. Please follow the [official Velero project docs](https://github.com/velero-io/velero-plugin-for-gcp#setup) instead.
 
 
 ## Local Prerequisites
@@ -58,7 +58,7 @@ kubara init --prep # generate .env-file & set values accordingly
 kubara init # generate config.yaml & set values accordingly
 kubara generate # generate helm charts
 
-# Stop after generating your Charts and proceed with ## Part 2
+# Stop after generating your Charts and proceed with "Part 2: Google Cloud Infrastructure"
 ```
 
 ## Part 2: Google Cloud Infrastructure
