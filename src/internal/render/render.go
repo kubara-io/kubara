@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/fs"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -150,11 +151,11 @@ func joinTemplateRoot(baseRoot string, elems ...string) string {
 		if len(elems) == 0 {
 			return "."
 		}
-		return filepath.Join(elems...)
+		return path.Join(elems...)
 	}
 
 	parts := append([]string{baseRoot}, elems...)
-	return filepath.Join(parts...)
+	return path.Join(parts...)
 }
 
 func templateRootsForType(baseRoot string, templateType TemplateType) []string {
