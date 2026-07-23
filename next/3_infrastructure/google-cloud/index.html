@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/3_infrastructure/t-cloud-public/">
+        <link rel="canonical" href="https://docs.kubara.io/next/3_infrastructure/google-cloud/">
       
       
-        <link rel="prev" href="../stackit_edge_cloud/">
+        <link rel="prev" href="../t-cloud-public/">
       
       
-        <link rel="next" href="../google-cloud/">
+        <link rel="next" href="../../4_building_your_platform/add_spoke_cluster/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>T Cloud Public (Community) - kubara - Docs</title>
+        <title>Google Cloud (Guide) - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#t-cloud-public-community" class="md-skip">
+        <a href="#kubara-on-google-cloud" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              T Cloud Public (Community)
+              Google Cloud (Guide)
             
           </span>
         </div>
@@ -874,6 +874,34 @@ You're not viewing the latest stable version.
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../t-cloud-public/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    T Cloud Public (Community)
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -893,7 +921,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    T Cloud Public (Community)
+    Google Cloud (Guide)
   
 
     
@@ -911,7 +939,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    T Cloud Public (Community)
+    Google Cloud (Guide)
   
 
     
@@ -937,10 +965,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#local-prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
+        Local Prerequisites
       
     </span>
   </a>
@@ -948,10 +976,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-generate-terraform-modules" class="md-nav__link">
+  <a href="#tldr-sneak-preview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Generate Terraform modules
+        TL;DR / Sneak preview:
       
     </span>
   </a>
@@ -959,10 +987,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-prepare-environment-variables" class="md-nav__link">
+  <a href="#part-1-preparing-the-google-cloud-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Prepare environment variables
+        Part 1: Preparing the Google Cloud deployment
       
     </span>
   </a>
@@ -970,22 +998,67 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-create-the-terraform-backend-state" class="md-nav__link">
+  <a href="#part-2-google-cloud-infrastructure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Create the Terraform backend state
+        Part 2: Google Cloud Infrastructure
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="3. Create the Terraform backend state">
+    <nav class="md-nav" aria-label="Part 2: Google Cloud Infrastructure">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#obs-to-kms-agency" class="md-nav__link">
+  <a href="#enable-secret-manager" class="md-nav__link">
     <span class="md-ellipsis">
       
-        OBS-to-KMS agency
+        Enable Secret Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choose-or-create-a-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choose or Create a Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-gke-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create the GKE Cluster
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create the GKE Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restrict-control-plane-api-access-to-your-own-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restrict Control Plane / API Access to Your Own IP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wait-for-the-cluster-check-the-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wait for the Cluster &amp; Check the Connection
       
     </span>
   </a>
@@ -996,46 +1069,29 @@ You're not viewing the latest stable version.
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#4-review-generated-infrastructure-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Review generated infrastructure values
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-provision-the-cce-infrastructure" class="md-nav__link">
+  <a href="#part-3-the-platform" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Provision the CCE infrastructure
+        Part 3: The Platform
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-openbao-manual-init-and-unseal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. OpenBao manual init and unseal
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="6. OpenBao manual init and unseal">
+    <nav class="md-nav" aria-label="Part 3: The Platform">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-wait-for-the-pods-to-be-running" class="md-nav__link">
+  <a href="#oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Wait for the pods to be Running
+        OAuth2 Configuration
       
     </span>
   </a>
@@ -1043,10 +1099,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-initialize-openbao-on-the-first-pod" class="md-nav__link">
+  <a href="#external-dns-with-google-dns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Initialize OpenBao on the first pod
+        external-DNS with Google DNS
       
     </span>
   </a>
@@ -1054,10 +1110,22 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-unseal-each-pod-with-3-keys" class="md-nav__link">
+  <a href="#external-secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Unseal each pod with 3 keys
+        External Secrets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#secretstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecretStore
       
     </span>
   </a>
@@ -1065,10 +1133,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-verify-the-cluster" class="md-nav__link">
+  <a href="#create-secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Verify the cluster
+        Create Secrets
       
     </span>
   </a>
@@ -1076,21 +1144,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-make-the-root-token-available-for-the-openbao-terraform-layer" class="md-nav__link">
+  <a href="#velero" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Make the root token available for the OpenBao Terraform layer
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pod-restarts-and-auto-unseal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pod restarts and auto-unseal
+        Velero
       
     </span>
   </a>
@@ -1101,40 +1158,6 @@ You're not viewing the latest stable version.
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#7-openbao-configuration-and-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. OpenBao configuration and secrets
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="7. OpenBao configuration and secrets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#namespace-isolated-secret-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Namespace-isolated secret access
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#oidc-admin-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        OIDC admin access
-      
-    </span>
-  </a>
-  
-</li>
         
       </ul>
     </nav>
@@ -1142,10 +1165,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#8-export-kubeconfig-and-review-outputs" class="md-nav__link">
+  <a href="#part-4-apply-the-secretstore-bootstrap-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Export kubeconfig and review outputs
+        Part 4: Apply the SecretStore &amp; Bootstrap Kubara
       
     </span>
   </a>
@@ -1156,34 +1179,6 @@ You're not viewing the latest stable version.
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../google-cloud/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Google Cloud (Guide)
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2701,10 +2696,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
+  <a href="#local-prerequisites" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Configuration
+        Local Prerequisites
       
     </span>
   </a>
@@ -2712,10 +2707,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#1-generate-terraform-modules" class="md-nav__link">
+  <a href="#tldr-sneak-preview" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Generate Terraform modules
+        TL;DR / Sneak preview:
       
     </span>
   </a>
@@ -2723,10 +2718,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-prepare-environment-variables" class="md-nav__link">
+  <a href="#part-1-preparing-the-google-cloud-deployment" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Prepare environment variables
+        Part 1: Preparing the Google Cloud deployment
       
     </span>
   </a>
@@ -2734,22 +2729,67 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-create-the-terraform-backend-state" class="md-nav__link">
+  <a href="#part-2-google-cloud-infrastructure" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Create the Terraform backend state
+        Part 2: Google Cloud Infrastructure
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="3. Create the Terraform backend state">
+    <nav class="md-nav" aria-label="Part 2: Google Cloud Infrastructure">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#obs-to-kms-agency" class="md-nav__link">
+  <a href="#enable-secret-manager" class="md-nav__link">
     <span class="md-ellipsis">
       
-        OBS-to-KMS agency
+        Enable Secret Manager
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#choose-or-create-a-network" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Choose or Create a Network
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-the-gke-cluster" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create the GKE Cluster
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Create the GKE Cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#restrict-control-plane-api-access-to-your-own-ip" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Restrict Control Plane / API Access to Your Own IP
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#wait-for-the-cluster-check-the-connection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Wait for the Cluster &amp; Check the Connection
       
     </span>
   </a>
@@ -2760,46 +2800,29 @@ You're not viewing the latest stable version.
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#4-review-generated-infrastructure-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        4. Review generated infrastructure values
-      
-    </span>
-  </a>
+        
+      </ul>
+    </nav>
   
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-provision-the-cce-infrastructure" class="md-nav__link">
+  <a href="#part-3-the-platform" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Provision the CCE infrastructure
+        Part 3: The Platform
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-openbao-manual-init-and-unseal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. OpenBao manual init and unseal
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="6. OpenBao manual init and unseal">
+    <nav class="md-nav" aria-label="Part 3: The Platform">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#1-wait-for-the-pods-to-be-running" class="md-nav__link">
+  <a href="#oauth2-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Wait for the pods to be Running
+        OAuth2 Configuration
       
     </span>
   </a>
@@ -2807,10 +2830,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#2-initialize-openbao-on-the-first-pod" class="md-nav__link">
+  <a href="#external-dns-with-google-dns" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Initialize OpenBao on the first pod
+        external-DNS with Google DNS
       
     </span>
   </a>
@@ -2818,10 +2841,22 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#3-unseal-each-pod-with-3-keys" class="md-nav__link">
+  <a href="#external-secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Unseal each pod with 3 keys
+        External Secrets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="External Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#secretstore" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SecretStore
       
     </span>
   </a>
@@ -2829,10 +2864,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#4-verify-the-cluster" class="md-nav__link">
+  <a href="#create-secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Verify the cluster
+        Create Secrets
       
     </span>
   </a>
@@ -2840,21 +2875,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#5-make-the-root-token-available-for-the-openbao-terraform-layer" class="md-nav__link">
+  <a href="#velero" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Make the root token available for the OpenBao Terraform layer
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#pod-restarts-and-auto-unseal" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Pod restarts and auto-unseal
+        Velero
       
     </span>
   </a>
@@ -2865,40 +2889,6 @@ You're not viewing the latest stable version.
     </nav>
   
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#7-openbao-configuration-and-secrets" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. OpenBao configuration and secrets
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="7. OpenBao configuration and secrets">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#namespace-isolated-secret-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Namespace-isolated secret access
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#oidc-admin-access" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        OIDC admin access
-      
-    </span>
-  </a>
-  
-</li>
         
       </ul>
     </nav>
@@ -2906,10 +2896,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#8-export-kubeconfig-and-review-outputs" class="md-nav__link">
+  <a href="#part-4-apply-the-secretstore-bootstrap-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        8. Export kubeconfig and review outputs
+        Part 4: Apply the SecretStore &amp; Bootstrap Kubara
       
     </span>
   </a>
@@ -2936,337 +2926,324 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="t-cloud-public-community">T Cloud Public (Community)</h1>
-<p>The terraform modules for the T Cloud Public are built by the kubara community and aren't tested on a regular basis through integration nor regression tests by the kubara maintainers.</p>
-<p>The kubara provider key is <code>t-cloud-public</code> and the Kubernetes type is <code>cce</code> for Cloud Container Engine.</p>
-<h2 id="configuration">Configuration</h2>
-<p>Use these values in <code>config.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">terraform</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">t-cloud-public</span>
-<span class="w">  </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;tenant-name&gt;</span>
-<span class="w">  </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cce</span>
-<span class="w">  </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.29</span>
-<span class="w">  </span><span class="nt">dns</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
-<span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
-</code></pre></div>
-<p>For T Cloud Public, set <code>projectId</code> to the tenant/project name used as <code>tenant_name</code>, not to a UUID.</p>
-<h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
-</code></pre></div>
-<p>Commit and push the generated files to your Git repository.</p>
-<p>The generated T Cloud Public Terraform layout contains:</p>
+<h1 id="kubara-on-google-cloud">Kubara on Google Cloud</h1>
+<p>If you want to run kubara on a hyperscaler like Google Cloud, there are specific configurations to apply. Here we provide an example that can be conveniently adapted to other major cloud providers.</p>
+<p>In this example we use provider-native components: 
+* Google Secret Manager for External Secrets
+* Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records).
+* Google Kubernetes Engine (GKE) as managed Kubernetes</p>
+<p>For any other setup, please check the corresponding component's own documentation.</p>
+<p>And feel free to contribute! :)  </p>
+<p>We assume you're starting from an empty Google Cloud Project to test kubara, and that you've already made yourself familiar with the <a href="../../1_getting_started/bootstrapping/">kubara deployment guide</a>. Please do that first if you haven't yet.</p>
+<div class="admonition note">
+<p class="admonition-title">Before you start</p>
+<ol>
+<li>GKE <strong>Autopilot</strong> isn't compatible with the privileges <code>kube-prometheus-stack</code> needs (its <code>node-exporter</code> requires host access that Autopilot blocks), so this guide uses <strong>Standard</strong> mode instead — see the cluster-creation parameters below.</li>
+<li>Velero on GCP hasn't been tested as part of this guide — please follow the <a href="https://github.com/velero-io/velero-plugin-for-gcp#setup" target="_blank" rel="noopener">official Velero project docs</a> instead.</li>
+<li>Google Cloud was formerly known as GCP "Google Cloud Platform", so this term will be seen often in this guide because of the former name.</li>
+</ol>
+</div>
+<h2 id="local-prerequisites">Local Prerequisites</h2>
+<p>Before starting, the <a href="https://cloud.google.com/sdk/docs/install" target="_blank" rel="noopener">gcloud CLI</a> is required, along with an already authenticated account (<code>gcloud auth login</code>) with access to the target Google Cloud Project.</p>
+<p>You'll also need kubara installed. See the <a href="../../1_getting_started/installation/">Installation guide</a>.</p>
+<h2 id="tldr-sneak-preview">TL;DR / Sneak preview:</h2>
+<ol>
+<li>
+<p>We will generate an <code>.env</code> file and configure all necessary values, after that generate the config.yaml and fill it out too. <code>kubara init (--prep)</code>
+Then we will generate all the rendered Helm-Charts: <code>kubara generate</code></p>
+</li>
+<li>
+<p>We will create and configure a GKE Cluster, set up Google Secret Manager, configure Google DNS with an existing domain by delegating a subdomain for ExternalDNS and set up SSO.</p>
+</li>
+<li>
+<p>We will create, check and adapt the following values files:</p>
+</li>
+</ol>
+<p>All paths below are relative to the <code>platform-configs</code> directory that <code>kubara generate</code> writes for you. We'll check and adapt the following Helm values files:</p>
 <ul>
-<li><code>bootstrap-tfstate-backend</code>: OBS bucket, backend credentials, and optional OBS KMS agency setup for Terraform state</li>
-<li><code>infrastructure</code>: DNS zone, IAM agencies, VPC/subnet/NAT/load balancer, keypair, KMS key, CCE cluster, StorageClass resources, and the OpenBao Helm release</li>
-<li><code>openbao</code>: OpenBao KV, Kubernetes auth, namespace-scoped policies and roles, and templated platform secrets</li>
-<li>reusable managed modules for OBS buckets, IAM agencies, DNS, network, keypair, KMS, CCE, and StorageClasses</li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/argo-cd/values-gcp.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/external-dns/values-gcp.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/external-secrets/values-gcp.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/kube-prometheus-stack/values-gcp.yaml</code></li>
+<li>
+<p><code>platform-configs/&lt;my-cluster&gt;/helm/oauth2-proxy/values-gcp.yaml</code></p>
+</li>
+<li>
+<p>We will then create our necessary secrets and deploy kubara on GKE. <code>kubara bootstrap &lt;my-cluster&gt;</code></p>
+</li>
 </ul>
-<p>The generated infrastructure stack is composed from small modules:</p>
-<ul>
-<li><code>objectstorage-bucket</code>: OBS bucket plus dedicated S3-compatible credentials for Terraform state or backup buckets</li>
-<li><code>identity-agencies</code>: IAM agencies for tenant-level service authorizations</li>
-<li><code>dns-zone</code>: DNS zone for the configured cluster domain</li>
-<li><code>network</code>: VPC, subnet, optional NAT gateway, shared external load balancer and optional independent dedicated load balancer</li>
-<li><code>keypair</code>: SSH keypair for CCE node pools</li>
-<li><code>kms-key</code>: KMS key for encrypted node volumes</li>
-<li><code>cce-cluster</code>: CCE cluster, configurable node pools, optional CCE addons, and optional local kubeconfig output</li>
-<li><code>openbao-helm</code>: OpenBao Helm release deployed after the CCE cluster is available</li>
-</ul>
-<p>OpenBao is the in-cluster secret backend for the T Cloud Public setup. kubara deploys it because this provider path does not currently integrate a managed Vault-compatible secret backend. OpenBao stores platform secrets and provides them to workloads through External Secrets.</p>
-<p>The same bucket module is also used for Velero backup buckets. The generated customer infrastructure renders a <code>velero_bucket</code> module only when Velero is enabled and <code>services.velero.config.backupStorage.create</code> is <code>true</code>.</p>
-<p>Generated OBS buckets use KMS server-side encryption by default. The bootstrap state backend stack normally creates the required tenant-wide OBS KMS agency. If you skipped that stack, enable <code>create_obs_kms_agency</code> before creating encrypted buckets. Set <code>create_t_cloud_public_agencies = false</code> if all required IAM agencies already exist.</p>
-<h2 id="2-prepare-environment-variables">2. Prepare environment variables</h2>
-<p>Before the first <code>terraform init</code>, prepare and load your environment variables:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>platform-configs/&lt;cluster-name&gt;/terraform
-cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
-</code></pre></div>
-<p>Set the T Cloud Public provider variables in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_region</span><span class="o">=</span><span class="s2">&quot;eu-de&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_domain_name</span><span class="o">=</span><span class="s2">&quot;&lt;domain-name&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_tenant_name</span><span class="o">=</span><span class="s2">&quot;&lt;tenant-name&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_access_key</span><span class="o">=</span><span class="s2">&quot;&lt;access-key&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_secret_key</span><span class="o">=</span><span class="s2">&quot;&lt;secret-key&gt;&quot;</span>
-</code></pre></div>
-<p><code>TF_VAR_t_cloud_public_tenant_name</code> must be the T Cloud Public tenant/project name. This is the same value kubara reads from <code>terraform.projectId</code> in <code>config.yaml</code> for T Cloud Public, and it is not a UUID.</p>
-<p>The generated environment file also sets <code>AWS_REQUEST_CHECKSUM_CALCULATION=when_required</code> and <code>AWS_RESPONSE_CHECKSUM_VALIDATION=when_required</code>. Keep these values for the T Cloud Public OBS backend. Terraform's <code>s3</code> backend only supports S3-compatible APIs on a best-effort basis, and recent AWS SDK checksum behavior can otherwise produce unreadable state objects against some S3-compatible backends.</p>
-<p>Then load the file:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>set-env.sh
-<span class="c1"># or for PowerShell</span>
-<span class="c1"># cp set-env-changeme.ps1 set-env.ps1</span>
-<span class="c1"># . .\set-env.ps1</span>
-</code></pre></div>
-<h2 id="3-create-the-terraform-backend-state">3. Create the Terraform backend state</h2>
-<p>Then navigate to:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>bootstrap-tfstate-backend
-</code></pre></div>
-<p>For persistent changes to generated Terraform values, use a separate override file as described in <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
-<h3 id="obs-to-kms-agency">OBS-to-KMS agency</h3>
-<p>The bootstrap stack creates an IAM agency named <code>OBSAccessKMS</code> (delegated to the <code>op_svc_obs</code> service principal) so that OBS can use the generated KMS key for server-side bucket encryption. Without this agency, the bucket creation fails with <code>Status=403 Forbidden, Code=AccessDenied</code> the moment <code>server_side_encryption</code> is set.</p>
-<p>The agency is tenant-scoped and only needs to exist once per T Cloud Public tenant. If your tenant already has it, for example created out-of-band or from a previous bootstrap of another cluster, disable the in-stack creation:</p>
-<div class="highlight"><pre><span></span><code><span class="na">create_obs_kms_agency</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">false</span>
-</code></pre></div>
-<p>If you do not need server-side encryption at all for the state bucket, set:</p>
-<div class="highlight"><pre><span></span><code><span class="na">enable_bucket_server_side_encryption</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">false</span>
-</code></pre></div>
-<p>The agency module is then skipped entirely.</p>
-<p>Run:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Terraform</label><label for="__tabbed_1_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
-terraform<span class="w"> </span>plan
-terraform<span class="w"> </span>apply
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
-tofu<span class="w"> </span>plan
-tofu<span class="w"> </span>apply
-</code></pre></div>
-</div>
-</div>
-</div>
-<p>Use the output to configure Terraform backend credentials:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
-</code></pre></div>
-</div>
-</div>
-</div>
-<p>You can also persist these values in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again before running the main infrastructure stack.</p>
-<h2 id="4-review-generated-infrastructure-values">4. Review generated infrastructure values</h2>
-<p>Review <code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure/env.auto.tfvars</code>. Keep persistent changes in a separate override file as described in <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>.</p>
-<p>A few defaults that often need attention before the first apply:</p>
-<ul>
-<li><strong><code>enable_cluster_public_endpoint = true</code></strong> binds a small EIP (<code>5_bgp</code>, 5 Mbit/s, traffic-charged) to the CCE master so the API server is reachable from the machine that runs Terraform. This is required for the in-stack Helm provider, for example the OpenBao Helm release, when applying from outside the VPC. After apply, the public IP is exposed as the <code>cluster_public_endpoint_ip</code> output. Set to <code>false</code> if you only run Terraform from inside the VPC, for example from a CI runner inside OTC, a bastion, or a VPN.</li>
-<li><strong><code>enable_nat_gateway = true</code></strong> creates the NAT gateway for node egress. Adjust <code>nat_gateway_spec</code> and <code>nat_eip_bandwidth_size</code> if the default size does not fit your cluster.</li>
-<li><strong><code>enable_shared_load_balancer = true</code></strong> creates the shared ELB used by Traefik. Set <code>enable_dedicated_load_balancer = true</code> only if you also need an independent dedicated ELB.</li>
-<li><strong><code>enable_openbao = true</code></strong> rolls out the in-cluster OpenBao Helm release after CCE comes up. The release is not initialized or unsealed automatically. That happens manually in step 6 below.</li>
-</ul>
-<h2 id="5-provision-the-cce-infrastructure">5. Provision the CCE infrastructure</h2>
-<p>Proceed to:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../infrastructure
-</code></pre></div>
-<p>The generated infrastructure backend stores state in:</p>
-<div class="highlight"><pre><span></span><code><span class="na">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bucket-tf-&lt;cluster-name&gt;-&lt;stage&gt;&quot;</span>
-<span class="na">key</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tf-state-&lt;cluster-name&gt;-&lt;stage&gt;&quot;</span>
-</code></pre></div>
-<p>The default backend endpoint is <code>https://obs.eu-de.otc.t-systems.com</code>, which is the technical OBS endpoint for the <code>eu-de</code> region. For <code>eu-nl</code>, adjust the generated backend endpoint and region before running <code>terraform init</code>.</p>
-<p>Make sure <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> from the bootstrap stack are set in <code>set-env.sh</code> before initializing the backend.</p>
-<p>Run:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="3:2"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><input id="__tabbed_3_2" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1">Terraform</label><label for="__tabbed_3_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>init
-terraform<span class="w"> </span>plan
-terraform<span class="w"> </span>apply
-</code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>init
-tofu<span class="w"> </span>plan
-tofu<span class="w"> </span>apply
-</code></pre></div>
-</div>
-</div>
-</div>
-<p>This creates the DNS zone, required IAM agencies, networking, keypair, KMS keys, the CCE cluster, the kubara-managed StorageClasses, and the OpenBao Helm release.</p>
-<p>The generated stack can optionally write a kubeconfig locally when <code>create_kubeconfig_local</code> is enabled.</p>
-<h2 id="6-openbao-manual-init-and-unseal">6. OpenBao manual init and unseal</h2>
-<p>After the infrastructure apply has installed the OpenBao Helm release, OpenBao is running as a 3-replica HA Raft cluster but sealed. Until it is initialized and unsealed, the pods report <code>0/1</code> ready, which is expected because the readiness probe deliberately fails on a sealed pod.</p>
-<p>The generated Helm release configures Raft peer discovery (<code>retry_join</code>) so the replicas find each other automatically. You only need to run <code>init</code> once on the first pod, then <code>unseal</code> on each replica.</p>
-<h3 id="1-wait-for-the-pods-to-be-running">1. Wait for the pods to be Running</h3>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>-w
-</code></pre></div>
-<p>You should see <code>openbao-0</code>, <code>openbao-1</code>, and <code>openbao-2</code> reach <code>Running</code> state while still showing <code>0/1</code>. Press Ctrl-C once they all show <code>Running</code>.</p>
-<h3 id="2-initialize-openbao-on-the-first-pod">2. Initialize OpenBao on the first pod</h3>
-<p>This generates the unseal keys and the initial root token. Run this exactly once. The output appears only once and cannot be recovered later.</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-0<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>init
-</code></pre></div>
-<p>Save the output immediately in an approved secure system that is accessible to the responsible team. Do not store unseal keys or the root token in Git, Terraform state, or shared plaintext files. By default OpenBao prints 5 unseal keys and 1 initial root token:</p>
-<ul>
-<li>Any 3 of the 5 unseal keys are needed to unseal a pod.</li>
-<li>Keep the keys under separate trusted operators or access controls where possible because anyone who collects 3 keys can decrypt the cluster.</li>
-<li>The root token gives full access, so rotate or revoke it after creating a long-lived admin role.</li>
-</ul>
-<h3 id="3-unseal-each-pod-with-3-keys">3. Unseal each pod with 3 keys</h3>
-<p>Unsealing is per-pod and per-restart. Repeat the command 3 times per pod, each time with a different unseal key:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># Pod 0</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-0<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-1&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-0<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-2&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-0<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-3&gt;
+<h2 id="part-1-preparing-the-google-cloud-deployment">Part 1: Preparing the Google Cloud deployment</h2>
+<p>Let's get started with the actual setup!</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Install gke-gcloud-auth-plugin – required so kubectl can authenticate against the GKE cluster</span>
+gcloud<span class="w"> </span>components<span class="w"> </span>install<span class="w"> </span>gke-gcloud-auth-plugin
 
-<span class="c1"># Pod 1</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-1<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-1&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-1<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-2&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-1<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-3&gt;
+<span class="c1"># Set the project</span>
+gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set</span><span class="w"> </span>project<span class="w"> </span><span class="o">[</span>YOUR-PROJECT-NAME<span class="o">]</span>
+</code></pre></div>
+<p>Follow the kubara <a href="../../1_getting_started/bootstrapping/">Bootstrapping Guide</a>, generate your helm charts and stop before bootstrapping <a href="../../1_getting_started/bootstrapping/#4-deploying-argo-cd">Step 4: Bootstrapping</a>. The bootstrapping will be handled as part of this page.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># pseudo-workflow, please check the up2date official guide!</span>
 
-<span class="c1"># Pod 2</span>
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-2<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-1&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-2<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-2&gt;
-kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-2<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>operator<span class="w"> </span>unseal<span class="w"> </span>&lt;unseal-key-3&gt;
+kubara<span class="w"> </span>init<span class="w"> </span>--prep<span class="w"> </span><span class="c1"># generate .env file &amp; set values accordingly</span>
+kubara<span class="w"> </span>init<span class="w"> </span><span class="c1"># generate config.yaml &amp; set values accordingly</span>
+kubara<span class="w"> </span>generate<span class="w"> </span><span class="c1"># generate helm charts</span>
+
+<span class="c1"># Stop after generating your Charts and proceed with: </span>
+<span class="c1"># &quot;Part 2: Google Cloud Infrastructure&quot;</span>
 </code></pre></div>
-<p>After the third successful key on a pod, that pod becomes unsealed and ready.</p>
-<h3 id="4-verify-the-cluster">4. Verify the cluster</h3>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>-ti<span class="w"> </span>openbao-0<span class="w"> </span>--<span class="w"> </span>bao<span class="w"> </span>status
+<h2 id="part-2-google-cloud-infrastructure">Part 2: Google Cloud Infrastructure</h2>
+<h3 id="enable-secret-manager">Enable Secret Manager</h3>
+<p>External DNS needs a secret store. As mentioned above, the platform-native Google Secret Manager is the natural choice. First, enable the corresponding API:</p>
+<div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>services<span class="w"> </span><span class="nb">enable</span><span class="w"> </span>secretmanager.googleapis.com
 </code></pre></div>
-<p>Expected output:</p>
-<div class="highlight"><pre><span></span><code>Sealed         false
-Initialized    true
-HA Enabled     true
-HA Cluster     http://openbao-0.openbao-internal:8201
-Active Node    true
+<h3 id="choose-or-create-a-network">Choose or Create a Network</h3>
+<p>Deploying Google Kubernetes Engine (GKE) requires a network (VPC). Existing networks can be checked as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="c1">## check for existing networks/VPC</span>
+gcloud<span class="w"> </span>compute<span class="w"> </span>networks<span class="w"> </span>list
 </code></pre></div>
-<p><code>kubectl -n openbao get pods</code> should now show all three pods as <code>1/1</code> ready.</p>
-<h3 id="5-make-the-root-token-available-for-the-openbao-terraform-layer">5. Make the root token available for the OpenBao Terraform layer</h3>
-<p>The Initial Root Token from step 2 is what the next stack, <code>openbao/</code>, uses to authenticate against OpenBao through the local port-forward. There is intentionally no Terraform output for it, so it is not stored in Terraform state.</p>
-<p>The set-env script already contains commented-out lines for it. Uncomment them and fill in the token you saved:</p>
-<div class="highlight"><pre><span></span><code><span class="c1"># platform-configs/&lt;cluster-name&gt;/terraform/set-env.sh</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_ADDR</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8200&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="s2">&quot;hvb.AAAAAQ...&quot;</span>
-</code></pre></div>
-<p>Re-source the file so the new variables apply to the OpenBao Terraform layer:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>../set-env.sh
-</code></pre></div>
-<h3 id="pod-restarts-and-auto-unseal">Pod restarts and auto-unseal</h3>
-<p>Until OpenBao supports auto-unseal with T Cloud Public KMS, every restarted OpenBao pod must be unsealed again with 3 of the 5 keys. This includes restarts caused by cluster upgrades, node maintenance, and OpenBao updates. The <a href="https://github.com/openbao/go-kms-wrapping/pull/63" target="_blank" rel="noopener">T Cloud Public KMS wrapper</a> has been merged, while the <a href="https://github.com/openbao/openbao/issues/2302" target="_blank" rel="noopener">OpenBao auto-unseal integration</a> is still pending.</p>
-<p>Do not write OpenBao secrets in this first infrastructure apply. Apply OpenBao configuration and secrets in a separate step after OpenBao is initialized, unsealed, and a valid OpenBao token is available.</p>
-<h2 id="7-openbao-configuration-and-secrets">7. OpenBao configuration and secrets</h2>
-<p>kubara also renders a separate OpenBao Terraform layer:</p>
-<div class="highlight"><pre><span></span><code>platform-configs/&lt;cluster-name&gt;/terraform/openbao
-</code></pre></div>
-<p>This layer uses the same OBS backend bucket as the infrastructure layer, but stores state under a separate key:</p>
-<div class="highlight"><pre><span></span><code><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tf-state-&lt;cluster-name&gt;-&lt;stage&gt;-openbao&quot;</span>
-</code></pre></div>
-<p>Run the port-forward in a separate terminal after OpenBao is initialized and unsealed:</p>
-<div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>port-forward<span class="w"> </span>svc/openbao<span class="w"> </span><span class="m">8200</span>:8200
-</code></pre></div>
-<p>Then apply the OpenBao Terraform layer:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="4:2"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1">Terraform</label><label for="__tabbed_4_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../openbao
-terraform<span class="w"> </span>init
-terraform<span class="w"> </span>apply
+<p>If no suitable network exists, one can be created from scratch, including a router, a subnet (with secondary ranges for pods/services), and Cloud NAT. </p>
+<div class="admonition note">
+<p class="admonition-title">Optional: Example how to create a new network, router, subnet &amp; Cloud NAT</p>
+<p>Please be careful and adapt these commands to your needs before applying:</p>
+<div class="highlight"><span class="filename">Optional Network component creation</span><pre><span></span><code><span class="c1">## OPTIONAL: create network &amp; nat router</span>
+gcloud<span class="w"> </span>compute<span class="w"> </span>networks<span class="w"> </span>create<span class="w"> </span>test-network<span class="w"> </span>--subnet-mode<span class="o">=</span>auto
+
+<span class="c1">## router</span>
+gcloud<span class="w"> </span>compute<span class="w"> </span>routers<span class="w"> </span>create<span class="w"> </span>test-router<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network<span class="o">=</span>test-network<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--region<span class="o">=</span>europe-west3
+
+<span class="c1">## subnet</span>
+gcloud<span class="w"> </span>compute<span class="w"> </span>networks<span class="w"> </span>subnets<span class="w"> </span>create<span class="w"> </span>test-subnet<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--network<span class="o">=</span>test-network<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--region<span class="o">=</span>europe-west3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--range<span class="o">=</span><span class="m">10</span>.0.0.0/24<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--secondary-range<span class="o">=</span><span class="nv">pods</span><span class="o">=</span><span class="m">10</span>.4.0.0/14,services<span class="o">=</span><span class="m">10</span>.8.0.0/20
+
+<span class="c1">## cloud nat</span>
+gcloud<span class="w"> </span>compute<span class="w"> </span>routers<span class="w"> </span>nats<span class="w"> </span>create<span class="w"> </span>test-nat<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--router<span class="o">=</span>test-router<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--region<span class="o">=</span>europe-west3<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--auto-allocate-nat-external-ips<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--nat-all-subnet-ip-ranges
 </code></pre></div>
 </div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../openbao
-tofu<span class="w"> </span>init
-tofu<span class="w"> </span>apply
+<h3 id="create-the-gke-cluster">Create the GKE Cluster</h3>
+<div class="highlight"><pre><span></span><code>gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>create<span class="w"> </span>test-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--zone<span class="o">=</span>europe-west3-a<span class="w"> </span><span class="se">\ </span><span class="w">               </span><span class="c1"># Zonal cluster (single availability zone for testing)</span>
+<span class="w">    </span>--network<span class="o">=</span>test-network<span class="w"> </span><span class="se">\ </span><span class="w">               </span><span class="c1"># VPC network the cluster is deployed into</span>
+<span class="w">    </span>--subnetwork<span class="o">=</span>test-subnet<span class="w"> </span><span class="se">\ </span><span class="w">             </span><span class="c1"># Subnet within that network (incl. pod/service ranges)</span>
+<span class="w">    </span>--enable-private-nodes<span class="w"> </span><span class="se">\ </span><span class="w">               </span><span class="c1"># Nodes only get internal IPs, no public IP (more secure)</span>
+<span class="w">    </span>--enable-ip-alias<span class="w"> </span><span class="se">\ </span><span class="w">                    </span><span class="c1"># Enable VPC-native networking (required for private nodes &amp; alias IP ranges)</span>
+<span class="w">    </span>--master-ipv4-cidr<span class="o">=</span><span class="m">172</span>.16.0.0/28<span class="w"> </span><span class="se">\ </span><span class="w">     </span><span class="c1"># Private IP range for the GKE control plane (must not overlap with anything else)</span>
+<span class="w">    </span>--release-channel<span class="o">=</span>regular<span class="w"> </span><span class="se">\ </span><span class="w">            </span><span class="c1"># Update channel for automatic cluster upgrades (regular = balance between stability and new features)</span>
+<span class="w">    </span>--machine-type<span class="o">=</span>e2-standard-4<span class="w"> </span><span class="se">\ </span><span class="w">         </span><span class="c1"># VM type for worker nodes (4 vCPUs, 16 GB RAM)</span>
+<span class="w">    </span>--num-nodes<span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\ </span><span class="w">                        </span><span class="c1"># Number of nodes at startup (per zone)</span>
+<span class="w">    </span>--enable-autoscaling<span class="w"> </span>--min-nodes<span class="o">=</span><span class="m">0</span><span class="w"> </span>--max-nodes<span class="o">=</span><span class="m">3</span><span class="w"> </span><span class="se">\ </span><span class="w"> </span><span class="c1"># Cluster autoscaler: scales automatically between 0 and 3 nodes</span>
+<span class="w">    </span>--spot<span class="w"> </span><span class="se">\ </span><span class="w">                               </span><span class="c1"># Uses cheap Spot VMs (can be reclaimed by the provider at any time – not suitable for critical workloads without tolerations)</span>
+<span class="w">    </span>--disk-size<span class="o">=</span><span class="m">30</span><span class="w"> </span><span class="se">\ </span><span class="w">                       </span><span class="c1"># Boot disk size per node in GB</span>
+<span class="w">    </span>--workload-pool<span class="o">=</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span>.svc.id.goog<span class="w"> </span><span class="se">\ </span><span class="w"> </span><span class="c1"># Enables Workload Identity: Kubernetes ServiceAccounts can securely impersonate GCP IAM service accounts, with no key files at all</span>
+<span class="w">    </span>--async<span class="w">                                 </span><span class="c1"># Command returns immediately without waiting for cluster creation to finish</span>
 </code></pre></div>
-</div>
-</div>
-</div>
-<p>The layer configures a KV v2 mount, Kubernetes auth at <code>k8s-auth</code>, the namespace-scoped <code>k8s-kv-read</code> role and templated policy, the <code>external-secrets</code> role used only for the cluster-wide image pull secret, and the generated Grafana admin credentials.</p>
-<p>User-provided secrets, the OAuth2 client credentials, <code>t-cloud-public-clouds-yaml</code> for ExternalDNS, and the Velero S3 credentials, are written through a separate <code>secrets.tf-oauth2</code> file. Copy it to activate the blocks you need:</p>
-<div class="highlight"><pre><span></span><code>cp<span class="w"> </span>secrets.tf-oauth2<span class="w"> </span>secrets.tf
+<h4 id="restrict-control-plane-api-access-to-your-own-ip">Restrict Control Plane / API Access to Your Own IP</h4>
+<p><code>--enable-master-authorized-networks</code> only allows explicitly permitted IP ranges to reach the Kubernetes API. Following the principle of least privilege. For test purposes, your own public IP is enough; in a production environment, you would instead enter fixed CIDR ranges for bastion hosts, VPNs, CI/CD runners, etc. </p>
+<div class="highlight"><pre><span></span><code><span class="c1">## Restrict control plane / API access to your own IP:</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>update<span class="w"> </span>test-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--zone<span class="o">=</span>europe-west3-a<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--enable-master-authorized-networks<span class="w"> </span><span class="se">\ </span><span class="w">                 </span><span class="c1"># Restricts access to the control plane API to an allowlist of IP ranges</span>
+<span class="w">    </span>--master-authorized-networks<span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>ifconfig.me<span class="k">)</span>/32<span class="w"> </span><span class="c1"># Adds only your own public IP (as a /32, so exactly one address) to that allowlist</span>
 </code></pre></div>
-<p>Each block declares a <code>variable</code> and the matching <code>vault_kv_secret_v2</code> resource. The values come from <code>TF_VAR_*</code> environment variables in your sourced <code>set-env.sh</code>, which already has commented-out templates for each one, so no secret is ever written into a committed file. Delete the blocks you do not use before applying.</p>
-<h3 id="namespace-isolated-secret-access">Namespace-isolated secret access</h3>
-<p>T Cloud Public uses <strong>namespace-isolated</strong> secret access. Each consuming service reads only its own namespace's secrets:</p>
-<table>
-<thead>
-<tr>
-<th>Secret</th>
-<th>KV path</th>
-<th>Consuming namespace</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Grafana admin / OAuth2</td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/kube-prometheus-stack/*</code></td>
-<td><code>kube-prometheus-stack</code></td>
-</tr>
-<tr>
-<td>Argo CD OAuth2</td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/argocd/*</code></td>
-<td><code>argocd</code></td>
-</tr>
-<tr>
-<td>OAuth2 Proxy</td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/oauth2-proxy/*</code></td>
-<td><code>oauth2-proxy</code></td>
-</tr>
-<tr>
-<td>Velero S3</td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/velero/*</code></td>
-<td><code>velero</code></td>
-</tr>
-<tr>
-<td>ExternalDNS clouds.yaml</td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/external-dns/*</code></td>
-<td><code>external-dns</code></td>
-</tr>
-<tr>
-<td><strong>Image pull secret</strong></td>
-<td><code>secret/&lt;cluster&gt;/&lt;stage&gt;/cluster_secrets/docker_config</code></td>
-<td><strong>all</strong> (cluster-wide)</td>
-</tr>
-</tbody>
-</table>
-<p>Every chart renders a <code>SecretStore</code> in its own namespace that authenticates with that namespace's <code>default</code> ServiceAccount through the <code>k8s-kv-read</code> role. The templated policy matches the namespace segment in <code>secret/&lt;cluster&gt;/&lt;stage&gt;/&lt;namespace&gt;/*</code>, so a workload in one namespace cannot read another namespace's secrets. The image pull secret is the deliberate exception. It is distributed to every namespace through a <code>ClusterExternalSecret</code> and remains on the cluster-wide store under <code>cluster_secrets</code>.</p>
-<p>Velero reads its S3 credentials through an <code>ExternalSecret</code> in the <code>velero</code> namespace. Keep the separate <code>external-secrets</code> service enabled because the Velero chart consumes External Secrets CRDs but does not install the External Secrets Operator itself. The generated <code>BackupStorageLocation</code> points at the same synchronized Kubernetes Secret, <code>velero-credentials</code>, key <code>cloud</code>.</p>
-<p>With <code>services.velero.config.backupStorage.create: true</code>, the generated Velero values point at the Terraform-managed bucket name <code>velero-&lt;cluster-name&gt;-&lt;stage&gt;</code>. Set the matching <code>backupStorage.region</code> and <code>backupStorage.s3Url</code> values in the cluster config. If you use an existing OBS or S3-compatible bucket instead, set <code>backupStorage.create: false</code> and provide <code>backupStorage.bucketName</code>.</p>
-<p>When Velero uses CSI snapshots, <code>backupMode: csi-snapshot</code> or <code>backupMode: csi-data-mover</code>, the generated values select the <code>t-cloud-public</code> <code>VolumeSnapshotClass</code> mapping for the CCE Everest CSI disk driver.</p>
-<h3 id="oidc-admin-access">OIDC admin access</h3>
-<p>The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in <code>platform-configs/&lt;cluster-name&gt;/terraform/openbao/override.auto.tfvars</code>, not in the generated <code>env.auto.tfvars</code>; see <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>. For example, use the following values for a Keycloak client:</p>
-<div class="highlight"><pre><span></span><code><span class="na">manage_openbao_oidc_auth_backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
-<span class="na">openbao_oidc_discovery_url</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://&lt;keycloak-host&gt;/realms/&lt;realm&gt;&quot;</span>
-<span class="na">openbao_oidc_client_id</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;openbao-client-id&gt;&quot;</span>
-<span class="na">openbao_oidc_admin_allowed_redirect_uris</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">  </span><span class="s2">&quot;https://&lt;cluster-dns-name&gt;/openbao/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;https://&lt;cluster-dns-name&gt;/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
-<span class="p">]</span>
+<h4 id="wait-for-the-cluster-check-the-connection">Wait for the Cluster &amp; Check the Connection</h4>
+<div class="highlight"><pre><span></span><code><span class="c1">## Wait until the cluster is ready (status: RUNNING)</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>list<span class="w">                                    </span><span class="c1"># Lists all clusters in the project including their current status</span>
+
+<span class="c1">## Generate credentials (kubeconfig) for the cluster</span>
+gcloud<span class="w"> </span>container<span class="w"> </span>clusters<span class="w"> </span>get-credentials<span class="w"> </span>test-cluster<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--region<span class="o">=</span>europe-west3-a<span class="w">                                       </span><span class="c1"># Writes connection details for test-cluster into the local kubeconfig, so kubectl can access it</span>
+
+<span class="c1">## Check the connection</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>ns<span class="w">                                                     </span><span class="c1"># Lists all namespaces in the cluster – fails if the connection/auth is broken</span>
 </code></pre></div>
-<p>Set <code>TF_VAR_openbao_oidc_client_secret</code> in <code>set-env.sh</code>, source the file again, and apply the OpenBao Terraform layer. After verifying OIDC access, revoke the Initial Root Token with <code>bao token revoke -self</code> and remove <code>VAULT_TOKEN</code> from <code>set-env.sh</code>.</p>
-<h2 id="8-export-kubeconfig-and-review-outputs">8. Export kubeconfig and review outputs</h2>
-<p>Export the kubeconfig:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">Terraform</label><label for="__tabbed_5_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>kubeconfig<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/.kube/kubara.yaml
+<h2 id="part-3-the-platform">Part 3: The Platform</h2>
+<h4 id="oauth2-configuration">OAuth2 Configuration</h4>
+<p>How exactly these configurations are done depends on the chosen SSO provider (examples see the <a href="../../4_building_your_platform/sso/add_sso/">SSO guide</a> for details). Regardless of the provider, however, at least the following SSO apps must be created for SSO:</p>
+<ol>
+<li>Argo CD SSO</li>
+<li>Grafana SSO</li>
+<li>OAuth2 Proxy SSO</li>
+</ol>
+<p>The resulting credentials are added manually later, in the <a href="#create-secrets">Create Secrets</a> section. So save them for later.</p>
+<div class="admonition note">
+<p class="admonition-title">Workload Identity</p>
+<p>We use workload identitys in these examples.
+Workload Identity binds a GCP service account directly and keylessly to a Kubernetes ServiceAccount. Pods then authenticate against GCP APIs transparently through that binding, with finely scoped IAM roles per use case — with no secret material to manage or rotate at all. (See: https://docs.cloud.google.com/iam/docs/workload-identities)</p>
+</div>
+<h3 id="external-dns-with-google-dns">external-DNS with Google DNS</h3>
+<div class="highlight"><span class="filename">External DNS Configuration for Google Cloud</span><pre><span></span><code><span class="c1"># Create a service account for ExternalDNS</span>
+gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>create<span class="w"> </span>external-dns-sa<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--display-name<span class="o">=</span><span class="s2">&quot;SA for GKE ExternalDNS&quot;</span>
+
+<span class="c1"># Grant the service account write permissions on Cloud DNS</span>
+gcloud<span class="w"> </span>projects<span class="w"> </span>add-iam-policy-binding<span class="w"> </span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--member<span class="o">=</span><span class="s2">&quot;serviceAccount:external-dns-sa@</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--role<span class="o">=</span><span class="s2">&quot;roles/dns.admin&quot;</span>
+
+<span class="c1"># Bind Workload Identity (note: requires the matching namespace – kubara&#39;s default is the chart name, so &quot;external-dns&quot; here)</span>
+gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>add-iam-policy-binding<span class="w"> </span>external-dns-sa@<span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span>.iam.gserviceaccount.com<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--role<span class="o">=</span><span class="s2">&quot;roles/iam.workloadIdentityUser&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--member<span class="o">=</span><span class="s2">&quot;serviceAccount:</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.svc.id.goog[external-dns/external-dns-sa]&quot;</span>
+
+<span class="c1"># Create the Google Cloud managed DNS zone</span>
+gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span class="w"> </span>create<span class="w"> </span>kubara-gcp-zone<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dns-name<span class="o">=</span><span class="s2">&quot;subdomain.your-domain.com.&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--description<span class="o">=</span><span class="s2">&quot;Subdomain Zone for GKE kubara&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--visibility<span class="o">=</span>public
+
+<span class="c1"># Print the zone&#39;s nameservers – these are then entered at the domain registrar as a delegated subdomain</span>
+gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span class="w"> </span>describe<span class="w"> </span>kubara-gcp-zone<span class="w"> </span>--format<span class="o">=</span><span class="s2">&quot;value(nameServers)&quot;</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>kubeconfig<span class="w"> </span>&gt;<span class="w"> </span><span class="nv">$HOME</span>/.kube/kubara.yaml
+<p>DNS example:</p>
+<p><img alt="Registrar Screenshot" src="../../images/gcp-dns.jpg" /></p>
+<p>Next, the <code>values.yaml</code> for external-dns needs to be adjusted.</p>
+<div class="highlight"><span class="filename">../platform-configs/&lt;my-cluster&gt;/helm/external-dns/values-gcp.yaml</span><pre><span></span><code><span class="c1"># set project id in service account annotation</span>
+<span class="nt">external-dns</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span>
+<span class="w">  </span><span class="nt">google</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;your-google-cloud-project-id&gt;&quot;</span><span class="w"> </span><span class="c1"># your project</span>
+<span class="w">  </span><span class="nt">domainFilters</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;subdomain.your-domain.com&quot;</span><span class="w"> </span><span class="c1"># your zone</span>
+<span class="w">  </span><span class="nt">serviceAccount</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">create</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-dns-sa</span>
+<span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-dns-sa@&lt;your-gcp-project-id&gt;.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="c1"># replace with your service account</span>
 </code></pre></div>
-</div>
-</div>
-</div>
-<p>Keep this <code>kubara.yaml</code> local and do not commit it to Git.</p>
-<p>Review the Terraform outputs:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="6:2"><input checked="checked" id="__tabbed_6_1" name="__tabbed_6" type="radio" /><input id="__tabbed_6_2" name="__tabbed_6" type="radio" /><div class="tabbed-labels"><label for="__tabbed_6_1">Terraform</label><label for="__tabbed_6_2">Tofu</label></div>
-<div class="tabbed-content">
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output
+<h3 id="external-secrets">External Secrets</h3>
+<div class="highlight"><span class="filename">Configure GCP for External Secrets</span><pre><span></span><code><span class="c1"># 1. Create a Google service account</span>
+<span class="l l-Scalar l-Scalar-Plain">gcloud iam service-accounts create external-secrets-sa \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--display-name=&quot;GKE Kubara External Secrets SA&quot;</span>
+
+<span class="l l-Scalar l-Scalar-Plain"># 2. Grant the service account permission to read secrets (Secret Accessor)</span>
+<span class="l l-Scalar l-Scalar-Plain">gcloud projects add-iam-policy-binding $(gcloud config get-value project) \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member=&quot;serviceAccount:external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com&quot; \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role=&quot;roles/secretmanager.secretAccessor&quot;</span>
+
+<span class="l l-Scalar l-Scalar-Plain"># 3. Link the Kubernetes ServiceAccount via Workload Identity</span>
+<span class="l l-Scalar l-Scalar-Plain">gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role=&quot;roles/iam.workloadIdentityUser&quot; \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member=&quot;serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]&quot;</span>
 </code></pre></div>
-</div>
-<div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output
+<div class="highlight"><span class="filename">../platform-configs/&lt;my-cluster&gt;/helm/external-secrets/values-gcp.yaml</span><pre><span></span><code><span class="nt">external-secrets</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">serviceAccount</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">create</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">    </span><span class="c1"># exact same name as the GCP service account you created in the previous step</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-sa&quot;</span>
+<span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
+<span class="w">      </span><span class="c1"># associate the Kubernetes service account with the GCP service account</span>
+<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-sa@google-project-xyz-0abc.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="c1"># replace with your service account</span>
 </code></pre></div>
+<h4 id="secretstore">SecretStore</h4>
+<p>Create a secretstore.yaml, use this template and change your Project ID:</p>
+<div class="highlight"><span class="filename">secretstore.yaml</span><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretStore</span>
+<span class="nt">metadata</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-store</span>
+<span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets</span>
+<span class="nt">spec</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">gcpsm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">projectID</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">$YOUR-GOOGLE-CLOUD-PROJECT-ID</span><span class="w"> </span><span class="c1"># replace with your project ID</span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Before <code>kubectl apply -f secretstore.yaml</code> can be run, the corresponding CRDs need to be installed first. This is handled automatically by the <code>kubara bootstrap</code> command later, so don't try to apply it now.</p>
 </div>
+<h4 id="create-secrets">Create Secrets</h4>
+<p>Now all secrets required by kubara are created. The commands below are just one proven example — secrets can just as well be created another way, as long as the name and content match.</p>
+<div class="admonition warning">
+<p class="admonition-title">Naming convention</p>
+<p>Replace every secret name below to match your cluster name and stage from <code>config.yaml</code>, using the pattern <code>&lt;cluster&gt;-&lt;stage&gt;-...</code>. Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called cthulhu-dev-cluster-secrets-docker-config. </p>
+<p>Also don't forget to replace the values in the secret command, like for example "$YOUR_COOKIE_SECRET_CREATED_ABOVE".</p>
+<p>In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names and set the values!</p>
 </div>
-</div>
-<p>The outputs are useful for the next steps around your cluster:</p>
+<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field &quot;pull-secret&quot; in Secret Manager</span>
+<span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;$YOUR_PASSWORD_IN_BASE64&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">&#39;{&quot;pull-secret&quot;:.}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;admin-user&quot;:&quot;admin&quot;,&quot;admin-password&quot;:&quot;$YOUR_PASSWORD&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Grafana SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
+
+<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_GRAFANA_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-
+</code></pre></div>
+<div class="highlight"><span class="filename">OAuth2 Proxy Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-oauth2-proxy-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
+
+<span class="c1"># Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;+/&#39;</span><span class="w"> </span><span class="s1">&#39;-_&#39;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+
+<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_OAUTH2_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;,&quot;cookie-secret&quot;:&quot;$YOUR_COOKIE_SECRET_CREATED_ABOVE&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-oauth2-proxy-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+</code></pre></div>
+<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-argocd-argo-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
+
+<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_ARGO_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-argocd-argo-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+</code></pre></div>
+<div class="admonition warning">
+<p class="admonition-title">Before you copy these over</p>
 <ul>
-<li><code>cluster_public_endpoint_ip</code> is the public IP for accessing the CCE control plane from outside the VPC</li>
-<li><code>load_balancer_public_ip</code> is the public IP used by the shared load balancer for Kubernetes Services</li>
-<li><code>dns_zone_name</code> and <code>dns_zone_masters</code> help when delegating or checking public DNS</li>
-<li><code>storage_classes</code> shows the StorageClass names kubara created for the cluster</li>
+<li>Place each snippet below at its matching path under <code>platform-configs/&lt;my-cluster&gt;/helm/...</code>.</li>
+<li>This example uses <code>gcp</code> as the cluster name — double-check your own path if it differs.</li>
+<li>Replace every secret name to match the cluster name and stage defined in your <code>config.yaml</code> 
+(see the naming convention above).</li>
 </ul>
-<p>Now continue with the generic <a href="../../1_getting_started/bootstrapping/">Bootstrap Your Own Platform</a> guide.</p>
+</div>
+<div class="highlight"><span class="filename">platform-configs/&lt;my-cluster&gt;/helm/argo-cd/values-gcp.yaml</span><pre><span></span><code><span class="nt">argo-cd</span><span class="p">:</span><span class="w">  </span>
+<span class="w">  </span><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">dockerPullSecrets</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">image-pull-secret</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-cluster-secrets-docker-config</span><span class="w"> </span><span class="c1"># change name according to your config.yaml (format: $clustername-$stage)</span>
+
+<span class="nt">externalSecrets</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">oauth2-credentials</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-argocd-argo-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name according to your config.yaml (format: $clustername-$stage)</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">platform-configs/&lt;my-cluster&gt;/helm/kube-prometheus-stack/values-gcp.yaml</span><pre><span></span><code><span class="nt">externalSecrets</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">grafana-admin-credentials</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="w">    </span><span class="nt">oauth2-credentials</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">platform-configs/&lt;my-cluster&gt;/helm/oauth2-proxy/values-gcp.yaml</span><pre><span></span><code><span class="nt">externalSecrets</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">oauth2-credentials</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-oauth2-proxy-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+</code></pre></div>
+<h4 id="velero">Velero</h4>
+<p>If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup<br />
+Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance this Google Cloud example.</p>
+<h2 id="part-4-apply-the-secretstore-bootstrap-kubara">Part 4: Apply the SecretStore &amp; Bootstrap Kubara</h2>
+<p>The <code>Secretstore</code> can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in <code>--with-es-css-file</code> if it differs):</p>
+<div class="highlight"><span class="filename">kubara bootstrap</span><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>gcp<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--with-es-css-file<span class="w"> </span>secretstore.yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--with-es-crds<span class="w"> </span>--with-prometheus-crds
+</code></pre></div>
+<p>Now you should have a successfully deployed kubara installation.
+Wait some minutes and check if all helm charts are synced and green.
+Enjoy!</p>
 
 
 
