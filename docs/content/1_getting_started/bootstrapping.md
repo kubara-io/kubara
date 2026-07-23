@@ -61,6 +61,34 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
         Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
         platform will be publicly available by default via your DNS zone.
 
+#### Git repository authentication
+
+kubara creates the initial Argo CD repository secret during `kubara bootstrap`.
+`ARGOCD_GIT_AUTH_MODE` controls which credential fields are written:
+
+| Mode | Required values | Notes |
+| --- | --- | --- |
+| `https` | `ARGOCD_GIT_URL` or legacy `ARGOCD_GIT_HTTPS_URL` | Backward-compatible default. `ARGOCD_GIT_USERNAME` + `ARGOCD_GIT_PAT_OR_PASSWORD` are optional: omit them for public repositories, set both for private ones. `PAT` usually means Personal Access Token and is often tied to a user account. Prefer a technical or machine account and use that account name for `ARGOCD_GIT_USERNAME`; exact username behavior is provider-dependent. |
+| `ssh` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_SSH_PRIVATE_KEY` | Use an SSH repository URL such as `git@github.com:org/repo.git`. Argo CD must know the SSH host key before it can connect securely. |
+| `github-app` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_GITHUB_APP_ID`, `ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID`, `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. |
+
+For new setups, prefer `ARGOCD_GIT_URL`.
+`ARGOCD_GIT_HTTPS_URL` is still supported for existing HTTPS/PAT setups.
+
+For SSH, keep strict host verification enabled.
+The bundled Argo CD Helm chart already includes known hosts for common public providers.
+For private Git hosts, add trusted host keys to the generated Argo CD values before bootstrapping, for example in `platform-configs/<cluster>/helm/argo-cd/values-additional.yaml`:
+
+```yaml
+argo-cd:
+  configs:
+    ssh:
+      extraHosts: |
+        git.example.com ssh-ed25519 <trusted-host-key>
+```
+
+If the required host key is missing, Argo CD will reject the SSH connection as an unknown SSH host.
+
 
 
 ### 1.3 Generate Base Configuration
@@ -73,6 +101,9 @@ kubara init
 
 This command creates a `config.yaml` file based on the values from your `.env`.
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
+The generated Argo CD repository config records the selected Git auth mode in `argocd.repo.authMode`.
+Repository URLs are stored under `argocd.repo.git`.
+Older configs are migrated up to `v1alpha5` when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`, and the old `terraform.dns` block is replaced by `terraform.dnsContactEmail` (the zone name is derived from the cluster `dnsName`).
 
 By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:
 
@@ -123,7 +154,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
@@ -133,15 +164,13 @@ clusters:
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:1.0.0
+      - oci://ghcr.io/kubara-io/catalogs/general:1.1.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
       kubernetesType: <ske, edge or cce>
       kubernetesVersion: 1.34
-      dns:
-        name: <dns-name>
-        email: <email>
+      dnsContactEmail: <email>
 ...
     services:  
       ...

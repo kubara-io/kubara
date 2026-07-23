@@ -10,7 +10,7 @@ import (
 
 func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
-
+	gitRepoURL := e.GitRepositoryURL()
 	services, err := createServicesFromCatalogWithOptions(effectiveCatalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
@@ -19,13 +19,14 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 	argoCD := ArgoCD{
 		SelfManaged: ArgoCDSelfManagedEnabled,
 		Repo: RepoProto{
-			HTTPS: &RepoType{
+			AuthMode: e.GitAuthMode(),
+			Git: &RepoType{
 				Configs: Repository{
-					URL:            e.ArgocdGitHttpsUrl,
+					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
 				Components: Repository{
-					URL:            e.ArgocdGitHttpsUrl,
+					URL:            gitRepoURL,
 					TargetRevision: "main",
 				},
 			},
@@ -51,10 +52,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
-			DNS: DNS{
-				Name:  "<subdomain.my-domain.com>",
-				Email: "my-test@nowhere.com",
-			},
+			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD:   argoCD,
 		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
@@ -124,15 +122,13 @@ func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Clu
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
 			KubernetesVersion: "<version>",
-			DNS: DNS{
-				Name:  "<dns-name>",
-				Email: "<dns-mail>",
-			},
+			DNSContactEmail:   "<dns-mail>",
 		},
 		ArgoCD: ArgoCD{
 			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
-				HTTPS: &RepoType{
+				AuthMode: envconfig.GitAuthModeHTTPS,
+				Git: &RepoType{
 					Configs:    Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
 					Components: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
 				},

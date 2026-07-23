@@ -54,7 +54,7 @@ func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID:         "some-id",
 					KubernetesVersion: "1.34",
-					DNS:               DNS{Name: "example.com", Email: "admin@example.com"},
+					DNSContactEmail:   "admin@example.com",
 					// Should get defaults for:
 					// Provider and KubernetesType
 				},
@@ -89,7 +89,8 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 			{
 				ArgoCD: ArgoCD{
 					Repo: RepoProto{
-						HTTPS: &RepoType{
+						AuthMode: "https",
+						Git: &RepoType{
 							Configs:    Repository{URL: "https://github.com/customer/repo.git"},
 							Components: Repository{URL: "https://github.com/managed/repo.git", TargetRevision: "release"},
 						},
@@ -102,10 +103,10 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 	applyDefaults(cfg)
 
 	argocd := cfg.Clusters[0].ArgoCD
-	https := argocd.Repo.HTTPS
+	git := cfg.Clusters[0].ArgoCD.Repo.Git
 	assert.Equal(t, ArgoCDSelfManagedEnabled, argocd.SelfManaged, "empty SelfManaged should default to enabled")
-	assert.Equal(t, "main", https.Configs.TargetRevision, "empty TargetRevision should default to main")
-	assert.Equal(t, "release", https.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
+	assert.Equal(t, "main", git.Configs.TargetRevision, "empty TargetRevision should default to main")
+	assert.Equal(t, "release", git.Components.TargetRevision, "explicit TargetRevision should not be overwritten")
 }
 
 func TestApplyDefaults_MultipleSliceElements(t *testing.T) {

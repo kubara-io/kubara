@@ -49,15 +49,13 @@ func TestNewClusterFromEnv(t *testing.T) {
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
 			KubernetesVersion: "1.34",
-			DNS: DNS{
-				Name:  expectedDNSName,
-				Email: "my-test@nowhere.com",
-			},
+			DNSContactEmail:   "my-test@nowhere.com",
 		},
 		ArgoCD: ArgoCD{
 			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
-				HTTPS: &RepoType{
+				AuthMode: envconfig.GitAuthModeHTTPS,
+				Git: &RepoType{
 					Configs: Repository{
 						URL:            "https://github.com/org/repo.git",
 						TargetRevision: "main",

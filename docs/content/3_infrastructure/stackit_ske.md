@@ -30,9 +30,7 @@ terraform:
   projectId: <project-id>
   kubernetesType: ske
   kubernetesVersion: 1.34
-  dns:
-    name: <dns-name>
-    email: <email>
+  dnsContactEmail: <email>
 ```
 
 For STACKIT SKE, set `projectId` to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.

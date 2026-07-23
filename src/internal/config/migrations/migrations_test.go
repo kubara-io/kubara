@@ -1,10 +1,13 @@
 package migrations
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -36,6 +39,101 @@ func TestMigrateV1Alpha2FilesCleansUpEmptyLegacyCategoryDirs(t *testing.T) {
 	assert.NoDirExists(t, filepath.Join(tempDir, "customer-service-catalog", "terraform", "test-cluster"))
 	assert.DirExists(t, filepath.Join(tempDir, "customer-service-catalog", "terraform"))
 	assert.FileExists(t, filepath.Join(otherTerraformSource, "keep.tf"))
+}
+
+func TestMigrateV1Alpha4ConfigRenamesRepoAndDNS(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha4,
+		"clusters": []any{
+			map[string]any{
+				"name":    "test-cluster",
+				"dnsName": "example.com",
+				"argocd": map[string]any{
+					"repo": map[string]any{
+						"oci": map[string]any{
+							"configs": map[string]any{"url": "ghcr.io/example/configs"},
+						},
+						"https": map[string]any{
+							"configs":    map[string]any{"url": "https://github.com/example/configs.git"},
+							"components": map[string]any{"url": "https://github.com/example/components.git"},
+						},
+					},
+				},
+				"terraform": map[string]any{
+					"projectId": "some-id",
+					"dns": map[string]any{
+						"name":  "example.com",
+						"email": "admin@example.com",
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha4Config(config))
+
+	assert.Equal(t, ConfigVersionV1Alpha5, config["version"])
+
+	cluster := config["clusters"].([]any)[0].(map[string]any)
+	repo := cluster["argocd"].(map[string]any)["repo"].(map[string]any)
+	assert.Contains(t, repo, "git")
+	assert.NotContains(t, repo, "https")
+	assert.Contains(t, repo["git"].(map[string]any), "configs")
+	assert.Contains(t, repo, "oci")
+
+	terraform := cluster["terraform"].(map[string]any)
+	assert.NotContains(t, terraform, "dns")
+	assert.Equal(t, "admin@example.com", terraform["dnsContactEmail"])
+}
+
+func TestMigrateV1Alpha4ConfigWarnsWhenLegacyDNSNameDiffers(t *testing.T) {
+	var logOutput bytes.Buffer
+	previousLogger := log.Logger
+	log.Logger = zerolog.New(&logOutput)
+	t.Cleanup(func() {
+		log.Logger = previousLogger
+	})
+
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha4,
+		"clusters": []any{
+			map[string]any{
+				"name":    "test-cluster",
+				"dnsName": "new.example.com",
+				"terraform": map[string]any{
+					"dns": map[string]any{
+						"name": "legacy.example.com",
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha4Config(config))
+	assert.Contains(t, logOutput.String(), "terraform.dns.name differs from the cluster dnsName")
+	assert.Contains(t, logOutput.String(), `"legacyDnsName":"legacy.example.com"`)
+	assert.Contains(t, logOutput.String(), `"dnsName":"new.example.com"`)
+}
+
+func TestMigrateV1Alpha4ConfigRejectsConflictingKeys(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha4,
+		"clusters": []any{
+			map[string]any{
+				"name": "test-cluster",
+				"argocd": map[string]any{
+					"repo": map[string]any{
+						"https": map[string]any{"configs": map[string]any{}},
+						"git":   map[string]any{"configs": map[string]any{}},
+					},
+				},
+			},
+		},
+	}
+
+	err := migrateV1Alpha4Config(config)
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "both legacy https and git")
 }
 
 func TestMigrateV1Alpha2ConfigMigratesReposAndCatalogDirs(t *testing.T) {
@@ -211,7 +309,7 @@ func TestMigrateV1Alpha3Config(t *testing.T) {
 	assert.Equal(t, ConfigVersionV1Alpha4, config["version"])
 
 	cluster := config["clusters"].([]any)[0].(map[string]any)
-	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.0.0"}, cluster["catalogs"])
+	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.1.0"}, cluster["catalogs"])
 	assert.Equal(t, "disabled", cluster["argocd"].(map[string]any)["selfManaged"])
 	assert.NotContains(t, cluster["services"], "argocd")
 }

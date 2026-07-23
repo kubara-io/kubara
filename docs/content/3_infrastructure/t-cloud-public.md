@@ -14,9 +14,7 @@ terraform:
   projectId: <tenant-name>
   kubernetesType: cce
   kubernetesVersion: 1.29
-  dns:
-    name: <dns-name>
-    email: <email>
+  dnsContactEmail: <email>
 ```
 
 For T Cloud Public, set `projectId` to the tenant/project name used as `tenant_name`, not to a UUID.

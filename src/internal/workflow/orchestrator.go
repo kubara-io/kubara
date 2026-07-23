@@ -17,9 +17,14 @@ func CreateOrUpdateCluster(cfg *config.Config, e *envconfig.EnvMap, catalogOptio
 			fmt.Printf("Found existing cluster '%s', updating fields...\n", clusterName)
 
 			// Apply the new values from the environment to the found cluster.
+			gitRepoURL := e.GitRepositoryURL()
 			cfg.Clusters[i].Stage = e.ProjectStage
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Configs.URL = e.ArgocdGitHttpsUrl
-			cfg.Clusters[i].ArgoCD.Repo.HTTPS.Components.URL = e.ArgocdGitHttpsUrl
+			cfg.Clusters[i].ArgoCD.Repo.AuthMode = e.GitAuthMode()
+			if cfg.Clusters[i].ArgoCD.Repo.Git == nil {
+				cfg.Clusters[i].ArgoCD.Repo.Git = &config.RepoType{}
+			}
+			cfg.Clusters[i].ArgoCD.Repo.Git.Configs.URL = gitRepoURL
+			cfg.Clusters[i].ArgoCD.Repo.Git.Components.URL = gitRepoURL
 
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)

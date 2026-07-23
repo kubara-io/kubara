@@ -931,8 +931,8 @@ middleware:
 
 func localProjectSourceRepos(opts *Options) []string {
 	repos := []string{
-		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Components.URL,
-		opts.ClusterConfig.ArgoCD.Repo.HTTPS.Configs.URL,
+		opts.ClusterConfig.ArgoCD.Repo.Git.Components.URL,
+		opts.ClusterConfig.ArgoCD.Repo.Git.Configs.URL,
 		"https://charts.external-secrets.io/",
 		"https://charts.jetstack.io",
 		"https://prometheus-community.github.io/helm-charts",

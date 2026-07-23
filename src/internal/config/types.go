@@ -11,6 +11,7 @@ const (
 	ConfigVersionV1Alpha2 = "v1alpha2"
 	ConfigVersionV1Alpha3 = "v1alpha3"
 	ConfigVersionV1Alpha4 = "v1alpha4"
+	ConfigVersionV1Alpha5 = "v1alpha5"
 )
 
 const (
@@ -44,7 +45,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha4,default=v1alpha4"`
+	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha5,default=v1alpha5"`
 	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty" jsonschema:"title=Bootstrap Catalog,description=The global bootstrap catalog to use."`
 	Clusters         []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
@@ -72,12 +73,7 @@ type Terraform struct {
 	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The provider-specific project subscription or tenant identifier. For t-cloud-public use the tenant or project name rather than a UUID.,minLength=1"`
 	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,enum=cce,default=ske"`
 	KubernetesVersion string            `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
-	DNS               DNS               `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
-}
-
-type DNS struct {
-	Name  string `json:"name" yaml:"name" jsonschema:"required,title=DNS Zone Name,description=The managed DNS zone name.,format=hostname"`
-	Email string `json:"email" yaml:"email" jsonschema:"required,title=Admin Email,description=Administrative email for the DNS zone.,format=email"`
+	DNSContactEmail   string            `json:"dnsContactEmail" yaml:"dnsContactEmail" jsonschema:"required,title=DNS Zone Contact Email,description=Administrative contact email for the managed DNS zone. The zone name itself is derived from the cluster dnsName.,format=email"`
 }
 
 type ArgoCDSelfManagedStatus string
@@ -94,9 +90,10 @@ type ArgoCD struct {
 }
 
 type RepoProto struct {
-	_     struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
-	HTTPS *RepoType `json:"https,omitempty" yaml:"https,omitempty" jsonschema:"title=Https Repository"`
-	OCI   *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
+	_        struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
+	AuthMode string    `json:"authMode,omitempty" yaml:"authMode,omitempty" jsonschema:"title=Git Auth Mode,description=Authentication mode kubara uses for the initial Argo CD Git repository secret.,enum=https,enum=ssh,enum=github-app,default=https"`
+	Git      *RepoType `json:"git,omitempty" yaml:"git,omitempty" jsonschema:"title=Git Repository"`
+	OCI      *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
 }
 
 type RepoType struct {
@@ -105,7 +102,7 @@ type RepoType struct {
 }
 
 type Repository struct {
-	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
+	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Git repository URL used by Argo CD. Use an HTTP(S) URL for https/github-app auth modes or an SSH URL for ssh auth mode.,minLength=1"`
 	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
 }
 

@@ -278,12 +278,36 @@ jobs:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
+      # TODO: Remove this checkout and the local packaging step once catalog
+      # version 1.1.0 has been published by kubara-io/catalogs#6.
+      - name: Checkout matching catalogs
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          repository: kubara-io/catalogs
+          ref: feat/catalog-repository-auth
+          path: .ci/catalogs
+
       - name: Setup Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version-file: src/go.mod
           cache: true
           cache-dependency-path: src/go.sum
+
+      - name: Build kubara CLI
+        working-directory: src
+        run: go build -o "${RUNNER_TEMP}/kubara" .
+
+      - name: Package matching catalogs locally
+        run: |
+          set -euo pipefail
+          for catalog in bootstrap general; do
+            (
+              cd ".ci/catalogs/${catalog}"
+              "${RUNNER_TEMP}/kubara" catalog package \
+                oci://ghcr.io/kubara-io/catalogs/
+            )
+          done
 
       - name: Create output directory
         run: |
@@ -293,8 +317,9 @@ jobs:
       - name: kubara init --prep
         run: |
           set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
+          "${RUNNER_TEMP}/kubara" \
+            --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" \
+            init --prep
 
       - name: Update .env (strict template mode)
         run: |
@@ -304,8 +329,9 @@ jobs:
       - name: kubara init
         run: |
           set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
+          "${RUNNER_TEMP}/kubara" \
+            --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" \
+            init
 
       - name: Update config.yaml (strict mode)
         run: |
@@ -314,8 +340,9 @@ jobs:
 
       - name: Generate kubara artifacts
         run: |
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
+          "${RUNNER_TEMP}/kubara" \
+            --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" \
+            generate
 
       - name: Upload generated helm and terraform files
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7

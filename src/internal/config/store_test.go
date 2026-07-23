@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version:          ConfigVersionV1Alpha4,
+		Version:          ConfigVersionV1Alpha5,
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
@@ -34,15 +34,13 @@ func newValidTestConfig() *Config {
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
 					KubernetesType:    "ske",
 					KubernetesVersion: "1.34",
-					DNS: DNS{
-						Name:  "example.com",
-						Email: "admin@example.com",
-					},
+					DNSContactEmail:   "admin@example.com",
 				},
 				ArgoCD: ArgoCD{
 					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
-						HTTPS: &RepoType{
+						AuthMode: "https",
+						Git: &RepoType{
 							Configs: Repository{
 								URL:            "https://github.com/example/configs.git",
 								TargetRevision: "main",
@@ -310,7 +308,7 @@ func TestConfigStore_Validate(t *testing.T) {
 	// Test format validation (email)
 	invalidConfigFormatMismatch := deepCopyConfig(validConfig)
 	clonedTerraform := *invalidConfigFormatMismatch.Clusters[0].Terraform
-	clonedTerraform.DNS.Email = "not-an-email"
+	clonedTerraform.DNSContactEmail = "not-an-email"
 	invalidConfigFormatMismatch.Clusters[0].Terraform = &clonedTerraform
 
 	// Terraform is optional at the cluster level

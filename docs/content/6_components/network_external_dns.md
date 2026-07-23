@@ -49,9 +49,7 @@ clusters:
 
     terraform:
       provider: stackit # currently supported: stackit
-      dns:
-        name: "example-zone"
-        email: "hostmaster@example.com"
+      dnsContactEmail: "hostmaster@example.com"
 
     services:
       external-dns:
@@ -60,8 +58,8 @@ clusters:
 
 ### Explanation
 
-- **`dnsName`** → base domain for the cluster  
-- **`terraform.dns`** → defines the zone for which kubara generates Terraform code (name and contact email).
+- **`dnsName`** → base domain for the cluster, also used as the zone name for which kubara generates Terraform code
+- **`terraform.dnsContactEmail`** → administrative contact email for the managed DNS zone.
 - **`services.external-dns.status`** → when set to `enabled`, ExternalDNS is templated into the Helm charts for deployment via Argo CD.
 - **provider-specific settings** → configure them in the chart overlay values (`values.generated.yaml` plus any extra `values-*.yaml` files you add).
 
