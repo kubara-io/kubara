@@ -93,8 +93,9 @@ jobs:
 
       - name: Extract images and set goreleaser header
         run: |
-          MANAGED=/tmp/gen/managed-service-catalog/helm \
-          OUTPUT_FILE=/tmp/images.txt \
+          CONFIG_FILE=/tmp/gen/config.yaml \
+          MANAGED=/tmp/gen/platform-components/helm \
+          IMAGE_OUTPUT_FILE=/tmp/images.txt \
             "$GITHUB_WORKSPACE"/.scripts/image-version.sh
           {
             echo "IMAGE_LIST<<EOF"
