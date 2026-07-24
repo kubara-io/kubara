@@ -55,7 +55,7 @@ yq eval '(.clusters[0].services[] | .status) = "enabled"' -i "$CFG"
 # metalb, loki and velero need custom configs
 yq eval '.clusters[0].services.metallb.config.publicLoadBalancerIPs = "203.0.113.10"' -i "$CFG"
 yq eval '.clusters[0].services.metallb.config.loadBalancerAddressPool = ["203.0.113.0/24"]' -i "$CFG"
-yq eval '.clusters[0].storage.bucketNames.chunks = "loki"' -i "$CFG"
+# yq eval '.clusters[0].storage.bucketNames.chunks = "loki"' -i "$CFG"
 
 yq eval '.clusters[0].services.velero.config.backupStorage.s3Url = "https://bucket.example.com"' -i "$CFG"
 

@@ -445,7 +445,7 @@ jobs:
         with:
           sparse-checkout: |
             .scripts
-            .github/helm-profiles
+            .github
 
       - name: Download generated kubara artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
@@ -458,7 +458,9 @@ jobs:
       - name: Extract container images
         run: |
           mkdir -p reports
-          OUTPUT_FILE="$PWD/reports/images.txt" .scripts/image-version.sh
+          IMAGE_OUTPUT_FILE="$PWD/reports/images.txt" 
+          HELM_CHART_VERSION_FILE="$PWD/reports/chart.txt" 
+          .scripts/image-version.sh
 
       - name: Write image summary
         if: always()

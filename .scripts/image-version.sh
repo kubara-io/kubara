@@ -9,12 +9,14 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 MANAGED="${MANAGED:-${PWD}/platform-components/helm}"
 CONFIG_FILE="${CONFIG_FILE:-config.yaml}"
+
+[[ -f "$CONFIG_FILE" ]] || { echo "::error::Missing $CONFIG_FILE — run 'kubara generate' first (or cd into its output)"; exit 1; }
+
 CLUSTER_NAME="$(yq -r '.clusters[0].name' "$CONFIG_FILE")"
 CONFIGS="${CONFIGS:-platform-configs/${CLUSTER_NAME}/helm}"
 IMAGE_OUTPUT_FILE="${IMAGE_OUTPUT_FILE:-}"
 HELM_IMAGE_OUTPUT_FILE="${HELM_IMAGE_OUTPUT_FILE:-}"
 
-[[ -f "$CONFIG_FILE" ]] || { echo "::error::Missing $CONFIG_FILE — run 'kubara generate' first (or cd into its output)"; exit 1; }
 [[ -d "$MANAGED" ]]     || { echo "::error::Missing $MANAGED — run 'kubara generate' first"; exit 1; }
 command -v helm >/dev/null 2>&1 || { echo "::error::helm not found on PATH"; exit 1; }
 command -v yq   >/dev/null 2>&1 || { echo "::error::yq not found on PATH"; exit 1; }
@@ -47,7 +49,7 @@ for chart_path in "$MANAGED"/*/; do
 
     echo "Updating dependency for ${chart_path}" >&2
 
-    if ! dep_out=$(helm dependency update "$chart_path" >/dev/null 2>&1); then
+    if ! dep_out=$(helm dependency update "$chart_path" 2>&1 >/dev/null ); then
         echo "::error::helm dependency update failed for '$chart_path'"; echo "$dep_out" >&2
         FAILED+=("$chart:dependency-update"); continue
     fi
@@ -64,9 +66,13 @@ for chart_path in "$MANAGED"/*/; do
     fi
 done
 
+# Note! This script does capture normal, init and sidecar containers, but by design
+# misses out on runtime-injected images (e.g through webhooks, Kyverno etc.)
+# and images refs passed via environment, this does not represent an exhaustive list of images
+# captured
 IMAGES="$(
   cat "$render_dir"/*.yaml |
-    grep -E '^[[:space:]]*image:' |
+    grep -E '^[[:space:]]*image:' || true |
     sed -E "s/^[[:space:]]*image:[[:space:]]*//; s/[\"']//g" |
     grep -vE '[*!]' |          # drop kyverno wildcard/negation entries
     grep -vE '^[[:space:]]*$' |
@@ -77,19 +83,30 @@ echo "Done Rendering!"
 
 [[ -n "$IMAGES" ]] || { echo "::warning::No image references found"; exit 0; }
 
-echo "$IMAGES"
-echo "Extracting Helm Dependencies"
-HELM_IMAGES="$(find . -name Chart.yaml -exec yq '.dependencies[] | select(.name != "template-library") | .name + ": " + .version' {} \;)"
-echo "$HELM_IMAGES"
-
-[[ -n "$HELM_IMAGES" ]] || { echo "::warning::No helm image references found"; exit 0; }
+if ((${#FAILED[@]})); then
+    echo "::warning:: Errors during templating: "
+    for err in "${FAILED[@]}"; do
+        echo "- $err"
+    done
+    exit 1
+fi
 
 if [[ -n "$IMAGE_OUTPUT_FILE" ]]; then
     echo "$IMAGES" > "$IMAGE_OUTPUT_FILE"
     echo "::notice::Image list written to $IMAGE_OUTPUT_FILE"
 fi
 
+echo "$IMAGES"
+
+### Helm dependency part
+echo "Extracting Helm Dependencies"
+HELM_CHART_VERSIONS="$(find "$MANAGED" -name Chart.yaml -exec yq '.dependencies[] | select(.name != "template-library") | .name + ": " + .version' {} \;)"
+echo "$HELM_CHART_VERSIONS"
+
+[[ -n "$HELM_CHART_VERSIONS" ]] || { echo "::warning::No helm image references found"; exit 0; }
+
+
 if [[ -n "$HELM_IMAGE_OUTPUT_FILE" ]]; then
-    echo "$HELM_IMAGES" > "$HELM_IMAGE_OUTPUT_FILE"
+    echo "$HELM_CHART_VERSIONS" > "$HELM_IMAGE_OUTPUT_FILE"
     echo "::notice:: Helm Image list written to $HELM_IMAGE_OUTPUT_FILE"
 fi
