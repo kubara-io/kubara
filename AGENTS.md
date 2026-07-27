@@ -18,7 +18,7 @@ These instructions apply to the entire repository unless a deeper `AGENTS.md` ov
 If docs and code diverge, treat code/tests as current behavior and update the nearest relevant docs in the same change.
 
 ## Reference Map
-- Product setup and bootstrap flow: `docs/content/1_getting_started/bootstrap_process.md`
+- Product setup and bootstrap flow: `docs/content/1_getting_started/bootstrapping.md`
 - Runtime prerequisites: `docs/content/1_getting_started/prerequisites.md`
 - Architecture context: `docs/content/7_architecture/architecture_overview.md`
 - Contributor and PR workflow: `CONTRIBUTING.md`
