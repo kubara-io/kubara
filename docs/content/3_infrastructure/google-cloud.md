@@ -398,8 +398,7 @@ The `Secretstore` can be passed directly into the bootstrap process instead of a
 
 ```bash title="kubara bootstrap"
 kubara bootstrap gcp \
-  --with-es-css-file secretstore.yaml \
-  --with-es-crds --with-prometheus-crds
+  --with-es-css-file secretstore.yaml
 ```
 
 Now you should have a successfully deployed kubara installation.
