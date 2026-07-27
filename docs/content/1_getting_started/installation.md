@@ -142,7 +142,10 @@ $ source <(kubara completion bash)
 $ source <(kubara completion zsh)
 # after loading your rc file or opening a new terminal you will have tab completion for kubara
 $ kubara <tab>
+agents     -- Scaffold an onboarding file for AI coding assistants (AGENTS.md)
 bootstrap  -- Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD
+catalog    -- Manage platform catalogs
+cluster    -- Manage your kubara cluster configurations
 generate   -- Generate Helm and Terraform artifacts from configured catalog templates
 help       -- Shows a list of commands or help for one command
 init       -- Initialize a new kubara directory
