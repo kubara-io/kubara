@@ -22,14 +22,14 @@ Later `schema`, `generate`, and `bootstrap` runs automatically resolve the catal
 
 ### Optional: Ingress annotation overrides
 
-Each service supports an optional `ingress.annotations` map that is merged with kubara's default annotations when rendering the service values files.
+Each service supports an optional `networking.annotations` map that is merged with kubara's default annotations when rendering the service values files.
 This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.
 
 ```yaml
 services:
-  kubePrometheusStack:
+  kube-prometheus-stack:
     status: enabled
-    ingress:
+    networking:
       annotations:
         nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
         nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
