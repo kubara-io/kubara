@@ -61,7 +61,7 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
 	assert.Equal(t, "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
-	assert.Equal(t, "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.", command.Description)
+	assert.Equal(t, "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
 	require.Len(t, command.Flags, 3)
@@ -146,7 +146,7 @@ func TestGenerateCmd(t *testing.T) {
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
 
-				// Provider selector folders are internal to embedded templates
+				// Provider selector folders are internal to catalog templates
 				// and must not leak into generated output paths.
 				_, err = os.Stat(filepath.Join(terraformDir, "stackit", "modules", "ske-cluster", "main.tf"))
 				require.NoError(t, err)

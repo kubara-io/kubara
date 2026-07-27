@@ -143,7 +143,7 @@ $ source <(kubara completion zsh)
 # after loading your rc file or opening a new terminal you will have tab completion for kubara
 $ kubara <tab>
 bootstrap  -- Bootstrap ArgoCD onto the specified cluster with optional external-secrets and prometheus CRD
-generate   -- generates files from embedded templates and the config file; by default for both Helm and Terraform
+generate   -- Generate Helm and Terraform artifacts from configured catalog templates
 help       -- Shows a list of commands or help for one command
 init       -- Initialize a new kubara directory
 schema     -- Generate JSON schema file for config structure

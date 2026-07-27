@@ -25,7 +25,7 @@ If docs and code diverge, treat code/tests as current behavior and update the ne
 - Config schema and template keys: `src/internal/config/types.go` (use `kubara schema` when needed)
 
 ## Project Layout
-- `src/`: Go CLI implementation, tests, embedded templates, release Makefile
+- `src/`: Go CLI implementation, tests, catalog engine, release Makefile
 - `docs/`: MkDocs site managed with `uv`
 - Root `Makefile`: monorepo entry point delegating to `src/` and `docs/`
 
