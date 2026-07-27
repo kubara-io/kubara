@@ -13,9 +13,17 @@ release:
   replace_existing_artifacts: true
   extra_files:
     - glob: licenses.csv
-  header: |
-    ## Container Images
-    {{ .Env.IMAGE_LIST }}
+  footer: |
+    ## Platform images
+    Container images referenced by the platform components in this release
+    ```text
+    {{ .Env.KUBARA_IMAGE_LIST }}
+    ```
+    ## Helm Charts
+    Helm Chart Versions for Images:
+    ```text
+    {{ .Env.HELM_IMAGES_VER }}
+    ```
 changelog:
   use: git
   sort: asc

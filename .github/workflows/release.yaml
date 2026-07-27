@@ -68,7 +68,43 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
+          set -euo pipefail
+
+          # TODO: replace dummy command with correct one
           echo "Dummy command"
+
+          cat > /tmp/platform-images.txt << 'EOF'
+          ghcr.io/dummy/argo-cd:v0.0.0-dummy
+          ghcr.io/dummy/cert-manager:v0.0.0-dummy
+          ghcr.io/dummy/external-secrets:v0.0.0-dummy
+          EOF
+
+          cat > /tmp/helm-images-ver.txt << 'EOF'
+          ghcr.io/helm/argo-cd:v0.0.0-dummy
+          ghcr.io/helm/cert-manager:v0.0.0-dummy
+          ghcr.io/helm/external-secrets:v0.0.0-dummy
+          EOF
+
+          echo "Images used for this release"
+          cat /tmp/platform-images.txt
+          echo "Helm Chart Versions used for this release"
+          cat /tmp/helm-images-ver.txt
+
+          
+          # write to Github Actions environment
+          {
+            echo 'images-list<<KUBARA_IMAGES_EOF'
+            cat /tmp/platform-images.txt
+            echo 'KUBARA_IMAGES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+          {
+            echo 'helm-images-ver<<KUBARA_HELM_IMAGES_EOF'
+            cat /tmp/helm-iamges-ver.txt
+            echo 'KUBARA_HELM_IMAGES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+          
 
 
 
@@ -82,6 +118,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          KUBARA_IMAGE_LIST: ${{ steps.images.outputs.images-list }}
+          HELM_IMAGES_VER: ${{ steps.images.outputs.helm-images-ver }}
           # The base64 of the contents of your '.p12' key.
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
           # The password to open the '.p12' key.
