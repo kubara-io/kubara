@@ -32,8 +32,6 @@ env:
   # renovate: datasource=github-releases depName=terraform-linters/tflint
   TFLINT_VERSION: "v0.63.1"
   ARTIFACT_RETENTION_DAYS: "15"
-  # renovate: datasource=github-releases depName=aquasecurity/trivy
-  TRIVY_VERSION: "v0.70.0"
 
 permissions:
   contents: read
