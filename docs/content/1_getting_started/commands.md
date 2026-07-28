@@ -235,21 +235,21 @@ Shows a list of commands or help for one command
 
 Log into a registry and store credentials
 
->kubara catalog login [flags] <registry>
+>kubara catalog login [flags] <registry>.
 
 **--help, -h**: show help
 
-**--identity-token**: Log in with identity token interactively
+**--identity-token**="": identity token
 
 **--identity-token-stdin**: Log in with identity token from stdin
 
 **--insecure**: Ignore TLS certificate verification issues for registry connections.
 
-**--password, -p**: Log in with password interactively
+**--password, -p**="": registry password
 
 **--password-stdin**: Log in with password from stdin
 
-**--username, -u**="": Log in using username and password
+**--username, -u**="": registry username
 
 #### help, h
 
