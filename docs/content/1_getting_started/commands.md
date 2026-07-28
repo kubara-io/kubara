@@ -233,7 +233,7 @@ Shows a list of commands or help for one command
 
 Log into a registry and store credentials
 
->kubara catalog login [flags] <registry>.
+>kubara catalog login [flags] <registry>
 
 **--help, -h**: show help
 
