@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
@@ -230,6 +231,10 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 		return fmt.Errorf("load config file: %w", configLoadErr)
 	}
 
+	if err := o.ensureRenovateConfig(cs); err != nil {
+		return err
+	}
+
 	if err := workflow.CreateOrUpdateCluster(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
 		return fmt.Errorf("create or update cluster from env: %w", err)
 	}
@@ -264,6 +269,10 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 		return err
 	}
 
+	if err := o.ensureRenovateConfig(cs); err != nil {
+		return err
+	}
+
 	if fileExists {
 		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
 		log.Info().Msg("Initialized successfully")
@@ -294,5 +303,79 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 	}
 
 	log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
+	return nil
+}
+
+func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
+	baseDir := filepath.Dir(cs.GetFilepath())
+	// https://docs.renovatebot.com/configuration-options/#locations-for-configuration-filenames
+	renovateFiles := []string{
+		"renovate.json",
+		"renovate.jsonc",
+		"renovate.json5",
+		".github/renovate.json",
+		".github/renovate.jsonc",
+		".github/renovate.json5",
+		".gitlab/renovate.json",
+		".gitlab/renovate.jsonc",
+		".gitlab/renovate.json5",
+		".renovaterc",
+		".renovaterc.json",
+		".renovaterc.jsonc",
+		".renovaterc.json5",
+	}
+
+	for _, file := range renovateFiles {
+		exists, err := utils.FileExist(filepath.Join(baseDir, file))
+		if err != nil {
+			return err
+		}
+		if exists {
+			return nil
+		}
+	}
+
+	renovatePath := filepath.Join(baseDir, "renovate.json")
+	configFileBase := filepath.Base(cs.GetFilepath())
+	fileMatchPattern := fmt.Sprintf("(^|/)%s$", regexp.QuoteMeta(configFileBase))
+
+	content := fmt.Sprintf(`{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update kubara catalog OCI references",
+      "fileMatch": [
+        %q
+      ],
+      "matchStrings": [
+        "oci:\\/\\/(?<depName>[^:\\s\"'`+"`"+`]+):(?<currentValue>[^\\s\"'`+"`"+`]+)"
+      ],
+      "datasourceTemplate": "docker"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Enforce semantic versioning for kubara catalogs",
+      "matchDatasources": [
+        "docker"
+      ],
+      "matchPackagePatterns": [
+        "^ghcr\\.io/kubara-io/catalogs/"
+      ],
+      "versioning": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
+    }
+  ]
+}
+`, fileMatchPattern)
+
+	if err := os.WriteFile(renovatePath, []byte(content), 0o644); err != nil {
+		return fmt.Errorf("write renovate config: %w", err)
+	}
+
+	log.Info().Msgf("Generated renovate config in path: %s", renovatePath)
 	return nil
 }
