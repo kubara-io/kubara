@@ -5,7 +5,7 @@ go 1.26.5
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260726151249-4eca63684042
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260731165437-504426d3a267
 	github.com/fatih/color v1.19.0
 	github.com/go-git/go-git/v5 v5.19.1
 	github.com/go-viper/mapstructure/v2 v2.5.0
