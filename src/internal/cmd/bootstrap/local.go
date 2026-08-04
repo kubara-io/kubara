@@ -355,17 +355,19 @@ func waitForLocalOpenBaoReady(ctx context.Context, client *k8s.Client, kubeconfi
 	var lastErr error
 
 	for {
-		if _, err := kubectlExec(ctx, kubeconfigPath,
+		// Run 'bao status' directly via runCommand (no token needed for status checks)
+		_, err := runCommand(ctx, "kubectl", map[string]string{"KUBECONFIG": kubeconfigPath}, "",
 			"-n", localOpenBaoNamespace,
 			"exec", localOpenBaoPodName,
+			"-c", "openbao",
 			"--",
 			"bao", "status",
-		); err == nil {
+		)
+		if err == nil {
 			log.Info().Msg("OpenBao is ready for configuration")
 			return nil
-		} else {
-			lastErr = err
 		}
+		lastErr = err
 
 		select {
 		case <-ctx.Done():
@@ -512,9 +514,7 @@ func configureLocalOpenBao(ctx context.Context, kubeconfigPath string, cluster *
 		"exec", localOpenBaoPodName,
 		"--",
 		"bao", "write", "auth/kubernetes/config",
-		"token_reviewer_jwt=@/var/run/secrets/kubernetes.io/serviceaccount/token",
 		"kubernetes_host=https://kubernetes.default.svc:443",
-		"kubernetes_ca_cert=@/var/run/secrets/kubernetes.io/serviceaccount/ca.crt",
 	); err != nil {
 		return fmt.Errorf("configure OpenBao kubernetes auth: %w", err)
 	}
@@ -639,11 +639,67 @@ func kubectlBao(ctx context.Context, kubeconfigPath string, args ...string) ([]b
 }
 
 func kubectlExec(ctx context.Context, kubeconfigPath string, args ...string) ([]byte, error) {
-	return runCommand(ctx, "kubectl", map[string]string{"KUBECONFIG": kubeconfigPath}, "", args...)
+	return kubectlExecWithInput(ctx, kubeconfigPath, "", args...)
 }
 
 func kubectlExecWithInput(ctx context.Context, kubeconfigPath, input string, args ...string) ([]byte, error) {
+	token, err := getOpenBaoRootToken(ctx, kubeconfigPath)
+	if err != nil {
+		return nil, fmt.Errorf("get local openbao token: %w", err)
+	}
+
+	var targetCmd []string
+	foundDashDash := false
+
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--" {
+			foundDashDash = true
+			targetCmd = args[i+1:]
+			break
+		}
+	}
+
+	if foundDashDash && len(targetCmd) > 0 {
+		execArgs := []string{
+			"-n", localOpenBaoNamespace,
+			"exec",
+		}
+		if input != "" {
+			execArgs = append(execArgs, "-i")
+		}
+
+		var quotedCmds []string
+		for _, arg := range targetCmd {
+			quotedCmds = append(quotedCmds, strconv.Quote(arg))
+		}
+
+		shellCmd := fmt.Sprintf("BAO_TOKEN=%s exec %s", token, strings.Join(quotedCmds, " "))
+
+		execArgs = append(execArgs, localOpenBaoPodName, "-c", "openbao", "--", "sh", "-c", shellCmd)
+		return runCommand(ctx, "kubectl", map[string]string{"KUBECONFIG": kubeconfigPath}, input, execArgs...)
+	}
+
 	return runCommand(ctx, "kubectl", map[string]string{"KUBECONFIG": kubeconfigPath}, input, args...)
+}
+
+func getOpenBaoRootToken(ctx context.Context, kubeconfigPath string) (string, error) {
+	out, err := runCommand(ctx, "kubectl", map[string]string{"KUBECONFIG": kubeconfigPath}, "",
+		"-n", localOpenBaoNamespace,
+		"exec", localOpenBaoPodName,
+		"-c", "openbao",
+		"--",
+		"sh", "-c", `tr -d '\n\r' < /openbao/data/local-bootstrap/init.json | sed -n 's/.*"root_token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'`,
+	)
+	if err != nil {
+		return "", fmt.Errorf("failed to extract OpenBao root token: %w", err)
+	}
+
+	token := strings.TrimSpace(string(out))
+	if token == "" {
+		return "", fmt.Errorf("extracted OpenBao root token is empty")
+	}
+
+	return token, nil
 }
 
 func writeOpenBaoKVSecret(ctx context.Context, kubeconfigPath, remoteKey string, fields map[string]string) error {
@@ -663,10 +719,28 @@ func writeOpenBaoKVSecret(ctx context.Context, kubeconfigPath, remoteKey string,
 }
 
 func writeLocalOpenBaoValues(state *LocalState) error {
-	content := fmt.Sprintf(`server:
+	content := fmt.Sprintf(`# WARNING: This configuration is for LOCAL DEVELOPMENT ONLY.
+# It intentionally stores the unseal keys and initial root token on the persistent volume
+# to bypass the manual unseal process across reboots. Do NOT use this in production!
+# The encrypted storage backend and unseal credentials reside on the same PVC.
+
+server:
   dev:
+    enabled: false
+  standalone:
     enabled: true
-    devRootToken: root
+    config: |
+      ui = true
+      listener "tcp" {
+        address = "[::]:8200"
+        tls_disable = 1
+      }
+      storage "file" {
+        path = "/openbao/data/backend"
+      }
+  dataStorage:
+    enabled: true
+    size: 2Gi
   ha:
     apiAddr: "%s"
   ingress:
@@ -677,14 +751,159 @@ func writeLocalOpenBaoValues(state *LocalState) error {
       - host: %s
         paths:
           - /
-    tls: []
-  extraEnvironmentVars:
-    BAO_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
+  tls: []
+  extraContainers:
+    - name: auto-unsealer
+      image: openbao/openbao:2.0.1
+      command: ["/bin/sh", "-c"]
+      args:
+        - |
+          set -u
+          umask 077
+
+          echo "Starting local auto-unsealer sidecar..."
+          mkdir -p /openbao/data/local-bootstrap /openbao/data/backend
+
+          INIT_FILE="/openbao/data/local-bootstrap/init.json"
+          TMP_FILE="/openbao/data/local-bootstrap/init.json.tmp"
+
+          compact_file() {
+            tr -d '\n\r' < "$1"
+          }
+
+          extract_unseal_key() {
+            compact_file "$1" | sed -n 's/.*"unseal_keys_b64"[[:space:]]*:[[:space:]]*\[[[:space:]]*"\([^"]*\)".*/\1/p'
+          }
+
+          extract_root_token() {
+            compact_file "$1" | sed -n 's/.*"root_token"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p'
+          }
+
+          while true; do
+            # 1. Fetch API status safely and record exit code
+            STATUS=$(bao status -format=json 2>/dev/null)
+            EXIT_CODE=$?
+
+            # Handle API readiness/connectivity errors (Exit codes other than 0 or 2)
+            if [ $EXIT_CODE -ne 0 ] && [ $EXIT_CODE -ne 2 ]; then
+              echo "Waiting for OpenBao API..."
+              sleep 2
+              continue
+            fi
+
+            # 2. Flatten JSON to single line and parse flags safely with sed
+            STATUS_COMPACT="$(printf '%%s' "$STATUS" | tr -d '\n\r')"
+
+            INITIALIZED="$(printf '%%s' "$STATUS_COMPACT" | sed -n 's/.*"initialized"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p')"
+            SEALED="$(printf '%%s' "$STATUS_COMPACT" | sed -n 's/.*"sealed"[[:space:]]*:[[:space:]]*\(true\|false\).*/\1/p')"
+
+            if [ "$INITIALIZED" != "true" ] && [ "$INITIALIZED" != "false" ]; then
+              echo "FATAL: Could not parse initialized status from OpenBao API." >&2
+              exit 1
+            fi
+
+            if [ "$SEALED" != "true" ] && [ "$SEALED" != "false" ]; then
+              echo "FATAL: Could not parse sealed status from OpenBao API." >&2
+              exit 1
+            fi
+
+            # 3. Detect mismatched backend storage / init state
+            if [ "$INITIALIZED" = "false" ] && [ -f "$INIT_FILE" ]; then
+              echo "FATAL: OpenBao reports initialized=false, but bootstrap file ($INIT_FILE) already exists." >&2
+              echo "The OpenBao storage backend and local bootstrap state do not match." >&2
+              exit 1
+            fi
+
+            if [ "$INITIALIZED" = "true" ]; then
+              if [ ! -s "$INIT_FILE" ]; then
+                echo "FATAL: OpenBao is initialized but bootstrap file ($INIT_FILE) is missing or empty." >&2
+                exit 1
+              fi
+
+              CHECK_KEY="$(extract_unseal_key "$INIT_FILE")"
+              if [ -z "$CHECK_KEY" ]; then
+                echo "FATAL: OpenBao is initialized but bootstrap file does not contain a valid unseal key." >&2
+                unset CHECK_KEY
+                exit 1
+              fi
+              unset CHECK_KEY
+            fi
+
+            # 4. Handle Initialization (Only when initialized=false and init.json does not exist)
+            if [ "$INITIALIZED" = "false" ]; then
+              echo "Initializing OpenBao..."
+              rm -f "$TMP_FILE"
+
+              if ! bao operator init -key-shares=1 -key-threshold=1 -format=json > "$TMP_FILE"; then
+                echo "FATAL: bao operator init failed." >&2
+                rm -f "$TMP_FILE"
+                exit 1
+              fi
+
+              if [ ! -s "$TMP_FILE" ]; then
+                echo "FATAL: Initialization output file is empty." >&2
+                rm -f "$TMP_FILE"
+                exit 1
+              fi
+
+              TMP_KEY="$(extract_unseal_key "$TMP_FILE")"
+              TMP_TOKEN="$(extract_root_token "$TMP_FILE")"
+
+              if [ -z "$TMP_KEY" ] || [ -z "$TMP_TOKEN" ]; then
+                echo "FATAL: Generated initialization data is invalid or missing required keys." >&2
+                unset TMP_KEY TMP_TOKEN
+                rm -f "$TMP_FILE"
+                exit 1
+              fi
+
+              unset TMP_KEY TMP_TOKEN
+              chmod 600 "$TMP_FILE"
+              mv "$TMP_FILE" "$INIT_FILE"
+
+              echo "OpenBao initialization completed."
+              sleep 1
+              continue
+            fi
+
+            # 5. Handle Unsealing (When initialized=true and sealed=true)
+            if [ "$SEALED" = "true" ]; then
+              UNSEAL_KEY="$(extract_unseal_key "$INIT_FILE")"
+
+              if [ -z "$UNSEAL_KEY" ]; then
+                echo "FATAL: Failed to extract unseal key from $INIT_FILE." >&2
+                exit 1
+              fi
+
+              echo "OpenBao is sealed; unsealing..."
+
+              if bao operator unseal "$UNSEAL_KEY" >/dev/null; then
+                echo "OpenBao successfully unsealed."
+              else
+                echo "FATAL: Failed to unseal OpenBao." >&2
+                unset UNSEAL_KEY
+                exit 1
+              fi
+
+              unset UNSEAL_KEY
+            fi
+
+            # Keep monitoring loop active for restarts
+            sleep 5
+          done
+      env:
+        - name: VAULT_ADDR
+          value: "http://127.0.0.1:8200"
+        - name: BAO_ADDR
+          value: "http://127.0.0.1:8200"
+      volumeMounts:
+        - name: data
+          mountPath: /openbao/data
 injector:
   enabled: false
 ui:
   enabled: true
 `, localOpenBaoExternalAddress(state), state.OpenBaoHost)
+
 	return writeLocalFile(state.OpenBaoValuesPath, content)
 }
 

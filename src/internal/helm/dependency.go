@@ -17,7 +17,7 @@ type DependencyOptions struct {
 
 // BuildDependencies builds helm dependencies for a chart.
 func BuildDependencies(ctx context.Context, opts DependencyOptions) error {
-	args := []string{"dependency", "build"}
+	args := []string{"dependency", "update"}
 
 	if opts.SkipRefresh {
 		args = append(args, "--skip-refresh")
