@@ -145,7 +145,7 @@ platform-components/terraform/<provider>/
 
 kubara selects only the matching provider. It removes the provider selector from generated `platform-configs` paths and retains it in reusable `platform-components` module paths.
 
-When a cluster omits Terraform or uses `provider: none`, the default `kubara generate` run skips its Terraform templates and removes stale generated Terraform output for that cluster. Non-Terraform catalog assets are still copied.
+When a cluster omits Terraform or uses `provider: none`, the default `kubara generate` run skips its Terraform templates. Non-Terraform catalog assets are still copied. Existing generated Terraform output under `platform-configs/<cluster>/terraform/` is left untouched, so any files you keep there (for example Terraform state) are preserved; remove obsolete generated Terraform manually if you no longer need it.
 
 ## Where to go next
 
