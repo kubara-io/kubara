@@ -81,19 +81,14 @@ jobs:
         run: |
           set -euo pipefail
 
-          out="$RUNNTER_TEMP/catalog-images"
+          out="$RUNNER_TEMP/catalog-images"
 
           for catalog in bootstrap general; do
-            oras pull "${CATALOG_IMAGES_REPO}/$P{catalog}-images:latest" -o "$out/$catalog"
+            oras pull "${CATALOG_IMAGES_REPO}/${catalog}-images:latest" -o "$out/$catalog"
           done
 
           cat "$out"/*/images.txt | sort -u > "$out/platform-images.txt"
-          cat "$out/*/chart.txt" | sort -u > "$out/helm-images-ver.txt"
-
-          echo "Images used for this release"
-          cat /tmp/platform-images.txt
-          echo "Helm Chart Versions used for this release"
-          cat /tmp/helm-images-ver.txt
+          cat "$out"/*/chart.txt | sort -u > "$out/helm-images-ver.txt"
           
           # write to Github Actions environment
           echo "Writing images into release"
@@ -109,10 +104,6 @@ jobs:
             cat "$out/helm-images-ver.txt"
             echo 'KUBARA_HELM_IMAGES_EOF'
           } >> "$GITHUB_OUTPUT"
-
-
-          
-
 
 
       - name: Run GoReleaser
