@@ -9,6 +9,12 @@ permissions:
   contents: write
   packages: write
 
+env:
+  # renovate: datasource=github-releases depName=oras-project/oras extractVersion=^v(?<version>.*)$
+  ORAS_VERSION: "1.3.1"
+  CATALOG_IMAGES_REPO: ghcr.io/${{ github.repository_owner }}/catalogs
+
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -57,6 +63,49 @@ jobs:
       - name: Install go-licenses
         run: go install github.com/google/go-licenses/v2@3e084b0caf710f7bfead967567539214f598c0a2 #v2.0.1
 
+      - name: Verify preinstalled Helm
+        run: |
+          set -euo pipefail
+          helm version --short
+
+      - name: Install oras
+        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
+        with:
+          version: ${{ env.ORAS_VERSION }}
+
+
+      - name: Pull Images list from Catalog
+        id: images
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          set -euo pipefail
+
+          out="$RUNNER_TEMP/catalog-images"
+
+          for catalog in bootstrap general; do
+            oras pull "${CATALOG_IMAGES_REPO}/${catalog}-images:latest" -o "$out/$catalog"
+          done
+
+          cat "$out"/*/images.txt | sort -u > "$out/platform-images.txt"
+          cat "$out"/*/chart.txt | sort -u > "$out/helm-images-ver.txt"
+          
+          # write to Github Actions environment
+          echo "Writing images into release"
+
+          {
+            echo 'images-list<<KUBARA_IMAGES_EOF'
+            cat "$out/platform-images.txt"
+            echo 'KUBARA_IMAGES_EOF'
+          } >> "$GITHUB_OUTPUT"
+      
+          {
+            echo 'helm-images-ver<<KUBARA_HELM_IMAGES_EOF'
+            cat "$out/helm-images-ver.txt"
+            echo 'KUBARA_HELM_IMAGES_EOF'
+          } >> "$GITHUB_OUTPUT"
+
+
       - name: Run GoReleaser
         if: github.event_name == 'push'
         uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94  # v7.2.3
@@ -67,6 +116,8 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          KUBARA_IMAGE_LIST: ${{ steps.images.outputs.images-list }}
+          HELM_IMAGES_VER: ${{ steps.images.outputs.helm-images-ver }}
           # The base64 of the contents of your '.p12' key.
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
           # The password to open the '.p12' key.

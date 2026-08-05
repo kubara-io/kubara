@@ -1,8 +1,9 @@
 .DS_Store
 .idea/
 .vscode/
+mise.toml
 
-
+dist/
 ./dist
 .act/
 .actrc
