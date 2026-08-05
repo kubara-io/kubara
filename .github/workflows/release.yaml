@@ -9,6 +9,12 @@ permissions:
   contents: write
   packages: write
 
+env:
+  # renovate: datasource=github-releases depName=oras-project/oras extractVersion=^v(?<version>.*)$
+  ORAS_VERSION: "1.3.1"
+  CATALOG_IMAGES_REPO: ghcr.io/${{ github.repository_owner }}/catalogs
+
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
@@ -62,6 +68,11 @@ jobs:
           set -euo pipefail
           helm version --short
 
+      - name: Install oras
+        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
+        with:
+          version: ${{ env.ORAS_VERSION }}
+
 
       - name: Pull Images list from Catalog
         id: images
@@ -70,39 +81,35 @@ jobs:
         run: |
           set -euo pipefail
 
-          # TODO: replace dummy command with correct one
-          echo "Dummy command"
+          out="$RUNNTER_TEMP/catalog-images"
 
-          cat > /tmp/platform-images.txt << 'EOF'
-          ghcr.io/dummy/argo-cd:v0.0.0-dummy
-          ghcr.io/dummy/cert-manager:v0.0.0-dummy
-          ghcr.io/dummy/external-secrets:v0.0.0-dummy
-          EOF
+          for catalog in bootstrap general; do
+            oras pull "${CATALOG_IMAGES_REPO}/$P{catalog}-images:latest" -o "$out/$catalog"
+          done
 
-          cat > /tmp/helm-images-ver.txt << 'EOF'
-          ghcr.io/helm/argo-cd:v0.0.0-dummy
-          ghcr.io/helm/cert-manager:v0.0.0-dummy
-          ghcr.io/helm/external-secrets:v0.0.0-dummy
-          EOF
+          cat "$out"/*/images.txt | sort -u > "$out/platform-images.txt"
+          cat "$out/*/chart.txt" | sort -u > "$out/helm-images-ver.txt"
 
           echo "Images used for this release"
           cat /tmp/platform-images.txt
           echo "Helm Chart Versions used for this release"
           cat /tmp/helm-images-ver.txt
-
           
           # write to Github Actions environment
-          {
-            echo 'images-list<<KUBARA_IMAGES_EOF'
-            cat /tmp/platform-images.txt
-            echo 'KUBARA_IMAGES_EOF'
-          } >> "$GITHUB_OUTPUT"
+          echo "Writing images into release"
 
           {
+            echo 'images-list<<KUBARA_IMAGES_EOF'
+            cat "$out/platform-images.txt"
+            echo 'KUBARA_IMAGES_EOF'
+          } >> "$GITHUB_OUTPUT"
+      
+          {
             echo 'helm-images-ver<<KUBARA_HELM_IMAGES_EOF'
-            cat /tmp/helm-iamges-ver.txt
+            cat "$out/helm-images-ver.txt"
             echo 'KUBARA_HELM_IMAGES_EOF'
           } >> "$GITHUB_OUTPUT"
+
 
           
 
