@@ -32,15 +32,6 @@
   ],
   "packageRules": [
     {
-      "description": "Keep Catalog default updates manual",
-      "matchDatasources": ["docker"],
-      "matchPackageNames": [
-        "ghcr.io/kubara-io/catalogs/bootstrap",
-        "ghcr.io/kubara-io/catalogs/general"
-      ],
-      "automerge": false
-    },
-    {
       "matchFiles": ["**/Chart.{yaml,yml}"],
       "bumpVersions": [
         {
