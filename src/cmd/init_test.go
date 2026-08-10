@@ -68,7 +68,6 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	var generated renovateConfig
 	require.NoError(t, json.Unmarshal(content, &generated))
 	require.Len(t, generated.CustomManagers, 1)
-	assert.Equal(t, []string{"custom.regex"}, generated.EnabledManagers)
 	manager := generated.CustomManagers[0]
 	assert.Equal(t, []string{`/^clusters\/prod\/config\.yaml$/`}, manager.ManagerFilePatterns)
 	assert.Equal(t, "docker", manager.DatasourceTemplate)
@@ -76,6 +75,7 @@ func TestEnsureRenovateConfig(t *testing.T) {
 
 	var raw map[string]any
 	require.NoError(t, json.Unmarshal(content, &raw))
+	assert.NotContains(t, raw, "enabledManagers")
 	assert.NotContains(t, raw, "packageRules")
 	customManagers := raw["customManagers"].([]any)
 	customManager := customManagers[0].(map[string]any)

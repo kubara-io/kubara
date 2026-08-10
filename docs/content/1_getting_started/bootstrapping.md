@@ -78,7 +78,7 @@ It also creates a `renovate.json` in the working directory when no supported Ren
 kubara init --renovate=false
 ```
 
-For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated configuration intentionally sets `enabledManagers` to `custom.regex`, so enabling catalog updates does not also enable Renovate for every dependency in the repository. Remove or extend `enabledManagers` in `renovate.json` if Renovate should also manage Go modules, GitHub Actions, container images, or other dependency types.
+For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file extends Renovate's `config:recommended` preset and adds the custom manager for catalog references. Renovate can therefore also update other supported dependencies it detects in the repository.
 
 Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [documented custom manager](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
 
