@@ -78,9 +78,9 @@ It also creates a `renovate.json` in the working directory when no supported Ren
 kubara init --renovate=false
 ```
 
-For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file extends Renovate's `config:recommended` preset and adds the custom manager for catalog references. Renovate can therefore also update other supported dependencies it detects in the repository.
+For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file uses Renovate's `config:recommended` preset and enables automatic updates for kubara catalog versions in `config.yaml`. Renovate can also update other supported dependencies it detects in the repository.
 
-Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [documented custom manager](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
+Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [Renovate settings for catalog updates](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
 
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
 

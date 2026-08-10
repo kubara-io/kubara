@@ -191,7 +191,7 @@ This is useful when you want to inspect or edit a catalog that was distributed t
 
 You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.
 
-Add a custom manager block to your `renovate.json` or GitOps repository's Renovate configuration:
+Add the following settings to your `renovate.json` or GitOps repository's Renovate configuration:
 
 ```json
 {
