@@ -35,7 +35,7 @@ func NewGenerateCmd() *cli.Command {
 		Name:        "generate",
 		Usage:       "Generate files from catalog templates",
 		UsageText:   "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
-		Description: "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.",
+		Description: "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
 			if err != nil {

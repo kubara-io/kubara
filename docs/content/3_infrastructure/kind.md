@@ -162,7 +162,7 @@ kubara also writes a local `ClusterSecretStore` manifest that points `external-s
 
 After the local preparation is done, the remaining bootstrap flow continues with the same general kubara bootstrap logic:
 
-- Install required CRDs when requested
+- Install required CRDs from the bootstrap catalog
 - Install Argo CD
 - Hand ongoing reconciliation over to Argo CD
 

@@ -61,7 +61,7 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
 	assert.Equal(t, "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
-	assert.Equal(t, "Renders embedded Helm and Terraform templates using values from the config file. By default, it generates both template types.", command.Description)
+	assert.Equal(t, "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
 	require.Len(t, command.Flags, 3)
@@ -146,7 +146,7 @@ func TestGenerateCmd(t *testing.T) {
 				require.NoError(t, err)
 				assert.NotEmpty(t, entries)
 
-				// Provider selector folders are internal to embedded templates
+				// Provider selector folders are internal to catalog templates
 				// and must not leak into generated output paths.
 				_, err = os.Stat(filepath.Join(terraformDir, "stackit", "modules", "ske-cluster", "main.tf"))
 				require.NoError(t, err)
@@ -410,9 +410,11 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 	//dummy values
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
-	staleTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "stale.tf")
-	require.NoError(t, os.MkdirAll(filepath.Dir(staleTerraform), 0o750))
-	require.NoError(t, os.WriteFile(staleTerraform, []byte("stale\n"), 0o600))
+	// A user-managed file placed next to generated Terraform output must survive
+	// a generate run; kubara never wipes per-cluster platform-configs directories.
+	userTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "extra.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(userTerraform), 0o750))
+	require.NoError(t, os.WriteFile(userTerraform, []byte("user\n"), 0o600))
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -421,7 +423,7 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
 	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
-	assert.NoFileExists(t, staleTerraform)
+	assert.FileExists(t, userTerraform)
 }
 
 func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {

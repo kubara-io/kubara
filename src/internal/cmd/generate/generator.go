@@ -169,16 +169,6 @@ func (o *Options) cleanupOldFiles() error {
 	var deletePaths []string
 	if o.TemplateType != render.Helm {
 		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Terraform.String()))
-		clusterDirs, err := os.ReadDir(o.PlatformConfigs)
-		if err != nil && !errors.Is(err, os.ErrNotExist) {
-			return fmt.Errorf("read platform config directories: %w", err)
-		}
-		for _, clusterDir := range clusterDirs {
-			if !clusterDir.IsDir() {
-				continue
-			}
-			deletePaths = append(deletePaths, filepath.Join(o.PlatformConfigs, clusterDir.Name(), render.Terraform.String()))
-		}
 	}
 	if o.TemplateType != render.Terraform {
 		deletePaths = append(deletePaths, filepath.Join(o.PlatformComponents, render.Helm.String()))

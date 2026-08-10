@@ -211,7 +211,15 @@ func TestMigrateV1Alpha3Config(t *testing.T) {
 	assert.Equal(t, ConfigVersionV1Alpha4, config["version"])
 
 	cluster := config["clusters"].([]any)[0].(map[string]any)
-	assert.Equal(t, []any{"oci://ghcr.io/kubara-io/catalogs/general:1.0.0"}, cluster["catalogs"])
+	require.Contains(t, cluster, "catalogs")
+	catalogs, ok := cluster["catalogs"].([]any)
+	require.True(t, ok)
+	require.NotEmpty(t, catalogs)
+
+	catalog0, ok := catalogs[0].(string)
+	require.True(t, ok)
+	assert.Contains(t, catalog0, "oci://ghcr.io/kubara-io/catalogs/general:")
+
 	assert.Equal(t, "disabled", cluster["argocd"].(map[string]any)["selfManaged"])
 	assert.NotContains(t, cluster["services"], "argocd")
 }

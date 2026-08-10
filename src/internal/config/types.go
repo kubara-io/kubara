@@ -18,7 +18,7 @@ const (
 	Spoke string = "spoke"
 )
 
-// TerraformProvider identifies an infrastructure provider with embedded Terraform templates.
+// TerraformProvider identifies an infrastructure provider supported by catalog generation.
 type TerraformProvider string
 
 const (
@@ -32,12 +32,12 @@ var supportedTerraformProviders = [...]TerraformProvider{
 	TerraformProviderTCloudPublic,
 }
 
-// IsSupported reports whether kubara ships Terraform templates for the provider.
+// IsSupported reports whether kubara supports Terraform generation for the provider.
 func (p TerraformProvider) IsSupported() bool {
 	return slices.Contains(supportedTerraformProviders[:], p)
 }
 
-// SupportedTerraformProviders returns the providers with embedded Terraform templates.
+// SupportedTerraformProviders returns the providers supported by Terraform generation.
 func SupportedTerraformProviders() []TerraformProvider {
 	return append([]TerraformProvider(nil), supportedTerraformProviders[:]...)
 }

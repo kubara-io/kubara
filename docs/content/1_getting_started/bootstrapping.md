@@ -123,7 +123,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.0.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
@@ -133,7 +133,7 @@ clusters:
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:1.0.0
+      - oci://ghcr.io/kubara-io/catalogs/general:1.1.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
@@ -159,7 +159,7 @@ clusters:
 `bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd` and `bootstrap-crds` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
 
 `ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
-Each service also accepts an optional `ingress.annotations` map under `services.<service>.ingress.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
+Each service also accepts an optional `networking.annotations` map under `services.<service>.networking.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
 User-provided annotations are merged on top using `mergeOverwrite`: equal keys are overwritten, while kubara default keys that are not present in the override remain.
 
 kubara generates resources in two stages:
