@@ -410,9 +410,11 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 	//dummy values
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
-	staleTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "stale.tf")
-	require.NoError(t, os.MkdirAll(filepath.Dir(staleTerraform), 0o750))
-	require.NoError(t, os.WriteFile(staleTerraform, []byte("stale\n"), 0o600))
+	// A user-managed file placed next to generated Terraform output must survive
+	// a generate run; kubara never wipes per-cluster platform-configs directories.
+	userTerraform := filepath.Join(tempDir, "platform-configs", "helm-only-cluster", "terraform", "extra.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(userTerraform), 0o750))
+	require.NoError(t, os.WriteFile(userTerraform, []byte("user\n"), 0o600))
 
 	app := CreateTestApp(NewGenerateCmd())
 	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
@@ -421,7 +423,7 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "helpers", "readme.txt"))
 	assert.NoFileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "disabled.txt"))
-	assert.NoFileExists(t, staleTerraform)
+	assert.FileExists(t, userTerraform)
 }
 
 func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
