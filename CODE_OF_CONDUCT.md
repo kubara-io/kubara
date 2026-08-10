@@ -38,7 +38,7 @@ Examples of unacceptable behavior include:
 
 ## Enforcement Responsibilities
 
-Project maintainers (see [Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/))
+Project maintainers (see [Maintainers](https://docs.kubara.io/latest-stable/8_community/maintainers/))
 are responsible for clarifying and enforcing our standards of
 acceptable behavior and will take appropriate and fair corrective action in
 response to any behavior that they deem inappropriate, threatening, offensive,
@@ -64,10 +64,10 @@ representative at an online or offline event.
 If you observe any instance of abusive, harassing, or otherwise unacceptable behavior,
 report it by email to the project maintainers at **kubara@digits.schwarz**.
 As a second channel, you can contact one or more maintainers directly by email
-(see [Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)).
+(see [Maintainers](https://docs.kubara.io/latest-stable/8_community/maintainers/)).
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported to the [project maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)
+reported to the [project maintainers](https://docs.kubara.io/latest-stable/8_community/maintainers/)
 responsible for enforcement at **kubara@digits.schwarz**.
 
 Please do **not** report Code of Conduct violations in public GitHub issues.
