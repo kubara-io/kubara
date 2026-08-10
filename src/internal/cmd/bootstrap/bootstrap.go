@@ -478,7 +478,11 @@ Log in with:
 
 Other useful links:
   - Portal:  https://%s
-  - OpenBao: https://%s/ui login with root
+  - OpenBao: https://%s/ui
+
+Retrieve the generated local OpenBao root token with:
+    kubectl --kubeconfig .local/kind.kubeconfig -n openbao exec openbao-0 -c openbao -- \
+      sh -c "tr -d '\n\r' < /openbao/data/local-bootstrap/init.json | sed -n 's/.*\"root_token\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p'"
 
 `, config.ClusterDNSName, config.WizardPassword, config.ClusterDNSName, config.OpenBaoHost)
 	}

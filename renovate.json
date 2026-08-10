@@ -28,6 +28,14 @@
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "semver"
+    },
+    {
+      "customType": "regex",
+      "description": "Update annotated dependency versions in Go constants",
+      "managerFilePatterns": ["/\\.go$/"],
+      "matchStrings": [
+        "// renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+) registryUrl=(?<registryUrl>\\S+)\\s+(?:const\\s+)?\\w+\\s*=\\s*[\"'](?<currentValue>[^\"']+)[\"']"
+      ]
     }
   ],
   "packageRules": [

@@ -27,7 +27,7 @@ In practice this means:
 
 ## Available presets
 
-- [kind (local)](kind.md): the local evaluation setup used by `kubara bootstrap --local`, including `cloud-provider-kind`, Traefik, and OpenBao in dev mode.
+- [kind (local)](kind.md): the local evaluation setup used by `kubara bootstrap --local`, including `cloud-provider-kind`, Traefik, and persistent OpenBao with automatic unsealing.
 - [STACKIT SKE](stackit_ske.md): managed Kubernetes on STACKIT with the generated Terraform modules for DNS, Secrets Manager, IAM, and the cluster itself.
 - [STACKIT Edge Cloud](stackit_edge_cloud.md): an edge-focused flow where kubara generates the Terraform and you finish the Edge-specific image and cluster steps in STACKIT Edge Cloud.
 
