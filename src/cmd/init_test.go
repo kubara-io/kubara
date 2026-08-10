@@ -62,6 +62,8 @@ func TestEnsureRenovateConfig(t *testing.T) {
 
 	content, err := os.ReadFile(renovatePath)
 	require.NoError(t, err)
+	assert.Contains(t, string(content), `(?<depName>`)
+	assert.NotContains(t, string(content), `\u003c`)
 
 	var generated renovateConfig
 	require.NoError(t, json.Unmarshal(content, &generated))
@@ -87,6 +89,25 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	assert.Equal(t, "registry.example.com:5000/platform/security", match[matchRegexp.SubexpIndex("depName")])
 	assert.Equal(t, "1.2.3", match[matchRegexp.SubexpIndex("currentValue")])
 	assert.Nil(t, matchRegexp.FindStringSubmatch("catalog: oci://registry.example.com/platform/security@sha256:abcdef"))
+	assert.Nil(t, matchRegexp.FindStringSubmatch("catalog: oci://registry.example.com/platform/security:1.2.3@sha256:abcdef"))
+
+	require.NoError(t, options.ensureRenovateConfig(store))
+}
+
+func TestRenovateConfigContainsKubaraManager(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	renovatePath := filepath.Join(workDir, "renovate.jsonc")
+	require.NoError(t, os.WriteFile(renovatePath, []byte(`{
+  // Generated config may contain comments.
+  "customManagers": [{"description": "Update kubara catalog OCI references"}]
+}
+`), 0o600))
+
+	contains, err := renovateConfigContainsKubaraManager(renovatePath)
+	require.NoError(t, err)
+	assert.True(t, contains)
 }
 
 func TestEnsureRenovateConfigDisabled(t *testing.T) {

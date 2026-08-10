@@ -200,7 +200,7 @@ Add a custom manager block to your `renovate.json` or GitOps repository's Renova
       "customType": "regex",
       "description": "Update kubara catalog OCI references",
       "managerFilePatterns": ["/^config\\.yaml$/"],
-      "matchStrings": ["oci:\\/\\/(?<depName>[^\\s\"'@]+):(?<currentValue>[^\\s/:\"']+)"],
+      "matchStrings": ["oci:\\/\\/(?<depName>[^\\s\"'@]+):(?<currentValue>[^\\s/:\"'@]+)(?:$|[\\s\"'#,}\\]])"],
       "datasourceTemplate": "docker",
       "versioningTemplate": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
     }
