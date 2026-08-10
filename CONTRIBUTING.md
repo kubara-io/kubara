@@ -7,7 +7,7 @@ Whether you're fixing bugs, improving documentation, or adding features - all co
 
 * **Contributors**: Anyone submitting code, docs or ideas via Issues or Pull Requests.
 * **Maintainers**: Core team members with permission to review, approve, and merge contributions. Maintainers help enforce standards and ensure quality.
-[Current Maintainers](https://docs.kubara.io/latest-stable/5_community/maintainers/)
+[Current Maintainers](https://docs.kubara.io/latest-stable/8_community/maintainers/)
 
 ## 🐛 Reporting Issues
 
@@ -28,8 +28,8 @@ Before you begin working on a bug fix or implementing a new feature, please crea
 This allows us to briefly discuss the best approach to solving the problem and avoid duplicated efforts.
 
 For larger topics, such as fundamental or strategic decisions, we recommend discussing them in a contributor meeting or during the kubara Office Hours.
-For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/).
-For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
+For significant technical decisions, please document the outcome using an Architecture Decision Record (ADR), see [ADR](https://docs.kubara.io/latest-stable/10_decisions/ADR/).
+For more information, please refer to our support documentation: [Support](https://docs.kubara.io/latest-stable/8_community/community-n-support/)
 
 ### AI-Assisted Contributions
 
@@ -73,7 +73,7 @@ Temporarily skipping a hook (use only if necessary):
 
 Once you have set up the pre-commit hooks, you can follow the steps below to start contributing:
 
-1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/7_decisions/ADR/)
+1. **Check if an ADR is required**: If your change involves a significant technical or architectural decision, create an Architecture Decision Record (ADR) first, see [ADR](https://docs.kubara.io/latest-stable/10_decisions/ADR/)
 2. **Fork** the repository and clone it locally, see also here: https://docs.github.com/en/get-started/exploring-projects-on-github/contributing-to-a-project
 3. **Create a new branch** for your work
 4. **Implement your changes**
@@ -248,4 +248,4 @@ The following is a list on critera which leads to the automatic rejection of the
 - **Suggestions for alternative approaches**
 - **Path for resubmission**: Clear requirements for reconsideration
 
-Support: [Support](https://docs.kubara.io/latest-stable/5_community/support/)
+Support: [Support](https://docs.kubara.io/latest-stable/8_community/community-n-support/)
