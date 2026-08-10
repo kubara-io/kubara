@@ -31,6 +31,10 @@ See [INSTALLATION.md](docs/content/1_getting_started/installation.md) for Linux,
 - Public docs: <https://docs.kubara.io>
 - Local docs sources: [`docs/`](./docs)
 
+## Catalogs
+
+kubara resolves its bootstrap foundation and default platform stack from OCI catalogs. Find the catalog source and versioned releases at [kubara-io/catalogs](https://github.com/kubara-io/catalogs) and [its releases](https://github.com/kubara-io/catalogs/releases). See [Catalogs](https://docs.kubara.io/latest-stable/2_concepts/catalogs/) for per-cluster catalog configuration and custom catalogs.
+
 ## CLI Commands
 
 ```text

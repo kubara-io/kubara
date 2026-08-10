@@ -76,6 +76,8 @@ clusters:
 
 `bootstrapCatalog` is optional. When omitted or empty, kubara uses its versioned default bootstrap catalog. The bootstrap services `argo-cd` and `bootstrap-crds` are always part of the foundation and are not configurable entries under `clusters[].services`.
 
+The official bootstrap and general catalogs are maintained in [kubara-io/catalogs](https://github.com/kubara-io/catalogs); choose released versions from [its releases](https://github.com/kubara-io/catalogs/releases).
+
 Use `--catalog` to add catalogs for a command:
 
 Examples:

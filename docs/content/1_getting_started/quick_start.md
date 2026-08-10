@@ -69,7 +69,7 @@ Run the bootstrap command. It will do the following:
 - creates a local `kind` cluster named `test-cluster`
 - installs the required CRDs and namespaces
 - installs and configures Argo CD
-- installs OpenBao as the local secret engine (we highly recommend to use a managed service for this in a production environment)
+- installs OpenBao with persistent local storage and automatic unsealing as the local secret engine (use a managed service in production)
 - applies less strict defaults for local testing and generates local deployment values
 - creates the placeholder Traefik `LoadBalancer` service
 - waits for you to start `cloud-provider-kind` manually so the local LoadBalancer IP can be assigned
@@ -129,7 +129,11 @@ Log in with:
 
 Other useful links:
   - Portal:  https://172.18.0.3.traefik.me
-  - OpenBao: https://openbao.172.18.0.3.traefik.me/ui login with root
+  - OpenBao: https://openbao.172.18.0.3.traefik.me/ui
+
+Retrieve the generated local OpenBao root token with:
+    kubectl --kubeconfig .local/kind.kubeconfig -n openbao exec openbao-0 -c openbao -- \
+      sh -c "tr -d '\n\r' < /openbao/data/local-bootstrap/init.json | sed -n 's/.*\"root_token\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p'"
 
 
 2026-06-11 12:42:02 INF ArgoCD bootstrap completed successfully
@@ -167,7 +171,7 @@ The `.local/` directory is **not** part of your GitOps state. It only contains h
 - `kind.kubeconfig`: kubeconfig for the local `kind` cluster
 - `kind-config.yaml`: the `kind` cluster definition used during bootstrap
 - `generate.env`: the environment snapshot kubara used for local generation
-- `openbao/`: temporary local Helm values for the OpenBao bootstrap step
+- `openbao/`: local Helm values for the persistent OpenBao bootstrap step
 - `external-secrets/`: the generated local `ClusterSecretStore` manifest
 
 You can inspect the local cluster with the dedicated kubeconfig:
@@ -209,13 +213,13 @@ On macOS using Colima the bootstrapping might get stuck due to a combination of 
 4. Otherwise restart `cloud-provider-kind` again
 
 
-**OpenBao only runs with in-memory**
+**Local OpenBao persistence and auto-unseal**
 
-OpenBao runs with its [dev mode](https://openbao.org/docs/concepts/dev-server/) for lax evaluation purposes. This causes the following:
+OpenBao runs in standalone mode with a 2 GiB persistent volume. A local-only sidecar initializes OpenBao on its first start and automatically unseals it after pod or container-runtime restarts. The generated root token and unseal key are stored on the same volume as the encrypted OpenBao data.
 
-* It only runs with an in-memory database and with a restart its pod, runtime or host system its database will be lost and you will have to rerun: `kubara bootstrap --local test-cluster`
-* The instance is not secure and always unsealed
-* The instances root token is not a random string but instead always `root`
+This design is intentionally convenient rather than secure: anyone with access to the volume can obtain both the encrypted data and the credentials needed to unlock it. Do not copy this pattern to production; use an external KMS, HSM, or another supported seal mechanism there.
+
+If the auto-unsealer reports that OpenBao is initialized but `/openbao/data/local-bootstrap/init.json` is missing, initialization was interrupted before the credentials reached the persistent file. The unseal key cannot be recovered; delete the local cluster and run the bootstrap again.
 
 
 ## How to clean up your local environment
