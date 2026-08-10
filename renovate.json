@@ -15,9 +15,31 @@
       ],
       "datasourceTemplate": "docker",
       "versioningTemplate": "docker"
+    },
+    {
+      "customType": "regex",
+      "description": "Update built-in Kubara Catalog OCI references",
+      "managerFilePatterns": [
+        "/^src\\/internal\\/catalog\\/bootstrap\\.go$/",
+        "/^docs\\/content\\/.*\\.md$/"
+      ],
+      "matchStrings": [
+        "oci://(?<depName>ghcr\\.io/kubara-io/catalogs/(bootstrap|general)):(?<currentValue>\\d+\\.\\d+\\.\\d+)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver"
     }
   ],
   "packageRules": [
+    {
+      "description": "Keep Catalog default updates manual",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "ghcr.io/kubara-io/catalogs/bootstrap",
+        "ghcr.io/kubara-io/catalogs/general"
+      ],
+      "automerge": false
+    },
     {
       "matchFiles": ["**/Chart.{yaml,yml}"],
       "bumpVersions": [
