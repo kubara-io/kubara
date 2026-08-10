@@ -72,6 +72,14 @@ kubara init
 ```
 
 This command creates a `config.yaml` file based on the values from your `.env`.
+It also creates a `renovate.json` in the working directory when no supported Renovate configuration exists. The generated custom manager keeps versioned OCI catalog references in this config up to date. Use `--renovate=false` if the repository does not use Renovate:
+
+```bash
+kubara init --renovate=false
+```
+
+Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [documented custom manager](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
+
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
 
 By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:

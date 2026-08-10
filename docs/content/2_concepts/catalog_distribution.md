@@ -199,18 +199,13 @@ Add a custom manager block to your `renovate.json` or GitOps repository's Renova
     {
       "customType": "regex",
       "description": "Update kubara catalog OCI references",
-      "fileMatch": ["(^|/)config\\.yaml$"],
-      "matchStrings": ["oci:\\/\\/(?<depName>[^:\\s\"'\\`]+):(?<currentValue>[^\\s\"'\\`]+)"],
-      "datasourceTemplate": "docker"
-    }
-  ],
-  "packageRules": [
-    {
-      "description": "Enforce semantic versioning for kubara catalogs",
-      "matchDatasources": ["docker"],
-      "matchPackagePatterns": ["^ghcr\\.io/kubara-io/catalogs/"],
-      "versioning": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
+      "managerFilePatterns": ["/^config\\.yaml$/"],
+      "matchStrings": ["oci:\\/\\/(?<depName>[^\\s\"'@]+):(?<currentValue>[^\\s/:\"']+)"],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
     }
   ]
 }
 ```
+
+Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.

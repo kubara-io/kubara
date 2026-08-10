@@ -75,7 +75,7 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init [--prep] [--local]
+>kubara init [--prep] [--local] [--renovate=false]
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
@@ -86,6 +86,8 @@ Initialize kubara config for your GitOps repository
 **--overwrite**: Overwrite config if exists
 
 **--prep**: Copy embedded prep/ folder into current working directory
+
+**--renovate**: Generate a Renovate configuration for kubara catalog updates if none exists
 
 ### help, h
 

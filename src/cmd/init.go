@@ -2,10 +2,12 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
@@ -22,6 +24,7 @@ type InitOptions struct {
 	copyPrepFolder bool
 	force          bool
 	local          bool
+	renovate       bool
 	cwd            string
 	configFilePath string
 	dotEnvFilePath string
@@ -33,6 +36,7 @@ type InitFlags struct {
 	PrepFlag      bool
 	ForceFlag     bool
 	LocalFlag     bool
+	RenovateFlag  bool
 	EnvFileFlag   string
 	EnvPrefixFlag string
 }
@@ -42,6 +46,7 @@ func NewInitFlags() *InitFlags {
 		PrepFlag:      false,
 		ForceFlag:     false,
 		LocalFlag:     false,
+		RenovateFlag:  true,
 		EnvFileFlag:   ".env",
 		EnvPrefixFlag: "KUBARA_",
 	}
@@ -53,8 +58,8 @@ func NewInitCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "init",
 		Usage:       "Initialize kubara config for your GitOps repository",
-		UsageText:   "kubara init [--prep] [--local]",
-		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables and catalog options. By default, it creates a config file if it does not exist. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
+		UsageText:   "kubara init [--prep] [--local] [--renovate=false]",
+		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables, catalog options, and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, _ := flags.ToOptions(cmd)
 			return o.Run()
@@ -88,6 +93,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 		copyPrepFolder: flags.PrepFlag,
 		force:          flags.ForceFlag,
 		local:          flags.LocalFlag,
+		renovate:       flags.RenovateFlag,
 		cwd:            cwd,
 		configFilePath: configFilePath,
 		dotEnvFilePath: dotEnvFilePath,
@@ -116,6 +122,12 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Value:       flags.LocalFlag,
 			Usage:       "Initialize files for the local evaluation workflow. Local testing only; not for production use.",
 			Destination: &flags.LocalFlag,
+		},
+		&cli.BoolFlag{
+			Name:        "renovate",
+			Value:       flags.RenovateFlag,
+			Usage:       "Generate a Renovate configuration for kubara catalog updates if none exists",
+			Destination: &flags.RenovateFlag,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",
@@ -231,10 +243,6 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 		return fmt.Errorf("load config file: %w", configLoadErr)
 	}
 
-	if err := o.ensureRenovateConfig(cs); err != nil {
-		return err
-	}
-
 	if err := workflow.CreateOrUpdateCluster(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
 		return fmt.Errorf("create or update cluster from env: %w", err)
 	}
@@ -250,6 +258,9 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 	}
 	if err := cs.SaveToFile(); err != nil {
 		return fmt.Errorf("write config file: %w", err)
+	}
+	if err := o.ensureRenovateConfig(cs); err != nil {
+		return err
 	}
 
 	if o.local {
@@ -269,11 +280,10 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 		return err
 	}
 
-	if err := o.ensureRenovateConfig(cs); err != nil {
-		return err
-	}
-
 	if fileExists {
+		if err := o.ensureRenovateConfig(cs); err != nil {
+			return err
+		}
 		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
 		log.Info().Msg("Initialized successfully")
 		return nil
@@ -294,6 +304,9 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 
 	cs.GetConfig().Clusters = []config.Cluster{newCluster}
 	if err := cs.SaveToFile(); err != nil {
+		return fmt.Errorf("write config file: %w", err)
+	}
+	if err := o.ensureRenovateConfig(cs); err != nil {
 		return err
 	}
 
@@ -306,8 +319,27 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 	return nil
 }
 
+type renovateConfig struct {
+	Schema          string                  `json:"$schema"`
+	Extends         []string                `json:"extends"`
+	EnabledManagers []string                `json:"enabledManagers"`
+	CustomManagers  []renovateCustomManager `json:"customManagers"`
+}
+
+type renovateCustomManager struct {
+	CustomType          string   `json:"customType"`
+	Description         string   `json:"description"`
+	ManagerFilePatterns []string `json:"managerFilePatterns"`
+	MatchStrings        []string `json:"matchStrings"`
+	DatasourceTemplate  string   `json:"datasourceTemplate"`
+	VersioningTemplate  string   `json:"versioningTemplate"`
+}
+
 func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
-	baseDir := filepath.Dir(cs.GetFilepath())
+	if !o.renovate {
+		return nil
+	}
+
 	// https://docs.renovatebot.com/configuration-options/#locations-for-configuration-filenames
 	renovateFiles := []string{
 		"renovate.json",
@@ -326,52 +358,50 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 	}
 
 	for _, file := range renovateFiles {
-		exists, err := utils.FileExist(filepath.Join(baseDir, file))
+		path := filepath.Join(o.cwd, file)
+		exists, err := utils.FileExist(path)
 		if err != nil {
-			return err
+			return fmt.Errorf("check renovate config %q: %w", path, err)
 		}
 		if exists {
+			log.Warn().Str("path", path).Msg("Renovate config already exists; add the kubara custom manager manually if needed")
 			return nil
 		}
 	}
 
-	renovatePath := filepath.Join(baseDir, "renovate.json")
-	configFileBase := filepath.Base(cs.GetFilepath())
-	fileMatchPattern := fmt.Sprintf("(^|/)%s$", regexp.QuoteMeta(configFileBase))
+	relativeConfigPath, err := filepath.Rel(o.cwd, cs.GetFilepath())
+	if err != nil {
+		return fmt.Errorf("get config path relative to working directory: %w", err)
+	}
+	if relativeConfigPath == ".." || strings.HasPrefix(relativeConfigPath, ".."+string(filepath.Separator)) {
+		log.Warn().Str("configPath", cs.GetFilepath()).Str("workDir", o.cwd).Msg("Skipping Renovate config because the kubara config is outside the working directory")
+		return nil
+	}
+	fileMatchPattern := regexp.QuoteMeta(filepath.ToSlash(relativeConfigPath))
+	fileMatchPattern = strings.ReplaceAll(fileMatchPattern, "/", `\/`)
 
-	content := fmt.Sprintf(`{
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    "config:recommended"
-  ],
-  "customManagers": [
-    {
-      "customType": "regex",
-      "description": "Update kubara catalog OCI references",
-      "fileMatch": [
-        %q
-      ],
-      "matchStrings": [
-        "oci:\\/\\/(?<depName>[^:\\s\"'`+"`"+`]+):(?<currentValue>[^\\s\"'`+"`"+`]+)"
-      ],
-      "datasourceTemplate": "docker"
-    }
-  ],
-  "packageRules": [
-    {
-      "description": "Enforce semantic versioning for kubara catalogs",
-      "matchDatasources": [
-        "docker"
-      ],
-      "matchPackagePatterns": [
-        "^ghcr\\.io/kubara-io/catalogs/"
-      ],
-      "versioning": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
-    }
-  ]
-}
-`, fileMatchPattern)
+	generatedConfig := renovateConfig{
+		Schema:          "https://docs.renovatebot.com/renovate-schema.json",
+		Extends:         []string{"config:recommended"},
+		EnabledManagers: []string{"custom.regex"},
+		CustomManagers: []renovateCustomManager{
+			{
+				CustomType:          "regex",
+				Description:         "Update kubara catalog OCI references",
+				ManagerFilePatterns: []string{"/^" + fileMatchPattern + "$/"},
+				MatchStrings:        []string{`oci:\/\/(?<depName>[^\s"'@]+):(?<currentValue>[^\s/:"']+)`},
+				DatasourceTemplate:  "docker",
+				VersioningTemplate:  `regex:^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)$`,
+			},
+		},
+	}
+	content, err := json.MarshalIndent(generatedConfig, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal renovate config: %w", err)
+	}
+	content = append(content, '\n')
 
+	renovatePath := filepath.Join(o.cwd, "renovate.json")
 	if err := os.WriteFile(renovatePath, []byte(content), 0o644); err != nil {
 		return fmt.Errorf("write renovate config: %w", err)
 	}
