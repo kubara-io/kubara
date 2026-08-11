@@ -186,3 +186,26 @@ kubara catalog unpackage oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3 .
 ```
 
 This is useful when you want to inspect or edit a catalog that was distributed through a registry.
+
+## Automatic catalog updates with Renovate
+
+You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.
+
+Add the following settings to your `renovate.json` or GitOps repository's Renovate configuration:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update kubara catalog OCI references",
+      "managerFilePatterns": ["/^config\\.yaml$/"],
+      "matchStrings": ["oci:\\/\\/(?<depName>[^\\s\"'@]+):(?<currentValue>[^\\s/:\"'@]+)(?:$|[\\s\"'#,}\\]])"],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
+    }
+  ]
+}
+```
+
+Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.

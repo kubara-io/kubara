@@ -51,7 +51,7 @@ type EnvMap struct {
 	ArgocdHelmRepoPassword      string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
 	ArgocdHelmRepoUrl           string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
 	_                           struct{} `doc:"\n# Optional: Container Registry Config"`
-	_                           struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/6_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
+	_                           struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/9_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
 	DockerconfigBase64          string   `default:"" koanf:"DOCKERCONFIG_BASE64" optional:"true"`
 }
 
