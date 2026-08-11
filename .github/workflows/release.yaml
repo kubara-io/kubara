@@ -10,8 +10,6 @@ permissions:
   packages: write
 
 env:
-  # renovate: datasource=github-releases depName=oras-project/oras extractVersion=^v(?<version>.*)$
-  ORAS_VERSION: "1.3.1"
   CATALOG_IMAGES_REPO: ghcr.io/${{ github.repository_owner }}/catalogs
 
 
@@ -36,6 +34,17 @@ jobs:
           repositories: |
             ${{ github.event.repository.name }}
             homebrew-tap
+
+      - name: Extract Catalog Versions
+        run: |
+          for catalog in bootstrap general; do
+            symbol="Default${catalog^}Catalog"
+            ref="$(awk -v name="$symbol" \
+              1 == name { gsub(/"/, "", $3); print $3 }' \
+              /internal/catalog/bootstrap.go)"
+            version="${ref##*:}"
+            echo "${catalog^^}_CATALOG_VERSION=$version" >> "$GITHUB_ENV"
+          done
 
       - name: Set up Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
@@ -63,48 +72,17 @@ jobs:
       - name: Install go-licenses
         run: go install github.com/google/go-licenses/v2@3e084b0caf710f7bfead967567539214f598c0a2 #v2.0.1
 
-      - name: Verify preinstalled Helm
-        run: |
-          set -euo pipefail
-          helm version --short
-
-      - name: Install oras
-        uses: oras-project/setup-oras@1d808f7d7f6995cc68b7bf507bfe5c5446e1dc9d # v2.0.1
-        with:
-          version: ${{ env.ORAS_VERSION }}
-
-
-      - name: Pull Images list from Catalog
+      - name: Check availability of catalogs
         id: images
-        env:
-          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           set -euo pipefail
-
-          out="$RUNNER_TEMP/catalog-images"
 
           for catalog in bootstrap general; do
-            oras pull "${CATALOG_IMAGES_REPO}/${catalog}-images:latest" -o "$out/$catalog"
+            url="https://github.com/${{ github.repository_owner }}/catalogs/pkgs/container/catalogs%2F${catalog}"
+            echo "Checking ${url}"
+            curl --fail --silent --show-error --location --head "${url}" > /dev/null
+            echo "${catalog}-url=${url}" >> "$GITHUB_OUTPUT"
           done
-
-          cat "$out"/*/images.txt | sort -u > "$out/platform-images.txt"
-          cat "$out"/*/chart.txt | sort -u > "$out/helm-images-ver.txt"
-          
-          # write to Github Actions environment
-          echo "Writing images into release"
-
-          {
-            echo 'images-list<<KUBARA_IMAGES_EOF'
-            cat "$out/platform-images.txt"
-            echo 'KUBARA_IMAGES_EOF'
-          } >> "$GITHUB_OUTPUT"
-      
-          {
-            echo 'helm-images-ver<<KUBARA_HELM_IMAGES_EOF'
-            cat "$out/helm-images-ver.txt"
-            echo 'KUBARA_HELM_IMAGES_EOF'
-          } >> "$GITHUB_OUTPUT"
-
 
       - name: Run GoReleaser
         if: github.event_name == 'push'
@@ -115,9 +93,10 @@ jobs:
           workdir: src
           args: release --clean
         env:
+          BOOTSTRAP_CATALOG_URL: ${{ steps.images.outputs.bootstrap-url }}
+          GENERAL_CATALOG_URL: ${{ steps.images.outputs.general-url }}
+
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
-          KUBARA_IMAGE_LIST: ${{ steps.images.outputs.images-list }}
-          HELM_IMAGES_VER: ${{ steps.images.outputs.helm-images-ver }}
           # The base64 of the contents of your '.p12' key.
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
           # The password to open the '.p12' key.

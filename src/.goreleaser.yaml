@@ -14,15 +14,15 @@ release:
   extra_files:
     - glob: licenses.csv
   footer: |
-    ## Platform images
-    Container images referenced by the platform components in this release
+    ## TODO: insert link to latest gorlease
+    ## Bootstrap catalog:
     ```text
-    {{ .Env.KUBARA_IMAGE_LIST }}
+    {{ .Env.BOOTSTRAP_CATALOG_URL }}
     ```
-    ## Helm Charts
+    ## General Catalog
     Helm Chart Versions for Images:
     ```text
-    {{ .Env.HELM_IMAGES_VER }}
+    {{ .Env.GENERAL_CATALOG_URL }}
     ```
 changelog:
   use: git
