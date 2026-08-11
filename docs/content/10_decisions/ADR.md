@@ -84,20 +84,24 @@ To create a new ADR:
 ### Process (validated)
 
 **Create proposal**
+
    - Engineer creates an ADR using the template
    - Status: `proposed`
 
 **Discuss and decide**
+
    - ADR is reviewed and discussed in the **maintainer ADR meeting**
    - Decision is documented inside the ADR  
    - Status becomes: `accepted` (if approved)
 
 **Implement**
+
    - Implementation starts **after acceptance**
    - Changes are delivered via Pull Requests  
    - Optional status during implementation: `active`
 
 **Merge and persist**
+
    - ADR is merged into the repository (usually via PR)
    - ADR becomes part of the official project documentation
 
