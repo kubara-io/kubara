@@ -14,16 +14,10 @@ release:
   extra_files:
     - glob: licenses.csv
   footer: |
-    ## TODO: insert link to latest gorlease
-    ## Bootstrap catalog:
-    ```text
-    {{ .Env.BOOTSTRAP_CATALOG_URL }}
-    ```
-    ## General Catalog
-    Helm Chart Versions for Images:
-    ```text
-    {{ .Env.GENERAL_CATALOG_URL }}
-    ```
+    ## Default catalogs
+    - [Bootstrap catalog {{ .Env.BOOTSTRAP_CATALOG_VERSION }}]({{ .Env.BOOTSTRAP_CATALOG_URL }})
+    - [General catalog {{ .Env.GENERAL_CATALOG_VERSION }}]({{ .Env.GENERAL_CATALOG_URL }})
+    > Projects can override these default catalog versions in their configuration.
 changelog:
   use: git
   sort: asc
