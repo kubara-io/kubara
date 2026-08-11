@@ -18,6 +18,7 @@ To use pre-configured processes (e.g. get secrets from vault) you can leverage t
 `platform-components`.<br>
 Take a look at other chart to find out how to use these templates.<br>
 The general steps are:
+
 1. Add template-library as a dependency to your Chart.yaml
 2. add a template to your new Chart's "templates/" directory and include the templates you need from `template-libary` Chart
    (check other Chart templates to find out how)
