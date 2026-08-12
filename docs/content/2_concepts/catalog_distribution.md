@@ -109,7 +109,13 @@ Only plain `major.minor.patch` is accepted.
 If your registry needs authentication, log in once:
 
 ```bash
-kubara catalog login -u my-github-user --password ghcr.io
+kubara catalog login -u my-github-user --password my-password ghcr.io
+```
+
+or alternatively
+
+```bash
+kubara catalog login -u my-github-user --password-stdin ghcr.io
 ```
 
 kubara stores registry credentials in:
