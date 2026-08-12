@@ -115,7 +115,7 @@ kubara catalog login -u my-github-user --password my-password ghcr.io
 or alternatively
 
 ```bash
-kubara catalog login -u my-github-user --password-stdin ghcr.io
+printf '%s' "$GITHUB_TOKEN" | kubara catalog login -u my-github-user --password-stdin ghcr.io
 ```
 
 kubara stores registry credentials in:
