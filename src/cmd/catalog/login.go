@@ -111,22 +111,15 @@ func resolveCatalogLoginOptions(flags *catalogLoginFlags) (internal.LoginOptions
 	if usesIdentityTokenAuth {
 		var identityToken string
 
-		switch {
-		case flags.identityToken != "":
+		if flags.identityToken != "" {
 			identityToken = flags.identityToken
-		case flags.identityTokenStdin:
+		}
+		if flags.identityTokenStdin {
 			identityToken, err = readLine(io.Discard, "", false)
 			if err != nil {
 				return internal.LoginOptions{}, fmt.Errorf("read identity token from stdin: %w", err)
 			}
-
-		default:
-			identityToken, err = readLine(os.Stdout, "Identity Token: ", true)
-			if err != nil {
-				return internal.LoginOptions{}, fmt.Errorf("read identity token: %w", err)
-			}
 		}
-
 		return internal.LoginOptions{
 			IdentityToken: identityToken,
 			Insecure:      flags.insecure,
