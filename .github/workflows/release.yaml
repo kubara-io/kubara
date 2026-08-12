@@ -31,6 +31,67 @@ jobs:
             ${{ github.event.repository.name }}
             homebrew-tap
 
+      - name: Resolve default catalog releases
+        id: catalogs
+        shell: bash
+        env:
+          # Authenticated reads of the public catalogs repo lift the API rate
+          # limit from 60/h per runner IP to 1000/h.
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          for catalog in bootstrap general; do
+            case "$catalog" in
+              bootstrap)
+                symbol="DefaultBootstrapCatalog"
+                ;;
+              general)
+                symbol="DefaultGeneralCatalog"
+                ;;
+            esac
+
+            ref="$(
+              awk -v name="$symbol" \
+                '$1 == name { gsub(/"/, "", $3); print $3 }' \
+                src/internal/catalog/bootstrap.go
+            )"
+
+            if [[ -z "$ref" ]]; then
+              echo "::error::Could not resolve $symbol"
+              exit 1
+            fi
+
+            version="${ref##*:}"
+
+            # The existing 1.1.0 releases predate the current "-v" tag convention.
+            if [[ "$version" == "1.1.0" ]]; then
+              tag="${catalog}-${version}"
+            else
+              tag="${catalog}-v${version}"
+            fi
+
+            url="https://github.com/${GITHUB_REPOSITORY_OWNER}/catalogs/releases/tag/${tag}"
+            api_url="https://api.github.com/repos/${GITHUB_REPOSITORY_OWNER}/catalogs/releases/tags/${tag}"
+
+            echo "Checking ${tag}"
+            curl \
+              --fail \
+              --silent \
+              --show-error \
+              --retry 3 \
+              --location \
+              --header "Authorization: Bearer ${GH_TOKEN}" \
+              --header "Accept: application/vnd.github+json" \
+              --header "X-GitHub-Api-Version: 2022-11-28" \
+              "$api_url" > /dev/null
+
+            {
+              echo "${catalog}-version=${version}"
+              echo "${catalog}-url=${url}"
+            } >> "$GITHUB_OUTPUT"
+          done
+
       - name: Set up Go
         uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
@@ -66,6 +127,10 @@ jobs:
           workdir: src
           args: release --clean
         env:
+          BOOTSTRAP_CATALOG_VERSION: ${{ steps.catalogs.outputs.bootstrap-version }}
+          BOOTSTRAP_CATALOG_URL: ${{ steps.catalogs.outputs.bootstrap-url }}
+          GENERAL_CATALOG_VERSION: ${{ steps.catalogs.outputs.general-version }}
+          GENERAL_CATALOG_URL: ${{ steps.catalogs.outputs.general-url }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           # The base64 of the contents of your '.p12' key.
           MACOS_SIGN_P12: ${{ secrets.MACOS_SIGN_P12 }}
