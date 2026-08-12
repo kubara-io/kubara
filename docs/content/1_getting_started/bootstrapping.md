@@ -143,7 +143,7 @@ clusters:
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:1.1.0
+      - oci://ghcr.io/kubara-io/catalogs/general:2.0.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>

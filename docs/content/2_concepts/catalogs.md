@@ -70,7 +70,7 @@ bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:1.1.0
 clusters:
   - name: production
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:1.1.0
+      - oci://ghcr.io/kubara-io/catalogs/general:2.0.0
       - oci://ghcr.io/acme/platform-catalogs/security:2.1.0
 ```
 
