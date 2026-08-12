@@ -128,7 +128,7 @@ You can use:
 
 - username/password (interactive)
 - password from stdin
-- identity token (interactive)
+- identity token from flag
 - identity token from stdin
 
 ## Step 4: Push the cached catalog
