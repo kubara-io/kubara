@@ -13,6 +13,11 @@ release:
   replace_existing_artifacts: true
   extra_files:
     - glob: licenses.csv
+  footer: |
+    ## Default catalogs
+    - [Bootstrap catalog {{ .Env.BOOTSTRAP_CATALOG_VERSION }}]({{ .Env.BOOTSTRAP_CATALOG_URL }})
+    - [General catalog {{ .Env.GENERAL_CATALOG_VERSION }}]({{ .Env.GENERAL_CATALOG_URL }})
+    > Projects can override these default catalog versions in their configuration.
 changelog:
   use: git
   sort: asc

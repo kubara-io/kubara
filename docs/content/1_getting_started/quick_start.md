@@ -183,6 +183,7 @@ kubectl --kubeconfig .local/kind.kubeconfig get applications -n argocd
 ```
 
 For more details about the directory and file structure have a look at the concept pages:
+
 - [Overview of Core Concepts](../2_concepts/overview_core_concept.md)
 - [What is a Catalog](../2_concepts/catalogs.md)
 - [How the local kind preset works](../3_infrastructure/kind.md)

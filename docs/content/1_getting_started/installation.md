@@ -88,6 +88,7 @@ You do not need Go installed to run the CLI.
     <https://github.com/kubara-io/kubara/releases>
 
     Current release artifacts:
+
     - Linux: `kubara_<version>_linux_amd64.tar.gz`, `kubara_<version>_linux_arm64.tar.gz`
     - macOS: `kubara_<version>_darwin_amd64.tar.gz`, `kubara_<version>_darwin_arm64.tar.gz`
 
@@ -105,6 +106,7 @@ You do not need Go installed to run the CLI.
     <https://github.com/kubara-io/kubara/releases>
 
     Current release artifacts:
+
     - `kubara_<version>_windows_amd64.zip`
     - `kubara_<version>_windows_arm64.zip`
 

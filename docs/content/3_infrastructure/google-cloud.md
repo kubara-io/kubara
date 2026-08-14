@@ -2,7 +2,7 @@
 
 If you want to run kubara on a hyperscaler like Google Cloud, there are specific configurations to apply. Here we provide an example that can be conveniently adapted to other major cloud providers.
 
-In this example we use provider-native components: 
+In this example we use provider-native components:
 
 * Google Secret Manager for External Secrets
 * Google DNS with a delegated subdomain (from any domain registrar that allows setting NS records).

@@ -16,9 +16,9 @@ import (
 type catalogLoginFlags struct {
 	insecure           bool
 	username           string
-	password           bool
+	password           string
 	passwordStdin      bool
-	identityToken      bool
+	identityToken      string
 	identityTokenStdin bool
 }
 
@@ -33,13 +33,13 @@ func NewCatalogLogin() *cli.Command {
 			&cli.StringFlag{
 				Name:        "username",
 				Aliases:     []string{"u"},
-				Usage:       "Log in using username and password",
+				Usage:       "registry username",
 				Destination: &flags.username,
 			},
-			&cli.BoolFlag{
+			&cli.StringFlag{
 				Name:        "password",
 				Aliases:     []string{"p"},
-				Usage:       "Log in with password interactively",
+				Usage:       "registry password",
 				Destination: &flags.password,
 			},
 			&cli.BoolFlag{
@@ -47,9 +47,9 @@ func NewCatalogLogin() *cli.Command {
 				Usage:       "Log in with password from stdin",
 				Destination: &flags.passwordStdin,
 			},
-			&cli.BoolFlag{
+			&cli.StringFlag{
 				Name:        "identity-token",
-				Usage:       "Log in with identity token interactively",
+				Usage:       "identity token",
 				Destination: &flags.identityToken,
 			},
 			&cli.BoolFlag{
@@ -94,15 +94,15 @@ func NewCatalogLogin() *cli.Command {
 func resolveCatalogLoginOptions(flags *catalogLoginFlags) (internal.LoginOptions, error) {
 	var err error
 
-	if flags.password && flags.passwordStdin {
+	if (flags.password != "") && flags.passwordStdin {
 		return internal.LoginOptions{}, fmt.Errorf("password and password-stdin cannot be used together")
 	}
-	if flags.identityToken && flags.identityTokenStdin {
+	if (flags.identityToken != "") && flags.identityTokenStdin {
 		return internal.LoginOptions{}, fmt.Errorf("identity-token and identity-token-stdin cannot be used together")
 	}
 
-	usesPasswordInputs := flags.username != "" || flags.password || flags.passwordStdin
-	usesIdentityTokenAuth := flags.identityToken || flags.identityTokenStdin
+	usesPasswordInputs := flags.username != "" || flags.password != "" || flags.passwordStdin
+	usesIdentityTokenAuth := flags.identityToken != "" || flags.identityTokenStdin
 
 	if usesPasswordInputs && usesIdentityTokenAuth {
 		return internal.LoginOptions{}, fmt.Errorf("username/password and identity token authentication cannot be combined")
@@ -111,20 +111,15 @@ func resolveCatalogLoginOptions(flags *catalogLoginFlags) (internal.LoginOptions
 	if usesIdentityTokenAuth {
 		var identityToken string
 
-		switch {
-		case flags.identityTokenStdin:
+		if flags.identityToken != "" {
+			identityToken = flags.identityToken
+		}
+		if flags.identityTokenStdin {
 			identityToken, err = readLine(io.Discard, "", false)
 			if err != nil {
 				return internal.LoginOptions{}, fmt.Errorf("read identity token from stdin: %w", err)
 			}
-
-		default:
-			identityToken, err = readLine(os.Stdout, "Identity Token: ", true)
-			if err != nil {
-				return internal.LoginOptions{}, fmt.Errorf("read identity token: %w", err)
-			}
 		}
-
 		return internal.LoginOptions{
 			IdentityToken: identityToken,
 			Insecure:      flags.insecure,
@@ -141,6 +136,8 @@ func resolveCatalogLoginOptions(flags *catalogLoginFlags) (internal.LoginOptions
 
 	var password string
 	switch {
+	case flags.password != "":
+		password = flags.password
 	case flags.passwordStdin:
 		password, err = readLine(io.Discard, "", false)
 		if err != nil {

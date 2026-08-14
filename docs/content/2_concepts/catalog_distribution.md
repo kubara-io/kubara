@@ -109,7 +109,13 @@ Only plain `major.minor.patch` is accepted.
 If your registry needs authentication, log in once:
 
 ```bash
-kubara catalog login -u my-github-user --password ghcr.io
+kubara catalog login -u my-github-user --password my-password ghcr.io
+```
+
+or alternatively
+
+```bash
+printf '%s' "$GITHUB_TOKEN" | kubara catalog login -u my-github-user --password-stdin ghcr.io
 ```
 
 kubara stores registry credentials in:
@@ -122,7 +128,7 @@ You can use:
 
 - username/password (interactive)
 - password from stdin
-- identity token (interactive)
+- identity token from flag
 - identity token from stdin
 
 ## Step 4: Push the cached catalog

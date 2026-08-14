@@ -33,6 +33,7 @@ ADRs are stored as **Markdown files in the repository** (versioned like code).
 **Location:** `docs/content/10_decisions/`
 
 This ensures ADRs are:
+
 - reviewable via PR
 - searchable in the codebase
 - permanently available alongside the implementation
@@ -60,6 +61,7 @@ ADR-0001-replace-deprecated-nginx-ingress.md
 ```
 
 **Title guidelines:**
+
 - lowercase
 - hyphen-separated
 - short and descriptive
@@ -82,20 +84,24 @@ To create a new ADR:
 ### Process (validated)
 
 **Create proposal**
+
    - Engineer creates an ADR using the template
    - Status: `proposed`
 
 **Discuss and decide**
+
    - ADR is reviewed and discussed in the **maintainer ADR meeting**
    - Decision is documented inside the ADR  
    - Status becomes: `accepted` (if approved)
 
 **Implement**
+
    - Implementation starts **after acceptance**
    - Changes are delivered via Pull Requests  
    - Optional status during implementation: `active`
 
 **Merge and persist**
+
    - ADR is merged into the repository (usually via PR)
    - ADR becomes part of the official project documentation
 
@@ -120,6 +126,7 @@ ADR number with link to the document, title and status.
 **Index page location:** [ADR-index](ADR-index.md) -> `docs/content/10_decisions/ADR-index.md` 
 
 The index can be maintained:
+
 - **manually** (simple table, best for a small number of ADRs), or
 - **automatically** via a small script in CI (recommended once the list grows)
 
@@ -140,6 +147,7 @@ We use the following ADR status values:
 ## Quick checklist (author)
 
 Before opening the PR, ensure:
+
 - [ ] file name follows `ADR-000X-...`
 - [ ] status is set to `proposed`
 - [ ] decision context is clear

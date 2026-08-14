@@ -40,6 +40,16 @@
   ],
   "packageRules": [
     {
+      "description": "Update the compatible bootstrap and general catalogs together",
+      "matchDatasources": ["docker"],
+      "matchPackageNames": [
+        "ghcr.io/kubara-io/catalogs/bootstrap",
+        "ghcr.io/kubara-io/catalogs/general"
+      ],
+      "groupName": "Kubara catalogs",
+      "groupSlug": "kubara-catalogs"
+    },
+    {
       "matchFiles": ["**/Chart.{yaml,yml}"],
       "bumpVersions": [
         {

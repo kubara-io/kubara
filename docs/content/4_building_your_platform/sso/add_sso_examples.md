@@ -22,6 +22,7 @@ Sometimes you use Gitea Providers and sometimes its GitHub - **Keep that in mind
 Below are working examples when these Docs are released.
 
 **They are based on:**  
+
 - [Grafana](https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/)  
 - [OAuth2 Proxy](https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea)  
 - [Argo](https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex) & [Dex](https://dexidp.io/docs/connectors/gitea/)  
