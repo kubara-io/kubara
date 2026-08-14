@@ -50,3 +50,18 @@ func TestResolveLoadOptions_PreservesPortableReferences(t *testing.T) {
 	assert.Equal(t, []string{"./catalog", DefaultGeneralCatalog}, options.Catalogs)
 	assert.True(t, options.Overwrite)
 }
+
+func TestResolveLoadOptionsWithBootstrap_PreservesPortableReferences(t *testing.T) {
+	options, err := ResolveLoadOptionsWithBootstrap(
+		"/workspace",
+		"./bootstrap",
+		[]string{"./catalog", DefaultGeneralCatalog},
+		true,
+	)
+	require.NoError(t, err)
+
+	assert.Equal(t, "/workspace", options.CWD)
+	assert.Equal(t, "./bootstrap", options.BootstrapCatalog)
+	assert.Equal(t, []string{"./catalog", DefaultGeneralCatalog}, options.Catalogs)
+	assert.True(t, options.Overwrite)
+}

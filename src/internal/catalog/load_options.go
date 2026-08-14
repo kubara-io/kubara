@@ -8,10 +8,15 @@ import (
 )
 
 func ResolveLoadOptions(cwd string, catalogs []string, overwrite bool) (LoadOptions, error) {
+	return ResolveLoadOptionsWithBootstrap(cwd, "", catalogs, overwrite)
+}
+
+func ResolveLoadOptionsWithBootstrap(cwd, bootstrapCatalog string, catalogs []string, overwrite bool) (LoadOptions, error) {
 	options := LoadOptions{
-		CWD:       cwd,
-		Catalogs:  append([]string(nil), catalogs...),
-		Overwrite: overwrite,
+		CWD:              cwd,
+		BootstrapCatalog: bootstrapCatalog,
+		Catalogs:         append([]string(nil), catalogs...),
+		Overwrite:        overwrite,
 	}
 	if _, err := ResolveSources(options); err != nil {
 		return LoadOptions{}, err

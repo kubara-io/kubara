@@ -75,7 +75,9 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init [--prep] [--local] [--renovate=false]
+>kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]
+
+**--bootstrap-catalog**="": Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
 **--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 

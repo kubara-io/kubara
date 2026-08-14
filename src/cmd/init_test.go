@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"os"
@@ -9,11 +10,14 @@ import (
 	"strings"
 	"testing"
 
+	cmdtestutil "github.com/kubara-io/kubara/cmd/testutil"
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
+	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"sigs.k8s.io/yaml"
 )
 
 func TestNewInitFlags(t *testing.T) {
@@ -27,6 +31,7 @@ func TestNewInitFlags(t *testing.T) {
 	assert.True(t, flags.RenovateFlag)
 	assert.Equal(t, ".env", flags.EnvFileFlag)
 	assert.Equal(t, "KUBARA_", flags.EnvPrefixFlag)
+	assert.Empty(t, flags.BootstrapCatalogFlag)
 }
 
 func TestNewInitCmd(t *testing.T) {
@@ -44,6 +49,40 @@ func TestNewInitCmd(t *testing.T) {
 	assert.True(t, flagNames["local"])
 	assert.True(t, flagNames["renovate"])
 	assert.True(t, flagNames["envVarPrefix"])
+	assert.True(t, flagNames["bootstrap-catalog"])
+}
+
+func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
+	require.NoError(t, err)
+	envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
+	configPath := filepath.Join(workDir, "config.yaml")
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+
+	err = app.Run(context.Background(), []string{
+		"kubara",
+		"--work-dir", workDir,
+		"--config-file", configPath,
+		"--env-file", envPath,
+		"init",
+		"--bootstrap-catalog", bootstrapPath,
+		"--catalog", generalPath,
+		"--catalog-overwrite",
+		"--renovate=false",
+	})
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	var generated config.Config
+	require.NoError(t, yaml.Unmarshal(data, &generated))
+	require.NotNil(t, generated.BootstrapCatalog)
+	assert.Equal(t, bootstrapPath, *generated.BootstrapCatalog)
+	require.Len(t, generated.Clusters, 1)
+	assert.Equal(t, []string{generalPath}, generated.Clusters[0].Catalogs)
 }
 
 func TestEnsureRenovateConfig(t *testing.T) {

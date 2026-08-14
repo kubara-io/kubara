@@ -92,6 +92,17 @@ kubara init \
   --catalog oci://ghcr.io/acme/platform-catalogs/security:1.4.0
 ```
 
+Use `--bootstrap-catalog` when the new configuration should also reference a custom bootstrap catalog:
+
+```bash
+kubara init \
+  --bootstrap-catalog ./bootstrap \
+  --catalog ./company-platform \
+  --catalog-overwrite
+```
+
+The bootstrap reference is stored in the root `bootstrapCatalog` field, while repeated `--catalog` values are stored on the generated cluster. Local paths are resolved relative to `--work-dir` when kubara loads them.
+
 When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
 This currently applies **only to the first cluster entry**.

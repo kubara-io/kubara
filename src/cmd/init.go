@@ -34,12 +34,13 @@ type InitOptions struct {
 }
 
 type InitFlags struct {
-	PrepFlag      bool
-	ForceFlag     bool
-	LocalFlag     bool
-	RenovateFlag  bool
-	EnvFileFlag   string
-	EnvPrefixFlag string
+	PrepFlag             bool
+	ForceFlag            bool
+	LocalFlag            bool
+	RenovateFlag         bool
+	EnvFileFlag          string
+	EnvPrefixFlag        string
+	BootstrapCatalogFlag string
 }
 
 func NewInitFlags() *InitFlags {
@@ -59,7 +60,7 @@ func NewInitCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "init",
 		Usage:       "Initialize kubara config for your GitOps repository",
-		UsageText:   "kubara init [--prep] [--local] [--renovate=false]",
+		UsageText:   "kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]",
 		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables, catalog options, and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, _ := flags.ToOptions(cmd)
@@ -85,7 +86,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get env file path: %w", err)
 	}
-	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	catalogOptions, err := catalogLoadOptionsFromCommandWithBootstrap(cmd, flags.BootstrapCatalogFlag)
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
@@ -129,6 +130,14 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Value:       flags.RenovateFlag,
 			Usage:       "Generate a Renovate configuration for kubara catalog updates if none exists",
 			Destination: &flags.RenovateFlag,
+		},
+		&cli.StringFlag{
+			Name:        "bootstrap-catalog",
+			Usage:       "Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z",
+			Destination: &flags.BootstrapCatalogFlag,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",
@@ -176,6 +185,13 @@ func (o *InitOptions) Run() error {
 
 func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
 	return o.catalogOptions
+}
+
+func (o *InitOptions) applyBootstrapCatalogOverride(cfg *config.Config) {
+	bootstrapCatalog := strings.TrimSpace(o.catalogOptions.BootstrapCatalog)
+	if bootstrapCatalog != "" {
+		cfg.BootstrapCatalog = &bootstrapCatalog
+	}
 }
 
 func (o *InitOptions) ensureLocalDotEnv(es *envconfig.EnvStore) error {
@@ -304,6 +320,7 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 	}
 
 	cs.GetConfig().Clusters = []config.Cluster{newCluster}
+	o.applyBootstrapCatalogOverride(cs.GetConfig())
 	if err := cs.SaveToFile(); err != nil {
 		return fmt.Errorf("write config file: %w", err)
 	}
