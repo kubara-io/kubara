@@ -22,4 +22,4 @@ Third-party components:
   - `src/go.mod`
   - `src/go.sum`
 - Helm chart dependencies are resolved at runtime from upstream repositories and may be deployed to target clusters.
-  See THIRD_PARTY_HELM_DEPENDENCIES.md for the current dependency list and source repositories.
+  See [THIRD_PARTY_HELM_DEPENDENCIES.md](THIRD_PARTY_HELM_DEPENDENCIES.md) for the current dependency list and source repositories.
