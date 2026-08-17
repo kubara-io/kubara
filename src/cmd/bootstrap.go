@@ -13,7 +13,6 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/cmd/bootstrap"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/rs/zerolog/log"
@@ -26,8 +25,6 @@ type BootstrapFlags struct {
 	ClusterSecretStorePath string
 	PlatformComponentsPath string
 	PlatformConfigsPath    string
-	EnvFile                string
-	EnvPrefixFlag          string
 	DryRun                 bool
 	Timeout                time.Duration
 }
@@ -39,9 +36,7 @@ var deprecatedBootstrapCRDFlags = []string{
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		EnvFile:       ".env",
-		EnvPrefixFlag: "KUBARA_",
-		Timeout:       2 * time.Minute,
+		Timeout: 2 * time.Minute,
 	}
 }
 
@@ -83,11 +78,6 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
 		return nil, fmt.Errorf("get working directory: %w", err)
-	}
-
-	envFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get env file path: %w", err)
 	}
 
 	kubeconfig := cmd.String("kubeconfig")
@@ -146,14 +136,13 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
 	}
 
-	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
-	if err := es.Load(); err != nil {
-		return nil, fmt.Errorf("load env: %w", err)
+	creds, err := bootstrap.LoadCredentials(cwd)
+	if err != nil {
+		return nil, fmt.Errorf("load credentials: %w", err)
 	}
 
-	envMap, err := prepareBootstrapEnv(clusterConfig, es.GetConfig(), flags.Local)
-	if err != nil {
-		return nil, fmt.Errorf("prepare env: %w", err)
+	if err := creds.ValidateForCluster(clusterConfig); err != nil {
+		return nil, fmt.Errorf("validate credentials for cluster %q: %w", clusterConfig.Name, err)
 	}
 
 	// Validate and normalize ClusterSecretStore path if provided
@@ -196,7 +185,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		PlatformConfigs:    configsAbsPath,
 		Local:              flags.Local,
 		WithESCSSPath:      cssAbsPath,
-		EnvMap:             envMap,
+		Credentials:        creds,
 		Catalog:            loadedCatalog,
 		ClusterConfig:      clusterConfig,
 		DryRun:             flags.DryRun,
@@ -249,12 +238,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Path to platform-configs directory",
 			Destination: &flags.PlatformConfigsPath,
 		},
-		&cli.StringFlag{
-			Name:        "envVarPrefix",
-			Value:       flags.EnvPrefixFlag,
-			Usage:       "Prefix for envs read from envVars",
-			Destination: &flags.EnvPrefixFlag,
-		},
 		&cli.DurationFlag{
 			Name:        "timeout",
 			Value:       5 * time.Minute,
@@ -279,29 +262,4 @@ func printDeprecatedBootstrapCRDFlagNotice(cmd *cli.Command) {
 			log.Warn().Msgf("--%s is deprecated and ignored; CRDs are applied automatically during bootstrap.\n", flagName)
 		}
 	}
-}
-
-func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
-	if err := envMap.Validate(); err != nil {
-		return nil, err
-	}
-
-	if (envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && !envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) ||
-		(!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) {
-		return nil, fmt.Errorf("if you are using a private repository you need to configure both ARGOCD_GIT_PAT_OR_PASSWORD and ARGOCD_GIT_USERNAME")
-	}
-
-	if !local {
-		return envMap, nil
-	}
-
-	prepared := *envMap
-	if !envconfig.IsConfiguredEnvValue(prepared.ProjectName) {
-		prepared.ProjectName = cluster.Name
-	}
-	if !envconfig.IsConfiguredEnvValue(prepared.ProjectStage) {
-		prepared.ProjectStage = cluster.Stage
-	}
-
-	return &prepared, nil
 }

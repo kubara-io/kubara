@@ -9,7 +9,7 @@
 
 
 To setup and use the kubara framework these are tools and external entities you need to prepare. Information from the external
-entities can be added to .env to smoothen bootstrap process.
+entities will be configured in `config.yaml` or supplied as bootstrap credentials.
 
 ### Required Tools
 - `kubectl`
@@ -57,8 +57,8 @@ Prepare the provider credentials you will need later during bootstrap to create 
 
 ---
 
-After setting up these entities (or use existing ones) you need to provide some information to the kubara framework
-(and store it in .env)
+After setting up these entities (or using existing ones), configure your cluster in `config.yaml`
+and supply repository credentials during `kubara bootstrap`.
 
 #### Infrastructure as Code (IaC)
 

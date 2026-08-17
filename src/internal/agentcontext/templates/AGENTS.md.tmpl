@@ -14,7 +14,7 @@ over guessing, and open the linked docs only when you need depth.
 ## Core workflow (run in this order)
 
 1. Make sure you are in a git repository that is either empty or already contains a `config.yaml`.
-2. `kubara init` — generate `config.yaml` from `.env`.
+2. `kubara init` — scaffold `config.yaml`.
 3. `kubara generate --helm` (add `--terraform` if you provision infrastructure with kubara) — render
    Helm/Terraform artifacts from the service catalog into this repository.
 4. `kubara bootstrap <cluster-name>` — install Argo CD onto the target cluster.
@@ -26,14 +26,14 @@ Use `kubara generate --dry-run` to preview without writing.
 
 - `config.yaml` — the platform definition (clusters, stages, services). Run `kubara schema` for its
   JSON Schema instead of guessing field names.
-- `.env` — inputs/credentials consumed by `kubara init`. Git-ignored; never commit it.
+- `.env` — optional repository credentials consumed by `kubara bootstrap` (`GITOPS_*`). Git-ignored; never commit it.
 - `platform-configs/` — generated Helm values and Terraform overlays. Review them and fill
   in any environment-specific values before bootstrapping.
 
 ## Conventions for agents
 
-- The CLI is fully non-interactive. Drive it with flags, the `.env` file, or `KUBARA_*` environment
-  variables — never expect an interactive prompt.
+- The CLI is fully non-interactive. Drive it with flags, OS environment variables (`GITOPS_*`), or an optional
+  `.env` file — never expect an interactive prompt.
 - Reach for `kubara <command> --help` and `kubara schema` before inferring flags or config fields.
 - Match the tool to the workload, and ask the user when it is unclear: use Argo CD
   `Application`s/`ApplicationSet`s for cluster-specific workloads, and the catalog for components

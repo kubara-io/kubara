@@ -1,48 +1,55 @@
 package config
 
 import (
+	"context"
 	"fmt"
+	"os/exec"
+	"strings"
+	"time"
 
 	"github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/utils"
 )
 
-func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.LoadOptions) (Cluster, error) {
+// InferGitRemote attempts to detect the git remote.origin.url and infer its GitAuthMode.
+func InferGitRemote(cwd string) (string, GitAuthMode) {
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "git", "-C", cwd, "config", "--get", "remote.origin.url")
+	out, err := cmd.Output()
+	if err == nil {
+		rawURL := strings.TrimSpace(string(out))
+		if rawURL != "" {
+			if utils.IsSSHGitURL(rawURL) {
+				return rawURL, GitAuthModeSSH
+			}
+			return rawURL, GitAuthModeHTTPS
+		}
+	}
+
+	return "", GitAuthModeHTTPS
+}
+
+// NewDefaultClusterWithCatalog creates a new Cluster scaffold for kubara init.
+func NewDefaultClusterWithCatalog(cwd string, catalogOptions catalog.LoadOptions) (Cluster, error) {
 	effectiveCatalogOptions := clusterCatalogLoadOptions(catalogOptions)
-	gitRepoURL := e.GitRepositoryURL()
 	services, err := createServicesFromCatalogWithOptions(effectiveCatalogOptions, "")
 	if err != nil {
 		return Cluster{}, fmt.Errorf("create services from catalog: %w", err)
 	}
 
-	argoCD := ArgoCD{
-		SelfManaged: ArgoCDSelfManagedEnabled,
-		Repo: RepoProto{
-			AuthMode: GitAuthMode(e.GitAuthMode()),
-			Git: &RepoType{
-				Configs: Repository{
-					URL:            gitRepoURL,
-					TargetRevision: "main",
-				},
-				Components: Repository{
-					URL:            gitRepoURL,
-					TargetRevision: "main",
-				},
-			},
-		},
-	}
-	if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
-		helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
-		argoCD.HelmRepo = &HelmRepository{
-			URL: helmRepoURL,
-		}
+	inferredURL, authMode := InferGitRemote(cwd)
+	gitRepoURL := inferredURL
+	if gitRepoURL == "" {
+		gitRepoURL = "https://git.example.com/platform/repo.git"
 	}
 
 	return Cluster{
-		Name:    e.ProjectName,
-		Stage:   e.ProjectStage,
-		Type:    "<hub or spoke>",
+		Name:    "<cluster-name>",
+		Stage:   "<stage>",
+		Type:    Hub,
 		DNSName: "<subdomain.my-domain.com>",
 		SSOOrg:  "<my-org>",
 		SSOTeam: "<my-team>",
@@ -59,10 +66,25 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			KubernetesVersion: "1.36",
 			DNS: DNS{
 				Name:  "<subdomain.my-domain.com>",
-				Email: "my-test@nowhere.com",
+				Email: "[EMAIL_REDACTED]",
 			},
 		},
-		ArgoCD:   argoCD,
+		ArgoCD: ArgoCD{
+			SelfManaged: ArgoCDSelfManagedEnabled,
+			Repo: RepoProto{
+				AuthMode: authMode,
+				Git: &RepoType{
+					Configs: Repository{
+						URL:            gitRepoURL,
+						TargetRevision: "main",
+					},
+					Components: Repository{
+						URL:            gitRepoURL,
+						TargetRevision: "main",
+					},
+				},
+			},
+		},
 		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: services,
 	}, nil

@@ -347,8 +347,8 @@ runtime_settings.properties
 /secrets
 
 # Specific
-launchers/demo-e2e/edc-config.properties
 .env
+env.example
 .kubara/
 .local/
 

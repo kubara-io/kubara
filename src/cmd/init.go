@@ -12,45 +12,31 @@ import (
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/localmode"
 	"github.com/kubara-io/kubara/internal/utils"
-	"github.com/kubara-io/kubara/internal/workflow"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
 )
 
 type InitOptions struct {
-	copyPrepFolder bool
-	force          bool
 	local          bool
 	renovate       bool
 	cwd            string
 	configFilePath string
-	dotEnvFilePath string
-	envVarPrefix   string
 	catalogOptions catalog.LoadOptions
 }
 
 type InitFlags struct {
-	PrepFlag             bool
-	ForceFlag            bool
 	LocalFlag            bool
 	RenovateFlag         bool
-	EnvFileFlag          string
-	EnvPrefixFlag        string
 	BootstrapCatalogFlag string
 }
 
 func NewInitFlags() *InitFlags {
 	return &InitFlags{
-		PrepFlag:      false,
-		ForceFlag:     false,
-		LocalFlag:     false,
-		RenovateFlag:  true,
-		EnvFileFlag:   ".env",
-		EnvPrefixFlag: "KUBARA_",
+		LocalFlag:    false,
+		RenovateFlag: true,
 	}
 }
 
@@ -60,10 +46,13 @@ func NewInitCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "init",
 		Usage:       "Initialize kubara config for your GitOps repository",
-		UsageText:   "kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]",
-		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables, catalog options, and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
+		UsageText:   "kubara init [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]",
+		Description: "Initializes the kubara configuration for your GitOps repository, including catalog options and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --local, it writes a local-evaluation cluster profile in config.yaml.",
 		Action: func(c context.Context, cmd *cli.Command) error {
-			o, _ := flags.ToOptions(cmd)
+			o, err := flags.ToOptions(cmd)
+			if err != nil {
+				return err
+			}
 			return o.Run()
 		},
 	}
@@ -82,24 +71,16 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
-	dotEnvFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get env file path: %w", err)
-	}
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, flags.BootstrapCatalogFlag)
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
 
 	o := &InitOptions{
-		copyPrepFolder: flags.PrepFlag,
-		force:          flags.ForceFlag,
 		local:          flags.LocalFlag,
 		renovate:       flags.RenovateFlag,
 		cwd:            cwd,
 		configFilePath: configFilePath,
-		dotEnvFilePath: dotEnvFilePath,
-		envVarPrefix:   flags.EnvPrefixFlag,
 		catalogOptions: catalogOptions,
 	}
 	return o, nil
@@ -107,18 +88,6 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 
 func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 	initFlags := []cli.Flag{
-		&cli.BoolFlag{
-			Name:        "prep",
-			Value:       flags.PrepFlag,
-			Usage:       "Copy embedded prep/ folder into current working directory",
-			Destination: &flags.PrepFlag,
-		},
-		&cli.BoolFlag{
-			Name:        "overwrite",
-			Value:       flags.ForceFlag,
-			Usage:       "Overwrite config if exists",
-			Destination: &flags.ForceFlag,
-		},
 		&cli.BoolFlag{
 			Name:        "local",
 			Value:       flags.LocalFlag,
@@ -139,204 +108,48 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 				TrimSpace: true,
 			},
 		},
-		&cli.StringFlag{
-			Name:        "envVarPrefix",
-			Value:       flags.EnvPrefixFlag,
-			Usage:       "Prefix for envs read from envVars",
-			Destination: &flags.EnvPrefixFlag,
-		},
 	}
 
 	cmd.Flags = initFlags
 }
 
 func (o *InitOptions) Run() error {
-	es := envconfig.NewEnvStore(o.dotEnvFilePath, ".", o.envVarPrefix)
-	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogLoadOptions())
+	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogOptions)
 
-	envLoadErr := es.Load()
-	configLoadErr := cs.Load()
-	var envValidateErr error
-	if o.local {
-		if o.copyPrepFolder {
-			localmode.PopulateInitEnv(es.GetConfig())
-		}
-		envValidateErr = es.Validate()
-	} else {
-		envValidateErr = es.Validate()
-		es.SetDefaults()
-	}
-
-	if envLoadErr != nil {
-		log.Error().Msgf("Reading Env failed. %s", envLoadErr)
-		return envLoadErr
-	}
-
-	if o.copyPrepFolder {
-		return o.runPrepMode(es)
-	}
-
-	if o.force {
-		return o.runForceMode(es, cs, envValidateErr, configLoadErr)
-	}
-
-	return o.runNormalMode(es, cs, envValidateErr)
-}
-
-func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
-	return o.catalogOptions
-}
-
-func (o *InitOptions) applyBootstrapCatalogOverride(cfg *config.Config) {
-	bootstrapCatalog := strings.TrimSpace(o.catalogOptions.BootstrapCatalog)
-	if bootstrapCatalog != "" {
-		cfg.BootstrapCatalog = &bootstrapCatalog
-	}
-}
-
-func (o *InitOptions) ensureLocalDotEnv(es *envconfig.EnvStore) error {
-	if err := utils.AddGitignore(o.cwd); err != nil {
-		return err
-	}
-
-	_, err := os.Stat(o.dotEnvFilePath)
-	if err == nil {
-		log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
-		return nil
-	}
-	if !os.IsNotExist(err) {
-		return err
-	}
-
-	content, err := es.GenerateEnvFileFromCurrentValues()
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(o.dotEnvFilePath, content, 0o600); err != nil {
-		return err
-	}
-
-	log.Info().Msgf("Generated local-evaluation dotenv in path: %v", es.GetFilepath())
-	return nil
-}
-
-func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
-	if o.local {
-		if err := o.ensureLocalDotEnv(es); err != nil {
-			return err
-		}
-		log.Info().Msg("Next steps: update your .env file, then run 'kubara init --local'.")
-		return nil
-	}
-
-	if err := utils.AddGitignore(o.cwd); err != nil {
-		return err
-	}
-
-	_, err := os.Stat(o.dotEnvFilePath)
-	if err == nil {
-		log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
-		log.Info().Msg("Next steps: fill in your .env file, then run 'kubara init'.")
-		return nil
-	}
-	if !os.IsNotExist(err) {
-		return err
-	}
-
-	initialEnvs, err := es.GenerateInitialEnvs()
-	if err != nil {
-		return err
-	}
-	if err := os.WriteFile(o.dotEnvFilePath, initialEnvs, 0600); err != nil {
-		return err
-	}
-
-	log.Info().Msgf("Generated .env in path: %s", es.GetFilepath())
-	log.Info().Msg("Next steps: fill in your .env file, then run 'kubara init'.")
-	return nil
-}
-
-func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStore, envValidateErr, configLoadErr error) error {
-	if envValidateErr != nil {
-		return fmt.Errorf("validate env: %w", envValidateErr)
-	}
-
-	fileExists, _ := utils.FileExist(cs.GetFilepath())
-	if !fileExists {
-		return fmt.Errorf("load config file: %w", configLoadErr)
-	}
-
-	if err := workflow.CreateOrUpdateCluster(cs.GetConfig(), es.GetConfig(), o.catalogLoadOptions()); err != nil {
-		return fmt.Errorf("create or update cluster from env: %w", err)
-	}
-	if o.local {
-		clusterName := es.GetConfig().ProjectName
-		dnsName := localmode.DefaultDNSName(es.GetConfig().ProjectName, es.GetConfig().ProjectStage)
-		for i := range cs.GetConfig().Clusters {
-			if cs.GetConfig().Clusters[i].Name == clusterName {
-				localmode.ApplyClusterProfile(&cs.GetConfig().Clusters[i], dnsName)
-				break
-			}
-		}
-	}
-	if err := cs.SaveToFile(); err != nil {
-		return fmt.Errorf("write config file: %w", err)
-	}
-	if err := o.ensureRenovateConfig(cs); err != nil {
-		return err
-	}
-
-	if o.local {
-		log.Info().Msgf("Overwrote local-evaluation config file: %s", cs.GetFilepath())
-		log.Info().Msg("Initialized local evaluation workflow successfully")
-		log.Info().Msg("Next steps: review config.yaml, then run 'kubara bootstrap --local test-cluster'.")
-		return nil
-	}
-
-	log.Info().Msgf("overwritten config file: %s", cs.GetFilepath())
-	log.Info().Msg("Initialized successfully")
-	log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
-	return nil
-}
-
-func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigStore, envValidateErr error) error {
 	fileExists, err := utils.FileExist(cs.GetFilepath())
 	if err != nil {
 		return err
 	}
-
 	if fileExists {
-		if err := o.ensureRenovateConfig(cs); err != nil {
-			return err
-		}
-		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
-		log.Info().Msg("Initialized successfully")
-		if o.local {
-			log.Info().Msg("Next steps: review config.yaml, then run 'kubara bootstrap --local test-cluster'.")
-		} else {
-			log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
-		}
-		return nil
+		return fmt.Errorf("config file already exists: %s", cs.GetFilepath())
 	}
 
-	if envValidateErr != nil {
-		log.Info().Msgf("Env validation error. If you want to generate an initial .env file, pass the \"--prep\" flag.")
-		return fmt.Errorf("validate env: %w", envValidateErr)
+	if err := utils.AddGitignore(o.cwd); err != nil {
+		return err
 	}
 
-	newCluster, err := config.NewClusterFromEnvWithCatalog(es.GetConfig(), o.catalogLoadOptions())
+	newCluster, err := config.NewDefaultClusterWithCatalog(o.cwd, o.catalogOptions)
 	if err != nil {
-		return fmt.Errorf("create cluster from env: %w", err)
+		return fmt.Errorf("create cluster: %w", err)
 	}
+
 	if o.local {
-		localmode.ApplyClusterProfile(&newCluster, localmode.DefaultDNSName(es.GetConfig().ProjectName, es.GetConfig().ProjectStage))
+		localmode.ApplyClusterProfile(&newCluster, localmode.DefaultDNSName("test-cluster", localmode.DefaultProjectStage))
+		newCluster.Name = "test-cluster"
+		newCluster.Stage = localmode.DefaultProjectStage
 	}
 
 	cs.GetConfig().Clusters = []config.Cluster{newCluster}
 	o.applyBootstrapCatalogOverride(cs.GetConfig())
+
 	if err := cs.SaveToFile(); err != nil {
 		return fmt.Errorf("write config file: %w", err)
 	}
+
+	if err := o.ensureEnvExample(); err != nil {
+		return err
+	}
+
 	if err := o.ensureRenovateConfig(cs); err != nil {
 		return err
 	}
@@ -350,6 +163,13 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 	log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
 	log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
 	return nil
+}
+
+func (o *InitOptions) applyBootstrapCatalogOverride(cfg *config.Config) {
+	bootstrapCatalog := strings.TrimSpace(o.catalogOptions.BootstrapCatalog)
+	if bootstrapCatalog != "" {
+		cfg.BootstrapCatalog = &bootstrapCatalog
+	}
 }
 
 type renovateConfig struct {
@@ -471,4 +291,51 @@ func renovateConfigContainsKubaraManager(path string) (bool, error) {
 		return false, fmt.Errorf("read renovate config %q: %w", path, err)
 	}
 	return bytes.Contains(content, []byte(kubaraRenovateManagerDescription)), nil
+}
+
+const envExampleTemplate = `# ✅ These variables are optional credentials for 'kubara bootstrap'.
+# 💡 You can set them as OS environment variables or copy this file to .env.
+
+# Git repository credentials (mutually exclusive: choose HTTPS, SSH, or GitHub App)
+
+# https mode: username + password/PAT (if repository is private)
+# GITOPS_GIT_USERNAME=""
+# GITOPS_GIT_PASSWORD=""
+
+# ssh mode: private key (inline) or path to private key file
+# GITOPS_GIT_SSH_PRIVATE_KEY=""
+# GITOPS_GIT_SSH_PRIVATE_KEY_PATH=""
+
+# github-app mode: GitHub App IDs and private key (inline or path)
+# GITOPS_GIT_GITHUB_APP_ID=""
+# GITOPS_GIT_GITHUB_APP_INSTALLATION_ID=""
+# GITOPS_GIT_GITHUB_APP_PRIVATE_KEY=""
+# GITOPS_GIT_GITHUB_APP_PRIVATE_KEY_PATH=""
+# GITOPS_GIT_GITHUB_APP_ENTERPRISE_BASE_URL=""
+
+# Optional: Private Helm/OCI repository credentials
+# GITOPS_HELM_REPO_USERNAME=""
+# GITOPS_HELM_REPO_PASSWORD=""
+
+# Optional: Container Registry Config (base64-encoded dockerconfigjson)
+# DOCKERCONFIG_BASE64=""
+`
+
+func (o *InitOptions) ensureEnvExample() error {
+	path := filepath.Join(o.cwd, "env.example")
+	exists, err := utils.FileExist(path)
+	if err != nil {
+		return fmt.Errorf("check env.example %q: %w", path, err)
+	}
+	if exists {
+		log.Info().Str("path", path).Msg("env.example already exists; skipping creation")
+		return nil
+	}
+
+	if err := os.WriteFile(path, []byte(envExampleTemplate), 0o644); err != nil {
+		return fmt.Errorf("write env.example: %w", err)
+	}
+
+	log.Info().Msgf("Generated env.example in path: %s", path)
+	return nil
 }

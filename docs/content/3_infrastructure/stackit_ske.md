@@ -232,7 +232,7 @@ If you use OAuth2 with GitHub, create a GitHub application as shown [here](../4_
 If you want Terraform to create OAuth2-related Vault entries:
 
 * Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `platform-configs/<cluster-name>/terraform/`
-* `TF_Var_image_pull_secret` will already be set by kubara with what is present in the `.env`
+* Set `TF_VAR_image_pull_secret` if you configure a private container registry pull secret
 * In `platform-configs/<cluster-name>/terraform/infrastructure`, copy `secrets.tf-oauth2` to `oauth2-secrets.tf` and adjust values if needed
 
 Load the variables and apply:
