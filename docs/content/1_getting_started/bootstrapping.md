@@ -133,7 +133,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:2.0.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:2.0.1
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
