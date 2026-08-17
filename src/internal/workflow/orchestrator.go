@@ -23,7 +23,7 @@ func CreateOrUpdateCluster(cfg *config.Config, e *envconfig.EnvMap, catalogOptio
 
 			if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 				helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
-				cfg.Clusters[i].ArgoCD.HelmRepo = &config.HelmRepository{
+				cfg.Clusters[i].ArgoCD.HelmRepo = config.HelmRepository{
 					URL: helmRepoURL,
 				}
 			}

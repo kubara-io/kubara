@@ -68,7 +68,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 					},
 				},
 			},
-			HelmRepo: &HelmRepository{
+			HelmRepo: HelmRepository{
 				URL: "https://charts.example.com",
 			},
 		},
@@ -87,10 +87,14 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 	}
+
 	expectedClusterWithoutHelmRepo := expectedCluster
-	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
+	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = HelmRepository{
+		URL: "",
+	}
+
 	expectedClusterWithOCIHelmRepo := expectedCluster
-	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
+	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = HelmRepository{
 		URL: "registry-1.docker.io/bitnamicharts",
 	}
 

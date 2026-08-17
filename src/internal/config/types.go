@@ -7,13 +7,6 @@ import (
 )
 
 const (
-	ConfigVersionV1Alpha1 = "v1alpha1"
-	ConfigVersionV1Alpha2 = "v1alpha2"
-	ConfigVersionV1Alpha3 = "v1alpha3"
-	ConfigVersionV1Alpha4 = "v1alpha4"
-)
-
-const (
 	Hub   string = "hub"
 	Spoke string = "spoke"
 )
@@ -44,40 +37,39 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha4,default=v1alpha4"`
-	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty" jsonschema:"title=Bootstrap Catalog,description=The global bootstrap catalog to use."`
-	Clusters         []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
+	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty"`
+	Clusters         []Cluster `json:"clusters" yaml:"clusters"`
 }
 
 // Cluster defines the configuration for a single Kubernetes cluster.
 type Cluster struct {
-	Name    string `json:"name" yaml:"name" jsonschema:"required,title=Cluster Name,description=The unique name for the cluster.,minLength=1,example=my-prod-cluster"`
-	Stage   string `json:"stage" yaml:"stage" jsonschema:"title=Deployment Stage,description=The stage this cluster represents.,minLength=1,default=dev"`
-	Type    string `json:"type" yaml:"type" jsonschema:"title=Cluster Type,description=The type of the cluster,enum=hub,enum=spoke,default=hub"`
-	DNSName string `json:"dnsName" yaml:"dnsName" jsonschema:"required,title=Primary DNS Name,description=The fully qualified domain name for the cluster.,format=hostname,example=my-prod-cluster.example.com"`
+	Name    string `json:"name"`
+	Stage   string `json:"stage"`
+	Type    string `json:"type"`
+	DNSName string `json:"dnsName"`
 
-	SSOOrg  string `json:"ssoOrg,omitempty" yaml:"ssoOrg,omitempty" jsonschema:"title=SSO Organization,description=The SSO organization or group allowed to access this cluster.,minLength=1"`
-	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
+	SSOOrg  string `json:"ssoOrg,omitempty"`
+	SSOTeam string `json:"ssoTeam,omitempty"`
 
-	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
+	IngressClassName string `json:"ingressClassName,omitempty"`
 
-	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
-	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
-	Catalogs  []string         `json:"catalogs,omitempty" yaml:"catalogs,omitempty" jsonschema:"title=Catalogs,description=Catalogs to be used by this cluster"`
-	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
+	Terraform *Terraform       `json:"terraform,omitempty"`
+	ArgoCD    ArgoCD           `json:"argocd"`
+	Catalogs  []string         `json:"catalogs,omitempty"`
+	Services  service.Services `json:"services"`
 }
 
 type Terraform struct {
-	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Use none to skip Terraform generation. Currently supported providers: stackit and t-cloud-public.,enum=none,enum=stackit,enum=t-cloud-public,default=none"`
-	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The provider-specific project subscription or tenant identifier. For t-cloud-public use the tenant or project name rather than a UUID.,minLength=1"`
-	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,enum=cce,default=ske"`
-	KubernetesVersion string            `json:"kubernetesVersion" yaml:"kubernetesVersion" jsonschema:"required,title=Kubernetes Version,description=The Kubernetes version for the cluster.,example=1.34,pattern=^[0-9]\\.[0-9]+(\\.[0-9]+)?$"`
-	DNS               DNS               `json:"dns" yaml:"dns" jsonschema:"required,title=DNS Config,description=DNS Zone configuration"`
+	Provider          TerraformProvider `json:"provider"`
+	ProjectID         string            `json:"projectId"`
+	KubernetesType    string            `json:"kubernetesType"`
+	KubernetesVersion string            `json:"kubernetesVersion"`
+	DNS               DNS               `json:"dns"`
 }
 
 type DNS struct {
-	Name  string `json:"name" yaml:"name" jsonschema:"required,title=DNS Zone Name,description=The managed DNS zone name.,format=hostname"`
-	Email string `json:"email" yaml:"email" jsonschema:"required,title=Admin Email,description=Administrative email for the DNS zone.,format=email"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
 }
 
 type ArgoCDSelfManagedStatus string
@@ -88,27 +80,27 @@ const (
 )
 
 type ArgoCD struct {
-	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
-	Repo        RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	HelmRepo    *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty"`
+	Repo        RepoProto               `json:"repo"`
+	HelmRepo    HelmRepository          `json:"helmRepo,omitempty"`
 }
 
 type RepoProto struct {
-	_     struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
-	HTTPS *RepoType `json:"https,omitempty" yaml:"https,omitempty" jsonschema:"title=Https Repository"`
-	OCI   *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
+	HTTPS *RepoType `json:"https,omitempty"`
+	OCI   *RepoType `json:"oci,omitempty"`
 }
 
 type RepoType struct {
-	Configs    Repository `json:"configs" yaml:"configs" jsonschema:"required,title=Platform Configs Repository"`
-	Components Repository `json:"components" yaml:"components" jsonschema:"required,title=Platform Components Repository"`
+	Configs    Repository `json:"configs"`
+	Components Repository `json:"components"`
 }
 
 type Repository struct {
-	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
-	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
+	URL            string `json:"url"`
+	Path           string `json:"path"`
+	TargetRevision string `json:"targetRevision"`
 }
 
 type HelmRepository struct {
-	URL string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Helm repository URL or OCI registry URL (without oci:// prefix),minLength=1"`
+	URL string `json:"url"`
 }

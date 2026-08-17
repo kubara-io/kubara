@@ -1183,7 +1183,7 @@ func localProjectSourceRepos(opts *Options) []string {
 		"ghcr.io/traefik/helm",
 		"oci://ghcr.io/traefik/helm",
 	}
-	if opts.ClusterConfig.ArgoCD.HelmRepo != nil && strings.TrimSpace(opts.ClusterConfig.ArgoCD.HelmRepo.URL) != "" {
+	if strings.TrimSpace(opts.ClusterConfig.ArgoCD.HelmRepo.URL) != "" {
 		repos = append(repos, opts.ClusterConfig.ArgoCD.HelmRepo.URL)
 	}
 
