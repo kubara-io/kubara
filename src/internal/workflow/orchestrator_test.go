@@ -167,7 +167,7 @@ func TestCreateOrUpdateCluster_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.
 							},
 						},
 					},
-					HelmRepo: &config.HelmRepository{
+					HelmRepo: config.HelmRepository{
 						URL: "https://charts.old.example.com",
 					},
 				},
@@ -202,7 +202,7 @@ func TestCreateOrUpdateCluster_CreatesNewClusterWithoutHelmRepoWhenEnvMissing(t 
 
 	require.Len(t, cfg.Clusters, 1)
 	cluster := cfg.Clusters[0]
-	assert.Nil(t, cluster.ArgoCD.HelmRepo)
+	assert.Empty(t, cluster.ArgoCD.HelmRepo.URL)
 }
 
 func TestCreateOrUpdateCluster_NormalizesOCIHelmRepoURL(t *testing.T) {
