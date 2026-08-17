@@ -76,6 +76,15 @@ jobs:
             exit 1
           fi
 
+      - name: Verify CRD manifests are up to date
+        run: |
+          set -euo pipefail
+          make generate
+          if ! git diff --exit-code internal/config/crd/; then
+            echo "::error::CRD manifests are not up to date. Run 'make generate' locally."
+            exit 1
+          fi
+
       - name: Create report directory
         run: mkdir -p "${{ env.REPORT_DIR }}"
       - name: Check Go code formatting (gofmt)
