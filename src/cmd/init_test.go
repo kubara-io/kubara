@@ -77,12 +77,14 @@ func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
 
 	data, err := os.ReadFile(configPath)
 	require.NoError(t, err)
-	var generated config.Config
+	var generated struct {
+		Spec config.Config `json:"spec"`
+	}
 	require.NoError(t, yaml.Unmarshal(data, &generated))
-	require.NotNil(t, generated.BootstrapCatalog)
-	assert.Equal(t, bootstrapPath, *generated.BootstrapCatalog)
-	require.Len(t, generated.Clusters, 1)
-	assert.Equal(t, []string{generalPath}, generated.Clusters[0].Catalogs)
+	require.NotNil(t, generated.Spec.BootstrapCatalog)
+	assert.Equal(t, bootstrapPath, *generated.Spec.BootstrapCatalog)
+	require.Len(t, generated.Spec.Clusters, 1)
+	assert.Equal(t, []string{generalPath}, generated.Spec.Clusters[0].Catalogs)
 }
 
 func TestEnsureRenovateConfig(t *testing.T) {

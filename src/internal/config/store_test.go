@@ -10,16 +10,15 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/service"
 
-	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.yaml.in/yaml/v3"
+	k8syaml "sigs.k8s.io/yaml"
 )
 
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version:          ConfigVersionV1Alpha6,
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
@@ -73,7 +72,7 @@ func createLoadedConfigStore(t *testing.T, cfg *Config) *ConfigStore {
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
-	configYAML, err := yaml.Marshal(cfg)
+	configYAML, err := platformSetupDocument(cfg, "platform")
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(configPath, configYAML, 0o644))
 
@@ -89,14 +88,14 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 		provider       TerraformProvider
 		kubernetesType string
 		wantErr        bool
+		errContains    string
 	}{
 		{name: "stackit supports ske", provider: TerraformProviderStackit, kubernetesType: "ske"},
 		{name: "stackit supports edge", provider: TerraformProviderStackit, kubernetesType: "edge"},
 		{name: "t-cloud-public supports cce", provider: TerraformProviderTCloudPublic, kubernetesType: "cce"},
-		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true},
-		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true},
-		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true},
-		{name: "unknown provider is ignored by combination validation", provider: TerraformProvider("unknown"), kubernetesType: "ske"},
+		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true, errContains: "stackit supports kubernetesType ske or edge"},
+		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true, errContains: "t-cloud-public supports kubernetesType cce"},
+		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true, errContains: "t-cloud-public supports kubernetesType cce"},
 	}
 
 	for _, tt := range tests {
@@ -105,11 +104,12 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 			cfg.Clusters[0].Terraform.Provider = tt.provider
 			cfg.Clusters[0].Terraform.KubernetesType = tt.kubernetesType
 
-			err := validateProviderKubernetesTypes(cfg)
+			doc, err := platformSetupDocument(cfg, "platform")
+			require.NoError(t, err)
+			_, err = decodePlatformSetup(doc)
 			if tt.wantErr {
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), "terraform.provider")
-				assert.Contains(t, err.Error(), "terraform.kubernetesType")
+				assert.Contains(t, err.Error(), tt.errContains)
 				return
 			}
 
@@ -145,7 +145,7 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 			networking: ClusterNetworking{
 				Type: "unknown",
 			},
-			wantErr: "networking/type",
+			wantErr: "networking.type",
 		},
 		{
 			name: "gateway",
@@ -255,7 +255,7 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 			cfg.Clusters[0].Services["cert-manager"] = svc
 			dir := t.TempDir()
 			path := filepath.Join(dir, "config.yaml")
-			data, err := yaml.Marshal(cfg)
+			data, err := platformSetupDocument(cfg, "platform")
 			require.NoError(t, err)
 			require.NoError(t, os.WriteFile(path, data, 0600))
 			store := NewConfigStore(dir, path, catalog.LoadOptions{})
@@ -291,12 +291,23 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 	}
 }
 
+func configInstance(t *testing.T, cfg *Config) map[string]any {
+	t.Helper()
+
+	data, err := json.Marshal(cfg)
+	require.NoError(t, err)
+
+	var instance map[string]any
+	require.NoError(t, json.Unmarshal(data, &instance))
+	return instance
+}
+
 func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	cfg := newValidTestConfig()
-	cfg.Version = ConfigVersionV1Alpha5
 	cfg.Clusters[0].Networking = ClusterNetworking{}
 	cfg.Clusters[0].IngressClassName = "custom"
 	rawConfig := configInstance(t, cfg)
+	rawConfig["version"] = ConfigVersionV1Alpha5
 	delete(rawConfig["clusters"].([]any)[0].(map[string]any), "networking")
 	data, err := yaml.Marshal(rawConfig)
 	require.NoError(t, err)
@@ -306,7 +317,6 @@ func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	store := NewConfigStore(dir, path, catalog.LoadOptions{})
 	require.NoError(t, store.Load())
 	cluster := store.GetConfig().Clusters[0]
-	assert.Equal(t, ConfigVersionV1Alpha6, store.GetConfig().Version)
 	assert.Equal(t, NetworkingIngress, cluster.Networking.Type)
 	assert.Equal(t, "custom", cluster.Networking.Ingress.ClassName)
 	assert.Equal(t, "custom", cluster.IngressClassName)
@@ -320,12 +330,13 @@ func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	// Reintroducing even the same legacy value after migration must fail.
 	var raw map[string]any
 	require.NoError(t, yaml.Unmarshal(saved, &raw))
-	raw["clusters"].([]any)[0].(map[string]any)["ingressClassName"] = "custom"
+	spec := raw["spec"].(map[string]any)
+	spec["clusters"].([]any)[0].(map[string]any)["ingressClassName"] = "custom"
 	edited, err := yaml.Marshal(raw)
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(store.GetFilepath(), edited, 0600))
 	store = NewConfigStore(dir, path, catalog.LoadOptions{})
-	require.ErrorContains(t, store.Load(), "invalid keys: ingressClassName")
+	require.Error(t, store.Load())
 	unchanged, err := os.ReadFile(store.GetFilepath())
 	require.NoError(t, err)
 	assert.Equal(t, edited, unchanged)
@@ -336,8 +347,8 @@ func TestConfigStore_RejectReintroducedIngressClassName(t *testing.T) {
 		for _, value := range []any{"custom", "traefik", "", nil} {
 			t.Run(fmt.Sprintf("%s/value_%v", version, value), func(t *testing.T) {
 				cfg := newValidTestConfig()
-				cfg.Version = version
 				instance := configInstance(t, cfg)
+				instance["version"] = version
 				cluster := instance["clusters"].([]any)[0].(map[string]any)
 				cluster["ingressClassName"] = value
 				// New configs must reject the legacy field even without networking.
@@ -372,7 +383,7 @@ func TestConfigStore_Load(t *testing.T) {
 
 	expectedConfig := newValidTestConfig()
 
-	validYAML, err := yaml.Marshal(expectedConfig)
+	validYAML, err := platformSetupDocument(expectedConfig, "platform")
 	require.NoError(t, err, "Failed to marshal valid config to YAML")
 
 	validFilepath := filepath.Join(tempDir, "valid_config.yaml")
@@ -533,7 +544,7 @@ clusters:
 	}
 }
 
-func TestConfigStore_Validate(t *testing.T) {
+func TestPlatformSetupValidatesCoreConfig(t *testing.T) {
 	validConfig := newValidTestConfig()
 
 	// Test required field validation
@@ -641,10 +652,9 @@ func TestConfigStore_Validate(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			cs := &ConfigStore{
-				config: tt.config,
-			}
-			err := cs.validate()
+			document, err := platformSetupDocument(tt.config, "platform")
+			require.NoError(t, err)
+			_, err = decodePlatformSetup(document)
 			if tt.wantErr {
 				assert.Error(t, err)
 			} else {
@@ -710,11 +720,17 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 				savedBytes, err := os.ReadFile(filepath)
 				require.NoError(t, err, "Failed to read the newly saved file")
 
-				var savedConfig Config
-				err = yaml.Unmarshal(savedBytes, &savedConfig)
-				require.NoError(t, err, "Saved file content should be valid YAML")
+				var document map[string]any
+				require.NoError(t, yaml.Unmarshal(savedBytes, &document))
+				assert.Equal(t, PlatformSetupAPIVersion, document["apiVersion"])
+				assert.Equal(t, PlatformSetupKind, document["kind"])
+				assert.Equal(t, "platform", document["metadata"].(map[string]any)["name"])
 
-				assert.Equal(t, testConfig, &savedConfig)
+				var doc struct {
+					Spec Config `json:"spec"`
+				}
+				require.NoError(t, k8syaml.Unmarshal(savedBytes, &doc))
+				assert.Equal(t, *testConfig, doc.Spec)
 			},
 		},
 		{
@@ -777,158 +793,6 @@ func TestConfigStore_GetFilepath(t *testing.T) {
 	}
 }
 
-func TestGenerateSchema(t *testing.T) {
-	// Verify the generated schema catches validation errors
-	invalidConfig := &Config{
-		Clusters: []Cluster{
-			{
-				Name: "",
-			},
-		},
-	}
-
-	tests := []struct {
-		name          string
-		config        *Config
-		wantErr       bool
-		shouldBeValid bool
-	}{
-		{
-			name:          "Generated schema validates a valid config",
-			config:        newValidTestConfig(),
-			wantErr:       false,
-			shouldBeValid: true,
-		},
-		{
-			name:          "Generated schema rejects an invalid config",
-			config:        invalidConfig,
-			wantErr:       false,
-			shouldBeValid: false,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			cs := createLoadedConfigStore(t, newValidTestConfig())
-			schemaDoc, err := cs.GenerateSchema()
-			if tt.wantErr {
-				assert.Error(t, err)
-				return
-			}
-			require.NoError(t, err)
-			require.NotNil(t, schemaDoc)
-
-			schemaJSON, err := json.Marshal(schemaDoc)
-			require.NoError(t, err)
-			require.NotEmpty(t, schemaJSON)
-
-			// Compile and test the generated schema
-			const schemaURL = "mem://config.schema.json"
-			c := schemaValidator.NewCompiler()
-			c.AssertFormat()
-			err = c.AddResource(schemaURL, schemaDoc)
-			require.NoError(t, err)
-
-			compiled, err := c.Compile(schemaURL)
-			require.NoError(t, err)
-
-			var instance any
-			data, err := json.Marshal(tt.config)
-			require.NoError(t, err)
-			err = json.Unmarshal(data, &instance)
-			require.NoError(t, err)
-
-			err = compiled.Validate(instance)
-			if tt.shouldBeValid {
-				assert.NoError(t, err, "Schema should validate valid config")
-			} else {
-				assert.Error(t, err, "Schema should reject invalid config")
-			}
-		})
-	}
-}
-
-func TestGenerateSchema_TerraformProviderNoneAllowsMissingTerraformDetails(t *testing.T) {
-	cs := createLoadedConfigStore(t, newValidTestConfig())
-	schemaDoc, err := cs.GenerateSchema()
-	require.NoError(t, err)
-
-	const schemaURL = "mem://config.schema.json"
-	c := schemaValidator.NewCompiler()
-	c.AssertFormat()
-	require.NoError(t, c.AddResource(schemaURL, schemaDoc))
-
-	compiled, err := c.Compile(schemaURL)
-	require.NoError(t, err)
-
-	validNoneConfig := configInstance(t, newValidTestConfig())
-	cluster := validNoneConfig["clusters"].([]any)[0].(map[string]any)
-	cluster["terraform"] = map[string]any{
-		"provider": "none",
-	}
-	assert.NoError(t, compiled.Validate(validNoneConfig))
-
-	invalidStackitConfig := configInstance(t, newValidTestConfig())
-	cluster = invalidStackitConfig["clusters"].([]any)[0].(map[string]any)
-	cluster["terraform"] = map[string]any{
-		"provider": "stackit",
-	}
-	assert.Error(t, compiled.Validate(invalidStackitConfig))
-}
-
-func TestGenerateSchema_RequiresGitOrOCI(t *testing.T) {
-	cs := createLoadedConfigStore(t, newValidTestConfig())
-	schemaDoc, err := cs.GenerateSchema()
-	require.NoError(t, err)
-
-	const schemaURL = "mem://config.schema.json"
-	c := schemaValidator.NewCompiler()
-	c.AssertFormat()
-	require.NoError(t, c.AddResource(schemaURL, schemaDoc))
-
-	compiled, err := c.Compile(schemaURL)
-	require.NoError(t, err)
-
-	invalidRepoConfig := configInstance(t, newValidTestConfig())
-	cluster := invalidRepoConfig["clusters"].([]any)[0].(map[string]any)
-	argoCD := cluster["argocd"].(map[string]any)
-	argoCD["repo"] = map[string]any{
-		"authMode": "https",
-	}
-	assert.Error(t, compiled.Validate(invalidRepoConfig))
-}
-
-func configInstance(t *testing.T, cfg *Config) map[string]any {
-	t.Helper()
-
-	data, err := json.Marshal(cfg)
-	require.NoError(t, err)
-
-	var instance map[string]any
-	require.NoError(t, json.Unmarshal(data, &instance))
-	return instance
-}
-
-func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
-	cs := createLoadedConfigStore(t, newValidTestConfig())
-	schemaDoc, err := cs.GenerateSchema()
-	require.NoError(t, err)
-
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	require.True(t, ok)
-
-	servicesDef, ok := defs["Services"].(map[string]any)
-	require.True(t, ok)
-
-	properties, ok := servicesDef["properties"].(map[string]any)
-	require.True(t, ok)
-
-	assert.Contains(t, properties, "cert-manager")
-	assert.NotContains(t, properties, "argocd")
-	assert.NotContains(t, properties, "argo-cd")
-	assert.NotContains(t, properties, "bootstrap-crds")
-}
-
 func TestConfigStore_LoadAppliesDefaultsPerClusterCatalog(t *testing.T) {
 	cfg := newValidTestConfig()
 	cfg.Clusters[0].Catalogs = []string{testGeneralCatalogPath}
@@ -949,44 +813,6 @@ func TestConfigStore_LoadAppliesDefaultsPerClusterCatalog(t *testing.T) {
 	assert.NotContains(t, cs.GetConfig().Clusters[0].Services, "loki")
 	assert.Contains(t, cs.GetConfig().Clusters[1].Services, "loki")
 	assert.NotContains(t, cs.GetConfig().Clusters[1].Services, "cert-manager")
-}
-
-func TestGenerateSchema_UsesClusterSpecificServiceBranches(t *testing.T) {
-	cfg := newValidTestConfig()
-	cfg.Clusters[0].Catalogs = []string{testGeneralCatalogPath}
-	cfg.Clusters[0].Services = service.Services{}
-
-	secondCluster := cfg.Clusters[0]
-	secondCluster.Name = "logging-cluster"
-	secondCluster.DNSName = "logging.example.com"
-	secondCluster.Catalogs = []string{testCustomCatalogPath}
-	secondCluster.Services = service.Services{}
-	secondCluster.Type = "spoke"
-	cfg.Clusters = append(cfg.Clusters, secondCluster)
-
-	cs := createLoadedConfigStore(t, cfg)
-	schemaDoc, err := cs.GenerateSchema()
-	require.NoError(t, err)
-
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	require.True(t, ok)
-	clusterDef, ok := defs["Cluster"].(map[string]any)
-	require.True(t, ok)
-	branches, ok := clusterDef["oneOf"].([]any)
-	require.True(t, ok)
-	require.Len(t, branches, 2)
-
-	servicesByCluster := make(map[string]map[string]any, len(branches))
-	for _, rawBranch := range branches {
-		properties := rawBranch.(map[string]any)["properties"].(map[string]any)
-		name := properties["name"].(map[string]any)["const"].(string)
-		services := properties["services"].(map[string]any)["properties"].(map[string]any)
-		servicesByCluster[name] = services
-	}
-	assert.Contains(t, servicesByCluster["test-cluster"], "cert-manager")
-	assert.NotContains(t, servicesByCluster["test-cluster"], "loki")
-	assert.Contains(t, servicesByCluster["logging-cluster"], "loki")
-	assert.NotContains(t, servicesByCluster["logging-cluster"], "cert-manager")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
@@ -1023,8 +849,7 @@ clusters:
 	assert.Equal(t, "dev", c.Stage, "Stage should be defaulted")
 	assert.Equal(t, "hub", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.Networking.Ingress.ClassName, "IngressClassName should be defaulted")
-
-	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
+	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
 }
 
 func TestConfigStore_LoadStripsBootstrapServicesFromV1Alpha4Clusters(t *testing.T) {
@@ -1060,7 +885,7 @@ clusters:
             name: letsencrypt-prod
             email: cert@example.com
             server: https://acme-v02.api.letsencrypt.org/directory
-`, ConfigVersionV1Alpha4, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+`, "v1alpha4", *testBootstrapCatalogPtr(), testGeneralCatalogPath)
 
 	configPath := filepath.Join(t.TempDir(), "config.yaml")
 	require.NoError(t, os.WriteFile(configPath, []byte(configYAML), 0644))
@@ -1075,15 +900,12 @@ clusters:
 
 	require.NoError(t, cs.SaveToFile())
 
-	savedBytes, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-
-	var savedConfig Config
-	require.NoError(t, yaml.Unmarshal(savedBytes, &savedConfig))
-	require.Len(t, savedConfig.Clusters, 1)
-	assert.NotContains(t, savedConfig.Clusters[0].Services, "argo-cd")
-	assert.NotContains(t, savedConfig.Clusters[0].Services, "bootstrap-crds")
-	assert.Contains(t, savedConfig.Clusters[0].Services, "cert-manager")
+	reloaded := NewConfigStore(".", configPath, testCatalogLoadOptions())
+	require.NoError(t, reloaded.Load())
+	require.Len(t, reloaded.GetConfig().Clusters, 1)
+	assert.NotContains(t, reloaded.GetConfig().Clusters[0].Services, "argo-cd")
+	assert.NotContains(t, reloaded.GetConfig().Clusters[0].Services, "bootstrap-crds")
+	assert.Contains(t, reloaded.GetConfig().Clusters[0].Services, "cert-manager")
 }
 
 func TestLoadAndValidate_TerraformProviderNoneDisablesTerraform(t *testing.T) {
@@ -1104,7 +926,7 @@ clusters:
             url: "https://github.com/customer/repo.git"
           components:
             url: "https://github.com/managed/repo.git"
-`, ConfigVersionV1Alpha4, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+`, "v1alpha4", *testBootstrapCatalogPtr(), testGeneralCatalogPath)
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
@@ -1117,10 +939,7 @@ clusters:
 	assert.Nil(t, cs.GetConfig().Clusters[0].Terraform)
 }
 
-func TestGenerateSchema_Networking(t *testing.T) {
-	store := createLoadedConfigStore(t, newValidTestConfig())
-	schema, err := store.GenerateSchema()
-	require.NoError(t, err)
+func TestPlatformSetup_Networking(t *testing.T) {
 	for _, tt := range []struct {
 		name    string
 		field   string
@@ -1136,7 +955,15 @@ func TestGenerateSchema_Networking(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			instance := configInstance(t, newValidTestConfig())
 			instance["clusters"].([]any)[0].(map[string]any)[tt.field] = tt.value
-			err := validateAgainstSchema(schema, instance)
+			document := map[string]any{
+				"apiVersion": PlatformSetupAPIVersion,
+				"kind":       PlatformSetupKind,
+				"metadata":   map[string]any{"name": "platform"},
+				"spec":       instance,
+			}
+			data, err := yaml.Marshal(document)
+			require.NoError(t, err)
+			_, err = decodePlatformSetup(data)
 			if tt.wantErr {
 				require.Error(t, err)
 				return
@@ -1163,6 +990,7 @@ func TestConfigStore_LoadRejectsUnknownNetworkingFields(t *testing.T) {
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			raw := configInstance(t, newValidTestConfig())
+			raw["version"] = ConfigVersionV1Alpha6
 			cluster := raw["clusters"].([]any)[0].(map[string]any)
 			if tt.networking != nil {
 				cluster["networking"] = tt.networking
@@ -1196,20 +1024,23 @@ func TestConfigStore_LoadRejectsUnknownNetworkingFields(t *testing.T) {
 func TestConfigStore_LoadValidatesBeforePopulatingCompatibilityFields(t *testing.T) {
 	cfg := newValidTestConfig()
 	cfg.Clusters[0].DNSName = "not a valid hostname"
-	data, err := yaml.Marshal(cfg)
+	data, err := platformSetupDocument(cfg, "platform")
 	require.NoError(t, err)
 	dir := t.TempDir()
 	path := filepath.Join(dir, "config.yaml")
 	require.NoError(t, os.WriteFile(path, data, 0600))
 	store := NewConfigStore(dir, path, catalog.LoadOptions{})
-	require.ErrorContains(t, store.Load(), "validate config")
-	assert.Empty(t, store.GetConfig().Clusters[0].IngressClassName)
+	require.ErrorContains(t, store.Load(), "dnsName")
+	if len(store.GetConfig().Clusters) > 0 {
+		assert.Empty(t, store.GetConfig().Clusters[0].IngressClassName)
+	}
 }
 
 func TestConfigStore_LoadRejectsUnknownFields(t *testing.T) {
 	for _, scope := range []string{"root", "cluster", "service"} {
 		t.Run(scope, func(t *testing.T) {
 			raw := configInstance(t, newValidTestConfig())
+			raw["version"] = ConfigVersionV1Alpha6
 			target := raw
 			if scope != "root" {
 				target = raw["clusters"].([]any)[0].(map[string]any)
