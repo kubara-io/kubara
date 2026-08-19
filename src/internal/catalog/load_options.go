@@ -7,11 +7,7 @@ import (
 	"github.com/kubara-io/kubara/internal/utils"
 )
 
-func ResolveLoadOptions(cwd string, catalogs []string, overwrite bool) (LoadOptions, error) {
-	return ResolveLoadOptionsWithBootstrap(cwd, "", catalogs, overwrite)
-}
-
-func ResolveLoadOptionsWithBootstrap(cwd, bootstrapCatalog string, catalogs []string, overwrite bool) (LoadOptions, error) {
+func ResolveLoadOptions(cwd, bootstrapCatalog string, catalogs []string, overwrite bool) (LoadOptions, error) {
 	options := LoadOptions{
 		CWD:              cwd,
 		BootstrapCatalog: bootstrapCatalog,

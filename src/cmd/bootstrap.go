@@ -112,7 +112,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}

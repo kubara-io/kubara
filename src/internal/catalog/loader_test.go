@@ -43,7 +43,7 @@ func TestLoad_MergesGeneralCatalogAfterBootstrap(t *testing.T) {
 }
 
 func TestResolveLoadOptions_PreservesPortableReferences(t *testing.T) {
-	options, err := ResolveLoadOptions("/workspace", []string{"./catalog", DefaultGeneralCatalog}, true)
+	options, err := ResolveLoadOptions("/workspace", "", []string{"./catalog", DefaultGeneralCatalog}, true)
 	require.NoError(t, err)
 
 	assert.Equal(t, "/workspace", options.CWD)
@@ -52,7 +52,7 @@ func TestResolveLoadOptions_PreservesPortableReferences(t *testing.T) {
 }
 
 func TestResolveLoadOptionsWithBootstrap_PreservesPortableReferences(t *testing.T) {
-	options, err := ResolveLoadOptionsWithBootstrap(
+	options, err := ResolveLoadOptions(
 		"/workspace",
 		"./bootstrap",
 		[]string{"./catalog", DefaultGeneralCatalog},

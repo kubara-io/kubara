@@ -86,7 +86,7 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get env file path: %w", err)
 	}
-	catalogOptions, err := catalogLoadOptionsFromCommandWithBootstrap(cmd, flags.BootstrapCatalogFlag)
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, flags.BootstrapCatalogFlag)
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}

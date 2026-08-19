@@ -67,7 +67,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 	if err != nil {
 		return nil, fmt.Errorf("get platform-configs path: %w", err)
 	}
-	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}

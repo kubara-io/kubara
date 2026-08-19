@@ -68,7 +68,7 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 
-	catalogOptions, err := catalogLoadOptionsFromCommand(cmd)
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}

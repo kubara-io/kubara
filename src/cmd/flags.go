@@ -194,15 +194,11 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 	}
 }
 
-func catalogLoadOptionsFromCommand(cmd *cli.Command) (catalog.LoadOptions, error) {
-	return catalogLoadOptionsFromCommandWithBootstrap(cmd, "")
-}
-
-func catalogLoadOptionsFromCommandWithBootstrap(cmd *cli.Command, bootstrapCatalog string) (catalog.LoadOptions, error) {
+func catalogLoadOptionsFromCommand(cmd *cli.Command, bootstrapCatalog string) (catalog.LoadOptions, error) {
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
 		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
 	}
 
-	return catalog.ResolveLoadOptionsWithBootstrap(cwd, bootstrapCatalog, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
+	return catalog.ResolveLoadOptions(cwd, bootstrapCatalog, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 }
