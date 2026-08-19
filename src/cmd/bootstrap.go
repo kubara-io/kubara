@@ -23,6 +23,7 @@ import (
 type BootstrapFlags struct {
 	Local                  bool
 	ClusterSecretStorePath string
+	IaCCommand             string
 	PlatformComponentsPath string
 	PlatformConfigsPath    string
 	EnvFile                string
@@ -40,6 +41,7 @@ func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
 		EnvFile:       ".env",
 		EnvPrefixFlag: "KUBARA_",
+		IaCCommand:    "auto",
 		Timeout:       2 * time.Minute,
 	}
 }
@@ -191,6 +193,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		PlatformConfigs:    configsAbsPath,
 		Local:              flags.Local,
 		WithESCSSPath:      cssAbsPath,
+		IaCCommand:         flags.IaCCommand,
 		EnvMap:             envMap,
 		Catalog:            loadedCatalog,
 		ClusterConfig:      clusterConfig,
@@ -223,6 +226,12 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Name:        "with-es-css-file",
 			Usage:       "Path to the ClusterSecretStore manifest file (supports go-template + sprig)",
 			Destination: &flags.ClusterSecretStorePath,
+		},
+		&cli.StringFlag{
+			Name:        "iac-command",
+			Value:       flags.IaCCommand,
+			Usage:       "Infrastructure command used to read bootstrap outputs: auto, terraform, or tofu",
+			Destination: &flags.IaCCommand,
 		},
 		&cli.BoolFlag{
 			Name:  "with-es-crds",

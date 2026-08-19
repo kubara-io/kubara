@@ -31,6 +31,7 @@ type Options struct {
 	PlatformConfigs    string
 	Local              bool
 	WithESCSSPath      string
+	IaCCommand         string
 	EnvMap             *envconfig.EnvMap
 	Catalog            catalog.Catalog
 	ClusterConfig      *config.Cluster

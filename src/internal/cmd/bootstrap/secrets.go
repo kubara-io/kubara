@@ -24,12 +24,18 @@ import (
 
 // SecretManager handles Kubernetes secret creation programmatically
 type SecretManager struct {
-	client *k8s.Client
+	client             *k8s.Client
+	outputReader       infrastructureOutputReader
+	iacCommandResolver func(string) (string, error)
 }
 
 // NewSecretManager creates a new secret manager
 func NewSecretManager(client *k8s.Client) *SecretManager {
-	return &SecretManager{client: client}
+	return &SecretManager{
+		client:             client,
+		outputReader:       commandInfrastructureOutputReader{},
+		iacCommandResolver: resolveIaCCommand,
+	}
 }
 
 // CreateHubSecrets creates all hub cluster secrets
@@ -49,6 +55,24 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 		sm.createHelmRepositorySecret(o.EnvMap),
 	}
 
+	clusterSecStore, err := sm.createClusterSecretStore(o)
+	if err != nil {
+		return fmt.Errorf("create ClusterSecretStore: %w", err)
+	}
+	verifyClusterSecretStore := clusterSecStore != nil
+	verifyCredentialSecret := false
+	if clusterSecStore == nil {
+		var credentialSecret *corev1.Secret
+		clusterSecStore, credentialSecret, verifyClusterSecretStore, err = sm.resolveClusterSecretStore(ctx, o)
+		if err != nil {
+			return fmt.Errorf("resolve ClusterSecretStore: %w", err)
+		}
+		if credentialSecret != nil {
+			secrets = append(secrets, credentialSecret)
+			verifyCredentialSecret = true
+		}
+	}
+
 	for _, secret := range secrets {
 		if secret == nil {
 			continue
@@ -64,10 +88,6 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 	}
 
 	// Handle clusterSecretStore separately since it is its own type
-	clusterSecStore, err := sm.createClusterSecretStore(o)
-	if err != nil {
-		return fmt.Errorf("create ClusterSecretStore: %w", err)
-	}
 	if clusterSecStore != nil {
 		yamlData, err := yaml.Marshal(clusterSecStore)
 		if err != nil {
@@ -84,6 +104,18 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 	// Apply all secrets in one API call
 	if err := sm.client.ApplyManifest(ctx, manifest, k8sOpts); err != nil {
 		return fmt.Errorf("applying hub secrets: %w", err)
+	}
+	if !o.DryRun {
+		if verifyCredentialSecret {
+			if err := sm.validateCredentialSecret(ctx, stackitCredentialSecretName); err != nil {
+				return err
+			}
+		}
+		if verifyClusterSecretStore {
+			if err := sm.validateClusterSecretStore(ctx, clusterSecStore.Name); err != nil {
+				return err
+			}
+		}
 	}
 
 	log.Info().Msg("Created hub secrets successfully")
@@ -246,7 +278,6 @@ func loadAndValidateClusterSecretStore(filePath string, cluster *config.Cluster)
 // createClusterSecretStore creates the ClusterSecretStore for external-secrets
 func (sm *SecretManager) createClusterSecretStore(o *Options) (*externalsecretsv1.ClusterSecretStore, error) {
 	if o.WithESCSSPath == "" {
-		log.Warn().Msg("ClusterSecretStore manifest file not provided. You must apply an existing ClusterSecretStore or create one manually")
 		return nil, nil
 	}
 
@@ -265,7 +296,7 @@ func (sm *SecretManager) createClusterSecretStore(o *Options) (*externalsecretsv
 		log.Warn().
 			Str("expected", expectedName).
 			Str("actual", css.Name).
-			Msg("ClusterSecretStore name does not follow the pattern <cluster.name>-<cluster.stage>. Make sure to update any helm values reffering to the ClusterSecretStore accordingly")
+			Msg("ClusterSecretStore name does not follow the pattern <cluster.name>-<cluster.stage>. Make sure to update any Helm values referring to the ClusterSecretStore accordingly")
 	}
 
 	log.Info().

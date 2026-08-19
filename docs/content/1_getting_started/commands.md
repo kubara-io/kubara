@@ -125,6 +125,8 @@ Bootstrap Argo CD onto a cluster
 
 **--help, -h**: show help
 
+**--iac-command**="": Infrastructure command used to read bootstrap outputs: auto, terraform, or tofu (default: "auto")
+
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
 **--platform-components**="": Path to the platform-components directory (default: "platform-components")

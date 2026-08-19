@@ -284,9 +284,15 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 External Secrets needs a `ClusterSecretStore`.
 
+If the `external-secrets` service is disabled, kubara skips all store discovery and automatic setup.
+
 For T Cloud Public CCE, kubara already renders the OpenBao-backed `ClusterSecretStore` into `external-secrets/values.yaml`. Do not pass `--with-es-css-file` and do not create a separate provider credential secret.
 
-For other providers, create the provider credential secret first and either pass a `ClusterSecretStore` manifest during bootstrap with `--with-es-css-file`, or apply the `ClusterSecretStore` manually after bootstrap.
+For STACKIT, kubara first looks for an existing store named `<cluster-name>-<stage>`. If none exists, it reads the read-only Secrets Manager credentials, API URL, and mount path from the generated Terraform or OpenTofu outputs. It then creates the `stackit-secrets-manager-cred` Secret and the `ClusterSecretStore` automatically. Run the infrastructure apply before bootstrap so those outputs are available.
+
+Kubara automatically selects Terraform or OpenTofu when only one is installed. If both are installed, select the state tool explicitly with `--iac-command terraform` or `--iac-command tofu`.
+
+To use another secret backend on STACKIT or any provider without automatic setup, either create the expected store before bootstrap or pass its manifest with `--with-es-css-file`. A supplied manifest takes precedence over automatic STACKIT setup. Create any credential Secret referenced by that custom manifest separately.
 
 Bootstrap always installs the required CRDs from the bootstrap catalog's `bootstrap-crds` service. Separate External Secrets and Prometheus CRD flags are no longer required.
 
@@ -303,13 +309,9 @@ Example provider credential secret(s) for the `ClusterSecretStore`:
 kubectl -n external-secrets create secret generic bitwarden-access-token \
   --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
 
-## STACKIT Secrets Manager
-kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
-  --from-literal=username="<USERNAME>" \
-  --from-literal=password="<PASSWORD>"
 ```
 
-Example `clustersecretstore.yaml` for `--with-es-css-file` (templating with `{{ .cluster.name }}` / `{{ .cluster.stage }}` is supported):
+Example custom `clustersecretstore.yaml` for `--with-es-css-file` (templating with `{{ .cluster.name }}` / `{{ .cluster.stage }}` is supported):
 
 ```yaml
 apiVersion: external-secrets.io/v1
@@ -345,7 +347,7 @@ This path layout is the same for every provider and secret backend, including th
 kubara bootstrap <cluster-name-from-config-yaml>
 ```
 
-For providers that need an external `ClusterSecretStore` manifest, pass it during bootstrap:
+To override automatic setup or use another backend, pass its `ClusterSecretStore` manifest during bootstrap:
 
 ```bash
 kubara bootstrap <cluster-name-from-config-yaml> \

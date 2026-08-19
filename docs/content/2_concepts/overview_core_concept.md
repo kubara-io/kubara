@@ -89,8 +89,8 @@ graph TD
 2. Run `kubara generate` to render Terraform and Helm output.
 3. Commit and push the generated result to Git.
 4. Apply infrastructure where needed 
-5. Create your ClusterSecretStore yaml for External Secrets based on your used Secret Manager solution
-6. Bootstrap Argo CD using `kubara bootstrap <cluster-name> --with-es-css-file=<your-css.yaml>`
+5. Prepare a custom ClusterSecretStore only when your provider does not support automatic setup or you want to override it
+6. Bootstrap Argo CD using `kubara bootstrap <cluster-name>` and optionally `--with-es-css-file=<your-css.yaml>`
 7. Let Argo CD continuously reconcile the generated platform state.
 
 Secrets are typically synced via External Secrets based on your configured SecretStore or ClusterSecretStore.

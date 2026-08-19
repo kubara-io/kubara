@@ -201,6 +201,8 @@ Sensitive output example:
     tofu output vault_user_ro_password_b64
     ```
 
+When `external-secrets` is enabled, `kubara bootstrap` reads the read-only Secrets Manager outputs directly and creates the Kubernetes credential Secret and `ClusterSecretStore`. You do not need to copy these values into `.env` or create the resources manually. If both Terraform and OpenTofu are installed, pass the tool used for the state explicitly, for example `--iac-command tofu`.
+
 ## 7. Optional: OAuth2-related Vault entries via Terraform
 
 If you use OAuth2, create a GitHub application as shown [here](../4_building_your_platform/sso/add_sso.md).
