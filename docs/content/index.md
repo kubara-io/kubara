@@ -5,22 +5,24 @@
 ![Docs License: CC BY 4.0](https://img.shields.io/badge/docs%20license-CC%20BY%204.0-2ea44f)
 ![GitHub Discussions](https://img.shields.io/github/discussions/kubara-io/kubara)
 
-## 🤔 What is kubara?
+## What is kubara?
 
-**kubara** is a single binary CLI tool written in Go to bootstrap, build, and package Kubernetes platforms.
+### A package manager for your platform
 
-You can think of kubara as a package manager for platform architecture: it helps you define a reusable platform setup, generate the needed artifacts, and package that setup for reuse across many clusters.
+Helm packages and deploys one application. Kubara applies that idea to a whole Kubernetes platform.
 
-It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and essential third-party tooling in one reusable [GitOps](7_architecture/architecture_overview.md#gitops) workflow.
+A kubara catalog can bundle Helm charts, Terraform modules, scripts, and the GitOps structure needed for a platform. Kubara renders that catalog into reproducible artifacts and bootstraps the initial Argo CD setup.
+
+Kubara is not an operator. It does not install a Kubara controller or other Kubara runtime components in your cluster. After bootstrap, Argo CD reconciles the generated platform state from Git.
+
+In short, **kubara** is a single-binary Go CLI for building, packaging, and bootstrapping Kubernetes platforms.
+
+It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and third-party tooling in one reusable [GitOps](7_architecture/architecture_overview.md#gitops) workflow.
 
 
 ![Overview](assets/diagrams.drawio)
 
-kubara gives you a unified, reproducible way to deploy Kubernetes platforms with minimal effort and high consistency whether you run on cloud, edge, or hybrid infrastructure.
-
-kubara also gives you a reusable packaging model for platform architecture: **what Helm charts are for single applications, kubara catalogs are for your platform setup**.
-
-That means you can not only bootstrap a platform with kubara, but also package, distribute, and reuse that platform setup across many clusters.
+kubara gives you a reproducible way to deploy Kubernetes platforms across cloud, edge, and hybrid infrastructure. You can package, distribute, and reuse a platform setup across many clusters.
 
 
 
