@@ -15,18 +15,16 @@ A kubara catalog can bundle Helm charts, Terraform modules, scripts, and the Git
 
 Kubara is not an operator. It does not install a Kubara controller or other Kubara runtime components in your cluster. After bootstrap, Argo CD reconciles the generated platform state from Git.
 
-In short, **kubara** is a single-binary Go CLI for building, packaging, and bootstrapping Kubernetes platforms.
+In short, kubara is a single-binary Go CLI for building, packaging, and bootstrapping Kubernetes platforms.
 
-It brings together infrastructure provisioning, multi-tenancy setup, GitOps onboarding, and third-party tooling in one reusable [GitOps](7_architecture/architecture_overview.md#gitops) workflow.
+That means you can not only bootstrap a platform with kubara, but also package, distribute, and reuse that platform setup across many clusters.
 
 
 ![Overview](assets/diagrams.drawio)
 
-kubara gives you a reproducible way to deploy Kubernetes platforms across cloud, edge, and hybrid infrastructure. You can package, distribute, and reuse a platform setup across many clusters.
+Commit the generated output to Git. Then use the same catalog and configuration model for another cluster.
 
-
-
-## ⭐ Main Features
+## What kubara does?
 
 - ⚙️ **Full Platform Bootstrap** - From infrastructure to observability, GitOps, and secrets
 - 📦 **Platform Catalog Packaging** - Package, distribute, and reuse platform setups
@@ -36,49 +34,41 @@ kubara gives you a reproducible way to deploy Kubernetes platforms across cloud,
 - ☁️ **Cloud & Edge Ready** - Use it across cloud, hybrid, or bare-metal environments
 - 🔐 **Built-in Best Practices** - Production-grade setup used by real-world platforms
 
+## Why use kubara?
 
+Building and maintaining a multi-cluster Kubernetes platform means keeping infrastructure, GitOps configuration, secrets, and shared components in step.
 
-## 🙋 Why use kubara?
-
-Setting up a secure, multi-cluster Kubernetes platform is hard.
-
-kubara simplifies this with a single Go binary that:
+kubara gives you one CLI that:
 
 - Generates required configuration and secrets
-- Templatizes and deploys pre-vetted infrastructure components
-- Bootstraps your platform using Argo CD and GitOps
-- Packages reusable platform catalogs for repeatable rollout
-- Allows easy onboarding of new clusters and workloads
+- Renders Terraform and Helm outputs based on predefined templates
+- Bootstraps your platform using Argo CD
+- Packages catalogs for repeatable rollouts
+- Allows for easy onboarding of new clusters and workloads
 
 All based on real-world usage at Schwarz Group and the experience of multiple engineering teams - so you don't have to reinvent the wheel.
 
+## How it works
 
-
-## 🛠️ How does it work?
-
-kubara takes care of:
+The usual flow is:
 
 1. 📄 Initial configuration via `.env` and `config.yaml`
-2. 🧩 Rendering and deploying Terraform and Helm modules
-3. 🧪 Validating schemas and environment settings
-4. 🚀 Bootstrapping the Hub cluster and Argo CD
-5. 📦 Managing secrets (incl. External Secrets Operator)
+2. 🧩 Rendering and deploying Terraform and Helm modules using `kubara generate`
+3. 📦 Commit the output to your GitOps repository.
+4. 🚀 Bootstrapping the Hub cluster and Argo CD using `kubara bootstrap`
+5. 🐙 Let Argo CD reconcile the platform state from Git.
 6. 🧱 Adding additional spoke clusters and workloads
 
+## 🚀 Get started
 
-## 🚀 Getting Started
-
-Follow the [Bootstrap Your Platform Guide](1_getting_started/bootstrapping.md) to:
+Follow the [bootstrap guide](1_getting_started/bootstrapping.md) to:
 
 - Install the CLI
 - Prepare your `.env` and `config.yaml`
-- Run `kubara init`, `kubara schema` (optional) and `kubara generate`
+- Run `kubara init`, `kubara schema`, and `kubara generate`
 - Bootstrap Argo CD with `kubara bootstrap <cluster-name>`
 
-You're done 🎉
-
-
-## 🎥/📝/🎙️ Multimedia
+## 📚 Videos, talks, and articles
 
 - [📝 GitOps for 15,000+ Clusters: What Large-Scale Testing with vCluster Taught Us | Blog at Medium and ITNEXT, 2026](https://medium.com/itnext/gitops-for-15-000-clusters-what-large-scale-testing-with-vcluster-taught-us-41e4b0d43e0b)
 - [🎙️ One Platform Could Not Fit Them All | Virtual Talk at WeAreDevelopers, 2026 ](https://www.wearedevelopers.com/en/videos/1919/one-platform-could-not-fit-them-all)
@@ -94,24 +84,20 @@ You're done 🎉
 
 ## 🤝 Contributing
 
-We 💙 contributions! Here's how to get started:
+We would 💙 your contributions! Here's how to get started:
 
-1. Check the [Issues](https://github.com/kubara-io/kubara/issues)
-2. Open a new one if your problem isn't listed
-3. Want to fix something yourself? Go ahead and open a PR!
-4. Follow our [Commit Message Conventions](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#commit-and-pr-guidelines)
+1. Check the [issues](https://github.com/kubara-io/kubara/issues).
+2. Open an issue if yours is not listed.
+3. Open a pull request if you want to fix it.
+4. Follow the [commit message conventions](https://github.com/kubara-io/kubara/blob/main/CONTRIBUTING.md#commit-and-pr-guidelines).
 
-We're happy to help and review 🙌
+## Versioning
 
-
-
-## 🏷️ Versioning
-
-kubara follows [Semantic Versioning](http://semver.org/) in the `style v0.1.0-something`.
+kubara follows [Semantic Versioning](http://semver.org/), with releases named `v0.1.0-something`.
 Releases are listed in the [Release section](https://github.com/kubara-io/kubara/releases).
 
 
-## 📝 License
+## License
 
 Documentation is licensed under [CC BY 4.0](https://github.com/kubara-io/kubara/blob/main/NOTICE.md#documentation-license).
 Software source code is licensed under [Apache 2.0](https://github.com/kubara-io/kubara/blob/main/LICENSE).
