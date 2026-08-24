@@ -144,7 +144,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:2.0.1
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:2.2.0
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
@@ -154,7 +154,7 @@ clusters:
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:2.0.0
+      - oci://ghcr.io/kubara-io/catalogs/general:2.2.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
