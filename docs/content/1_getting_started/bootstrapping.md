@@ -277,16 +277,21 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 !!! warning
     **Don't forget to commit and push your changes to Git!**
 
+---
 
 #### 3.1.1 Secrets
 
-If you deploy with an Infrastructure Preset then you are ready for the next Step (4) and can skip this.
-Secrets will be created by Terraform / OpenTofu for you.
+!!! tip "Infrastructure Presets"
+    If you deploy with an Infrastructure Preset then you are ready for the next Step (4) and can skip this.  
+    Secrets will be created by Terraform / OpenTofu for you.
 
-But if you are doing a manual Installation without a Preset than you have to make sure you actually created your secrets 
-and also prepared your Secret Store for external Secrets.
 
-How to create them will be explained here. Also some changes you might have to make on the Secret Naming scheme.
+!!! danger "Manual Installation"
+    If you are doing a manual Installation without a Preset than you have to make sure you actually created your secrets 
+    and also prepared your Cluster Secret Store for external Secrets - How to create them will be explained here.
+
+
+Manual Handling of Secrets:
 
 ##### List of Secrets:
 
@@ -297,11 +302,14 @@ How to create them will be explained here. Also some changes you might have to m
 - `kube-prometheus-stack-grafana-oauth2-credentials`  # SSO: OAuth2 App Credentials for kube-prometheus-stack
 - Optional: The Velero Backup Storage Secret
 
-Depending on which Secret Management Tool you will use the naming of secrets can differ, for example some allow Slashes and Dashes, some just don't.
+Depending on which Secret Management Tool you will use the naming of secrets can differ, for example some allow Slashes and Dashes, some just don't.  
+  
+---  
 
-##### Values files to adapt to your Secret names
+##### Values files - Secret names
 
-You'll need to adapt the following Helm values with your secret names:
+You'll need to adapt the following Helm values with your secret names:  
+
 - `platform-configs/<my-cluster>/helm/argo-cd/values.yaml`
 - `platform-configs/<my-cluster>/helm/external-dns/values.yaml`
 - `platform-configs/<my-cluster>/helm/external-secrets/values.yaml`
@@ -317,6 +325,9 @@ Which means, for a DEV-stage cluster named `kuby`, the Docker pull secret would 
 ```txt
 kuby-dev-cluster-secrets-docker-config
 ```
+
+---
+
 
 The following Commands only explain how to create the Secrets, you have to save them in your Secret Manager by yourselves.
 
