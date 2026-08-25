@@ -11,9 +11,14 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 kubara can run on any Kubernetes cluster as long as the required surrounding capabilities exist, especially a secret backend for `external-secrets` and DNS handling for `external-dns`.
 
 For the ready-made example flows, use the [Infrastructure Presets](../3_infrastructure/overview.md) section. Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, 
-or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions.
+or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions to Setup your Infrastructure.
 
-If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
+If you already have a Kubernetes cluster with DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
+
+!!! warning
+    **Keep in mind, that if you use kubara without a [Infrastructure Presets](../3_infrastructure/overview.md) and its contained IaC Code,
+    that you have to create your [Secrets] manually and also create an according secret store**
+
 
 ### 1.1 Environment Configuration
 
@@ -271,6 +276,82 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 !!! warning
     **Don't forget to commit and push your changes to Git!**
+
+
+#### 3.1.1 Secrets
+
+If you deploy with an Infrastructure Preset then you are ready for the next Step (4) and can skip this.
+Secrets will be created by Terraform / OpenTofu for you.
+
+But if you are doing a manual Installation without a Preset than you have to make sure you actually created your secrets 
+and also prepared your Secret Store for external Secrets.
+
+How to create them will be explained here. Also some changes you might have to make on the Secret Naming scheme.
+
+##### List of Secrets:
+
+- `kube-prometheus-stack-grafana-credentials`         # Default Admin Credentials for Grafana
+- `cluster-secrets-docker-config`                     # Optional: Container-Registry Credentials (like Dockerhub)
+- `argocd-argo-oauth2-credentials`                    # SSO: OAuth2 App Credentials for ArgoCD
+- `oauth2-proxy-oauth2-credentials`                   # SSO: OAuth2 App Credentials for OAuth2Proxy (Homer Dashboard, etc.)
+- `kube-prometheus-stack-grafana-oauth2-credentials`  # SSO: OAuth2 App Credentials for kube-prometheus-stack
+- Optional: The Velero Backup Storage Secret
+
+Depending on which Secret Management Tool you will use the naming of secrets can differ, for example some allow Slashes and Dashes, some just don't.
+
+##### Values files to adapt to your Secret names
+
+You'll need to adapt the following Helm values with your secret names:
+- `platform-configs/<my-cluster>/helm/argo-cd/values.yaml`
+- `platform-configs/<my-cluster>/helm/external-dns/values.yaml`
+- `platform-configs/<my-cluster>/helm/external-secrets/values.yaml`
+- `platform-configs/<my-cluster>/helm/kube-prometheus-stack/values.yaml`
+- `platform-configs/<my-cluster>/helm/oauth2-proxy/values.yaml`
+
+You are free to choose the names of your secrets, since you have to reference them in your values file. But we highly recommend a fixed schema like:
+```txt
+<clustername>-<stage>-<secretname>
+```
+
+Which means, for a DEV-stage cluster named `kuby`, the Docker pull secret would be called:
+```txt
+kuby-dev-cluster-secrets-docker-config
+```
+
+The following Commands only explain how to create the Secrets, you have to save them in your Secret Manager by yourselves.
+
+```bash title="Docker Pull Secret"
+# Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in your Secret Manager
+printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}'
+```
+
+```bash title="Grafana Admin Secret"
+# Replace "$YOUR_PASSWORD" with your desired Grafana admin account password.
+printf '%s' '{"admin-user":"admin","admin-password":"$YOUR_PASSWORD"}'
+```
+
+```bash title="Grafana SSO Secret"
+# Replace secret values according to your SSO App Client ID and Secret
+printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}'
+```
+
+```bash title="OAuth2 Proxy Secret"
+# Based on the [OAuth2 Proxy Docs - Generating a Cookie Secret](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/).
+# Generate the cookie secret locally
+dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
+
+# Replace secret values accordingly
+printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}'
+```
+
+```bash title="ArgoCD SSO Secret"
+# Replace the secret name according to your cluster name and stage (for example "gcp-dev"), and replace the secret values accordingly
+printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}'
+```
+
+On the [official External Secrets Operator Website](https://external-secrets.io/latest/) you can find guidance on how to create the Cluster Secret Store.
+You are ready for the next Step if you have prepared a Cluster Secret Store for External Secrets.
+
 
 ---
 
