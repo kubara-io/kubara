@@ -9,13 +9,13 @@
 
 ### A package manager for your platform
 
-Helm packages and deploys one application. Kubara applies that idea to a whole Kubernetes platform.
+Helm packages and deploys one application. Kubara applies that idea to an entire Kubernetes platform across a fleet of clusters.
 
-A kubara catalog can bundle Helm charts, Terraform modules, scripts, and the GitOps structure needed for a platform. Kubara renders that catalog into reproducible artifacts and bootstraps the initial Argo CD setup.
+A kubara catalog can bundle Helm charts, Terraform modules, scripts, and the whole GitOps structure needed for your platform. Kubara uses such a catalog to render reproducible manifests and bootstraps a central **hub cluster** that uses Argo CD to manage and reconcile identical platform environments across **hundreds of spoke clusters**.
 
-Kubara is not an operator. It does not install a Kubara controller or other Kubara runtime components in your cluster. After bootstrap, Argo CD reconciles the generated platform state from Git.
+Kubara is not an operator. It does not install a kubara controller or other kubara runtime components in your cluster. After bootstrap, Argo CD reconciles the generated platform state from Git but kubara pre-templates the cross-integration of all your platform components for you.
 
-In short, kubara is a single-binary Go CLI for building, packaging, and bootstrapping Kubernetes platforms.
+In short, kubara is a CLI for building, packaging, and bootstrapping Kubernetes platforms. Inspired by real-world needs at Schwarz Group to standardize and operate large-scale environments through pure GitOps.
 
 That means you can not only bootstrap a platform with kubara, but also package, distribute, and reuse that platform setup across many clusters.
 
@@ -36,7 +36,7 @@ Commit the generated output to Git. Then use the same catalog and configuration 
 
 ## Why use kubara?
 
-Building and maintaining a multi-cluster Kubernetes platform means keeping infrastructure, GitOps configuration, secrets, and shared components in step.
+Building and maintaining a multi-cluster Kubernetes platform means keeping infrastructure, GitOps configuration, secrets, and shared components in sync.
 
 kubara gives you one CLI that:
 
@@ -65,7 +65,7 @@ Follow the [bootstrap guide](1_getting_started/bootstrapping.md) to:
 
 - Install the CLI
 - Prepare your `.env` and `config.yaml`
-- Run `kubara init`, `kubara schema`, and `kubara generate`
+- Run `kubara init`, `kubara schema` and `kubara generate`
 - Bootstrap Argo CD with `kubara bootstrap <cluster-name>`
 
 ## 📚 Videos, talks, and articles
