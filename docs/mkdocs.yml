@@ -29,7 +29,7 @@ nav:
       - How to create a Catalog: 4_building_your_platform/create_catalog.md
       - SSO:
           - About SSO: 4_building_your_platform/sso/sso.md
-          - Github: 4_building_your_platform/sso/add_sso_github.md
+          - GitHub: 4_building_your_platform/sso/add_sso_github.md
           - Forgejo: 4_building_your_platform/sso/add_sso_forgejo.md
   - Workload Onboarding:
       - Overview: 5_workload_onboarding/overview.md
