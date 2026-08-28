@@ -203,7 +203,7 @@ Sensitive output example:
 
 ## 7. Optional: OAuth2-related Vault entries via Terraform
 
-If you use OAuth2, create a GitHub application as shown [here](../4_building_your_platform/sso/add_sso.md).
+If you use OAuth2, create a GitHub application as shown [here](../4_building_your_platform/sso/sso.md).
 
 If you want Terraform to create OAuth2-related Vault entries:
 

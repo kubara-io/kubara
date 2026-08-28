@@ -426,5 +426,5 @@ After bootstrapping your platform, you can:
 * [How to add Git repositories](../5_workload_onboarding/add_app_repository.md)
 * [How to add Argo CD applications](../5_workload_onboarding/add_application.md)
 * [How to add Argo CD appset](../5_workload_onboarding/add_appset.md)
-* [How to add SSO Configuration](../4_building_your_platform/sso/add_sso.md)
+* [How to add SSO Configuration](../4_building_your_platform/sso/sso.md)
 * [How to add spoke clusters](../4_building_your_platform/add_spoke_cluster.md)

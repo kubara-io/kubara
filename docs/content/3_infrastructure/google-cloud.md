@@ -175,7 +175,7 @@ kubectl get ns                                                     # Lists all n
 
 #### OAuth2 Configuration
 
-How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/add_sso.md) for details). Regardless of the provider, however, at least the following SSO apps must be created for SSO:
+How exactly these configurations are done depends on the chosen SSO provider (examples see the [SSO guide](../4_building_your_platform/sso/sso.md) for details). Regardless of the provider, however, at least the following SSO apps must be created for SSO:
 
 1. Argo CD SSO
 2. Grafana SSO
