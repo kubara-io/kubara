@@ -29,6 +29,9 @@ type BootstrapFlags struct {
 	EnvPrefixFlag          string
 	DryRun                 bool
 	Timeout                time.Duration
+
+	InitialKubeconfig string
+	AgentNamespace    string
 }
 
 var deprecatedBootstrapCRDFlags = []string{
@@ -38,9 +41,10 @@ var deprecatedBootstrapCRDFlags = []string{
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		EnvFile:       ".env",
-		EnvPrefixFlag: "KUBARA_",
-		Timeout:       2 * time.Minute,
+		EnvFile:        ".env",
+		EnvPrefixFlag:  "KUBARA_",
+		Timeout:        2 * time.Minute,
+		AgentNamespace: "kubara",
 	}
 }
 
@@ -48,11 +52,12 @@ func NewBootstrapCmd() *cli.Command {
 	flags := NewBootstrapFlags()
 
 	cmd := &cli.Command{
-		Name:        "bootstrap",
-		Usage:       "Bootstrap Argo CD onto a cluster",
-		UsageText:   "kubara bootstrap CLUSTER_NAME [--local]",
+		Name:  "bootstrap",
+		Usage: "Bootstrap a hub or onboard a spoke cluster",
+		UsageText: `kubara bootstrap CLUSTER_NAME [--local]
+kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH [--namespace NAMESPACE]`,
 		ArgsUsage:   "CLUSTER_NAME",
-		Description: "Bootstraps Argo CD onto the specified cluster. The optional --local mode provisions an isolated local evaluation environment and is not intended for production use.",
+		Description: "Bootstraps Argo CD onto a hub cluster, or onboards a spoke cluster when --initial-kubeconfig is provided.",
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name:      "cluster-name",
@@ -62,19 +67,22 @@ func NewBootstrapCmd() *cli.Command {
 		Action: func(c context.Context, cmd *cli.Command) error {
 			printDeprecatedBootstrapCRDFlagNotice(cmd)
 
+			clusterName := cmd.StringArg("cluster-name")
+			if clusterName == "" {
+				return fmt.Errorf("missing argument %q", "cluster-name")
+			}
+
 			o, err := flags.ToOptions(cmd)
 			if err != nil {
 				return fmt.Errorf("convert flags to options: %w", err)
 			}
-			if cmd.StringArg("cluster-name") == "" {
-				return fmt.Errorf("missing argument %q", "cluster-name")
-			}
-			o.ClusterName = cmd.StringArg("cluster-name")
+
+			o.ClusterName = clusterName
 			return Run(c, o)
 		},
 	}
-	flags.AddFlags(cmd)
 
+	flags.AddFlags(cmd)
 	return cmd
 }
 
@@ -84,14 +92,115 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get working directory: %w", err)
 	}
 
+	kubeconfigPath := cmd.String("kubeconfig")
+	if !cmd.IsSet("kubeconfig") {
+		if envKubeconfig := os.Getenv("KUBECONFIG"); envKubeconfig != "" {
+			kubeconfigPath = envKubeconfig
+		}
+	}
+
+	kubeconf, err := utils.GetFullPath(kubeconfigPath, cwd)
+	if err != nil {
+		return nil, fmt.Errorf("get kubeconfig path: %w", err)
+	}
+
+	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
+	if err != nil {
+		return nil, fmt.Errorf("get catalog options: %w", err)
+	}
+
+	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
+	if err != nil {
+		return nil, fmt.Errorf("get config file path: %w", err)
+	}
+
+	cs := config.NewConfigStore(cwd, configFilePath, catalogOptions)
+	if err := cs.Load(); err != nil {
+		return nil, fmt.Errorf("load config: %w", err)
+	}
+
+	clusterName := cmd.StringArg("cluster-name")
+
+	var clusterConfig *config.Cluster
+	for i := range cs.GetConfig().Clusters {
+		if cs.GetConfig().Clusters[i].Name == clusterName {
+			clusterConfig = &cs.GetConfig().Clusters[i]
+			break
+		}
+	}
+
+	if clusterConfig == nil {
+		return nil, fmt.Errorf(
+			"cluster %q not found in config file %q",
+			clusterName,
+			configFilePath,
+		)
+	}
+
+	// Spoke onboarding is intentionally routed before the existing hub bootstrap
+	// environment/catalog preparation. The spoke path only needs the Kubara
+	// configuration, a Hub kubeconfig, and the initial Spoke kubeconfig.
+	if flags.InitialKubeconfig != "" {
+		if flags.Local {
+			return nil, fmt.Errorf(
+				"--local cannot be used with --initial-kubeconfig",
+			)
+		}
+
+		if flags.DryRun {
+			return nil, fmt.Errorf(
+				"--dry-run is not supported with --initial-kubeconfig",
+			)
+		}
+
+		if clusterConfig.Type != "spoke" {
+			return nil, fmt.Errorf(
+				"--initial-kubeconfig can only be used with a spoke cluster; cluster %q has type %q",
+				clusterConfig.Name,
+				clusterConfig.Type,
+			)
+		}
+
+		initialKubeconfig, err := utils.GetFullPath(
+			flags.InitialKubeconfig,
+			cwd,
+		)
+		if err != nil {
+			return nil, fmt.Errorf(
+				"resolve initial kubeconfig path: %w",
+				err,
+			)
+		}
+
+		if _, err := os.Stat(initialKubeconfig); err != nil {
+			return nil, fmt.Errorf(
+				"initial kubeconfig %q is not accessible: %w",
+				initialKubeconfig,
+				err,
+			)
+		}
+
+		return &bootstrap.Options{
+			Kubeconfig:        kubeconf,
+			InitialKubeconfig: initialKubeconfig,
+			AgentNamespace:    flags.AgentNamespace,
+			ClusterConfig:     clusterConfig,
+			ClusterName:       clusterName,
+			Timeout:           flags.Timeout,
+			WorkDir:           cwd,
+			ConfigFilePath:    configFilePath,
+		}, nil
+	}
+
+	if cmd.IsSet("namespace") {
+		return nil, fmt.Errorf(
+			"--namespace can only be used together with --initial-kubeconfig",
+		)
+	}
+
 	envFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
 	if err != nil {
 		return nil, fmt.Errorf("get env file path: %w", err)
-	}
-
-	kubeconf, err := utils.GetFullPath(cmd.String("kubeconfig"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
 
 	componentsAbsPath := flags.PlatformComponentsPath
@@ -112,35 +221,6 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 
-	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
-	if err != nil {
-		return nil, fmt.Errorf("get catalog options: %w", err)
-	}
-
-	// Load config file and find cluster by name
-	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get config file path: %w", err)
-	}
-
-	cs := config.NewConfigStore(cwd, configFilePath, catalogOptions)
-	if err := cs.Load(); err != nil {
-		return nil, fmt.Errorf("load config: %w", err)
-	}
-
-	// Find the cluster by name from the argument
-	clusterName := cmd.StringArg("cluster-name")
-	var clusterConfig *config.Cluster
-	for i := range cs.GetConfig().Clusters {
-		if cs.GetConfig().Clusters[i].Name == clusterName {
-			clusterConfig = &cs.GetConfig().Clusters[i]
-			break
-		}
-	}
-	if clusterConfig == nil {
-		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
-	}
-
 	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
 	if err := es.Load(); err != nil {
 		return nil, fmt.Errorf("load env: %w", err)
@@ -151,28 +231,36 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("prepare env: %w", err)
 	}
 
-	// Validate and normalize ClusterSecretStore path if provided
 	var cssAbsPath string
 	if flags.ClusterSecretStorePath != "" {
 		if !filepath.IsAbs(flags.ClusterSecretStorePath) {
 			cssAbsPath = filepath.Join(cwd, flags.ClusterSecretStorePath)
 			cssAbsPath, err = filepath.Abs(cssAbsPath)
 			if err != nil {
-				return nil, fmt.Errorf("getting absolute path for ClusterSecretStore file: %w", err)
+				return nil, fmt.Errorf(
+					"getting absolute path for ClusterSecretStore file: %w",
+					err,
+				)
 			}
 		} else {
 			cssAbsPath = flags.ClusterSecretStorePath
 		}
 
-		// Verify file exists
 		if _, err := os.Stat(cssAbsPath); err != nil {
-			return nil, fmt.Errorf("cluster secret store file not found: %w", err)
+			return nil, fmt.Errorf(
+				"cluster secret store file not found: %w",
+				err,
+			)
 		}
 	}
 
 	loadedCatalog, err := cs.GetCatalogForCluster(*clusterConfig)
 	if err != nil {
-		return nil, fmt.Errorf("load catalog for cluster %q: %w", clusterConfig.Name, err)
+		return nil, fmt.Errorf(
+			"load catalog for cluster %q: %w",
+			clusterConfig.Name,
+			err,
+		)
 	}
 
 	bootstrapCatalog := catalog.DefaultBootstrapCatalog
@@ -256,13 +344,34 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Timeout for kubernetes API calls (e.g. 10s, 1m)",
 			Destination: &flags.Timeout,
 		},
+		&cli.StringFlag{
+			Name:        "initial-kubeconfig",
+			Usage:       "Path to the initial kubeconfig used to onboard a spoke cluster",
+			Destination: &flags.InitialKubeconfig,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
+		},
+		&cli.StringFlag{
+			Name:        "namespace",
+			Value:       flags.AgentNamespace,
+			Usage:       "Namespace for the kubara-agent ServiceAccount on the spoke cluster",
+			Destination: &flags.AgentNamespace,
+			Config: cli.StringConfig{
+				TrimSpace: true,
+			},
+		},
 	}
 
 	cmd.Flags = append(cmd.Flags, bootstrapFlags...)
 }
 
 func Run(ctx context.Context, o *bootstrap.Options) error {
-	ctx, cancelSignal := signal.NotifyContext(ctx, os.Interrupt, syscall.SIGTERM)
+	ctx, cancelSignal := signal.NotifyContext(
+		ctx,
+		os.Interrupt,
+		syscall.SIGTERM,
+	)
 	defer cancelSignal()
 
 	return bootstrap.Bootstrap(ctx, o)
@@ -271,19 +380,31 @@ func Run(ctx context.Context, o *bootstrap.Options) error {
 func printDeprecatedBootstrapCRDFlagNotice(cmd *cli.Command) {
 	for _, flagName := range deprecatedBootstrapCRDFlags {
 		if cmd.IsSet(flagName) {
-			log.Warn().Msgf("--%s is deprecated and ignored; CRDs are applied automatically during bootstrap.\n", flagName)
+			log.Warn().
+				Msgf(
+					"--%s is deprecated and ignored; CRDs are applied automatically during bootstrap.\n",
+					flagName,
+				)
 		}
 	}
 }
 
-func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, local bool) (*envconfig.EnvMap, error) {
+func prepareBootstrapEnv(
+	cluster *config.Cluster,
+	envMap *envconfig.EnvMap,
+	local bool,
+) (*envconfig.EnvMap, error) {
 	if err := envMap.Validate(); err != nil {
 		return nil, err
 	}
 
-	if (envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && !envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) ||
-		(!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) {
-		return nil, fmt.Errorf("if you are using a private repository you need to configure both ARGOCD_GIT_PAT_OR_PASSWORD and ARGOCD_GIT_USERNAME")
+	if (envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) &&
+		!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) ||
+		(!envconfig.IsConfiguredEnvValue(envMap.ArgocdGitUsername) &&
+			envconfig.IsConfiguredEnvValue(envMap.ArgocdGitPatOrPassword)) {
+		return nil, fmt.Errorf(
+			"if you are using a private repository you need to configure both ARGOCD_GIT_PAT_OR_PASSWORD and ARGOCD_GIT_USERNAME",
+		)
 	}
 
 	if !local {
@@ -291,9 +412,11 @@ func prepareBootstrapEnv(cluster *config.Cluster, envMap *envconfig.EnvMap, loca
 	}
 
 	prepared := *envMap
+
 	if !envconfig.IsConfiguredEnvValue(prepared.ProjectName) {
 		prepared.ProjectName = cluster.Name
 	}
+
 	if !envconfig.IsConfiguredEnvValue(prepared.ProjectStage) {
 		prepared.ProjectStage = cluster.Stage
 	}
