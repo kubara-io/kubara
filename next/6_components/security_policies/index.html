@@ -8,9 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/10_decisions/ADR-template/">
+        <link rel="canonical" href="https://docs.kubara.io/next/6_components/security_policies/">
       
       
+        <link rel="prev" href="../security_certificates/">
+      
+      
+        <link rel="next" href="../observability_dashboards/">
       
       
         
@@ -21,7 +25,7 @@
     
     
       
-        <title>ADR template - kubara - Docs</title>
+        <title>Policies - kubara - Docs</title>
       
     
     
@@ -74,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#short-title-representative-of-solved-problem-and-found-solution" class="md-skip">
+        <a href="#security-kyverno-policies" class="md-skip">
           Skip to content
         </a>
       
@@ -125,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              ADR template
+              Policies
             
           </span>
         </div>
@@ -1358,8 +1362,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -1370,11 +1376,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
@@ -1395,7 +1401,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1413,7 +1419,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/components_overview/" class="md-nav__link">
+      <a href="../components_overview/" class="md-nav__link">
         
   
   
@@ -1441,7 +1447,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/best_practices/" class="md-nav__link">
+      <a href="../best_practices/" class="md-nav__link">
         
   
   
@@ -1469,7 +1475,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/backup_and_recovery/" class="md-nav__link">
+      <a href="../backup_and_recovery/" class="md-nav__link">
         
   
   
@@ -1546,7 +1552,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/network_external_dns/" class="md-nav__link">
+      <a href="../network_external_dns/" class="md-nav__link">
         
   
   
@@ -1579,6 +1585,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -1588,11 +1596,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_5" checked>
         
           
           <label class="md-nav__link" for="__nav_7_5" id="__nav_7_5_label" tabindex="0">
@@ -1613,7 +1621,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_7_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1631,7 +1639,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/security_certificates/" class="md-nav__link">
+      <a href="../security_certificates/" class="md-nav__link">
         
   
   
@@ -1656,10 +1664,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../6_components/security_policies/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Policies
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1675,6 +1710,209 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#why-policies-matter" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why policies matter
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core architecture
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#configuration-in-configyaml" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Configuration in config.yaml
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Configuration in config.yaml">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#modes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Modes
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#evaluation-and-precedence" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Evaluation and precedence
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy groups">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#workload-hardening-itgrundschutz-pss-baseline" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Workload hardening (itGrundschutz &amp; PSS baseline)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#best-practices-bestpractices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best practices (bestPractices)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ingress-and-certificates-traefik-certmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ingress and certificates (traefik &amp; certManager)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitops-guardrails-argocd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps guardrails (argoCD)
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-reporting-and-visibility" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy reporting and visibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy reporting and visibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-reports-via-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting reports via CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-reporter-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Reporter UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opt-in-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt-in controls
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1744,7 +1982,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/observability_dashboards/" class="md-nav__link">
+      <a href="../observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1772,7 +2010,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/observability_metrics/" class="md-nav__link">
+      <a href="../observability_metrics/" class="md-nav__link">
         
   
   
@@ -1800,7 +2038,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/observability_alerts/" class="md-nav__link">
+      <a href="../observability_alerts/" class="md-nav__link">
         
   
   
@@ -1828,7 +2066,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../6_components/observability_logs/" class="md-nav__link">
+      <a href="../observability_logs/" class="md-nav__link">
         
   
   
@@ -1951,7 +2189,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../ADR/" class="md-nav__link">
+      <a href="../../10_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -1979,7 +2217,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../ADR-index/" class="md-nav__link">
+      <a href="../../10_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -2460,10 +2698,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#context-and-problem-statement" class="md-nav__link">
+  <a href="#why-policies-matter" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Context and Problem Statement
+        Why policies matter
       
     </span>
   </a>
@@ -2471,10 +2709,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#decision-drivers" class="md-nav__link">
+  <a href="#core-architecture" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Decision Drivers
+        Core architecture
       
     </span>
   </a>
@@ -2482,33 +2720,22 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#considered-options" class="md-nav__link">
+  <a href="#configuration-in-configyaml" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Considered Options
+        Configuration in config.yaml
       
     </span>
   </a>
   
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#decision-outcome" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Decision Outcome
-      
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Decision Outcome">
+    <nav class="md-nav" aria-label="Configuration in config.yaml">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#consequences" class="md-nav__link">
+  <a href="#example" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Consequences
+        Example
       
     </span>
   </a>
@@ -2516,10 +2743,10 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#confirmation" class="md-nav__link">
+  <a href="#modes" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Confirmation
+        Modes
       
     </span>
   </a>
@@ -2532,22 +2759,33 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#pros-and-cons-of-the-options" class="md-nav__link">
+  <a href="#evaluation-and-precedence" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Pros and Cons of the Options
+        Evaluation and precedence
       
     </span>
   </a>
   
-    <nav class="md-nav" aria-label="Pros and Cons of the Options">
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-groups" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy groups
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy groups">
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#title-of-option-1" class="md-nav__link">
+  <a href="#workload-hardening-itgrundschutz-pss-baseline" class="md-nav__link">
     <span class="md-ellipsis">
       
-        {title of option 1}
+        Workload hardening (itGrundschutz &amp; PSS baseline)
       
     </span>
   </a>
@@ -2555,10 +2793,32 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#title-of-other-option" class="md-nav__link">
+  <a href="#best-practices-bestpractices" class="md-nav__link">
     <span class="md-ellipsis">
       
-        {title of other option}
+        Best practices (bestPractices)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ingress-and-certificates-traefik-certmanager" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Ingress and certificates (traefik &amp; certManager)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#gitops-guardrails-argocd" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        GitOps guardrails (argoCD)
       
     </span>
   </a>
@@ -2571,10 +2831,49 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#more-information" class="md-nav__link">
+  <a href="#policy-reporting-and-visibility" class="md-nav__link">
     <span class="md-ellipsis">
       
-        More Information
+        Policy reporting and visibility
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy reporting and visibility">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#inspecting-reports-via-cli" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Inspecting reports via CLI
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#policy-reporter-ui" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Reporter UI
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#opt-in-controls" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Opt-in controls
       
     </span>
   </a>
@@ -2601,78 +2900,98 @@ You're not viewing the latest stable version.
   
 
 
-<!--- remove this comment block
-status: "{proposed | rejected | accepted | deprecated | … | superseded by ADR-0123}"
-date: {YYYY-MM-DD when the decision was last updated}
-decision-makers: {list everyone involved in the decision}
-consulted: {list everyone whose opinions are sought (typically subject-matter experts); and with whom there is a two-way communication}
-informed: {list everyone who is kept up-to-date on progress; and with whom there is a one-way communication}
--->
+<h1 id="security-kyverno-policies">Security: Kyverno policies</h1>
+<p>Kubara includes Kyverno and a curated policy set to validate Kubernetes resources before they run.</p>
+<h2 id="why-policies-matter">Why policies matter</h2>
+<p>Platform teams need baseline guardrails that catch security and operational mistakes before deployment. Kyverno runs inside the cluster as an admission controller, validating and mutating manifests directly against the Kubernetes API.</p>
+<h2 id="core-architecture">Core architecture</h2>
+<p>Kubara splits policy management into three components:</p>
+<ol>
+<li><strong>kyverno</strong>: Admission controller and background scanner.</li>
+<li><strong>kyverno-policies</strong>: Curated validation rules shipped with the platform.</li>
+<li><strong>kyverno-policy-reporter</strong>: UI and Prometheus metrics exporter for policy violations.</li>
+</ol>
+<h2 id="configuration-in-configyaml">Configuration in <code>config.yaml</code></h2>
+<p>Policies run in <code>Audit</code> mode by default. You can switch individual policy groups to <code>Enforce</code> mode directly in your cluster configuration.</p>
+<h3 id="example">Example</h3>
+<div class="highlight"><pre><span></span><code><span class="nt">clusters</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-cluster</span>
+<span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">prod</span>
 
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">status</th>
-<th style="text-align: left;">date</th>
-<th style="text-align: left;">decision-makers</th>
-<th style="text-align: left;">consulted</th>
-<th style="text-align: left;">informed</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;"><strong>{status}</strong></td>
-<td style="text-align: left;">{YYYY-MM-DD}</td>
-<td style="text-align: left;">{list everyone involved}</td>
-<td style="text-align: left;">{experts}</td>
-<td style="text-align: left;">{informed}</td>
-</tr>
-</tbody>
-</table>
-<h1 id="short-title-representative-of-solved-problem-and-found-solution">{short title, representative of solved problem and found solution}</h1>
-<h2 id="context-and-problem-statement">Context and Problem Statement</h2>
-<p>{Describe the context and problem statement, e.g., in free form using two to three sentences or in the form of an illustrative story. You may want to articulate the problem in form of a question and add links to collaboration boards or issue management systems.}</p>
-<h2 id="decision-drivers">Decision Drivers</h2>
+<span class="w">    </span><span class="nt">services</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kyverno</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">      </span><span class="nt">kyverno-policies</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
+<span class="w">        </span><span class="nt">config</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">itGrundschutz</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Enforce</span><span class="w">      </span><span class="c1"># Audit (default) or Enforce</span>
+<span class="w">          </span><span class="nt">bestPractices</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Audit</span>
+<span class="w">          </span><span class="nt">certManager</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Audit</span>
+<span class="w">          </span><span class="nt">traefik</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Audit</span>
+<span class="w">          </span><span class="nt">argoCD</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">mode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Audit</span>
+</code></pre></div>
+<h3 id="modes">Modes</h3>
 <ul>
-<li>{decision driver 1, e.g., a force, facing concern, …}</li>
-<li>{decision driver 2, e.g., a force, facing concern, …}</li>
+<li><strong><code>Audit</code></strong>: Violations are logged to <code>PolicyReport</code> custom resources and visible in Policy Reporter without blocking deployments.</li>
+<li><strong><code>Enforce</code></strong>: Admission webhooks reject non-compliant resources at apply time.</li>
 </ul>
-<h2 id="considered-options">Considered Options</h2>
+<h2 id="evaluation-and-precedence">Evaluation and precedence</h2>
+<p>When determining whether a rule runs in <code>Audit</code> or <code>Enforce</code> mode, <code>kubara generate</code> evaluates the settings in this order:</p>
+<ol>
+<li><strong>Specific rule overrides:</strong> Highest priority. Set <code>actionOverride: Enforce</code> or <code>actionOverride: Audit</code> on individual rules inside overlay files such as <code>platform-configs/&lt;cluster&gt;/helm/kyverno-policies/values-override.yaml</code>.</li>
+<li><strong>Group mode:</strong> Set in <code>config.yaml</code> under <code>services.kyverno-policies.config.&lt;group&gt;.mode</code> (for example, <code>itGrundschutz: mode: Enforce</code>). This applies to all rules in that group unless a specific rule override exists.</li>
+<li><strong>Global default:</strong> Falls back to <code>Audit</code> if no group mode or rule override is configured.</li>
+</ol>
+<h2 id="policy-groups">Policy groups</h2>
+<h3 id="workload-hardening-itgrundschutz-pss-baseline">Workload hardening (<code>itGrundschutz</code> &amp; PSS baseline)</h3>
 <ul>
-<li>{title of option 1}</li>
-<li>{title of option 2}</li>
-<li>{title of option 3}</li>
+<li><strong>Disallow privileged containers:</strong> Blocks containers running in privileged mode.</li>
+<li><strong>Disallow privilege escalation:</strong> Prevents child processes from gaining more privileges than their parent.</li>
+<li><strong>Require read-only root filesystems:</strong> Requires container root filesystems to mount as read-only.</li>
+<li><strong>Require resource requests and limits:</strong> Checks that CPU and memory requests and limits exist.</li>
+<li><strong>Require health probes:</strong> Flags pods missing liveness or readiness probes.</li>
 </ul>
-<h2 id="decision-outcome">Decision Outcome</h2>
-<p>Chosen option: "<strong>{title of option 1}</strong>", because {justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force {force} | … | comes out best (see below)}.</p>
-<h3 id="consequences">Consequences</h3>
+<h3 id="best-practices-bestpractices">Best practices (<code>bestPractices</code>)</h3>
 <ul>
-<li><strong>Good</strong>, because {positive consequence, e.g., improvement of one or more desired qualities, …}</li>
-<li><strong>Bad</strong>, because {negative consequence, e.g., compromising one or more desired qualities, …}</li>
+<li><strong>Disallow <code>:latest</code> image tag:</strong> Requires explicit image tags or digests in production workloads.</li>
+<li><strong>Disallow <code>default</code> namespace:</strong> Prevents deploying workloads into the default namespace.</li>
+<li><strong>Require PodDisruptionBudgets:</strong> Checks that multi-replica workloads define a PDB.</li>
 </ul>
-<h3 id="confirmation">Confirmation</h3>
-<p>{Describe how the implementation / compliance of the ADR can/will be confirmed. Is there any automated or manual fitness function? If so, list it and explain how it is applied. Is the chosen design and its implementation in line with the decision? E.g., a design/code review or a test with a library such as ArchUnit can help validate this. Note that although we classify this element as optional, it is included in many ADRs.}</p>
-<hr />
-<h2 id="pros-and-cons-of-the-options">Pros and Cons of the Options</h2>
-<h3 id="title-of-option-1">{title of option 1}</h3>
-<p>{example | description | pointer to more information | …}</p>
+<h3 id="ingress-and-certificates-traefik-certmanager">Ingress and certificates (<code>traefik</code> &amp; <code>certManager</code>)</h3>
 <ul>
-<li><strong>Good</strong>, because {argument a}</li>
-<li><strong>Good</strong>, because {argument b}</li>
-<li><strong>Neutral</strong>, because {argument c}</li>
-<li><strong>Bad</strong>, because {argument d}</li>
+<li><strong>Traefik TLS options:</strong> Prevents using insecure default TLS options on IngressRoutes.</li>
+<li><strong>Cert-Manager limits:</strong> Restricts certificate duration and allowed DNS names on Certificate requests.</li>
 </ul>
-<h3 id="title-of-other-option">{title of other option}</h3>
-<p>{example | description | pointer to more information | …}</p>
+<h3 id="gitops-guardrails-argocd">GitOps guardrails (<code>argoCD</code>)</h3>
 <ul>
-<li><strong>Good</strong>, because {argument a}</li>
-<li><strong>Good</strong>, because {argument b}</li>
-<li><strong>Neutral</strong>, because {argument c}</li>
-<li><strong>Bad</strong>, because {argument d}</li>
-<li>…</li>
+<li><strong>Argo CD project restrictions:</strong> Prevents applications from targeting unauthorized projects or the default project.</li>
 </ul>
-<h2 id="more-information">More Information</h2>
-<p>{You might want to provide additional evidence/confidence for the decision outcome here and/or document the team agreement on the decision and/or define when/how this decision should be realized and if/when it should be re-visited. Links to other decisions and resources might appear here as well.}</p>
+<h2 id="policy-reporting-and-visibility">Policy reporting and visibility</h2>
+<p>In <code>Audit</code> mode, violations do not block deployments. Instead, Kyverno records them in <code>PolicyReport</code> and <code>ClusterPolicyReport</code> custom resources.</p>
+<h3 id="inspecting-reports-via-cli">Inspecting reports via CLI</h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check namespace-scoped policy violations</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>policyreport<span class="w"> </span>-A
+
+<span class="c1"># Check cluster-scoped policy violations</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>clusterpolicyreport
+</code></pre></div>
+<h3 id="policy-reporter-ui">Policy Reporter UI</h3>
+<p>When <code>kyverno-policy-reporter</code> is enabled, a web dashboard is exposed via Ingress and linked in Homer:</p>
+<div class="highlight"><pre><span></span><code>https://&lt;cluster-domain&gt;/kyverno
+</code></pre></div>
+<p><img alt="Policy Reporter" src="../../images/kyverno-policy-reporter.png" /></p>
+<h2 id="opt-in-controls">Opt-in controls</h2>
+<p>These rules exist in the catalog but stay disabled by default to avoid breaking existing environments:</p>
+<ul>
+<li><strong>Default-deny network policies:</strong> Generates default-deny ingress and egress rules for namespaces.</li>
+<li><strong>Registry allow-listing:</strong> Restricts image pulls to approved container registries.</li>
+<li><strong>Cosign image verification:</strong> Requires cryptographic signatures on container images.</li>
+</ul>
 
 
 

@@ -43,6 +43,7 @@
 - [Backup & Recovery](6_components/backup_and_recovery/index.md)
 - [Network > ExternalDNS](6_components/network_external_dns/index.md)
 - [Security > Certificates](6_components/security_certificates/index.md)
+- [Security > Policies](6_components/security_policies/index.md)
 - [Observability > Dashboards](6_components/observability_dashboards/index.md)
 - [Observability > Metrics](6_components/observability_metrics/index.md)
 - [Observability > Alerts](6_components/observability_alerts/index.md)
