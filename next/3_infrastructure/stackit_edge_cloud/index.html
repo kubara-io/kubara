@@ -2874,7 +2874,7 @@ All paths are valid:</p>
 <li>UI is often the fastest manual path for image and cluster creation.</li>
 <li>CLI/API with manifests is better for reproducibility and change history (for example in Git).</li>
 </ul>
-<p>For general STEC background, see the official <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/" target="_blank" rel="noopener">Edge Cloud overview</a>, <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/" target="_blank" rel="noopener">Authentication</a>, and <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-the-api/" target="_blank" rel="noopener">Using the API</a> guides.</p>
+<p>For general STEC background, see the official <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/" target="_blank" rel="noopener">Edge Cloud overview</a>, <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/" target="_blank" rel="noopener">Authentication</a>, and <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/configuration-and-deployment/using-the-api/" target="_blank" rel="noopener">Using the API</a> guides.</p>
 <h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>
@@ -3041,7 +3041,7 @@ curl<span class="w"> </span>https://image-factory.edge.<span class="nv">$INSTANC
 </code></pre></div>
 <p>Use one of the returned versions in <code>EdgeImage.spec.talosVersion</code>.
 If your kubara cluster will use Longhorn, include <code>siderolabs/iscsi-tools</code> and <code>siderolabs/util-linux-tools</code> in the <code>EdgeImage</code> system extensions.
-Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-extensions/" target="_blank" rel="noopener">Using extensions</a> and the <a href="https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/" target="_blank" rel="noopener">Longhorn Talos Linux support</a> documentation.</p>
+Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/configuration-and-deployment/using-extensions/" target="_blank" rel="noopener">Using extensions</a> and the <a href="https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/" target="_blank" rel="noopener">Longhorn Talos Linux support</a> documentation.</p>
 <div class="tabbed-set tabbed-alternate" data-tabs="5:2"><input checked="checked" id="__tabbed_5_1" name="__tabbed_5" type="radio" /><input id="__tabbed_5_2" name="__tabbed_5" type="radio" /><div class="tabbed-labels"><label for="__tabbed_5_1">UI</label><label for="__tabbed_5_2">kubectl</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">

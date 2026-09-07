@@ -22,7 +22,7 @@ All paths are valid:
 - UI is often the fastest manual path for image and cluster creation.
 - CLI/API with manifests is better for reproducibility and change history (for example in Git).
 
-For general STEC background, see the official [Edge Cloud overview](https://docs.stackit.cloud/products/runtime/edge-cloud/), [Authentication](https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/), and [Using the API](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-the-api/) guides.
+For general STEC background, see the official [Edge Cloud overview](https://docs.stackit.cloud/products/runtime/edge-cloud/), [Authentication](https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/), and [Using the API](https://docs.stackit.cloud/products/runtime/edge-cloud/configuration-and-deployment/using-the-api/) guides.
 
 ## 1. Generate Terraform modules
 
@@ -234,7 +234,7 @@ curl https://image-factory.edge.$INSTANCE_REGION.stackit.cloud/versions
 
 Use one of the returned versions in `EdgeImage.spec.talosVersion`.
 If your kubara cluster will use Longhorn, include `siderolabs/iscsi-tools` and `siderolabs/util-linux-tools` in the `EdgeImage` system extensions.
-Read more in the official STACKIT guide: [Using extensions](https://docs.stackit.cloud/products/runtime/edge-cloud/tutorials/using-extensions/) and the [Longhorn Talos Linux support](https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/) documentation.
+Read more in the official STACKIT guide: [Using extensions](https://docs.stackit.cloud/products/runtime/edge-cloud/configuration-and-deployment/using-extensions/) and the [Longhorn Talos Linux support](https://longhorn.io/docs/1.11.0/advanced-resources/os-distro-specific/talos-linux-support/) documentation.
 
 === "UI"
 
