@@ -5,7 +5,7 @@ With SSO, users authenticate against an identity provider (IdP), like GitHub, Fo
 against each application's own user directory. The applications trust the IdP's confirmation, no longer hold credentials themselves, 
 and your team signs in everywhere on the platform with one account.
 
-Kubara helps you set up SSO for the components it deploys:
+kubara helps you set up SSO for the components it deploys:
 
 - Argo CD
 - Grafana, Prometheus, Alertmanager (kube-prometheus-stack)
