@@ -21,5 +21,12 @@ Additionally not every provider speaks the same protocol — So some need a dedi
 ## How
 This section provides configuration examples for some common Providers.
 
+For example:
+
+- [Github](../4_building_your_platform/sso/add_sso_github.md)
+- [Forgejo](../4_building_your_platform/sso/add_sso_forgejo.md)
+- ... and potentially more, that you will find in the SSO Section.
+
+
 
 
