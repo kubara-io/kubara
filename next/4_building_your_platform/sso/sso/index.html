@@ -8,31 +8,31 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/6_components/observability_metrics/">
+        <link rel="canonical" href="https://docs.kubara.io/next/4_building_your_platform/sso/sso/">
       
       
-        <link rel="prev" href="../observability_dashboards/">
+        <link rel="prev" href="../../create_catalog/">
       
       
-        <link rel="next" href="../observability_alerts/">
+        <link rel="next" href="../add_sso_github/">
       
       
         
       
       
-      <link rel="icon" href="../../images/favicon.ico">
+      <link rel="icon" href="../../../images/favicon.ico">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
-        <title>Metrics - kubara - Docs</title>
+        <title>About SSO - kubara - Docs</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../../../assets/stylesheets/main.ec1eaa64.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../../../assets/stylesheets/palette.ab4e12ef.min.css">
       
       
 
@@ -45,15 +45,15 @@
       
     
     
-      <link rel="stylesheet" href="../../stylesheets/extra.css">
+      <link rel="stylesheet" href="../../../stylesheets/extra.css">
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("../../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
     
     
-  <link rel="alternate" type="text/plain" title="LLM-friendly documentation index" href="../../llms.txt">
+  <link rel="alternate" type="text/plain" title="LLM-friendly documentation index" href="../../../llms.txt">
 </head>
   
   
@@ -67,7 +67,7 @@
     <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
 <blockquote data-agent-docs-index="true" aria-hidden="true">
   <h2>Documentation Index</h2>
-  <p>Fetch the complete documentation index at: <a href="../../llms.txt" tabindex="-1">../../llms.txt</a></p>
+  <p>Fetch the complete documentation index at: <a href="../../../llms.txt" tabindex="-1">../../../llms.txt</a></p>
   <p>Use this file to discover all available pages before exploring further.</p>
 </blockquote>
   
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#metrics" class="md-skip">
+        <a href="#single-sign-on-sso" class="md-skip">
           Skip to content
         </a>
       
@@ -93,12 +93,12 @@
             <div class="md-banner__inner md-grid md-typeset">
               
 You're not viewing the latest stable version.
-<a href="../../..">
+<a href="../../../..">
     <strong>Click here to go to latest-stable.</strong>
 </a>
 
             </div>
-            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
+            <script>var el=document.querySelector("[data-md-component=outdated]"),base=new URL("../../.."),outdated=__md_get("__outdated",sessionStorage,base);!0===outdated&&el&&(el.hidden=!1)</script>
           </aside>
         
       </div>
@@ -110,9 +110,9 @@ You're not viewing the latest stable version.
 
 <header class="md-header md-header--shadow" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-header__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     <label class="md-header__button md-icon" for="__drawer">
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Metrics
+              About SSO
             
           </span>
         </div>
@@ -257,9 +257,9 @@ You're not viewing the latest stable version.
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
+    <a href="../../.." title="kubara - Docs" class="md-nav__button md-logo" aria-label="kubara - Docs" data-md-component="logo">
       
-  <img src="../../images/logo.svg" alt="logo">
+  <img src="../../../images/logo.svg" alt="logo">
 
     </a>
     kubara - Docs
@@ -286,7 +286,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href="../../.." class="md-nav__link">
         
   
   
@@ -365,7 +365,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/quick_start/" class="md-nav__link">
+      <a href="../../../1_getting_started/quick_start/" class="md-nav__link">
         
   
   
@@ -393,7 +393,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/installation/" class="md-nav__link">
+      <a href="../../../1_getting_started/installation/" class="md-nav__link">
         
   
   
@@ -421,7 +421,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/prerequisites/" class="md-nav__link">
+      <a href="../../../1_getting_started/prerequisites/" class="md-nav__link">
         
   
   
@@ -449,7 +449,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/bootstrapping/" class="md-nav__link">
+      <a href="../../../1_getting_started/bootstrapping/" class="md-nav__link">
         
   
   
@@ -536,7 +536,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/overview_core_concept/" class="md-nav__link">
+      <a href="../../../2_concepts/overview_core_concept/" class="md-nav__link">
         
   
   
@@ -564,7 +564,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
+      <a href="../../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
         
   
   
@@ -592,7 +592,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalogs/" class="md-nav__link">
+      <a href="../../../2_concepts/catalogs/" class="md-nav__link">
         
   
   
@@ -620,7 +620,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalog_distribution/" class="md-nav__link">
+      <a href="../../../2_concepts/catalog_distribution/" class="md-nav__link">
         
   
   
@@ -648,7 +648,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/catalog_templating/" class="md-nav__link">
+      <a href="../../../2_concepts/catalog_templating/" class="md-nav__link">
         
   
   
@@ -676,7 +676,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../2_concepts/scale_and_ha/" class="md-nav__link">
+      <a href="../../../2_concepts/scale_and_ha/" class="md-nav__link">
         
   
   
@@ -763,7 +763,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/overview/" class="md-nav__link">
+      <a href="../../../3_infrastructure/overview/" class="md-nav__link">
         
   
   
@@ -791,7 +791,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/kind/" class="md-nav__link">
+      <a href="../../../3_infrastructure/kind/" class="md-nav__link">
         
   
   
@@ -819,7 +819,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/stackit_ske/" class="md-nav__link">
+      <a href="../../../3_infrastructure/stackit_ske/" class="md-nav__link">
         
   
   
@@ -847,7 +847,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/stackit_edge_cloud/" class="md-nav__link">
+      <a href="../../../3_infrastructure/stackit_edge_cloud/" class="md-nav__link">
         
   
   
@@ -875,7 +875,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/t-cloud-public/" class="md-nav__link">
+      <a href="../../../3_infrastructure/t-cloud-public/" class="md-nav__link">
         
   
   
@@ -903,7 +903,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../3_infrastructure/google-cloud/" class="md-nav__link">
+      <a href="../../../3_infrastructure/google-cloud/" class="md-nav__link">
         
   
   
@@ -935,8 +935,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -947,11 +949,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -972,7 +974,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -990,7 +992,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/add_spoke_cluster/" class="md-nav__link">
+      <a href="../../add_spoke_cluster/" class="md-nav__link">
         
   
   
@@ -1018,7 +1020,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/create_catalog/" class="md-nav__link">
+      <a href="../../create_catalog/" class="md-nav__link">
         
   
   
@@ -1043,6 +1045,8 @@ You're not viewing the latest stable version.
                 
   
   
+    
+  
   
   
     
@@ -1052,11 +1056,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" checked>
         
           
           <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
@@ -1077,7 +1081,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1092,10 +1096,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/sso/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About SSO
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1111,6 +1142,59 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#why" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Why
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#how" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        How
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1123,7 +1207,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/add_sso_github/" class="md-nav__link">
+      <a href="../add_sso_github/" class="md-nav__link">
         
   
   
@@ -1151,7 +1235,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/add_sso_forgejo/" class="md-nav__link">
+      <a href="../add_sso_forgejo/" class="md-nav__link">
         
   
   
@@ -1246,7 +1330,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_workload_onboarding/overview/" class="md-nav__link">
+      <a href="../../../5_workload_onboarding/overview/" class="md-nav__link">
         
   
   
@@ -1274,7 +1358,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_workload_onboarding/add_app_project/" class="md-nav__link">
+      <a href="../../../5_workload_onboarding/add_app_project/" class="md-nav__link">
         
   
   
@@ -1302,7 +1386,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_workload_onboarding/add_app_repository/" class="md-nav__link">
+      <a href="../../../5_workload_onboarding/add_app_repository/" class="md-nav__link">
         
   
   
@@ -1330,7 +1414,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_workload_onboarding/add_appset/" class="md-nav__link">
+      <a href="../../../5_workload_onboarding/add_appset/" class="md-nav__link">
         
   
   
@@ -1358,7 +1442,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../5_workload_onboarding/add_application/" class="md-nav__link">
+      <a href="../../../5_workload_onboarding/add_application/" class="md-nav__link">
         
   
   
@@ -1390,8 +1474,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -1404,11 +1486,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="">
@@ -1429,7 +1511,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_7_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1447,7 +1529,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../components_overview/" class="md-nav__link">
+      <a href="../../../6_components/components_overview/" class="md-nav__link">
         
   
   
@@ -1475,7 +1557,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../best_practices/" class="md-nav__link">
+      <a href="../../../6_components/best_practices/" class="md-nav__link">
         
   
   
@@ -1503,7 +1585,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../backup_and_recovery/" class="md-nav__link">
+      <a href="../../../6_components/backup_and_recovery/" class="md-nav__link">
         
   
   
@@ -1580,7 +1662,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../network_external_dns/" class="md-nav__link">
+      <a href="../../../6_components/network_external_dns/" class="md-nav__link">
         
   
   
@@ -1665,7 +1747,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../security_certificates/" class="md-nav__link">
+      <a href="../../../6_components/security_certificates/" class="md-nav__link">
         
   
   
@@ -1693,7 +1775,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../security_policies/" class="md-nav__link">
+      <a href="../../../6_components/security_policies/" class="md-nav__link">
         
   
   
@@ -1726,8 +1808,6 @@ You're not viewing the latest stable version.
                 
   
   
-    
-  
   
   
     
@@ -1737,11 +1817,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7_6" >
         
           
           <label class="md-nav__link" for="__nav_7_6" id="__nav_7_6_label" tabindex="0">
@@ -1762,7 +1842,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_7_6_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_7_6">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1780,7 +1860,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_dashboards/" class="md-nav__link">
+      <a href="../../../6_components/observability_dashboards/" class="md-nav__link">
         
   
   
@@ -1805,37 +1885,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Metrics
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../../6_components/observability_metrics/" class="md-nav__link">
         
   
   
@@ -1851,103 +1904,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#architecture-overview" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Architecture Overview
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#accessing-prometheus" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Accessing Prometheus
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#kubara-standardization" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        kubara Standardization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-servicemonitor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: ServiceMonitor
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-via-valuesyaml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration via values.yaml
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prebuilt-dashboards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prebuilt Dashboards
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best Practices
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1960,7 +1916,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_alerts/" class="md-nav__link">
+      <a href="../../../6_components/observability_alerts/" class="md-nav__link">
         
   
   
@@ -1988,7 +1944,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../observability_logs/" class="md-nav__link">
+      <a href="../../../6_components/observability_logs/" class="md-nav__link">
         
   
   
@@ -2083,7 +2039,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../7_architecture/architecture_overview/" class="md-nav__link">
+      <a href="../../../7_architecture/architecture_overview/" class="md-nav__link">
         
   
   
@@ -2111,7 +2067,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../10_decisions/ADR/" class="md-nav__link">
+      <a href="../../../10_decisions/ADR/" class="md-nav__link">
         
   
   
@@ -2139,7 +2095,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../10_decisions/ADR-index/" class="md-nav__link">
+      <a href="../../../10_decisions/ADR-index/" class="md-nav__link">
         
   
   
@@ -2226,7 +2182,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../8_community/community-n-support/" class="md-nav__link">
+      <a href="../../../8_community/community-n-support/" class="md-nav__link">
         
   
   
@@ -2282,7 +2238,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../8_community/maintainers/" class="md-nav__link">
+      <a href="../../../8_community/maintainers/" class="md-nav__link">
         
   
   
@@ -2369,7 +2325,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../1_getting_started/commands/" class="md-nav__link">
+      <a href="../../../1_getting_started/commands/" class="md-nav__link">
         
   
   
@@ -2397,7 +2353,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../9_reference/release_cycle_and_updates/" class="md-nav__link">
+      <a href="../../../9_reference/release_cycle_and_updates/" class="md-nav__link">
         
   
   
@@ -2425,7 +2381,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../9_reference/known_issues/" class="md-nav__link">
+      <a href="../../../9_reference/known_issues/" class="md-nav__link">
         
   
   
@@ -2453,7 +2409,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../9_reference/faq/" class="md-nav__link">
+      <a href="../../../9_reference/faq/" class="md-nav__link">
         
   
   
@@ -2620,10 +2576,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#architecture-overview" class="md-nav__link">
+  <a href="#what" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Architecture Overview
+        What
       
     </span>
   </a>
@@ -2631,10 +2587,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#accessing-prometheus" class="md-nav__link">
+  <a href="#why" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Accessing Prometheus
+        Why
       
     </span>
   </a>
@@ -2642,54 +2598,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#kubara-standardization" class="md-nav__link">
+  <a href="#how" class="md-nav__link">
     <span class="md-ellipsis">
       
-        kubara Standardization
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#example-servicemonitor" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Example: ServiceMonitor
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration-via-valuesyaml" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Configuration via values.yaml
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prebuilt-dashboards" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Prebuilt Dashboards
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#best-practices" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Best Practices
+        How
       
     </span>
   </a>
@@ -2716,89 +2628,29 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="metrics">Metrics</h1>
-<p>Metrics are the foundation of effective monitoring in Kubernetes. They allow continuous observation and data-driven evaluation of the health and performance of clusters, nodes, pods, and applications.</p>
-<p>To collect, store, and visualize metrics, we use the <strong>kube-prometheus-stack</strong>, which includes <strong>Prometheus</strong> along with key exporters like <strong>Node Exporter</strong> and <strong>kube-state-metrics</strong>. The collected data is analyzed and visualized through <strong>Grafana</strong> and can also be explored directly in the <strong>Prometheus UI</strong>.</p>
-<h2 id="architecture-overview">Architecture Overview</h2>
+<h1 id="single-sign-on-sso">Single Sign-On (SSO)</h1>
+<h2 id="what">What</h2>
+<p>With SSO, users authenticate against an identity provider (IdP), like GitHub, Forgejo, Keycloak, Microsoft Entra ID, instead of 
+against each application's own user directory. The applications trust the IdP's confirmation, no longer hold credentials themselves, 
+and your team signs in everywhere on the platform with one account.</p>
+<p>kubara helps you set up SSO for the components it deploys:</p>
 <ul>
-<li><strong>Prometheus</strong> scrapes metrics from defined targets (e.g., nodes, pods, services).</li>
-<li><strong>Node Exporter</strong> provides system-level metrics (CPU, memory, disk I/O, etc.).</li>
-<li><strong>kube-state-metrics</strong> exposes metrics about the state of Kubernetes resources (e.g., Deployments, CronJobs, StatefulSets).</li>
-<li><strong>ServiceMonitors</strong> and <strong>PodMonitors</strong> define which services Prometheus should scrape.</li>
-<li>Configuration is managed declaratively using Helm charts and GitOps (via Argo CD).</li>
+<li>Argo CD</li>
+<li>Grafana, Prometheus, Alertmanager (kube-prometheus-stack)</li>
+<li>Homer dashboard</li>
+<li>and potentially further components in the future</li>
 </ul>
-<h2 id="accessing-prometheus">Accessing Prometheus</h2>
-<p>The <strong>Prometheus UI</strong> is accessible via Ingress at:</p>
-<div class="highlight"><pre><span></span><code>https://&lt;customer-domain&gt;/prometheus
-</code></pre></div>
-<p>It provides a functional interface to explore metrics, debug scraping targets, and manually execute PromQL queries.</p>
-<p>Note: While Prometheus is excellent for direct queries and troubleshooting, <strong>Grafana</strong> is used as the primary interface for metric visualization, offering rich dashboards and user-friendly analytics.
-See more in the <a href="../observability_dashboards/">Dashboards</a> section.</p>
-<h2 id="kubara-standardization">kubara Standardization</h2>
-<p>In kubara, <code>ServiceMonitors</code> are enabled by default for all deployed applications. This ensures that each app exposes Prometheus-compatible metrics and is automatically included in centralized monitoring.</p>
-<p>We also apply consistent labels to every ServiceMonitor-for example, <code>monitoring.instance</code>-to simplify filtering and organization.</p>
-<p>Example snippet from the Argo CD Helm chart <code>values.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">controller</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">metrics</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">    </span><span class="nt">serviceMonitor</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
-<span class="w">      </span><span class="nt">additionalLabels</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">monitoring.instance</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">default</span>
-</code></pre></div>
-<h2 id="example-servicemonitor">Example: ServiceMonitor</h2>
-<p>A <code>ServiceMonitor</code> defines which services Prometheus should monitor. Here's a basic example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring.coreos.com/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ServiceMonitor</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
-<span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">release</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-prometheus-stack</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">selector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchLabels</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">app</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app</span>
-<span class="w">  </span><span class="nt">namespaceSelector</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">matchNames</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-app-namespace</span>
-<span class="w">  </span><span class="nt">endpoints</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">port</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/metrics</span>
-<span class="w">      </span><span class="nt">interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30s</span>
-</code></pre></div>
-<h2 id="configuration-via-valuesyaml">Configuration via <code>values.yaml</code></h2>
-<p>Prometheus settings are defined in the <code>values.yaml</code> file of the Helm chart. This includes scrape intervals, retention policies, and storage settings.</p>
-<div class="highlight"><pre><span></span><code><span class="nt">prometheus</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">prometheusSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">scrapeInterval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
-<span class="w">    </span><span class="nt">evaluationInterval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
-<span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;15d&quot;</span>
-<span class="w">    </span><span class="nt">storageSpec</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">volumeClaimTemplate</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gp2&quot;</span>
-<span class="w">          </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ReadWriteOnce&quot;</span><span class="p p-Indicator">]</span>
-<span class="w">          </span><span class="nt">resources</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">requests</span><span class="p">:</span>
-<span class="w">              </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50Gi</span>
-</code></pre></div>
-<h2 id="prebuilt-dashboards">Prebuilt Dashboards</h2>
-<p>The kube-prometheus-stack comes with a wide set of <strong>preconfigured Grafana dashboards</strong> for:</p>
+<h2 id="why">Why</h2>
+<p>There is no single set of instructions for this. Every application solves SSO differently. </p>
+<p>Argo CD speaks OIDC, Grafana brings its own OAuth configuration, Prometheus and Homer have no authentication at all and sit behind oauth2-proxy.
+Additionally not every provider speaks the same protocol — So some need a dedicated connector.</p>
+<h2 id="how">How</h2>
+<p>This section provides configuration examples for some common Providers.</p>
+<p>For example:</p>
 <ul>
-<li>Kubernetes nodes and workloads</li>
-<li>Prometheus internals</li>
-<li>etcd, API server, scheduler</li>
-<li>kubelet performance</li>
-<li>resource usage and capacity planning</li>
-</ul>
-<p>These dashboards are automatically imported when Grafana is deployed with the stack.
-You can find more about them in the <a href="../observability_dashboards/">Dashboards</a> chapter.</p>
-<h2 id="best-practices">Best Practices</h2>
-<ul>
-<li>Use <code>ServiceMonitors</code> instead of static target definitions to keep deployments flexible and declarative.</li>
-<li>Apply labels for better metric organization and filtering (e.g., by namespace, app, or team).</li>
-<li>Set retention periods based on operational needs-long retention can impact performance.</li>
-<li>Monitor Prometheus itself: metrics like <code>prometheus_tsdb_head_series</code> and <code>prometheus_engine_query_duration_seconds</code> provide insight into system health and scaling requirements.</li>
+<li><a href="../add_sso_github/">Github</a></li>
+<li><a href="../add_sso_forgejo/">Forgejo</a></li>
+<li>... and potentially more, that you will find in the SSO Section.</li>
 </ul>
 
 
@@ -2853,10 +2705,10 @@ You can find more about them in the <a href="../observability_dashboards/">Dashb
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "../../..", "features": ["search.suggest", "navigation.sections", "content.code.copy"], "search": "../../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"alias": true, "default": "latest-stable", "provider": "mike"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../../../assets/javascripts/bundle.d7400e89.min.js"></script>
       
     
   </body>

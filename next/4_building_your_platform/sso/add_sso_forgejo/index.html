@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/4_building_your_platform/sso/add_sso/">
+        <link rel="canonical" href="https://docs.kubara.io/next/4_building_your_platform/sso/add_sso_forgejo/">
       
       
-        <link rel="prev" href="../../create_catalog/">
+        <link rel="prev" href="../add_sso_github/">
       
       
-        <link rel="next" href="../add_sso_examples/">
+        <link rel="next" href="../../../5_workload_onboarding/overview/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>How to add SSO - kubara - Docs</title>
+        <title>Forgejo - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#how-to-add-sso-configuration-for-github" class="md-skip">
+        <a href="#forgejo" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              How to add SSO
+              Forgejo
             
           </span>
         </div>
@@ -1096,6 +1096,62 @@ You're not viewing the latest stable version.
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="../sso/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    About SSO
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../add_sso_github/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    GitHub
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -1115,7 +1171,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    How to add SSO
+    Forgejo
   
 
     
@@ -1133,7 +1189,7 @@ You're not viewing the latest stable version.
   <span class="md-ellipsis">
     
   
-    How to add SSO
+    Forgejo
   
 
     
@@ -1159,10 +1215,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-argo-cd-sso" class="md-nav__link">
+  <a href="#forgejo-sso-config-for-oauth2-proxy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Argo CD SSO
+        Forgejo SSO config for oauth2-proxy:
       
     </span>
   </a>
@@ -1170,10 +1226,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-grafana-sso" class="md-nav__link">
+  <a href="#forgejo-sso-config-for-grafana" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Grafana SSO
+        Forgejo SSO config for Grafana:
       
     </span>
   </a>
@@ -1181,10 +1237,32 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-oauth2-proxy-sso" class="md-nav__link">
+  <a href="#secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. OAuth2 Proxy SSO
+        Secrets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forgejo-sso-config-for-argo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forgejo SSO config for Argo:
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other
       
     </span>
   </a>
@@ -1195,34 +1273,6 @@ You're not viewing the latest stable version.
   
 </nav>
       
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../add_sso_examples/" class="md-nav__link">
-        
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    SSO Examples
-  
-
-    
-  </span>
-  
-  
-
-      </a>
     </li>
   
 
@@ -2548,10 +2598,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#1-argo-cd-sso" class="md-nav__link">
+  <a href="#forgejo-sso-config-for-oauth2-proxy" class="md-nav__link">
     <span class="md-ellipsis">
       
-        1. Argo CD SSO
+        Forgejo SSO config for oauth2-proxy:
       
     </span>
   </a>
@@ -2559,10 +2609,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-grafana-sso" class="md-nav__link">
+  <a href="#forgejo-sso-config-for-grafana" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Grafana SSO
+        Forgejo SSO config for Grafana:
       
     </span>
   </a>
@@ -2570,10 +2620,32 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-oauth2-proxy-sso" class="md-nav__link">
+  <a href="#secrets" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. OAuth2 Proxy SSO
+        Secrets
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#forgejo-sso-config-for-argo" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Forgejo SSO config for Argo:
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#other" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Other
       
     </span>
   </a>
@@ -2600,42 +2672,143 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="how-to-add-sso-configuration-for-github">How to add SSO Configuration for GitHub</h1>
-<p>How to Setup your GitHub for SSO with kubara</p>
-<p>To enable full Single Sign-On experience, you’ll need:</p>
-<ol>
-<li>A GitHub <strong>Organization</strong> and at least one <strong>Team</strong></li>
-<li>Create <strong>three GitHub OAuth Apps</strong> under your org's Developer Settings → OAuth Apps:</li>
-</ol>
-<h3 id="1-argo-cd-sso">1. Argo CD SSO</h3>
-<ul>
-<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/argocd</code></li>
-<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/api/dex/callback</code></li>
-</ul>
-<h3 id="2-grafana-sso">2. Grafana SSO</h3>
-<ul>
-<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/grafana</code></li>
-<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/grafana/login/github</code></li>
-</ul>
-<h3 id="3-oauth2-proxy-sso">3. OAuth2 Proxy SSO</h3>
-<ul>
-<li><strong>Homepage URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run</code></li>
-<li><strong>Callback URL:</strong> <code>https://cp.&lt;your-domain&gt;.stackit.run/oauth2/callback</code></li>
-</ul>
-<div class="admonition tip">
-<p class="admonition-title">Tip</p>
-<p>Save the <strong>Client ID</strong> and generate a <strong>Client Secret</strong> for each app – you'll need them later.</p>
+<h1 id="forgejo">Forgejo</h1>
+<p><strong>The following documentation provides configuration examples for SSO-Configuration <br />
+with STACKIT GIT (Forgejo based).</strong>  </p>
+<p>These configurations are to enable kubara &amp; Forgejo Users to quick-start with SSO.  </p>
+<div class="admonition warning">
+<p class="admonition-title">Prerequisites</p>
+<p>Create Application in Forgejo for Grafana, OAuth2 Proxy &amp; Argo CD
+<a href="https://forgejo.org/docs/next/user/oauth2-provider/#examples" target="_blank" rel="noopener">Forgejo Docs</a>    </p>
+<p>Same Callback URLs like GitHub<br />
+<a href="../add_sso_github/">kubara Docs: Add SSO GitHub</a></p>
 </div>
-<p>For other providers, consult their documentation to find the correct URLs and settings.
-Here are some frequently used ones:</p>
+<p>With that being said, we can not provide Support for any SSO issues as you  might want to configure some parameters <br />
+differently and the stable configuration might also be subject to change in the different Software-Projects.  </p>
+<p>It's worth mentioning that Forgejo is a Fork of Gitea which aims to be compatible with GitHub.<br />
+Sometimes you use Gitea Providers and sometimes its GitHub - <strong>Keep that in mind when Updating and using this configuration in Production.</strong></p>
+<p>Below are working examples when these Docs are released.</p>
+<p><strong>They are based on:</strong>  </p>
 <ul>
-<li><a href="https://learn.microsoft.com/en-us/entra/identity-platform/quickstart-register-app" target="_blank" rel="noopener">Microsoft Entra ID</a></li>
-<li><a href="https://docs.github.com/en/developers/apps/building-oauth-apps/creating-an-oauth-app" target="_blank" rel="noopener">GitHub</a></li>
-<li><a href="https://auth0.com/docs/quickstart/webapp/nextjs/01-login" target="_blank" rel="noopener">Auth0</a></li>
-<li><a href="https://developers.google.com/identity/protocols/oauth2/native-app" target="_blank" rel="noopener">Google Cloud Identity</a></li>
-<li><a href="https://developer.okta.com/docs/guides/build-sso-integration/openidconnect/main/" target="_blank" rel="noopener">Okta</a></li>
-<li><a href="https://docs.gitea.com/development/oauth2-provider" target="_blank" rel="noopener">Forgejo (Gitea)</a></li>
+<li><a href="https://grafana.com/docs/grafana/latest/setup-grafana/configure-access/configure-authentication/github/" target="_blank" rel="noopener">Grafana</a>  </li>
+<li><a href="https://oauth2-proxy.github.io/oauth2-proxy/configuration/providers/gitea" target="_blank" rel="noopener">OAuth2 Proxy</a>  </li>
+<li><a href="https://argo-cd.readthedocs.io/en/stable/operator-manual/user-management/#dex" target="_blank" rel="noopener">Argo</a> &amp; <a href="https://dexidp.io/docs/connectors/gitea/" target="_blank" rel="noopener">Dex</a>  </li>
 </ul>
+<p>We recommend to take a look at them to make sure everything is configured as intended before<br />
+you finally apply your SSO config.</p>
+<h3 id="forgejo-sso-config-for-oauth2-proxy">Forgejo SSO config for oauth2-proxy:</h3>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/oauth2-proxy/values.generated.yaml"</strong>
+<div class="highlight"><pre><span></span><code><span class="nt">oauth2-proxy</span><span class="p">:</span>
+
+<span class="w">    </span><span class="nt">configFile</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|-</span>
+<span class="w">      </span><span class="no">reverse_proxy = true</span>
+<span class="w">      </span><span class="no">redirect_url = &quot;https://your-domain/oauth2/callback&quot;</span>
+<span class="w">      </span><span class="no">email_domains = [ &quot;*&quot; ]</span>
+<span class="w">      </span><span class="no">cookie_secure = true</span>
+<span class="w">      </span><span class="no">upstreams = [ &quot;file:///dev/null&quot; ]</span>
+<span class="w">      </span><span class="no">github_org = &quot;YOUR-ORGANIZATION&quot;</span>
+<span class="w">      </span><span class="no">github_team = &quot;Your-Team&quot;</span>
+<span class="w">      </span><span class="no">provider = &quot;github&quot;</span>
+<span class="w">      </span><span class="no">scope = &quot;read:user user:email read:org&quot;</span>
+<span class="w">      </span><span class="no">login_url=&quot;https://your-forgejo.domain/login/oauth/authorize&quot;</span>
+<span class="w">      </span><span class="no">redeem_url = &quot;https://your-forgejo.domain/login/oauth/access_token&quot;</span>
+<span class="w">      </span><span class="no">validate_url=&quot;https://your-forgejo.domain/api/v1/user/emails&quot;</span>
+<span class="w">      </span><span class="no">provider_display_name=&quot;Your Forgejo&quot;</span>
+</code></pre></div></p>
+<p>Replace the values of the following config variables accordingly to your setup:</p>
+<p>Replace "your-domain" in "redirect_url" with the value of "dnsName" set in kubara config.yaml and keep the trailing "/oauth2/callback".  </p>
+<p>Replace values of  </p>
+<ul>
+<li>"login_url", "redeem_url" &amp; "validate_url" with your according forgejo domain.</li>
+<li>"github_org" &amp; "github_team" with your according org and team-names.</li>
+<li>"provider_display_name" with your desired name to be displayed on the SSO-Login-Button</li>
+</ul>
+<hr />
+<h3 id="forgejo-sso-config-for-grafana">Forgejo SSO config for Grafana:</h3>
+<p>(As part of Kube-Prometheus-Stack Helm-Chart)</p>
+<h3 id="secrets"><strong>Secrets</strong></h3>
+<p>The "grafana.ini" Parts get rendered into a Grafana-Config File and it's better to include your <br />
+Secret  into your Container as an Environment-Variable. Env-Variables won't be touched in the rendering process 
+which otherwise could lead to escaping-issues with special Characters, like backslashes, Dollarsign, Asterisk, Quotes, etc.</p>
+<p>The below example includes the YAML identation-levels ("kube-prometheus-stack: grafana:") for reference.  </p>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/kube-prometheus-stack/values.generated.yaml"</strong></p>
+<p><div class="highlight"><pre><span></span><code><span class="nt">kube-prometheus-stack</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">grafana</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">envFromSecrets</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span>
+<span class="w">    </span><span class="nt">envValueFrom</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">GF_AUTH_GENERIC_OAUTH_CLIENT_ID</span><span class="p">:</span><span class="w">      </span><span class="c1"># desired name in pod env</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span><span class="w">          </span><span class="c1"># secret name</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client-id</span>
+<span class="w">      </span><span class="nt">GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET</span><span class="p">:</span><span class="w">  </span><span class="c1"># desired name in pod env</span>
+<span class="w">        </span><span class="nt">secretKeyRef</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oauth2-credentials</span><span class="w">          </span><span class="c1"># secret name</span>
+<span class="w">          </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">client-secret</span>
+<span class="w">    </span><span class="nt">grafana.ini</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">auth.github</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Forgejo&quot;</span>
+<span class="w">        </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">client_id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${client-id}</span>
+<span class="w">        </span><span class="nt">client_secret</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${client-secret}</span>
+<span class="w">        </span><span class="nt">allow_sign_up</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">        </span><span class="nt">auto_login</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">        </span><span class="nt">scopes</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;user:email,read:org&quot;</span>
+<span class="w">        </span><span class="c1"># Grafana doesn&#39;t support &quot;allowed organizations&quot; with Forgejo because of API-incompatibilites</span>
+<span class="w">        </span><span class="c1"># neither with github-provider nor with the generic-oauth</span>
+<span class="w">        </span><span class="c1"># allowed_organizations: &quot;test-orga&quot;</span>
+<span class="w">        </span><span class="c1"># role_attribute_path: contains(groups[*], &#39;@test-orga/Owners&#39;) &amp;&amp; &#39;Admin&#39; || &#39;Viewer&#39;</span>
+<span class="w">        </span><span class="nt">auth_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/login/oauth/authorize</span>
+<span class="w">        </span><span class="nt">token_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/login/oauth/access_token</span>
+<span class="w">        </span><span class="nt">api_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-forgejo.domain/api/v1/user</span>
+</code></pre></div>
+<strong>Replace the values of the following config variables accordingly to your setup:</strong></p>
+<p>Replace "your-forgejo.domain" in the following variables and keep the trailing paths: (like /login/...)</p>
+<ul>
+<li>auth_url</li>
+<li>token_url </li>
+<li>api_url</li>
+</ul>
+<hr />
+<h3 id="forgejo-sso-config-for-argo">Forgejo SSO config for Argo:</h3>
+<p>Change values in: <strong>"kubara/platform-configs/your-cluster/helm/argo-cd/values.generated.yaml"</strong></p>
+<p><div class="highlight"><pre><span></span><code><span class="w">  </span><span class="nt">configs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cm</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">dex.config</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">connectors:</span>
+<span class="w">          </span><span class="no">- type: gitea</span>
+<span class="w">            </span><span class="no">id: gitea</span>
+<span class="w">            </span><span class="no">name: Your Forgejo</span>
+<span class="w">            </span><span class="no">config:</span>
+<span class="w">              </span><span class="no">clientID: $oauth2-credentials:client-id</span>
+<span class="w">              </span><span class="no">clientSecret: $oauth2-credentials:client-secret</span>
+<span class="w">              </span><span class="no">baseURL: https://yourproject.git.onstackit.cloud</span>
+<span class="w">              </span><span class="no">orgs:</span>
+<span class="w">                </span><span class="no">- name: test-orga</span>
+<span class="w">                  </span><span class="no">teams:</span>
+<span class="w">                  </span><span class="no">- Owners        </span>
+<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://your-domain/argocd</span>
+<span class="w">    </span><span class="nt">params</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">server.basehref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/argocd</span>
+<span class="w">      </span><span class="nt">server.insecure</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">      </span><span class="nt">server.rootpath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/argocd</span>
+<span class="w">    </span><span class="nt">rbac</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">policy.csv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">g, test-orga:Owners, role:admin        </span>
+<span class="w">      </span><span class="nt">policy.default</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">role:readonly</span>
+</code></pre></div>
+<strong>Replace the values of the following config variables accordingly to your setup:</strong></p>
+<ul>
+<li>Replace "your-domain" in "configs.cm.url:" with your "dnsName" set in kubara config.yaml </li>
+<li>Replace value of "name:" and "teams:" in "orgs.name:"</li>
+<li>Replace "baseURL: https://yourproject.git.onstackit.cloud" with your oauth2-Provider Domain (in this case: Your Forgejo).</li>
+</ul>
+<p>And also replace "test-orga:Owners" according to your Organization Name and Team:</p>
+<div class="highlight"><pre><span></span><code><span class="w">      </span><span class="nt">policy.csv</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">g, test-orga:Owners, role:admin  </span>
+</code></pre></div>
+<h2 id="other">Other</h2>
+<p><strong>Feel free to contribute further configurations that are verified as working.</strong></p>
 
 
 
