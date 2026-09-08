@@ -625,6 +625,51 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="3.1 Additional value files and CI value files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.1 Secrets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1.1 Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-of-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List of Secrets:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#values-files-secret-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values files - Secret names
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2855,6 +2900,51 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="3.1 Additional value files and CI value files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#311-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3.1.1 Secrets
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="3.1.1 Secrets">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#list-of-secrets" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        List of Secrets:
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#values-files-secret-names" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Values files - Secret names
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
       </ul>
@@ -2967,8 +3057,13 @@ You're not viewing the latest stable version.
 <h2 id="1-getting-started">1. Getting Started</h2>
 <p>kubara can run on any Kubernetes cluster as long as the required surrounding capabilities exist, especially a secret backend for <code>external-secrets</code> and DNS handling for <code>external-dns</code>.</p>
 <p>For the ready-made example flows, use the <a href="../../3_infrastructure/overview/">Infrastructure Presets</a> section. Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, 
-or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions.</p>
-<p>If you already have a Kubernetes cluster without DNS, secrets management, etc., simply disable those services in the <code>config.yaml</code> file, which will be generated in the next steps.</p>
+or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions to Setup your Infrastructure.</p>
+<p>If you already have a Kubernetes cluster with DNS, secrets management, etc., simply disable those services in the <code>config.yaml</code> file, which will be generated in the next steps.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Keep in mind, that if you use kubara without a <a href="../../3_infrastructure/overview/">Infrastructure Presets</a> and its contained IaC Code,
+that you have to create your [Secrets] manually and also create an according secret store</strong></p>
+</div>
 <h3 id="11-environment-configuration">1.1 Environment Configuration</h3>
 <p>Refer to the <a href="../prerequisites/">Prerequisites</a> guide and ensure all non-optional tasks in that guide are completed.<br>
 Don't forget to create a new Git repository - all following steps should be executed from within that newly created repository.<br>
@@ -3179,6 +3274,68 @@ terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="
 <p class="admonition-title">Warning</p>
 <p><strong>Don't forget to commit and push your changes to Git!</strong></p>
 </div>
+<hr />
+<h4 id="311-secrets">3.1.1 Secrets</h4>
+<div class="admonition tip">
+<p class="admonition-title">Infrastructure Presets</p>
+<p>If you deploy with an Infrastructure Preset then you are ready for the next Step (4) and can skip this.<br />
+Secrets will be created by Terraform / OpenTofu for you.</p>
+</div>
+<div class="admonition danger">
+<p class="admonition-title">Manual Installation</p>
+<p>If you are doing a manual Installation without a Preset than you have to make sure you actually created your secrets 
+and also prepared your Cluster Secret Store for external Secrets - How to create them will be explained here.</p>
+</div>
+<p>Manual Handling of Secrets:</p>
+<h5 id="list-of-secrets">List of Secrets:</h5>
+<ul>
+<li><code>kube-prometheus-stack-grafana-credentials</code>         # Default Admin Credentials for Grafana</li>
+<li><code>cluster-secrets-docker-config</code>                     # Optional: Container-Registry Credentials (like Dockerhub)</li>
+<li><code>argocd-argo-oauth2-credentials</code>                    # SSO: OAuth2 App Credentials for ArgoCD</li>
+<li><code>oauth2-proxy-oauth2-credentials</code>                   # SSO: OAuth2 App Credentials for OAuth2Proxy (Homer Dashboard, etc.)</li>
+<li><code>kube-prometheus-stack-grafana-oauth2-credentials</code>  # SSO: OAuth2 App Credentials for kube-prometheus-stack</li>
+<li>Optional: The Velero Backup Storage Secret</li>
+</ul>
+<p>Depending on which Secret Management Tool you will use the naming of secrets can differ, for example some allow Slashes and Dashes, some just don't.  </p>
+<hr />
+<h5 id="values-files-secret-names">Values files - Secret names</h5>
+<p>You'll need to adapt the following Helm values with your secret names:  </p>
+<ul>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/argo-cd/values.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/external-dns/values.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/external-secrets/values.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/kube-prometheus-stack/values.yaml</code></li>
+<li><code>platform-configs/&lt;my-cluster&gt;/helm/oauth2-proxy/values.yaml</code></li>
+</ul>
+<p>You are free to choose the names of your secrets, since you have to reference them in your values file. But we highly recommend a fixed schema like:
+<div class="highlight"><pre><span></span><code>&lt;clustername&gt;-&lt;stage&gt;-&lt;secretname&gt;
+</code></pre></div></p>
+<p>Which means, for a DEV-stage cluster named <code>kuby</code>, the Docker pull secret would be called:
+<div class="highlight"><pre><span></span><code>kuby-dev-cluster-secrets-docker-config
+</code></pre></div></p>
+<hr />
+<p>The following Commands only explain how to create the Secrets, you have to save them in your Secret Manager by yourselves.</p>
+<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code><span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field &quot;pull-secret&quot; in your Secret Manager</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;$YOUR_PASSWORD_IN_BASE64&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">&#39;{&quot;pull-secret&quot;:.}&#39;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code><span class="c1"># Replace &quot;$YOUR_PASSWORD&quot; with your desired Grafana admin account password.</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;admin-user&quot;:&quot;admin&quot;,&quot;admin-password&quot;:&quot;$YOUR_PASSWORD&quot;}&#39;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">Grafana SSO Secret</span><pre><span></span><code><span class="c1"># Replace secret values according to your SSO App Client ID and Secret</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_GRAFANA_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">OAuth2 Proxy Secret</span><pre><span></span><code><span class="c1"># Based on the [OAuth2 Proxy Docs - Generating a Cookie Secret](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/).</span>
+<span class="c1"># Generate the cookie secret locally</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;+/&#39;</span><span class="w"> </span><span class="s1">&#39;-_&#39;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+
+<span class="c1"># Replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_OAUTH2_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;,&quot;cookie-secret&quot;:&quot;$YOUR_COOKIE_SECRET_CREATED_ABOVE&quot;}&#39;</span>
+</code></pre></div>
+<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># Replace the secret name according to your cluster name and stage (for example &quot;gcp-dev&quot;), and replace the secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_ARGO_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span>
+</code></pre></div>
+<p>On the <a href="https://external-secrets.io/latest/" target="_blank" rel="noopener">official External Secrets Operator Website</a> you can find guidance on how to create the Cluster Secret Store.
+You are ready for the next Step if you have prepared a Cluster Secret Store for External Secrets.</p>
 <hr />
 <h2 id="4-deploying-argo-cd">4. Deploying Argo CD</h2>
 <h3 id="41-bootstrap-the-hub-cluster">4.1 Bootstrap the Hub cluster</h3>

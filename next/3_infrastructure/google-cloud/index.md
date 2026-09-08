@@ -269,13 +269,13 @@ external-secrets:
 ```
 
 
-#### SecretStore
+#### ClusterSecretStore
 
-Create a secretstore.yaml, use this template and change your Project ID:
+Create a clustersecretstore.yaml, use this template and change your Project ID:
 
-```yaml title="secretstore.yaml"
+```yaml title="clustersecretstore.yaml"
 apiVersion: external-secrets.io/v1
-kind: SecretStore
+kind: ClusterSecretStore
 metadata:
   name: gcp-store
   namespace: external-secrets
@@ -286,11 +286,11 @@ spec:
 ```
 
 !!! warning
-    Before `kubectl apply -f secretstore.yaml` can be run, the corresponding CRDs need to be installed first. This is handled automatically by the `kubara bootstrap` command later, so don't try to apply it now.
+    Before `kubectl apply -f clustersecretstore.yaml` can be run, the corresponding CRDs need to be installed first. This is handled automatically by the `kubara bootstrap` command later, so don't try to apply it now.
 
 #### Create Secrets
 
-Now all secrets required by kubara are created. The commands below are just one proven example — secrets can just as well be created another way, as long as the name and content match.
+Now all secrets required by kubara need to be created. The commands below are just one proven example with mostly built-in tools — secrets can just as well be created another way, with different tools, as long as the name and content match.
 
 !!! warning "Naming convention"
     Replace every secret name below to match your cluster name and stage from `config.yaml`, using the pattern `<cluster>-<stage>-...`. Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called cthulhu-dev-cluster-secrets-docker-config. 
@@ -305,7 +305,6 @@ gcloud secrets create gcp-dev-cluster-secrets-docker-config --replication-policy
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager
 # change name of the secret according to your name and stage / replace "gcp-dev" & replace secret values accordingly
 printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}' | gcloud secrets versions add gcp-dev-cluster-secrets-docker-config --data-file=- 
-
 ```
 
 
@@ -351,6 +350,7 @@ printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}
     - Replace every secret name to match the cluster name and stage defined in your `config.yaml` 
     (see the naming convention above).
 
+#### Create values.yaml files
 
 ```yaml title="platform-configs/<my-cluster>/helm/argo-cd/values-gcp.yaml"
 argo-cd:  
@@ -393,13 +393,13 @@ Please refer to the official velero docs - feel free to contribute if you have s
 
 
 
-## Part 4: Apply the SecretStore & Bootstrap Kubara
+## Part 4: Apply the ClusterSecretStore & Bootstrap Kubara
 
-The `Secretstore` can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in `--with-es-css-file` if it differs):
+The `ClusterSecretstore` can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in `--with-es-css-file` if it differs):
 
 ```bash title="kubara bootstrap"
 kubara bootstrap gcp \
-  --with-es-css-file secretstore.yaml
+  --with-es-css-file clustersecretstore.yaml
 ```
 
 Now you should have a successfully deployed kubara installation.

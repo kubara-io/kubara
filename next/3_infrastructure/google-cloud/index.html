@@ -1122,10 +1122,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#secretstore" class="md-nav__link">
+  <a href="#clustersecretstore" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SecretStore
+        ClusterSecretStore
       
     </span>
   </a>
@@ -1137,6 +1137,17 @@ You're not viewing the latest stable version.
     <span class="md-ellipsis">
       
         Create Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-valuesyaml-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create values.yaml files
       
     </span>
   </a>
@@ -1165,10 +1176,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#part-4-apply-the-secretstore-bootstrap-kubara" class="md-nav__link">
+  <a href="#part-4-apply-the-clustersecretstore-bootstrap-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Part 4: Apply the SecretStore &amp; Bootstrap Kubara
+        Part 4: Apply the ClusterSecretStore &amp; Bootstrap Kubara
       
     </span>
   </a>
@@ -2909,10 +2920,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#secretstore" class="md-nav__link">
+  <a href="#clustersecretstore" class="md-nav__link">
     <span class="md-ellipsis">
       
-        SecretStore
+        ClusterSecretStore
       
     </span>
   </a>
@@ -2924,6 +2935,17 @@ You're not viewing the latest stable version.
     <span class="md-ellipsis">
       
         Create Secrets
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#create-valuesyaml-files" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Create values.yaml files
       
     </span>
   </a>
@@ -2952,10 +2974,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#part-4-apply-the-secretstore-bootstrap-kubara" class="md-nav__link">
+  <a href="#part-4-apply-the-clustersecretstore-bootstrap-kubara" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Part 4: Apply the SecretStore &amp; Bootstrap Kubara
+        Part 4: Apply the ClusterSecretStore &amp; Bootstrap Kubara
       
     </span>
   </a>
@@ -3199,10 +3221,10 @@ gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span clas
 <span class="w">      </span><span class="c1"># associate the Kubernetes service account with the GCP service account</span>
 <span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-sa@google-project-xyz-0abc.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="c1"># replace with your service account</span>
 </code></pre></div>
-<h4 id="secretstore">SecretStore</h4>
-<p>Create a secretstore.yaml, use this template and change your Project ID:</p>
-<div class="highlight"><span class="filename">secretstore.yaml</span><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">SecretStore</span>
+<h4 id="clustersecretstore">ClusterSecretStore</h4>
+<p>Create a clustersecretstore.yaml, use this template and change your Project ID:</p>
+<div class="highlight"><span class="filename">clustersecretstore.yaml</span><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
+<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-store</span>
 <span class="w">  </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets</span>
@@ -3213,10 +3235,10 @@ gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span clas
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>Before <code>kubectl apply -f secretstore.yaml</code> can be run, the corresponding CRDs need to be installed first. This is handled automatically by the <code>kubara bootstrap</code> command later, so don't try to apply it now.</p>
+<p>Before <code>kubectl apply -f clustersecretstore.yaml</code> can be run, the corresponding CRDs need to be installed first. This is handled automatically by the <code>kubara bootstrap</code> command later, so don't try to apply it now.</p>
 </div>
 <h4 id="create-secrets">Create Secrets</h4>
-<p>Now all secrets required by kubara are created. The commands below are just one proven example — secrets can just as well be created another way, as long as the name and content match.</p>
+<p>Now all secrets required by kubara need to be created. The commands below are just one proven example with mostly built-in tools — secrets can just as well be created another way, with different tools, as long as the name and content match.</p>
 <div class="admonition warning">
 <p class="admonition-title">Naming convention</p>
 <p>Replace every secret name below to match your cluster name and stage from <code>config.yaml</code>, using the pattern <code>&lt;cluster&gt;-&lt;stage&gt;-...</code>. Example: Given your cluster is called "cthulhu" and the stage is called "dev", the following docker-config secret would be called cthulhu-dev-cluster-secrets-docker-config. </p>
@@ -3262,6 +3284,7 @@ gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="
 (see the naming convention above).</li>
 </ul>
 </div>
+<h4 id="create-valuesyaml-files">Create values.yaml files</h4>
 <div class="highlight"><span class="filename">platform-configs/&lt;my-cluster&gt;/helm/argo-cd/values-gcp.yaml</span><pre><span></span><code><span class="nt">argo-cd</span><span class="p">:</span><span class="w">  </span>
 <span class="w">  </span><span class="nt">bootstrapValues</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">dockerPullSecrets</span><span class="p">:</span>
@@ -3293,10 +3316,10 @@ gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="
 <h4 id="velero">Velero</h4>
 <p>If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup<br />
 Please refer to the official velero docs - feel free to contribute if you have some proposal to enhance this Google Cloud example.</p>
-<h2 id="part-4-apply-the-secretstore-bootstrap-kubara">Part 4: Apply the SecretStore &amp; Bootstrap Kubara</h2>
-<p>The <code>Secretstore</code> can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in <code>--with-es-css-file</code> if it differs):</p>
+<h2 id="part-4-apply-the-clustersecretstore-bootstrap-kubara">Part 4: Apply the ClusterSecretStore &amp; Bootstrap Kubara</h2>
+<p>The <code>ClusterSecretstore</code> can be passed directly into the bootstrap process instead of applying via kubectl (just adjust the path/filename in <code>--with-es-css-file</code> if it differs):</p>
 <div class="highlight"><span class="filename">kubara bootstrap</span><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>gcp<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--with-es-css-file<span class="w"> </span>secretstore.yaml
+<span class="w">  </span>--with-es-css-file<span class="w"> </span>clustersecretstore.yaml
 </code></pre></div>
 <p>Now you should have a successfully deployed kubara installation.
 Wait some minutes and check if all helm charts are synced and green.
