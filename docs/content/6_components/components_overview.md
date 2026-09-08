@@ -89,7 +89,7 @@ If you deactivate or replace applications (Y-axis) with others not part of the k
 | external-dns            |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
 | traefik                 |         |                 |                       |      |                |              |                  |         |                  |                         |              |          |              |         |         |        |
 | metalLB                 | X       | X               | X                     |      |                |              |                  |         |                  | X                       |              |          |              | X       |         |        |
-| velero                  |         |                 |                       |      |                |              |         X         |         |                  |                         |              |          |              |         |         |        |
+| velero                  |         |                 |                       |      |                |              | X                |         |                  |                         |              |          |              |         |         |        |
 
 ## Not enough?
 
