@@ -1,0 +1,217 @@
+# Catalog distribution
+
+This page explains how to package, publish, pull, and use kubara catalogs as OCI artifacts.
+
+## Why kubara uses OCI
+
+[OCI (Open Container Initiative)](https://opencontainers.org/) is the artifact format and distribution model behind container images. It is also widely used in the Kubernetes ecosystem, including Helm registries and other registry-backed artifacts.
+
+kubara uses OCI so catalogs can be:
+
+- Versioned
+- Cached locally
+- Pushed to standard registries
+- Pulled in other environments
+- Promoted between registries
+
+Common registries that support OCI include:
+
+- AWS Elastic Container Registry (ECR)
+- Azure Container Registry (ACR)
+- GitHub Container Registry (`ghcr.io`)
+- Google Artifact Registry
+- Harbor
+- STACKIT Container Registry
+
+If you want the deeper OCI background, read:
+
+- [ORAS: OCI artifacts](https://oras.land/docs/concepts/artifact)
+- [ORAS: reference types](https://oras.land/docs/concepts/reftypes)
+
+## Important model: OCI references use a local cache
+
+kubara works with a **local catalog cache**.
+
+That means:
+
+- `kubara catalog package` creates a cached catalog artifact from a local directory
+- `kubara catalog pull` downloads a catalog artifact into that cache
+- `kubara catalog push` uploads a catalog artifact that is already in that cache
+- `--catalog oci://...` resolves an OCI reference through that cache and pulls it when missing
+
+In other words:
+
+- **push does not package**
+- catalog-consuming commands auto-pull an OCI reference when it is not cached
+
+`push` still requires a previously packaged or pulled artifact and never packages implicitly. An explicit `pull` is useful to prefetch a catalog or refresh a cached tag before running another command.
+
+## Step 1: Create or update the catalog
+
+Start with a normal catalog directory:
+
+```bash
+kubara catalog create my-catalog
+cd my-catalog
+kubara catalog add pet-store
+```
+
+Edit the service definitions and template files until the catalog is ready.
+
+## Step 2: Package the catalog into the local cache
+
+Package the current catalog directory:
+
+```bash
+kubara catalog package oci://ghcr.io/acme/platform-catalogs/
+```
+
+kubara reads:
+
+- `metadata.name` from `Catalog.yaml`
+- `spec.version` from `Catalog.yaml`
+
+and builds the final reference from that information.
+
+Example `Catalog.yaml`:
+
+```yaml
+apiVersion: kubara.io/v1alpha1
+kind: Catalog
+metadata:
+  name: my-catalog
+spec:
+  version: 1.2.3
+```
+
+Example result:
+
+```text
+oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+```
+
+The packaged artifact includes the files inside the catalog directory, so your catalog can ship more than just Helm and Terraform sources.
+
+`spec.version` is important because kubara uses it when packaging the catalog as an OCI artifact.
+
+kubara enforces strict semantic version formatting for catalogs:
+
+- allowed: `0.1.0`
+- not allowed: `v0.1.0`
+- not allowed: `0.1.0-rc.1`
+- not allowed: `0.1.0-beta`
+- not allowed: `0.1.0+build.5`
+
+Only plain `major.minor.patch` is accepted.
+
+## Step 3: Log into the registry
+
+If your registry needs authentication, log in once:
+
+```bash
+kubara catalog login -u my-github-user --password my-password ghcr.io
+```
+
+or alternatively
+
+```bash
+printf '%s' "$GITHUB_TOKEN" | kubara catalog login -u my-github-user --password-stdin ghcr.io
+```
+
+kubara stores registry credentials in:
+
+```text
+$HOME/.kubara/credentials.json
+```
+
+You can use:
+
+- username/password (interactive)
+- password from stdin
+- identity token from flag
+- identity token from stdin
+
+## Step 4: Push the cached catalog
+
+Push the cached artifact to the registry:
+
+```bash
+kubara catalog push oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+```
+
+Important:
+
+- The destination must use a **tag**, not a digest
+- The destination tag must match `spec.version` from `Catalog.yaml`
+- The artifact must already exist in the local cache
+
+You can also promote an already cached catalog from one reference to another:
+
+```bash
+kubara catalog push \
+  --from oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3 \
+  oci://registry.example.com/platform/my-catalog:1.2.3
+```
+
+This is useful when you want to copy the same packaged version into another registry or repository path.
+
+## Step 5: Pull the catalog somewhere else
+
+On another machine or in CI, pull the catalog into the local cache:
+
+```bash
+kubara catalog pull oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+```
+
+If the cached version already exists and the remote digest changed, kubara updates the cached entry.
+
+## Step 6: Use the OCI catalog with kubara
+
+Use the same OCI reference in configuration or kubara commands:
+
+```bash
+kubara schema --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+kubara init --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+kubara generate --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+```
+
+If the reference is not cached, kubara pulls it automatically. Registry authentication still needs to be configured first for private artifacts. Run `kubara catalog pull` explicitly when you want to prefetch or refresh the cached tag.
+
+## Useful supporting commands
+
+List cached artifacts:
+
+```bash
+kubara catalog list
+```
+
+Materialize a cached artifact as an editable directory:
+
+```bash
+kubara catalog unpackage oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3 ./my-catalog
+```
+
+This is useful when you want to inspect or edit a catalog that was distributed through a registry.
+
+## Automatic catalog updates with Renovate
+
+You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.
+
+Add the following settings to your `renovate.json` or GitOps repository's Renovate configuration:
+
+```json
+{
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update kubara catalog OCI references",
+      "managerFilePatterns": ["/^config\\.yaml$/"],
+      "matchStrings": ["oci:\\/\\/(?<depName>[^\\s\"'@]+):(?<currentValue>[^\\s/:\"'@]+)(?:$|[\\s\"'#,}\\]])"],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>0|[1-9]\\d*)\\.(?<minor>0|[1-9]\\d*)\\.(?<patch>0|[1-9]\\d*)$"
+    }
+  ]
+}
+```
+
+Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.
