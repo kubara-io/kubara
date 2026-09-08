@@ -2770,14 +2770,14 @@ See more in the <a href="../observability_dashboards/">Dashboards</a> section.</
 <p>Prometheus settings are defined in the <code>values.yaml</code> file of the Helm chart. This includes scrape intervals, retention policies, and storage settings.</p>
 <div class="highlight"><pre><span></span><code><span class="nt">prometheus</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">prometheusSpec</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">scrapeInterval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
-<span class="w">    </span><span class="nt">evaluationInterval</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;30s&quot;</span>
-<span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;15d&quot;</span>
+<span class="w">    </span><span class="nt">scrapeInterval</span><span class="p">:</span><span class="w"> </span><span class="s">"30s"</span>
+<span class="w">    </span><span class="nt">evaluationInterval</span><span class="p">:</span><span class="w"> </span><span class="s">"30s"</span>
+<span class="w">    </span><span class="nt">retention</span><span class="p">:</span><span class="w"> </span><span class="s">"15d"</span>
 <span class="w">    </span><span class="nt">storageSpec</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">volumeClaimTemplate</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">spec</span><span class="p">:</span>
-<span class="w">          </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;gp2&quot;</span>
-<span class="w">          </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&quot;ReadWriteOnce&quot;</span><span class="p p-Indicator">]</span>
+<span class="w">          </span><span class="nt">storageClassName</span><span class="p">:</span><span class="w"> </span><span class="s">"gp2"</span>
+<span class="w">          </span><span class="nt">accessModes</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">"ReadWriteOnce"</span><span class="p p-Indicator">]</span>
 <span class="w">          </span><span class="nt">resources</span><span class="p">:</span>
 <span class="w">            </span><span class="nt">requests</span><span class="p">:</span>
 <span class="w">              </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">50Gi</span>

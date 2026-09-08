@@ -2715,26 +2715,26 @@ which is included as part of the <a href="https://github.com/prometheus-communit
 <span class="w">      </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">msteams-notifications</span><span class="w">  </span><span class="c1"># Default receiver if no route matches</span>
 
 <span class="w">      </span><span class="nt">routes</span><span class="p">:</span>
-<span class="w">        </span><span class="c1"># 1. Silence all alerts named &quot;InfoInhibitor&quot;</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;null&quot;</span><span class="w">  </span>
+<span class="w">        </span><span class="c1"># 1. Silence all alerts named "InfoInhibitor"</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s">"null"</span><span class="w">  </span>
 <span class="w">          </span><span class="nt">matchers</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alertname =~ &quot;InfoInhibitor&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alertname =~ "InfoInhibitor"</span>
 
-<span class="w">        </span><span class="c1"># 2. Route &quot;Watchdog&quot; alerts to UptimeRobot with a short repeat interval</span>
+<span class="w">        </span><span class="c1"># 2. Route "Watchdog" alerts to UptimeRobot with a short repeat interval</span>
 <span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">uptimerobot</span>
 <span class="w">          </span><span class="nt">repeat_interval</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1m</span>
 <span class="w">          </span><span class="nt">matchers</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alertname =~ &quot;Watchdog&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">alertname =~ "Watchdog"</span>
 
-<span class="w">        </span><span class="c1"># 3. Route all alerts with severity &quot;warning&quot; or &quot;critical&quot; to Microsoft Teams</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;msteams-notifications&#39;</span>
+<span class="w">        </span><span class="c1"># 3. Route all alerts with severity "warning" or "critical" to Microsoft Teams</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">receiver</span><span class="p">:</span><span class="w"> </span><span class="s">'msteams-notifications'</span>
 <span class="w">          </span><span class="nt">matchers</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">severity =~ &quot;warning|critical&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">severity =~ "warning|critical"</span>
 <span class="w">          </span><span class="nt">continue</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span><span class="w">  </span><span class="c1"># Continue to evaluate other routes after this one</span>
 
 <span class="w">    </span><span class="nt">receivers</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># Microsoft Teams v2 receiver using `msteamsv2_configs`</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;msteams-notifications&#39;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">'msteams-notifications'</span>
 <span class="w">        </span><span class="nt">msteamsv2_configs</span><span class="p">:</span>
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">send_resolved</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">            </span><span class="nt">webhook_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;your-msteams-webhook-url&gt;</span><span class="w">  </span><span class="c1"># Replace with your real MS Teams webhook</span>
@@ -2745,7 +2745,7 @@ which is included as part of the <a href="https://github.com/prometheus-communit
 <span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;your-uptimerobot-webhook-url&gt;</span><span class="w">  </span><span class="c1"># Replace with your real UptimeRobot endpoint</span>
 
 <span class="w">      </span><span class="c1"># Null receiver to discard matched alerts</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;null&quot;</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"null"</span>
 
 <span class="w">    </span><span class="c1"># Optional: Use custom templates for consistent alert formatting</span>
 <span class="w">    </span><span class="nt">templates</span><span class="p">:</span>

@@ -3068,7 +3068,7 @@ kubara<span class="w"> </span>init<span class="w"> </span><span class="c1"># gen
 kubara<span class="w"> </span>generate<span class="w"> </span><span class="c1"># generate helm charts</span>
 
 <span class="c1"># Stop after generating your Charts and proceed with: </span>
-<span class="c1"># &quot;Part 2: Google Cloud Infrastructure&quot;</span>
+<span class="c1"># "Part 2: Google Cloud Infrastructure"</span>
 </code></pre></div>
 <h2 id="part-2-google-cloud-infrastructure">Part 2: Google Cloud Infrastructure</h2>
 <h3 id="enable-secret-manager">Enable Secret Manager</h3>
@@ -3160,26 +3160,26 @@ Workload Identity binds a GCP service account directly and keylessly to a Kubern
 <h3 id="external-dns-with-google-dns">external-DNS with Google DNS</h3>
 <div class="highlight"><span class="filename">External DNS Configuration for Google Cloud</span><pre><span></span><code><span class="c1"># Create a service account for ExternalDNS</span>
 gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>create<span class="w"> </span>external-dns-sa<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--display-name<span class="o">=</span><span class="s2">&quot;SA for GKE ExternalDNS&quot;</span>
+<span class="w">    </span>--display-name<span class="o">=</span><span class="s2">"SA for GKE ExternalDNS"</span>
 
 <span class="c1"># Grant the service account write permissions on Cloud DNS</span>
 gcloud<span class="w"> </span>projects<span class="w"> </span>add-iam-policy-binding<span class="w"> </span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--member<span class="o">=</span><span class="s2">&quot;serviceAccount:external-dns-sa@</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--role<span class="o">=</span><span class="s2">&quot;roles/dns.admin&quot;</span>
+<span class="w">    </span>--member<span class="o">=</span><span class="s2">"serviceAccount:external-dns-sa@</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.iam.gserviceaccount.com"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--role<span class="o">=</span><span class="s2">"roles/dns.admin"</span>
 
-<span class="c1"># Bind Workload Identity (note: requires the matching namespace – kubara&#39;s default is the chart name, so &quot;external-dns&quot; here)</span>
+<span class="c1"># Bind Workload Identity (note: requires the matching namespace – kubara's default is the chart name, so "external-dns" here)</span>
 gcloud<span class="w"> </span>iam<span class="w"> </span>service-accounts<span class="w"> </span>add-iam-policy-binding<span class="w"> </span>external-dns-sa@<span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span>.iam.gserviceaccount.com<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--role<span class="o">=</span><span class="s2">&quot;roles/iam.workloadIdentityUser&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--member<span class="o">=</span><span class="s2">&quot;serviceAccount:</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.svc.id.goog[external-dns/external-dns-sa]&quot;</span>
+<span class="w">    </span>--role<span class="o">=</span><span class="s2">"roles/iam.workloadIdentityUser"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--member<span class="o">=</span><span class="s2">"serviceAccount:</span><span class="k">$(</span>gcloud<span class="w"> </span>config<span class="w"> </span>get-value<span class="w"> </span>project<span class="k">)</span><span class="s2">.svc.id.goog[external-dns/external-dns-sa]"</span>
 
 <span class="c1"># Create the Google Cloud managed DNS zone</span>
 gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span class="w"> </span>create<span class="w"> </span>kubara-gcp-zone<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--dns-name<span class="o">=</span><span class="s2">&quot;subdomain.your-domain.com.&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--description<span class="o">=</span><span class="s2">&quot;Subdomain Zone for GKE kubara&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--dns-name<span class="o">=</span><span class="s2">"subdomain.your-domain.com."</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--description<span class="o">=</span><span class="s2">"Subdomain Zone for GKE kubara"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--visibility<span class="o">=</span>public
 
-<span class="c1"># Print the zone&#39;s nameservers – these are then entered at the domain registrar as a delegated subdomain</span>
-gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span class="w"> </span>describe<span class="w"> </span>kubara-gcp-zone<span class="w"> </span>--format<span class="o">=</span><span class="s2">&quot;value(nameServers)&quot;</span>
+<span class="c1"># Print the zone's nameservers – these are then entered at the domain registrar as a delegated subdomain</span>
+gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span class="w"> </span>describe<span class="w"> </span>kubara-gcp-zone<span class="w"> </span>--format<span class="o">=</span><span class="s2">"value(nameServers)"</span>
 </code></pre></div>
 <p>DNS example:</p>
 <p><img alt="Registrar Screenshot" src="../../images/gcp-dns.jpg" /></p>
@@ -3188,38 +3188,38 @@ gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span clas
 <span class="nt">external-dns</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">google</span>
 <span class="w">  </span><span class="nt">google</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;your-google-cloud-project-id&gt;&quot;</span><span class="w"> </span><span class="c1"># your project</span>
+<span class="w">    </span><span class="nt">project</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;your-google-cloud-project-id&gt;"</span><span class="w"> </span><span class="c1"># your project</span>
 <span class="w">  </span><span class="nt">domainFilters</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;subdomain.your-domain.com&quot;</span><span class="w"> </span><span class="c1"># your zone</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"subdomain.your-domain.com"</span><span class="w"> </span><span class="c1"># your zone</span>
 <span class="w">  </span><span class="nt">serviceAccount</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">create</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-dns-sa</span>
 <span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
-<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-dns-sa@&lt;your-gcp-project-id&gt;.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="c1"># replace with your service account</span>
+<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">"external-dns-sa@&lt;your-gcp-project-id&gt;.iam.gserviceaccount.com"</span><span class="w"> </span><span class="c1"># replace with your service account</span>
 </code></pre></div>
 <h3 id="external-secrets">External Secrets</h3>
 <div class="highlight"><span class="filename">Configure GCP for External Secrets</span><pre><span></span><code><span class="c1"># 1. Create a Google service account</span>
 <span class="l l-Scalar l-Scalar-Plain">gcloud iam service-accounts create external-secrets-sa \</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--display-name=&quot;GKE Kubara External Secrets SA&quot;</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--display-name="GKE Kubara External Secrets SA"</span>
 
 <span class="l l-Scalar l-Scalar-Plain"># 2. Grant the service account permission to read secrets (Secret Accessor)</span>
 <span class="l l-Scalar l-Scalar-Plain">gcloud projects add-iam-policy-binding $(gcloud config get-value project) \</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member=&quot;serviceAccount:external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com&quot; \</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role=&quot;roles/secretmanager.secretAccessor&quot;</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member="serviceAccount:external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com" \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role="roles/secretmanager.secretAccessor"</span>
 
 <span class="l l-Scalar l-Scalar-Plain"># 3. Link the Kubernetes ServiceAccount via Workload Identity</span>
 <span class="l l-Scalar l-Scalar-Plain">gcloud iam service-accounts add-iam-policy-binding external-secrets-sa@$(gcloud config get-value project).iam.gserviceaccount.com \</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role=&quot;roles/iam.workloadIdentityUser&quot; \</span>
-<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member=&quot;serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]&quot;</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--role="roles/iam.workloadIdentityUser" \</span>
+<span class="w">    </span><span class="l l-Scalar l-Scalar-Plain">--member="serviceAccount:$(gcloud config get-value project).svc.id.goog[external-secrets/external-secrets-sa]"</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">../platform-configs/&lt;my-cluster&gt;/helm/external-secrets/values-gcp.yaml</span><pre><span></span><code><span class="nt">external-secrets</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">serviceAccount</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">create</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">    </span><span class="c1"># exact same name as the GCP service account you created in the previous step</span>
-<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-sa&quot;</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"external-secrets-sa"</span>
 <span class="w">    </span><span class="nt">annotations</span><span class="p">:</span>
 <span class="w">      </span><span class="c1"># associate the Kubernetes service account with the GCP service account</span>
-<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;external-secrets-sa@google-project-xyz-0abc.iam.gserviceaccount.com&quot;</span><span class="w"> </span><span class="c1"># replace with your service account</span>
+<span class="w">      </span><span class="nt">iam.gke.io/gcp-service-account</span><span class="p">:</span><span class="w"> </span><span class="s">"external-secrets-sa@google-project-xyz-0abc.iam.gserviceaccount.com"</span><span class="w"> </span><span class="c1"># replace with your service account</span>
 </code></pre></div>
 <h4 id="clustersecretstore">ClusterSecretStore</h4>
 <p>Create a clustersecretstore.yaml, use this template and change your Project ID:</p>
@@ -3245,35 +3245,35 @@ gcloud<span class="w"> </span>dns<span class="w"> </span>managed-zones<span clas
 <p>Also don't forget to replace the values in the secret command, like for example "$YOUR_COOKIE_SECRET_CREATED_ABOVE".</p>
 <p>In this example it is called gcp-dev (name: gcp, stage: dev), so be careful to replace all names and set the values!</p>
 </div>
-<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
-<span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field &quot;pull-secret&quot; in Secret Manager</span>
-<span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;$YOUR_PASSWORD_IN_BASE64&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">&#39;{&quot;pull-secret&quot;:.}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev"</span>
+<span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in Secret Manager</span>
+<span class="c1"># change name of the secret according to your name and stage / replace "gcp-dev" &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'$YOUR_PASSWORD_IN_BASE64'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">'{"pull-secret":.}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-cluster-secrets-docker-config<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
 </code></pre></div>
-<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
-<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;admin-user&quot;:&quot;admin&quot;,&quot;admin-password&quot;:&quot;$YOUR_PASSWORD&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code>gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev"</span>
+<span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev" &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"admin-user":"admin","admin-password":"$YOUR_PASSWORD"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
 </code></pre></div>
-<div class="highlight"><span class="filename">Grafana SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<div class="highlight"><span class="filename">Grafana SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev"</span>
 gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
 
-<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_GRAFANA_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-
+<span class="w"> </span><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev" &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-
 </code></pre></div>
-<div class="highlight"><span class="filename">OAuth2 Proxy Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<div class="highlight"><span class="filename">OAuth2 Proxy Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev"</span>
 gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-oauth2-proxy-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
 
 <span class="c1"># Generate the cookie secret locally (see https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/)</span>
-dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;+/&#39;</span><span class="w"> </span><span class="s1">&#39;-_&#39;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">'\n'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">'+/'</span><span class="w"> </span><span class="s1">'-_'</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
 
-<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_OAUTH2_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;,&quot;cookie-secret&quot;:&quot;$YOUR_COOKIE_SECRET_CREATED_ABOVE&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-oauth2-proxy-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+<span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev" &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-oauth2-proxy-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
 </code></pre></div>
-<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev"</span>
 gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="w"> </span>gcp-dev-argocd-argo-oauth2-credentials<span class="w"> </span>--replication-policy<span class="o">=</span>automatic<span class="w"> </span>
 
-<span class="c1"># replace name of the secret according to your name and stage / replace &quot;gcp-dev&quot; &amp; replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_ARGO_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-argocd-argo-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
+<span class="c1"># replace name of the secret according to your name and stage / replace "gcp-dev" &amp; replace secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>gcloud<span class="w"> </span>secrets<span class="w"> </span>versions<span class="w"> </span>add<span class="w"> </span>gcp-dev-argocd-argo-oauth2-credentials<span class="w"> </span>--data-file<span class="o">=</span>-<span class="w"> </span>
 </code></pre></div>
 <div class="admonition warning">
 <p class="admonition-title">Before you copy these over</p>
@@ -3302,16 +3302,16 @@ gcloud<span class="w"> </span>secrets<span class="w"> </span>create<span class="
 <span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">grafana-admin-credentials</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace "gcp-dev"</span>
 <span class="w">    </span><span class="nt">oauth2-credentials</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-kube-prometheus-stack-grafana-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace "gcp-dev"</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">platform-configs/&lt;my-cluster&gt;/helm/oauth2-proxy/values-gcp.yaml</span><pre><span></span><code><span class="nt">externalSecrets</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">secrets</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">oauth2-credentials</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">dataFrom</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-oauth2-proxy-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace &quot;gcp-dev&quot;</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gcp-dev-oauth2-proxy-oauth2-credentials</span><span class="w"> </span><span class="c1"># change name of the secret according to your name and stage / replace "gcp-dev"</span>
 </code></pre></div>
 <h4 id="velero">Velero</h4>
 <p>If you want to use Velero see: https://github.com/velero-io/velero-plugin-for-gcp#setup<br />

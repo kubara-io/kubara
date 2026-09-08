@@ -2865,7 +2865,7 @@ kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w">
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>login<span class="w"> </span>-u<span class="w"> </span>my-github-user<span class="w"> </span>--password<span class="w"> </span>my-password<span class="w"> </span>ghcr.io
 </code></pre></div>
 <p>or alternatively</p>
-<div class="highlight"><pre><span></span><code><span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$GITHUB_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>kubara<span class="w"> </span>catalog<span class="w"> </span>login<span class="w"> </span>-u<span class="w"> </span>my-github-user<span class="w"> </span>--password-stdin<span class="w"> </span>ghcr.io
+<div class="highlight"><pre><span></span><code><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$GITHUB_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>kubara<span class="w"> </span>catalog<span class="w"> </span>login<span class="w"> </span>-u<span class="w"> </span>my-github-user<span class="w"> </span>--password-stdin<span class="w"> </span>ghcr.io
 </code></pre></div>
 <p>kubara stores registry credentials in:</p>
 <div class="highlight"><pre><span></span><code>$HOME/.kubara/credentials.json
@@ -2917,14 +2917,14 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <p>You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.</p>
 <p>Add the following settings to your <code>renovate.json</code> or GitOps repository's Renovate configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">&quot;customManagers&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="nt">"customManagers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">&quot;customType&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;description&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Update kubara catalog OCI references&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;managerFilePatterns&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;/^config\\.yaml$/&quot;</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;matchStrings&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;oci:\\/\\/(?&lt;depName&gt;[^\\s\&quot;&#39;@]+):(?&lt;currentValue&gt;[^\\s/:\&quot;&#39;@]+)(?:$|[\\s\&quot;&#39;#,}\\]])&quot;</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">&quot;datasourceTemplate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">&quot;versioningTemplate&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;regex:^(?&lt;major&gt;0|[1-9]\\d*)\\.(?&lt;minor&gt;0|[1-9]\\d*)\\.(?&lt;patch&gt;0|[1-9]\\d*)$&quot;</span>
+<span class="w">      </span><span class="nt">"customType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Update kubara catalog OCI references"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"managerFilePatterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"/^config\\.yaml$/"</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"matchStrings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"oci:\\/\\/(?&lt;depName&gt;[^\\s\"'@]+):(?&lt;currentValue&gt;[^\\s/:\"'@]+)(?:$|[\\s\"'#,}\\]])"</span><span class="p">],</span>
+<span class="w">      </span><span class="nt">"datasourceTemplate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"docker"</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">"versioningTemplate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex:^(?&lt;major&gt;0|[1-9]\\d*)\\.(?&lt;minor&gt;0|[1-9]\\d*)\\.(?&lt;patch&gt;0|[1-9]\\d*)$"</span>
 <span class="w">    </span><span class="p">}</span>
 <span class="w">  </span><span class="p">]</span>
 <span class="p">}</span>

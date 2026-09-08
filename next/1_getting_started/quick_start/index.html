@@ -2881,7 +2881,7 @@ Other<span class="w"> </span>useful<span class="w"> </span>links:
 
 Retrieve<span class="w"> </span>the<span class="w"> </span>generated<span class="w"> </span><span class="nb">local</span><span class="w"> </span>OpenBao<span class="w"> </span>root<span class="w"> </span>token<span class="w"> </span>with:
 <span class="w">    </span>kubectl<span class="w"> </span>--kubeconfig<span class="w"> </span>.local/kind.kubeconfig<span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span><span class="nb">exec</span><span class="w"> </span>openbao-0<span class="w"> </span>-c<span class="w"> </span>openbao<span class="w"> </span>--<span class="w"> </span><span class="se">\</span>
-<span class="w">      </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;tr -d &#39;\n\r&#39; &lt; /openbao/data/local-bootstrap/init.json | sed -n &#39;s/.*\&quot;root_token\&quot;[[:space:]]*:[[:space:]]*\&quot;\([^\&quot;]*\)\&quot;.*/\1/p&#39;&quot;</span>
+<span class="w">      </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s2">"tr -d '\n\r' &lt; /openbao/data/local-bootstrap/init.json | sed -n 's/.*\"root_token\"[[:space:]]*:[[:space:]]*\"\([^\"]*\)\".*/\1/p'"</span>
 
 
 <span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:42:02<span class="w"> </span>INF<span class="w"> </span>ArgoCD<span class="w"> </span>bootstrap<span class="w"> </span>completed<span class="w"> </span>successfully
@@ -2943,10 +2943,10 @@ kubectl<span class="w"> </span>--kubeconfig<span class="w"> </span>.local/kind.k
 <li>Restart <code>cloud-provider-kind</code></li>
 <li>If the process still gets stuck, watch the <code>cloud-provider-kind</code> terminal output. Repeat this step if needed.
    You should no longer see failing readiness checks like:
-   <div class="highlight"><pre><span></span><code>I0611 10:51:09.391260   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get &quot;http://127.0.0.1:32810/ready&quot;: EOF
-I0611 10:51:10.390284   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get &quot;http://127.0.0.1:32810/ready&quot;: EOF
-I0611 10:51:11.393015   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get &quot;http://127.0.0.1:32810/ready&quot;: EOF
-I0611 10:51:12.393818   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get &quot;http://127.0.0.1:32810/ready&quot;: EOF
+   <div class="highlight"><pre><span></span><code>I0611 10:51:09.391260   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
+I0611 10:51:10.390284   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
+I0611 10:51:11.393015   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
+I0611 10:51:12.393818   94008 proxy.go:342] unexpected error trying to get load balancer kindccm-6c8d6f6b98d6 readiness :Get "http://127.0.0.1:32810/ready": EOF
 </code></pre></div></li>
 <li>Otherwise restart <code>cloud-provider-kind</code> again</li>
 </ol>

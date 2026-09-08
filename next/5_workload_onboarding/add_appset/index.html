@@ -2747,7 +2747,7 @@ For example, you can use <code>values-additional.yaml</code>, but the generated 
 <p>This is an example on how to add an AppSet to the hub cluster.
 Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
 <div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span><span class="w">  </span><span class="c1"># usually your existing hub cluster key (for example &quot;&lt;cluster&gt;-&lt;stage&gt;&quot;)</span>
+<span class="w">  </span><span class="nt">applicationSets</span><span class="p">:</span><span class="w">  </span><span class="c1"># usually your existing hub cluster key (for example "&lt;cluster&gt;-&lt;stage&gt;")</span>
 <span class="w">    </span><span class="nt">my-hub-dev</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-hub-dev</span>
 <span class="w">      </span><span class="nt">platformComponents</span><span class="p">:</span>
@@ -2783,16 +2783,16 @@ If you let Argo CD manage itself, it will add the configured application to the 
 <span class="w">        </span><span class="nt">akv2k8s</span><span class="p">:</span>
 <span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
 <span class="w">          </span><span class="nt">sources</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://your-repo.de/with-overlay-values&quot;</span>
-<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;main&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="s">"https://your-repo.de/with-overlay-values"</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">"main"</span>
 <span class="w">              </span><span class="nt">ref</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">valuesRepo</span>
 <span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repoURL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://charts.spvapi.no</span>
 <span class="w">              </span><span class="nt">chart</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">akv2k8s</span>
-<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;2.7.3&quot;</span>
+<span class="w">              </span><span class="nt">targetRevision</span><span class="p">:</span><span class="w"> </span><span class="s">"2.7.3"</span>
 <span class="w">              </span><span class="nt">helm</span><span class="p">:</span>
 <span class="w">                </span><span class="nt">valueFiles</span><span class="p">:</span>
 <span class="w">                  </span><span class="c1"># Keep `{{name}}`: the AppSet controller injects the cluster name</span>
-<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;$valuesRepo/platform-configs/{{name}}/helm/akv2k8s/values.generated.yaml&quot;</span>
+<span class="w">                  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"$valuesRepo/platform-configs/{{name}}/helm/akv2k8s/values.generated.yaml"</span>
 </code></pre></div></p>
 
 

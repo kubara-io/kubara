@@ -3038,11 +3038,11 @@ You're not viewing the latest stable version.
 cp<span class="w"> </span>set-env-changeme.sh<span class="w"> </span>set-env.sh
 </code></pre></div>
 <p>Set the T Cloud Public provider variables in <code>set-env.sh</code> / <code>set-env.ps1</code> before sourcing:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_region</span><span class="o">=</span><span class="s2">&quot;eu-de&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_domain_name</span><span class="o">=</span><span class="s2">&quot;&lt;domain-name&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_tenant_name</span><span class="o">=</span><span class="s2">&quot;&lt;tenant-name&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_access_key</span><span class="o">=</span><span class="s2">&quot;&lt;access-key&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_secret_key</span><span class="o">=</span><span class="s2">&quot;&lt;secret-key&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_region</span><span class="o">=</span><span class="s2">"eu-de"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_domain_name</span><span class="o">=</span><span class="s2">"&lt;domain-name&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_tenant_name</span><span class="o">=</span><span class="s2">"&lt;tenant-name&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_access_key</span><span class="o">=</span><span class="s2">"&lt;access-key&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">TF_VAR_t_cloud_public_secret_key</span><span class="o">=</span><span class="s2">"&lt;secret-key&gt;"</span>
 </code></pre></div>
 <p><code>TF_VAR_t_cloud_public_tenant_name</code> must be the T Cloud Public tenant/project name. This is the same value kubara reads from <code>terraform.projectId</code> in <code>config.yaml</code> for T Cloud Public, and it is not a UUID.</p>
 <p>The generated environment file also sets <code>AWS_REQUEST_CHECKSUM_CALCULATION=when_required</code> and <code>AWS_RESPONSE_CHECKSUM_VALIDATION=when_required</code>. Keep these values for the T Cloud Public OBS backend. Terraform's <code>s3</code> backend only supports S3-compatible APIs on a best-effort basis, and recent AWS SDK checksum behavior can otherwise produce unreadable state objects against some S3-compatible backends.</p>
@@ -3087,13 +3087,13 @@ tofu<span class="w"> </span>apply
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_access_key<span class="k">)</span><span class="s2">"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">"</span><span class="k">$(</span>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>credential_secret_access_key<span class="k">)</span><span class="s2">"</span>
 </code></pre></div>
 </div>
 </div>
@@ -3113,8 +3113,8 @@ tofu<span class="w"> </span>apply
 <div class="highlight"><pre><span></span><code><span class="nb">cd</span><span class="w"> </span>../infrastructure
 </code></pre></div>
 <p>The generated infrastructure backend stores state in:</p>
-<div class="highlight"><pre><span></span><code><span class="na">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;bucket-tf-&lt;cluster-name&gt;-&lt;stage&gt;&quot;</span>
-<span class="na">key</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tf-state-&lt;cluster-name&gt;-&lt;stage&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="na">bucket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"bucket-tf-&lt;cluster-name&gt;-&lt;stage&gt;"</span>
+<span class="na">key</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="s2">"tf-state-&lt;cluster-name&gt;-&lt;stage&gt;"</span>
 </code></pre></div>
 <p>The default backend endpoint is <code>https://obs.eu-de.otc.t-systems.com</code>, which is the technical OBS endpoint for the <code>eu-de</code> region. For <code>eu-nl</code>, adjust the generated backend endpoint and region before running <code>terraform init</code>.</p>
 <p>Make sure <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> from the bootstrap stack are set in <code>set-env.sh</code> before initializing the backend.</p>
@@ -3187,8 +3187,8 @@ Active Node    true
 <p>The Initial Root Token from step 2 is what the next stack, <code>openbao/</code>, uses to authenticate against OpenBao through the local port-forward. There is intentionally no Terraform output for it, so it is not stored in Terraform state.</p>
 <p>The set-env script already contains commented-out lines for it. Uncomment them and fill in the token you saved:</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># platform-configs/&lt;cluster-name&gt;/terraform/set-env.sh</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_ADDR</span><span class="o">=</span><span class="s2">&quot;http://127.0.0.1:8200&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="s2">&quot;hvb.AAAAAQ...&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_ADDR</span><span class="o">=</span><span class="s2">"http://127.0.0.1:8200"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">VAULT_TOKEN</span><span class="o">=</span><span class="s2">"hvb.AAAAAQ..."</span>
 </code></pre></div>
 <p>Re-source the file so the new variables apply to the OpenBao Terraform layer:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">source</span><span class="w"> </span>../set-env.sh
@@ -3201,7 +3201,7 @@ Active Node    true
 <div class="highlight"><pre><span></span><code>platform-configs/&lt;cluster-name&gt;/terraform/openbao
 </code></pre></div>
 <p>This layer uses the same OBS backend bucket as the infrastructure layer, but stores state under a separate key:</p>
-<div class="highlight"><pre><span></span><code><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;tf-state-&lt;cluster-name&gt;-&lt;stage&gt;-openbao&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="na">key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"tf-state-&lt;cluster-name&gt;-&lt;stage&gt;-openbao"</span>
 </code></pre></div>
 <p>Run the port-forward in a separate terminal after OpenBao is initialized and unsealed:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>-n<span class="w"> </span>openbao<span class="w"> </span>port-forward<span class="w"> </span>svc/openbao<span class="w"> </span><span class="m">8200</span>:8200
@@ -3278,12 +3278,12 @@ tofu<span class="w"> </span>apply
 <h3 id="oidc-admin-access">OIDC admin access</h3>
 <p>The OpenBao Terraform layer can configure OIDC admin login. Put the overrides in <code>platform-configs/&lt;cluster-name&gt;/terraform/openbao/override.auto.tfvars</code>, not in the generated <code>env.auto.tfvars</code>; see <a href="../../2_concepts/overview_core_concept/#terraform-value-overrides">Terraform value overrides</a>. For example, use the following values for a Keycloak client:</p>
 <div class="highlight"><pre><span></span><code><span class="na">manage_openbao_oidc_auth_backend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">true</span>
-<span class="na">openbao_oidc_discovery_url</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;https://&lt;keycloak-host&gt;/realms/&lt;realm&gt;&quot;</span>
-<span class="na">openbao_oidc_client_id</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;&lt;openbao-client-id&gt;&quot;</span>
+<span class="na">openbao_oidc_discovery_url</span><span class="w">       </span><span class="o">=</span><span class="w"> </span><span class="s2">"https://&lt;keycloak-host&gt;/realms/&lt;realm&gt;"</span>
+<span class="na">openbao_oidc_client_id</span><span class="w">           </span><span class="o">=</span><span class="w"> </span><span class="s2">"&lt;openbao-client-id&gt;"</span>
 <span class="na">openbao_oidc_admin_allowed_redirect_uris</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
-<span class="w">  </span><span class="s2">&quot;https://&lt;cluster-dns-name&gt;/openbao/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;https://&lt;cluster-dns-name&gt;/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
-<span class="w">  </span><span class="s2">&quot;http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">"https://&lt;cluster-dns-name&gt;/openbao/ui/vault/auth/oidc/oidc/callback"</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">"https://&lt;cluster-dns-name&gt;/ui/vault/auth/oidc/oidc/callback"</span><span class="p">,</span>
+<span class="w">  </span><span class="s2">"http://127.0.0.1:8200/ui/vault/auth/oidc/oidc/callback"</span><span class="p">,</span>
 <span class="p">]</span>
 </code></pre></div>
 <p>Set <code>TF_VAR_openbao_oidc_client_secret</code> in <code>set-env.sh</code>, source the file again, and apply the OpenBao Terraform layer. After verifying OIDC access, revoke the Initial Root Token with <code>bao token revoke -self</code> and remove <code>VAULT_TOKEN</code> from <code>set-env.sh</code>.</p>

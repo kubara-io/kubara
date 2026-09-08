@@ -3164,17 +3164,17 @@ You can set a custom output file:</p>
 <strong>Not using an SSO provider?</strong> Just set the ssoOrg and ssoTeam to "none"</p>
 </div>
 <p>Example:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">bootstrapCatalog</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/bootstrap:2.2.1</span>
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapCatalog</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0</span>
 <span class="nt">clusters</span><span class="p">:</span>
 <span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-name-from-env-file</span>
 <span class="w">    </span><span class="nt">stage</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">project-stage-something-like-dev</span>
 <span class="w">    </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;hub or spoke&gt;</span>
 <span class="w">    </span><span class="nt">dnsName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cp.demo-42.stackit.run&gt;</span>
-<span class="w">    </span><span class="c1"># Hint: If you don&#39;t use an SSO provider, you can set ssoOrg and ssoTeam to &quot;none&quot;</span>
+<span class="w">    </span><span class="c1"># Hint: If you don't use an SSO provider, you can set ssoOrg and ssoTeam to "none"</span>
 <span class="w">    </span><span class="nt">ssoOrg</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;oidc-org&gt;</span><span class="w"> </span>
 <span class="w">    </span><span class="nt">ssoTeam</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;org-team&gt;</span>
 <span class="w">    </span><span class="nt">catalogs</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/general:2.3.0</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">oci://ghcr.io/kubara-io/catalogs/general:3.0.0</span>
 <span class="w">    </span><span class="nt">terraform</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit, t-cloud-public</span>
 <span class="w">      </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id-or-tenant-name&gt;</span>
@@ -3315,24 +3315,24 @@ and also prepared your Cluster Secret Store for external Secrets - How to create
 </code></pre></div></p>
 <hr />
 <p>The following Commands only explain how to create the Secrets, you have to save them in your Secret Manager by yourselves.</p>
-<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code><span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field &quot;pull-secret&quot; in your Secret Manager</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;$YOUR_PASSWORD_IN_BASE64&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">&#39;{&quot;pull-secret&quot;:.}&#39;</span>
+<div class="highlight"><span class="filename">Docker Pull Secret</span><pre><span></span><code><span class="c1"># Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in your Secret Manager</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'$YOUR_PASSWORD_IN_BASE64'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>-d<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-Rs<span class="w"> </span><span class="s1">'{"pull-secret":.}'</span>
 </code></pre></div>
-<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code><span class="c1"># Replace &quot;$YOUR_PASSWORD&quot; with your desired Grafana admin account password.</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;admin-user&quot;:&quot;admin&quot;,&quot;admin-password&quot;:&quot;$YOUR_PASSWORD&quot;}&#39;</span>
+<div class="highlight"><span class="filename">Grafana Admin Secret</span><pre><span></span><code><span class="c1"># Replace "$YOUR_PASSWORD" with your desired Grafana admin account password.</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"admin-user":"admin","admin-password":"$YOUR_PASSWORD"}'</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">Grafana SSO Secret</span><pre><span></span><code><span class="c1"># Replace secret values according to your SSO App Client ID and Secret</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_GRAFANA_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}'</span>
 </code></pre></div>
 <div class="highlight"><span class="filename">OAuth2 Proxy Secret</span><pre><span></span><code><span class="c1"># Based on the [OAuth2 Proxy Docs - Generating a Cookie Secret](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/).</span>
 <span class="c1"># Generate the cookie secret locally</span>
-dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;\n&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">&#39;+/&#39;</span><span class="w"> </span><span class="s1">&#39;-_&#39;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
+dd<span class="w"> </span><span class="k">if</span><span class="o">=</span>/dev/urandom<span class="w"> </span><span class="nv">bs</span><span class="o">=</span><span class="m">32</span><span class="w"> </span><span class="nv">count</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="w"> </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>-d<span class="w"> </span>--<span class="w"> </span><span class="s1">'\n'</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tr<span class="w"> </span>--<span class="w"> </span><span class="s1">'+/'</span><span class="w"> </span><span class="s1">'-_'</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nb">echo</span>
 
 <span class="c1"># Replace secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_OAUTH2_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;,&quot;cookie-secret&quot;:&quot;$YOUR_COOKIE_SECRET_CREATED_ABOVE&quot;}&#39;</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}'</span>
 </code></pre></div>
-<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># Replace the secret name according to your cluster name and stage (for example &quot;gcp-dev&quot;), and replace the secret values accordingly</span>
-<span class="nb">printf</span><span class="w"> </span><span class="s1">&#39;%s&#39;</span><span class="w"> </span><span class="s1">&#39;{&quot;client-id&quot;:&quot;$YOUR_ARGO_CLIENT_ID&quot;,&quot;client-secret&quot;:&quot;$YOUR_SECRET&quot;}&#39;</span>
+<div class="highlight"><span class="filename">ArgoCD SSO Secret</span><pre><span></span><code><span class="c1"># Replace the secret name according to your cluster name and stage (for example "gcp-dev"), and replace the secret values accordingly</span>
+<span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s1">'{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}'</span>
 </code></pre></div>
 <p>On the <a href="https://external-secrets.io/latest/" target="_blank" rel="noopener">official External Secrets Operator Website</a> you can find guidance on how to create the Cluster Secret Store.
 You are ready for the next Step if you have prepared a Cluster Secret Store for External Secrets.</p>
@@ -3354,12 +3354,12 @@ To target a specific cluster, provide your own config with <code>--kubeconfig yo
 <p>Example provider credential secret(s) for the <code>ClusterSecretStore</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="c1">## Bitwarden</span>
 kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>bitwarden-access-token<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span><span class="s2">&quot;&lt;BITWARDEN_MACHINE_ACCOUNT_TOKEN&gt;&quot;</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">token</span><span class="o">=</span><span class="s2">"&lt;BITWARDEN_MACHINE_ACCOUNT_TOKEN&gt;"</span>
 
 <span class="c1">## STACKIT Secrets Manager</span>
 kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span class="w"> </span>create<span class="w"> </span>secret<span class="w"> </span>generic<span class="w"> </span>stackit-secrets-manager-cred<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span><span class="s2">&quot;&lt;USERNAME&gt;&quot;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span><span class="s2">&quot;&lt;PASSWORD&gt;&quot;</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">username</span><span class="o">=</span><span class="s2">"&lt;USERNAME&gt;"</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--from-literal<span class="o">=</span><span class="nv">password</span><span class="o">=</span><span class="s2">"&lt;PASSWORD&gt;"</span>
 </code></pre></div>
 <p>Example <code>clustersecretstore.yaml</code> for <code>--with-es-css-file</code> (templating with <code>{{ .cluster.name }}</code> / <code>{{ .cluster.stage }}</code> is supported):</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets.io/v1</span>
@@ -3367,7 +3367,7 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="nt">metadata</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">labels</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">argocd.argoproj.io/instance</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.cluster.name</span><span class="w"> </span><span class="p p-Indicator">}}</span><span class="l l-Scalar l-Scalar-Plain">-external-secrets</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;{{</span><span class="nv"> </span><span class="s">.cluster.name</span><span class="nv"> </span><span class="s">}}-{{</span><span class="nv"> </span><span class="s">.cluster.stage</span><span class="nv"> </span><span class="s">}}&quot;</span>
+<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">"{{</span><span class="nv"> </span><span class="s">.cluster.name</span><span class="nv"> </span><span class="s">}}-{{</span><span class="nv"> </span><span class="s">.cluster.stage</span><span class="nv"> </span><span class="s">}}"</span>
 <span class="nt">spec</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">provider</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">vault</span><span class="p">:</span>
@@ -3378,9 +3378,9 @@ kubectl<span class="w"> </span>-n<span class="w"> </span>external-secrets<span c
 <span class="w">            </span><span class="nt">key</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">password</span>
 <span class="w">            </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit-secrets-manager-cred</span>
 <span class="w">            </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">external-secrets</span>
-<span class="w">          </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;USERNAME&gt;&quot;</span>
-<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;VAULT_PATH&gt;&quot;</span>
-<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;https://&lt;your-secrets-manager-endpoint&gt;&quot;</span>
+<span class="w">          </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;USERNAME&gt;"</span>
+<span class="w">      </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;VAULT_PATH&gt;"</span>
+<span class="w">      </span><span class="nt">server</span><span class="p">:</span><span class="w"> </span><span class="s">"https://&lt;your-secrets-manager-endpoint&gt;"</span>
 <span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v2</span>
 </code></pre></div>
 <p>kubara scopes secret paths by cluster and stage. Namespace-specific secrets use

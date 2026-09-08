@@ -2865,14 +2865,14 @@ before you will feel right at home.</p>
 <li>Catalog metadata</li>
 </ul>
 <h2 id="small-example">Small example</h2>
-<div class="highlight"><pre><span></span><code><span class="c1"># Dig can traverse a nested map like &quot;cluster.services.&lt;service-name&gt;.status&quot; while staying null safe</span>
+<div class="highlight"><pre><span></span><code><span class="c1"># Dig can traverse a nested map like "cluster.services.&lt;service-name&gt;.status" while staying null safe</span>
 <span class="c1"># Meaning if any of the keys listed below is missing it will default to the last value in the</span>
-<span class="c1"># list below: &quot;disabled&quot;</span>
-<span class="p p-Indicator">{{</span><span class="nv">- $oauth2ProxyStatus</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= dig &quot;cluster&quot; &quot;services&quot; &quot;oauth2-proxy&quot; &quot;status&quot; &quot;disabled&quot; . -</span><span class="p p-Indicator">}}</span>
-<span class="p p-Indicator">{{</span><span class="nv">- $traefikStatus</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= dig &quot;cluster&quot; &quot;services&quot; &quot;traefik&quot; &quot;status&quot; &quot;disabled&quot; . -</span><span class="p p-Indicator">}}</span>
+<span class="c1"># list below: "disabled"</span>
+<span class="p p-Indicator">{{</span><span class="nv">- $oauth2ProxyStatus</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -</span><span class="p p-Indicator">}}</span>
+<span class="p p-Indicator">{{</span><span class="nv">- $traefikStatus</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= dig "cluster" "services" "traefik" "status" "disabled" . -</span><span class="p p-Indicator">}}</span>
 
 <span class="nt">ingress</span><span class="p">:</span>
-<span class="w">  </span><span class="p p-Indicator">{{</span><span class="nv">- if (eq $oauth2ProxyStatus &quot;enabled&quot;)</span><span class="w"> </span><span class="p p-Indicator">}}</span>
+<span class="w">  </span><span class="p p-Indicator">{{</span><span class="nv">- if (eq $oauth2ProxyStatus "enabled")</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 <span class="w">  </span><span class="nt">enabled</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
 <span class="w">  </span><span class="p p-Indicator">{{</span><span class="nv">- end</span><span class="w"> </span><span class="p p-Indicator">}}</span>
 <span class="w">  </span><span class="nt">host</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">{{</span><span class="w"> </span><span class="nv">.cluster.dnsName</span><span class="w"> </span><span class="p p-Indicator">}}</span>

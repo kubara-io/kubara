@@ -2943,18 +2943,18 @@ tofu<span class="w"> </span>apply
 <div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Terraform</label><label for="__tabbed_2_2">Tofu</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+<div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">"credential_access_key|credential_secret_access_key"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;credential_access_key|credential_secret_access_key&quot;</span>
+<div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>debug<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">"credential_access_key|credential_secret_access_key"</span>
 </code></pre></div>
 </div>
 </div>
 </div>
 <p>You can set <code>AWS_ACCESS_KEY_ID</code> and <code>AWS_SECRET_ACCESS_KEY</code> in <code>set-env.sh</code> / <code>set-env.ps1</code> and source the file again, or export them directly:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">&quot;&lt;credential_access_key from terraform output&gt;&quot;</span>
-<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">&quot;&lt;credential_secret_access_key from terraform output&gt;&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">AWS_ACCESS_KEY_ID</span><span class="o">=</span><span class="s2">"&lt;credential_access_key from terraform output&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">AWS_SECRET_ACCESS_KEY</span><span class="o">=</span><span class="s2">"&lt;credential_secret_access_key from terraform output&gt;"</span>
 </code></pre></div>
 <h2 id="terraform-modules-for-the-kubara-edge-example">Terraform modules for the kubara Edge example</h2>
 <p>The generated Edge Terraform example intentionally creates only the following resources:</p>
@@ -3003,11 +3003,11 @@ You do not need to pre-enter a public IP for that path.</p>
 <span class="w">        </span><span class="nt">config</span><span class="p">:</span>
 <span class="w">          </span><span class="c1"># the STACKIT public IP assigned to the VM; generated ingress</span>
 <span class="w">          </span><span class="c1"># annotations use this as external-dns target</span>
-<span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;public-ip&gt;&quot;</span>
+<span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="s">"&lt;public-ip&gt;"</span>
 <span class="w">          </span><span class="c1"># the private IP of the same VM on the STACKIT network; MetalLB</span>
 <span class="w">          </span><span class="c1"># allocates from this pool</span>
 <span class="w">          </span><span class="nt">loadBalancerAddressPool</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&quot;&lt;private-ip&gt;/32&quot;</span>
+<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">"&lt;private-ip&gt;/32"</span>
 </code></pre></div>
 <p>This works because the STACKIT public IP is routed/NATed to the selected VM, while MetalLB exposes the Kubernetes <code>LoadBalancer</code> service on the VM's private network address.
 Do not use this as a production multi-node ingress design. For multi-node setups, plan a dedicated ingress architecture, for example a STACKIT Network Load Balancer in front of the nodes.</p>
@@ -3046,13 +3046,13 @@ tofu<span class="w"> </span>apply<span class="w"> </span>-target<span class="o">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>terraform<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>edge_kubeconfig<span class="w"> </span>&gt;<span class="w"> </span>edge-kubeconfig.yaml
 chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>edge-kubeconfig.yaml
-<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml"</span>
 </code></pre></div>
 </div>
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>tofu<span class="w"> </span>output<span class="w"> </span>-raw<span class="w"> </span>edge_kubeconfig<span class="w"> </span>&gt;<span class="w"> </span>edge-kubeconfig.yaml
 chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>edge-kubeconfig.yaml
-<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml"</span>
 </code></pre></div>
 </div>
 </div>
@@ -3064,7 +3064,7 @@ chmod<span class="w"> </span><span class="m">600</span><span class="w"> </span>e
 <p><code>EdgeImage</code> is the Kubernetes resource kind. The examples below use the <code>default</code> namespace, matching the STACKIT documentation.
 Read more in the official STACKIT guide: <a href="https://docs.stackit.cloud/de/products/runtime/edge-cloud/getting-started/creating-images/" target="_blank" rel="noopener">Creating images</a>.</p>
 <p>Before applying manifests, verify which Talos image versions are currently available in your STEC region:</p>
-<div class="highlight"><pre><span></span><code><span class="nv">INSTANCE_REGION</span><span class="o">=</span><span class="s2">&quot;eu01&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">INSTANCE_REGION</span><span class="o">=</span><span class="s2">"eu01"</span>
 curl<span class="w"> </span>https://image-factory.edge.<span class="nv">$INSTANCE_REGION</span>.stackit.cloud/versions
 </code></pre></div>
 <p>Use one of the returned versions in <code>EdgeImage.spec.talosVersion</code>.
@@ -3105,7 +3105,7 @@ The <code>EdgeImage</code> reports readiness through the boolean <code>status.re
 field (it does not set a <code>Ready</code> condition, so <code>--for=condition=Ready</code>
 would never complete):</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>edge-image.yaml
-kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>EdgeImage/kubara-edge-image<span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">&#39;{.status.ready}&#39;</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>--timeout<span class="o">=</span>60m
+kubectl<span class="w"> </span><span class="nb">wait</span><span class="w"> </span>EdgeImage/kubara-edge-image<span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>--for<span class="o">=</span><span class="nv">jsonpath</span><span class="o">=</span><span class="s1">'{.status.ready}'</span><span class="o">=</span><span class="nb">true</span><span class="w"> </span>--timeout<span class="o">=</span>60m
 </code></pre></div>
 <p>If you are not using Longhorn, keep only the extensions you actually need.</p>
 </div>
@@ -3136,17 +3136,17 @@ ls<span class="w"> </span>edge-artifacts/openstack-amd64.raw
 </code></pre></div>
 </div>
 <div class="tabbed-block">
-<div class="highlight"><pre><span></span><code><span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="s2">&quot;kubara-edge-image&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="s2">"kubara-edge-image"</span>
 
-kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span><span class="s1">&#39;.status.artifacts&#39;</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span><span class="s1">'.status.artifacts'</span>
 
 <span class="nv">IMAGE_URL</span><span class="o">=</span><span class="k">$(</span>
-<span class="w">  </span>kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.status.artifacts[] | select(.type == &quot;openstack&quot;) | .artifacts[] | select(.architecture == &quot;amd64&quot;) | .url&#39;</span>
+<span class="w">  </span>kubectl<span class="w"> </span>get<span class="w"> </span>EdgeImage<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">IMAGE_NAME</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>--namespace<span class="w"> </span>default<span class="w"> </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.status.artifacts[] | select(.type == "openstack") | .artifacts[] | select(.architecture == "amd64") | .url'</span>
 <span class="k">)</span>
 
 mkdir<span class="w"> </span>-p<span class="w"> </span>edge-artifacts
-curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGE_URL</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span>-o<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
+curl<span class="w"> </span>-L<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">IMAGE_URL</span><span class="si">}</span><span class="s2">"</span><span class="w"> </span>-o<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
 unxz<span class="w"> </span>edge-artifacts/openstack-amd64.raw.xz
 ls<span class="w"> </span>edge-artifacts/openstack-amd64.raw
 </code></pre></div>
@@ -3157,7 +3157,7 @@ The exact artifact list can differ by STEC version and selected target platform.
 </div>
 <p>Then set the unpacked path in <code>env.auto.tfvars</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nb">edge_image</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
-<span class="w">  </span><span class="na">local_file_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">&quot;edge-artifacts/openstack-amd64.raw&quot;</span>
+<span class="w">  </span><span class="na">local_file_path</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s2">"edge-artifacts/openstack-amd64.raw"</span>
 <span class="c1">  # ...</span>
 <span class="p">}</span>
 </code></pre></div>
@@ -3253,17 +3253,17 @@ The cluster kubeconfig is used for the actual Kubernetes cluster and for the nex
 </div>
 <div class="tabbed-block">
 <p>Use the STEC management kubeconfig from Phase 1 and decode the generated cluster kubeconfig secret:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">/edge-kubeconfig.yaml"</span>
 
-<span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">&quot;kubara-cluster&quot;</span>
-kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">-kubeconfig&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="nv">CLUSTER_NAME</span><span class="o">=</span><span class="s2">"kubara-cluster"</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>secret<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">-kubeconfig"</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--namespace<span class="w"> </span>default<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>-o<span class="w"> </span>yaml<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.data.value&#39;</span><span class="w"> </span><span class="se">\</span>
-<span class="w">  </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml&quot;</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>yq<span class="w"> </span>-r<span class="w"> </span><span class="s1">'.data.value'</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>base64<span class="w"> </span>--decode<span class="w"> </span>&gt;<span class="w"> </span><span class="s2">"</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml"</span>
 </code></pre></div>
 <p>Then switch to the cluster kubeconfig and verify Kubernetes access:</p>
-<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$PWD</span><span class="s2">/</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml&quot;</span>
+<div class="highlight"><pre><span></span><code><span class="nb">export</span><span class="w"> </span><span class="nv">KUBECONFIG</span><span class="o">=</span><span class="s2">"</span><span class="nv">$PWD</span><span class="s2">/</span><span class="si">${</span><span class="nv">CLUSTER_NAME</span><span class="si">}</span><span class="s2">.kubeconfig.yaml"</span>
 kubectl<span class="w"> </span>get<span class="w"> </span>nodes
 kubectl<span class="w"> </span>get<span class="w"> </span>pods<span class="w"> </span>--all-namespaces
 </code></pre></div>
