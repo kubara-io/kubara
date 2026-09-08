@@ -381,7 +381,7 @@ Use a Talos version that is available in your STEC region and keep it aligned wi
     kubectl get EdgeHost --namespace default
     ```
 
-    Save this as `edge-cluster.yaml` and replace `<edge-host-id-1>` with the host ID from STEC:
+    Save this as `edge-cluster.yaml` and replace `<edge-host-id-1>` with the host ID from STEC and `<talos-version>` with the version from your `EdgeImage`:
 
     ```yaml
     apiVersion: edge.stackit.cloud/v1alpha1
@@ -395,7 +395,7 @@ Use a Talos version that is available in your STEC region and keep it aligned wi
           installDisk: /dev/vda
           role: controlplane
       talos:
-        version: v1.12.5-stackit.v1.7.1
+        version: <talos-version>
         kubernetes:
           version: v1.30.2
     ```
