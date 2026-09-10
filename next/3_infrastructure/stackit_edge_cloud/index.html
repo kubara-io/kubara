@@ -3208,7 +3208,7 @@ Use a Talos version that is available in your STEC region and keep it aligned wi
 <p>First inspect registered hosts:</p>
 <div class="highlight"><pre><span></span><code>kubectl<span class="w"> </span>get<span class="w"> </span>EdgeHost<span class="w"> </span>--namespace<span class="w"> </span>default
 </code></pre></div>
-<p>Save this as <code>edge-cluster.yaml</code> and replace <code>&lt;edge-host-id-1&gt;</code> with the host ID from STEC:</p>
+<p>Save this as <code>edge-cluster.yaml</code> and replace <code>&lt;edge-host-id-1&gt;</code> with the host ID from STEC and <code>&lt;talos-version&gt;</code> with the version from your <code>EdgeImage</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">edge.stackit.cloud/v1alpha1</span>
 <span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">EdgeCluster</span>
 <span class="nt">metadata</span><span class="p">:</span>
@@ -3220,7 +3220,7 @@ Use a Talos version that is available in your STEC region and keep it aligned wi
 <span class="w">      </span><span class="nt">installDisk</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">/dev/vda</span>
 <span class="w">      </span><span class="nt">role</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">controlplane</span>
 <span class="w">  </span><span class="nt">talos</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.12.5-stackit.v1.7.1</span>
+<span class="w">    </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;talos-version&gt;</span>
 <span class="w">    </span><span class="nt">kubernetes</span><span class="p">:</span>
 <span class="w">      </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">v1.30.2</span>
 </code></pre></div>
