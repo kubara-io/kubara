@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version:          ConfigVersionV1Alpha4,
+		Version:          ConfigVersionV1Alpha5,
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
@@ -42,7 +42,8 @@ func newValidTestConfig() *Config {
 				ArgoCD: ArgoCD{
 					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
-						HTTPS: &RepoType{
+						AuthMode: "https",
+						Git: &RepoType{
 							Configs: Repository{
 								URL:            "https://github.com/example/configs.git",
 								TargetRevision: "main",

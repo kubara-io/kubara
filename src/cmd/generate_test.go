@@ -191,7 +191,7 @@ func TestGenerateCmd(t *testing.T) {
 				},
 				ArgoCD: config.ArgoCD{
 					Repo: config.RepoProto{
-						HTTPS: &config.RepoType{
+						Git: &config.RepoType{
 							Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 							Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 						},
@@ -251,7 +251,7 @@ func TestGenerateCmd(t *testing.T) {
 					},
 					ArgoCD: config.ArgoCD{
 						Repo: config.RepoProto{
-							HTTPS: &config.RepoType{
+							Git: &config.RepoType{
 								Configs: config.Repository{
 									URL:            "https://github.com/example/configs",
 									TargetRevision: "main",
@@ -328,7 +328,7 @@ func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
@@ -366,7 +366,7 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
@@ -399,7 +399,7 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 		Catalogs: []string{helperCatalogPath},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
@@ -441,7 +441,7 @@ func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
@@ -471,7 +471,7 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 		DNSName: "test.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
@@ -505,7 +505,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		DNSName: "test.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
 				},
