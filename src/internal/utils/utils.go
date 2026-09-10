@@ -11,7 +11,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 	"github.com/rs/zerolog/log"
 )
 
@@ -214,15 +213,6 @@ func readGitignoreLines(filePath string) ([]string, error) {
 				lines = append(lines, "")
 			}
 			continue
-		}
-
-		// Validate non-comment lines
-		if !strings.HasPrefix(trimmed, "#") {
-			pattern := gitignore.ParsePattern(line, nil)
-			if pattern == nil {
-				fmt.Printf("Warning: Invalid pattern ignored: %s\n", line)
-				continue
-			}
 		}
 
 		lines = append(lines, line)
