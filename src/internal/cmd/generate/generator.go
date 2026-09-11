@@ -21,6 +21,7 @@ import (
 type Options struct {
 	TemplateType       render.TemplateType
 	DryRun             bool
+	Reset              bool
 	CWD                string
 	ConfigFilePath     string
 	Catalogs           []string
@@ -162,7 +163,7 @@ func toJSONMap(value any) (map[string]any, error) {
 }
 
 func (o *Options) cleanupOldFiles() error {
-	if o.DryRun {
+	if o.DryRun || !o.Reset {
 		return nil
 	}
 
@@ -185,6 +186,11 @@ func (o *Options) writeTemplateResults(results []render.TemplateResult) error {
 	for _, t := range results {
 		if o.DryRun {
 			fmt.Println("DRY-RUN: " + t.Path)
+			continue
+		}
+
+		if _, err := os.Stat(t.Path); err == nil {
+			log.Warn().Str("path", t.Path).Msg("file already exists, skipping")
 			continue
 		}
 
