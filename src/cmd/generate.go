@@ -16,6 +16,7 @@ type GenerateFlags struct {
 	Terraform bool
 	Helm      bool
 	DryRun    bool
+	Reset     bool
 }
 
 func NewGenerateFlags() *GenerateFlags {
@@ -23,18 +24,18 @@ func NewGenerateFlags() *GenerateFlags {
 		Terraform: false,
 		Helm:      false,
 		DryRun:    false,
+		Reset:     false,
 	}
 }
 
 // NewGenerateCmd returns the command with flags added
-// TODO implement deep-merge and/or --reset flag
 func NewGenerateCmd() *cli.Command {
 	flags := NewGenerateFlags()
 
 	cmd := &cli.Command{
 		Name:        "generate",
 		Usage:       "Generate files from catalog templates",
-		UsageText:   "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
+		UsageText:   "kubara generate [--terraform|--helm] [--reset] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]",
 		Description: "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -79,6 +80,7 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 	o := &generate.Options{
 		TemplateType:       render.All,
 		DryRun:             flags.DryRun,
+		Reset:              flags.Reset,
 		CWD:                cwd,
 		ConfigFilePath:     configFilePath,
 		Catalogs:           catalogOptions.Catalogs,
@@ -116,6 +118,12 @@ func (flags *GenerateFlags) AddFlags(cmd *cli.Command) {
 			Usage:       "Preview generation without creating files",
 			Value:       flags.DryRun,
 			Destination: &flags.DryRun,
+		},
+		&cli.BoolFlag{
+			Name:        "reset",
+			Usage:       "Delete existing platform-components before generation",
+			Value:       flags.Reset,
+			Destination: &flags.Reset,
 		},
 	}
 
