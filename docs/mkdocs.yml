@@ -12,6 +12,7 @@ nav:
       - Bootstrapping: 1_getting_started/bootstrapping.md
   - Concepts:
       - Overview: 2_concepts/overview_core_concept.md
+      - Argo CD Add App of Apps: 2_concepts/argocd-add-app-of-apps.md
       - Platform Engineering: 2_concepts/gitops_platform_engineering_idp.md
       - Catalogs: 2_concepts/catalogs.md
       - Catalog Distribution: 2_concepts/catalog_distribution.md
