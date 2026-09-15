@@ -8,13 +8,13 @@
       
       
       
-        <link rel="canonical" href="https://docs.kubara.io/next/2_concepts/catalog_distribution/">
+        <link rel="canonical" href="https://docs.kubara.io/next/4_building_your_platform/argocd-add-app-of-apps/">
       
       
-        <link rel="prev" href="../catalogs/">
+        <link rel="prev" href="../../3_infrastructure/google-cloud/">
       
       
-        <link rel="next" href="../catalog_templating/">
+        <link rel="next" href="../add_spoke_cluster/">
       
       
         
@@ -25,7 +25,7 @@
     
     
       
-        <title>Catalog Distribution - kubara - Docs</title>
+        <title>Argo CD App-of-Apps - kubara - Docs</title>
       
     
     
@@ -78,7 +78,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#catalog-distribution" class="md-skip">
+        <a href="#argo-cd-add-app-of-apps-to-kubara" class="md-skip">
           Skip to content
         </a>
       
@@ -129,7 +129,7 @@ You're not viewing the latest stable version.
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Catalog Distribution
+              Argo CD App-of-Apps
             
           </span>
         </div>
@@ -481,8 +481,6 @@ You're not viewing the latest stable version.
       
   
   
-    
-  
   
   
     
@@ -495,11 +493,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
@@ -520,7 +518,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             
@@ -538,7 +536,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../overview_core_concept/" class="md-nav__link">
+      <a href="../../2_concepts/overview_core_concept/" class="md-nav__link">
         
   
   
@@ -566,7 +564,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../gitops_platform_engineering_idp/" class="md-nav__link">
+      <a href="../../2_concepts/gitops_platform_engineering_idp/" class="md-nav__link">
         
   
   
@@ -594,7 +592,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../catalogs/" class="md-nav__link">
+      <a href="../../2_concepts/catalogs/" class="md-nav__link">
         
   
   
@@ -619,37 +617,10 @@ You're not viewing the latest stable version.
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  
-  <span class="md-ellipsis">
-    
-  
-    Catalog Distribution
-  
-
-    
-  </span>
-  
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../2_concepts/catalog_distribution/" class="md-nav__link">
         
   
   
@@ -665,136 +636,6 @@ You're not viewing the latest stable version.
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#why-kubara-uses-oci" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Why kubara uses OCI
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#important-model-oci-references-use-a-local-cache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Important model: OCI references use a local cache
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-1-create-or-update-the-catalog" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 1: Create or update the catalog
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-package-the-catalog-into-the-local-cache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Package the catalog into the local cache
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-log-into-the-registry" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Log into the registry
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-push-the-cached-catalog" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Push the cached catalog
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-pull-the-catalog-somewhere-else" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: Pull the catalog somewhere else
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-6-use-the-oci-catalog-with-kubara" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 6: Use the OCI catalog with kubara
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#useful-supporting-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Useful supporting commands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#automatic-catalog-updates-with-renovate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automatic catalog updates with Renovate
-      
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -807,7 +648,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../catalog_templating/" class="md-nav__link">
+      <a href="../../2_concepts/catalog_templating/" class="md-nav__link">
         
   
   
@@ -835,7 +676,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../scale_and_ha/" class="md-nav__link">
+      <a href="../../2_concepts/scale_and_ha/" class="md-nav__link">
         
   
   
@@ -1094,8 +935,10 @@ You're not viewing the latest stable version.
       
   
   
+    
   
   
+  
     
     
     
@@ -1106,11 +949,11 @@ You're not viewing the latest stable version.
       
     
     
-    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
           <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
@@ -1131,7 +974,7 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             
@@ -1146,10 +989,37 @@ You're not viewing the latest stable version.
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../4_building_your_platform/argocd-add-app-of-apps/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD App-of-Apps
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   
@@ -1165,6 +1035,98 @@ You're not viewing the latest stable version.
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#minimal-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Minimal setup
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#when-to-use-it" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        When to use it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When to use it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-manage-different-dynamic-applications-from-a-single-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Manage different / dynamic applications from a single folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-vclusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create vClusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-application-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported application sources
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#app-of-apps-versus-applicationset" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        App of Apps versus ApplicationSet
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1177,7 +1139,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/add_spoke_cluster/" class="md-nav__link">
+      <a href="../add_spoke_cluster/" class="md-nav__link">
         
   
   
@@ -1205,7 +1167,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/create_catalog/" class="md-nav__link">
+      <a href="../create_catalog/" class="md-nav__link">
         
   
   
@@ -1282,7 +1244,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/sso/" class="md-nav__link">
+      <a href="../sso/sso/" class="md-nav__link">
         
   
   
@@ -1310,7 +1272,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/add_sso_github/" class="md-nav__link">
+      <a href="../sso/add_sso_github/" class="md-nav__link">
         
   
   
@@ -1338,7 +1300,7 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
-      <a href="../../4_building_your_platform/sso/add_sso_forgejo/" class="md-nav__link">
+      <a href="../sso/add_sso_forgejo/" class="md-nav__link">
         
   
   
@@ -2679,10 +2641,10 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#why-kubara-uses-oci" class="md-nav__link">
+  <a href="#minimal-setup" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Why kubara uses OCI
+        Minimal setup
       
     </span>
   </a>
@@ -2690,10 +2652,49 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#important-model-oci-references-use-a-local-cache" class="md-nav__link">
+  <a href="#when-to-use-it" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Important model: OCI references use a local cache
+        When to use it
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="When to use it">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-manage-different-dynamic-applications-from-a-single-folder" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Manage different / dynamic applications from a single folder
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-create-vclusters" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Create vClusters
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#supported-application-sources" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Supported application sources
       
     </span>
   </a>
@@ -2701,87 +2702,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#step-1-create-or-update-the-catalog" class="md-nav__link">
+  <a href="#app-of-apps-versus-applicationset" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Step 1: Create or update the catalog
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-2-package-the-catalog-into-the-local-cache" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 2: Package the catalog into the local cache
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-3-log-into-the-registry" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 3: Log into the registry
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-4-push-the-cached-catalog" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 4: Push the cached catalog
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-5-pull-the-catalog-somewhere-else" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 5: Pull the catalog somewhere else
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#step-6-use-the-oci-catalog-with-kubara" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Step 6: Use the OCI catalog with kubara
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#useful-supporting-commands" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Useful supporting commands
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#automatic-catalog-updates-with-renovate" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        Automatic catalog updates with Renovate
+        App of Apps versus ApplicationSet
       
     </span>
   </a>
@@ -2808,156 +2732,100 @@ You're not viewing the latest stable version.
   
 
 
-<h1 id="catalog-distribution">Catalog distribution</h1>
-<p>This page explains how to package, publish, pull, and use kubara catalogs as OCI artifacts.</p>
-<h2 id="why-kubara-uses-oci">Why kubara uses OCI</h2>
-<p><a href="https://opencontainers.org/" target="_blank" rel="noopener">OCI (Open Container Initiative)</a> is the artifact format and distribution model behind container images. It is also widely used in the Kubernetes ecosystem, including Helm registries and other registry-backed artifacts.</p>
-<p>kubara uses OCI so catalogs can be:</p>
-<ul>
-<li>Versioned</li>
-<li>Cached locally</li>
-<li>Pushed to standard registries</li>
-<li>Pulled in other environments</li>
-<li>Promoted between registries</li>
-</ul>
-<p>Common registries that support OCI include:</p>
-<ul>
-<li>AWS Elastic Container Registry (ECR)</li>
-<li>Azure Container Registry (ACR)</li>
-<li>GitHub Container Registry (<code>ghcr.io</code>)</li>
-<li>Google Artifact Registry</li>
-<li>Harbor</li>
-<li>STACKIT Container Registry</li>
-</ul>
-<p>If you want the deeper OCI background, read:</p>
-<ul>
-<li><a href="https://oras.land/docs/concepts/artifact" target="_blank" rel="noopener">ORAS: OCI artifacts</a></li>
-<li><a href="https://oras.land/docs/concepts/reftypes" target="_blank" rel="noopener">ORAS: reference types</a></li>
-</ul>
-<h2 id="important-model-oci-references-use-a-local-cache">Important model: OCI references use a local cache</h2>
-<p>kubara works with a <strong>local catalog cache</strong>.</p>
-<p>That means:</p>
-<ul>
-<li><code>kubara catalog package</code> creates a cached catalog artifact from a local directory</li>
-<li><code>kubara catalog pull</code> downloads a catalog artifact into that cache</li>
-<li><code>kubara catalog push</code> uploads a catalog artifact that is already in that cache</li>
-<li><code>--catalog oci://...</code> resolves an OCI reference through that cache and pulls it when missing</li>
-</ul>
-<p>In other words:</p>
-<ul>
-<li><strong>push does not package</strong></li>
-<li>catalog-consuming commands auto-pull an OCI reference when it is not cached</li>
-</ul>
-<p><code>push</code> still requires a previously packaged or pulled artifact and never packages implicitly. An explicit <code>pull</code> is useful to prefetch a catalog or refresh a cached tag before running another command.</p>
-<h2 id="step-1-create-or-update-the-catalog">Step 1: Create or update the catalog</h2>
-<p>Start with a normal catalog directory:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>create<span class="w"> </span>my-catalog
-<span class="nb">cd</span><span class="w"> </span>my-catalog
-kubara<span class="w"> </span>catalog<span class="w"> </span>add<span class="w"> </span>pet-store
+<h1 id="argo-cd-add-app-of-apps-to-kubara">Argo CD: Add App of Apps to kubara</h1>
+<p><img alt="App of Apps pattern diagram" src="../../images/app-of-apps-overview.png" /></p>
+<p>The <a href="https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative" target="_blank" rel="noopener">App of Apps</a> pattern uses one parent Argo CD <code>Application</code> to manage a set
+of child <code>Application</code> resources. In kubara, the parent points to a Git folder;
+each manifest in that folder defines a separate child application.</p>
+<h2 id="minimal-setup">Minimal setup</h2>
+<p>Add a parent application to the Argo CD override of the hub cluster, for
+example <code>platform-configs/&lt;cluster&gt;/helm/argo-cd/additional-values.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applications</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-of-apps</span>
+<span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-stage&gt;</span>
+<span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster&gt;</span>
+<span class="w">      </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/example/&lt;repository&gt;</span>
+<span class="w">      </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">apps</span>
+<span class="w">      </span><span class="nt">info</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-of-apps</span>
 </code></pre></div>
-<p>Edit the service definitions and template files until the catalog is ready.</p>
-<h2 id="step-2-package-the-catalog-into-the-local-cache">Step 2: Package the catalog into the local cache</h2>
-<p>Package the current catalog directory:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>package<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/
+<p>The referenced repository then contains one Argo CD <code>Application</code> manifest per
+child application:</p>
+<div class="highlight"><pre><span></span><code>apps/
+├── vcluster-dev.yaml
+├── vcluster-test.yaml
+├── frontend.yaml
+├── api-service.yaml
+└── postgresql.yaml
 </code></pre></div>
-<p>kubara reads:</p>
-<ul>
-<li><code>metadata.name</code> from <code>Catalog.yaml</code></li>
-<li><code>spec.version</code> from <code>Catalog.yaml</code></li>
-</ul>
-<p>and builds the final reference from that information.</p>
-<p>Example <code>Catalog.yaml</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kubara.io/v1alpha1</span>
-<span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Catalog</span>
-<span class="nt">metadata</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">my-catalog</span>
-<span class="nt">spec</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">version</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.2.3</span>
+<p>This setup is not recursive. With <code>repoPath: apps</code>, Argo CD reads only the
+manifests directly in that directory. Child manifests placed in subfolders are
+ignored without an error, keep them flat in <code>apps/</code>, or enable
+<code>directory.recurse: true</code> on the parent application.</p>
+<p>Ensure that the repository is allowed by the Argo CD project and that each
+child <code>Application</code> uses a permitted destination. Commit and push the changes.</p>
+<p>This pattern is compatible with the repository contents generated through <code>kubara generate</code>.
+You can just add your parent app inside the pre-defined folder structure:</p>
+<div class="highlight"><pre><span></span><code>platform-components/
+platform-configs/
+└── your-cluster
+    └── apps/
+        ├── frontend.yaml
+        ├── api-service.yaml
+        └── postgresql.yaml
 </code></pre></div>
-<p>Example result:</p>
-<div class="highlight"><pre><span></span><code>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
+<p>And configure the parent to point to that location:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># platform-configs/&lt;cluster&gt;/helm/argo-cd/additional-values.yaml</span>
+<span class="nt">bootstrapValues</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">applications</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-of-apps</span>
+<span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-stage&gt;</span>
+<span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster&gt;</span>
+<span class="w">      </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/example/&lt;your-kubara-repo&gt;</span>
+<span class="w">      </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform-configs/&lt;cluster&gt;/apps</span>
+<span class="w">      </span><span class="nt">info</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-of-apps</span>
 </code></pre></div>
-<p>The packaged artifact includes the files inside the catalog directory, so your catalog can ship more than just Helm and Terraform sources.</p>
-<p><code>spec.version</code> is important because kubara uses it when packaging the catalog as an OCI artifact.</p>
-<p>kubara enforces strict semantic version formatting for catalogs:</p>
-<ul>
-<li>allowed: <code>0.1.0</code></li>
-<li>not allowed: <code>v0.1.0</code></li>
-<li>not allowed: <code>0.1.0-rc.1</code></li>
-<li>not allowed: <code>0.1.0-beta</code></li>
-<li>not allowed: <code>0.1.0+build.5</code></li>
-</ul>
-<p>Only plain <code>major.minor.patch</code> is accepted.</p>
-<h2 id="step-3-log-into-the-registry">Step 3: Log into the registry</h2>
-<p>If your registry needs authentication, log in once:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>login<span class="w"> </span>-u<span class="w"> </span>my-github-user<span class="w"> </span>--password<span class="w"> </span>my-password<span class="w"> </span>ghcr.io
+<h2 id="when-to-use-it">When to use it</h2>
+<h3 id="1-manage-different-dynamic-applications-from-a-single-folder">1. Manage different / dynamic applications from a single folder</h3>
+<p>Use a shared folder as a small application catalog. For example, separate child
+manifests can deploy a frontend, an API, and a database from different charts
+or repositories and into different namespaces. Adding or removing an
+<code>Application</code> manifest changes what the parent manages.</p>
+<h3 id="2-create-vclusters">2. Create vClusters</h3>
+<p>Use one child <code>Application</code> per vCluster when every instance needs its own name,
+namespace, domain, values, or lifecycle. Adding <code>apps/vcluster-test.yaml</code> makes
+the parent application create and reconcile that vCluster application.</p>
+<p>kubara's label-based <code>ApplicationSet</code> pattern deploys vClusters onto the hub
+cluster and generates one vCluster application per matching cluster from a
+shared template. Because a cluster carries a single value per label key, that
+template produces one instance on the hub, so N vClusters would mean either N
+<code>ApplicationSet</code>s with distinct labels or a different generator. App of Apps is
+the simpler fit when the goal is <strong>N independent vClusters on the same hub
+cluster</strong>: add one child <code>Application</code> manifest per vCluster to the folder, and
+the labels stay out of it.</p>
+<h2 id="supported-application-sources">Supported application sources</h2>
+<p>Each child is an Argo CD <code>Application</code>, and its source can be a Helm chart, a
+Kustomize overlay, or a directory containing plain YAML manifests. The parent
+path itself may also use Helm or Kustomize.</p>
+<p><img alt="Supported application sources diagram" src="../../images/app-of-apps-different-types.png" /></p>
+<h2 id="app-of-apps-versus-applicationset">App of Apps versus ApplicationSet</h2>
+<p>Use an <strong>ApplicationSet</strong> to generate multiple similar applications from one
+template, for example to roll out the same app to every cluster that carries
+the matching label:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">cert-manager</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">enabled</span>
 </code></pre></div>
-<p>or alternatively</p>
-<div class="highlight"><pre><span></span><code><span class="nb">printf</span><span class="w"> </span><span class="s1">'%s'</span><span class="w"> </span><span class="s2">"</span><span class="nv">$GITHUB_TOKEN</span><span class="s2">"</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>kubara<span class="w"> </span>catalog<span class="w"> </span>login<span class="w"> </span>-u<span class="w"> </span>my-github-user<span class="w"> </span>--password-stdin<span class="w"> </span>ghcr.io
-</code></pre></div>
-<p>kubara stores registry credentials in:</p>
-<div class="highlight"><pre><span></span><code>$HOME/.kubara/credentials.json
-</code></pre></div>
-<p>You can use:</p>
-<ul>
-<li>username/password (interactive)</li>
-<li>password from stdin</li>
-<li>identity token from flag</li>
-<li>identity token from stdin</li>
-</ul>
-<h2 id="step-4-push-the-cached-catalog">Step 4: Push the cached catalog</h2>
-<p>Push the cached artifact to the registry:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>push<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
-</code></pre></div>
-<p>Important:</p>
-<ul>
-<li>The destination must use a <strong>tag</strong>, not a digest</li>
-<li>The destination tag must match <code>spec.version</code> from <code>Catalog.yaml</code></li>
-<li>The artifact must already exist in the local cache</li>
-</ul>
-<p>You can also promote an already cached catalog from one reference to another:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>push<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--from<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>oci://registry.example.com/platform/my-catalog:1.2.3
-</code></pre></div>
-<p>This is useful when you want to copy the same packaged version into another registry or repository path.</p>
-<h2 id="step-5-pull-the-catalog-somewhere-else">Step 5: Pull the catalog somewhere else</h2>
-<p>On another machine or in CI, pull the catalog into the local cache:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>pull<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
-</code></pre></div>
-<p>If the cached version already exists and the remote digest changed, kubara updates the cached entry.</p>
-<h2 id="step-6-use-the-oci-catalog-with-kubara">Step 6: Use the OCI catalog with kubara</h2>
-<p>Use the same OCI reference in configuration or kubara commands:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>schema<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
-kubara<span class="w"> </span>init<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
-kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
-</code></pre></div>
-<p>If the reference is not cached, kubara pulls it automatically. Registry authentication still needs to be configured first for private artifacts. Run <code>kubara catalog pull</code> explicitly when you want to prefetch or refresh the cached tag.</p>
-<h2 id="useful-supporting-commands">Useful supporting commands</h2>
-<p>List cached artifacts:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>list
-</code></pre></div>
-<p>Materialize a cached artifact as an editable directory:</p>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>catalog<span class="w"> </span>unpackage<span class="w"> </span>oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3<span class="w"> </span>./my-catalog
-</code></pre></div>
-<p>This is useful when you want to inspect or edit a catalog that was distributed through a registry.</p>
-<h2 id="automatic-catalog-updates-with-renovate">Automatic catalog updates with Renovate</h2>
-<p>You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.</p>
-<p>Add the following settings to your <code>renovate.json</code> or GitOps repository's Renovate configuration:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-<span class="w">  </span><span class="nt">"customManagers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
-<span class="w">    </span><span class="p">{</span>
-<span class="w">      </span><span class="nt">"customType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"description"</span><span class="p">:</span><span class="w"> </span><span class="s2">"Update kubara catalog OCI references"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"managerFilePatterns"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"/^config\\.yaml$/"</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">"matchStrings"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">"oci:\\/\\/(?&lt;depName&gt;[^\\s\"'@]+):(?&lt;currentValue&gt;[^\\s/:\"'@]+)(?:$|[\\s\"'#,}\\]])"</span><span class="p">],</span>
-<span class="w">      </span><span class="nt">"datasourceTemplate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"docker"</span><span class="p">,</span>
-<span class="w">      </span><span class="nt">"versioningTemplate"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex:^(?&lt;major&gt;0|[1-9]\\d*)\\.(?&lt;minor&gt;0|[1-9]\\d*)\\.(?&lt;patch&gt;0|[1-9]\\d*)$"</span>
-<span class="w">    </span><span class="p">}</span>
-<span class="w">  </span><span class="p">]</span>
-<span class="p">}</span>
-</code></pre></div>
-<p>Adjust <code>managerFilePatterns</code> when the kubara config has a different repository-relative path. <code>kubara init</code> does this automatically for the configured <code>--config-file</code>. The reference matcher supports registries with ports and ignores digest-pinned catalog references.</p>
+<p>Use <strong>App of Apps</strong> to group different applications that can have different
+sources, values, destinations, and lifecycles under one parent application.
+Both patterns can be used together.</p>
 
 
 
