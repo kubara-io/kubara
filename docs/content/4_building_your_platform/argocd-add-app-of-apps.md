@@ -2,7 +2,7 @@
 
 ![App of Apps pattern diagram](../images/app-of-apps-overview.png)
 
-The App of Apps pattern uses one parent Argo CD `Application` to manage a set
+The [App of Apps](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative) pattern uses one parent Argo CD `Application` to manage a set
 of child `Application` resources. In kubara, the parent points to a Git folder;
 each manifest in that folder defines a separate child application.
 
@@ -46,9 +46,47 @@ ignored without an error, keep them flat in `apps/`, or enable
 Ensure that the repository is allowed by the Argo CD project and that each
 child `Application` uses a permitted destination. Commit and push the changes.
 
+This pattern is compatible with the repository contents generated through `kubara generate`.
+You can just add your parent app inside the pre-defined folder structure:
+
+```text
+platform-components/
+platform-configs/
+└── your-cluster
+    └── apps/
+        ├── frontend.yaml
+        ├── api-service.yaml
+        └── postgresql.yaml
+```
+
+And configure the parent to point to that location:
+
+```yaml
+# platform-configs/<cluster>/helm/argo-cd/additional-values.yaml
+bootstrapValues:
+  applications:
+    - name: app-of-apps
+      namespace: argocd
+      projectName: <cluster-stage>
+      destination:
+        serverName: <cluster>
+      repoUrl: https://github.com/example/<your-kubara-repo>
+      repoPath: platform-configs/<cluster>/apps
+      info:
+        - name: type
+          value: app-of-apps
+```
+
 ## When to use it
 
-### 1. Create vClusters
+### 1. Manage different / dynamic applications from a single folder
+
+Use a shared folder as a small application catalog. For example, separate child
+manifests can deploy a frontend, an API, and a database from different charts
+or repositories and into different namespaces. Adding or removing an
+`Application` manifest changes what the parent manages.
+
+### 2. Create vClusters
 
 Use one child `Application` per vCluster when every instance needs its own name,
 namespace, domain, values, or lifecycle. Adding `apps/vcluster-test.yaml` makes
@@ -63,12 +101,6 @@ the simpler fit when the goal is **N independent vClusters on the same hub
 cluster**: add one child `Application` manifest per vCluster to the folder, and
 the labels stay out of it.
 
-### 2. Manage different applications from one folder
-
-Use a shared folder as a small application catalog. For example, separate child
-manifests can deploy a frontend, an API, and a database from different charts
-or repositories and into different namespaces. Adding or removing an
-`Application` manifest changes what the parent manages.
 
 ## Supported application sources
 
