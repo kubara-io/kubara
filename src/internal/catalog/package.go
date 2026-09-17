@@ -30,16 +30,16 @@ func PackageCatalog(options PackageOptions) (PackageResult, error) {
 		return PackageResult{}, err
 	}
 
-	ref, err := BuildCatalogReference(manifest.Metadata.Name, manifest.Spec.Version, options.ReferenceBase)
+	ref, err := BuildCatalogReference(manifest.Name, manifest.Spec.Version, options.ReferenceBase)
 	if err != nil {
 		return PackageResult{}, err
 	}
 
 	artifact, err := createCachedArtifact(manifest, options.CatalogRoot, CachedArtifact{
 		SchemaVersion:  cacheSchemaVersion,
-		CatalogName:    manifest.Metadata.Name,
+		CatalogName:    manifest.Name,
 		CatalogVersion: manifest.Spec.Version,
-		RootDirectory:  manifest.Metadata.Name,
+		RootDirectory:  manifest.Name,
 	})
 	if err != nil {
 		return PackageResult{}, err
@@ -73,7 +73,7 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 	}()
 	fileStore.TarReproducible = true
 
-	layerDescriptor, err := fileStore.Add(ctx, manifest.Metadata.Name, CatalogLayerMediaType, catalogRoot)
+	layerDescriptor, err := fileStore.Add(ctx, manifest.Name, CatalogLayerMediaType, catalogRoot)
 	if err != nil {
 		return CachedArtifact{}, fmt.Errorf("package catalog directory: %w", err)
 	}
@@ -120,12 +120,12 @@ func createCachedArtifact(manifest CatalogManifest, catalogRoot string, artifact
 }
 
 func buildCatalogManifestAnnotations(manifest CatalogManifest) map[string]string {
-	annotations := maps.Clone(manifest.Metadata.Annotations)
+	annotations := maps.Clone(manifest.Annotations)
 	if annotations == nil {
 		annotations = make(map[string]string, 2)
 	}
 
-	annotations["io.kubara.catalog.name"] = manifest.Metadata.Name
+	annotations["io.kubara.catalog.name"] = manifest.Name
 	annotations["io.kubara.catalog.version"] = manifest.Spec.Version
 	// Fake timestamp for forcing immutable manifest digests for the same catalog contents
 	annotations[v1.AnnotationCreated] = "1970-01-01T00:00:00Z"

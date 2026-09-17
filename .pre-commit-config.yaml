@@ -34,7 +34,7 @@ repos:
         args:
           - -c
           - .pre-commit-config/yamlfix.toml
-        exclude: templates/|\.md$|\.github/|src/internal/config/crd/kubara\.io_platformsetups\.yaml$
+        exclude: templates/|\.md$|\.github/|src/internal/config/crd/|src/internal/catalog/crd/
   - repo: https://github.com/adrienverge/yamllint.git
     rev: v1.38.0
     hooks:
@@ -44,4 +44,4 @@ repos:
           - .pre-commit-config/yamllint.yaml
           - --format
           - parsable
-        exclude: templates/|\.md$|\.github/|src/internal/config/crd/kubara\.io_platformsetups\.yaml$
+        exclude: templates/|\.md$|\.github/|src/internal/config/crd/|src/internal/catalog/crd/

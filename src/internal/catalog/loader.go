@@ -6,8 +6,6 @@ import (
 	"os"
 	"sort"
 	"strings"
-
-	"sigs.k8s.io/yaml"
 )
 
 type LoadOptions struct {
@@ -90,23 +88,20 @@ func loadFromFS(fsys fs.FS, root string) (Catalog, error) {
 
 	sort.Strings(files)
 	for _, path := range files {
-		content, err := fs.ReadFile(fsys, path)
+		data, err := fs.ReadFile(fsys, path)
 		if err != nil {
 			return Catalog{}, fmt.Errorf("read %q: %w", path, err)
 		}
 
-		var definition ServiceDefinition
-		if err := yaml.Unmarshal(content, &definition); err != nil {
-			return Catalog{}, fmt.Errorf("unmarshal %q: %w", path, err)
-		}
-		if err := definition.Validate(); err != nil {
+		def, err := DecodeServiceDefinition(data)
+		if err != nil {
 			return Catalog{}, fmt.Errorf("invalid service definition %q: %w", path, err)
 		}
 
-		if _, exists := catalog.Services[definition.Metadata.Name]; exists {
-			return Catalog{}, fmt.Errorf("duplicate service definition %q in %q", definition.Metadata.Name, path)
+		if _, exists := catalog.Services[def.Name]; exists {
+			return Catalog{}, fmt.Errorf("duplicate service definition %q in %q", def.Name, path)
 		}
-		catalog.Services[definition.Metadata.Name] = definition
+		catalog.Services[def.Name] = def
 	}
 
 	return catalog, nil

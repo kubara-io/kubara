@@ -39,7 +39,7 @@ func NewCatalogPackage() *cli.Command {
 
 			log.Info().Msgf(
 				"Catalog %q version %q has been packaged into the local cache as %s with digest %s",
-				result.Manifest.Metadata.Name,
+				result.Manifest.Name,
 				result.Manifest.Spec.Version,
 				result.Reference,
 				result.Artifact.ManifestDigest,

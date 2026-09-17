@@ -73,6 +73,7 @@ format:
 generate:
 	@echo "Generating CRD manifests..."
 	@$(CONTROLLER_GEN) crd paths=./internal/config output:crd:dir=./internal/config/crd
+	@$(CONTROLLER_GEN) crd paths=./internal/catalog/v1alpha1 output:crd:dir=./internal/catalog/crd
 
 # Update command docs
 docs:

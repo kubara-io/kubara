@@ -1,17 +1,16 @@
 package catalog
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	catalogTypes "github.com/kubara-io/kubara/internal/catalog"
-	"go.yaml.in/yaml/v3"
-
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func NewCatalogCreate() *cli.Command {
@@ -66,10 +65,12 @@ func CreateCatalog(catalogName string) (err error) {
 		err = cleanupCatalogRoot(catalogName, err)
 	}()
 
-	catalogScaffold := catalogTypes.CatalogManifest{
-		APIVersion: catalogTypes.CatalogAPIVersion,
-		Kind:       catalogTypes.CatalogKind,
-		Metadata: catalogTypes.Metadata{
+	scaffold := catalogTypes.CatalogManifest{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: catalogTypes.CatalogAPIVersion,
+			Kind:       catalogTypes.CatalogKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
 			Name: catalogName,
 		},
 		Spec: catalogTypes.CatalogSpec{
@@ -77,15 +78,12 @@ func CreateCatalog(catalogName string) (err error) {
 		},
 	}
 
-	var output bytes.Buffer
-	encoder := yaml.NewEncoder(&output)
-	encoder.SetIndent(2)
-	if err := encoder.Encode(catalogScaffold); err != nil {
+	data, err := yaml.Marshal(scaffold)
+	if err != nil {
 		return fmt.Errorf("cannot marshal Catalog.yaml: %w", err)
 	}
-	catalogYaml := output.Bytes()
 
-	if err = os.WriteFile(filepath.Join(catalogName, "Catalog.yaml"), catalogYaml, 0o600); err != nil {
+	if err = os.WriteFile(filepath.Join(catalogName, "Catalog.yaml"), data, 0o600); err != nil {
 		return fmt.Errorf("cannot create Catalog.yaml: %w", err)
 	}
 

@@ -89,12 +89,12 @@ func decodePlatformSetup(data []byte) (*Config, error) {
 	}
 
 	result := v.ValidateCreate(context.Background(), object, crdvalidate.RejectUnknown)
-	var doc PlatformSetup
-	if err := result.Into(&doc); err != nil {
+	var setup PlatformSetup
+	if err := result.Into(&setup); err != nil {
 		return nil, fmt.Errorf("validate PlatformSetup %q: %w", object.Name(), err)
 	}
-	normalizeDisabledTerraform(&doc.Spec)
-	return &doc.Spec, nil
+	normalizeDisabledTerraform(&setup.Spec)
+	return &setup.Spec, nil
 }
 
 // ValidatePlatformSetupTransition validates a proposed CR against its
@@ -113,8 +113,8 @@ func ValidatePlatformSetupTransition(ctx context.Context, oldData, proposedData 
 		return nil, err
 	}
 	result := v.ValidateTransition(ctx, proposedObject, oldObject, crdvalidate.RejectUnknown)
-	var doc PlatformSetup
-	if err := result.Into(&doc); err != nil {
+	var setup PlatformSetup
+	if err := result.Into(&setup); err != nil {
 		return nil, fmt.Errorf(
 			"validate PlatformSetup transition from %q to %q: %w",
 			oldObject.Name(),
@@ -122,6 +122,6 @@ func ValidatePlatformSetupTransition(ctx context.Context, oldData, proposedData 
 			err,
 		)
 	}
-	normalizeDisabledTerraform(&doc.Spec)
-	return &doc.Spec, nil
+	normalizeDisabledTerraform(&setup.Spec)
+	return &setup.Spec, nil
 }

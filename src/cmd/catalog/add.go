@@ -1,7 +1,6 @@
 package catalog
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -10,10 +9,10 @@ import (
 
 	cat "github.com/kubara-io/kubara/internal/catalog"
 	svc "github.com/kubara-io/kubara/internal/service"
-
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"go.yaml.in/yaml/v3"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"sigs.k8s.io/yaml"
 )
 
 func NewCatalogService() *cli.Command {
@@ -60,10 +59,12 @@ func CreateService(serviceName string) error {
 		return fmt.Errorf("a service with name %s already exists", serviceName)
 	}
 
-	service := cat.ServiceDefinition{
-		APIVersion: cat.ServiceDefinitionAPIVersion,
-		Kind:       cat.ServiceDefinitionKind,
-		Metadata: cat.Metadata{
+	def := cat.ServiceDefinition{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: cat.ServiceDefinitionAPIVersion,
+			Kind:       cat.ServiceDefinitionKind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
 			Name: serviceName,
 		},
 		Spec: cat.ServiceSpec{
@@ -76,19 +77,16 @@ func CreateService(serviceName string) error {
 		},
 	}
 
-	var output bytes.Buffer
-	encoder := yaml.NewEncoder(&output)
-	encoder.SetIndent(2)
-	if err := encoder.Encode(service); err != nil {
+	data, err := yaml.Marshal(def)
+	if err != nil {
 		return fmt.Errorf("cannot marshal service: %w", err)
 	}
-	serviceRaw := output.Bytes()
 
 	if err := os.MkdirAll(filepath.Join("services"), 0o755); err != nil {
 		return fmt.Errorf("cannot create services directory: %w", err)
 	}
 
-	if err := os.WriteFile(servicePath, serviceRaw, 0o600); err != nil {
+	if err := os.WriteFile(servicePath, data, 0o600); err != nil {
 		return fmt.Errorf("cannot create service: %w", err)
 	}
 

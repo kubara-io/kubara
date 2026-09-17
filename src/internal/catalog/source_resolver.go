@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"sigs.k8s.io/yaml"
 )
 
 var ErrCatalogManifestNotFound = errors.New("catalog manifest not found")
@@ -122,7 +120,7 @@ func resolvedSourceFromArtifact(artifact CachedArtifact) (ResolvedSource, error)
 
 func LoadCatalogManifest(root string) (CatalogManifest, error) {
 	path := filepath.Join(root, "Catalog.yaml")
-	content, err := os.ReadFile(path)
+	data, err := os.ReadFile(path)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			return CatalogManifest{}, fmt.Errorf("catalog root %q is missing Catalog.yaml: %w", root, ErrCatalogManifestNotFound)
@@ -130,11 +128,8 @@ func LoadCatalogManifest(root string) (CatalogManifest, error) {
 		return CatalogManifest{}, fmt.Errorf("read %q: %w", path, err)
 	}
 
-	var manifest CatalogManifest
-	if err := yaml.Unmarshal(content, &manifest); err != nil {
-		return CatalogManifest{}, fmt.Errorf("unmarshal %q: %w", path, err)
-	}
-	if err := manifest.Validate(); err != nil {
+	manifest, err := DecodeCatalogManifest(data)
+	if err != nil {
 		return CatalogManifest{}, fmt.Errorf("invalid Catalog.yaml: %w", err)
 	}
 

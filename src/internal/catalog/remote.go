@@ -269,7 +269,7 @@ func pullRemoteCatalog(ctx context.Context, ref OCIReference, insecure bool) (Ca
 
 	artifact := CachedArtifact{
 		SchemaVersion:  cacheSchemaVersion,
-		CatalogName:    manifest.Metadata.Name,
+		CatalogName:    manifest.Name,
 		CatalogVersion: manifest.Spec.Version,
 		ManifestDigest: desc.Digest.String(),
 		RootDirectory:  filepath.Base(rootDir),
