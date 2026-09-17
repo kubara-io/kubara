@@ -89,9 +89,7 @@ func decodePlatformSetup(data []byte) (*Config, error) {
 	}
 
 	result := v.ValidateCreate(context.Background(), object, crdvalidate.RejectUnknown)
-	var doc struct {
-		Spec Config `json:"spec"`
-	}
+	var doc PlatformSetup
 	if err := result.Into(&doc); err != nil {
 		return nil, fmt.Errorf("validate PlatformSetup %q: %w", object.Name(), err)
 	}
@@ -115,9 +113,7 @@ func ValidatePlatformSetupTransition(ctx context.Context, oldData, proposedData 
 		return nil, err
 	}
 	result := v.ValidateTransition(ctx, proposedObject, oldObject, crdvalidate.RejectUnknown)
-	var doc struct {
-		Spec Config `json:"spec"`
-	}
+	var doc PlatformSetup
 	if err := result.Into(&doc); err != nil {
 		return nil, fmt.Errorf(
 			"validate PlatformSetup transition from %q to %q: %w",

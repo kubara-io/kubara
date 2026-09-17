@@ -81,14 +81,14 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 		provider       TerraformProvider
 		kubernetesType string
 		wantErr        bool
+		errContains    string
 	}{
 		{name: "stackit supports ske", provider: TerraformProviderStackit, kubernetesType: "ske"},
 		{name: "stackit supports edge", provider: TerraformProviderStackit, kubernetesType: "edge"},
 		{name: "t-cloud-public supports cce", provider: TerraformProviderTCloudPublic, kubernetesType: "cce"},
-		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true},
-		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true},
-		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true},
-		{name: "unknown provider is ignored by combination validation", provider: TerraformProvider("unknown"), kubernetesType: "ske"},
+		{name: "stackit rejects cce", provider: TerraformProviderStackit, kubernetesType: "cce", wantErr: true, errContains: "stackit supports kubernetesType ske or edge"},
+		{name: "t-cloud-public rejects ske", provider: TerraformProviderTCloudPublic, kubernetesType: "ske", wantErr: true, errContains: "t-cloud-public supports kubernetesType cce"},
+		{name: "t-cloud-public rejects edge", provider: TerraformProviderTCloudPublic, kubernetesType: "edge", wantErr: true, errContains: "t-cloud-public supports kubernetesType cce"},
 	}
 
 	for _, tt := range tests {
@@ -97,11 +97,12 @@ func TestValidateProviderKubernetesTypes(t *testing.T) {
 			cfg.Clusters[0].Terraform.Provider = tt.provider
 			cfg.Clusters[0].Terraform.KubernetesType = tt.kubernetesType
 
-			err := validateProviderKubernetesTypes(cfg)
+			doc, err := platformSetupDocument(cfg, "platform")
+			require.NoError(t, err)
+			_, err = decodePlatformSetup(doc)
 			if tt.wantErr {
 				require.Error(t, err)
-				assert.Contains(t, err.Error(), "terraform.provider")
-				assert.Contains(t, err.Error(), "terraform.kubernetesType")
+				assert.Contains(t, err.Error(), tt.errContains)
 				return
 			}
 
@@ -561,8 +562,6 @@ clusters:
 	assert.Equal(t, "dev", c.Stage, "Stage should be defaulted")
 	assert.Equal(t, "hub", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.IngressClassName, "IngressClassName should be defaulted")
-
-	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
 }
 
 func TestConfigStore_LoadStripsBootstrapServicesFromV1Alpha4Clusters(t *testing.T) {
