@@ -22,7 +22,6 @@ type ConfigStore struct {
 	filepath       string
 	config         *Config
 	catalogOptions catalog.LoadOptions
-	customResource bool
 }
 
 func NewConfigStore(cwd string, filePath string, catalogOptions catalog.LoadOptions) *ConfigStore {
@@ -39,7 +38,6 @@ func NewConfigStore(cwd string, filePath string, catalogOptions catalog.LoadOpti
 
 // Load loads configuration
 func (cs *ConfigStore) Load() error {
-	cs.customResource = false
 	data, err := os.ReadFile(cs.filepath)
 	if err != nil {
 		return fmt.Errorf("read config file: %w", err)
@@ -55,7 +53,6 @@ func (cs *ConfigStore) Load() error {
 			return err
 		}
 		cs.config = cfg
-		cs.customResource = true
 		if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 			return fmt.Errorf("apply service catalog defaults: %w", err)
 		}
@@ -76,16 +73,10 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("persist migrated PlatformSetup: %w", err)
 	}
 	cs.config = normalized
-	cs.customResource = true
 	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
 	}
 	return nil
-}
-
-// IsPlatformSetup reports whether the loaded input used the CR format.
-func (cs *ConfigStore) IsPlatformSetup() bool {
-	return cs.customResource
 }
 
 func (cs *ConfigStore) loadLegacy(raw map[string]any) error {
@@ -216,21 +207,6 @@ func (cs *ConfigStore) SaveToFile() error {
 	if err := os.WriteFile(cs.filepath, document, 0600); err != nil {
 		return fmt.Errorf("write config file: %w", err)
 	}
-	cs.customResource = true
-	return nil
-}
-
-func composeServiceSchema(schemaDoc map[string]any, cat catalog.Catalog) error {
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	if !ok {
-		return fmt.Errorf("catalog schema is missing $defs")
-	}
-
-	servicesSchema, err := buildServicesSchema(cat)
-	if err != nil {
-		return err
-	}
-	defs["Services"] = servicesSchema
 	return nil
 }
 
