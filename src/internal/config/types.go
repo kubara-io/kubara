@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"slices"
 
 	"github.com/kubara-io/kubara/internal/service"
@@ -56,6 +55,7 @@ type PlatformSetup struct {
 }
 
 // Config is the root of the configuration structure.
+// +kubebuilder:validation:XValidation:rule="self.clusters.size() == 0 || self.clusters.filter(c, c.type == 'hub').size() == 1",message="exactly one cluster must be of type hub"
 type Config struct {
 	// Global bootstrap catalog reference.
 	// +optional
@@ -170,14 +170,14 @@ type ArgoCD struct {
 	HelmRepo *HelmRepository `json:"helmRepo,omitempty"`
 }
 
-// +kubebuilder:validation:XValidation:rule="has(self.https) != has(self.oci)",message="exactly one of https or oci must be configured"
+// +kubebuilder:validation:XValidation:rule="has(self.git) != has(self.oci)",message="exactly one of git or oci must be configured"
 type RepoProto struct {
 	// +kubebuilder:validation:Enum=https;ssh;github-app
 	// +optional
 	AuthMode GitAuthMode `json:"authMode,omitempty"`
 
 	// +optional
-	HTTPS *RepoType `json:"https,omitempty"`
+	Git *RepoType `json:"git,omitempty"`
 
 	// +optional
 	OCI *RepoType `json:"oci,omitempty"`

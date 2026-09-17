@@ -61,7 +61,13 @@ spec:
                           type: object
                         repo:
                           properties:
-                            https:
+                            authMode:
+                              enum:
+                              - https
+                              - ssh
+                              - github-app
+                              type: string
+                            git:
                               properties:
                                 components:
                                   properties:
@@ -131,8 +137,8 @@ spec:
                               type: object
                           type: object
                           x-kubernetes-validations:
-                          - message: exactly one of https or oci must be configured
-                            rule: has(self.https) != has(self.oci)
+                          - message: exactly one of git or oci must be configured
+                            rule: has(self.git) != has(self.oci)
                         selfManaged:
                           default: enabled
                           enum:
@@ -237,6 +243,10 @@ spec:
             required:
             - clusters
             type: object
+            x-kubernetes-validations:
+            - message: exactly one cluster must be of type hub
+              rule: self.clusters.size() == 0 || self.clusters.filter(c, c.type ==
+                'hub').size() == 1
         required:
         - spec
         type: object
