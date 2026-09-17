@@ -115,7 +115,7 @@ func (m GitAuthMode) Validate() error {
 type ArgoCD struct {
 	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty"`
 	Repo        RepoProto               `json:"repo"`
-	HelmRepo    HelmRepository          `json:"helmRepo,omitempty"`
+	HelmRepo    *HelmRepository         `json:"helmRepo,omitempty"`
 }
 
 type RepoProto struct {
