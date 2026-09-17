@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
-	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config/migrations"
@@ -60,10 +59,6 @@ func (cs *ConfigStore) Load() error {
 		if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 			return fmt.Errorf("apply service catalog defaults: %w", err)
 		}
-
-		if err := cs.validate(); err != nil {
-			return fmt.Errorf("validate config: %w", err)
-		}
 		return nil
 	}
 	if err := cs.loadLegacy(raw); err != nil {
@@ -84,10 +79,6 @@ func (cs *ConfigStore) Load() error {
 	cs.customResource = true
 	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
-	}
-
-	if err := cs.validate(); err != nil {
-		return fmt.Errorf("validate config: %w", err)
 	}
 	return nil
 }
@@ -124,16 +115,6 @@ func (cs *ConfigStore) loadLegacy(raw map[string]any) error {
 	return nil
 }
 
-func (cs *ConfigStore) validate() error {
-	if err := validateProviderKubernetesTypes(cs.config); err != nil {
-		return fmt.Errorf("validate provider kubernetes types: %w", err)
-	}
-	if err := validateHubCount(cs.config); err != nil {
-		return fmt.Errorf("each config must contain exactly one hub: %w", err)
-	}
-	return nil
-}
-
 func ensureClusterServices(cfg *Config) {
 	for i := range cfg.Clusters {
 		if cfg.Clusters[i].Services == nil {
@@ -157,50 +138,6 @@ func stripBootstrapServices(cfg *Config) {
 				delete(cfg.Clusters[i].Services, name)
 			}
 		}
-	}
-}
-
-func validateProviderKubernetesTypes(cfg *Config) error {
-	for _, cluster := range cfg.Clusters {
-		if cluster.Terraform == nil {
-			continue
-		}
-		provider := cluster.Terraform.Provider
-		supportedTypes := supportedKubernetesTypesForProvider(provider)
-		if len(supportedTypes) == 0 || slices.Contains(supportedTypes, cluster.Terraform.KubernetesType) {
-			continue
-		}
-		return fmt.Errorf("cluster %q uses terraform.provider %q with terraform.kubernetesType %q; supported kubernetes types for %q are: %s",
-			cluster.Name, provider, cluster.Terraform.KubernetesType, provider, strings.Join(supportedTypes, ", "))
-	}
-	return nil
-}
-
-func validateHubCount(cfg *Config) error {
-	var hubs []string
-
-	for _, cluster := range cfg.Clusters {
-		if cluster.Type == "hub" {
-			hubs = append(hubs, cluster.Name)
-		}
-	}
-	if len(hubs) == 0 {
-		return fmt.Errorf("no hubs were definded in config")
-	}
-	if len(hubs) > 1 {
-		return fmt.Errorf("multiple hubs defined in config: %v", hubs)
-	}
-	return nil
-}
-
-func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
-	switch provider {
-	case TerraformProviderStackit:
-		return []string{"ske", "edge"}
-	case TerraformProviderTCloudPublic:
-		return []string{"cce"}
-	default:
-		return nil
 	}
 }
 

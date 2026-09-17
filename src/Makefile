@@ -3,7 +3,11 @@ BINARY_NAME = kubara
 SRC = main.go
 BUILD_ENV ?= CGO_ENABLED=0
 
-.PHONY: all build run clean modtidy build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 test test-verbose test-coverage test-race lint format vet help
+# renovate: datasource=go depName=sigs.k8s.io/controller-tools
+CONTROLLER_GEN_VERSION ?= v0.21.0
+CONTROLLER_GEN = go run sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_GEN_VERSION)
+
+.PHONY: all build run clean modtidy generate build-all build-linux-amd64 build-linux-arm64 build-darwin-amd64 build-darwin-arm64 build-windows-amd64 build-windows-arm64 test test-verbose test-coverage test-race lint format vet help
 
 # Default target: Build the binary for the local platform
 all: build
@@ -65,6 +69,11 @@ format:
 	@echo "Formatting Go code..."
 	@go fmt ./...
 
+# Generate CRD manifests
+generate:
+	@echo "Generating CRD manifests..."
+	@$(CONTROLLER_GEN) crd paths=./internal/config output:crd:dir=./internal/config/crd
+
 # Update command docs
 docs:
 	@echo "Updating command docs..."
@@ -122,6 +131,7 @@ help:
 	@echo "  vet                - Run go vet analyzer"
 	@echo "  lint               - Lint code (requires golangci-lint)"
 	@echo "  format             - Format code"
+	@echo "  generate           - Generate CRD manifests"
 	@echo "  build-all          - Build for all platforms"
 	@echo "  build-linux-*      - Build for Linux platforms"
 	@echo "  build-darwin-*     - Build for macOS platforms"
