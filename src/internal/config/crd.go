@@ -5,6 +5,7 @@ import (
 	"context"
 	_ "embed"
 	"fmt"
+	"path"
 	"sync"
 
 	"github.com/kubara-io/libkubara/crdvalidate"
@@ -50,9 +51,10 @@ func ConfigurationJSONSchema() (map[string]any, error) {
 	if err != nil || !found {
 		return nil, fmt.Errorf("PlatformSetup CRD has no versions")
 	}
+	targetVersion := path.Base(PlatformSetupAPIVersion)
 	for _, version := range versions {
 		versionMap, ok := version.(map[string]any)
-		if !ok || versionMap["name"] != "v1alpha5" {
+		if !ok || versionMap["name"] != targetVersion {
 			continue
 		}
 		schema, ok := versionMap["schema"].(map[string]any)
@@ -68,12 +70,12 @@ func ConfigurationJSONSchema() (map[string]any, error) {
 			out[key] = value
 		}
 		out["$schema"] = "https://json-schema.org/draft/2020-12/schema"
-		out["$id"] = "https://kubara.io/schemas/platformsetup-v1alpha5.json"
+		out["$id"] = fmt.Sprintf("https://kubara.io/schemas/platformsetup-%s.json", targetVersion)
 		out["$defs"] = map[string]any{}
 		out["title"] = PlatformSetupKind
 		return out, nil
 	}
-	return nil, fmt.Errorf("PlatformSetup CRD has no v1alpha5 OpenAPI schema")
+	return nil, fmt.Errorf("PlatformSetup CRD has no %s OpenAPI schema", targetVersion)
 }
 
 func decodePlatformSetup(data []byte) (*Config, error) {

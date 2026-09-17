@@ -77,11 +77,18 @@ func (cs *ConfigStore) Load() error {
 	if err != nil {
 		return fmt.Errorf("validate migrated PlatformSetup: %w", err)
 	}
-	cs.config = normalized
 	if err := os.WriteFile(cs.filepath, document, 0600); err != nil {
 		return fmt.Errorf("persist migrated PlatformSetup: %w", err)
 	}
+	cs.config = normalized
 	cs.customResource = true
+	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
+		return fmt.Errorf("apply service catalog defaults: %w", err)
+	}
+
+	if err := cs.validate(); err != nil {
+		return fmt.Errorf("validate config: %w", err)
+	}
 	return nil
 }
 
@@ -112,14 +119,8 @@ func (cs *ConfigStore) loadLegacy(raw map[string]any) error {
 	}
 
 	normalizeDisabledTerraform(cs.config)
-	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
-		return fmt.Errorf("apply service catalog defaults: %w", err)
-	}
-
-	if err = cs.validate(); err != nil {
-		return fmt.Errorf("validate config: %w", err)
-	}
-
+	stripBootstrapServices(cs.config)
+	ensureClusterServices(cs.config)
 	return nil
 }
 
@@ -130,10 +131,28 @@ func (cs *ConfigStore) validate() error {
 	return nil
 }
 
+func ensureClusterServices(cfg *Config) {
+	for i := range cfg.Clusters {
+		if cfg.Clusters[i].Services == nil {
+			cfg.Clusters[i].Services = service.Services{}
+		}
+	}
+}
+
 func normalizeDisabledTerraform(cfg *Config) {
 	for index := range cfg.Clusters {
 		if terraform := cfg.Clusters[index].Terraform; terraform != nil && terraform.Provider == TerraformProviderNone {
 			cfg.Clusters[index].Terraform = nil
+		}
+	}
+}
+
+func stripBootstrapServices(cfg *Config) {
+	for i := range cfg.Clusters {
+		for name := range cfg.Clusters[i].Services {
+			if catalog.IsBootstrapService(name) {
+				delete(cfg.Clusters[i].Services, name)
+			}
 		}
 	}
 }
