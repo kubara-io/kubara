@@ -49,3 +49,21 @@ func TestBuildEnabledServiceTemplatePathPredicate_AlwaysIncludesBootstrapService
 
 	assert.True(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
 }
+
+func TestBuildTemplateContext_IncludesEmptyHelmRepoWhenUnconfigured(t *testing.T) {
+	context, err := buildTemplateContext(config.Cluster{
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{},
+			},
+		},
+	}, buildContext{})
+
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	cluster := context["cluster"].(map[string]any)
+	argocd := cluster["argocd"].(map[string]any)
+	assert.Equal(t, map[string]any{"url": ""}, argocd["helmRepo"])
+}

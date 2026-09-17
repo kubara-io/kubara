@@ -68,6 +68,13 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 			"provider": config.TerraformProviderNone,
 		}
 	}
+	argocd, ok := clusterMap["argocd"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
+	}
+	if _, configured := argocd["helmRepo"]; !configured {
+		argocd["helmRepo"] = map[string]any{"url": ""}
+	}
 
 	data := libtemplate.NewData()
 	if err := data.Namespace("env", bctx.EnvMap); err != nil {
