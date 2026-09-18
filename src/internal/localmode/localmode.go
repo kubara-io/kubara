@@ -58,11 +58,17 @@ func ApplyClusterProfile(cluster *config.Cluster, dnsName string) {
 	cluster.DNSName = dnsName
 	cluster.SSOOrg = DefaultSSOOrg
 	cluster.SSOTeam = DefaultSSOTeam
-	cluster.IngressClassName = "traefik"
+	cluster.IngressClassName = "traefik" //nolint:staticcheck // Keep the deprecated field in sync for existing catalogs during the transition.
+	cluster.Networking = &config.ClusterNetworking{Type: config.NetworkingIngress, Ingress: &config.IngressNetworking{ClassName: "traefik"}}
 	cluster.Terraform = nil
 
 	for serviceName, serviceConfig := range cluster.Services {
 		serviceConfig.Status = service.StatusDisabled
+		if serviceConfig.Networking != nil {
+			networking := *serviceConfig.Networking
+			networking.Gateway = nil
+			serviceConfig.Networking = &networking
+		}
 		cluster.Services[serviceName] = serviceConfig
 	}
 	for serviceName := range enabledServices {

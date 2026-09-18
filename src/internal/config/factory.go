@@ -39,13 +39,13 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 	}
 
 	return Cluster{
-		Name:             e.ProjectName,
-		Stage:            e.ProjectStage,
-		Type:             "<hub or spoke>",
-		DNSName:          "<subdomain.my-domain.com>",
-		SSOOrg:           "<my-org>",
-		SSOTeam:          "<my-team>",
-		IngressClassName: "traefik",
+		Name:       e.ProjectName,
+		Stage:      e.ProjectStage,
+		Type:       "<hub or spoke>",
+		DNSName:    "<subdomain.my-domain.com>",
+		SSOOrg:     "<my-org>",
+		SSOTeam:    "<my-team>",
+		Networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "traefik"}},
 		Terraform: &Terraform{
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",

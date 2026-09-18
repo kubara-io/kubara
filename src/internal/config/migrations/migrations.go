@@ -48,6 +48,13 @@ func Apply(cwd string, config map[string]any) (bool, error) {
 		migrated = true
 	}
 
+	if config["version"] == ConfigVersionV1Alpha4 {
+		networkingMigrated, err := migrateIngressNetworking(config)
+		if err != nil {
+			return false, fmt.Errorf("migrate Ingress networking: %w", err)
+		}
+		migrated = migrated || networkingMigrated
+	}
 	return migrated, nil
 }
 
