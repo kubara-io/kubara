@@ -41,7 +41,7 @@ That means templates can read fields such as:
 - `.cluster.stage`
 - `.cluster.type`
 - `.cluster.dnsName`
-- `.cluster.ingressClassName`
+- `.cluster.networking.ingressClassName`
 - `.cluster.publicLoadbalancerIP`
 - `.cluster.terraform.provider`
 
@@ -55,6 +55,48 @@ For example:
 
 - `.cluster.services.traefik.status`
 - `.cluster.services.cert-manager.config.clusterIssuer.name`
+
+#### Networking
+
+`.cluster.networking` contains the current cluster's routing settings.
+
+Templates can read fields such as:
+
+- `.cluster.networking.ingressClassName`
+- `.cluster.networking.gateway.name`
+- `.cluster.networking.gateway.namespace`
+- `.cluster.networking.gateway.sectionName`
+
+Use `ingressClassName` for Ingress or `gateway` for Gateway API. Without either setting, kubara defaults to the `traefik` Ingress class.
+A Gateway reference requires `name` and `namespace`; `sectionName` optionally selects a listener.
+
+For example, this cluster configuration supplies a parent Gateway:
+
+```yaml
+networking:
+  gateway:
+    name: platform
+    namespace: traefik
+    sectionName: websecure
+```
+
+Use `dig` to read the optional reference:
+
+```yaml
+{{- $gateway := dig "cluster" "networking" "gateway" (dict) . -}}
+```
+
+Services can provide their own routing settings under:
+
+- `.cluster.services.<service-name>.networking.gateway`
+- `.cluster.services.<service-name>.networking.annotations`
+
+A service Gateway replaces the complete cluster reference and requires a cluster Gateway to be configured.
+An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
+
+The deprecated `.cluster.ingressClassName` remains available for existing catalogs.
+kubara warns when it is used and automatically adds and saves the structured setting for old Ingress configurations.
+If both Ingress fields are supplied, their values must match. Templates supporting older CLI versions should fall back to the deprecated field.
 
 ### `.env`
 

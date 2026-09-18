@@ -226,7 +226,7 @@ supported version as described in [STACKIT SKE configuration](../3_infrastructur
 
 `bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd` and `bootstrap-crds` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
 
-`ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
+`networking.ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `networking.annotations` map under `services.<service>.networking.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
 User-provided annotations are merged on top using `mergeOverwrite`: equal keys are overwritten, while kubara default keys that are not present in the override remain.
 
