@@ -238,7 +238,7 @@ func TestEnvStore_Validate(t *testing.T) {
 				ArgocdHelmRepoUsername:      "user",
 				ArgocdHelmRepoPassword:      "pass",
 				ArgocdHelmRepoUrl:           "url",
-				ArgocdGitHttpsUrl:           "url",
+				ArgocdGitHttpsUrl:           "https://github.com/example/repo.git",
 				ArgocdGitPatOrPassword:      "token",
 				ArgocdGitUsername:           "user",
 			},
