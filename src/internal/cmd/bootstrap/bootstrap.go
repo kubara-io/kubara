@@ -43,6 +43,8 @@ type Options struct {
 	CatalogOverwrite   bool
 	LocalState         *LocalState
 	BootstrapCatalog   string
+	InitialKubeconfig  string
+	AgentNamespace     string
 }
 
 type BootstrapChart struct {
@@ -85,7 +87,9 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		ctx, cancel = context.WithTimeout(ctx, opts.Timeout)
 		defer cancel()
 	}
-
+	if opts.ClusterConfig.Type == config.Spoke {
+		return BootstrapSpoke(ctx, opts)
+	}
 	if opts.Local {
 		if err := prepareLocalBootstrap(ctx, opts); err != nil {
 			return fmt.Errorf("prepare local bootstrap: %w", err)
