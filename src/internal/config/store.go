@@ -1,24 +1,18 @@
 package config
 
 import (
-	"bytes"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"slices"
 	"sort"
-	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config/migrations"
 	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/go-viper/mapstructure/v2"
-	"github.com/invopop/jsonschema"
-	schemaValidator "github.com/santhosh-tekuri/jsonschema/v6"
 	"go.yaml.in/yaml/v3"
 )
 
@@ -53,14 +47,47 @@ func (cs *ConfigStore) Load() error {
 	if err := yaml.Unmarshal(data, &raw); err != nil {
 		return fmt.Errorf("parse YAML config: %w", err)
 	}
+	if raw["apiVersion"] == PlatformSetupAPIVersion && raw["kind"] == PlatformSetupKind {
+		cfg, err := decodePlatformSetup(data)
+		if err != nil {
+			return err
+		}
+		cs.config = cfg
+		if err := cs.ApplyServiceCatalogDefaults(); err != nil {
+			return fmt.Errorf("apply service catalog defaults: %w", err)
+		}
+		return nil
+	}
+	if err := cs.loadLegacy(raw); err != nil {
+		return err
+	}
+	document, err := platformSetupDocument(cs.config, "platform")
+	if err != nil {
+		return fmt.Errorf("convert legacy config to PlatformSetup: %w", err)
+	}
+	normalized, err := decodePlatformSetup(document)
+	if err != nil {
+		return fmt.Errorf("validate migrated PlatformSetup: %w", err)
+	}
+	if err := os.WriteFile(cs.filepath, document, 0600); err != nil {
+		return fmt.Errorf("persist migrated PlatformSetup: %w", err)
+	}
+	cs.config = normalized
+	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
+		return fmt.Errorf("apply service catalog defaults: %w", err)
+	}
+	return nil
+}
 
-	migrated, err := migrations.Apply(cs.cwd, raw)
+func (cs *ConfigStore) loadLegacy(raw map[string]any) error {
+	_, err := migrations.Apply(cs.cwd, raw)
 	if err != nil {
 		return fmt.Errorf("migration of config failed: %w", err)
 	}
+	applyLegacyDefaults(raw)
 
 	dc := &mapstructure.DecoderConfig{
-		TagName:          "yaml",
+		TagName:          "json",
 		WeaklyTypedInput: false,
 		Result:           cs.config,
 		Squash:           true,
@@ -73,278 +100,81 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("decode config: %w", err)
 	}
 
-	applyDefaults(cs.config)
 	normalizeDisabledTerraform(cs.config)
-	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
-		return fmt.Errorf("apply service catalog defaults: %w", err)
-	}
-
-	if err = cs.validate(); err != nil {
-		return fmt.Errorf("validate config: %w", err)
-	}
-
-	if migrated {
-		if err := cs.SaveToFile(); err != nil {
-			return fmt.Errorf("persist migrated config: %w", err)
-		}
-	}
-
+	stripBootstrapServices(cs.config)
+	ensureClusterServices(cs.config)
 	return nil
 }
 
-// GenerateSchema generates a JSON schema from the Config struct using the
-// same per-cluster catalog resolution as config validation and generation.
-func (cs *ConfigStore) GenerateSchema() (map[string]any, error) {
-	if len(cs.config.Clusters) == 0 {
-		cat, err := catalog.Load(clusterCatalogLoadOptions(cs.catalogOptions))
-		if err != nil {
-			return nil, fmt.Errorf("load catalog: %w", err)
-		}
-		return generateSchemaWithCatalog(cat)
-	}
-
-	clusterCatalogs := make([]catalog.Catalog, 0, len(cs.config.Clusters))
-	unionCatalog := catalog.Catalog{Services: map[string]catalog.ServiceDefinition{}}
-	for _, cluster := range cs.config.Clusters {
-		cat, err := cs.GetCatalogForCluster(cluster)
-		if err != nil {
-			return nil, fmt.Errorf("load catalog for cluster %q: %w", cluster.Name, err)
-		}
-		clusterCatalogs = append(clusterCatalogs, cat)
-		for name, def := range cat.Services {
-			if _, exists := unionCatalog.Services[name]; !exists {
-				unionCatalog.Services[name] = def
-			}
+func ensureClusterServices(cfg *Config) {
+	for i := range cfg.Clusters {
+		if cfg.Clusters[i].Services == nil {
+			cfg.Clusters[i].Services = service.Services{}
 		}
 	}
-
-	schemaDoc, err := generateSchemaWithCatalog(unionCatalog)
-	if err != nil {
-		return nil, err
-	}
-	if err := applyClusterSpecificSchemaBranches(schemaDoc, cs.config.Clusters, clusterCatalogs); err != nil {
-		return nil, err
-	}
-	return schemaDoc, nil
-}
-
-func generateSchemaWithCatalog(cat catalog.Catalog) (map[string]any, error) {
-	cat = cat.UserConfigurableServices()
-
-	r := jsonschema.Reflector{
-		RequiredFromJSONSchemaTags: true,
-		ExpandedStruct:             true,
-		AllowAdditionalProperties:  false,
-	}
-	// Build schema from the root using a single reflector
-	sch := r.ReflectFromType(reflect.TypeFor[Config]())
-
-	const schemaURL = "mem://config.schema.json"
-	if sch.ID == "" {
-		sch.ID = schemaURL
-	}
-
-	// Marshal to bytes then decode into map[string]any
-	b, err := json.Marshal(sch)
-	if err != nil {
-		return nil, fmt.Errorf("marshal schema: %w", err)
-	}
-	var schemaDoc map[string]any
-	if err := json.Unmarshal(b, &schemaDoc); err != nil {
-		return nil, fmt.Errorf("unmarshal schema: %w", err)
-	}
-	ensureServiceConfigDefinition(schemaDoc)
-	allowDisabledTerraformSchema(schemaDoc)
-	if err := composeServiceSchema(schemaDoc, cat); err != nil {
-		return nil, fmt.Errorf("compose service schema: %w", err)
-	}
-
-	return schemaDoc, nil
-}
-
-func allowDisabledTerraformSchema(schemaDoc map[string]any) {
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	if !ok {
-		return
-	}
-
-	terraform, ok := defs["Terraform"].(map[string]any)
-	if !ok {
-		return
-	}
-
-	required, ok := terraform["required"].([]any)
-	if !ok || len(required) == 0 {
-		return
-	}
-
-	terraform["anyOf"] = []any{
-		map[string]any{
-			"properties": map[string]any{
-				"provider": map[string]any{
-					"const": string(TerraformProviderNone),
-				},
-			},
-		},
-		map[string]any{
-			"required": required,
-		},
-	}
-	delete(terraform, "required")
 }
 
 func normalizeDisabledTerraform(cfg *Config) {
-	for idx := range cfg.Clusters {
-		terraform := cfg.Clusters[idx].Terraform
-		if terraform != nil && terraform.Provider == TerraformProviderNone {
-			cfg.Clusters[idx].Terraform = nil
+	for index := range cfg.Clusters {
+		if terraform := cfg.Clusters[index].Terraform; terraform != nil && terraform.Provider == TerraformProviderNone {
+			cfg.Clusters[index].Terraform = nil
 		}
 	}
 }
 
-// ensureServiceConfigDefinition ensures that for every service the
-// config schema document object is properly generated even
-func ensureServiceConfigDefinition(schemaDoc map[string]any) {
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	if !ok {
-		return
-	}
-	if _, exists := defs["Config"]; exists {
-		return
-	}
-	defs["Config"] = map[string]any{
-		"type":                 "object",
-		"title":                "Service Config",
-		"description":          "Service-specific configuration",
-		"additionalProperties": true,
-	}
-}
-
-func (cs *ConfigStore) validate() error {
-	schemaDoc, err := cs.GenerateSchema()
-	if err != nil {
-		return fmt.Errorf("generate schema: %w", err)
-	}
-	if err := validateAgainstSchema(schemaDoc, cs.config); err != nil {
-		return fmt.Errorf("validate config: %w", err)
-	}
-	if err := validateProviderKubernetesTypes(cs.config); err != nil {
-		return fmt.Errorf("validate provider kubernetes types: %w", err)
-	}
-	return nil
-}
-
-func applyClusterSpecificSchemaBranches(schemaDoc map[string]any, clusters []Cluster, catalogs []catalog.Catalog) error {
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	if !ok {
-		return fmt.Errorf("catalog schema is missing $defs")
-	}
-	clusterDef, ok := defs["Cluster"].(map[string]any)
-	if !ok {
-		return fmt.Errorf("catalog schema is missing Cluster")
-	}
-
-	branches := make([]any, 0, len(clusters))
-	for index, cluster := range clusters {
-		data, err := json.Marshal(clusterDef)
-		if err != nil {
-			return fmt.Errorf("clone cluster schema for %q: %w", cluster.Name, err)
+func stripBootstrapServices(cfg *Config) {
+	for i := range cfg.Clusters {
+		for name := range cfg.Clusters[i].Services {
+			if catalog.IsBootstrapService(name) {
+				delete(cfg.Clusters[i].Services, name)
+			}
 		}
-		var branch map[string]any
-		if err := json.Unmarshal(data, &branch); err != nil {
-			return fmt.Errorf("clone cluster schema for %q: %w", cluster.Name, err)
-		}
-		properties, ok := branch["properties"].(map[string]any)
-		if !ok {
-			return fmt.Errorf("cluster schema is missing properties")
-		}
-		nameSchema, ok := properties["name"].(map[string]any)
-		if !ok {
-			return fmt.Errorf("cluster schema is missing name property")
-		}
-		nameSchema["const"] = cluster.Name
-		servicesSchema, err := buildServicesSchema(catalogs[index].UserConfigurableServices())
-		if err != nil {
-			return fmt.Errorf("build service schema for cluster %q: %w", cluster.Name, err)
-		}
-		properties["services"] = servicesSchema
-		branches = append(branches, branch)
-	}
-	defs["Cluster"] = map[string]any{"oneOf": branches}
-	return nil
-}
-
-func validateAgainstSchema(schemaDoc map[string]any, value any) error {
-	const schemaURL = "mem://schema.json"
-	compiler := schemaValidator.NewCompiler()
-	compiler.AssertFormat()
-	if err := compiler.AddResource(schemaURL, schemaDoc); err != nil {
-		return fmt.Errorf("add schema resource: %w", err)
-	}
-	compiled, err := compiler.Compile(schemaURL)
-	if err != nil {
-		return fmt.Errorf("compile schema: %w", err)
-	}
-
-	data, err := json.Marshal(value)
-	if err != nil {
-		return fmt.Errorf("marshal value: %w", err)
-	}
-	var instance any
-	if err := json.Unmarshal(data, &instance); err != nil {
-		return fmt.Errorf("unmarshal value: %w", err)
-	}
-	if err := compiled.Validate(instance); err != nil {
-		if validationErr, ok := errors.AsType[*schemaValidator.ValidationError](err); ok {
-			return validationErr
-		}
-		return err
-	}
-	return nil
-}
-
-func validateProviderKubernetesTypes(cfg *Config) error {
-	for _, cluster := range cfg.Clusters {
-		if cluster.Terraform == nil {
-			continue
-		}
-
-		provider := cluster.Terraform.Provider
-		kubernetesType := cluster.Terraform.KubernetesType
-		supportedTypes := supportedKubernetesTypesForProvider(provider)
-		if len(supportedTypes) == 0 {
-			continue
-		}
-		if slices.Contains(supportedTypes, kubernetesType) {
-			continue
-		}
-
-		return fmt.Errorf("cluster %q uses terraform.provider %q with terraform.kubernetesType %q; supported kubernetes types for %q are: %s",
-			cluster.Name,
-			provider,
-			kubernetesType,
-			provider,
-			strings.Join(supportedTypes, ", "),
-		)
-	}
-
-	return nil
-}
-
-func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
-	switch provider {
-	case TerraformProviderStackit:
-		return []string{"ske", "edge"}
-	case TerraformProviderTCloudPublic:
-		return []string{"cce"}
-	default:
-		return nil
 	}
 }
 
 // GetConfig returns the current configuration struct.
 func (cs *ConfigStore) GetConfig() *Config {
 	return cs.config
+}
+
+// DynamicJSONSchema returns the generic CRD schema with per-cluster catalog
+// service contracts for editor use. It is not used for runtime validation.
+func (cs *ConfigStore) DynamicJSONSchema() (map[string]any, error) {
+	schema, err := ConfigurationJSONSchema()
+	if err != nil {
+		return nil, err
+	}
+	if len(cs.config.Clusters) == 0 {
+		return schema, nil
+	}
+	spec := schema["properties"].(map[string]any)["spec"].(map[string]any)
+	clusters := spec["properties"].(map[string]any)["clusters"].(map[string]any)
+	item := clusters["items"].(map[string]any)
+	branches := make([]any, 0, len(cs.config.Clusters))
+	for _, cluster := range cs.config.Clusters {
+		encoded, err := json.Marshal(item)
+		if err != nil {
+			return nil, fmt.Errorf("clone cluster schema: %w", err)
+		}
+		var branch map[string]any
+		if err := json.Unmarshal(encoded, &branch); err != nil {
+			return nil, fmt.Errorf("decode cluster schema: %w", err)
+		}
+		cat, err := cs.GetCatalogForCluster(cluster)
+		if err != nil {
+			return nil, fmt.Errorf("load catalog for cluster %q: %w", cluster.Name, err)
+		}
+		services, err := buildServicesSchema(cat.UserConfigurableServices())
+		if err != nil {
+			return nil, fmt.Errorf("build services schema for cluster %q: %w", cluster.Name, err)
+		}
+		properties := branch["properties"].(map[string]any)
+		properties["name"].(map[string]any)["const"] = cluster.Name
+		properties["services"] = services
+		branches = append(branches, branch)
+	}
+	clusters["items"] = map[string]any{"oneOf": branches}
+	return schema, nil
 }
 
 // GetCatalogForCluster returns the effective catalog for one cluster using the
@@ -367,44 +197,16 @@ func (cs *ConfigStore) GetFilepath() string {
 
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
-	if strings.TrimSpace(cs.config.Version) == "" {
-		cs.config.Version = ConfigVersionV1Alpha4
+	document, err := platformSetupDocument(cs.config, "platform")
+	if err != nil {
+		return fmt.Errorf("convert config to PlatformSetup: %w", err)
 	}
-
-	// Ensure directory exists
-	filePath := cs.filepath
-	if err := os.MkdirAll(filepath.Dir(filePath), 0750); err != nil {
+	if err := os.MkdirAll(filepath.Dir(cs.filepath), 0750); err != nil {
 		return fmt.Errorf("create directory: %w", err)
 	}
-
-	// Marshal to YAML
-	var b bytes.Buffer
-	encoder := yaml.NewEncoder(&b)
-	encoder.SetIndent(2)
-	err := encoder.Encode(cs.config)
-	if err != nil {
-		return fmt.Errorf("marshal config to YAML: %w", err)
-	}
-
-	// Write to file
-	if err := os.WriteFile(filePath, b.Bytes(), 0600); err != nil {
+	if err := os.WriteFile(cs.filepath, document, 0600); err != nil {
 		return fmt.Errorf("write config file: %w", err)
 	}
-
-	return nil
-}
-
-func composeServiceSchema(schemaDoc map[string]any, cat catalog.Catalog) error {
-	defs, ok := schemaDoc["$defs"].(map[string]any)
-	if !ok {
-		return fmt.Errorf("catalog schema is missing $defs")
-	}
-
-	servicesSchema, err := buildServicesSchema(cat)
-	if err != nil {
-		return err
-	}
-	defs["Services"] = servicesSchema
 	return nil
 }
 
@@ -441,6 +243,7 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 			"title":       "Service Status",
 			"description": "The desired status of the service.",
 			"enum":        []any{string(service.StatusEnabled), string(service.StatusDisabled)},
+			"default":     string(definition.Spec.Status),
 		},
 		"storage":    buildServiceStorageSchema(),
 		"networking": buildServiceNetworkingSchema(),
@@ -451,6 +254,11 @@ func buildServiceInstanceSchema(definition catalog.ServiceDefinition) (map[strin
 		if err != nil {
 			return nil, fmt.Errorf("convert service config schema to map: %w", err)
 		}
+		defaultConfig, err := applySchemaDefaults(definition.Spec.ConfigSchema, map[string]any{})
+		if err != nil {
+			return nil, fmt.Errorf("apply service config defaults: %w", err)
+		}
+		configSchema["default"] = defaultConfig
 		properties["config"] = configSchema
 	}
 

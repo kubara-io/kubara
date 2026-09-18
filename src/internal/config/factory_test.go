@@ -87,8 +87,10 @@ func TestNewClusterFromEnv(t *testing.T) {
 			},
 		},
 	}
+
 	expectedClusterWithoutHelmRepo := expectedCluster
 	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
+
 	expectedClusterWithOCIHelmRepo := expectedCluster
 	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
 		URL: "registry-1.docker.io/bitnamicharts",

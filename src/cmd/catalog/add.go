@@ -1,6 +1,7 @@
 package catalog
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -12,7 +13,7 @@ import (
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
-	"sigs.k8s.io/yaml"
+	"go.yaml.in/yaml/v3"
 )
 
 func NewCatalogService() *cli.Command {
@@ -75,10 +76,13 @@ func CreateService(serviceName string) error {
 		},
 	}
 
-	serviceRaw, err := yaml.Marshal(service)
-	if err != nil {
+	var output bytes.Buffer
+	encoder := yaml.NewEncoder(&output)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(service); err != nil {
 		return fmt.Errorf("cannot marshal service: %w", err)
 	}
+	serviceRaw := output.Bytes()
 
 	if err := os.MkdirAll(filepath.Join("services"), 0o755); err != nil {
 		return fmt.Errorf("cannot create services directory: %w", err)

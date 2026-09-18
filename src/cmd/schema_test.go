@@ -56,7 +56,7 @@ func TestNewSchemaCmd(t *testing.T) {
 
 	assert.Equal(t, "schema", command.Name)
 	assert.Equal(t, "Generate a JSON schema for the config yaml structure", command.Usage)
-	assert.Equal(t, "kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]", command.UsageText)
+	assert.Equal(t, "kubara schema [--output PATH]", command.UsageText)
 	assert.Equal(t, "Generates a JSON schema for the config yaml structure and catalog definitions to use for validation and editor autocompletion", command.Description)
 
 	require.Len(t, command.Flags, 1)
@@ -153,7 +153,7 @@ func TestSchemaCmd(t *testing.T) {
 			},
 		},
 		{
-			name: "catalog collision fails without force",
+			name: "schema reports catalog collisions",
 			flags: []string{
 				"--catalog", "distribution",
 			},
@@ -162,21 +162,6 @@ func TestSchemaCmd(t *testing.T) {
 			},
 			wantErr:     true,
 			errContains: "already exists in another catalog",
-		},
-		{
-			name: "catalog collision succeeds with catalog-overwrite",
-			flags: []string{
-				"--catalog", "distribution",
-				"--catalog-overwrite",
-			},
-			setup: func(t *testing.T, tempDir string) {
-				createSchemaCollisionCatalog(t, tempDir)
-			},
-			wantErr: false,
-			validate: func(t *testing.T, tempDir string) {
-				schemaPath := filepath.Join(tempDir, "config.schema.json")
-				assert.FileExists(t, schemaPath)
-			},
 		},
 	}
 

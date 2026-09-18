@@ -1,0 +1,244 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.21.0
+  name: platformsetups.kubara.io
+spec:
+  group: kubara.io
+  names:
+    kind: PlatformSetup
+    listKind: PlatformSetupList
+    plural: platformsetups
+    shortNames:
+    - ps
+    singular: platformsetup
+  scope: Cluster
+  versions:
+  - name: v1alpha5
+    schema:
+      openAPIV3Schema:
+        description: PlatformSetup is the Schema for the platformsetups API.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: Config is the root of the configuration structure.
+            properties:
+              bootstrapCatalog:
+                description: Global bootstrap catalog reference.
+                type: string
+              clusters:
+                items:
+                  description: Cluster defines the configuration for a single Kubernetes
+                    cluster.
+                  properties:
+                    argocd:
+                      properties:
+                        helmRepo:
+                          properties:
+                            url:
+                              format: uri
+                              type: string
+                          required:
+                          - url
+                          type: object
+                        repo:
+                          properties:
+                            https:
+                              properties:
+                                components:
+                                  properties:
+                                    path:
+                                      type: string
+                                    targetRevision:
+                                      default: main
+                                      minLength: 1
+                                      type: string
+                                    url:
+                                      format: uri
+                                      type: string
+                                  required:
+                                  - url
+                                  type: object
+                                configs:
+                                  properties:
+                                    path:
+                                      type: string
+                                    targetRevision:
+                                      default: main
+                                      minLength: 1
+                                      type: string
+                                    url:
+                                      format: uri
+                                      type: string
+                                  required:
+                                  - url
+                                  type: object
+                              required:
+                              - components
+                              - configs
+                              type: object
+                            oci:
+                              properties:
+                                components:
+                                  properties:
+                                    path:
+                                      type: string
+                                    targetRevision:
+                                      default: main
+                                      minLength: 1
+                                      type: string
+                                    url:
+                                      format: uri
+                                      type: string
+                                  required:
+                                  - url
+                                  type: object
+                                configs:
+                                  properties:
+                                    path:
+                                      type: string
+                                    targetRevision:
+                                      default: main
+                                      minLength: 1
+                                      type: string
+                                    url:
+                                      format: uri
+                                      type: string
+                                  required:
+                                  - url
+                                  type: object
+                              required:
+                              - components
+                              - configs
+                              type: object
+                          type: object
+                          x-kubernetes-validations:
+                          - message: exactly one of https or oci must be configured
+                            rule: has(self.https) != has(self.oci)
+                        selfManaged:
+                          default: enabled
+                          enum:
+                          - enabled
+                          - disabled
+                          type: string
+                      required:
+                      - repo
+                      type: object
+                    catalogs:
+                      items:
+                        type: string
+                      type: array
+                    dnsName:
+                      format: hostname
+                      type: string
+                    ingressClassName:
+                      default: traefik
+                      minLength: 1
+                      type: string
+                    name:
+                      minLength: 1
+                      type: string
+                    services:
+                      x-kubernetes-preserve-unknown-fields: true
+                    ssoOrg:
+                      minLength: 1
+                      type: string
+                    ssoTeam:
+                      minLength: 1
+                      type: string
+                    stage:
+                      default: dev
+                      minLength: 1
+                      type: string
+                    terraform:
+                      properties:
+                        dns:
+                          properties:
+                            email:
+                              format: email
+                              type: string
+                            name:
+                              format: hostname
+                              type: string
+                          required:
+                          - email
+                          - name
+                          type: object
+                        kubernetesType:
+                          default: ske
+                          enum:
+                          - edge
+                          - ske
+                          - cce
+                          type: string
+                        kubernetesVersion:
+                          pattern: ^[0-9]\.[0-9]+(\.[0-9]+)?$
+                          type: string
+                        projectId:
+                          minLength: 1
+                          type: string
+                        provider:
+                          default: none
+                          description: TerraformProvider identifies an infrastructure
+                            provider supported by catalog generation.
+                          enum:
+                          - none
+                          - stackit
+                          - t-cloud-public
+                          type: string
+                      required:
+                      - provider
+                      type: object
+                      x-kubernetes-validations:
+                      - message: projectId, kubernetesVersion, and dns are required
+                          when terraform.provider is enabled
+                        rule: self.provider == 'none' || (has(self.projectId) && has(self.kubernetesVersion)
+                          && has(self.dns))
+                      - message: stackit supports kubernetesType ske or edge
+                        rule: self.provider != 'stackit' || self.kubernetesType in
+                          ['ske', 'edge']
+                      - message: t-cloud-public supports kubernetesType cce
+                        rule: self.provider != 't-cloud-public' || self.kubernetesType
+                          == 'cce'
+                    type:
+                      default: hub
+                      enum:
+                      - hub
+                      - spoke
+                      type: string
+                  required:
+                  - argocd
+                  - dnsName
+                  - name
+                  - services
+                  type: object
+                type: array
+                x-kubernetes-list-map-keys:
+                - name
+                x-kubernetes-list-type: map
+            required:
+            - clusters
+            type: object
+        required:
+        - spec
+        type: object
+    served: true
+    storage: true

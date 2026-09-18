@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -18,7 +17,6 @@ import (
 
 type SchemaOptions struct {
 	outputFilePath string
-	cwd            string
 	configFilePath string
 	catalogOptions catalog.LoadOptions
 }
@@ -38,7 +36,7 @@ func NewSchemaCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "schema",
 		Usage:       "Generate a JSON schema for the config yaml structure",
-		UsageText:   "kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]",
+		UsageText:   "kubara schema [--output PATH]",
 		Description: "Generates a JSON schema for the config yaml structure and catalog definitions to use for validation and editor autocompletion",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, err := flags.ToOptions(cmd)
@@ -70,12 +68,10 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
 	if err != nil {
-		return nil, fmt.Errorf("get catalog options: %w", err)
+		return nil, err
 	}
-
 	o := &SchemaOptions{
 		outputFilePath: outputFilePath,
-		cwd:            cwd,
 		configFilePath: configFilePath,
 		catalogOptions: catalogOptions,
 	}
@@ -97,12 +93,11 @@ func (flags *SchemaFlags) AddFlags(cmd *cli.Command) {
 }
 
 func (o *SchemaOptions) Run() error {
-	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogOptions)
-	if err := cs.Load(); err != nil && !errors.Is(err, os.ErrNotExist) {
+	store := config.NewConfigStore(filepath.Dir(o.configFilePath), o.configFilePath, o.catalogOptions)
+	if err := store.Load(); err != nil && !os.IsNotExist(err) {
 		return fmt.Errorf("load config: %w", err)
 	}
-
-	schemaDoc, err := cs.GenerateSchema()
+	schemaDoc, err := store.DynamicJSONSchema()
 	if err != nil {
 		return fmt.Errorf("generate schema: %w", err)
 	}
