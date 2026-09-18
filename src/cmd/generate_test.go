@@ -236,7 +236,7 @@ func TestGenerateCmd(t *testing.T) {
 				cluster := config.Cluster{
 					Name:       "test-cluster",
 					Stage:      "dev",
-					Networking: &config.ClusterNetworking{IngressClassName: "traefik"},
+					Networking: &config.ClusterNetworking{Type: config.NetworkingIngress, Ingress: &config.IngressNetworking{ClassName: "traefik"}},
 					Type:       "hub",
 					DNSName:    "test.example.com",
 					Terraform: &config.Terraform{

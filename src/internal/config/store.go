@@ -59,10 +59,17 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("migration of config failed: %w", err)
 	}
 
+	if err := rejectLegacyIngressConfig(raw); err != nil {
+		return err
+	}
+	// A fresh value prevents repeated loads from retaining catalog compatibility fields.
+	cs.config = &Config{}
+	var metadata mapstructure.Metadata
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
 		Result:           cs.config,
+		Metadata:         &metadata,
 		Squash:           true,
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
@@ -73,17 +80,16 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("decode config: %w", err)
 	}
 
-	// Persist the structured form when loading an old Ingress-only config.
-	// Keep the deprecated field available to existing catalog templates.
-	for _, cluster := range cs.config.Clusters {
-		if cluster.IngressClassName != "" && (cluster.Networking == nil ||
-			(cluster.Networking.Gateway == nil && cluster.Networking.IngressClassName == "")) {
-			migrated = true
+	// Unknown routing fields must not disappear before schema validation.
+	slices.Sort(metadata.Unused)
+	for _, key := range metadata.Unused {
+		if strings.Contains(key, ".networking.") {
+			return fmt.Errorf("unknown networking field %q", key)
 		}
 	}
-	if err := applyConfigDefaults(cs.config); err != nil {
-		return fmt.Errorf("apply config defaults: %w", err)
-	}
+
+	initializeNetworking(cs.config)
+	applyDefaults(cs.config)
 	normalizeDisabledTerraform(cs.config)
 	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
 		return fmt.Errorf("apply service catalog defaults: %w", err)
@@ -93,12 +99,35 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("validate config: %w", err)
 	}
 
+	// Populate compatibility inputs only after the config has passed validation.
+	for i := range cs.config.Clusters {
+		cluster := &cs.config.Clusters[i]
+		if cluster.Networking.Ingress == nil {
+			continue
+		}
+		cluster.IngressClassName = cluster.Networking.Ingress.ClassName
+	}
+
 	if migrated {
 		if err := cs.SaveToFile(); err != nil {
 			return fmt.Errorf("persist migrated config: %w", err)
 		}
 	}
 
+	return nil
+}
+
+func rejectLegacyIngressConfig(raw map[string]any) error {
+	clusters, _ := raw["clusters"].([]any)
+	for i, item := range clusters {
+		cluster, ok := item.(map[string]any)
+		if !ok {
+			continue
+		}
+		if _, exists := cluster["ingressClassName"]; exists {
+			return fmt.Errorf("clusters[%d]: ingressClassName is no longer supported in config files; use networking.ingress.className", i)
+		}
+	}
 	return nil
 }
 
@@ -235,14 +264,17 @@ func (cs *ConfigStore) validate() error {
 	if err != nil {
 		return fmt.Errorf("generate schema: %w", err)
 	}
+	if err := validateHubCount(cs.config); err != nil {
+		return fmt.Errorf("each config must contain exactly one hub: %w", err)
+	}
 	if err := validateAgainstSchema(schemaDoc, cs.config); err != nil {
 		return fmt.Errorf("validate config: %w", err)
 	}
 	if err := validateProviderKubernetesTypes(cs.config); err != nil {
 		return fmt.Errorf("validate provider kubernetes types: %w", err)
 	}
-	if err := validateHubCount(cs.config); err != nil {
-		return fmt.Errorf("each config must contain exactly one hub: %w", err)
+	if err := validateNetworking(cs.config); err != nil {
+		return fmt.Errorf("validate networking: %w", err)
 	}
 	return nil
 }
@@ -312,6 +344,21 @@ func validateAgainstSchema(schemaDoc map[string]any, value any) error {
 			return validationErr
 		}
 		return err
+	}
+	return nil
+}
+
+func validateNetworking(cfg *Config) error {
+	for _, cluster := range cfg.Clusters {
+		networking := cluster.Networking
+		if networking.Type == NetworkingGateway && networking.Gateway == nil {
+			return fmt.Errorf("cluster %q: networking.gateway is required when networking.type is gateway", cluster.Name)
+		}
+		for name, svc := range cluster.Services {
+			if svc.Networking != nil && svc.Networking.Gateway != nil && networking.Type != NetworkingGateway {
+				return fmt.Errorf("cluster %q service %q: a service Gateway override requires networking.type gateway", cluster.Name, name)
+			}
+		}
 	}
 	return nil
 }
@@ -395,6 +442,16 @@ func (cs *ConfigStore) GetFilepath() string {
 	return cs.filepath
 }
 
+// configFileView excludes fields that exist only for catalog compatibility.
+func configFileView(cfg *Config) Config {
+	result := *cfg
+	result.Clusters = slices.Clone(cfg.Clusters)
+	for i := range result.Clusters {
+		result.Clusters[i].IngressClassName = ""
+	}
+	return result
+}
+
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
@@ -411,7 +468,7 @@ func (cs *ConfigStore) SaveToFile() error {
 	var b bytes.Buffer
 	encoder := yaml.NewEncoder(&b)
 	encoder.SetIndent(2)
-	err := encoder.Encode(cs.config)
+	err := encoder.Encode(configFileView(cs.config))
 	if err != nil {
 		return fmt.Errorf("marshal config to YAML: %w", err)
 	}

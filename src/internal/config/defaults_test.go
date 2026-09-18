@@ -10,20 +10,21 @@ func TestApplyDefaults_ClusterLevelDefaults(t *testing.T) {
 	cfg := &Config{
 		Clusters: []Cluster{
 			{
-				Name:    "test",
-				DNSName: "test.example.com",
+				Name:       "test",
+				DNSName:    "test.example.com",
+				Networking: &ClusterNetworking{Ingress: &IngressNetworking{}},
 				// Should get defaults for:
-				// Stage, Type, IngressClassName
+				// Stage, Type, Networking.Type, Networking.Ingress.ClassName
 			},
 		},
 	}
 
-	assert.NoError(t, applyConfigDefaults(cfg))
+	applyDefaults(cfg)
 
 	c := cfg.Clusters[0]
 	assert.Equal(t, "dev", c.Stage, "Stage should default to dev")
 	assert.Equal(t, "hub", c.Type, "Type should default to hub")
-	assert.Equal(t, "traefik", c.Networking.IngressClassName, "IngressClassName should default to traefik")
+	assert.Equal(t, "traefik", c.Networking.Ingress.ClassName, "IngressClassName should default to traefik")
 }
 
 func TestApplyDefaults_DoesNotOverwriteExplicitValues(t *testing.T) {
@@ -33,18 +34,18 @@ func TestApplyDefaults_DoesNotOverwriteExplicitValues(t *testing.T) {
 				Name:       "test",
 				Stage:      "production",
 				Type:       "spoke",
-				Networking: &ClusterNetworking{IngressClassName: "nginx"},
+				Networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "nginx"}},
 				DNSName:    "test.example.com",
 			},
 		},
 	}
 
-	assert.NoError(t, applyConfigDefaults(cfg))
+	applyDefaults(cfg)
 
 	c := cfg.Clusters[0]
 	assert.Equal(t, "production", c.Stage)
 	assert.Equal(t, "spoke", c.Type)
-	assert.Equal(t, "nginx", c.Networking.IngressClassName)
+	assert.Equal(t, "nginx", c.Networking.Ingress.ClassName)
 }
 
 func TestApplyDefaults_NestedTerraformDefaults(t *testing.T) {

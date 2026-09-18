@@ -41,7 +41,7 @@ That means templates can read fields such as:
 - `.cluster.stage`
 - `.cluster.type`
 - `.cluster.dnsName`
-- `.cluster.networking.ingressClassName`
+- `.cluster.networking.ingress.className`
 - `.cluster.publicLoadbalancerIP`
 - `.cluster.terraform.provider`
 
@@ -62,18 +62,22 @@ For example:
 
 Templates can read fields such as:
 
-- `.cluster.networking.ingressClassName`
+- `.cluster.networking.type`
+- `.cluster.networking.ingress.className`
 - `.cluster.networking.gateway.name`
 - `.cluster.networking.gateway.namespace`
 - `.cluster.networking.gateway.sectionName`
 
-Use `ingressClassName` for Ingress or `gateway` for Gateway API. Without either setting, kubara defaults to the `traefik` Ingress class.
+`type` selects `ingress` (the default) or `gateway`. Ingress defaults to class `traefik`.
+Both blocks may be configured; templates must use `type` to select the active routing API.
+Unknown fields in cluster or service networking settings are rejected.
 A Gateway reference requires `name` and `namespace`; `sectionName` optionally selects a listener.
 
 For example, this cluster configuration supplies a parent Gateway:
 
 ```yaml
 networking:
+  type: gateway
   gateway:
     name: platform
     namespace: traefik
@@ -91,12 +95,13 @@ Services can provide their own routing settings under:
 - `.cluster.services.<service-name>.networking.gateway`
 - `.cluster.services.<service-name>.networking.annotations`
 
-A service Gateway replaces the complete cluster reference and requires a cluster Gateway to be configured.
+A service Gateway replaces the complete cluster reference and requires `networking.type: gateway`.
 An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
 
-The deprecated `.cluster.ingressClassName` remains available for existing catalogs.
-kubara warns when it is used and automatically adds and saves the structured setting for old Ingress configurations.
-If both Ingress fields are supplied, their values must match. Templates supporting older CLI versions should fall back to the deprecated field.
+When `networking` is absent, kubara migrates the legacy `ingressClassName` to `networking.ingress.className` and saves the structured config, keeping version `v1alpha4`.
+If `networking` exists, the top-level field is rejected, even when the values match. Removing the entire `networking` block makes the config indistinguishable from the legacy format.
+For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
+Templates supporting older CLI versions can fall back to this field.
 
 ### `.env`
 

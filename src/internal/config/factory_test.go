@@ -43,7 +43,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		DNSName:    expectedDNSName,
 		SSOOrg:     "<my-org>",
 		SSOTeam:    "<my-team>",
-		Networking: &ClusterNetworking{IngressClassName: "traefik"},
+		Networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "traefik"}},
 		Terraform: &Terraform{
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",

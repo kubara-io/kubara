@@ -266,13 +266,13 @@ func TestTemplateFiles(t *testing.T) {
 					"stage":      "dev",
 				},
 				"cluster": map[string]any{
-					"type":       "hub",
-					"name":       "test-cluster",
-					"stage":      "dev",
-					"dnsName":    "test.example.com",
-					"networking": map[string]any{"ingressClassName": "traefik"},
-					"ssoOrg":     "myorg",
-					"ssoTeam":    "myteam",
+					"type":             "hub",
+					"name":             "test-cluster",
+					"stage":            "dev",
+					"dnsName":          "test.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
 					"terraform": map[string]any{
 						"kubernetesType": "ske",
 					},
@@ -390,13 +390,13 @@ func TestTemplateFiles(t *testing.T) {
 			tplType: Helm,
 			context: map[string]any{
 				"cluster": map[string]any{
-					"type":       "hub",
-					"name":       "helm-cluster",
-					"stage":      "production",
-					"dnsName":    "helm.example.com",
-					"networking": map[string]any{"ingressClassName": "traefik"},
-					"ssoOrg":     "myorg",
-					"ssoTeam":    "myteam",
+					"type":             "hub",
+					"name":             "helm-cluster",
+					"stage":            "production",
+					"dnsName":          "helm.example.com",
+					"ingressClassName": "traefik",
+					"ssoOrg":           "myorg",
+					"ssoTeam":          "myteam",
 					"argocd": map[string]any{
 						"repo": map[string]any{
 							"https": map[string]any{
