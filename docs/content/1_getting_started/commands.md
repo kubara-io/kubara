@@ -99,13 +99,15 @@ Shows a list of commands or help for one command
 
 Generate files from catalog templates
 
->kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
+>kubara generate [--terraform|--helm] [--reset] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
 
 **--dry-run**: Preview generation without creating files
 
 **--helm**: Only generate Helm files
 
 **--help, -h**: show help
+
+**--reset**: Delete existing platform-components before generation
 
 **--terraform**: Only generate Terraform files
 

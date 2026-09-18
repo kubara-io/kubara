@@ -51,6 +51,7 @@ func TestNewGenerateFlags(t *testing.T) {
 	assert.False(t, flags.Terraform)
 	assert.False(t, flags.Helm)
 	assert.False(t, flags.DryRun)
+	assert.False(t, flags.Reset)
 }
 
 func TestNewGenerateCmd(t *testing.T) {
@@ -60,11 +61,11 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
-	assert.Equal(t, "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "kubara generate [--terraform|--helm] [--reset] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
 	assert.Equal(t, "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.", command.Description)
 
 	// Check that flags are added
-	require.Len(t, command.Flags, 3)
+	require.Len(t, command.Flags, 4)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -74,6 +75,7 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["terraform"])
 	assert.True(t, flagNames["helm"])
 	assert.True(t, flagNames["dry-run"])
+	assert.True(t, flagNames["reset"])
 }
 
 func TestGenerateCmd(t *testing.T) {
@@ -529,6 +531,122 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 	}
 	require.NoError(t, err)
 	assert.NotContains(t, names, serviceName)
+}
+
+func TestGenerateCmd_PreservesExistingFilesWithoutReset(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+		Name:             "test-cluster",
+		Stage:            "dev",
+		IngressClassName: "traefik",
+		Type:             "hub",
+		DNSName:          "test.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "stackit",
+			ProjectID:         "00000000-0000-0000-0000-000000000000",
+			KubernetesType:    "ske",
+			KubernetesVersion: "1.28.0",
+			DNS: config.DNS{
+				Name:  "example.com",
+				Email: "[EMAIL_REDACTED]",
+			},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Configs: config.Repository{
+						URL:            "https://github.com/example/configs",
+						TargetRevision: "main",
+					},
+					Components: config.Repository{
+						URL:            "https://github.com/example/components",
+						TargetRevision: "main",
+					},
+				},
+			},
+		},
+		Services: service.Services{},
+	})
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
+
+	// Pre-create an unreferenced module from another config
+	otherModulePath := filepath.Join(tempDir, "platform-components", "terraform", "other", "main.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(otherModulePath), 0o750))
+	require.NoError(t, os.WriteFile(otherModulePath, []byte("other content"), 0o644))
+
+	// Pre-create a file that would normally be generated to test no-overwrite
+	existingGeneratedPath := filepath.Join(tempDir, "platform-components", "terraform", "stackit", "modules", "ske-cluster", "main.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(existingGeneratedPath), 0o750))
+	require.NoError(t, os.WriteFile(existingGeneratedPath, []byte("custom content"), 0o644))
+
+	app := CreateTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	// Verify unreferenced file from another config was preserved
+	assert.FileExists(t, otherModulePath)
+	otherContent, err := os.ReadFile(otherModulePath)
+	require.NoError(t, err)
+	assert.Equal(t, "other content", string(otherContent))
+
+	// Verify existing generated file was not overwritten
+	existingContent, err := os.ReadFile(existingGeneratedPath)
+	require.NoError(t, err)
+	assert.Equal(t, "custom content", string(existingContent))
+}
+
+func TestGenerateCmd_DeletesWithReset(t *testing.T) {
+	tempDir := t.TempDir()
+	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+		Name:             "test-cluster",
+		Stage:            "dev",
+		IngressClassName: "traefik",
+		Type:             "hub",
+		DNSName:          "test.example.com",
+		Terraform: &config.Terraform{
+			Provider:          "stackit",
+			ProjectID:         "00000000-0000-0000-0000-000000000000",
+			KubernetesType:    "ske",
+			KubernetesVersion: "1.28.0",
+			DNS: config.DNS{
+				Name:  "example.com",
+				Email: "[EMAIL_REDACTED]",
+			},
+		},
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				HTTPS: &config.RepoType{
+					Configs: config.Repository{
+						URL:            "https://github.com/example/configs",
+						TargetRevision: "main",
+					},
+					Components: config.Repository{
+						URL:            "https://github.com/example/components",
+						TargetRevision: "main",
+					},
+				},
+			},
+		},
+		Services: service.Services{},
+	})
+	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
+
+	// Pre-create an unreferenced module
+	otherModulePath := filepath.Join(tempDir, "platform-components", "terraform", "other", "main.tf")
+	require.NoError(t, os.MkdirAll(filepath.Dir(otherModulePath), 0o750))
+	require.NoError(t, os.WriteFile(otherModulePath, []byte("other content"), 0o644))
+
+	app := CreateTestApp(NewGenerateCmd())
+	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--reset"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	// Verify old terraform directory was wiped and otherModulePath is gone
+	assert.NoFileExists(t, otherModulePath)
+
+	// Verify new files were generated
+	assert.FileExists(t, filepath.Join(tempDir, "platform-components", "terraform", "stackit", "modules", "ske-cluster", "main.tf"))
 }
 
 // Helper function
