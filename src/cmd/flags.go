@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -56,10 +55,8 @@ func NewGlobalFlags() *GlobalFlags {
 
 func (flags *GlobalFlags) ToRootOptions() RootOptions {
 	kubeconfigFilePath := flags.KubeconfigFilePath
-	if kubeconfigFilePath == defaultKubeconfigPath {
-		if envKC := os.Getenv("KUBECONFIG"); envKC != "" {
-			kubeconfigFilePath = envKC
-		}
+	if kubeconfigFilePath == "" {
+		kubeconfigFilePath = defaultKubeconfigPath
 	}
 
 	return RootOptions{
@@ -85,6 +82,7 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.KubeconfigFilePath,
 			Usage:       "Path to kubeconfig file",
 			Destination: &flags.KubeconfigFilePath,
+			Sources:     cli.EnvVars("KUBECONFIG"),
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},
