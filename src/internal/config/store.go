@@ -231,6 +231,9 @@ func (cs *ConfigStore) validate() error {
 	if err := validateProviderKubernetesTypes(cs.config); err != nil {
 		return fmt.Errorf("validate provider kubernetes types: %w", err)
 	}
+	if err := validateHubCount(cs.config); err != nil {
+		return fmt.Errorf("each config must contain exactly one hub: %w", err)
+	}
 	return nil
 }
 
@@ -330,6 +333,24 @@ func validateProviderKubernetesTypes(cfg *Config) error {
 
 	return nil
 }
+
+func validateHubCount(cfg *Config) error {
+	var hubs []string
+
+	for _, cluster := range cfg.Clusters {
+		if cluster.Type == "hub" {
+			hubs = append(hubs, cluster.Name)
+		}
+	}
+	if len(hubs) == 0 {
+		return fmt.Errorf("no hubs were definded in config")
+	}
+	if len(hubs) >= 2 {
+		return fmt.Errorf("multiple hubs defined in config: %v" , hubs)
+	}
+	return nil
+}
+
 
 func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
 	switch provider {

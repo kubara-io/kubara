@@ -323,6 +323,17 @@ func TestConfigStore_Validate(t *testing.T) {
 	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
 
+	// Test 
+	invalidConfigTwoHubs := deepCopyConfig(validConfig)
+	invalidMultipleHubsConfig := deepCopyConfig(validConfig)
+	secondHub := invalidMultipleHubsConfig.Clusters[0]
+	secondHub.Name = "second-hub-cluster"
+	secondHub.DNSName = "second-hub.example.com"
+	secondHub.Type = "hub"
+	invalidMultipleHubsConfig.Clusters = append(invalidMultipleHubsConfig.Clusters, secondHub)
+	//out, _ := json.MarshalIndent(invalidMultipleHubsConfig, "", "\t")
+	//fmt.Println(string(out))
+
 	tests := []struct {
 		name    string
 		config  *Config
@@ -366,6 +377,11 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name:    "invalid_config_should_fail_on_missing_terraform_required_field",
 			config:  invalidConfigMissingTerraformField,
+			wantErr: true,
+		},
+		{
+			name: "invalid_config_two_hubs",
+			config: invalidConfigTwoHubs,
 			wantErr: true,
 		},
 	}
@@ -643,6 +659,7 @@ func TestConfigStore_LoadAppliesDefaultsPerClusterCatalog(t *testing.T) {
 	secondCluster.DNSName = "logging.example.com"
 	secondCluster.Catalogs = []string{testCustomCatalogPath}
 	secondCluster.Services = service.Services{}
+	secondCluster.Type = "spoke"
 	cfg.Clusters = append(cfg.Clusters, secondCluster)
 
 	cs := createLoadedConfigStore(t, cfg)
@@ -664,6 +681,7 @@ func TestGenerateSchema_UsesClusterSpecificServiceBranches(t *testing.T) {
 	secondCluster.DNSName = "logging.example.com"
 	secondCluster.Catalogs = []string{testCustomCatalogPath}
 	secondCluster.Services = service.Services{}
+	secondCluster.Type = "spoke"
 	cfg.Clusters = append(cfg.Clusters, secondCluster)
 
 	cs := createLoadedConfigStore(t, cfg)
