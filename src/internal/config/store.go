@@ -345,7 +345,7 @@ func validateHubCount(cfg *Config) error {
 	if len(hubs) == 0 {
 		return fmt.Errorf("no hubs were definded in config")
 	}
-	if len(hubs) >= 2 {
+	if len(hubs) > 1 {
 		return fmt.Errorf("multiple hubs defined in config: %v" , hubs)
 	}
 	return nil
