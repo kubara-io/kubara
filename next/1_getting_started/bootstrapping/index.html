@@ -729,10 +729,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bootstrapping-multiple-hub-cluster" class="md-nav__link">
+  <a href="#bootstrapping-multiple-hub-clusters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bootstrapping Multiple Hub Cluster
+        Bootstrapping Multiple Hub Clusters
       
     </span>
   </a>
@@ -3032,10 +3032,10 @@ You're not viewing the latest stable version.
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#bootstrapping-multiple-hub-cluster" class="md-nav__link">
+  <a href="#bootstrapping-multiple-hub-clusters" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Bootstrapping Multiple Hub Cluster
+        Bootstrapping Multiple Hub Clusters
       
     </span>
   </a>
@@ -3450,9 +3450,9 @@ This path layout is the same for every provider and secret backend, including th
 <h2 id="whats-also-possible">What's also possible?</h2>
 <p>This section will be extended in the future to describe not just technical changes,
 but also other supported possibilities when bootstrapping.</p>
-<h3 id="bootstrapping-multiple-hub-cluster">Bootstrapping Multiple Hub Cluster</h3>
+<h3 id="bootstrapping-multiple-hub-clusters">Bootstrapping Multiple Hub Clusters</h3>
 <p>You can bootstrap multiple Hub clusters.
-Do <strong>not</strong> reuse the same <code>config.yaml</code> file for multiple Hub clusters.</p>
+You <strong>cannot</strong> reuse the same <code>config.yaml</code> file for multiple Hub clusters. Only one hub per config is supported.</p>
 <p><strong>Why?</strong>
 During the bootstrap process, the <code>.env</code> file is used to provide credentials.
 If you reuse the same <code>.env</code> file, you would have to constantly adjust it for each Hub - which is error-prone.</p>

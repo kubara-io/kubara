@@ -474,10 +474,10 @@ Enjoy your new platform!
 This section will be extended in the future to describe not just technical changes,
 but also other supported possibilities when bootstrapping.
 
-### Bootstrapping Multiple Hub Cluster
+### Bootstrapping Multiple Hub Clusters
 
 You can bootstrap multiple Hub clusters.
-Do **not** reuse the same `config.yaml` file for multiple Hub clusters.
+You **cannot** reuse the same `config.yaml` file for multiple Hub clusters. Only one hub per config is supported.
 
 **Why?**
 During the bootstrap process, the `.env` file is used to provide credentials.
