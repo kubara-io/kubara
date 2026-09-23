@@ -234,11 +234,11 @@ func TestGenerateCmd(t *testing.T) {
 			// Create config file if not testing error case
 			if !tt.wantErr || tt.errContains != "load config" {
 				cluster := config.Cluster{
-					Name:             "test-cluster",
-					Stage:            "dev",
-					IngressClassName: "traefik",
-					Type:             "hub",
-					DNSName:          "test.example.com",
+					Name:       "test-cluster",
+					Stage:      "dev",
+					Networking: &config.ClusterNetworking{Type: config.NetworkingIngress, Ingress: &config.IngressNetworking{ClassName: "traefik"}},
+					Type:       "hub",
+					DNSName:    "test.example.com",
 					Terraform: &config.Terraform{
 						Provider:          "stackit",
 						ProjectID:         "00000000-0000-0000-0000-000000000000",

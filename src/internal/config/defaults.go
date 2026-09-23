@@ -7,6 +7,20 @@ import (
 	"github.com/kubara-io/kubara/internal/utils"
 )
 
+// initializeNetworking creates the routing blocks needed before applying schema defaults.
+func initializeNetworking(cfg *Config) {
+	for i := range cfg.Clusters {
+		cluster := &cfg.Clusters[i]
+		if cluster.Networking == nil {
+			cluster.Networking = &ClusterNetworking{}
+		}
+		networking := cluster.Networking
+		if (networking.Type == "" || networking.Type == NetworkingIngress) && networking.Ingress == nil {
+			networking.Ingress = &IngressNetworking{}
+		}
+	}
+}
+
 // applyDefaults walks the config struct tree via reflection and sets zero-value
 // fields to their default, as declared in the `jsonschema:"default=..."` tag.
 // This keeps the jsonschema struct tags as the single source of truth for both

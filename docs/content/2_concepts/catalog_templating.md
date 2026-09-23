@@ -41,7 +41,7 @@ That means templates can read fields such as:
 - `.cluster.stage`
 - `.cluster.type`
 - `.cluster.dnsName`
-- `.cluster.ingressClassName`
+- `.cluster.networking.ingress.className`
 - `.cluster.publicLoadbalancerIP`
 - `.cluster.terraform.provider`
 
@@ -55,6 +55,53 @@ For example:
 
 - `.cluster.services.traefik.status`
 - `.cluster.services.cert-manager.config.clusterIssuer.name`
+
+#### Networking
+
+`.cluster.networking` contains the current cluster's routing settings.
+
+Templates can read fields such as:
+
+- `.cluster.networking.type`
+- `.cluster.networking.ingress.className`
+- `.cluster.networking.gateway.name`
+- `.cluster.networking.gateway.namespace`
+- `.cluster.networking.gateway.sectionName`
+
+`type` selects `ingress` (the default) or `gateway`. Ingress defaults to class `traefik`.
+Both blocks may be configured; templates must use `type` to select the active routing API.
+Unknown fields in cluster or service networking settings are rejected.
+A Gateway reference requires `name` and `namespace`; `sectionName` optionally selects a listener.
+
+For example, this cluster configuration supplies a parent Gateway:
+
+```yaml
+networking:
+  type: gateway
+  gateway:
+    name: platform
+    namespace: traefik
+    sectionName: websecure
+```
+
+Use `dig` to read the optional reference:
+
+```yaml
+{{- $gateway := dig "cluster" "networking" "gateway" (dict) . -}}
+```
+
+Services can provide their own routing settings under:
+
+- `.cluster.services.<service-name>.networking.gateway`
+- `.cluster.services.<service-name>.networking.annotations`
+
+A service Gateway replaces the complete cluster reference and requires `networking.type: gateway`.
+An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
+
+When `networking` is absent, kubara migrates the legacy `ingressClassName` to `networking.ingress.className` and saves the structured config, keeping version `v1alpha4`.
+If `networking` exists, the top-level field is rejected, even when the values match. Removing the entire `networking` block makes the config indistinguishable from the legacy format.
+For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
+Templates supporting older CLI versions can fall back to this field.
 
 ### `.env`
 
