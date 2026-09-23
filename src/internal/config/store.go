@@ -346,11 +346,10 @@ func validateHubCount(cfg *Config) error {
 		return fmt.Errorf("no hubs were definded in config")
 	}
 	if len(hubs) > 1 {
-		return fmt.Errorf("multiple hubs defined in config: %v" , hubs)
+		return fmt.Errorf("multiple hubs defined in config: %v", hubs)
 	}
 	return nil
 }
-
 
 func supportedKubernetesTypesForProvider(provider TerraformProvider) []string {
 	switch provider {

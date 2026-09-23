@@ -380,13 +380,13 @@ func TestConfigStore_Validate(t *testing.T) {
 			wantErr: true,
 		},
 		{
-			name: "invalid_config_two_hubs",
-			config: invalidConfigTwoHubs,
+			name:    "invalid_config_two_hubs",
+			config:  invalidConfigTwoHubs,
 			wantErr: true,
 		},
 		{
-			name: "invalid_config_no_hub",
-			config: invalidConfigNoHub,
+			name:    "invalid_config_no_hub",
+			config:  invalidConfigNoHub,
 			wantErr: true,
 		},
 	}
