@@ -323,16 +323,16 @@ func TestConfigStore_Validate(t *testing.T) {
 	clonedTerraformMissing.ProjectID = ""
 	invalidConfigMissingTerraformField.Clusters[0].Terraform = &clonedTerraformMissing
 
-	// Test 
+	// Verify that only exactly one hub is allowed
 	invalidConfigTwoHubs := deepCopyConfig(validConfig)
-	invalidMultipleHubsConfig := deepCopyConfig(validConfig)
-	secondHub := invalidMultipleHubsConfig.Clusters[0]
+	secondHub := invalidConfigTwoHubs.Clusters[0]
 	secondHub.Name = "second-hub-cluster"
 	secondHub.DNSName = "second-hub.example.com"
 	secondHub.Type = "hub"
-	invalidMultipleHubsConfig.Clusters = append(invalidMultipleHubsConfig.Clusters, secondHub)
-	//out, _ := json.MarshalIndent(invalidMultipleHubsConfig, "", "\t")
-	//fmt.Println(string(out))
+	invalidConfigTwoHubs.Clusters = append(invalidConfigTwoHubs.Clusters, secondHub)
+
+	invalidConfigNoHub := deepCopyConfig(validConfig)
+	invalidConfigNoHub.Clusters[0].Type = "spoke"
 
 	tests := []struct {
 		name    string
@@ -382,6 +382,11 @@ func TestConfigStore_Validate(t *testing.T) {
 		{
 			name: "invalid_config_two_hubs",
 			config: invalidConfigTwoHubs,
+			wantErr: true,
+		},
+		{
+			name: "invalid_config_no_hub",
+			config: invalidConfigNoHub,
 			wantErr: true,
 		},
 	}
