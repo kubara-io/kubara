@@ -40,8 +40,8 @@ github.com/evanphx/json-patch v0.5.2 h1:xVCHIVMUu1wtM/VkR9jVZ45N3FhZfYMMYGorLCR8
 github.com/evanphx/json-patch v0.5.2/go.mod h1:ZWS5hhDbVDyob71nXKNL0+PWn6ToqBHMikGIFbs31qQ=
 github.com/evanphx/json-patch/v5 v5.9.11 h1:/8HVnzMq13/3x9TPvjG08wUGqBTmZBsCWzjTM0wiaDU=
 github.com/evanphx/json-patch/v5 v5.9.11/go.mod h1:3j+LviiESTElxA4p3EMKAB9HXj3/XEtnUf6OZxqIQTM=
-github.com/external-secrets/external-secrets/apis v0.0.0-20260916122731-5c3416887e2a h1:4ABnG2N0/yhIjRFus/D95KrqPF65WBzm5CC/wS5nI1A=
-github.com/external-secrets/external-secrets/apis v0.0.0-20260916122731-5c3416887e2a/go.mod h1:1HdrhQd9BpjfoAAn0I7Jo4NVMPwLj3OWw4C4VQWju5w=
+github.com/external-secrets/external-secrets/apis v0.0.0-20260923100115-ecbfdd362b43 h1:SN0MV9TDFIolNKya9bBQHcqm5NtBDVJ9wgEDcODa3vY=
+github.com/external-secrets/external-secrets/apis v0.0.0-20260923100115-ecbfdd362b43/go.mod h1:1HdrhQd9BpjfoAAn0I7Jo4NVMPwLj3OWw4C4VQWju5w=
 github.com/fatih/color v1.19.0 h1:Zp3PiM21/9Ld6FzSKyL5c/BULoe/ONr9KlbYVOfG8+w=
 github.com/fatih/color v1.19.0/go.mod h1:zNk67I0ZUT1bEGsSGyCZYZNrHuTkJJB+r6Q9VuMi0LE=
 github.com/felixge/httpsnoop v1.0.4 h1:NFTV2Zj1bL4mc9sqWACXbQFVBBg2W3GPvqp8/ESS2Wg=
@@ -209,8 +209,8 @@ github.com/stretchr/testify v1.12.1 h1:EuwCh5fleGS7H32xRwO3wRGT7DxrDhLAT6FF8MpWD
 github.com/stretchr/testify v1.12.1/go.mod h1:MDEgiDPPsNp5cuIrHPPCyornHKgEVbtFUmoNlxoYthg=
 github.com/urfave/cli-docs/v3 v3.1.0 h1:Sa5xm19IpE5gpm6tZzXdfjdFxn67PnEsE4dpXF7vsKw=
 github.com/urfave/cli-docs/v3 v3.1.0/go.mod h1:59d+5Hz1h6GSGJ10cvcEkbIe3j233t4XDqI72UIx7to=
-github.com/urfave/cli/v3 v3.12.0 h1:p2iMu5yeXB+ORzD1AAqwP2kHV9Q6QObnwyQXFFdnXYQ=
-github.com/urfave/cli/v3 v3.12.0/go.mod h1:vXn6HxPNccJSzQr2QvwVncOKrgYGIHU0HY5h8B2nQj4=
+github.com/urfave/cli/v3 v3.13.0 h1:Dr6jqMfIyyFsRVn7Nz5mqLsMY+ZMpfh3a0aMs+umPVY=
+github.com/urfave/cli/v3 v3.13.0/go.mod h1:vXn6HxPNccJSzQr2QvwVncOKrgYGIHU0HY5h8B2nQj4=
 github.com/x448/float16 v0.8.4 h1:qLwI1I70+NjRFUR3zs1JPUCgaCXSh3SW62uAKT1mSBM=
 github.com/x448/float16 v0.8.4/go.mod h1:14CWIYCyZA/cWjXOioeEpHeN/83MdbZDRQHoFcYsOfg=
 go.etcd.io/etcd/api/v3 v3.7.0 h1:WZlGK7pRtYGDB8ti8wkrQ5D2oWGMbtNL9VA5e+vF2Fg=

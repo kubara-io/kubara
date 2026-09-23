@@ -5,7 +5,7 @@ go 1.26.6
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/external-secrets/external-secrets/apis v0.0.0-20260916122731-5c3416887e2a
+	github.com/external-secrets/external-secrets/apis v0.0.0-20260923100115-ecbfdd362b43
 	github.com/fatih/color v1.19.0
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/invopop/jsonschema v0.14.0
@@ -19,7 +19,7 @@ require (
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.3
 	github.com/stretchr/testify v1.12.1
 	github.com/urfave/cli-docs/v3 v3.1.0
-	github.com/urfave/cli/v3 v3.12.0
+	github.com/urfave/cli/v3 v3.13.0
 	go.yaml.in/yaml/v3 v3.0.5
 	golang.org/x/crypto v0.57.0
 	golang.org/x/term v0.46.0
