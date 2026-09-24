@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM alpine AS terraform-downloader
+FROM --platform=$BUILDPLATFORM alpine:3.24.2 AS terraform-downloader
 ARG TARGETARCH
 
 RUN apk add --no-cache curl unzip
@@ -6,7 +6,7 @@ RUN curl -fsSL -o terraform.zip https://releases.hashicorp.com/terraform/1.14.7/
     && unzip terraform.zip \
     && mv terraform /usr/local/bin/terraform
 
-FROM alpine
+FROM alpine:3.24.2
 ARG TARGETPLATFORM
 
 COPY $TARGETPLATFORM/kubara /kubara
