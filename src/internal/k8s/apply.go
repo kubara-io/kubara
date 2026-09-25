@@ -5,22 +5,26 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	"k8s.io/client-go/dynamic"
 )
 
 // ApplyOptions for server-side apply operations
 type ApplyOptions struct {
-	FieldManager   string
-	ForceConflicts bool
-	DryRun         bool
-	Validate       bool
+	FieldManager        string
+	ForceConflicts      bool
+	DryRun              bool
+	Validate            bool
+	RecreateBeforeApply func(*unstructured.Unstructured) bool
 }
 
 // DefaultApplyOptions returns default apply options
@@ -85,6 +89,14 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 		dr = c.DynamicClient.Resource(gvr)
 	}
 
+	if !opts.DryRun &&
+		opts.RecreateBeforeApply != nil &&
+		opts.RecreateBeforeApply(obj) {
+		if err := deleteObjectAndWait(ctx, dr, obj.GetName()); err != nil {
+			return fmt.Errorf("recreate before apply: %w", err)
+		}
+	}
+
 	// Prepare apply options
 	applyOpts := metav1.ApplyOptions{
 		FieldManager: opts.FieldManager,
@@ -99,6 +111,47 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 	_, err = dr.Apply(ctx, obj.GetName(), obj, applyOpts)
 	if err != nil {
 		return fmt.Errorf("server-side apply: %w", err)
+	}
+
+	return nil
+}
+
+func deleteObjectAndWait(
+	ctx context.Context,
+	dr dynamic.ResourceInterface,
+	name string,
+) error {
+	propagation := metav1.DeletePropagationForeground
+
+	err := dr.Delete(ctx, name, metav1.DeleteOptions{
+		PropagationPolicy: &propagation,
+	})
+	if apierrors.IsNotFound(err) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("delete existing object: %w", err)
+	}
+
+	err = wait.PollUntilContextTimeout(
+		ctx,
+		time.Second,
+		time.Minute,
+		true,
+		func(ctx context.Context) (bool, error) {
+			_, err := dr.Get(ctx, name, metav1.GetOptions{})
+			if apierrors.IsNotFound(err) {
+				return true, nil
+			}
+			if err != nil {
+				return false, fmt.Errorf("check object deletion: %w", err)
+			}
+
+			return false, nil
+		},
+	)
+	if err != nil {
+		return fmt.Errorf("wait for object deletion: %w", err)
 	}
 
 	return nil

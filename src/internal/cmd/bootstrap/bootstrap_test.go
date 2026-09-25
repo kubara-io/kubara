@@ -9,7 +9,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 const completionMessageTemplate = `
@@ -161,4 +162,61 @@ func TestWriteLocalOpenBaoValuesUsesChartServerImageForAutoUnsealer(t *testing.T
 
 	assert.Contains(t, string(content), `image: '{{ .Values.server.image.registry | default "docker.io" }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default (trimPrefix "v" .Chart.AppVersion) }}'`)
 	assert.NotContains(t, string(content), "openbao/openbao:2.0.1")
+}
+
+func TestShouldRecreateBootstrapJob(t *testing.T) {
+	tests := []struct {
+		name        string
+		kind        string
+		annotations map[string]string
+		expected    bool
+	}{
+		{
+			name: "job with before hook creation",
+			kind: "Job",
+			annotations: map[string]string{
+				"helm.sh/hook-delete-policy": "before-hook-creation,hook-succeeded",
+			},
+			expected: true,
+		},
+		{
+			name: "job with spaced policies",
+			kind: "Job",
+			annotations: map[string]string{
+				"helm.sh/hook-delete-policy": "hook-succeeded, before-hook-creation",
+			},
+			expected: true,
+		},
+		{
+			name: "job without before hook creation",
+			kind: "Job",
+			annotations: map[string]string{
+				"helm.sh/hook-delete-policy": "hook-succeeded",
+			},
+			expected: false,
+		},
+		{
+			name:     "job without annotation",
+			kind:     "Job",
+			expected: false,
+		},
+		{
+			name: "non job with before hook creation",
+			kind: "Deployment",
+			annotations: map[string]string{
+				"helm.sh/hook-delete-policy": "before-hook-creation",
+			},
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			obj := &unstructured.Unstructured{}
+			obj.SetKind(tt.kind)
+			obj.SetAnnotations(tt.annotations)
+
+			assert.Equal(t, tt.expected, shouldRecreateBootstrapJob(obj))
+		})
+	}
 }
