@@ -2932,6 +2932,11 @@ All paths are valid:</p>
 </ul>
 <p>For general STEC background, see the official <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/" target="_blank" rel="noopener">Edge Cloud overview</a>, <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/getting-started/authentication/" target="_blank" rel="noopener">Authentication</a>, and <a href="https://docs.stackit.cloud/products/runtime/edge-cloud/configuration-and-deployment/using-the-api/" target="_blank" rel="noopener">Using the API</a> guides.</p>
 <h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
+<div class="admonition info">
+<p class="admonition-title">Info</p>
+<p>Prerequisite for the following command is that you already filled out your config.yaml and .env file which are
+created by running <code>kubara init --prep</code> and <code>kubara init</code>, see <a href="../../1_getting_started/bootstrapping/">Installation Guide</a> section.</p>
+</div>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>
 <p>Commit and push the generated files to your Git repository.</p>

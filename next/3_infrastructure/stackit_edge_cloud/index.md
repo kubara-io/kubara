@@ -26,6 +26,10 @@ For general STEC background, see the official [Edge Cloud overview](https://docs
 
 ## 1. Generate Terraform modules
 
+!!! info
+    Prerequisite for the following command is that you already filled out your config.yaml and .env file which are
+    created by running `kubara init --prep` and `kubara init`, see [Installation Guide](../1_getting_started/bootstrapping.md) section.
+
 ```bash
 kubara generate --terraform
 ```
