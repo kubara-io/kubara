@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -13,6 +14,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
 	"github.com/kubara-io/kubara/internal/k8s"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
 	"github.com/rs/zerolog/log"
@@ -339,6 +341,24 @@ func applyCRDs(ctx context.Context, client *k8s.Client, opts *Options, charts []
 	return nil
 }
 
+const helmHookDeletePolicyAnnotation = "helm.sh/hook-delete-policy"
+
+func shouldRecreateBootstrapJob(obj *unstructured.Unstructured) bool {
+	if obj.GetKind() != "Job" {
+		return false
+	}
+
+	policy := obj.GetAnnotations()[helmHookDeletePolicyAnnotation]
+
+	for _, value := range strings.Split(policy, ",") {
+		if strings.TrimSpace(value) == "before-hook-creation" {
+			return true
+		}
+	}
+
+	return false
+}
+
 // bootstrapArgoCD performs the main ArgoCD installation
 func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, argoChart BootstrapChart) error {
 	log.Info().Msg("Bootstrapping ArgoCD")
@@ -368,6 +388,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	applyOpts := k8s.DefaultApplyOptions()
 	applyOpts.FieldManager = "kubara-argocd-bootstrap"
 	applyOpts.ForceConflicts = true
+	applyOpts.RecreateBeforeApply = shouldRecreateBootstrapJob
 
 	// TODO: Implement proper DryRun with client
 	if opts.DryRun {
