@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions"
@@ -110,32 +111,27 @@ func initScheme() error {
 
 // buildRESTConfig builds REST config with enhanced kubeconfig resolution
 func buildRESTConfig(cfg Config) (*rest.Config, error) {
-	var kubeconfigPath string
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
 
-	// TODO: use correct vars from bootstrap command opts
-	if cfg.KubeconfigPath != "" && cfg.KubeconfigPath != "~/.kube/config" {
-		kubeconfigPath = cfg.KubeconfigPath
-	} else {
-		// Try KUBECONFIG env var first
-		if envKC := os.Getenv("KUBECONFIG"); envKC != "" {
-			kubeconfigPath = envKC
-		} else {
-			// Default to ~/.kube/config
+	path := strings.TrimSpace(cfg.KubeconfigPath)
+	if path != "" {
+		if path == "~" || strings.HasPrefix(path, "~/") {
 			home, err := os.UserHomeDir()
 			if err != nil {
 				return nil, fmt.Errorf("get home directory: %w", err)
 			}
-			kubeconfigPath = filepath.Join(home, ".kube", "config")
+			if path == "~" {
+				path = home
+			} else {
+				path = filepath.Join(home, path[2:])
+			}
 		}
+		loadingRules.ExplicitPath = path
 	}
-
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	loadingRules.ExplicitPath = kubeconfigPath
-	configOverrides := &clientcmd.ConfigOverrides{}
 
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 		loadingRules,
-		configOverrides,
+		&clientcmd.ConfigOverrides{},
 	).ClientConfig()
 }
 

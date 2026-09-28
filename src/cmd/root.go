@@ -13,6 +13,7 @@ import (
 	"github.com/kubara-io/kubara/cmd/cluster"
 	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/updatecheck"
+	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/rs/zerolog/log"
 	docs "github.com/urfave/cli-docs/v3"
 	"github.com/urfave/cli/v3"
@@ -181,12 +182,11 @@ func runBase64Mode(options Base64Options) error {
 }
 
 func testConnection(kubeconfig string) {
-	if kubeconfig == "" {
-		home, err := os.UserHomeDir()
-		if err != nil {
-			log.Fatal().Err(err).Msg("home dir")
-		}
-		kubeconfig = filepath.Join(home, ".kube", "config")
+	if strings.TrimSpace(kubeconfig) == "" {
+		kubeconfig = defaultKubeconfigPath
+	}
+	if fullPath, err := utils.GetFullPath(kubeconfig, "."); err == nil {
+		kubeconfig = fullPath
 	}
 
 	log.Info().Msgf("Testing connection to your cluster using: %s", kubeconfig)

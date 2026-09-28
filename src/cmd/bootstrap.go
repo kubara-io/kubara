@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"syscall"
 	"time"
 
@@ -89,7 +90,11 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("get env file path: %w", err)
 	}
 
-	kubeconf, err := utils.GetFullPath(cmd.String("kubeconfig"), cwd)
+	kubeconfig := cmd.String("kubeconfig")
+	if strings.TrimSpace(kubeconfig) == "" {
+		kubeconfig = defaultKubeconfigPath
+	}
+	kubeconf, err := utils.GetFullPath(kubeconfig, cwd)
 	if err != nil {
 		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
