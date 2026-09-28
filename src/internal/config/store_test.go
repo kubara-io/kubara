@@ -23,12 +23,17 @@ func newValidTestConfig() *Config {
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
-				Name:       "test-cluster",
-				Stage:      "dev",
-				Networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "traefik"}},
-				Type:       "hub",
-				DNSName:    "test-cluster.example.com",
-				Catalogs:   testClusterCatalogs(),
+				Name:  "test-cluster",
+				Stage: "dev",
+				Networking: ClusterNetworking{
+					Type: NetworkingIngress,
+					Ingress: &IngressNetworking{
+						ClassName: "traefik",
+					},
+				},
+				Type:     "hub",
+				DNSName:  "test-cluster.example.com",
+				Catalogs: testClusterCatalogs(),
 				Terraform: &Terraform{
 					Provider:          "stackit",
 					ProjectID:         "00000000-0000-0000-0000-000000000000",
@@ -117,25 +122,130 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 	gateway := &service.GatewayReference{Name: "edge", Namespace: "networking"}
 	for _, tt := range []struct {
 		name           string
-		networking     *ClusterNetworking
+		networking     ClusterNetworking
 		serviceGateway *service.GatewayReference
 		wantErr        string
 	}{
 		{name: "omitted networking"},
-		{name: "empty networking", networking: &ClusterNetworking{}},
-		{name: "custom ingress", networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "custom"}}},
-		{name: "unknown type", networking: &ClusterNetworking{Type: "unknown"}, wantErr: "networking/type"},
-		{name: "gateway", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: gateway}},
-		{name: "gateway listener", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: &service.GatewayReference{Name: "edge", Namespace: "networking", SectionName: "https"}}},
-		{name: "missing gateway", networking: &ClusterNetworking{Type: NetworkingGateway}, wantErr: "networking.gateway is required"},
-		{name: "missing gateway name", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: &service.GatewayReference{Namespace: "networking"}}, wantErr: "name"},
-		{name: "missing gateway namespace", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: &service.GatewayReference{Name: "edge"}}, wantErr: "namespace"},
-		{name: "ingress selected with both blocks", networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "custom"}, Gateway: gateway}},
-		{name: "gateway selected with both blocks", networking: &ClusterNetworking{Type: NetworkingGateway, Ingress: &IngressNetworking{ClassName: "custom"}, Gateway: gateway}},
-		{name: "gateway presence does not select type", networking: &ClusterNetworking{Gateway: gateway}},
-		{name: "service gateway override", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: gateway}, serviceGateway: gateway},
-		{name: "incomplete service gateway", networking: &ClusterNetworking{Type: NetworkingGateway, Gateway: gateway}, serviceGateway: &service.GatewayReference{Name: "private"}, wantErr: "namespace"},
-		{name: "service gateway with ingress selected", networking: &ClusterNetworking{Type: NetworkingIngress, Gateway: gateway}, serviceGateway: gateway, wantErr: "requires networking.type gateway"},
+		{
+			name:       "empty networking",
+			networking: ClusterNetworking{},
+		},
+		{
+			name: "custom ingress",
+			networking: ClusterNetworking{
+				Type: NetworkingIngress,
+				Ingress: &IngressNetworking{
+					ClassName: "custom",
+				},
+			},
+		},
+		{
+			name: "unknown type",
+			networking: ClusterNetworking{
+				Type: "unknown",
+			},
+			wantErr: "networking/type",
+		},
+		{
+			name: "gateway",
+			networking: ClusterNetworking{
+				Type:    NetworkingGateway,
+				Gateway: gateway,
+			},
+		},
+		{
+			name: "gateway listener",
+			networking: ClusterNetworking{
+				Type: NetworkingGateway,
+				Gateway: &service.GatewayReference{
+					Name:        "edge",
+					Namespace:   "networking",
+					SectionName: "https",
+				},
+			},
+		},
+		{
+			name: "missing gateway",
+			networking: ClusterNetworking{
+				Type: NetworkingGateway,
+			},
+			wantErr: "networking.gateway is required",
+		},
+		{
+			name: "missing gateway name",
+			networking: ClusterNetworking{
+				Type: NetworkingGateway,
+				Gateway: &service.GatewayReference{
+					Namespace: "networking",
+				},
+			},
+			wantErr: "name",
+		},
+		{
+			name: "missing gateway namespace",
+			networking: ClusterNetworking{
+				Type: NetworkingGateway,
+				Gateway: &service.GatewayReference{
+					Name: "edge",
+				},
+			},
+			wantErr: "namespace",
+		},
+		{
+			name: "ingress selected with both blocks",
+			networking: ClusterNetworking{
+				Type: NetworkingIngress,
+				Ingress: &IngressNetworking{
+					ClassName: "custom",
+				},
+				Gateway: gateway,
+			},
+		},
+		{
+			name: "gateway selected with both blocks",
+			networking: ClusterNetworking{
+				Type: NetworkingGateway,
+				Ingress: &IngressNetworking{
+					ClassName: "custom",
+				},
+				Gateway: gateway,
+			},
+		},
+		{
+			name: "gateway presence does not select type",
+			networking: ClusterNetworking{
+				Gateway: gateway,
+			},
+		},
+		{
+			name: "service gateway override",
+			networking: ClusterNetworking{
+				Type:    NetworkingGateway,
+				Gateway: gateway,
+			},
+			serviceGateway: gateway,
+		},
+		{
+			name: "incomplete service gateway",
+			networking: ClusterNetworking{
+				Type:    NetworkingGateway,
+				Gateway: gateway,
+			},
+			serviceGateway: &service.GatewayReference{
+				Name: "private",
+			},
+			wantErr: "namespace",
+		},
+		{
+			name: "service gateway with ingress selected",
+			networking: ClusterNetworking{
+				Type:    NetworkingIngress,
+				Gateway: gateway,
+			},
+			serviceGateway: gateway,
+			wantErr:        "requires networking.type gateway",
+		},
 	} {
 		t.Run(tt.name, func(t *testing.T) {
 			cfg := newValidTestConfig()
@@ -157,7 +267,7 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 			require.NoError(t, err)
 			loaded := store.GetConfig().Clusters[0]
 			wantType := NetworkingIngress
-			if tt.networking != nil && tt.networking.Type != "" {
+			if tt.networking.Type != "" {
 				wantType = tt.networking.Type
 			}
 			assert.Equal(t, wantType, loaded.Networking.Type)
@@ -174,6 +284,7 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 			require.NoError(t, err)
 			assert.NotContains(t, string(saved), "ingressClassName:")
 			assert.Equal(t, loaded.IngressClassName, store.GetConfig().Clusters[0].IngressClassName)
+			store = NewConfigStore(dir, path, catalog.LoadOptions{})
 			require.NoError(t, store.Load())
 			assert.Equal(t, loaded.Networking, store.GetConfig().Clusters[0].Networking)
 		})
@@ -183,17 +294,26 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	cfg := newValidTestConfig()
 	cfg.Version = ConfigVersionV1Alpha4
-	cfg.Clusters[0].Networking = nil
+	cfg.Clusters[0].Networking = ClusterNetworking{}
 	cfg.Clusters[0].IngressClassName = "custom"
-	store := createLoadedConfigStore(t, cfg)
+	rawConfig := configInstance(t, cfg)
+	delete(rawConfig["clusters"].([]any)[0].(map[string]any), "networking")
+	data, err := yaml.Marshal(rawConfig)
+	require.NoError(t, err)
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	require.NoError(t, os.WriteFile(path, data, 0600))
+	store := NewConfigStore(dir, path, catalog.LoadOptions{})
+	require.NoError(t, store.Load())
 	cluster := store.GetConfig().Clusters[0]
-	assert.Equal(t, ConfigVersionV1Alpha4, store.GetConfig().Version)
+	assert.Equal(t, ConfigVersionV1Alpha5, store.GetConfig().Version)
 	assert.Equal(t, NetworkingIngress, cluster.Networking.Type)
 	assert.Equal(t, "custom", cluster.Networking.Ingress.ClassName)
 	assert.Equal(t, "custom", cluster.IngressClassName)
 	saved, err := os.ReadFile(store.GetFilepath())
 	require.NoError(t, err)
 	assert.NotContains(t, string(saved), "ingressClassName:")
+	store = NewConfigStore(dir, path, catalog.LoadOptions{})
 	require.NoError(t, store.Load())
 	assert.Equal(t, "custom", store.GetConfig().Clusters[0].IngressClassName)
 
@@ -204,29 +324,38 @@ func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	edited, err := yaml.Marshal(raw)
 	require.NoError(t, err)
 	require.NoError(t, os.WriteFile(store.GetFilepath(), edited, 0600))
-	require.ErrorContains(t, store.Load(), "ingressClassName is no longer supported")
+	store = NewConfigStore(dir, path, catalog.LoadOptions{})
+	require.ErrorContains(t, store.Load(), "invalid keys: ingressClassName")
 	unchanged, err := os.ReadFile(store.GetFilepath())
 	require.NoError(t, err)
 	assert.Equal(t, edited, unchanged)
 }
 
 func TestConfigStore_RejectReintroducedIngressClassName(t *testing.T) {
-	for _, value := range []any{"custom", "traefik", "", nil} {
-		t.Run(fmt.Sprintf("value_%v", value), func(t *testing.T) {
-			cfg := newValidTestConfig()
-			instance := configInstance(t, cfg)
-			instance["clusters"].([]any)[0].(map[string]any)["ingressClassName"] = value
-			data, err := yaml.Marshal(instance)
-			require.NoError(t, err)
-			dir := t.TempDir()
-			path := filepath.Join(dir, "config.yaml")
-			require.NoError(t, os.WriteFile(path, data, 0600))
-			store := NewConfigStore(dir, path, catalog.LoadOptions{})
-			require.ErrorContains(t, store.Load(), "ingressClassName is no longer supported")
-			unchanged, err := os.ReadFile(path)
-			require.NoError(t, err)
-			assert.Equal(t, data, unchanged)
-		})
+	for _, version := range []string{ConfigVersionV1Alpha4, ConfigVersionV1Alpha5} {
+		for _, value := range []any{"custom", "traefik", "", nil} {
+			t.Run(fmt.Sprintf("%s/value_%v", version, value), func(t *testing.T) {
+				cfg := newValidTestConfig()
+				cfg.Version = version
+				instance := configInstance(t, cfg)
+				cluster := instance["clusters"].([]any)[0].(map[string]any)
+				cluster["ingressClassName"] = value
+				// New configs must reject the legacy field even without networking.
+				if version == ConfigVersionV1Alpha5 {
+					delete(cluster, "networking")
+				}
+				data, err := yaml.Marshal(instance)
+				require.NoError(t, err)
+				dir := t.TempDir()
+				path := filepath.Join(dir, "config.yaml")
+				require.NoError(t, os.WriteFile(path, data, 0600))
+				store := NewConfigStore(dir, path, catalog.LoadOptions{})
+				require.ErrorContains(t, store.Load(), "invalid keys: ingressClassName")
+				unchanged, err := os.ReadFile(path)
+				require.NoError(t, err)
+				assert.Equal(t, data, unchanged)
+			})
+		}
 	}
 }
 
@@ -529,11 +658,16 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 	testConfig := &Config{
 		Clusters: []Cluster{
 			{
-				Name:       "prod-cluster",
-				Networking: &ClusterNetworking{Type: NetworkingIngress, Ingress: &IngressNetworking{ClassName: "traefik"}},
-				Stage:      "production",
-				Type:       "hub",
-				DNSName:    "prod.example.com",
+				Name: "prod-cluster",
+				Networking: ClusterNetworking{
+					Type: NetworkingIngress,
+					Ingress: &IngressNetworking{
+						ClassName: "traefik",
+					},
+				},
+				Stage:   "production",
+				Type:    "hub",
+				DNSName: "prod.example.com",
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
@@ -1044,7 +1178,7 @@ func TestConfigStore_LoadRejectsUnknownNetworkingFields(t *testing.T) {
 			store := NewConfigStore(dir, path, catalog.LoadOptions{})
 			err = store.Load()
 			if tt.wantErr != "" {
-				require.ErrorContains(t, err, "unknown networking field")
+				require.ErrorContains(t, err, "decode config")
 				require.ErrorContains(t, err, tt.wantErr)
 				unchanged, err := os.ReadFile(path)
 				require.NoError(t, err)
@@ -1069,4 +1203,27 @@ func TestConfigStore_LoadValidatesBeforePopulatingCompatibilityFields(t *testing
 	store := NewConfigStore(dir, path, catalog.LoadOptions{})
 	require.ErrorContains(t, store.Load(), "validate config")
 	assert.Empty(t, store.GetConfig().Clusters[0].IngressClassName)
+}
+
+func TestConfigStore_LoadRejectsUnknownFields(t *testing.T) {
+	for _, scope := range []string{"root", "cluster", "service"} {
+		t.Run(scope, func(t *testing.T) {
+			raw := configInstance(t, newValidTestConfig())
+			target := raw
+			if scope != "root" {
+				target = raw["clusters"].([]any)[0].(map[string]any)
+			}
+			if scope == "service" {
+				target = target["services"].(map[string]any)["cert-manager"].(map[string]any)
+			}
+			target["unknownField"] = "value"
+			data, err := yaml.Marshal(raw)
+			require.NoError(t, err)
+			dir := t.TempDir()
+			path := filepath.Join(dir, "config.yaml")
+			require.NoError(t, os.WriteFile(path, data, 0600))
+			store := NewConfigStore(dir, path, catalog.LoadOptions{})
+			require.ErrorContains(t, store.Load(), "invalid keys: unknownField")
+		})
+	}
 }

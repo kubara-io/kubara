@@ -62,8 +62,8 @@ type Cluster struct {
 	SSOTeam string `json:"ssoTeam,omitempty" yaml:"ssoTeam,omitempty" jsonschema:"title=SSO Team,description=The specific SSO team or sub-group allowed to access this cluster.,minLength=1"`
 
 	// Deprecated: use Networking.Ingress.ClassName. Retained for older catalogs.
-	IngressClassName string             `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"-"`
-	Networking       *ClusterNetworking `json:"networking,omitempty" yaml:"networking,omitempty" jsonschema:"title=Networking,description=Routing settings consumed by catalog templates."`
+	IngressClassName string            `json:"ingressClassName,omitempty" yaml:"-" jsonschema:"-"`
+	Networking       ClusterNetworking `json:"networking,omitempty" yaml:"networking,omitempty" jsonschema:"title=Networking,description=Routing settings consumed by catalog templates."`
 
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`

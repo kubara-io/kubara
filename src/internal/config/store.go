@@ -59,17 +59,11 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("migration of config failed: %w", err)
 	}
 
-	if err := rejectLegacyIngressConfig(raw); err != nil {
-		return err
-	}
-	// A fresh value prevents repeated loads from retaining catalog compatibility fields.
-	cs.config = &Config{}
-	var metadata mapstructure.Metadata
 	dc := &mapstructure.DecoderConfig{
 		TagName:          "yaml",
 		WeaklyTypedInput: false,
 		Result:           cs.config,
-		Metadata:         &metadata,
+		ErrorUnused:      true,
 		Squash:           true,
 	}
 	decoder, err := mapstructure.NewDecoder(dc)
@@ -80,15 +74,6 @@ func (cs *ConfigStore) Load() error {
 		return fmt.Errorf("decode config: %w", err)
 	}
 
-	// Unknown routing fields must not disappear before schema validation.
-	slices.Sort(metadata.Unused)
-	for _, key := range metadata.Unused {
-		if strings.Contains(key, ".networking.") {
-			return fmt.Errorf("unknown networking field %q", key)
-		}
-	}
-
-	initializeNetworking(cs.config)
 	applyDefaults(cs.config)
 	normalizeDisabledTerraform(cs.config)
 	if err := cs.ApplyServiceCatalogDefaults(); err != nil {
@@ -114,20 +99,6 @@ func (cs *ConfigStore) Load() error {
 		}
 	}
 
-	return nil
-}
-
-func rejectLegacyIngressConfig(raw map[string]any) error {
-	clusters, _ := raw["clusters"].([]any)
-	for i, item := range clusters {
-		cluster, ok := item.(map[string]any)
-		if !ok {
-			continue
-		}
-		if _, exists := cluster["ingressClassName"]; exists {
-			return fmt.Errorf("clusters[%d]: ingressClassName is no longer supported in config files; use networking.ingress.className", i)
-		}
-	}
 	return nil
 }
 
@@ -442,16 +413,6 @@ func (cs *ConfigStore) GetFilepath() string {
 	return cs.filepath
 }
 
-// configFileView excludes fields that exist only for catalog compatibility.
-func configFileView(cfg *Config) Config {
-	result := *cfg
-	result.Clusters = slices.Clone(cfg.Clusters)
-	for i := range result.Clusters {
-		result.Clusters[i].IngressClassName = ""
-	}
-	return result
-}
-
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
@@ -468,7 +429,7 @@ func (cs *ConfigStore) SaveToFile() error {
 	var b bytes.Buffer
 	encoder := yaml.NewEncoder(&b)
 	encoder.SetIndent(2)
-	err := encoder.Encode(configFileView(cs.config))
+	err := encoder.Encode(cs.config)
 	if err != nil {
 		return fmt.Errorf("marshal config to YAML: %w", err)
 	}

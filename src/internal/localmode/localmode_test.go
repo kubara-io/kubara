@@ -48,7 +48,13 @@ func TestApplyClusterProfileDisablesOAuth2ProxyForLocalMode(t *testing.T) {
 
 func TestApplyClusterProfileResetsGatewayRouting(t *testing.T) {
 	cluster := &config.Cluster{
-		Networking: &config.ClusterNetworking{Type: config.NetworkingGateway, Gateway: &service.GatewayReference{Name: "edge", Namespace: "networking"}},
+		Networking: config.ClusterNetworking{
+			Type: config.NetworkingGateway,
+			Gateway: &service.GatewayReference{
+				Name:      "edge",
+				Namespace: "networking",
+			},
+		},
 		Services: service.Services{"example": {Networking: &service.Networking{
 			Annotations: map[string]string{"example.com/key": "value"},
 			Gateway:     &service.GatewayReference{Name: "private", Namespace: "internal"},

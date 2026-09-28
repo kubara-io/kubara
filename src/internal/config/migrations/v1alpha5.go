@@ -1,12 +1,14 @@
 package migrations
 
-import "fmt"
+import (
+	"fmt"
 
-// migrateIngressNetworking upgrades legacy-only configs without changing their version.
-// A networking block marks the structured format; any legacy field beside it is
-// left for config validation to reject instead of being migrated again.
-func migrateIngressNetworking(config map[string]any) (bool, error) {
-	migrated := false
+	"github.com/rs/zerolog/log"
+)
+
+// migrateV1Alpha5Config migrates v1alpha5 routing settings to the v1alpha6 schema.
+func migrateV1Alpha5Config(config map[string]any) error {
+	log.Info().Msg("migrating config from v1alpha5 format to v1alpha6")
 	clusters, _ := config["clusters"].([]any)
 	for i, item := range clusters {
 		cluster, ok := item.(map[string]any)
@@ -22,14 +24,14 @@ func migrateIngressNetworking(config map[string]any) (bool, error) {
 		}
 		className, ok := rawClass.(string)
 		if !ok {
-			return false, fmt.Errorf("%s.ingressClassName must be a string", clusterLabel(cluster, i))
+			return fmt.Errorf("%s.ingressClassName must be a string", clusterLabel(cluster, i))
 		}
 		cluster["networking"] = map[string]any{
 			"type":    "ingress",
 			"ingress": map[string]any{"className": className},
 		}
 		delete(cluster, "ingressClassName")
-		migrated = true
 	}
-	return migrated, nil
+	config["version"] = ConfigVersionV1Alpha6
+	return nil
 }

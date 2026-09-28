@@ -60,17 +60,22 @@ For example:
 
 `.cluster.networking` contains the current cluster's routing settings.
 
-Templates can read fields such as:
+The networking block is defined as follows:
 
-- `.cluster.networking.type`
-- `.cluster.networking.ingress.className`
-- `.cluster.networking.gateway.name`
-- `.cluster.networking.gateway.namespace`
-- `.cluster.networking.gateway.sectionName`
+```yaml
+networking:
+  type: ingress # or gateway
+  ingress:
+    className: your-class-name # defaults to traefik
+  gateway:
+    name: your-gateway
+    namespace: namespace-of-controller # e.g. traefik
+    sectionName: optional-listener-section
+```
 
 `type` selects `ingress` (the default) or `gateway`. Ingress defaults to class `traefik`.
 Both blocks may be configured; templates must use `type` to select the active routing API.
-Unknown fields in cluster or service networking settings are rejected.
+Unknown configuration fields are rejected during decoding. Keys in service-specific `config` and annotation maps remain governed by their schemas.
 A Gateway reference requires `name` and `namespace`; `sectionName` optionally selects a listener.
 
 For example, this cluster configuration supplies a parent Gateway:
@@ -98,8 +103,8 @@ Services can provide their own routing settings under:
 A service Gateway replaces the complete cluster reference and requires `networking.type: gateway`.
 An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
 
-When `networking` is absent, kubara migrates the legacy `ingressClassName` to `networking.ingress.className` and saves the structured config, keeping version `v1alpha4`.
-If `networking` exists, the top-level field is rejected, even when the values match. Removing the entire `networking` block makes the config indistinguishable from the legacy format.
+kubara migrates `v1alpha4` configs to `v1alpha5`, moving the legacy `ingressClassName` to `networking.ingress.className` when no `networking` block exists. The migrated config is saved only after successful validation.
+In `v1alpha5`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
 For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
 Templates supporting older CLI versions can fall back to this field.
 
