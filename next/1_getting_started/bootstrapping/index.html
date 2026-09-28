@@ -553,6 +553,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1.2 Generate preparation files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#git-repository-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git repository authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2856,6 +2873,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="1.2 Generate preparation files">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#git-repository-authentication" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Git repository authentication
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -3140,6 +3174,47 @@ platform will be publicly available by default via your DNS zone.</p>
 </div>
 </li>
 </ol>
+<h4 id="git-repository-authentication">Git repository authentication</h4>
+<p>kubara creates the initial Argo CD repository secret during <code>kubara bootstrap</code>.
+<code>ARGOCD_GIT_AUTH_MODE</code> controls which credential fields are written:</p>
+<table>
+<thead>
+<tr>
+<th>Mode</th>
+<th>Required values</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>https</code></td>
+<td><code>ARGOCD_GIT_URL</code> or legacy <code>ARGOCD_GIT_HTTPS_URL</code></td>
+<td>Backward-compatible default. <code>ARGOCD_GIT_USERNAME</code> + <code>ARGOCD_GIT_PAT_OR_PASSWORD</code> are optional: omit them for public repositories, set both for private ones. <code>PAT</code> usually means Personal Access Token and is often tied to a user account. Prefer a technical or machine account and use that account name for <code>ARGOCD_GIT_USERNAME</code>; exact username behavior is provider-dependent.</td>
+</tr>
+<tr>
+<td><code>ssh</code></td>
+<td><code>ARGOCD_GIT_URL</code>, <code>ARGOCD_GIT_SSH_PRIVATE_KEY</code></td>
+<td>Use an SSH repository URL such as <code>git@github.com:org/repo.git</code>. Argo CD must know the SSH host key before it can connect securely.</td>
+</tr>
+<tr>
+<td><code>github-app</code></td>
+<td><code>ARGOCD_GIT_URL</code>, <code>ARGOCD_GIT_GITHUB_APP_ID</code>, <code>ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID</code>, <code>ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY</code></td>
+<td>Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set <code>ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL</code> as well.</td>
+</tr>
+</tbody>
+</table>
+<p>For new setups, prefer <code>ARGOCD_GIT_URL</code>.
+<code>ARGOCD_GIT_HTTPS_URL</code> is still supported for existing HTTPS/PAT setups.</p>
+<p>For SSH, keep strict host verification enabled.
+The bundled Argo CD Helm chart already includes known hosts for common public providers.
+For private Git hosts, add trusted host keys to the generated Argo CD values before bootstrapping, for example in <code>platform-configs/&lt;cluster&gt;/helm/argo-cd/values-additional.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">argo-cd</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">configs</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">ssh</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">extraHosts</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">        </span><span class="no">git.example.com ssh-ed25519 &lt;trusted-host-key&gt;</span>
+</code></pre></div>
+<p>If the required host key is missing, Argo CD will reject the SSH connection as an unknown SSH host.</p>
 <h3 id="13-generate-base-configuration">1.3 Generate Base Configuration</h3>
 <p>Initialize your configuration:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init
@@ -3150,7 +3225,10 @@ It also creates a <code>renovate.json</code> in the working directory when no su
 </code></pre></div>
 <p>For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file uses Renovate's <code>config:recommended</code> preset and enables automatic updates for kubara catalog versions in <code>config.yaml</code>. Renovate can also update other supported dependencies it detects in the repository.</p>
 <p>Kubara does not modify an existing Renovate configuration. In that case, <code>init</code> logs a warning and you can add the <a href="../../2_concepts/catalog_distribution/#automatic-catalog-updates-with-renovate">Renovate settings for catalog updates</a> manually.</p>
-<p>If you make changes to <code>.env</code> later, you can re-run the command with <code>--overwrite</code> to update the configuration.</p>
+<p>If you make changes to <code>.env</code> later, you can re-run the command with <code>--overwrite</code> to update the configuration.
+The generated Argo CD repository config records the selected Git auth mode in <code>argocd.repo.authMode</code>.
+Repository URLs are stored under <code>argocd.repo.git</code>.
+Older configs are migrated up to <code>v1alpha5</code> when kubara loads and saves the config: the old <code>argocd.repo.https</code> key moves to <code>argocd.repo.git</code>.</p>
 <p>By default, the generated cluster references kubara's versioned general catalog. Use repeated <code>--catalog</code> flags to initialize it with a different ordered catalog set:</p>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--catalog<span class="w"> </span>./company-platform<span class="w"> </span><span class="se">\</span>

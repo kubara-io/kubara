@@ -2661,31 +2661,82 @@ a way to deploy their applications onto your platform without much intervention 
 For more information check:
 https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/</p>
 <h2 id="add-credentials-to-vault"><strong>Add credentials to vault</strong></h2>
-<p>Add the repository credentials to your vault at
-<code>&lt;cluster-name&gt;/&lt;stage&gt;/repo_pat</code>. This can be a <code>password</code> or a <code>PAT</code>.
+<p>Add the repository credentials to your vault below <code>&lt;cluster-name&gt;/&lt;stage&gt;</code>.
+The examples below use one secret value per repository credential.</p>
+<p>For HTTPS username + password/PAT authentication, <code>PAT</code> usually means Personal Access Token and is often tied to a user account.
+For platform automation, prefer a technical or machine account instead of a personal user account.
+Set <code>username</code> to the account name expected by your Git provider; the exact value is provider-dependent.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
 <span class="w">  </span><span class="nt">"repo_pat"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
-<span class="w">    </span><span class="nt">"pat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;the kubeconfig&gt;"</span>
+<span class="w">    </span><span class="nt">"pat"</span><span class="p">:</span><span class="w"> </span><span class="s2">"&lt;password-or-PAT&gt;"</span>
 <span class="w">  </span><span class="p">}</span>
 <span class="p">}</span>
-</code></pre></div></p>
+</code></pre></div>
+<p>For SSH deploy key authentication:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"repo_ssh"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"privateKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>For GitHub App authentication:</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"repo_github_app"</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nt">"privateKey"</span><span class="p">:</span><span class="w"> </span><span class="s2">"-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
 <h2 id="modify-argo-cd-overlays"><strong>Modify Argo CD overlays</strong></h2>
-<p>Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
+<p>Add one of the following repository definitions to your Argo CD overlay, typically
+<code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.</p>
+<p>HTTPS username + password/PAT:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
-<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-mock</span>
-<span class="w">      </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
-<span class="w">      </span><span class="c1"># # This points to the secret in vault</span>
-<span class="w">      </span><span class="nt">remoteRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-name&gt;/&lt;stage&gt;/repo_pat</span>
-<span class="w">        </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pat</span>
-<span class="w">      </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
-<span class="w">      </span><span class="nt">secretStoreRef</span><span class="p">:</span>
-<span class="w">        </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
-<span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-0-production</span>
-<span class="w">      </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the repo url you want to add&gt;</span>
-<span class="w">      </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the username for connection. also needed for PAT&gt;</span>
-</code></pre></div></p>
-<p>That whats happening behind the scenes:</p>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-mock</span>
+<span class="w">    </span><span class="nt">authMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https</span>
+<span class="w">    </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">    </span><span class="nt">remoteRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-name&gt;/&lt;stage&gt;/repo_pat</span>
+<span class="w">      </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pat</span>
+<span class="w">    </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">    </span><span class="nt">secretStoreRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-0-production</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://git.example.com/org/repo.git</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;technical-account-username&gt;</span>
+</code></pre></div>
+<p>SSH deploy key:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-ssh</span>
+<span class="w">    </span><span class="nt">authMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ssh</span>
+<span class="w">    </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">    </span><span class="nt">sshPrivateKeyRemoteRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-name&gt;/&lt;stage&gt;/repo_ssh</span>
+<span class="w">      </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">privateKey</span>
+<span class="w">    </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">    </span><span class="nt">secretStoreRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-0-production</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git@git.example.com:org/repo.git</span>
+</code></pre></div>
+<p>For SSH repositories, make sure Argo CD already trusts the SSH host key. See the bootstrap documentation for <code>configs.ssh.extraHosts</code>.</p>
+<p>GitHub App:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">repositories</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">user-repo-github-app</span>
+<span class="w">    </span><span class="nt">authMode</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github-app</span>
+<span class="w">    </span><span class="nt">projectScope</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">    </span><span class="nt">githubAppID</span><span class="p">:</span><span class="w"> </span><span class="s">"123456"</span>
+<span class="w">    </span><span class="nt">githubAppInstallationID</span><span class="p">:</span><span class="w"> </span><span class="s">"987654"</span>
+<span class="w">    </span><span class="nt">githubAppPrivateKeyRemoteRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">remoteKey</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;cluster-name&gt;/&lt;stage&gt;/repo_github_app</span>
+<span class="w">      </span><span class="nt">remoteKeyProperty</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">privateKey</span>
+<span class="w">    </span><span class="nt">repoType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">git</span>
+<span class="w">    </span><span class="nt">secretStoreRef</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ClusterSecretStore</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">hub-0-production</span>
+<span class="w">    </span><span class="nt">url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/org/repo.git</span>
+</code></pre></div>
+<p>For GitHub Enterprise, also set <code>githubAppEnterpriseBaseUrl</code>.</p>
+<p>That's what's happening behind the scenes:</p>
 <p><img alt="Add Repository" src="../../images/add-repository.png" /></p>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
 <p>Do not forget to push your changes to the git repository that serves your Argo CD application.
