@@ -27,7 +27,16 @@ apply_if_set() {
     || die "Template key missing in .env: ${dst_key} (because ${src_env} is set)"
 
   local escaped="${val//\'/\'\\\'\'}"  # escape single quotes
-  sed -i -e "s|^${dst_key}=.*$|${dst_key}='${escaped}'|g" "$ENV_FILE"
+  local tmp
+  tmp="$(mktemp)"
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == "${dst_key}="* ]]; then
+      printf "%s='%s'\n" "$dst_key" "$escaped" >> "$tmp"
+    else
+      printf "%s\n" "$line" >> "$tmp"
+    fi
+  done < "$ENV_FILE"
+  mv "$tmp" "$ENV_FILE"
 }
 
 log "Updating .env (strict mode, no secret output): $ENV_FILE"
@@ -39,9 +48,16 @@ apply_if_set KUBARA_PROJECT_STAGE          PROJECT_STAGE
 apply_if_set KUBARA_DOCKERCONFIG_BASE64    DOCKERCONFIG_BASE64
 
 apply_if_set KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD  ARGOCD_WIZARD_ACCOUNT_PASSWORD
+apply_if_set KUBARA_ARGOCD_GIT_AUTH_MODE            ARGOCD_GIT_AUTH_MODE
+apply_if_set KUBARA_ARGOCD_GIT_URL                  ARGOCD_GIT_URL
+apply_if_set KUBARA_ARGOCD_GIT_HTTPS_URL            ARGOCD_GIT_HTTPS_URL
 apply_if_set KUBARA_ARGOCD_GIT_USERNAME             ARGOCD_GIT_USERNAME
 apply_if_set KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD      ARGOCD_GIT_PAT_OR_PASSWORD
-apply_if_set KUBARA_ARGOCD_GIT_HTTPS_URL            ARGOCD_GIT_HTTPS_URL
+apply_if_set KUBARA_ARGOCD_GIT_SSH_PRIVATE_KEY      ARGOCD_GIT_SSH_PRIVATE_KEY
+apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_ID               ARGOCD_GIT_GITHUB_APP_ID
+apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID  ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID
+apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY      ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY
+apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL
 apply_if_set KUBARA_ARGOCD_HELM_REPO_URL            ARGOCD_HELM_REPO_URL
 apply_if_set KUBARA_ARGOCD_HELM_REPO_USERNAME       ARGOCD_HELM_REPO_USERNAME
 apply_if_set KUBARA_ARGOCD_HELM_REPO_PASSWORD       ARGOCD_HELM_REPO_PASSWORD
