@@ -95,7 +95,7 @@ The local profile does all of the following:
 - Forces `type: hub`
 - Sets `dnsName` to the generated `traefik.me` host
 - Sets `ssoOrg` and `ssoTeam` to `local`
-- Forces `ingressClassName: traefik`
+- Forces `networking.type: ingress` and `networking.ingress.className: traefik`
 - Only enables a minimal set of services:
   - `cert-manager`
   - `external-secrets`

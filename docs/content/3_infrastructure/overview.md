@@ -23,7 +23,7 @@ In practice this means:
 1. Your cluster must be reachable with a kubeconfig.
 2. You need a secret manager or vault that `external-secrets` can read from.
 3. You should have a DNS zone that `external-dns` can manage automatically, or you need to replace that part with your own process.
-4. You need an ingress setup that matches your `ingressClassName` and service annotations.
+4. You need routing that matches `networking.type` and its `networking.ingress` or `networking.gateway` settings and the service networking settings supported by your catalog.
 
 ## Available presets
 

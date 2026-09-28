@@ -11,8 +11,17 @@ import (
 // fields to their default, as declared in the `jsonschema:"default=..."` tag.
 // This keeps the jsonschema struct tags as the single source of truth for both
 // schema generation (invopop/jsonschema) and runtime defaulting.
-func applyDefaults(v any) {
-	applyDefaultsValue(reflect.ValueOf(v))
+func applyDefaults(cfg *Config) {
+	if cfg == nil {
+		return
+	}
+	for i := range cfg.Clusters {
+		networking := &cfg.Clusters[i].Networking
+		if (networking.Type == "" || networking.Type == NetworkingIngress) && networking.Ingress == nil {
+			networking.Ingress = &IngressNetworking{}
+		}
+	}
+	applyDefaultsValue(reflect.ValueOf(cfg))
 }
 
 func applyDefaultsValue(v reflect.Value) {
