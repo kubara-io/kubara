@@ -93,7 +93,7 @@ kubara generate --catalog oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3
 - a local catalog directory
 - an OCI reference such as `oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3`
 
-Local paths are resolved relative to `--work-dir`. OCI-backed catalogs use the local kubara cache and are pulled automatically when the requested reference is not cached. See [Catalog distribution](catalog_distribution.md).
+Local paths are resolved relative to the workspace directory. OCI-backed catalogs use the local kubara cache and are pulled automatically when the requested reference is not cached. See [Catalog distribution](catalog_distribution.md).
 
 `init` and `cluster add` persist their `--catalog` references in the new cluster entry. Commands such as `schema`, `generate`, and `bootstrap` use CLI catalogs as temporary additions and do not rewrite `config.yaml`.
 
@@ -233,6 +233,7 @@ If a provider-specific file and a common file map to the same output path, the p
 If a cluster has no Terraform block or uses `terraform.provider: none`, the default `kubara generate` run skips Terraform templates for that cluster.
 
 Shared output paths must also be deterministic across clusters. Identical content is written once; conflicting content for the same final path causes generation to fail before files are changed.
+
 
 ## Schema generation
 

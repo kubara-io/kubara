@@ -25,11 +25,12 @@ Files without the `.tplt` suffix are copied as-is.
 
 ## What data is available in templates?
 
-kubara builds a template context with three top-level objects:
+kubara builds a template context with four top-level objects:
 
 - `.cluster`
 - `.env`
 - `.catalog`
+- `.workspace`
 
 ### `.cluster`
 
@@ -73,6 +74,16 @@ Today this is mainly service metadata such as:
 - `.catalog.services.<service-name>.clusterTypes`
 
 This is useful when template logic needs catalog-level defaults or service metadata.
+
+### `.workspace`
+
+When working in a Git repository, `.workspace` exposes GitOps path context:
+
+- `.workspace.gitRelativePath`: Relative subpath from the Git repository root to the workspace (e.g. `setups/dev-fleet`, or `""` if at repo root).
+- `.workspace.platformComponents`: Relative Git path to components (`<gitRelativePath>/platform-components/helm`).
+- `.workspace.platformConfigs`: Relative Git path to configs (`<gitRelativePath>/platform-configs`).
+
+Additionally, kubara automatically populates these computed paths into `.cluster.argocd.repo.https.components.path` and `.cluster.argocd.repo.https.configs.path` (or their OCI equivalents) unless explicitly overridden in `config.yaml`. Spoke clusters in `.spokes` receive matching computed paths.
 
 ## Cross-templating in practice
 

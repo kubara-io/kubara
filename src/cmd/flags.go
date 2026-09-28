@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/catalog"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/urfave/cli/v3"
 )
@@ -13,9 +13,6 @@ const defaultKubeconfigPath = "~/.kube/config"
 
 type GlobalFlags struct {
 	KubeconfigFilePath string
-	WorkDir            string
-	ConfigFilePath     string
-	EnvFilePath        string
 	Catalogs           []string
 	CatalogOverwrite   bool
 	TestK8sConnection  bool
@@ -47,9 +44,6 @@ type RootOptions struct {
 func NewGlobalFlags() *GlobalFlags {
 	return &GlobalFlags{
 		KubeconfigFilePath: defaultKubeconfigPath,
-		WorkDir:            ".",
-		ConfigFilePath:     "config.yaml",
-		EnvFilePath:        ".env",
 	}
 }
 
@@ -83,35 +77,6 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Usage:       "Path to kubeconfig file",
 			Destination: &flags.KubeconfigFilePath,
 			Sources:     cli.EnvVars("KUBECONFIG"),
-			Config: cli.StringConfig{
-				TrimSpace: true,
-			},
-		},
-		&cli.StringFlag{
-			Name:        "work-dir",
-			Aliases:     []string{"w"},
-			Value:       flags.WorkDir,
-			Usage:       "Working directory",
-			Destination: &flags.WorkDir,
-			Config: cli.StringConfig{
-				TrimSpace: true,
-			},
-		},
-		&cli.StringFlag{
-			Name:        "config-file",
-			Aliases:     []string{"c"},
-			Value:       flags.ConfigFilePath,
-			Usage:       "Path to the configuration file",
-			Destination: &flags.ConfigFilePath,
-			Config: cli.StringConfig{
-				TrimSpace: true,
-			},
-		},
-		&cli.StringFlag{
-			Name:        "env-file",
-			Value:       flags.EnvFilePath,
-			Usage:       "Path to the .env file",
-			Destination: &flags.EnvFilePath,
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},
@@ -192,11 +157,17 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 	}
 }
 
+type WorkspacePaths = utils.WorkspacePaths
+
+func ResolveWorkspace(cmd *cli.Command) (*WorkspacePaths, error) {
+	return utils.ResolveWorkspaceFromCommand(cmd)
+}
+
 func catalogLoadOptionsFromCommand(cmd *cli.Command, bootstrapCatalog string) (catalog.LoadOptions, error) {
-	cwd, err := filepath.Abs(cmd.String("work-dir"))
+	ws, err := ResolveWorkspace(cmd)
 	if err != nil {
-		return catalog.LoadOptions{}, fmt.Errorf("get working directory: %w", err)
+		return catalog.LoadOptions{}, fmt.Errorf("resolve workspace: %w", err)
 	}
 
-	return catalog.ResolveLoadOptions(cwd, bootstrapCatalog, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
+	return catalog.ResolveLoadOptions(ws.WorkDir, bootstrapCatalog, cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 }

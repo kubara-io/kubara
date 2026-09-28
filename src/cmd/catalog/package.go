@@ -32,7 +32,7 @@ func NewCatalogPackage() *cli.Command {
 			})
 			if err != nil {
 				if errors.Is(err, internal.ErrCatalogManifestNotFound) {
-					return fmt.Errorf("%w; run this command from the catalog root or pass --work-dir /path/to/catalog", err)
+					return fmt.Errorf("%w; run this command from the catalog root", err)
 				}
 				return err
 			}

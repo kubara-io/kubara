@@ -3,7 +3,6 @@ package cluster
 import (
 	"context"
 	"fmt"
-	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
@@ -33,22 +32,17 @@ func CreateAddClusterCommand() *cli.Command {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
 			}
 
-			cwd, err := filepath.Abs(cmd.String("work-dir"))
+			ws, err := utils.ResolveWorkspaceFromCommand(cmd)
 			if err != nil {
-				return fmt.Errorf("get working directory: %w", err)
+				return fmt.Errorf("resolve workspace: %w", err)
 			}
 
-			catalogOptions, err := catalog.ResolveLoadOptions(cwd, "", cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
+			catalogOptions, err := catalog.ResolveLoadOptions(ws.WorkDir, "", cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 			if err != nil {
 				return fmt.Errorf("could not resolve catalog options: %w", err)
 			}
 
-			configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-			if err != nil {
-				return fmt.Errorf("get config file path: %w", err)
-			}
-
-			configStore := config.NewConfigStore(cwd, configFilePath, catalogOptions)
+			configStore := config.NewConfigStore(ws.WorkDir, ws.ConfigFilePath, catalogOptions)
 			err = configStore.Load()
 			if err != nil {
 				return fmt.Errorf("config load: %w", err)
