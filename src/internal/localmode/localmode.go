@@ -39,8 +39,8 @@ func PopulateInitEnv(env *envconfig.EnvMap) {
 	if !envconfig.IsConfiguredEnvValue(env.ProjectStage) {
 		env.ProjectStage = DefaultProjectStage
 	}
-	if !envconfig.IsConfiguredEnvValue(env.ArgocdGitHttpsUrl) {
-		env.ArgocdGitHttpsUrl = ExampleGitRepoURL
+	if !envconfig.IsConfiguredEnvValue(env.GitRepositoryURL()) {
+		env.ArgocdGitUrl = ExampleGitRepoURL
 	}
 	if !envconfig.IsConfiguredEnvValue(env.ArgocdWizardAccountPassword) {
 		env.ArgocdWizardAccountPassword = ExampleWizardPassword

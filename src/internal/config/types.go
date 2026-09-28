@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"slices"
 
 	"github.com/kubara-io/kubara/internal/service"
@@ -11,6 +12,7 @@ const (
 	ConfigVersionV1Alpha2 = "v1alpha2"
 	ConfigVersionV1Alpha3 = "v1alpha3"
 	ConfigVersionV1Alpha4 = "v1alpha4"
+	ConfigVersionV1Alpha5 = "v1alpha5"
 )
 
 const (
@@ -44,7 +46,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha4,default=v1alpha4"`
+	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha5,default=v1alpha5"`
 	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty" jsonschema:"title=Bootstrap Catalog,description=The global bootstrap catalog to use."`
 	Clusters         []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
@@ -87,6 +89,30 @@ const (
 	ArgoCDSelfManagedDisabled ArgoCDSelfManagedStatus = "disabled"
 )
 
+type GitAuthMode string
+
+const (
+	GitAuthModeHTTPS     GitAuthMode = "https"
+	GitAuthModeSSH       GitAuthMode = "ssh"
+	GitAuthModeGitHubApp GitAuthMode = "github-app"
+)
+
+func (m GitAuthMode) IsValid() bool {
+	switch m {
+	case GitAuthModeHTTPS, GitAuthModeSSH, GitAuthModeGitHubApp:
+		return true
+	default:
+		return false
+	}
+}
+
+func (m GitAuthMode) Validate() error {
+	if m == "" || m.IsValid() {
+		return nil
+	}
+	return fmt.Errorf("invalid git auth mode %q, supported modes: %s, %s, %s", m, GitAuthModeHTTPS, GitAuthModeSSH, GitAuthModeGitHubApp)
+}
+
 type ArgoCD struct {
 	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
 	Repo        RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
@@ -94,9 +120,10 @@ type ArgoCD struct {
 }
 
 type RepoProto struct {
-	_     struct{}  `jsonschema:"minProperties=1,additionalProperties=false"`
-	HTTPS *RepoType `json:"https,omitempty" yaml:"https,omitempty" jsonschema:"title=Https Repository"`
-	OCI   *RepoType `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"title=Oci Repository"`
+	_        struct{}    `jsonschema:"minProperties=1,additionalProperties=false"`
+	AuthMode GitAuthMode `json:"authMode,omitempty" yaml:"authMode,omitempty" jsonschema:"title=Git Auth Mode,description=Authentication mode kubara uses for the initial Argo CD Git repository secret.,enum=https,enum=ssh,enum=github-app,default=https"`
+	Git      *RepoType   `json:"git,omitempty" yaml:"git,omitempty" jsonschema:"anyof_required=git,title=Git Repository"`
+	OCI      *RepoType   `json:"oci,omitempty" yaml:"oci,omitempty" jsonschema:"anyof_required=oci,title=Oci Repository"`
 }
 
 type RepoType struct {
@@ -105,7 +132,7 @@ type RepoType struct {
 }
 
 type Repository struct {
-	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The HTTPS URL of the Git repository.,format=uri"`
+	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Git repository URL used by Argo CD. Use an HTTP(S) URL for https/github-app auth modes or an SSH URL for ssh auth mode.,minLength=1"`
 	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
 }
 
