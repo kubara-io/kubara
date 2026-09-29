@@ -59,7 +59,6 @@ List available versions with:
 stackit ske options --kubernetes-versions --region eu01
 ```
 
-For Kubernetes 1.36, use Flatcar nodes; see [STACKIT prerequisites](https://docs.stackit.cloud/products/runtime/kubernetes-engine/release-notes/).
 Set `terraform.kubernetesVersion` in `config.yaml` and regenerate Terraform to prepare an upgrade.
 
 ## 1. Generate Terraform modules
