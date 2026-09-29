@@ -195,7 +195,7 @@ clusters:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
       kubernetesType: <ske, edge or cce>
-      kubernetesVersion: 1.34
+      kubernetesVersion: "1.34" # example; select a version supported by your provider
       dns:
         name: <dns-name>
         email: <email>
@@ -210,6 +210,10 @@ clusters:
           publicLoadBalancerIPs: 0.0.0.0
 ...
 ```
+
+The Kubernetes version above is a generic example. For STACKIT SKE, select a currently
+supported version as described in [STACKIT SKE configuration](../3_infrastructure/stackit_ske.md#configuration).
+
 
 `terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
