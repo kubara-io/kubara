@@ -58,16 +58,8 @@ Choose a version marked `supported` in the target region. To list the available 
 stackit ske options --kubernetes-versions --region eu01
 ```
 
-The example uses `1.36.4`, supported in SKE as of September 2026. Kubernetes 1.36
-requires containerd 2.0 or newer; STACKIT currently recommends Flatcar node images
-because SKE Ubuntu 22.04 images do not meet this requirement. See the
-[STACKIT SKE release notes](https://docs.stackit.cloud/products/runtime/kubernetes-engine/release-notes/).
-
-`kubara generate` uses the Kubernetes version already set in `config.yaml`; updating
-kubara or a catalog does not automatically raise it. For an existing cluster, change
-`terraform.kubernetesVersion`, regenerate Terraform and review the plan before applying.
-Follow the supported upgrade path and maintenance guidance in
-[STACKIT version updates](https://docs.stackit.cloud/products/runtime/kubernetes-engine/basics/operations/version-updates/).
+For Kubernetes 1.36, use Flatcar nodes; see [STACKIT prerequisites](https://docs.stackit.cloud/products/runtime/kubernetes-engine/release-notes/).
+Set `terraform.kubernetesVersion` in `config.yaml` and regenerate Terraform to prepare an upgrade.
 
 ## 1. Generate Terraform modules
 
