@@ -136,3 +136,10 @@ kubara bootstrap <hub-cluster-name-from-config-yaml>
 
 * If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.
 * Extra overlay files can use any `values-*.yaml` name. `values-additional.yaml` is a common choice, and it keeps provider-specific overrides separate from the generated `values.generated.yaml`.
+
+### Alternative multi-cluster architectures
+
+The standard spoke flow assumes the hub cluster can directly reach the spoke cluster's Kubernetes API endpoint using stored credentials. For alternative topologies and fleet management patterns, see the following reference setups in `platform-setup-examples`:
+
+* **Outbound-only agent topology**: [Argo CD Agent Managed-Mode Lab](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents) demonstrates a hub-and-spoke setup where spoke clusters initiate outbound mTLS connections to the hub and run their own application controllers, eliminating the need to store spoke kubeconfigs on the hub.
+* **Fleet add-on distribution**: [Scalable Cluster Management with Project Sveltos](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management) demonstrates delegating add-on and configuration lifecycle across large cluster fleets to Project Sveltos using declarative selectors.

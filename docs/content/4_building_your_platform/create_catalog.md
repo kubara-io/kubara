@@ -212,3 +212,6 @@ Provider-specific directories below Helm paths are **not** treated as provider o
 - Use `configSchema` for defaults and validation instead of prose only.
 - Treat the catalog directory as the maintainable source.
 - Treat generated files in your repo as output.
+
+!!! tip "Real-world Custom Catalog Example"
+    For a complete example of a custom catalog packaging real platform services (including `ServiceDefinition` manifests, underlying Helm charts, and overlay templates), explore the `my-catalog/` directory in the [sveltos-cluster-management reference](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management) in `platform-setup-examples`.

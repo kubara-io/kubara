@@ -39,6 +39,9 @@ That whats happening behind the scenes:
 
 ![Add Application](../images/add-application.png)
 
+!!! tip "Reference example: Kustomize workloads with App of Apps"
+    To see how an App of Apps structure is organized across files in a GitOps repository, explore the [Kustomize application onboarding reference](https://github.com/kubara-io/platform-setup-examples/tree/main/kustomize-application-onboarding) in `platform-setup-examples`. It illustrates how parent values, child application definitions, and workload overlays are structured within `platform-configs/`.
+
 ## **Push your changes to git**
 Do not forget to push your changes to the git repository that serves your Argo CD application.
 If you let Argo CD manage itself, it will add the configured application to the cluster.

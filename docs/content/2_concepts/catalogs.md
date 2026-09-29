@@ -257,6 +257,7 @@ Read more:
 ## Where to go next
 
 - To build your own catalog: [How to create a Catalog](../4_building_your_platform/create_catalog.md)
+- To inspect a reference custom catalog layout: [Sveltos cluster management catalog example](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management)
 - To distribute catalogs through a registry: [Catalog distribution](catalog_distribution.md)
 - To learn template authoring: [Catalog templating](catalog_templating.md)
 - To add simpler workloads through Argo CD instead: [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md)

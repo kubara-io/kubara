@@ -83,6 +83,13 @@ larger, more complex systems and multi-cluster environments.
       workload migration to other clusters, ensuring high availability and
       disaster recovery.
 
+### Reference setups and runnable labs
+
+For concrete implementations and runnable lab environments illustrating variations of the Hub-and-Spoke model, refer to the [platform-setup-examples](https://github.com/kubara-io/platform-setup-examples) repository:
+
+* [Argo CD Agent managed-mode lab](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents): A runnable kind/vCluster lab demonstrating autonomous spoke clusters pulling manifests over outbound mTLS without central hub kubeconfigs.
+* [Project Sveltos cluster management](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management): An architecture pattern for dynamic fleet distribution across multi-cluster environments using declarative selectors.
+
 ## GitOps
 
 GitOps is an approach to continuous delivery and infrastructure management,
