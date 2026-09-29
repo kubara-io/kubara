@@ -44,7 +44,7 @@ terraform:
   provider: stackit
   projectId: <project-id>
   kubernetesType: ske
-  kubernetesVersion: "1.36.4"
+  kubernetesVersion: "1.36"
   dns:
     name: <dns-name>
     email: <email>
@@ -52,7 +52,8 @@ terraform:
 
 For STACKIT SKE, set `projectId` to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.
 
-Choose a version marked `supported` in the target region. To list the available versions:
+Use a supported minor version such as `"1.36"`; the STACKIT provider resolves the patch version.
+List available versions with:
 
 ```bash
 stackit ske options --kubernetes-versions --region eu01

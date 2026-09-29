@@ -51,7 +51,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
-			KubernetesVersion: "1.34",
+			KubernetesVersion: "1.36",
 			DNS: DNS{
 				Name:  "<subdomain.my-domain.com>",
 				Email: "my-test@nowhere.com",

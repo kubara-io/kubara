@@ -48,7 +48,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
-			KubernetesVersion: "1.34",
+			KubernetesVersion: "1.36",
 			DNS: DNS{
 				Name:  expectedDNSName,
 				Email: "my-test@nowhere.com",

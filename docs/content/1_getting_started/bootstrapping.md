@@ -195,7 +195,7 @@ clusters:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
       kubernetesType: <ske, edge or cce>
-      kubernetesVersion: "1.34" # example; select a version supported by your provider
+      kubernetesVersion: "1.36" # select a minor version supported by your provider
       dns:
         name: <dns-name>
         email: <email>
