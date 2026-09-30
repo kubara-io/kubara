@@ -11,13 +11,13 @@ the use case.
 
 ## How much does it cost?
 While kubara itself is free and open-source, running the platform incurs infrastructure and operational costs. 
-The exact costs depend on the setup and individual requirements and must be calculated individually.  
+The exact costs depend on the pricing of the actual infrastructure you are deploying to and must be calculated individually.  
+
+As a reference for sizing and performance estimation you can take a look at the sizing guide:  
+[Scale and HA - Sizing](../2_concepts/scale_and_ha.md/#argo-cd-sizing-component-configuration-per-t-shirt-size) 
 
 Pricing estimation about a kubara setup with STACKIT SKE can be found here:  
 [STACKIT SKE](../3_infrastructure/stackit_ske.md/#sizing-and-price)
-
-As a reference for performance estimation you can take a look at the sizing guide:  
-[Scale and HA - Sizing](../2_concepts/scale_and_ha.md/#argo-cd-sizing-component-configuration-per-t-shirt-size) 
 
 We recommend checking in advance which services are to be used to carry out a rough calculation,
 depending on your cloud provider or infrastructure template you are using.
@@ -25,13 +25,11 @@ depending on your cloud provider or infrastructure template you are using.
 Components that may incur costs:
 
  - Git-Instances
- - Hardware
+ - Hardware (like Machines for Worker Nodes, Controlplane Costs, Storage, ...)
  - SaaS Services (like Key-Vaults)
- - Storage
  - DNS/PKI/Certificates
  - Artifact Storage
  - Network-Traffic
- - ...
 
 ---
 
