@@ -370,5 +370,6 @@ func (o *Options) Run() error {
 	if err != nil {
 		return err
 	}
+	log.Info().Msg("Next steps: commit and push your changes to Git, then run 'kubara bootstrap <cluster-name>'.")
 	return nil
 }

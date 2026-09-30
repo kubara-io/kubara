@@ -222,7 +222,11 @@ func (o *InitOptions) ensureLocalDotEnv(es *envconfig.EnvStore) error {
 
 func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
 	if o.local {
-		return o.ensureLocalDotEnv(es)
+		if err := o.ensureLocalDotEnv(es); err != nil {
+			return err
+		}
+		log.Info().Msg("Next steps: update your .env file, then run 'kubara init --local'.")
+		return nil
 	}
 
 	if err := utils.AddGitignore(o.cwd); err != nil {
@@ -232,6 +236,7 @@ func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
 	_, err := os.Stat(o.dotEnvFilePath)
 	if err == nil {
 		log.Info().Msgf("Skipping dotenv creation. File exist: %v", es.GetFilepath())
+		log.Info().Msg("Next steps: fill in your .env file, then run 'kubara init'.")
 		return nil
 	}
 	if !os.IsNotExist(err) {
@@ -247,6 +252,7 @@ func (o *InitOptions) runPrepMode(es *envconfig.EnvStore) error {
 	}
 
 	log.Info().Msgf("Generated .env in path: %s", es.GetFilepath())
+	log.Info().Msg("Next steps: fill in your .env file, then run 'kubara init'.")
 	return nil
 }
 
@@ -283,11 +289,13 @@ func (o *InitOptions) runForceMode(es *envconfig.EnvStore, cs *config.ConfigStor
 	if o.local {
 		log.Info().Msgf("Overwrote local-evaluation config file: %s", cs.GetFilepath())
 		log.Info().Msg("Initialized local evaluation workflow successfully")
+		log.Info().Msg("Next steps: review config.yaml, then run 'kubara bootstrap --local test-cluster'.")
 		return nil
 	}
 
 	log.Info().Msgf("overwritten config file: %s", cs.GetFilepath())
 	log.Info().Msg("Initialized successfully")
+	log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
 	return nil
 }
 
@@ -303,6 +311,11 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 		}
 		log.Info().Msgf("Config file already exist. To overwrite existing variables in the config from env: set flag \"--overwrite\"")
 		log.Info().Msg("Initialized successfully")
+		if o.local {
+			log.Info().Msg("Next steps: review config.yaml, then run 'kubara bootstrap --local test-cluster'.")
+		} else {
+			log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
+		}
 		return nil
 	}
 
@@ -330,10 +343,12 @@ func (o *InitOptions) runNormalMode(es *envconfig.EnvStore, cs *config.ConfigSto
 
 	if o.local {
 		log.Info().Msgf("Generated local-evaluation config in path: %v", cs.GetFilepath())
+		log.Info().Msgf("Next steps: review config.yaml, then run 'kubara bootstrap --local %s'.", newCluster.Name)
 		return nil
 	}
 
 	log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
+	log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
 	return nil
 }
 

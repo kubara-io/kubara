@@ -38,6 +38,7 @@ This creates the local evaluation `.env` template.
 ```bash
 2026-06-11 12:37:42 INF ✓ copied prep file file=/Users/<user>/kubara-local/.gitignore
 2026-06-11 12:37:42 INF Generated local-evaluation dotenv in path: /Users/<user>/kubara-local/.env
+2026-06-11 12:37:42 INF Next steps: update your .env file, then run 'kubara init --local'.
 ```
 
 ## 3. Update the Argo CD settings
@@ -60,6 +61,7 @@ This creates `config.yaml`. For this local flow you do not need to change it yet
 2026-06-11 12:39:00 INF ✓ copied prep file file=/Users/<user>/kubara-local/.gitignore
 2026-06-11 12:39:00 INF Skipping dotenv creation. File exist: /Users/<user>/kubara-local/.env
 2026-06-11 12:39:00 INF Generated local-evaluation config in path: /Users/<user>/kubara-local/config.yaml
+2026-06-11 12:39:00 INF Next steps: review config.yaml, then run 'kubara bootstrap --local test-cluster'.
 ```
 
 ## 5. Bootstrap the local cluster
