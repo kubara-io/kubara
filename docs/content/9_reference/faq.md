@@ -22,17 +22,15 @@ As a reference for performance estimation you can take a look at the sizing guid
 We recommend checking in advance which services are to be used to carry out a rough calculation,
 depending on your cloud provider or infrastructure template you are using.
 
-Services that may incur costs:
+Components that may incur costs:
 
- - Work effort of the platform team
- - Hardware/Hyperscaler
- - DNS/PKI/Certificates
- - Artifactory
- - GIT
- - Key-Vaults
- - Network-Traffic
+ - Git-Instances
+ - Hardware
+ - SaaS Services (like Key-Vaults)
  - Storage
- - Individual support-contracts
+ - DNS/PKI/Certificates
+ - Artifact Storage
+ - Network-Traffic
  - ...
 
 ---

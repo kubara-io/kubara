@@ -26,6 +26,15 @@ As a starting point for your sizing, the default configuration matches "S", whic
 
 A default kubara setup deployed on STACKIT Kubernetes Engine (SKE) costs around 580€/Month, running 24/7 (Last Update: September, 2026).
 
+The measured components are:  
+- Kubernetes Cluster  
+3 Worker Node VMs (Type: g3i.4), Bootvolumes, Controlplane management fee  
+- Object Storage Bucket  
+- Secrets Manager Secrets (Out of the box: 8 Secrets)  
+- DNS Zone  
+- Loadbalancer 
+- Public IPs 
+
 ## Configuration
 
 Use these values in `config.yaml`:
