@@ -44,13 +44,22 @@ terraform:
   provider: stackit
   projectId: <project-id>
   kubernetesType: ske
-  kubernetesVersion: 1.34
+  kubernetesVersion: "1.36"
   dns:
     name: <dns-name>
     email: <email>
 ```
 
 For STACKIT SKE, set `projectId` to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.
+
+Use a supported minor version such as `"1.36"`; the STACKIT provider resolves the patch version.
+List available versions with:
+
+```bash
+stackit ske options --kubernetes-versions --region eu01
+```
+
+Set `terraform.kubernetesVersion` in `config.yaml` and regenerate Terraform to prepare an upgrade.
 
 ## 1. Generate Terraform modules
 

@@ -2825,12 +2825,17 @@ For more info look at our <a href="../../9_reference/faq/#what-happens-when-oaut
 <span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span>
 <span class="w">  </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id&gt;</span>
 <span class="w">  </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ske</span>
-<span class="w">  </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.34</span>
+<span class="w">  </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="s">"1.36"</span>
 <span class="w">  </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
 <span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 </code></pre></div>
 <p>For STACKIT SKE, set <code>projectId</code> to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.</p>
+<p>Use a supported minor version such as <code>"1.36"</code>; the STACKIT provider resolves the patch version.
+List available versions with:</p>
+<div class="highlight"><pre><span></span><code>stackit<span class="w"> </span>ske<span class="w"> </span>options<span class="w"> </span>--kubernetes-versions<span class="w"> </span>--region<span class="w"> </span>eu01
+</code></pre></div>
+<p>Set <code>terraform.kubernetesVersion</code> in <code>config.yaml</code> and regenerate Terraform to prepare an upgrade.</p>
 <h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>

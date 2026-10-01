@@ -3285,7 +3285,7 @@ You can set a custom output file:</p>
 <span class="w">      </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span><span class="w"> </span><span class="c1"># currently supported: stackit, t-cloud-public</span>
 <span class="w">      </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id-or-tenant-name&gt;</span>
 <span class="w">      </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;ske, edge or cce&gt;</span>
-<span class="w">      </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.34</span>
+<span class="w">      </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="s">"1.36"</span><span class="w"> </span><span class="c1"># select a minor version supported by your provider</span>
 <span class="w">      </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">        </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
 <span class="w">        </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
@@ -3300,6 +3300,8 @@ You can set a custom output file:</p>
 <span class="w">          </span><span class="nt">publicLoadBalancerIPs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">0.0.0.0</span>
 <span class="nn">...</span>
 </code></pre></div>
+<p>The Kubernetes version above is a generic example. For STACKIT SKE, select a currently
+supported version as described in <a href="../../3_infrastructure/stackit_ske/#configuration">STACKIT SKE configuration</a>.</p>
 <p><code>terraform.projectId</code> is provider-specific. For <code>t-cloud-public</code>, use the T Cloud Public tenant/project name that the Terraform provider expects as <code>tenant_name</code>, not a UUID.</p>
 <p><code>bootstrapCatalog</code> is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed <code>argo-cd</code> and <code>bootstrap-crds</code> services, which do not appear under the configurable <code>services</code> map. Each cluster's ordered <code>catalogs</code> list provides its configurable platform services and templates.</p>
 <p><code>ingressClassName</code> defaults to <code>traefik</code>. Set it explicitly when using a different ingress controller.
