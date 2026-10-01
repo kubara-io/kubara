@@ -1,6 +1,6 @@
 # Argo CD: Add App of Apps to kubara
 
-![App of Apps pattern diagram](../images/app-of-apps-overview.png)
+![App-of-Apps Overview](../assets/diagrams.drawio)
 
 The [App of Apps](https://argo-cd.readthedocs.io/en/latest/operator-manual/cluster-bootstrapping/#app-of-apps-pattern-alternative) pattern uses one parent Argo CD `Application` to manage a set
 of child `Application` resources. In kubara, the parent points to a Git folder;
@@ -108,7 +108,7 @@ Each child is an Argo CD `Application`, and its source can be a Helm chart, a
 Kustomize overlay, or a directory containing plain YAML manifests. The parent
 path itself may also use Helm or Kustomize.
 
-![Supported application sources diagram](../images/app-of-apps-different-types.png)
+![App-of-Apps Types](../assets/diagrams.drawio)
 
 ## App of Apps versus ApplicationSet
 
