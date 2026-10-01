@@ -881,6 +881,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#sizing-and-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing and Price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2657,6 +2668,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#sizing-and-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing and Price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2785,6 +2807,18 @@ Make sure your created Service Account has Project Owner permissions.</p>
 <p>If you do not intend to use OAuth2 Proxy you can ignore some of the steps below that talk about it, but you might run into later differences in the generated setup.
 For more info look at our <a href="../../9_reference/faq/#what-happens-when-oauth2-proxy-is-disabled">FAQ</a>.</p>
 </div>
+<h2 id="sizing-and-price">Sizing and Price</h2>
+<p>As a starting point for your sizing, the default configuration matches "S", which is benchmarked and described here:
+<a href="../../2_concepts/scale_and_ha/#argo-cd-sizing-component-configuration-per-t-shirt-size">Scale and HA - Sizing</a></p>
+<p>A default kubara setup deployed on STACKIT Kubernetes Engine (SKE) costs around 580€/Month, running 24/7 (Last Update: September, 2026).</p>
+<p>The measured components are:<br />
+- Kubernetes Cluster<br />
+3 Worker Node VMs (Type: g3i.4), Bootvolumes, Controlplane management fee<br />
+- Object Storage Bucket<br />
+- Secrets Manager Secrets (Out of the box: 8 Secrets)<br />
+- DNS Zone<br />
+- Loadbalancer 
+- Public IPs </p>
 <h2 id="configuration">Configuration</h2>
 <p>Use these values in <code>config.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">terraform</span><span class="p">:</span>

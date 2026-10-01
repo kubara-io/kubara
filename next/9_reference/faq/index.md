@@ -2,33 +2,34 @@
 
 ## Is kubara only usable on STACKIT?
 
-A clear and definite **NO**! kubara was specifically designed to be
-provider-independent. kubara is based on Kubernetes and the underlying
+A clear and definite **NO**!  
+kubara was specifically designed to be provider-independent. kubara is based on Kubernetes and the underlying
 infrastructure plays a secondary role that needs to be considered depending on
 the use case.
 
 ---
 
 ## How much does it cost?
+While kubara itself is free and open-source, running the platform incurs infrastructure and operational costs. 
+The exact costs depend on the pricing of the actual infrastructure you are deploying to and must be calculated individually.  
 
-Even if kubara itself costs nothing, implementing incurs costs. The
-exact costs depend on the setup and individual requirements and must be
-calculated individually.
-We recommend checking in advance which services are to be used to carry out
-a rough calculation.
+As a reference for sizing and performance estimation you can take a look at the sizing guide:  
+[Scale and HA - Sizing](../2_concepts/scale_and_ha.md/#argo-cd-sizing-component-configuration-per-t-shirt-size) 
 
-Services that may incur costs:
+Pricing estimation about a kubara setup with STACKIT SKE can be found here:  
+[STACKIT SKE](../3_infrastructure/stackit_ske.md/#sizing-and-price)
 
- - Work effort of the platform team
- - Hardware/Hyperscaler
+We recommend checking in advance which services are to be used to carry out a rough calculation,
+depending on your cloud provider or infrastructure template you are using.
+
+Components that may incur costs:
+
+ - Git-Instances
+ - Hardware (like Machines for Worker Nodes, Controlplane Costs, Storage, ...)
+ - SaaS Services (like Key-Vaults)
  - DNS/PKI/Certificates
- - Artifactory
- - GIT
- - Key-Vaults
+ - Artifact Storage
  - Network-Traffic
- - Storage
- - Individual support-contracts
- - ...
 
 ---
 
