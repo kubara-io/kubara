@@ -2688,6 +2688,10 @@ Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;
 </code></pre></div></p>
 <p>That whats happening behind the scenes:</p>
 <p><img alt="Add Application" src="../../images/add-application.png" /></p>
+<div class="admonition tip">
+<p class="admonition-title">Reference example: Kustomize workloads with App of Apps</p>
+<p>To see how an App of Apps structure is organized across files in a GitOps repository, explore the <a href="https://github.com/kubara-io/platform-setup-examples/tree/main/kustomize-application-onboarding" target="_blank" rel="noopener">Kustomize application onboarding reference</a> in <code>platform-setup-examples</code>. It illustrates how parent values, child application definitions, and workload overlays are structured within <code>platform-configs/</code>.</p>
+</div>
 <h2 id="push-your-changes-to-git"><strong>Push your changes to git</strong></h2>
 <p>Do not forget to push your changes to the git repository that serves your Argo CD application.
 If you let Argo CD manage itself, it will add the configured application to the cluster.</p>

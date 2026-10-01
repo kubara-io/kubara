@@ -563,6 +563,19 @@ You're not viewing the latest stable version.
       
     </span>
 </a>
+<nav aria-label="Additional notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#alternative-multi-cluster-architectures">
+<span class="md-ellipsis">
+      
+        Alternative multi-cluster architectures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -1280,6 +1293,19 @@ You're not viewing the latest stable version.
       
     </span>
 </a>
+<nav aria-label="Additional notes" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#alternative-multi-cluster-architectures">
+<span class="md-ellipsis">
+      
+        Alternative multi-cluster architectures
+      
+    </span>
+</a>
+</li>
+</ul>
+</nav>
 </li>
 </ul>
 </nav>
@@ -1386,6 +1412,12 @@ If not, run bootstrap again for your hub cluster:</p>
 <ul>
 <li>If you enable <code>oauth2-proxy</code>, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.</li>
 <li>Extra overlay files can use any <code>values-*.yaml</code> name. <code>values-additional.yaml</code> is a common choice, and it keeps provider-specific overrides separate from the generated <code>values.generated.yaml</code>.</li>
+</ul>
+<h3 id="alternative-multi-cluster-architectures">Alternative multi-cluster architectures</h3>
+<p>The standard spoke flow assumes the hub cluster can directly reach the spoke cluster's Kubernetes API endpoint using stored credentials. For alternative topologies and fleet management patterns, see the following reference setups in <code>platform-setup-examples</code>:</p>
+<ul>
+<li><strong>Outbound-only agent topology</strong>: <a href="https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents" target="_blank" rel="noopener">Argo CD Agent Managed-Mode Lab</a> demonstrates a hub-and-spoke setup where spoke clusters initiate outbound mTLS connections to the hub and run their own application controllers, eliminating the need to store spoke kubeconfigs on the hub.</li>
+<li><strong>Fleet add-on distribution</strong>: <a href="https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management" target="_blank" rel="noopener">Scalable Cluster Management with Project Sveltos</a> demonstrates delegating add-on and configuration lifecycle across large cluster fleets to Project Sveltos using declarative selectors.</li>
 </ul>
 </article>
 </div>

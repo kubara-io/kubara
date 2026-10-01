@@ -101,6 +101,8 @@ the simpler fit when the goal is **N independent vClusters on the same hub
 cluster**: add one child `Application` manifest per vCluster to the folder, and
 the labels stay out of it.
 
+For a concrete layout illustrating how multiple vClusters are provisioned through `apps/` manifests using App of Apps, see the [sveltos-cluster-management example](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management) in `platform-setup-examples`.
+
 
 ## Supported application sources
 
@@ -109,6 +111,9 @@ Kustomize overlay, or a directory containing plain YAML manifests. The parent
 path itself may also use Helm or Kustomize.
 
 ![App-of-Apps Types](../assets/diagrams.drawio)
+
+!!! tip "Example: Kustomize workload onboarding with App of Apps"
+    For a complete example of onboarding an application using Kustomize overlays under this pattern, see the [Kustomize application onboarding example](https://github.com/kubara-io/platform-setup-examples/tree/main/kustomize-application-onboarding) in `platform-setup-examples`. It demonstrates configuring the parent application in `additional-values.yaml`, managing child manifests in `platform-configs/<cluster>/apps/`, and consuming remote upstream Kustomize components with local patches.
 
 ## App of Apps versus ApplicationSet
 

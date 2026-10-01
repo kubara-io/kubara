@@ -2681,6 +2681,14 @@ You're not viewing the latest stable version.
 <p>This is one of the questions we have received several times from the community. To answer it, we ran scale tests with up to 1,000 vclusters and used the results to define practical sizing guidelines for kubara users.</p>
 <p>The key question is not simply how many clusters or applications a single hub can manage. What matters more in practice is how many cached objects one hub can handle before resource limits need to be increased or an HA setup becomes necessary.</p>
 <p>To make this easier to understand, we created the simplified view below. kubara currently relies on Argo CD as its GitOps engine, which means that kubara fleet management scales as far as Argo CD can scale. However, Argo CD is not the only component that needs to be considered. Platform components bootstrapped through kubara also need to be sized accordingly.</p>
+<div class="admonition info">
+<p class="admonition-title">Alternative Fleet Scalability Patterns</p>
+<p>When managing hundreds of clusters, centralizing every cluster cache into a single Argo CD controller can create memory and API bottlenecks. The <a href="https://github.com/kubara-io/platform-setup-examples" target="_blank" rel="noopener">platform-setup-examples</a> repository provides two architectural alternatives:</p>
+<ul>
+<li><a href="https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management" target="_blank" rel="noopener">Scalable cluster management with Project Sveltos</a>: Offloads cluster add-on and drift reconciliation across large fleets to Project Sveltos via <code>ClusterProfile</code> selectors, keeping central Argo CD focused on hub controllers.</li>
+<li><a href="https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents" target="_blank" rel="noopener">Argo CD Agent managed mode</a>: Moves the application controller directly to each spoke cluster while preserving centralized visibility at the hub.</li>
+</ul>
+</div>
 <h2 id="overview">Overview</h2>
 <p>As the test results show, the limiting factor is not the number of vclusters or applications by itself. vclusters or k8s clusters in general do not add much weight to Argo CD, as they are represented as Secrets and do not create significant load on their own. Applications, however, can vary significantly in size. A small nginx deployment creates very little load, while something like <code>kube-prometheus-stack</code> creates many Kubernetes objects. For that reason, judging scalability only by the number of clusters or applications is misleading.</p>
 <p>The relationship between clusters and applications is important, and it is not linear. Running 50 applications on one cluster is not the same as running 50 applications across 50 cluster, because more metadata and more live-state data needs to be cached. For our tests, we used six applications per cluster to create a balanced and realistic weighting.</p>
