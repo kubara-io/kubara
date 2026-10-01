@@ -20,11 +20,11 @@ import (
 
 // ApplyOptions for server-side apply operations
 type ApplyOptions struct {
-	FieldManager        string
-	ForceConflicts      bool
-	DryRun              bool
-	Validate            bool
-	RecreateBeforeApply func(*unstructured.Unstructured) bool
+	FieldManager              string
+	ForceConflicts            bool
+	DryRun                    bool
+	Validate                  bool
+	ShouldRecreateBeforeApply func(*unstructured.Unstructured) bool
 }
 
 // DefaultApplyOptions returns default apply options
@@ -90,8 +90,8 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 	}
 
 	if !opts.DryRun &&
-		opts.RecreateBeforeApply != nil &&
-		opts.RecreateBeforeApply(obj) {
+		opts.ShouldRecreateBeforeApply != nil &&
+		opts.ShouldRecreateBeforeApply(obj) {
 		if err := deleteObjectAndWait(ctx, dr, obj.GetName()); err != nil {
 			return fmt.Errorf("recreate before apply: %w", err)
 		}
