@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
-	"strings"
 	"time"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -341,22 +340,15 @@ func applyCRDs(ctx context.Context, client *k8s.Client, opts *Options, charts []
 	return nil
 }
 
-const helmHookDeletePolicyAnnotation = "helm.sh/hook-delete-policy"
-
-func shouldRecreateBootstrapJob(obj *unstructured.Unstructured) bool {
-	if obj.GetKind() != "Job" {
+func shouldRecreateBootstrapHook(obj *unstructured.Unstructured) bool {
+	hook, ok := helm.ParseHook(obj)
+	if !ok {
 		return false
 	}
 
-	policy := obj.GetAnnotations()[helmHookDeletePolicyAnnotation]
-
-	for _, value := range strings.Split(policy, ",") {
-		if strings.TrimSpace(value) == "before-hook-creation" {
-			return true
-		}
-	}
-
-	return false
+	return hook.HasDeletePolicy(
+		helm.HookDeletePolicyBeforeHookCreation,
+	)
 }
 
 // bootstrapArgoCD performs the main ArgoCD installation
@@ -388,7 +380,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	applyOpts := k8s.DefaultApplyOptions()
 	applyOpts.FieldManager = "kubara-argocd-bootstrap"
 	applyOpts.ForceConflicts = true
-	applyOpts.RecreateBeforeApply = shouldRecreateBootstrapJob
+	applyOpts.ShouldRecreateBeforeApply = shouldRecreateBootstrapHook
 
 	// TODO: Implement proper DryRun with client
 	if opts.DryRun {
