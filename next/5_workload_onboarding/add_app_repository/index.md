@@ -49,36 +49,40 @@ Add one of the following repository definitions to your Argo CD overlay, typical
 HTTPS username + password/PAT:
 
 ```yaml
-repositories:
-  - name: user-repo-mock
-    authMode: https
-    projectScope: k8s-spoke-0
-    remoteRef:
-      remoteKey: <cluster-name>/<stage>/repo_pat
-      remoteKeyProperty: pat
-    repoType: git
-    secretStoreRef:
-      kind: ClusterSecretStore
-      name: hub-0-production
-    url: https://git.example.com/org/repo.git
-    username: <technical-account-username>
+bootstrapValues:
+  repositories:
+    user-repo-mock:
+      name: user-repo-mock
+      authMode: https
+      projectScope: k8s-spoke-0
+      remoteRef:
+        remoteKey: <cluster-name>/<stage>/repo_pat
+        remoteKeyProperty: pat
+      repoType: git
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: hub-0-production
+      url: https://git.example.com/org/repo.git
+      username: <technical-account-username>
 ```
 
 SSH deploy key:
 
 ```yaml
-repositories:
-  - name: user-repo-ssh
-    authMode: ssh
-    projectScope: k8s-spoke-0
-    sshPrivateKeyRemoteRef:
-      remoteKey: <cluster-name>/<stage>/repo_ssh
-      remoteKeyProperty: privateKey
-    repoType: git
-    secretStoreRef:
-      kind: ClusterSecretStore
-      name: hub-0-production
-    url: git@git.example.com:org/repo.git
+bootstrapValues:
+  repositories:
+    user-repo-ssh:
+      name: user-repo-ssh
+      authMode: ssh
+      projectScope: k8s-spoke-0
+      sshPrivateKeyRemoteRef:
+        remoteKey: <cluster-name>/<stage>/repo_ssh
+        remoteKeyProperty: privateKey
+      repoType: git
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: hub-0-production
+      url: git@git.example.com:org/repo.git
 ```
 
 For SSH repositories, make sure Argo CD already trusts the SSH host key. See the bootstrap documentation for `configs.ssh.extraHosts`.
@@ -86,20 +90,22 @@ For SSH repositories, make sure Argo CD already trusts the SSH host key. See the
 GitHub App:
 
 ```yaml
-repositories:
-  - name: user-repo-github-app
-    authMode: github-app
-    projectScope: k8s-spoke-0
-    githubAppID: "123456"
-    githubAppInstallationID: "987654"
-    githubAppPrivateKeyRemoteRef:
-      remoteKey: <cluster-name>/<stage>/repo_github_app
-      remoteKeyProperty: privateKey
-    repoType: git
-    secretStoreRef:
-      kind: ClusterSecretStore
-      name: hub-0-production
-    url: https://github.com/org/repo.git
+bootstrapValues:
+  repositories:
+    user-repo-github-app:
+      name: user-repo-github-app
+      authMode: github-app
+      projectScope: k8s-spoke-0
+      githubAppID: "123456"
+      githubAppInstallationID: "987654"
+      githubAppPrivateKeyRemoteRef:
+        remoteKey: <cluster-name>/<stage>/repo_github_app
+        remoteKeyProperty: privateKey
+      repoType: git
+      secretStoreRef:
+        kind: ClusterSecretStore
+        name: hub-0-production
+      url: https://github.com/org/repo.git
 ```
 
 For GitHub Enterprise, also set `githubAppEnterpriseBaseUrl`.
