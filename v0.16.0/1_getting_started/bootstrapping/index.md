@@ -66,6 +66,34 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
         Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
         platform will be publicly available by default via your DNS zone.
 
+#### Git repository authentication
+
+kubara creates the initial Argo CD repository secret during `kubara bootstrap`.
+`ARGOCD_GIT_AUTH_MODE` controls which credential fields are written:
+
+| Mode | Required values | Notes |
+| --- | --- | --- |
+| `https` | `ARGOCD_GIT_URL` or legacy `ARGOCD_GIT_HTTPS_URL` | Backward-compatible default. `ARGOCD_GIT_USERNAME` + `ARGOCD_GIT_PAT_OR_PASSWORD` are optional: omit them for public repositories, set both for private ones. `PAT` usually means Personal Access Token and is often tied to a user account. Prefer a technical or machine account and use that account name for `ARGOCD_GIT_USERNAME`; exact username behavior is provider-dependent. |
+| `ssh` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_SSH_PRIVATE_KEY` | Use an SSH repository URL such as `git@github.com:org/repo.git`. Argo CD must know the SSH host key before it can connect securely. |
+| `github-app` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_GITHUB_APP_ID`, `ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID`, `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. |
+
+For new setups, prefer `ARGOCD_GIT_URL`.
+`ARGOCD_GIT_HTTPS_URL` is still supported for existing HTTPS/PAT setups.
+
+For SSH, keep strict host verification enabled.
+The bundled Argo CD Helm chart already includes known hosts for common public providers.
+For private Git hosts, add trusted host keys to the generated Argo CD values before bootstrapping, for example in `platform-configs/<cluster>/helm/argo-cd/values-additional.yaml`:
+
+```yaml
+argo-cd:
+  configs:
+    ssh:
+      extraHosts: |
+        git.example.com ssh-ed25519 <trusted-host-key>
+```
+
+If the required host key is missing, Argo CD will reject the SSH connection as an unknown SSH host.
+
 
 
 ### 1.3 Generate Base Configuration
@@ -88,6 +116,9 @@ For Renovate to discover the generated file, use the Git repository root as kuba
 Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [Renovate settings for catalog updates](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
 
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
+The generated Argo CD repository config records the selected Git auth mode in `argocd.repo.authMode`.
+Repository URLs are stored under `argocd.repo.git`.
+Older configs are migrated up to `v1alpha5` when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`.
 
 By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:
 
@@ -149,7 +180,7 @@ For editor integration (e.g. VS Code with YAML language server), reference the s
 Example:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:5.0.1
 clusters:
   - name: project-name-from-env-file
     stage: project-stage-something-like-dev
@@ -159,12 +190,12 @@ clusters:
     ssoOrg: <oidc-org> 
     ssoTeam: <org-team>
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:3.0.0
+      - oci://ghcr.io/kubara-io/catalogs/general:5.1.0
     terraform:
       provider: stackit # currently supported: stackit, t-cloud-public
       projectId: <project-id-or-tenant-name>
       kubernetesType: <ske, edge or cce>
-      kubernetesVersion: 1.34
+      kubernetesVersion: "1.36" # select a minor version supported by your provider
       dns:
         name: <dns-name>
         email: <email>
@@ -179,6 +210,10 @@ clusters:
           publicLoadBalancerIPs: 0.0.0.0
 ...
 ```
+
+The Kubernetes version above is a generic example. For STACKIT SKE, select a currently
+supported version as described in [STACKIT SKE configuration](../3_infrastructure/stackit_ske.md#configuration).
+
 
 `terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
@@ -279,71 +314,74 @@ CI-specific values can be stored in chart-local CI files (for example `ci/ci-val
 
 ---
 
-#### 3.1.1 Secrets
+### 3.2 Secret handling & preparation
 
 !!! tip "Infrastructure Presets"
-    If you deploy with an Infrastructure Preset then you are ready for the next Step (4) and can skip this.  
-    Secrets will be created by Terraform / OpenTofu for you.
+    Infrastructure presets already contain the logic to create and configure the secret backend for you.
+    But you must still provide optional platform credentials before bootstrapping yourself.
+
+    For STACKIT SKE, use:
+    [OAuth2-related Vault entries via Terraform](../3_infrastructure/stackit_ske.md#7-optional-oauth2-related-vault-entries-via-terraform)
+
+    For T Cloud Public, use:
+    [OpenBao configuration and secrets](../3_infrastructure/t-cloud-public.md#7-openbao-configuration-and-secrets)
+
+    Both guides explain which example secret files to copy, the required `TF_VAR_*` values in `set-env.sh`
+    and when to apply the Terraform/OpenTofu parts.
 
 
 !!! danger "Manual Installation"
-    If you are doing a manual Installation without a Preset than you have to make sure you actually created your secrets 
-    and also prepared your Cluster Secret Store for external Secrets - How to create them will be explained here.
+    Without an Infrastructure Preset, you have to ensure the required secrets are created in your chosen 
+    backend and need to prepare a `ClusterSecretStore` before running `kubara bootstrap`. The next sections
+    list the platform secrets and show how the generated ExternalSecrets locate them.
 
 
-Manual Handling of Secrets:
+The generated charts create ExternalSecrets during bootstrap. Those resources cannot synchronize until the secret
+backend contains the referenced values and the cluster has a working `ClusterSecretStore`.
 
-##### List of Secrets:
+#### Platform secret paths
 
-- `kube-prometheus-stack-grafana-credentials`         # Default Admin Credentials for Grafana
-- `cluster-secrets-docker-config`                     # Optional: Container-Registry Credentials (like Dockerhub)
-- `argocd-argo-oauth2-credentials`                    # SSO: OAuth2 App Credentials for ArgoCD
-- `oauth2-proxy-oauth2-credentials`                   # SSO: OAuth2 App Credentials for OAuth2Proxy (Homer Dashboard, etc.)
-- `kube-prometheus-stack-grafana-oauth2-credentials`  # SSO: OAuth2 App Credentials for kube-prometheus-stack
-- Optional: The Velero Backup Storage Secret
+kubara reads these backend paths. Replace `<cluster>` and `<stage>` with the values from `config.yaml`.
+The key names are the fields that must exist in the stored secret.
 
-Depending on which Secret Management Tool you will use the naming of secrets can differ, for example some allow Slashes and Dashes, some just don't.  
+| Purpose | Backend path | Keys |
+|---|---|---|
+| Grafana admin account | `<cluster>/<stage>/kube-prometheus-stack/grafana_credentials` | `admin-user`, `admin-password` |
+| Container registry pull credentials | `<cluster>/<stage>/cluster_secrets/docker_config` | `pull-secret` |
+| OAuth2 Proxy | `<cluster>/<stage>/oauth2-proxy/oauth2_credentials` | `client-id`, `client-secret`, `cookie-secret` |
+| Argo CD OAuth2 | `<cluster>/<stage>/argocd/argo_oauth2_credentials` | `client-id`, `client-secret` |
+| Grafana OAuth2 | `<cluster>/<stage>/kube-prometheus-stack/grafana_oauth2_credentials` | `client-id`, `client-secret` |
+| Velero backup storage | `<cluster>/<stage>/velero/velero_s3_credentials` | `cloud` |
+
+Create only the secrets for enabled services. The container registry secret for example is only needed when 
+the generated image pull secret is in use for a private registry or commerical access to something like DockerHub.
   
 ---  
 
-##### Values files - Secret names
+#### Changing generated secret references
 
-You'll need to adapt the following Helm values with your secret names:  
-
-- `platform-configs/<my-cluster>/helm/argo-cd/values.yaml`
-- `platform-configs/<my-cluster>/helm/external-dns/values.yaml`
-- `platform-configs/<my-cluster>/helm/external-secrets/values.yaml`
-- `platform-configs/<my-cluster>/helm/kube-prometheus-stack/values.yaml`
-- `platform-configs/<my-cluster>/helm/oauth2-proxy/values.yaml`
-
-You are free to choose the names of your secrets, since you have to reference them in your values file. But we highly recommend a fixed schema like:
-```txt
-<clustername>-<stage>-<secretname>
-```
-
-Which means, for a DEV-stage cluster named `kuby`, the Docker pull secret would be called:
-```txt
-kuby-dev-cluster-secrets-docker-config
-```
+Do not edit `values.generated.yaml`. `kubara generate --helm` replaces them on every run. To use different backend 
+paths, add a `values-*.yaml` file in the specific chart directory and override that chart's `externalSecrets` settings.
+The generated values files show the required Kubernetes secret names and fields.
 
 ---
-
-
-The following Commands only explain how to create the Secrets, you have to save them in your Secret Manager by yourselves.
+The following commands show the expected value format. Store their output in your secret manager.
 
 ```bash title="Docker Pull Secret"
 # Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in your Secret Manager
-printf '%s' '$YOUR_PASSWORD_IN_BASE64' | base64 -d | jq -Rs '{"pull-secret":.}'
+printf '%s' "$YOUR_PASSWORD_IN_BASE64" | base64 -d | jq -Rs '{"pull-secret":.}'
 ```
 
 ```bash title="Grafana Admin Secret"
 # Replace "$YOUR_PASSWORD" with your desired Grafana admin account password.
-printf '%s' '{"admin-user":"admin","admin-password":"$YOUR_PASSWORD"}'
+jq -n --arg password "$YOUR_PASSWORD" \
+  '{"admin-user": "admin", "admin-password": $password}'
 ```
 
 ```bash title="Grafana SSO Secret"
 # Replace secret values according to your SSO App Client ID and Secret
-printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRET"}'
+jq -n --arg clientID "$YOUR_GRAFANA_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  '{"client-id": $clientID, "client-secret": $clientSecret}'
 ```
 
 ```bash title="OAuth2 Proxy Secret"
@@ -352,16 +390,20 @@ printf '%s' '{"client-id":"$YOUR_GRAFANA_CLIENT_ID","client-secret":"$YOUR_SECRE
 dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
 
 # Replace secret values accordingly
-printf '%s' '{"client-id":"$YOUR_OAUTH2_CLIENT_ID","client-secret":"$YOUR_SECRET","cookie-secret":"$YOUR_COOKIE_SECRET_CREATED_ABOVE"}'
+jq -n --arg clientID "$YOUR_OAUTH2_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  --arg cookieSecret "$YOUR_COOKIE_SECRET_CREATED_ABOVE" \
+  '{"client-id": $clientID, "client-secret": $clientSecret, "cookie-secret": $cookieSecret}'
 ```
 
 ```bash title="ArgoCD SSO Secret"
 # Replace the secret name according to your cluster name and stage (for example "gcp-dev"), and replace the secret values accordingly
-printf '%s' '{"client-id":"$YOUR_ARGO_CLIENT_ID","client-secret":"$YOUR_SECRET"}'
+jq -n --arg clientID "$YOUR_ARGO_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  '{"client-id": $clientID, "client-secret": $clientSecret}'
 ```
 
-On the [official External Secrets Operator Website](https://external-secrets.io/latest/) you can find guidance on how to create the Cluster Secret Store.
-You are ready for the next Step if you have prepared a Cluster Secret Store for External Secrets.
+Use the [External Secrets Operator documentation](https://external-secrets.io/latest/) to create a
+`ClusterSecretStore` for your backend. Continue only after the secret manager contains the required values and
+the `ClusterSecretStore` can reach it.
 
 
 ---
@@ -474,10 +516,10 @@ Enjoy your new platform!
 This section will be extended in the future to describe not just technical changes,
 but also other supported possibilities when bootstrapping.
 
-### Bootstrapping Multiple Hub Cluster
+### Bootstrapping Multiple Hub Clusters
 
 You can bootstrap multiple Hub clusters.
-Do **not** reuse the same `config.yaml` file for multiple Hub clusters.
+You **cannot** reuse the same `config.yaml` file for multiple Hub clusters. Only one hub per config is supported.
 
 **Why?**
 During the bootstrap process, the `.env` file is used to provide credentials.

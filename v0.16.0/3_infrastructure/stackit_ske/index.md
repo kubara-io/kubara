@@ -20,6 +20,21 @@ The kubara provider key is `stackit` and the Kubernetes type is `ske`.
     If you do not intend to use OAuth2 Proxy you can ignore some of the steps below that talk about it, but you might run into later differences in the generated setup.
     For more info look at our [FAQ](../9_reference/faq.md#what-happens-when-oauth2-proxy-is-disabled).
 
+## Sizing and Price
+As a starting point for your sizing, the default configuration matches "S", which is benchmarked and described here:
+[Scale and HA - Sizing](../2_concepts/scale_and_ha.md/#argo-cd-sizing-component-configuration-per-t-shirt-size)
+
+A default kubara setup deployed on STACKIT Kubernetes Engine (SKE) costs around 580€/Month, running 24/7 (Last Update: September, 2026).
+
+The measured components are:  
+- Kubernetes Cluster  
+3 Worker Node VMs (Type: g3i.4), Bootvolumes, Controlplane management fee  
+- Object Storage Bucket  
+- Secrets Manager Secrets (Out of the box: 8 Secrets)  
+- DNS Zone  
+- Loadbalancer 
+- Public IPs 
+
 ## Configuration
 
 Use these values in `config.yaml`:
@@ -29,13 +44,22 @@ terraform:
   provider: stackit
   projectId: <project-id>
   kubernetesType: ske
-  kubernetesVersion: 1.34
+  kubernetesVersion: "1.36"
   dns:
     name: <dns-name>
     email: <email>
 ```
 
 For STACKIT SKE, set `projectId` to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.
+
+Use a supported minor version such as `"1.36"`; the STACKIT provider resolves the patch version.
+List available versions with:
+
+```bash
+stackit ske options --kubernetes-versions --region eu01
+```
+
+Set `terraform.kubernetesVersion` in `config.yaml` and regenerate Terraform to prepare an upgrade.
 
 ## 1. Generate Terraform modules
 

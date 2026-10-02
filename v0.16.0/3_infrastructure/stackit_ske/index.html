@@ -881,6 +881,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#sizing-and-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing and Price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -1127,6 +1138,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../4_building_your_platform/argocd-add-app-of-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD App-of-Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../4_building_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
@@ -1193,10 +1232,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
             
   
   
@@ -1214,8 +1253,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2629,6 +2668,17 @@ You're not viewing the latest stable version.
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#sizing-and-price" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sizing and Price
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2757,18 +2807,35 @@ Make sure your created Service Account has Project Owner permissions.</p>
 <p>If you do not intend to use OAuth2 Proxy you can ignore some of the steps below that talk about it, but you might run into later differences in the generated setup.
 For more info look at our <a href="../../9_reference/faq/#what-happens-when-oauth2-proxy-is-disabled">FAQ</a>.</p>
 </div>
+<h2 id="sizing-and-price">Sizing and Price</h2>
+<p>As a starting point for your sizing, the default configuration matches "S", which is benchmarked and described here:
+<a href="../../2_concepts/scale_and_ha/#argo-cd-sizing-component-configuration-per-t-shirt-size">Scale and HA - Sizing</a></p>
+<p>A default kubara setup deployed on STACKIT Kubernetes Engine (SKE) costs around 580€/Month, running 24/7 (Last Update: September, 2026).</p>
+<p>The measured components are:<br />
+- Kubernetes Cluster<br />
+3 Worker Node VMs (Type: g3i.4), Bootvolumes, Controlplane management fee<br />
+- Object Storage Bucket<br />
+- Secrets Manager Secrets (Out of the box: 8 Secrets)<br />
+- DNS Zone<br />
+- Loadbalancer 
+- Public IPs </p>
 <h2 id="configuration">Configuration</h2>
 <p>Use these values in <code>config.yaml</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="nt">terraform</span><span class="p">:</span>
 <span class="w">  </span><span class="nt">provider</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">stackit</span>
 <span class="w">  </span><span class="nt">projectId</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;project-id&gt;</span>
 <span class="w">  </span><span class="nt">kubernetesType</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ske</span>
-<span class="w">  </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">1.34</span>
+<span class="w">  </span><span class="nt">kubernetesVersion</span><span class="p">:</span><span class="w"> </span><span class="s">"1.36"</span>
 <span class="w">  </span><span class="nt">dns</span><span class="p">:</span>
 <span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;dns-name&gt;</span>
 <span class="w">    </span><span class="nt">email</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;email&gt;</span>
 </code></pre></div>
 <p>For STACKIT SKE, set <code>projectId</code> to the STACKIT project ID that should own the DNS zone, IAM resources, Secrets Manager, optional Velero bucket, and the SKE cluster.</p>
+<p>Use a supported minor version such as <code>"1.36"</code>; the STACKIT provider resolves the patch version.
+List available versions with:</p>
+<div class="highlight"><pre><span></span><code>stackit<span class="w"> </span>ske<span class="w"> </span>options<span class="w"> </span>--kubernetes-versions<span class="w"> </span>--region<span class="w"> </span>eu01
+</code></pre></div>
+<p>Set <code>terraform.kubernetesVersion</code> in <code>config.yaml</code> and regenerate Terraform to prepare an upgrade.</p>
 <h2 id="1-generate-terraform-modules">1. Generate Terraform modules</h2>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>generate<span class="w"> </span>--terraform
 </code></pre></div>

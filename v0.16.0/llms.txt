@@ -25,6 +25,7 @@
 - [Google Cloud (Guide)](3_infrastructure/google-cloud/index.md)
 
 ## Building Your Platform
+- [Argo CD App-of-Apps](4_building_your_platform/argocd-add-app-of-apps/index.md)
 - [How to add a Spoke Cluster](4_building_your_platform/add_spoke_cluster/index.md)
 - [How to create a Catalog](4_building_your_platform/create_catalog/index.md)
 - [SSO > About SSO](4_building_your_platform/sso/sso/index.md)

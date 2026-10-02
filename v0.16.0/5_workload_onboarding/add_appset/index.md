@@ -11,22 +11,11 @@ For more information and possible configuration check:<br>
 
 ## **Add Chart to your platform-components**
 Add the Chart you want to add to your `platform-components`:<br>
-platform-components/helm/my-new-servie-in-a-long-dir-name/
-
-## **Add Templates to your new Chart (optional)**
-To use pre-configured processes (e.g. get secrets from vault) you can leverage the Chart `template-library` inside 
-`platform-components`.<br>
-Take a look at other chart to find out how to use these templates.<br>
-The general steps are:
-
-1. Add template-library as a dependency to your Chart.yaml
-2. add a template to your new Chart's "templates/" directory and include the templates you need from `template-libary` Chart
-   (check other Chart templates to find out how)
-3. update the new Chart's values and/or override values according to the templates you included
+platform-components/helm/my-new-service-in-a-long-dir-name/
 
 ## **Add Override Values to your platform-configs**
 Add Override Values to your `platform-configs`:<br>
-platform-configs/my-cluster/helm/my-new-servie-in-a-long-dir-name/values.generated.yaml
+platform-configs/my-cluster/helm/my-new-service-in-a-long-dir-name/values-additional.yaml
 
 Optional: Add one or more `values-*.yaml` files in the same chart folder for cluster-specific overrides.
 For example, you can use `values-additional.yaml`, but the generated ApplicationSet will also pick up other files matching `values-*.yaml`.
@@ -36,24 +25,14 @@ This is an example on how to add an AppSet to the hub cluster.
 Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 bootstrapValues:
-  applicationSets:  # usually your existing hub cluster key (for example "<cluster>-<stage>")
+  applicationSets:  # match your existing hub cluster key (for example "<cluster>-<stage>")
     my-hub-dev:
-      projectName: my-hub-dev
-      platformComponents:
-        repoURL: https://your-repo.example/managed.git
-        path: platform-components/helm
-        targetRevision: main
-      platformConfigs:
-        repoURL: https://your-repo.example/customer.git
-        path: platform-configs
-        targetRevision: main
       apps:
         my-new-service:
-          name: my-new-service # This will determine the generated AppName
-          path: my-new-servie-in-a-long-dir-name # This points to the directory you created for the chart inside platform-components
+          name: my-new-service # This will determine the generated AppName and label selector
+          path: my-new-service-in-a-long-dir-name # Points to the directory you created for the chart inside platform-components/helm
 inClusterSecretLabels:
   my-new-service: enabled
-    
 ```
 
 This is meant to be added to the same directive where all pre-configured appSets are defined.

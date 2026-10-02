@@ -8,6 +8,12 @@ The key question is not simply how many clusters or applications a single hub ca
 
 To make this easier to understand, we created the simplified view below. kubara currently relies on Argo CD as its GitOps engine, which means that kubara fleet management scales as far as Argo CD can scale. However, Argo CD is not the only component that needs to be considered. Platform components bootstrapped through kubara also need to be sized accordingly.
 
+!!! info "Alternative Fleet Scalability Patterns"
+    When managing hundreds of clusters, centralizing every cluster cache into a single Argo CD controller can create memory and API bottlenecks. The [platform-setup-examples](https://github.com/kubara-io/platform-setup-examples) repository provides two architectural alternatives:
+
+    * [Scalable cluster management with Project Sveltos](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management): Offloads cluster add-on and drift reconciliation across large fleets to Project Sveltos via `ClusterProfile` selectors, keeping central Argo CD focused on hub controllers.
+    * [Argo CD Agent managed mode](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents): Moves the application controller directly to each spoke cluster while preserving centralized visibility at the hub.
+
 
 ## Overview
 
@@ -22,7 +28,7 @@ Based on this assumption, we found that the number of cached objects in the Argo
 
 !!! note
 
-    These tests were performed with kubara versions `0.7.0` and `0.8.0`, Argo CD versions `v3.3.7` and `v3.3.9`, and STACKIT Kubernetes Engine (SKE) version `1.35.4` between May and June 2026. Baseline sizing without hydration and without fine-tuning.
+    These tests were performed with kubara versions `0.7.0` and `0.8.0`, Argo CD versions `v3.3.7` and `v3.3.9`, and STACKIT Kubernetes Engine (SKE) version `1.35.4` between May and June 2026. Baseline sizing without hydration and without fine-tuning. A default kubara deployment on SKE is equivalent to size "S".
 
 ![image](../images/kubara-t-shirt-sizes.png)
 

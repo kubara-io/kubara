@@ -66,11 +66,11 @@ kubara resolves catalogs in layers:
 New configurations use kubara's general catalog unless catalogs are supplied during `init`. The selected catalog references are stored on the cluster:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:3.0.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:5.0.1
 clusters:
   - name: production
     catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:3.0.0
+      - oci://ghcr.io/kubara-io/catalogs/general:5.1.0
       - oci://ghcr.io/acme/platform-catalogs/security:2.1.0
 ```
 
@@ -257,6 +257,7 @@ Read more:
 ## Where to go next
 
 - To build your own catalog: [How to create a Catalog](../4_building_your_platform/create_catalog.md)
+- To inspect a reference custom catalog layout: [Sveltos cluster management catalog example](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management)
 - To distribute catalogs through a registry: [Catalog distribution](catalog_distribution.md)
 - To learn template authoring: [Catalog templating](catalog_templating.md)
 - To add simpler workloads through Argo CD instead: [Workload Onboarding with Argo CD](../5_workload_onboarding/overview.md)

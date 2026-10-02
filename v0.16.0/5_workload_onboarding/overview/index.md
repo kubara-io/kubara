@@ -38,3 +38,7 @@ Related catalog pages:
 
 - [Catalogs](../2_concepts/catalogs.md)
 - [How to create a Catalog](../4_building_your_platform/create_catalog.md)
+
+Related examples:
+
+- [Kustomize application onboarding](https://github.com/kubara-io/platform-setup-examples/tree/main/kustomize-application-onboarding): A concrete example of onboarding an external workload using Argo CD and Kustomize overlays without modifying the platform catalog.

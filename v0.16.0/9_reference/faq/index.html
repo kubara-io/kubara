@@ -988,6 +988,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../4_building_your_platform/argocd-add-app-of-apps/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Argo CD App-of-Apps
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../4_building_your_platform/add_spoke_cluster/" class="md-nav__link">
         
   
@@ -1054,10 +1082,10 @@ You're not viewing the latest stable version.
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5_4" >
         
           
-          <label class="md-nav__link" for="__nav_5_3" id="__nav_5_3_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5_4" id="__nav_5_4_label" tabindex="0">
             
   
   
@@ -1075,8 +1103,8 @@ You're not viewing the latest stable version.
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_3_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_5_3">
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_5_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5_4">
             <span class="md-nav__icon md-icon"></span>
             
   
@@ -2824,29 +2852,28 @@ You're not viewing the latest stable version.
 
 <h1 id="frequently-asked-questions">Frequently Asked Questions</h1>
 <h2 id="is-kubara-only-usable-on-stackit">Is kubara only usable on STACKIT?</h2>
-<p>A clear and definite <strong>NO</strong>! kubara was specifically designed to be
-provider-independent. kubara is based on Kubernetes and the underlying
+<p>A clear and definite <strong>NO</strong>!<br />
+kubara was specifically designed to be provider-independent. kubara is based on Kubernetes and the underlying
 infrastructure plays a secondary role that needs to be considered depending on
 the use case.</p>
 <hr />
 <h2 id="how-much-does-it-cost">How much does it cost?</h2>
-<p>Even if kubara itself costs nothing, implementing incurs costs. The
-exact costs depend on the setup and individual requirements and must be
-calculated individually.
-We recommend checking in advance which services are to be used to carry out
-a rough calculation.</p>
-<p>Services that may incur costs:</p>
+<p>While kubara itself is free and open-source, running the platform incurs infrastructure and operational costs. 
+The exact costs depend on the pricing of the actual infrastructure you are deploying to and must be calculated individually.  </p>
+<p>As a reference for sizing and performance estimation you can take a look at the sizing guide:<br />
+<a href="../../2_concepts/scale_and_ha/#argo-cd-sizing-component-configuration-per-t-shirt-size">Scale and HA - Sizing</a> </p>
+<p>Pricing estimation about a kubara setup with STACKIT SKE can be found here:<br />
+<a href="../../3_infrastructure/stackit_ske/#sizing-and-price">STACKIT SKE</a></p>
+<p>We recommend checking in advance which services are to be used to carry out a rough calculation,
+depending on your cloud provider or infrastructure template you are using.</p>
+<p>Components that may incur costs:</p>
 <ul>
-<li>Work effort of the platform team</li>
-<li>Hardware/Hyperscaler</li>
+<li>Git-Instances</li>
+<li>Hardware (like Machines for Worker Nodes, Controlplane Costs, Storage, ...)</li>
+<li>SaaS Services (like Key-Vaults)</li>
 <li>DNS/PKI/Certificates</li>
-<li>Artifactory</li>
-<li>GIT</li>
-<li>Key-Vaults</li>
+<li>Artifact Storage</li>
 <li>Network-Traffic</li>
-<li>Storage</li>
-<li>Individual support-contracts</li>
-<li>...</li>
 </ul>
 <hr />
 <h2 id="what-knowledge-is-required-to-use-kubara">What knowledge is required to use kubara</h2>
