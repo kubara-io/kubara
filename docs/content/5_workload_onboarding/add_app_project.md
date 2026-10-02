@@ -11,14 +11,16 @@ https://argo-cd.readthedocs.io/en/stable/user-guide/projects/
 ## **Modify Argo CD overlays**
 Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
-projects:
-  - description: k8s-ske-spoke-0 project
-    name: k8s-spoke-0
-    namespace: argocd
-    # You can add as many allowed Repos in here as you like
-    # Must be added to Argo CD before
-    sourceRepos:
-      - registry.onstackit.cloud/stackit-edge-cloud-blueprint
+bootstrapValues:
+  projects:
+    k8s-spoke-0:
+      name: k8s-spoke-0
+      description: k8s-ske-spoke-0 project
+      namespace: argocd
+      # You can add as many allowed Repos in here as you like
+      # Must be added to Argo CD before
+      sourceRepos:
+        - registry.onstackit.cloud/stackit-edge-cloud-blueprint
 ```
 
 That whats happening behind the scenes:
