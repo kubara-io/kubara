@@ -13,6 +13,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
 	"github.com/kubara-io/kubara/internal/k8s"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
 	"github.com/rs/zerolog/log"
@@ -339,6 +340,17 @@ func applyCRDs(ctx context.Context, client *k8s.Client, opts *Options, charts []
 	return nil
 }
 
+func shouldRecreateBootstrapHook(obj *unstructured.Unstructured) bool {
+	hook, ok := helm.ParseHook(obj)
+	if !ok {
+		return false
+	}
+
+	return hook.HasDeletePolicy(
+		helm.HookDeletePolicyBeforeHookCreation,
+	)
+}
+
 // bootstrapArgoCD performs the main ArgoCD installation
 func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, argoChart BootstrapChart) error {
 	log.Info().Msg("Bootstrapping ArgoCD")
@@ -368,6 +380,7 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	applyOpts := k8s.DefaultApplyOptions()
 	applyOpts.FieldManager = "kubara-argocd-bootstrap"
 	applyOpts.ForceConflicts = true
+	applyOpts.ShouldRecreateBeforeApply = shouldRecreateBootstrapHook
 
 	// TODO: Implement proper DryRun with client
 	if opts.DryRun {
