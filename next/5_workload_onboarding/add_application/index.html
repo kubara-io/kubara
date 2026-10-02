@@ -2674,17 +2674,18 @@ https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#
 Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your Argo CD overlay, typically <code>platform-configs/&lt;hub-cluster-name&gt;/helm/argo-cd/values-additional.yaml</code>.
 <div class="highlight"><pre><span></span><code><span class="nt">bootstrapValues</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">applications</span><span class="p">:</span>
-<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">destination</span><span class="p">:</span>
-<span class="w">            </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
-<span class="w">          </span><span class="nt">info</span><span class="p">:</span>
-<span class="w">            </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">greeting</span>
-<span class="w">              </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"Hello</span><span class="nv"> </span><span class="s">World"</span>
-<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-node-red</span>
-<span class="w">          </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
-<span class="w">          </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
-<span class="w">          </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-red</span><span class="w"> </span><span class="c1"># the path inside the repository</span>
-<span class="w">          </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the developer repository where the app code can be found&gt;</span>
+<span class="w">  </span><span class="nt">applications</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">app-node-red</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">app-node-red</span>
+<span class="w">      </span><span class="nt">projectName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">      </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">argocd</span>
+<span class="w">      </span><span class="nt">destination</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">serverName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">k8s-spoke-0</span>
+<span class="w">      </span><span class="nt">repoUrl</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;the developer repository where the app code can be found&gt;</span>
+<span class="w">      </span><span class="nt">repoPath</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">node-red</span><span class="w"> </span><span class="c1"># the path inside the repository</span>
+<span class="w">      </span><span class="nt">info</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">greeting</span>
+<span class="w">          </span><span class="nt">value</span><span class="p">:</span><span class="w"> </span><span class="s">"Hello</span><span class="nv"> </span><span class="s">World"</span>
 </code></pre></div></p>
 <p>That whats happening behind the scenes:</p>
 <p><img alt="Add Application" src="../../images/add-application.png" /></p>

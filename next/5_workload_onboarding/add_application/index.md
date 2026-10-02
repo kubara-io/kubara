@@ -22,17 +22,18 @@ Usually you want to add a repository that serves an app-of-apps pattern.
 Add the following to your Argo CD overlay, typically `platform-configs/<hub-cluster-name>/helm/argo-cd/values-additional.yaml`.
 ```yaml
 bootstrapValues:
-    applications:
-        - destination:
-            serverName: k8s-spoke-0
-          info:
-            - name: greeting
-              value: "Hello World"
-          name: app-node-red
-          namespace: argocd
-          projectName: k8s-spoke-0
-          repoPath: node-red # the path inside the repository
-          repoUrl: <the developer repository where the app code can be found>
+  applications:
+    app-node-red:
+      name: app-node-red
+      projectName: k8s-spoke-0
+      namespace: argocd
+      destination:
+        serverName: k8s-spoke-0
+      repoUrl: <the developer repository where the app code can be found>
+      repoPath: node-red # the path inside the repository
+      info:
+        - name: greeting
+          value: "Hello World"
 ```
 
 That whats happening behind the scenes:
