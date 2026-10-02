@@ -45,6 +45,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			EphemeralSecrets:  true,
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
@@ -174,6 +175,7 @@ func TestClusterCatalogLoadOptions_PreservesExplicitCatalogs(t *testing.T) {
 func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
 
+	assert.True(t, cluster.Terraform.EphemeralSecrets)
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
 }
 

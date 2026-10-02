@@ -48,6 +48,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 		SSOTeam:          "<my-team>",
 		IngressClassName: "traefik",
 		Terraform: &Terraform{
+			EphemeralSecrets:  true,
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
@@ -121,6 +122,7 @@ func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Clu
 		SSOOrg:  "<my-org>",
 		SSOTeam: "<my-team>",
 		Terraform: &Terraform{
+			EphemeralSecrets:  true,
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
