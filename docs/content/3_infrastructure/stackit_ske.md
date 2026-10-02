@@ -105,7 +105,7 @@ Run:
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu init
@@ -121,7 +121,7 @@ Use the output to configure Terraform backend credentials:
     terraform output debug | grep -E "credential_access_key|credential_secret_access_key"
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output debug | grep -E "credential_access_key|credential_secret_access_key"
@@ -151,7 +151,7 @@ Run:
     terraform plan
     ```
 
-===  "Tofu"
+===  "OpenTofu"
 
     ```bash
     tofu init
@@ -168,7 +168,7 @@ Apply:
     terraform apply
     ```
 
-===  "Tofu"
+===  "OpenTofu"
 
     ```bash
     tofu apply
@@ -185,7 +185,7 @@ This creates the Kubernetes cluster and all required infrastructure.
     terraform output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     # change command accordingly to your needs. For example change the name of your kubeconfig, to not overwrite any files
@@ -202,7 +202,7 @@ Keep this `kubara.yaml` local and do not commit it to Git.
     terraform output
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output
@@ -219,7 +219,7 @@ Sensitive output example:
     terraform output vault_user_ro_password_b64
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output vault_user_ro_password_b64
@@ -229,61 +229,141 @@ Sensitive output example:
 
 If you use OAuth2 with GitHub, create a GitHub application as shown [here](../4_building_your_platform/sso/add_sso_github.md).
 
-If you want Terraform to create OAuth2-related Vault entries:
+The optional `secrets.tf-oauth2` example manages registry credentials and the OAuth2 credentials for
+OAuth2 Proxy, Argo CD and Grafana. With `terraform.ephemeralSecrets: true`, it uses ephemeral
+inputs and write-only Vault payloads, so these
+secret values are not saved in new Terraform/OpenTofu state or plan files. The Vault paths and
+configuration revision counters remain in state: the entries are still managed.
 
-* Use `set-env.sh` / `set-env.ps1` for `TF_VAR_*` in `platform-configs/<cluster-name>/terraform/`
-* `TF_Var_image_pull_secret` will already be set by kubara with what is present in the `.env`
-* In `platform-configs/<cluster-name>/terraform/infrastructure`, copy `secrets.tf-oauth2` to `oauth2-secrets.tf` and adjust values if needed
+The following workflow applies when `terraform.ephemeralSecrets: true`. If the field is omitted
+or `false`, the previous stateful behavior is retained; migration is optional. See
+[the configuration option](../2_concepts/overview_core_concept.md#ephemeral-secret-management).
 
-Load the variables and apply:
+The ephemeral workflow requires **Terraform 1.11+ or OpenTofu 1.11+** and the Vault/Random provider versions
+pinned by the catalog. Use a general catalog release containing the write-only example; verify that
+`secrets.tf-oauth2` contains `data_json_wo` before following this procedure. Older generated copies
+using `data_json` still store the payload in state.
+
+### Create new entries
+
+1. In `platform-configs/<cluster-name>/terraform/infrastructure`, copy `secrets.tf-oauth2` to
+   `oauth2-secrets.tf`. Remove the resource and input-variable blocks for services you do not use.
+2. Supply the matching `TF_VAR_*` inputs using your local `set-env.sh` / `set-env.ps1` or your CI
+   secret store. The registry input, `TF_VAR_image_pull_secret`, is already rendered from `.env`.
+   Keep these files local and out of Git; ephemeral values do not protect the source files.
+3. Load the inputs and apply:
 
 === "Terraform"
 
     ```bash
-    cp secrets.tf-oauth2 oauth2-secrets.tf
     source ../set-env.sh
-    # or for PowerShell
-    # Copy-Item secrets.tf-oauth2 oauth2-secrets.tf
-    . ..\set-env.ps1
+    terraform plan
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
-    cp secrets.tf-oauth2 oauth2-secrets.tf
     source ../set-env.sh
-    # or for PowerShell
-    # Copy-Item secrets.tf-oauth2 oauth2-secrets.tf
-    . ..\set-env.ps1
+    tofu plan
     tofu apply
     ```
 
-!!! warning
-     You need to set these environment variables again before re-applying Terraform if they are not persisted in your shell/session setup.
+In PowerShell, use `Copy-Item secrets.tf-oauth2 oauth2-secrets.tf` and `. ..\set-env.ps1` instead
+of the shell copy/source commands above.
 
-To clean up:
+Keep `oauth2-secrets.tf` enabled after the apply. **Do not run `state rm` or comment out its
+resources as a cleanup step.** Removing managed Vault resources from configuration would plan to
+delete the entries. To deliberately hand ownership to another system, use a separate, reviewed
+state-removal procedure and remove the corresponding configuration together.
 
-=== "Terraform"
+Supply the ephemeral inputs for **every plan and apply**, including when applying a saved plan;
+they are intentionally absent from that plan. Unchanged applies leave the stored payloads alone,
+even though the ephemeral cookie-password generator produces a fresh candidate on each run.
+
+### Update or rotate a secret
+
+The `oauth2_secret_versions` object controls writes independently for each entry. Its numbers are
+configuration revisions, not Vault KV version numbers. Store the object in a non-secret
+`oauth2-secrets.auto.tfvars` file and increment only the entry you want to update:
+
+```hcl
+oauth2_secret_versions = {
+  image_pull_secret    = 1
+  oauth2_creds         = 1
+  argo_oauth2_creds    = 2 # write the new Argo CD credentials
+  grafana_oauth2_creds = 1
+}
+```
+
+Supply the new secret input before planning and applying. Changing an input alone, including a
+client ID, does not update the write-only payload: increment its revision too. OpenTofu/Terraform
+cannot compare the secret contents for drift because it does not retain a reference value.
+
+Incrementing `oauth2_creds` also generates a new cookie secret and invalidates existing OAuth2
+Proxy sessions. Recreating a deleted OAuth2 Proxy Vault entry also generates a new cookie secret.
+After a rotation, verify ExternalSecret synchronization and restart consumers that read credentials
+only at startup.
+
+### Migrate existing entries
+
+Set `terraform.ephemeralSecrets: true` in the cluster configuration and regenerate with
+`kubara generate --terraform`. Replace the active `.tf` copy of the optional secret example
+with the newly generated `secrets.tf-oauth2`, retaining any deliberate service exclusions.
+Do not leave both old and new active copies. Review all infrastructure changes before applying.
+
+Do not apply the new example as a fresh create over existing Vault paths. First determine whether
+the entries are still managed (`terraform state list` / `tofu state list`) or were removed using
+the old guide's `state rm` step.
+
+1. Keep the existing Vault resource addresses, mount and paths. Replace the old example with the
+   write-only version and use the catalog's pinned providers. The obsolete `vault.secondary`
+   configuration is no longer needed; this example uses the root's default Vault provider.
+2. Supply the **current** registry/client credentials from Vault. Do not commit them. The first
+   write-only apply generates a new OAuth2 Proxy cookie secret, so existing sessions become invalid
+   when the proxy picks it up and users must sign in again. This is a one-time migration effect;
+   later applies retain the stored cookie unless `oauth2_secret_versions.oauth2_creds` changes.
+3. If an entry is no longer in state, import it before applying. For example:
 
     ```bash
-    terraform state rm \
-      vault_kv_secret_v2.image_pull_secret \
-      vault_kv_secret_v2.oauth2_creds \
-      vault_kv_secret_v2.argo_oauth2_creds \
-      vault_kv_secret_v2.grafana_oauth2_creds \
-      random_password.oauth2_cookie_secret
+    tofu import vault_kv_secret_v2.oauth2_creds \
+      '<mount>/data/<cluster-name>/<stage>/oauth2-proxy/oauth2_credentials'
     ```
 
-=== "Tofu"
+    Use `terraform import` for Terraform. Repeat for the other existing entries:
 
-    ```bash
-    tofu state rm \
-      vault_kv_secret_v2.image_pull_secret \
-      vault_kv_secret_v2.oauth2_creds \
-      vault_kv_secret_v2.argo_oauth2_creds \
-      vault_kv_secret_v2.grafana_oauth2_creds \
-      random_password.oauth2_cookie_secret
-    ```
+    | Resource address | Path below `<mount>/data/<cluster-name>/<stage>/` |
+    |---|---|
+    | `vault_kv_secret_v2.image_pull_secret` | `cluster_secrets/docker_config` |
+    | `vault_kv_secret_v2.argo_oauth2_creds` | `argocd/argo_oauth2_credentials` |
+    | `vault_kv_secret_v2.grafana_oauth2_creds` | `kube-prometheus-stack/grafana_oauth2_credentials` |
+
+4. Review the plan. Expect in-place writes with the initial write-only revisions, retaining the
+   registry/client credentials and replacing the OAuth2 Proxy cookie secret. There should be no
+   Vault-entry replacements or deletions. If the old managed
+   `random_password.oauth2_cookie_secret` is still in state, its removal is expected: it only
+   forgets the generated value and does not delete anything in Vault.
+5. Apply, verify that registry/client credentials are unchanged and that the current state no
+   longer contains secret payloads. Synchronize the new cookie secret to OAuth2 Proxy and verify
+   a fresh sign-in. Check that the next plan is empty and a subsequent apply retains the cookie.
+
+The first migration plan can still contain secrets from the old state. Protect it along with old
+plan files, state backups and backend state versions; migration does not erase those historical
+copies. STACKIT-generated cloud credentials still remain in their producing resources and
+their automatically synchronized Vault entries.
+
+### Grafana admin credentials
+
+With the option enabled, the infrastructure root requires Terraform/OpenTofu **1.11+** and writes Grafana admin
+credentials using a write-only payload. `grafana_admin_password` is ephemeral; when empty, a
+password is generated. Ordinary applies retain the stored password. Increment
+`grafana_admin_credentials_version` (default `1`) to write a new username/password pair.
+Read the credentials from the `kube-prometheus-stack/grafana_credentials` Vault entry.
+
+For an existing installation, supply its current password through `TF_VAR_grafana_admin_password`
+for the migration plan and apply. Keep its username unchanged. The old managed random password
+can then leave state without changing the login. Updating the Vault entry does not reset the
+password in an initialized Grafana database; coordinate any later rotation with Grafana itself.
+Historical state copies and migration plans can still contain the old password.
 
 Now continue with the generic [Bootstrap Your Own Platform](../1_getting_started/bootstrapping.md) guide.

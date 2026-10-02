@@ -35,6 +35,41 @@ If you want to understand how catalogs work internally or create your own extern
 
 kubara keeps reusable generated artifacts separate from cluster-specific overlays so the platform stays maintainable across multiple clusters.
 
+#### Ephemeral secret management
+
+Each cluster's existing `terraform` section accepts `ephemeralSecrets`:
+
+```yaml
+terraform:
+  # Keep the existing provider, project, Kubernetes and DNS settings here.
+  ephemeralSecrets: true
+```
+
+New cluster configurations created by a supporting kubara release explicitly set this to `true`.
+Existing configurations with the field omitted, or set to `false`, retain the stateful secret
+workflow. Defaults are not applied retroactively when loading an existing configuration.
+Use CLI and catalog releases that both support the option; check `kubara schema` for
+`ephemeralSecrets` and the generated payloads for `data_json_wo`.
+
+The option selects the secret-handling code at generation time, not during `terraform apply`.
+With `true`, supported secret inputs and generated passwords are ephemeral and KV payloads use
+write-only attributes; supported values are omitted from new state and saved plans. Updates
+require explicit revision counters. With `false`, the generated code retains the original
+managed passwords, KV payload comparison and Grafana password output where available.
+OpenBao's pre-existing write-only OIDC argument remains unchanged in either mode.
+
+Enabling the option requires Terraform/OpenTofu 1.11+. With it disabled, the existing minimums
+remain: 1.9.3 for STACKIT infrastructure and T Cloud Public bootstrap/infrastructure, and 1.11
+for the T Cloud Public OpenBao root. The STACKIT backend bootstrap is unaffected.
+
+For an existing deployment, enabling the option is a deliberate migration: regenerate, update
+any manually activated `secrets.tf-oauth2` copy, review the plan, and follow the
+[STACKIT](../3_infrastructure/stackit_ske.md#7-optional-oauth2-related-vault-entries-via-terraform) or
+[T Cloud Public](../3_infrastructure/t-cloud-public.md#secret-updates-and-migration) migration steps.
+In particular, preserve existing Grafana admin credentials. Switching back is also a migration:
+it can generate new passwords and put payloads back into state. This is not a runtime rotation
+switch. The option does not remove historical state copies or secrets held by unsupported resources.
+
 #### Terraform value overrides
 
 In generated Terraform directories, `env.auto.tfvars` is owned by kubara. `kubara generate --terraform` rewrites that file, so do not use it for persistent manual changes.
