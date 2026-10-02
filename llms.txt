@@ -25,6 +25,7 @@
 - [Google Cloud (Guide)](https://docs.kubara.io/v0.16.0/3_infrastructure/google-cloud/index.md)
 
 ## Building Your Platform
+- [Argo CD App-of-Apps](https://docs.kubara.io/v0.16.0/4_building_your_platform/argocd-add-app-of-apps/index.md)
 - [How to add a Spoke Cluster](https://docs.kubara.io/v0.16.0/4_building_your_platform/add_spoke_cluster/index.md)
 - [How to create a Catalog](https://docs.kubara.io/v0.16.0/4_building_your_platform/create_catalog/index.md)
 - [SSO > About SSO](https://docs.kubara.io/v0.16.0/4_building_your_platform/sso/sso/index.md)
