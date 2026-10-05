@@ -2,7 +2,7 @@
 |--------------|------------|-----------------|--------------------|--------------------|
 | **proposed** | 2026-09-01 | kubara-Team     |                    |                    |
 
-# Support multiple GitOps engines, top-level GitOps configuration, and fleet flavors
+# Support multiple GitOps engines and top-level GitOps configuration
 
 ## Context and problem
 
@@ -27,8 +27,7 @@ We also want to support other tools like [Flux v2](https://fluxcd.io/flux/concep
 2. **Remove repeated settings.** Stop copying the same repository URLs and branch names into every spoke cluster.
 3. **Support multiple engines.** Let users choose their engine, like `engine: argocd` or `engine: flux`.
 4. **Follow catalog boundaries.** Keep tool-specific logic in catalog files and templates, not in Go code (`ADR-0002`).
-5. **Support fleet flavors.** Allow extra tools, such as Sveltos for add-ons or Argo CD Agent for edge clusters, without breaking the configuration format.
-6. **Clean bootstrap process.** Install, configure, and check the health of any engine using catalog metadata.
+5. **Clean bootstrap process.** Install, configure, and check the health of any engine using catalog metadata.
 
 ---
 
@@ -44,17 +43,18 @@ Looking at how GitOps tools work in multi-cluster setups:
 | **Agent mode** (Argo CD Agent in managed mode) | Runs Argo CD and the agent principal server. Sends sync jobs to spokes. | Runs a small agent that calls home to the hub over mTLS. | **Derived automatically.** Spoke connection info comes from hub DNS and certificates. |
 | **Autonomous edge** (Autonomous Argo CD Agent or local Flux) | Runs the main dashboard and stores base templates. | Runs a local engine that syncs its own cluster folder (like `clusters/<spoke-name>/`). | **Only path or branch overrides.** The main repo settings remain the same. |
 
-In all cases, the GitOps engine belongs to the **hub**. Placing `gitops` inside each cluster was a mistake from early single-cluster versions.
+In all cases, the GitOps engine belongs to the **hub**. Placing `gitops` inside each cluster was a design mistake from early single-cluster versions.
 
 ---
 
 ### 2. Comparing the two options
 
-#### Top-level `gitops:` (selected)
-- **Clear single source.** Repository URLs and credentials are typed once.
-- **Enforces the hub model.** Prevents conflicting engine choices in the same repository.
-- **Simpler spoke entries.** Spoke clusters only list their stage, DNS, catalogs, and enabled services.
-- **Handles overrides easily.** If a spoke needs a different branch, use a short `gitopsOverrides` field (like `targetRevision: staging`).
+#### Top-level `gitops:` and `hub:` (selected)
+- **Clear single source**: Repository URLs and credentials are typed once.
+- **Clear separation**: The `hub` gets a dedicated block and `clusters` gets renamed to `spokes`
+- **Enforces the hub model**: Prevents conflicting engine choices in the same repository.
+- **Simpler spoke entries**: Spoke clusters only list their stage, DNS, catalogs, and enabled services.
+- **Handles overrides easily**: If a spoke needs a different branch, use a short `gitopsOverrides` field (like `targetRevision: staging`).
 
 #### Per-cluster `clusters[].gitops` (old approach)
 - **Too much repetition.** 20 spoke clusters mean repeating the same repository block 20 times.
@@ -67,7 +67,8 @@ In all cases, the GitOps engine belongs to the **hub**. Placing `gitops` inside 
 
 ### Key changes
 - A top-level `gitops:` section holds all GitOps engine settings, repository links, credentials, and extra fleet tools.
-- The `clusters[]` array no longer contains `argocd` blocks.
+- A top-level `hub:` sections holds all settings for the Hub-cluster as there can always be only a single hub per config file.
+- The `clusters[]` array no longer contains `argocd` blocks nor the `hub` and can therefore be renamed to `spokes[]`
 - Spoke clusters only specify cluster-specific information (stage, DNS, catalogs, enabled services).
 - An optional `gitopsOverrides` field on a spoke cluster allows tracking a different git branch or revision when needed.
 
@@ -93,21 +94,20 @@ gitops:
   helmRepo:
     url: https://charts.example.com
 
-clusters:
-  # Hub cluster: GitOps engine runs here
-  - name: management-hub
-    type: hub
-    stage: prod
-    dnsName: hub.example.com
-    catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
-    services:
-      cert-manager:
-        status: enabled
-      traefik:
-        status: enabled
+hub:
+  name: management-hub
+  stage: prod
+  dnsName: hub.example.com
+  catalogs:
+    - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
+  services:
+    cert-manager:
+      status: enabled
+    traefik:
+      status: enabled
 
-  # Spoke cluster: Managed from the hub
+# Spoke clusters: Managed from the hub
+spokes:
   - name: workload-spoke-01
     type: spoke
     stage: prod
@@ -134,59 +134,7 @@ clusters:
         status: enabled
 ```
 
----
-
-### 2. Multi-cluster fleet (Sveltos add-ons + Argo CD Agent)
-
-```yaml
-gitops:
-  engine: argocd
-  selfManaged: enabled
-  repo:
-    https:
-      configs:
-        url: https://github.com/my-org/platform-configs.git
-        targetRevision: main
-      components:
-        url: https://github.com/my-org/platform-components.git
-        targetRevision: main
-  flavors:
-    # Sveltos matches cluster labels to install add-on profiles
-    - name: sveltos
-      config:
-        syncMode: ContinuousWithDriftDetection
-    # Agent connects edge spokes back to the hub
-    - name: argocd-agent
-      config:
-        mode: managed
-
-clusters:
-  - name: management-hub
-    type: hub
-    stage: prod
-    dnsName: hub.example.com
-    catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
-    services:
-      cert-manager:
-        status: enabled
-      traefik:
-        status: enabled
-
-  - name: edge-spoke-factory-1
-    type: spoke
-    stage: prod
-    dnsName: edge-f1.internal.example.com
-    catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
-    services:
-      cert-manager:
-        status: enabled
-```
-
----
-
-### 3. Pure Flux v2 setup
+### 2. Pure Flux v2 setup
 
 ```yaml
 gitops:
@@ -200,22 +148,19 @@ gitops:
       components:
         url: https://github.com/my-org/platform-components.git
         targetRevision: main
-  flavors:
-    - name: sveltos
-      config:
-        syncMode: ContinuousWithDriftDetection
 
-clusters:
-  - name: flux-hub
-    type: hub
-    stage: prod
-    dnsName: flux-hub.example.com
-    catalogs:
-      - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
-    services:
-      cert-manager:
-        status: enabled
+hub:
+  name: flux-hub
+  type: hub
+  stage: prod
+  dnsName: flux-hub.example.com
+  catalogs:
+    - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
+  services:
+    cert-manager:
+      status: enabled
 
+spokes:
   - name: flux-spoke-01
     type: spoke
     stage: dev
@@ -229,9 +174,63 @@ clusters:
 
 ---
 
+### 3. GitOps Extensions (Sveltos add-ons + Argo CD Agent)
+
+This is **NOT** part of the present ADR but the proposed structure would allow for future additions like extensions/add-ons
+by easily adapting/adding new fields like shown below.
+
+```yaml
+gitops:
+  engine: argocd
+  selfManaged: enabled
+  repo:
+    https:
+      configs:
+        url: https://github.com/my-org/platform-configs.git
+        targetRevision: main
+      components:
+        url: https://github.com/my-org/platform-components.git
+        targetRevision: main
+  extensions:
+    # Sveltos matches cluster labels to install add-on profiles
+    - name: sveltos
+      config:
+        syncMode: ContinuousWithDriftDetection
+    # Agent connects edge spokes back to the hub
+    - name: argocd-agent
+      config:
+        mode: managed
+
+hub:
+  name: management-hub
+  type: hub
+  stage: prod
+  dnsName: hub.example.com
+  catalogs:
+    - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
+  services:
+    cert-manager:
+      status: enabled
+    traefik:
+      status: enabled
+
+spokes:
+  - name: edge-spoke-factory-1
+    type: spoke
+    stage: prod
+    dnsName: edge-f1.internal.example.com
+    catalogs:
+      - oci://ghcr.io/kubara-io/catalogs/general:2.3.0
+    services:
+      cert-manager:
+        status: enabled
+```
+
+
+---
+
 ## Outcomes
 
 - **Good.** Top-level `gitops:` matches how kubara works: one control plane on the hub cluster.
 - **Good.** Removes duplicate repository URLs and credentials across spokes.
-- **Good.** Supports multiple engines and fleet flavors cleanly.
-- **Good.** Keeps engine-specific logic out of Go code.
+- **Good.** Supports multiple engines and is cleanly extendability in the future.
