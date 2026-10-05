@@ -550,7 +550,7 @@ func TestGenerate_MultiSetup_Isolation(t *testing.T) {
 		DNSName: "a.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -571,7 +571,7 @@ func TestGenerate_MultiSetup_Isolation(t *testing.T) {
 		DNSName: "b.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -624,7 +624,7 @@ func TestGenerate_All_Workspaces(t *testing.T) {
 		DNSName: "1.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -645,7 +645,7 @@ func TestGenerate_All_Workspaces(t *testing.T) {
 		DNSName: "2.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -683,7 +683,7 @@ func TestGenerate_Multiple_Hubs(t *testing.T) {
 		DNSName: "1.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -704,7 +704,7 @@ func TestGenerate_Multiple_Hubs(t *testing.T) {
 		DNSName: "2.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
@@ -725,7 +725,7 @@ func TestGenerate_Multiple_Hubs(t *testing.T) {
 		DNSName: "3.example.com",
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
-				HTTPS: &config.RepoType{
+				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
 				},
