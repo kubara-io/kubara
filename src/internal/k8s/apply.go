@@ -5,26 +5,19 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"time"
 
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/apimachinery/pkg/util/yaml"
-	"k8s.io/client-go/dynamic"
 )
 
 // ApplyOptions for server-side apply operations
 type ApplyOptions struct {
-	FieldManager              string
-	ForceConflicts            bool
-	DryRun                    bool
-	Validate                  bool
-	ShouldRecreateBeforeApply func(*unstructured.Unstructured) bool
+	FieldManager   string
+	ForceConflicts bool
+	DryRun         bool
+	Validate       bool
 }
 
 // DefaultApplyOptions returns default apply options
@@ -55,7 +48,7 @@ func (c *Client) ApplyManifest(ctx context.Context, manifest []byte, opts ApplyO
 		}
 
 		if len(obj.Object) == 0 {
-			continue // Skip empty documents
+			continue
 		}
 
 		if err := c.applyObject(ctx, obj, opts); err != nil {
@@ -69,35 +62,11 @@ func (c *Client) ApplyManifest(ctx context.Context, manifest []byte, opts ApplyO
 
 // applyObject applies a single object using server-side apply
 func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured, opts ApplyOptions) error {
-	// Get GVR from the object
-	gvk := obj.GroupVersionKind()
-
-	// Find the REST mapping for this GVK
-	gvr, scope, err := c.getGVR(gvk)
+	dr, err := c.resourceInterface(obj)
 	if err != nil {
-		return fmt.Errorf("get GVR for %q: %w", gvk.String(), err)
+		return err
 	}
 
-	// Get the appropriate resource interface
-	var dr dynamic.ResourceInterface
-	if scope == meta.RESTScopeNamespace {
-		if obj.GetNamespace() == "" {
-			obj.SetNamespace("default")
-		}
-		dr = c.DynamicClient.Resource(gvr).Namespace(obj.GetNamespace())
-	} else {
-		dr = c.DynamicClient.Resource(gvr)
-	}
-
-	if !opts.DryRun &&
-		opts.ShouldRecreateBeforeApply != nil &&
-		opts.ShouldRecreateBeforeApply(obj) {
-		if err := deleteObjectAndWait(ctx, dr, obj.GetName()); err != nil {
-			return fmt.Errorf("recreate before apply: %w", err)
-		}
-	}
-
-	// Prepare apply options
 	applyOpts := metav1.ApplyOptions{
 		FieldManager: opts.FieldManager,
 		Force:        opts.ForceConflicts,
@@ -107,65 +76,12 @@ func (c *Client) applyObject(ctx context.Context, obj *unstructured.Unstructured
 		applyOpts.DryRun = []string{metav1.DryRunAll}
 	}
 
-	// Server-side apply
 	_, err = dr.Apply(ctx, obj.GetName(), obj, applyOpts)
 	if err != nil {
 		return fmt.Errorf("server-side apply: %w", err)
 	}
 
 	return nil
-}
-
-func deleteObjectAndWait(
-	ctx context.Context,
-	dr dynamic.ResourceInterface,
-	name string,
-) error {
-	propagation := metav1.DeletePropagationForeground
-
-	err := dr.Delete(ctx, name, metav1.DeleteOptions{
-		PropagationPolicy: &propagation,
-	})
-	if apierrors.IsNotFound(err) {
-		return nil
-	}
-	if err != nil {
-		return fmt.Errorf("delete existing object: %w", err)
-	}
-
-	err = wait.PollUntilContextTimeout(
-		ctx,
-		time.Second,
-		time.Minute,
-		true,
-		func(ctx context.Context) (bool, error) {
-			_, err := dr.Get(ctx, name, metav1.GetOptions{})
-			if apierrors.IsNotFound(err) {
-				return true, nil
-			}
-			if err != nil {
-				return false, fmt.Errorf("check object deletion: %w", err)
-			}
-
-			return false, nil
-		},
-	)
-	if err != nil {
-		return fmt.Errorf("wait for object deletion: %w", err)
-	}
-
-	return nil
-}
-
-// getGVR gets GroupVersionResource from GroupVersionKind
-func (c *Client) getGVR(gvk schema.GroupVersionKind) (schema.GroupVersionResource, meta.RESTScope, error) {
-	// Use the REST mapper to find the GVR
-	mapping, err := c.RESTMapper.RESTMapping(gvk.GroupKind(), gvk.Version)
-	if err != nil {
-		return schema.GroupVersionResource{}, nil, fmt.Errorf("resolve REST mapping for %q: %w", gvk.String(), err)
-	}
-
-	return mapping.Resource, mapping.Scope, nil
 }
 
 // FilterCRDs extracts only CustomResourceDefinition objects from a manifest
