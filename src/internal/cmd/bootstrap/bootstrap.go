@@ -13,6 +13,8 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
 	"github.com/kubara-io/kubara/internal/k8s"
+	helmRelease "helm.sh/helm/v4/pkg/release/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"sigs.k8s.io/yaml"
 
 	"github.com/rs/zerolog/log"
@@ -180,7 +182,12 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("bootstrap ArgoCD: %w", err)
 	}
 
-	// Step 7: Print completion message
+	// Step 7: Wait for ArgoCD to be ready
+	if err := waitForArgoCD(ctx, client, opts, argoChart); err != nil {
+		return fmt.Errorf("wait for ArgoCD readiness: %w", err)
+	}
+
+	// Step 8: Print completion message
 	printCompletionMessage(opts)
 	log.Info().Msg("ArgoCD bootstrap completed successfully")
 	return nil
@@ -334,6 +341,30 @@ func applyCRDs(ctx context.Context, client *k8s.Client, opts *Options, charts []
 	return nil
 }
 
+func applyStagedManifest(
+	ctx context.Context,
+	client *k8s.Client,
+	objects []*unstructured.Unstructured,
+	applyOpts k8s.ApplyOptions,
+) error {
+	for _, obj := range objects {
+		hook, ok := helm.ParseHook(obj)
+		if !applyOpts.DryRun && ok && helm.HasHookDeletePolicy(hook, helmRelease.HookBeforeHookCreation) {
+			if err := client.DeleteObjectAndWait(ctx, obj); err != nil {
+				return fmt.Errorf("recreate before apply %q \"%s/%s\": %w",
+					obj.GetKind(), obj.GetNamespace(), obj.GetName(), err)
+			}
+		}
+
+		if err := client.ApplyObject(ctx, obj, applyOpts); err != nil {
+			return fmt.Errorf("apply %q \"%s/%s\": %w",
+				obj.GetKind(), obj.GetNamespace(), obj.GetName(), err)
+		}
+	}
+
+	return nil
+}
+
 // bootstrapArgoCD performs the main ArgoCD installation
 func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, argoChart BootstrapChart) error {
 	log.Info().Msg("Bootstrapping ArgoCD")
@@ -345,95 +376,55 @@ func bootstrapArgoCD(ctx context.Context, client *k8s.Client, opts *Options, arg
 	}
 
 	// Template ArgoCD with hashed password
-	manifest, err := helm.Template(
-		ctx,
-		helm.TemplateOptions{
-			ReleaseName: argoChart.Namespace,
-			ChartPath:   argoChart.Path,
-			Namespace:   argoChart.Namespace,
-			ValuesPaths: argoChart.OverlayValues,
-			APIVersions: []string{
-				prometheusAPIVersion,
-			},
-			SetArgs: []string{
-				fmt.Sprintf(
-					"argo-cd.configs.secret.extra.accounts\\.wizard\\.password=%s",
-					string(hashedPassword),
-				),
-			},
+	manifest, err := helm.Template(ctx, helm.TemplateOptions{
+		ReleaseName: argoChart.Namespace,
+		ChartPath:   argoChart.Path,
+		Namespace:   argoChart.Namespace,
+		ValuesPaths: argoChart.OverlayValues,
+		APIVersions: []string{prometheusAPIVersion},
+		SetArgs: []string{
+			fmt.Sprintf("argo-cd.configs.secret.extra.accounts\\.wizard\\.password=%s", string(hashedPassword)),
 		},
-	)
+	})
 	if err != nil {
-		return fmt.Errorf(
-			"template ArgoCD: %w",
-			err,
-		)
+		return fmt.Errorf("template ArgoCD: %w", err)
 	}
 
+	plan, err := helm.PlanManifest(manifest)
+	if err != nil {
+		return fmt.Errorf("plan ArgoCD manifest: %w", err)
+	}
+
+	// Apply ArgoCD manifest
 	applyOpts := k8s.DefaultApplyOptions()
 	applyOpts.FieldManager = "kubara-argocd-bootstrap"
 	applyOpts.ForceConflicts = true
 
-	// Parse even during dry-run so invalid/unsupported hook annotations
-	// are still reported.
-	if _, err := helm.ParseManifestSet(
-		manifest,
-	); err != nil {
-		return fmt.Errorf(
-			"parse ArgoCD Helm hooks: %w",
-			err,
-		)
-	}
-
 	// TODO: Implement proper DryRun with client
 	if opts.DryRun {
-		log.Info().Msg(
-			"DRY RUN: Would apply ArgoCD manifest and execute Helm hooks",
-		)
+		log.Info().Msg("DRY RUN: Would apply ArgoCD manifest")
 		return nil
 	}
 
-	hooks := helm.NewBootstrapHooks(
-		client,
-		helm.BootstrapHookOptions{
-			Timeout:      5 * time.Minute,
-			ApplyOptions: applyOpts,
-		},
-	)
-
-	if err := helm.ApplyWithHooks(
-		ctx,
-		manifest,
-		hooks,
-		func(
-			ctx context.Context,
-			resources []byte,
-		) error {
-			return client.ApplyManifest(
-				ctx,
-				resources,
-				applyOpts,
-			)
-		},
-		func(ctx context.Context) error {
-			return waitForArgoCD(
-				ctx,
-				client,
-				opts,
-				argoChart,
-			)
-		},
-	); err != nil {
-		return fmt.Errorf(
-			"apply ArgoCD manifest: %w",
-			err,
-		)
+	stages := []struct {
+		name    string
+		objects []*unstructured.Unstructured
+	}{
+		{name: "pre-install", objects: plan.PreInstall},
+		{name: "main", objects: plan.Main},
+		{name: "post-install", objects: plan.PostInstall},
 	}
 
-	log.Info().Msg(
-		"ArgoCD manifest applied successfully",
-	)
+	for _, stage := range stages {
+		if len(stage.objects) == 0 {
+			continue
+		}
+		if err := applyStagedManifest(ctx, client, stage.objects, applyOpts); err != nil {
+			return fmt.Errorf("apply %s stage: %w", stage.name, err)
+		}
+	}
 
+	log.Info().Msg("ArgoCD manifest applied successfully")
 	return nil
 }
 
