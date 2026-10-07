@@ -39,6 +39,14 @@ This enables precise queries like:
 {namespace="my-app", loglevel="error"} |= "failed"
 ```
 
+## Log format
+
+Kubara configures JSON logging where supported. Not all components support it, so JSON output is not guaranteed for every container. Exceptions include:
+
+- OAuth2 Proxy and kube-state-metrics.
+- Redis, memcached, FRR, and NGINX/lighttpd error logs.
+- Loki Canary, some sidecars, init containers, and helper scripts.
+
 ## Best Practices
 
 - Use structured logging (e.g., JSON) whenever possible for better field extraction.
