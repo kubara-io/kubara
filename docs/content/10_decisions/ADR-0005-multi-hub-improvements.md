@@ -2,7 +2,7 @@
 |--------------|------------|-----------------|--------------------|--------------------|
 |              |            |                 |                    |                    |
 
-# Directory-Scoped Workspaces for Multi-Hub GitOps Repositories
+# Directory-Scoped Execution Context for Multi-Hub GitOps Repositories
 
 ## Context and Problem Statement
 
@@ -22,16 +22,16 @@ Kubara needs an ergonomic, deterministic way to support multiple hub-and-spoke c
 ## Decision Drivers
 
 - Different configurations may use different catalog versions and platform stacks.
-- Templating for one configuration must never mutate, wipe, or overwrite another configuration's artifacts.
+- Templating for one configuration must never mutate, wipe or overwrite another configuration's manifests.
 - Zero breaking changes to existing single-configuration repositories.
 - Keep Terraform relative module paths (`../../../../platform-components/...`) working without requiring modifications to catalog templates.
 - Git repository subpaths must be computed automatically to simplify Argo CD GitOps workflows.
-- Developer experience must be intuitive: easily target individual setups or run batch generation across all setups.
+- Developer experience must be intuitive: Easily target individual hubs, a set of hubs or run batch generation across all.
 - Minimize sources of mixups in execution context around .env file and config.yaml
 
 ## Decision Outcome
 
-Chosen option: **One Hub per Config, one Folder per Hub**.
+**One Hub per Config, one Folder per Hub**.
 
 ### Folder Layout
 Hubs exist in isolated directories, at the root level or nested (e.g. `prod`, `project-a/staging`) containing:
@@ -43,7 +43,7 @@ Hubs exist in isolated directories, at the root level or nested (e.g. `prod`, `p
 Because `platform-configs` and `platform-components` remain siblings inside each hub directory, existing Terraform relative source paths (`../../../../platform-components/...`) remain valid.
 
 ### Automatic GitOps Path Computation
-When executing within a hub folder, kubara generate automatically:
+When executing within a hub folder, `kubara generate` automatically:
 1. Traverses up the directory tree to discover the Git repository root (`.git`).
 1. Calculates the Git-relative subpath from the Git root to the hub (e.g. `setups/dev-fleet`).
 1. Injects computed repository paths into `argocd.repo`:
