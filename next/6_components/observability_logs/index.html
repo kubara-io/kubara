@@ -1996,6 +1996,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#log-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2670,6 +2681,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#log-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Log format
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#best-practices" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2727,6 +2749,13 @@ You're not viewing the latest stable version.
 <p>This enables precise queries like:</p>
 <div class="highlight"><pre><span></span><code>{namespace="my-app", loglevel="error"} |= "failed"
 </code></pre></div>
+<h2 id="log-format">Log format</h2>
+<p>Kubara configures JSON logging where supported. Not all components support it, so JSON output is not guaranteed for every container. Exceptions include:</p>
+<ul>
+<li>OAuth2 Proxy and kube-state-metrics.</li>
+<li>Redis, memcached, FRR, and NGINX/lighttpd error logs.</li>
+<li>Loki Canary, some sidecars, init containers, and helper scripts.</li>
+</ul>
 <h2 id="best-practices">Best Practices</h2>
 <ul>
 <li>Use structured logging (e.g., JSON) whenever possible for better field extraction.</li>
