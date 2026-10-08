@@ -356,6 +356,7 @@ type renovateConfig struct {
 	Schema         string                  `json:"$schema"`
 	Description    []string                `json:"description"`
 	Extends        []string                `json:"extends"`
+	IgnorePaths    []string                `json:"ignorePaths"`
 	CustomManagers []renovateCustomManager `json:"customManagers"`
 }
 
@@ -430,6 +431,12 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 			"This configuration adds support for updating kubara catalog OCI references.",
 		},
 		Extends: []string{"config:recommended"},
+		IgnorePaths: []string{
+			"**/node_modules/**",
+			"**/bower_components/**",
+			"platform-components/**",
+			"platform-configs/**/helm/**/values.generated.yaml",
+		},
 		CustomManagers: []renovateCustomManager{
 			{
 				CustomType:          "regex",
