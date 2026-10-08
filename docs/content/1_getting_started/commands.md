@@ -171,6 +171,20 @@ Scaffold an onboarding file for AI coding assistants (AGENTS.md)
 
 Shows a list of commands or help for one command
 
+## github-action
+
+Create a GitHub Actions workflow for generation on pull requests
+
+>kubara github-action [--overwrite]
+
+**--help, -h**: show help
+
+**--overwrite**: Overwrite an existing kubara-generate.yml
+
+### help, h
+
+Shows a list of commands or help for one command
+
 ## catalog
 
 Manage platform catalogs
