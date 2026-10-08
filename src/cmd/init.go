@@ -436,6 +436,8 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 			"**/bower_components/**",
 			"platform-components/**",
 			"platform-configs/**/helm/**/values.generated.yaml",
+			"platform-configs/**/terraform/infrastructure/terraform.tf",
+			"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
 		},
 		CustomManagers: []renovateCustomManager{
 			{
