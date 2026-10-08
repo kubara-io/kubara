@@ -69,6 +69,7 @@ func NewRootCmd(ver string) *cli.Command {
 			NewBootstrapCmd(),
 			NewSchemaCmd(),
 			NewAgentsCmd(),
+			NewGitHubActionCmd(),
 			catalog.NewCatalogCommand(),
 			cluster.NewClusterCommand(),
 		},
