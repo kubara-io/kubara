@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -15,10 +16,12 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/fatih/color"
+	libtemplate "github.com/kubara-io/libkubara/template"
 	"github.com/rs/zerolog/log"
 )
 
 type Options struct {
+	Context            context.Context
 	TemplateType       render.TemplateType
 	DryRun             bool
 	CWD                string
@@ -65,20 +68,36 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 			"provider": config.TerraformProviderNone,
 		}
 	}
+	argocd, ok := clusterMap["argocd"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
+	}
+	if _, configured := argocd["helmRepo"]; !configured {
+		argocd["helmRepo"] = map[string]any{"url": ""}
+	}
 
-	context := map[string]any{
-		"env":     bctx.EnvMap,
-		"cluster": clusterMap,
-		"catalog": resolveCatalog(bctx.Catalog),
+	data := libtemplate.NewData()
+	if err := data.Namespace("env", bctx.EnvMap); err != nil {
+		return nil, err
+	}
+	if err := data.Namespace("cluster", clusterMap); err != nil {
+		return nil, err
+	}
+	if err := data.Namespace("catalog", resolveCatalog(bctx.Catalog)); err != nil {
+		return nil, err
 	}
 	if cluster.Type == config.Hub {
 		spokes, err := getSpokeClusters(bctx.Clusters)
 		if err != nil {
 			return nil, err
 		}
-		if len(spokes) > 0 {
-			context["spokes"] = spokes
+		if err := data.Namespace("spokes", spokes); err != nil {
+			return nil, err
 		}
+	}
+	context, err := data.Build()
+	if err != nil {
+		return nil, err
 	}
 	return context, nil
 }
@@ -311,6 +330,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 
 		clusterTplResults, err := render.TemplateFiles(
 			render.TemplateOptions{
+				Context:        o.Context,
 				Type:           templateType,
 				Provider:       provider,
 				CatalogOptions: config.CatalogLoadOptions(cnf, cluster, catalogOptions),

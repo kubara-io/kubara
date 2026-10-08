@@ -1,8 +1,6 @@
 package localmode
 
 import (
-	"strings"
-
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
@@ -45,12 +43,6 @@ func PopulateInitEnv(env *envconfig.EnvMap) {
 	if !envconfig.IsConfiguredEnvValue(env.ArgocdWizardAccountPassword) {
 		env.ArgocdWizardAccountPassword = ExampleWizardPassword
 	}
-}
-
-func IsGeneratedPlaceholder(v string) bool {
-	trimmed := strings.TrimSpace(v)
-	return trimmed == ExampleGitRepoURL ||
-		trimmed == ExampleWizardPassword
 }
 
 func ApplyClusterProfile(cluster *config.Cluster, dnsName string) {

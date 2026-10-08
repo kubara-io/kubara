@@ -10,12 +10,12 @@ const (
 
 // Storage contains service storage settings.
 type Storage struct {
-	ClassName string `json:"className,omitempty" yaml:"className,omitempty" jsonschema:"title=Storage Class Name,description=Optional storage class name override for persistent volumes.,minLength=1"`
+	ClassName string `json:"className,omitempty"`
 }
 
 // Networking contains service networking settings.
 type Networking struct {
-	Annotations map[string]string `json:"annotations,omitempty" yaml:"annotations,omitempty" jsonschema:"title=Ingress Annotations,description=Optional ingress annotation overrides for this service."`
+	Annotations map[string]string `json:"annotations,omitempty"`
 }
 
 // Config holds arbitrary service-specific values.
@@ -25,16 +25,16 @@ type Config map[string]any
 type Service struct {
 	// Status defines the desired status for the service.
 	// If not specified, the service will be disabled by default.
-	Status Status `json:"status" yaml:"status" jsonschema:"title=Service Status,description=The desired status of the service.,enum=enabled,enum=disabled,default=disabled"`
+	Status Status `json:"status"`
 	// Storage contains optional storage-related settings for the service.
 	// These settings may be used to customize the generated storage interaction for the service, if applicable.
-	Storage *Storage `json:"storage,omitempty" yaml:"storage,omitempty" jsonschema:"title=Storage Settings,description=Storage-related service settings."`
+	Storage *Storage `json:"storage,omitempty"`
 	// Networking contains optional networking-related settings for the service.
 	// These settings may be used to customize the generated network settings for the service, if applicable.
-	Networking *Networking `json:"networking,omitempty" yaml:"networking,omitempty" jsonschema:"title=Networking Settings,description=Networking-related service settings."`
+	Networking *Networking `json:"networking,omitempty"`
 	// Config contains arbitrary service-specific configuration values.
 	// The schema for these values is defined in the catalog's service definition and enforced at runtime.
-	Config Config `json:"config,omitempty" yaml:"config,omitempty" jsonschema:"title=Service Config,description=Service-specific configuration"`
+	Config Config `json:"config,omitempty"`
 }
 
 // Services maps service names to service instances.
