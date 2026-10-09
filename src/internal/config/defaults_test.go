@@ -4,6 +4,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.yaml.in/yaml/v3"
 )
 
 func TestApplyDefaults_ClusterLevelDefaults(t *testing.T) {
@@ -146,6 +148,32 @@ func TestParseDefaultFromTag(t *testing.T) {
 			if ok {
 				assert.Equal(t, tt.want, got)
 			}
+		})
+	}
+}
+
+// Loading an old config must not opt users into a secret migration. Only
+// creation of a new cluster sets the option to true.
+func TestEphemeralSecretsSurvivesConfigDefaultsAndRoundTrip(t *testing.T) {
+	for _, tt := range []struct {
+		name, setting string
+		want          bool
+	}{
+		{"omitted", "", false},
+		{"disabled", "ephemeralSecrets: false", false},
+		{"enabled", "ephemeralSecrets: true", true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			var cfg Config
+			require.NoError(t, yaml.Unmarshal([]byte("clusters:\n  - terraform:\n      provider: stackit\n      "+tt.setting+"\n"), &cfg))
+			applyDefaults(&cfg)
+			assert.Equal(t, tt.want, cfg.Clusters[0].Terraform.EphemeralSecrets)
+			data, err := yaml.Marshal(cfg)
+			require.NoError(t, err)
+			var restored Config
+			require.NoError(t, yaml.Unmarshal(data, &restored))
+			applyDefaults(&restored)
+			assert.Equal(t, tt.want, restored.Clusters[0].Terraform.EphemeralSecrets)
 		})
 	}
 }

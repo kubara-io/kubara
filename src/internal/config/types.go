@@ -70,6 +70,7 @@ type Cluster struct {
 }
 
 type Terraform struct {
+	EphemeralSecrets  bool              `json:"ephemeralSecrets,omitempty" yaml:"ephemeralSecrets,omitempty" jsonschema:"title=Ephemeral Secrets,description=Generate supported secret inputs and payloads without persisting their values in state or plans. Requires compatible catalog templates. Omitted or false preserves the existing stateful workflow."`
 	Provider          TerraformProvider `json:"provider" yaml:"provider" jsonschema:"title=Cloud Provider,description=Infrastructure provider used for Terraform templates. Use none to skip Terraform generation. Currently supported providers: stackit and t-cloud-public.,enum=none,enum=stackit,enum=t-cloud-public,default=none"`
 	ProjectID         string            `json:"projectId" yaml:"projectId" jsonschema:"required,title=Cloud Project ID,description=The provider-specific project subscription or tenant identifier. For t-cloud-public use the tenant or project name rather than a UUID.,minLength=1"`
 	KubernetesType    string            `json:"kubernetesType" yaml:"kubernetesType" jsonschema:"title=Kubernetes Type,description=The type of Kubernetes cluster.,enum=edge,enum=ske,enum=cce,default=ske"`
