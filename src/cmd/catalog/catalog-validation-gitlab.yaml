@@ -1,0 +1,17 @@
+---
+# Pin the image to a reviewed release tag or digest for reproducible validation.
+image:
+  name: ghcr.io/kubara-io/kubara:latest
+  entrypoint: ['']
+workflow:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "web"'
+    - if: '$CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS'
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+validate-catalog:
+  script:
+    - /kubara schema --catalog . --output /tmp/catalog.schema.json
+    - /kubara catalog package

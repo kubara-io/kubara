@@ -193,6 +193,9 @@ kubara catalog unpackage oci://ghcr.io/acme/platform-catalogs/my-catalog:1.2.3 .
 
 This is useful when you want to inspect or edit a catalog that was distributed through a registry.
 
+For pipelines that update catalog pins, regenerate artifacts, and open a PR or MR, see
+[CI Automation](../4_building_your_platform/ci_automation.md).
+
 ## Automatic catalog updates with Renovate
 
 You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.

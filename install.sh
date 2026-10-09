@@ -68,16 +68,25 @@ curl_wrap() {
     rm -f "$_sc_tmp_err" "$_sc_tmp_out"
 }
 
-echo "Fetching the latest release version..."
-LATEST_TAG=$(curl_wrap "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+LATEST_TAG=${KUBARA_VERSION:-latest}
+if [ "$LATEST_TAG" = latest ]; then
+    echo "Fetching the latest release version..."
+    LATEST_TAG=$(curl_wrap "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
+else
+    LATEST_TAG="v${LATEST_TAG#v}"
+fi
 
-if [ -z "$LATEST_TAG" ]; then
-    echo "Error: Failed to fetch the latest version."
+if ! printf '%s\n' "$LATEST_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'; then
+    echo "Error: KUBARA_VERSION must be latest or a release version." >&2
     exit 1
 fi
 
+INSTALL_DIR=${KUBARA_INSTALL_DIR:-"$HOME/.local/bin"}
+mkdir -p "$INSTALL_DIR"
+INSTALL_DIR=$(cd "$INSTALL_DIR" && pwd)
+
 VERSION=${LATEST_TAG#v}
-echo "Latest version found: $LATEST_TAG"
+echo "Installing release: $LATEST_TAG"
 
 # Detect Operating System
 OS_NAME=$(uname -s | tr '[:upper:]' '[:lower:]')
@@ -104,6 +113,7 @@ DOWNLOAD_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$FILENAME"
 CHECKSUM_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$CHECKSUM_FILE"
 
 TMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TMP_DIR"' EXIT
 cd "$TMP_DIR"
 
 echo "Downloading $FILENAME..."
@@ -113,7 +123,8 @@ echo "Downloading checksum file..."
 curl_wrap -L -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
 
 echo "Verifying checksum..."
-grep "$FILENAME" "$CHECKSUM_FILE" > checksum_check.txt
+awk -v file="$FILENAME" '$2 == file {print}' "$CHECKSUM_FILE" > checksum_check.txt
+test "$(wc -l < checksum_check.txt)" -eq 1
 
 if command -v sha256sum >/dev/null 2>&1; then
     sha256sum -c checksum_check.txt
@@ -133,8 +144,6 @@ if [ ! -f "kubara" ]; then
     echo "Error: 'kubara' binary was not found in the extracted archive."
     exit 1
 fi
-
-INSTALL_DIR="$HOME/.local/bin"
 
 echo "Installing kubara to $INSTALL_DIR..."
 mkdir -p "$INSTALL_DIR"
