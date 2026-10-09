@@ -6,6 +6,8 @@ It is intended for **local testing only**, not for production use.
 
 This guide supports Linux, macOS and WSL on Windows.
 
+If you intend to manage multiple hubs with kubara, take a look at [Multi-Hub Environments](../4_building_your_platform/multi-hub.md)
+
 ## Prerequisites
 
 Install kubara first via the [installation guide](installation.md), then make sure these tools are available on your host:

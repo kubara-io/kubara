@@ -38,13 +38,14 @@ func TestNewClusterCommand(t *testing.T) {
 
 func TestListAllClustersNoError(t *testing.T) {
 	dir := t.TempDir()
-	configPath := testutil.CreateTestConfig(t, dir, testutil.CreateTestCluster(t))
+	t.Chdir(dir)
+	testutil.CreateTestConfig(t, dir, testutil.CreateTestCluster(t))
 
 	testutil.CreateDefaultGenerateTestEnv(t, dir)
 
 	cliFlags := flags.NewGlobalFlags().CLIFlags()
 	app := testutil.CreateTestAppWithFlags(cliFlags, cluster.NewClusterCommand())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", dir, "cluster", "list"}
+	args := []string{"kubara", "cluster", "list"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 }
@@ -52,7 +53,8 @@ func TestListAllClustersNoError(t *testing.T) {
 func TestAddNewSpokesCluster(t *testing.T) {
 	spokeName := "coolNewSpoke"
 	dir := t.TempDir()
-	configPath := testutil.CreateTestConfig(t, dir, testutil.CreateTestCluster(t))
+	t.Chdir(dir)
+	testutil.CreateTestConfig(t, dir, testutil.CreateTestCluster(t))
 
 	testutil.CreateDefaultGenerateTestEnv(t, dir)
 
@@ -60,8 +62,6 @@ func TestAddNewSpokesCluster(t *testing.T) {
 	app := testutil.CreateTestAppWithFlags(cliFlags, cluster.NewClusterCommand())
 	args := []string{
 		"kubara",
-		"--config-file", configPath,
-		"--work-dir", dir,
 		"--catalog", testutil.GeneralCatalogPath(),
 		"cluster", "add", spokeName,
 	}

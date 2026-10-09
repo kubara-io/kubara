@@ -52,9 +52,6 @@ help, h    Shows a list of commands or help for one command
 
 ```text
 --kubeconfig string               Path to kubeconfig file (default: "~/.kube/config")
---work-dir string, -w string      Working directory (default: ".")
---config-file string, -c string   Path to the configuration file (default: "config.yaml")
---env-file string                 Path to the .env file (default: ".env")
 --test-connection                 Check if Kubernetes cluster can be reached. List namespaces and exit
 --base64                          Enable base64 encode/decode mode
 --encode                          Base64 encode input

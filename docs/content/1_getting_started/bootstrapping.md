@@ -4,6 +4,7 @@
 
 This guide provides a step-by-step process for bootstrapping your platform running on Kubernetes, including the necessary [prerequisites](prerequisites.md), architecture setup, and deployment instructions. Try to follow the instructions first. If you have any questions or issues, please reach out directly via Teams. If you're interested in the setup details, explore the Wiki pages.
 
+If you intend to manage multiple hubs with kubara, take a look at [Multi-Hub Environments](../4_building_your_platform/multi-hub.md)
 ---
 
 ## 1. Getting Started
@@ -105,13 +106,13 @@ kubara init
 ```
 
 This command creates a `config.yaml` file based on the values from your `.env`.
-It also creates a `renovate.json` in the working directory when no supported Renovate configuration exists. The generated custom manager keeps versioned OCI catalog references in this config up to date. Use `--renovate=false` if the repository does not use Renovate:
+It also creates a `renovate.json` at the root of your Git repository (or working directory if outside a Git repository) when no supported Renovate configuration exists. The generated custom manager keeps versioned OCI catalog references in this config up to date. Use `--renovate=false` if the repository does not use Renovate:
 
 ```bash
 kubara init --renovate=false
 ```
 
-For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file uses Renovate's `config:recommended` preset and enables automatic updates for kubara catalog versions in `config.yaml`. Renovate can also update other supported dependencies it detects in the repository.
+When run from a subfolder in a Git repository, `init` automatically writes `renovate.json` to the Git repository root with the correct relative path matcher for your workspace's `config.yaml`. The generated file uses Renovate's `config:recommended` preset and enables automatic updates for kubara catalog versions in `config.yaml`. Renovate can also update other supported dependencies it detects in the repository.
 
 Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [Renovate settings for catalog updates](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
 
@@ -137,7 +138,7 @@ kubara init \
   --catalog-overwrite
 ```
 
-The bootstrap reference is stored in the root `bootstrapCatalog` field, while repeated `--catalog` values are stored on the generated cluster. Local paths are resolved relative to `--work-dir` when kubara loads them.
+The bootstrap reference is stored in the root `bootstrapCatalog` field, while repeated `--catalog` values are stored on the generated cluster. Local paths are resolved relative to the workspace directory when kubara loads them.
 
 When using `--overwrite`, only values from `.env` are replaced.
 Additional settings in your existing `config.yaml` are preserved and merged.
@@ -518,38 +519,36 @@ but also other supported possibilities when bootstrapping.
 
 ### Bootstrapping Multiple Hub Clusters
 
-You can bootstrap multiple Hub clusters.
-You **cannot** reuse the same `config.yaml` file for multiple Hub clusters. Only one hub per config is supported.
+You can bootstrap multiple Hub clusters in the same Git repository.
+Each Hub cluster has its own directory (workspace) containing its own `config.yaml` and optional `.env`. Only one hub per config is supported.
 
-**Why?**
-During the bootstrap process, the `.env` file is used to provide credentials.
-If you reuse the same `.env` file, you would have to constantly adjust it for each Hub - which is error-prone.
+For a detailed guide on managing multiple hubs, directory layouts, selective generation (`--hub`), and batch generation (`--all`), see [Multi-Hub Environments](../4_building_your_platform/multi-hub.md).
 
-Since version `0.2.0`, this is much easier. You can simply provide a different env file:
+To set up an additional Hub cluster, create and switch to its directory:
 
 ```bash
-kubara init --prep --env-file .another-env
+mkdir -p setups/another-hub
+cd setups/another-hub
+kubara init --prep
 ```
-Fill out `.another-env` with the required values. Generate a new config file from it:
+Fill out `.env` with the required values. Generate the config file:
 
 ```bash
-kubara --config-file another-config.yaml --env-file .another-env init
+kubara init
 ```
-
-This will use the values from `.another-env` to generate `another-config.yaml`.
 
 Render Terraform modules and Helm charts for the new Hub cluster:
 
 ```bash
 # default: generates both Helm and Terraform
 # use --helm or --terraform to generate only one type
-./kubara --config-file another-config.yaml generate
+kubara generate
 ```
 
 Finally, bootstrap your additional Hub cluster:
 
 ```bash
-kubara bootstrap --config-file another-config.yaml --env-file .another-env <cluster name from another-config.yaml>
+kubara bootstrap <cluster name from config.yaml>
 ```
 
 ## What's Next?

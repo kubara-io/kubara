@@ -50,6 +50,8 @@ func GeneralCatalogPath() string {
 func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) string {
 	t.Helper()
 
+	_ = os.Mkdir(filepath.Join(dir, ".git"), 0755)
+
 	configPath := filepath.Join(dir, "config.yaml")
 
 	for i := range clusters {
