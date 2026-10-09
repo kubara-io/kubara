@@ -21,10 +21,11 @@ terraform:
 
 For T Cloud Public, set `projectId` to the tenant/project name used as `tenant_name`, not to a UUID.
 
-With `terraform.ephemeralSecrets: true`, the generated roots require **Terraform 1.11+ or
-OpenTofu 1.11+**. API access and secret key inputs are then ephemeral: supply them for both plan
-and apply, including saved-plan applies. When omitted or `false`, the option preserves the
-existing workflow and version requirements. See
+The supporting catalog requires **Terraform 1.11+ or OpenTofu 1.11+** for all roots and modules,
+including backend bootstrap, regardless of `terraform.ephemeralSecrets`. With the option set
+to `true`, API access and secret key inputs are ephemeral: supply them for both plan and apply,
+including saved-plan applies. When omitted or `false`, the option preserves the stateful
+secret workflow; the higher minimum version still applies. See
 [ephemeral secret management](../2_concepts/overview_core_concept.md#ephemeral-secret-management).
 
 ## 1. Generate Terraform modules
