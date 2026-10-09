@@ -115,7 +115,7 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	var raw map[string]any
 	require.NoError(t, json.Unmarshal(content, &raw))
 	assert.NotContains(t, raw, "enabledManagers")
-	assert.NotContains(t, raw, "ignorePaths")
+	assert.NotContains(t, raw, "packageRules")
 	customManagers := raw["customManagers"].([]any)
 	customManager := customManagers[0].(map[string]any)
 	assert.Contains(t, customManager, "managerFilePatterns")

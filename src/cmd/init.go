@@ -356,16 +356,11 @@ type renovateConfig struct {
 	Schema         string                  `json:"$schema"`
 	Description    []string                `json:"description"`
 	Extends        []string                `json:"extends"`
-	PackageRules   []renovatePackageRule   `json:"packageRules"`
+	IgnorePaths    []string                `json:"ignorePaths"`
 	CustomManagers []renovateCustomManager `json:"customManagers"`
 }
 
 const kubaraRenovateManagerDescription = "Update kubara catalog OCI references"
-
-type renovatePackageRule struct {
-	MatchFileNames []string `json:"matchFileNames"`
-	Enabled        bool     `json:"enabled"`
-}
 
 type renovateCustomManager struct {
 	CustomType          string   `json:"customType"`
@@ -436,16 +431,11 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 			"This configuration adds support for updating kubara catalog OCI references.",
 		},
 		Extends: []string{"config:recommended"},
-		PackageRules: []renovatePackageRule{
-			{
-				MatchFileNames: []string{
-					"platform-components/**",
-					"platform-configs/**/helm/**/values.generated.yaml",
-					"platform-configs/**/terraform/infrastructure/terraform.tf",
-					"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
-				},
-				Enabled: false,
-			},
+		IgnorePaths: []string{
+			"platform-components/**",
+			"platform-configs/**/helm/**/values.generated.yaml",
+			"platform-configs/**/terraform/infrastructure/terraform.tf",
+			"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
 		},
 		CustomManagers: []renovateCustomManager{
 			{
