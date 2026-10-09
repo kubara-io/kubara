@@ -201,6 +201,12 @@ Add the following settings to your `renovate.json` or GitOps repository's Renova
 
 ```json
 {
+  "ignorePaths": [
+    "platform-components/**",
+    "platform-configs/**/helm/**/values.generated.yaml",
+    "platform-configs/**/terraform/infrastructure/terraform.tf",
+    "platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf"
+  ],
   "customManagers": [
     {
       "customType": "regex",
@@ -215,3 +221,9 @@ Add the following settings to your `renovate.json` or GitOps repository's Renova
 ```
 
 Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.
+
+The generated configuration excludes catalog-rendered components, Helm values, and provider declarations in the infrastructure and state-backend roots from direct dependency updates to avoid duplicate chart, image, and provider update PRs. Local catalog sources, hand-maintained overlays, and custom Terraform roots remain eligible. After updating a catalog reference, run `kubara generate` and review the generated changes before merging.
+
+The generated `ignorePaths` replaces Renovate’s default and preset-provided exclusions, so other paths (including test and example directories) remain eligible for updates.
+
+Existing Renovate configurations are not overwritten. Add the exclusions above to their `ignorePaths`, preserving any existing entries.
