@@ -1,0 +1,139 @@
+name: Generate Kubara artifacts
+# Uses config.yaml and its catalogs from the repository root.
+
+on:
+  pull_request:
+    paths:
+      - config.yaml
+      - .github/workflows/kubara-generate.yml
+      # Add your local catalog paths, for example:
+      # - my-catalog/**
+  workflow_dispatch:
+    inputs:
+      pull-request:
+        description: Open same-repository PR number to regenerate
+        required: true
+        type: string
+      write:
+        description: Commit generated changes to the PR branch
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: kubara-generate-${{ github.event.pull_request.number || inputs.pull-request }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Select PR
+        id: pr
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
+        run: |
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
+          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" > "$RUNNER_TEMP/pr.json"
+          jq -e --arg repo "$REPOSITORY" \
+            '.state == "open" and .head.repo.full_name == $repo and .head.ref != .base.ref' "$RUNNER_TEMP/pr.json"
+          jq -r '"head=\(.head.sha)", "branch=\(.head.ref)"' "$RUNNER_TEMP/pr.json" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ steps.pr.outputs.head }}
+          persist-credentials: false
+      - name: Install Kubara
+        env:
+          # renovate: datasource=github-releases depName=kubara-io/kubara extractVersion=^v(?<version>.*)$
+          KUBARA_VERSION: 0.16.0
+        run: |
+          mkdir -p "$RUNNER_TEMP/kubara"
+          cd "$RUNNER_TEMP/kubara"
+          release="https://github.com/kubara-io/kubara/releases/download/v${KUBARA_VERSION}"
+          archive="kubara_${KUBARA_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL -o "$archive" "$release/$archive"
+          curl -fsSL -o checksums.txt "$release/kubara_${KUBARA_VERSION}_checksums.txt"
+          awk -v file="$archive" '$2 == file' checksums.txt | sha256sum --check --strict
+          tar -xzf "$archive" kubara
+          echo "$RUNNER_TEMP/kubara" >> "$GITHUB_PATH"
+      - name: Generate artifacts
+        id: render
+        shell: bash
+        run: |
+          # Provide required environment values without deployment credentials.
+          mkdir -p "$RUNNER_TEMP/kubara/home"
+          env -i PATH="$PATH" HOME="$RUNNER_TEMP/kubara/home" LANG=C.UTF-8 \
+            PROJECT_NAME=generation PROJECT_STAGE=ci \
+            ARGOCD_WIZARD_ACCOUNT_PASSWORD=unused-generation-placeholder \
+            ARGOCD_GIT_HTTPS_URL=https://example.invalid/config.git \
+            kubara --env-file /dev/null generate 2>&1 | tee "$RUNNER_TEMP/kubara/generate.log"
+          find platform-components platform-configs -type f \
+            \( -name 'set-env-changeme.sh' -o -name 'set-env-changeme.ps1' \) -delete
+          if grep -rFq 'unused-generation-placeholder' platform-components platform-configs; then
+            echo 'A catalog rendered the placeholder password; refusing to publish.' >&2
+            exit 1
+          fi
+          git add -- platform-components platform-configs
+          git diff --cached --binary > "$RUNNER_TEMP/kubara/generated.patch"
+          git diff --cached --stat >> "$GITHUB_STEP_SUMMARY"
+          echo "changed=$([[ -s "$RUNNER_TEMP/kubara/generated.patch" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+      - name: Save patch for review
+        if: steps.render.outputs.changed == 'true'
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7.0.0
+        with:
+          name: kubara-generated-patch
+          path: ${{ runner.temp }}/kubara/generated.patch
+          retention-days: 7
+      - name: Commit generated changes
+        if: steps.render.outputs.changed == 'true' && (github.event_name != 'workflow_dispatch' || inputs.write)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
+          EXPECTED_HEAD: ${{ steps.pr.outputs.head }}
+          PR_BRANCH: ${{ steps.pr.outputs.branch }}
+        run: |
+          # Stop if the PR was closed or updated while generating. Never force-push.
+          gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" | jq -e \
+            --arg sha "$EXPECTED_HEAD" --arg branch "$PR_BRANCH" \
+            '.state == "open" and .head.sha == $sha and .head.ref == $branch'
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git -c core.hooksPath=/dev/null commit -m 'chore: regenerate kubara artifacts'
+          git -c core.hooksPath=/dev/null -c credential.helper= \
+            -c 'credential.helper=!gh auth git-credential' push origin "HEAD:refs/heads/$PR_BRANCH"
+      - name: Update PR comment
+        if: ${{ !cancelled() && steps.render.outcome != 'skipped' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
+          RESULT: ${{ steps.render.outcome }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          {
+            echo '<!-- kubara-generate -->'
+            printf '### Kubara generate: %s\n\n[Workflow run](%s)\n\n' "$RESULT" "$RUN_URL"
+            echo '<details><summary>Generation output (last 40 KB)</summary><pre>'
+            tail -c 40000 "$RUNNER_TEMP/kubara/generate.log" \
+              | sed -E $'s/\x1b\\[[0-9;]*[[:alpha:]]//g' \
+              | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'
+            echo '</pre></details>'
+          } > "$RUNNER_TEMP/kubara/comment.md"
+          comment_id=$(gh api --paginate "repos/$REPOSITORY/issues/$PR_NUMBER/comments" \
+            --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- kubara-generate -->"))) | .id' | head -n 1)
+          endpoint="repos/$REPOSITORY/issues/$PR_NUMBER/comments"
+          method=POST
+          if [[ -n "$comment_id" ]]; then
+            endpoint="repos/$REPOSITORY/issues/comments/$comment_id"
+            method=PATCH
+          fi
+          jq -n --rawfile body "$RUNNER_TEMP/kubara/comment.md" '{body: $body}' \
+            | gh api --method "$method" "$endpoint" --input - > /dev/null

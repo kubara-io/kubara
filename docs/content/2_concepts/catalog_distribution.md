@@ -215,3 +215,21 @@ Add the following settings to your `renovate.json` or GitOps repository's Renova
 ```
 
 Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.
+
+### Generate artifacts in GitHub Actions
+
+Run from the repository root:
+
+```bash
+kubara github-action
+```
+
+Creates `.github/workflows/kubara-generate.yml`. Use `--overwrite` to replace an existing workflow.
+
+PRs changing `config.yaml` trigger generation. Add local catalog paths to the workflow's `paths` filter as needed.
+Generated changes are committed to the same PR, with the output posted as a comment.
+
+Commits use `GITHUB_TOKEN` and do not trigger follow-up CI automatically. Run the relevant checks before merging.
+
+For Kubara CLI updates, add `customManagers:githubActionsVersions` to your Renovate `extends` list.
+New configurations created by `kubara init` include it. The workflow verifies the download against the selected release's checksums.
