@@ -201,13 +201,17 @@ Add the following settings to your `renovate.json` or GitOps repository's Renova
 
 ```json
 {
-  "ignorePaths": [
-    "**/node_modules/**",
-    "**/bower_components/**",
-    "platform-components/**",
-    "platform-configs/**/helm/**/values.generated.yaml",
-    "platform-configs/**/terraform/infrastructure/terraform.tf",
-    "platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf"
+  "packageRules": [
+    {
+      "description": "Disable direct updates to generated kubara artifacts",
+      "matchFileNames": [
+        "platform-components/**",
+        "platform-configs/**/helm/**/values.generated.yaml",
+        "platform-configs/**/terraform/infrastructure/terraform.tf",
+        "platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf"
+      ],
+      "enabled": false
+    }
   ],
   "customManagers": [
     {
@@ -226,4 +230,6 @@ Adjust `managerFilePatterns` when the kubara config has a different repository-r
 
 The generated configuration excludes catalog-rendered components, Helm values, and provider declarations in the infrastructure and state-backend roots from direct dependency updates to avoid duplicate chart, image, and provider update PRs. Local catalog sources, hand-maintained overlays, and custom Terraform roots remain eligible. After updating a catalog reference, run `kubara generate` and review the generated changes before merging.
 
-Existing Renovate configurations are not overwritten. Add the exclusions above to their `ignorePaths`, preserving any existing entries.
+The package rule disables updates only for the generated paths, preserving Renovate's default and preset-provided `ignorePaths` exclusions.
+
+Existing Renovate configurations are not overwritten. Append the rule above to their `packageRules`, preserving any existing rules and `ignorePaths` settings.

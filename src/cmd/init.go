@@ -356,11 +356,17 @@ type renovateConfig struct {
 	Schema         string                  `json:"$schema"`
 	Description    []string                `json:"description"`
 	Extends        []string                `json:"extends"`
-	IgnorePaths    []string                `json:"ignorePaths"`
+	PackageRules   []renovatePackageRule   `json:"packageRules"`
 	CustomManagers []renovateCustomManager `json:"customManagers"`
 }
 
 const kubaraRenovateManagerDescription = "Update kubara catalog OCI references"
+
+type renovatePackageRule struct {
+	Description    string   `json:"description"`
+	MatchFileNames []string `json:"matchFileNames"`
+	Enabled        bool     `json:"enabled"`
+}
 
 type renovateCustomManager struct {
 	CustomType          string   `json:"customType"`
@@ -431,13 +437,17 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 			"This configuration adds support for updating kubara catalog OCI references.",
 		},
 		Extends: []string{"config:recommended"},
-		IgnorePaths: []string{
-			"**/node_modules/**",
-			"**/bower_components/**",
-			"platform-components/**",
-			"platform-configs/**/helm/**/values.generated.yaml",
-			"platform-configs/**/terraform/infrastructure/terraform.tf",
-			"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
+		PackageRules: []renovatePackageRule{
+			{
+				Description: "Disable direct updates to generated kubara artifacts",
+				MatchFileNames: []string{
+					"platform-components/**",
+					"platform-configs/**/helm/**/values.generated.yaml",
+					"platform-configs/**/terraform/infrastructure/terraform.tf",
+					"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
+				},
+				Enabled: false,
+			},
 		},
 		CustomManagers: []renovateCustomManager{
 			{
