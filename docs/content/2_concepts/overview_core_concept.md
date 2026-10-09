@@ -58,9 +58,9 @@ require explicit revision counters. With `false`, the generated code retains the
 managed passwords, KV payload comparison and Grafana password output where available.
 OpenBao's pre-existing write-only OIDC argument remains unchanged in either mode.
 
-Enabling the option requires Terraform/OpenTofu 1.11+. With it disabled, the existing minimums
-remain: 1.9.3 for STACKIT infrastructure and T Cloud Public bootstrap/infrastructure, and 1.11
-for the T Cloud Public OpenBao root. The STACKIT backend bootstrap is unaffected.
+The supporting catalog requires Terraform/OpenTofu 1.11+ for all Terraform roots and modules,
+including backend bootstrap, regardless of this option. Existing deployments must upgrade
+older Terraform/OpenTofu versions even when retaining the stateful secret workflow.
 
 For an existing deployment, enabling the option is a deliberate migration: regenerate, update
 any manually activated `secrets.tf-oauth2` copy, review the plan, and follow the

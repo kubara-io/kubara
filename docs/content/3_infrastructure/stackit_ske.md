@@ -239,8 +239,8 @@ The following workflow applies when `terraform.ephemeralSecrets: true`. If the f
 or `false`, the previous stateful behavior is retained; migration is optional. See
 [the configuration option](../2_concepts/overview_core_concept.md#ephemeral-secret-management).
 
-The ephemeral workflow requires **Terraform 1.11+ or OpenTofu 1.11+** and the Vault/Random provider versions
-pinned by the catalog. Use a general catalog release containing the write-only example; verify that
+The supporting catalog requires **Terraform 1.11+ or OpenTofu 1.11+** in both secret modes,
+including backend bootstrap and modules. Use the Vault/Random provider versions pinned by the catalog. Use a general catalog release containing the write-only example; verify that
 `secrets.tf-oauth2` contains `data_json_wo` before following this procedure. Older generated copies
 using `data_json` still store the payload in state.
 
@@ -354,8 +354,8 @@ their automatically synchronized Vault entries.
 
 ### Grafana admin credentials
 
-With the option enabled, the infrastructure root requires Terraform/OpenTofu **1.11+** and writes Grafana admin
-credentials using a write-only payload. `grafana_admin_password` is ephemeral; when empty, a
+With the option enabled, the infrastructure root writes Grafana admin credentials using a
+write-only payload. `grafana_admin_password` is ephemeral; when empty, a
 password is generated. Ordinary applies retain the stored password. Increment
 `grafana_admin_credentials_version` (default `1`) to write a new username/password pair.
 Read the credentials from the `kube-prometheus-stack/grafana_credentials` Vault entry.
