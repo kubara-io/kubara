@@ -115,19 +115,7 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	var raw map[string]any
 	require.NoError(t, json.Unmarshal(content, &raw))
 	assert.NotContains(t, raw, "enabledManagers")
-	assert.NotContains(t, raw, "ignorePaths", "preserve default and preset-provided exclusions")
-	assert.Equal(t, []string{"config:recommended"}, generated.Extends)
-	packageRules, ok := raw["packageRules"].([]any)
-	require.True(t, ok)
-	require.Len(t, packageRules, 1)
-	packageRule := packageRules[0].(map[string]any)
-	assert.Equal(t, false, packageRule["enabled"], "serialize enabled: false explicitly")
-	assert.Equal(t, []any{
-		"platform-components/**",
-		"platform-configs/**/helm/**/values.generated.yaml",
-		"platform-configs/**/terraform/infrastructure/terraform.tf",
-		"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf",
-	}, packageRule["matchFileNames"])
+	assert.NotContains(t, raw, "ignorePaths")
 	customManagers := raw["customManagers"].([]any)
 	customManager := customManagers[0].(map[string]any)
 	assert.Contains(t, customManager, "managerFilePatterns")

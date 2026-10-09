@@ -363,7 +363,6 @@ type renovateConfig struct {
 const kubaraRenovateManagerDescription = "Update kubara catalog OCI references"
 
 type renovatePackageRule struct {
-	Description    string   `json:"description"`
 	MatchFileNames []string `json:"matchFileNames"`
 	Enabled        bool     `json:"enabled"`
 }
@@ -439,7 +438,6 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 		Extends: []string{"config:recommended"},
 		PackageRules: []renovatePackageRule{
 			{
-				Description: "Disable direct updates to generated kubara artifacts",
 				MatchFileNames: []string{
 					"platform-components/**",
 					"platform-configs/**/helm/**/values.generated.yaml",
