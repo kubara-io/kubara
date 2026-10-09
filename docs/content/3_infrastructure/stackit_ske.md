@@ -239,10 +239,8 @@ The following workflow applies when `terraform.ephemeralSecrets: true`. If the f
 or `false`, the previous stateful behavior is retained; migration is optional. See
 [the configuration option](../2_concepts/overview_core_concept.md#ephemeral-secret-management).
 
-The supporting catalog requires **Terraform 1.11+ or OpenTofu 1.11+** in both secret modes,
-including backend bootstrap and modules. Use the Vault/Random provider versions pinned by the catalog. Use a general catalog release containing the write-only example; verify that
-`secrets.tf-oauth2` contains `data_json_wo` before following this procedure. Older generated copies
-using `data_json` still store the payload in state.
+**Required: Terraform/OpenTofu 1.11+ in both modes** and the catalog-pinned providers.
+For this workflow, verify that `secrets.tf-oauth2` uses `data_json_wo`; `data_json` stores secrets in state.
 
 ### Create new entries
 
