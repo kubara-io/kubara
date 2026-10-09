@@ -58,9 +58,8 @@ require explicit revision counters. With `false`, the generated code retains the
 managed passwords, KV payload comparison and Grafana password output where available.
 OpenBao's pre-existing write-only OIDC argument remains unchanged in either mode.
 
-The supporting catalog requires Terraform/OpenTofu 1.11+ for all Terraform roots and modules,
-including backend bootstrap, regardless of this option. Existing deployments must upgrade
-older Terraform/OpenTofu versions even when retaining the stateful secret workflow.
+**Required: Terraform/OpenTofu 1.11+ in both modes**, including backend bootstrap and modules.
+Upgrade older versions before using this catalog.
 
 For an existing deployment, enabling the option is a deliberate migration: regenerate, update
 any manually activated `secrets.tf-oauth2` copy, review the plan, and follow the
