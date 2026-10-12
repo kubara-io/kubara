@@ -81,6 +81,15 @@ You do not need Go installed to run the CLI.
 
     The script downloads the latest release for your platform and verifies checksums automatically.
 
+    By default, it installs to `$HOME/.local/bin`. To select a release and installation directory,
+    download the script and set `KUBARA_VERSION` and `KUBARA_INSTALL_DIR`:
+
+    ```bash
+    curl -sSLf https://raw.githubusercontent.com/kubara-io/kubara/refs/heads/main/install.sh -o install.sh
+    KUBARA_VERSION=v0.16.0 KUBARA_INSTALL_DIR=/tmp/kubara-bin sh install.sh
+    /tmp/kubara-bin/kubara --version
+    ```
+
 === "Manual (macOS/Linux)"
 
     Download the matching release archive from:

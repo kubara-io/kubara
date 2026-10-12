@@ -7,6 +7,8 @@ on:
       - 'src/**'
       - '.github/workflows/pr-checks.yaml'
       - '.scripts/**'
+      - 'action.yml'
+      - 'install.sh'
       - '.github/helm-profiles/**'
   pull_request:
     branches:
@@ -15,6 +17,8 @@ on:
       - 'src/**'
       - '.github/workflows/pr-checks.yaml'
       - '.scripts/**'
+      - 'action.yml'
+      - 'install.sh'
       - '.github/helm-profiles/**'
   workflow_dispatch:
 
@@ -40,6 +44,21 @@ permissions:
   actions: read
 
 jobs:
+  catalog-automation:
+    name: Catalog automation checks
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check shell scripts
+        run: |
+          shellcheck src/cmd/kubara-catalog-update.sh .scripts/test-catalog-automation.sh src/cmd/install-oras.sh
+          sh -n install.sh
+      - name: Test catalog automation
+        run: bash .scripts/test-catalog-automation.sh
+
   go-static-analysis:
     runs-on: ubuntu-latest
     defaults:

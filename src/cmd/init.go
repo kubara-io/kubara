@@ -3,6 +3,7 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"embed"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -21,11 +22,16 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+//go:embed *-catalog-update.yaml kubara-catalog-update.sh install-oras.sh
+var catalogUpdateTemplates embed.FS
+
 type InitOptions struct {
 	copyPrepFolder bool
 	force          bool
 	local          bool
 	renovate       bool
+	githubActions  bool
+	gitlabCI       bool
 	cwd            string
 	configFilePath string
 	dotEnvFilePath string
@@ -38,6 +44,8 @@ type InitFlags struct {
 	ForceFlag            bool
 	LocalFlag            bool
 	RenovateFlag         bool
+	GitHubActionsFlag    bool
+	GitLabCIFlag         bool
 	EnvFileFlag          string
 	EnvPrefixFlag        string
 	BootstrapCatalogFlag string
@@ -60,7 +68,7 @@ func NewInitCmd() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "init",
 		Usage:       "Initialize kubara config for your GitOps repository",
-		UsageText:   "kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]",
+		UsageText:   "kubara init [--prep] [--local] [--renovate=false] [--github-actions] [--gitlab-ci] [--bootstrap-catalog PATH_OR_OCI]",
 		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables, catalog options, and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
 		Action: func(c context.Context, cmd *cli.Command) error {
 			o, _ := flags.ToOptions(cmd)
@@ -96,6 +104,8 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 		force:          flags.ForceFlag,
 		local:          flags.LocalFlag,
 		renovate:       flags.RenovateFlag,
+		githubActions:  flags.GitHubActionsFlag,
+		gitlabCI:       flags.GitLabCIFlag,
 		cwd:            cwd,
 		configFilePath: configFilePath,
 		dotEnvFilePath: dotEnvFilePath,
@@ -130,6 +140,16 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Value:       flags.RenovateFlag,
 			Usage:       "Generate a Renovate configuration for kubara catalog updates if none exists",
 			Destination: &flags.RenovateFlag,
+		},
+		&cli.BoolFlag{
+			Name:        "github-actions",
+			Usage:       "Generate a GitHub Actions catalog update workflow if none exists",
+			Destination: &flags.GitHubActionsFlag,
+		},
+		&cli.BoolFlag{
+			Name:        "gitlab-ci",
+			Usage:       "Generate a GitLab catalog update pipeline if none exists",
+			Destination: &flags.GitLabCIFlag,
 		},
 		&cli.StringFlag{
 			Name:        "bootstrap-catalog",
@@ -176,11 +196,16 @@ func (o *InitOptions) Run() error {
 		return o.runPrepMode(es)
 	}
 
+	var err error
 	if o.force {
-		return o.runForceMode(es, cs, envValidateErr, configLoadErr)
+		err = o.runForceMode(es, cs, envValidateErr, configLoadErr)
+	} else {
+		err = o.runNormalMode(es, cs, envValidateErr)
 	}
-
-	return o.runNormalMode(es, cs, envValidateErr)
+	if err != nil {
+		return err
+	}
+	return o.ensureCatalogUpdateCI()
 }
 
 func (o *InitOptions) catalogLoadOptions() catalog.LoadOptions {
@@ -464,4 +489,40 @@ func renovateConfigContainsKubaraManager(path string) (bool, error) {
 		return false, fmt.Errorf("read renovate config %q: %w", path, err)
 	}
 	return bytes.Contains(content, []byte(kubaraRenovateManagerDescription)), nil
+}
+
+func (o *InitOptions) ensureCatalogUpdateCI() error {
+	for _, file := range []struct {
+		enabled bool
+		source  string
+		target  string
+	}{
+		{o.githubActions, "github-catalog-update.yaml", ".github/workflows/kubara-update.yaml"},
+		{o.gitlabCI, "gitlab-catalog-update.yaml", ".gitlab-ci.yml"},
+		{o.githubActions || o.gitlabCI, "kubara-catalog-update.sh", ".scripts/kubara-catalog-update.sh"},
+		{o.gitlabCI, "install-oras.sh", ".scripts/install-oras.sh"},
+	} {
+		if !file.enabled {
+			continue
+		}
+		path := filepath.Join(o.cwd, file.target)
+		if _, err := os.Lstat(path); err == nil {
+			log.Info().Msgf("Skipping existing CI file: %s", path)
+			continue
+		} else if !os.IsNotExist(err) {
+			return fmt.Errorf("check CI file %q: %w", path, err)
+		}
+		contents, err := catalogUpdateTemplates.ReadFile(file.source)
+		if err != nil {
+			return fmt.Errorf("read CI template: %w", err)
+		}
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return fmt.Errorf("create CI directory: %w", err)
+		}
+		if err := os.WriteFile(path, contents, 0o644); err != nil {
+			return fmt.Errorf("write CI file: %w", err)
+		}
+		log.Info().Msgf("Generated CI file: %s", path)
+	}
+	return nil
 }

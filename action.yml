@@ -1,0 +1,39 @@
+---
+name: kubara
+description: Install a verified kubara release and run the CLI
+inputs:
+  version:
+    description: Release version (for example v0.16.0) or latest
+    default: latest
+  args:
+    description: CLI arguments as a JSON array of strings; use [] to install only
+    default: '["generate"]'
+  working-directory:
+    description: Directory in which to run kubara
+    default: '.'
+runs:
+  using: composite
+  steps:
+    - name: Install kubara
+      shell: bash
+      env:
+        KUBARA_VERSION: ${{ inputs.version }}
+        KUBARA_INSTALL_DIR: ${{ runner.temp }}/kubara-bin
+      run: |
+        sh "$GITHUB_ACTION_PATH/install.sh"
+        echo "$KUBARA_INSTALL_DIR" >> "$GITHUB_PATH"
+    - name: Run kubara
+      shell: bash
+      env:
+        KUBARA_ARGS: ${{ inputs.args }}
+        KUBARA_WORK_DIR: ${{ inputs.working-directory }}
+      run: |-
+        jq -e 'type == "array" and all(.[]; type == "string" and (contains("\u0000") | not))' <<< "$KUBARA_ARGS" > /dev/null
+        args=()
+        while IFS= read -r -d '' arg; do
+          args+=("$arg")
+        done < <(jq -j '.[] | ., "\u0000"' <<< "$KUBARA_ARGS")
+        if [ "${#args[@]}" -gt 0 ]; then
+          cd "$KUBARA_WORK_DIR"
+          kubara "${args[@]}"
+        fi

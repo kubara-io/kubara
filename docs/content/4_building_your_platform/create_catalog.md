@@ -23,6 +23,9 @@ Create the catalog root:
 kubara catalog create my-catalog
 ```
 
+Add `--github-actions`, `--gitlab-ci`, or both to include catalog validation pipelines.
+See [CI Automation](ci_automation.md) for generated pipeline behavior and environment update workflows.
+
 The catalog name must follow RFC 1123 naming rules:
 
 - lowercase letters
