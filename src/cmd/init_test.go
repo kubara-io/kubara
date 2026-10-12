@@ -29,7 +29,6 @@ func TestNewInitFlags(t *testing.T) {
 	assert.False(t, flags.ForceFlag)
 	assert.False(t, flags.LocalFlag)
 	assert.True(t, flags.RenovateFlag)
-	assert.Equal(t, ".env", flags.EnvFileFlag)
 	assert.Equal(t, "KUBARA_", flags.EnvPrefixFlag)
 	assert.Empty(t, flags.BootstrapCatalogFlag)
 }
@@ -53,20 +52,17 @@ func TestNewInitCmd(t *testing.T) {
 }
 
 func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
-	t.Parallel()
-
 	workDir := t.TempDir()
+	t.Chdir(workDir)
+	require.NoError(t, os.Mkdir(filepath.Join(workDir, ".git"), 0755))
 	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
 	require.NoError(t, err)
-	envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
+	_ = cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
 	configPath := filepath.Join(workDir, "config.yaml")
 	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
 
 	err = app.Run(context.Background(), []string{
 		"kubara",
-		"--work-dir", workDir,
-		"--config-file", configPath,
-		"--env-file", envPath,
 		"init",
 		"--bootstrap-catalog", bootstrapPath,
 		"--catalog", generalPath,
@@ -89,6 +85,7 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	t.Parallel()
 
 	workDir := t.TempDir()
+	require.NoError(t, os.Mkdir(filepath.Join(workDir, ".git"), 0755))
 	configPath := filepath.Join(workDir, "clusters", "prod", "config.yaml")
 	store := config.NewConfigStore(workDir, configPath, catalog.LoadOptions{})
 	options := &InitOptions{cwd: workDir, renovate: true}
@@ -185,6 +182,7 @@ func TestEnsureRenovateConfigPreservesExistingConfig(t *testing.T) {
 			t.Parallel()
 
 			workDir := t.TempDir()
+			require.NoError(t, os.Mkdir(filepath.Join(workDir, ".git"), 0755))
 			existingPath := filepath.Join(workDir, renovateFile)
 			require.NoError(t, os.MkdirAll(filepath.Dir(existingPath), 0o750))
 			require.NoError(t, os.WriteFile(existingPath, []byte("existing\n"), 0o600))
@@ -213,4 +211,88 @@ func TestRunNormalModeDoesNotCreateRenovateConfigOnValidationError(t *testing.T)
 	err := options.runNormalMode(nil, store, errors.New("invalid environment"))
 	require.ErrorContains(t, err, "validate env")
 	assert.NoFileExists(t, filepath.Join(workDir, "renovate.json"))
+}
+
+func TestEnsureRenovateConfigInSubfolderWritesToTopLevelFolder(t *testing.T) {
+	t.Parallel()
+
+	repoDir := t.TempDir()
+	gitDir := filepath.Join(repoDir, ".git")
+	require.NoError(t, os.Mkdir(gitDir, 0755))
+
+	subDir := filepath.Join(repoDir, "setups", "dev")
+	require.NoError(t, os.MkdirAll(subDir, 0755))
+
+	configPath := filepath.Join(subDir, "config.yaml")
+	store := config.NewConfigStore(subDir, configPath, catalog.LoadOptions{})
+	options := &InitOptions{cwd: subDir, renovate: true}
+
+	require.NoError(t, options.ensureRenovateConfig(store))
+
+	topLevelRenovatePath := filepath.Join(repoDir, "renovate.json")
+	assert.FileExists(t, topLevelRenovatePath)
+	assert.NoFileExists(t, filepath.Join(subDir, "renovate.json"))
+
+	content, err := os.ReadFile(topLevelRenovatePath)
+	require.NoError(t, err)
+
+	var generated renovateConfig
+	require.NoError(t, json.Unmarshal(content, &generated))
+	require.Len(t, generated.CustomManagers, 1)
+	assert.Equal(t, []string{`/^setups\/dev\/config\.yaml$/`}, generated.CustomManagers[0].ManagerFilePatterns)
+}
+
+func TestEnsureRenovateConfigInSubfolderSkipsIfTopLevelAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	repoDir := t.TempDir()
+	gitDir := filepath.Join(repoDir, ".git")
+	require.NoError(t, os.Mkdir(gitDir, 0755))
+
+	subDir := filepath.Join(repoDir, "setups", "dev")
+	require.NoError(t, os.MkdirAll(subDir, 0755))
+
+	topLevelRenovatePath := filepath.Join(repoDir, "renovate.json")
+	existingContent := "existing renovate content\n"
+	require.NoError(t, os.WriteFile(topLevelRenovatePath, []byte(existingContent), 0644))
+
+	configPath := filepath.Join(subDir, "config.yaml")
+	store := config.NewConfigStore(subDir, configPath, catalog.LoadOptions{})
+	options := &InitOptions{cwd: subDir, renovate: true}
+
+	require.NoError(t, options.ensureRenovateConfig(store))
+
+	content, err := os.ReadFile(topLevelRenovatePath)
+	require.NoError(t, err)
+	assert.Equal(t, existingContent, string(content))
+	assert.NoFileExists(t, filepath.Join(subDir, "renovate.json"))
+}
+
+func TestInitInSubfolderWritesRenovateToGitRoot(t *testing.T) {
+	repoDir := t.TempDir()
+	gitDir := filepath.Join(repoDir, ".git")
+	require.NoError(t, os.Mkdir(gitDir, 0755))
+
+	subDir := filepath.Join(repoDir, "setups", "hub-a")
+	require.NoError(t, os.MkdirAll(subDir, 0755))
+	t.Chdir(subDir)
+
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(repoDir, "catalogs"))
+	require.NoError(t, err)
+
+	_ = cmdtestutil.CreateDefaultGenerateTestEnv(t, subDir)
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+
+	err = app.Run(context.Background(), []string{
+		"kubara",
+		"init",
+		"--bootstrap-catalog", bootstrapPath,
+		"--catalog", generalPath,
+		"--catalog-overwrite",
+	})
+	require.NoError(t, err)
+
+	topRenovate := filepath.Join(repoDir, "renovate.json")
+	assert.FileExists(t, topRenovate)
+	assert.NoFileExists(t, filepath.Join(subDir, "renovate.json"))
 }

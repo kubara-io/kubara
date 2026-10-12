@@ -55,17 +55,13 @@ func NewSchemaCmd() *cli.Command {
 }
 
 func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
-	cwd, err := filepath.Abs(cmd.String("work-dir"))
+	ws, err := ResolveWorkspace(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("get working directory: %w", err)
+		return nil, fmt.Errorf("resolve workspace: %w", err)
 	}
-	outputFilePath, err := utils.GetFullPath(flags.OutputFlag, cwd)
+	outputFilePath, err := utils.GetFullPath(flags.OutputFlag, ws.WorkDir)
 	if err != nil {
 		return nil, fmt.Errorf("get output file path: %w", err)
-	}
-	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get config file path: %w", err)
 	}
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
@@ -75,8 +71,8 @@ func (flags *SchemaFlags) ToOptions(cmd *cli.Command) (*SchemaOptions, error) {
 
 	o := &SchemaOptions{
 		outputFilePath: outputFilePath,
-		cwd:            cwd,
-		configFilePath: configFilePath,
+		cwd:            ws.WorkDir,
+		configFilePath: ws.ConfigFilePath,
 		catalogOptions: catalogOptions,
 	}
 	return o, nil

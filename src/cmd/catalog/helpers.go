@@ -2,15 +2,15 @@ package catalog
 
 import (
 	"fmt"
-	"path/filepath"
 
+	"github.com/kubara-io/kubara/internal/utils"
 	"github.com/urfave/cli/v3"
 )
 
 func resolveCatalogCommandWorkingDir(cmd *cli.Command) (string, error) {
-	cwd, err := filepath.Abs(cmd.String("work-dir"))
+	ws, err := utils.ResolveWorkspaceFromCommand(cmd)
 	if err != nil {
-		return "", fmt.Errorf("get working directory: %w", err)
+		return "", fmt.Errorf("resolve workspace: %w", err)
 	}
-	return cwd, nil
+	return ws.WorkDir, nil
 }

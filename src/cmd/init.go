@@ -38,7 +38,6 @@ type InitFlags struct {
 	ForceFlag            bool
 	LocalFlag            bool
 	RenovateFlag         bool
-	EnvFileFlag          string
 	EnvPrefixFlag        string
 	BootstrapCatalogFlag string
 }
@@ -49,7 +48,6 @@ func NewInitFlags() *InitFlags {
 		ForceFlag:     false,
 		LocalFlag:     false,
 		RenovateFlag:  true,
-		EnvFileFlag:   ".env",
 		EnvPrefixFlag: "KUBARA_",
 	}
 }
@@ -63,7 +61,10 @@ func NewInitCmd() *cli.Command {
 		UsageText:   "kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]",
 		Description: "Initializes the kubara configuration for your GitOps repository, including environment variables, catalog options, and Renovate support for catalog updates. By default, it creates a config file and, if none exists, a renovate.json file. With --prep, it only generates the .env template for manual configuration. Combined with --local, --prep pre-fills local-evaluation defaults in .env and init writes a local-only cluster profile in config.yaml.",
 		Action: func(c context.Context, cmd *cli.Command) error {
-			o, _ := flags.ToOptions(cmd)
+			o, err := flags.ToOptions(cmd)
+			if err != nil {
+				return err
+			}
 			return o.Run()
 		},
 	}
@@ -74,17 +75,9 @@ func NewInitCmd() *cli.Command {
 }
 
 func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
-	cwd, err := filepath.Abs(cmd.String("work-dir"))
+	ws, err := ResolveWorkspace(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("get working directory: %w", err)
-	}
-	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get config file path: %w", err)
-	}
-	dotEnvFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get env file path: %w", err)
+		return nil, fmt.Errorf("resolve workspace: %w", err)
 	}
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, flags.BootstrapCatalogFlag)
 	if err != nil {
@@ -96,9 +89,9 @@ func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
 		force:          flags.ForceFlag,
 		local:          flags.LocalFlag,
 		renovate:       flags.RenovateFlag,
-		cwd:            cwd,
-		configFilePath: configFilePath,
-		dotEnvFilePath: dotEnvFilePath,
+		cwd:            ws.WorkDir,
+		configFilePath: ws.ConfigFilePath,
+		dotEnvFilePath: ws.EnvFilePath,
 		envVarPrefix:   flags.EnvPrefixFlag,
 		catalogOptions: catalogOptions,
 	}
@@ -375,6 +368,15 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 		return nil
 	}
 
+	targetDir := o.cwd
+	gitRoot, err := utils.FindGitRepoRoot(o.cwd)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+	if gitRoot != "" {
+		targetDir = gitRoot
+	}
+
 	// https://docs.renovatebot.com/configuration-options/#locations-for-configuration-filenames
 	renovateFiles := []string{
 		"renovate.json",
@@ -393,7 +395,7 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 	}
 
 	for _, file := range renovateFiles {
-		path := filepath.Join(o.cwd, file)
+		path := filepath.Join(targetDir, file)
 		exists, err := utils.FileExist(path)
 		if err != nil {
 			return fmt.Errorf("check renovate config %q: %w", path, err)
@@ -412,12 +414,12 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 		}
 	}
 
-	relativeConfigPath, err := filepath.Rel(o.cwd, cs.GetFilepath())
+	relativeConfigPath, err := filepath.Rel(targetDir, cs.GetFilepath())
 	if err != nil {
-		return fmt.Errorf("get config path relative to working directory: %w", err)
+		return fmt.Errorf("get config path relative to target directory: %w", err)
 	}
 	if relativeConfigPath == ".." || strings.HasPrefix(relativeConfigPath, ".."+string(filepath.Separator)) {
-		log.Warn().Str("configPath", cs.GetFilepath()).Str("workDir", o.cwd).Msg("Skipping Renovate config because the kubara config is outside the working directory")
+		log.Warn().Str("configPath", cs.GetFilepath()).Str("targetDir", targetDir).Msg("Skipping Renovate config because the kubara config is outside the target directory")
 		return nil
 	}
 	fileMatchPattern := regexp.QuoteMeta(filepath.ToSlash(relativeConfigPath))
@@ -449,7 +451,7 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 		return fmt.Errorf("marshal renovate config: %w", err)
 	}
 
-	renovatePath := filepath.Join(o.cwd, "renovate.json")
+	renovatePath := filepath.Join(targetDir, "renovate.json")
 	if err := os.WriteFile(renovatePath, content.Bytes(), 0o644); err != nil {
 		return fmt.Errorf("write renovate config: %w", err)
 	}

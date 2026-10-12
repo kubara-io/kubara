@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/kubara-io/kubara/internal/agentcontext"
 
@@ -31,11 +30,11 @@ func NewAgentsCmd() *cli.Command {
 		UsageText:   "kubara agents [--overwrite]",
 		Description: "Writes AGENTS.md into the working directory so AI coding assistants (Claude Code, Codex, …) have a compact, token-lean entry point into kubara. It delegates command and config details to the self-describing CLI (kubara --help, kubara schema) and links the published Markdown documentation for the installed kubara version on the docs site. The existing file is left untouched unless --overwrite is set. Commit it so it travels with the repository.",
 		Action: func(_ context.Context, cmd *cli.Command) error {
-			cwd, err := filepath.Abs(cmd.String("work-dir"))
+			ws, err := ResolveWorkspace(cmd)
 			if err != nil {
-				return fmt.Errorf("get working directory: %w", err)
+				return fmt.Errorf("resolve workspace: %w", err)
 			}
-			return runAgents(cwd, flags.OverwriteFlag)
+			return runAgents(ws.WorkDir, flags.OverwriteFlag)
 		},
 	}
 

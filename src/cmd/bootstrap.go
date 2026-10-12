@@ -24,9 +24,6 @@ import (
 type BootstrapFlags struct {
 	Local                  bool
 	ClusterSecretStorePath string
-	PlatformComponentsPath string
-	PlatformConfigsPath    string
-	EnvFile                string
 	EnvPrefixFlag          string
 	DryRun                 bool
 	Timeout                time.Duration
@@ -39,7 +36,6 @@ var deprecatedBootstrapCRDFlags = []string{
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		EnvFile:       ".env",
 		EnvPrefixFlag: "KUBARA_",
 		Timeout:       2 * time.Minute,
 	}
@@ -80,41 +76,28 @@ func NewBootstrapCmd() *cli.Command {
 }
 
 func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, error) {
-	cwd, err := filepath.Abs(cmd.String("work-dir"))
+	ws, err := ResolveWorkspace(cmd)
 	if err != nil {
-		return nil, fmt.Errorf("get working directory: %w", err)
-	}
-
-	envFilePath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get env file path: %w", err)
+		return nil, fmt.Errorf("resolve workspace: %w", err)
 	}
 
 	kubeconfig := cmd.String("kubeconfig")
 	if strings.TrimSpace(kubeconfig) == "" {
 		kubeconfig = defaultKubeconfigPath
 	}
-	kubeconf, err := utils.GetFullPath(kubeconfig, cwd)
+	kubeconf, err := utils.GetFullPath(kubeconfig, ws.WorkDir)
 	if err != nil {
 		return nil, fmt.Errorf("get kubeconfig path: %w", err)
 	}
 
-	componentsAbsPath := flags.PlatformComponentsPath
-	if !filepath.IsAbs(componentsAbsPath) {
-		componentsAbsPath = filepath.Join(cwd, componentsAbsPath)
-		componentsAbsPath, err = filepath.Abs(componentsAbsPath)
-		if err != nil {
-			return nil, fmt.Errorf("resolve absolute path: %w", err)
-		}
+	componentsAbsPath, err := utils.GetFullPath(render.DefaultPlatformComponentsPath, ws.WorkDir)
+	if err != nil {
+		return nil, fmt.Errorf("resolve platform-components path: %w", err)
 	}
 
-	configsAbsPath := flags.PlatformConfigsPath
-	if !filepath.IsAbs(configsAbsPath) {
-		configsAbsPath = filepath.Join(cwd, configsAbsPath)
-		configsAbsPath, err = filepath.Abs(configsAbsPath)
-		if err != nil {
-			return nil, fmt.Errorf("resolve absolute path: %w", err)
-		}
+	configsAbsPath, err := utils.GetFullPath(render.DefaultPlatformConfigsPath, ws.WorkDir)
+	if err != nil {
+		return nil, fmt.Errorf("resolve platform-configs path: %w", err)
 	}
 
 	catalogOptions, err := catalogLoadOptionsFromCommand(cmd, "")
@@ -123,12 +106,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	}
 
 	// Load config file and find cluster by name
-	configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get config file path: %w", err)
-	}
-
-	cs := config.NewConfigStore(cwd, configFilePath, catalogOptions)
+	cs := config.NewConfigStore(ws.WorkDir, ws.ConfigFilePath, catalogOptions)
 	if err := cs.Load(); err != nil {
 		return nil, fmt.Errorf("load config: %w", err)
 	}
@@ -143,10 +121,10 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		}
 	}
 	if clusterConfig == nil {
-		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
+		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, ws.ConfigFilePath)
 	}
 
-	es := envconfig.NewEnvStore(envFilePath, ".", flags.EnvPrefixFlag)
+	es := envconfig.NewEnvStore(ws.EnvFilePath, ".", flags.EnvPrefixFlag)
 	if err := es.Load(); err != nil {
 		return nil, fmt.Errorf("load env: %w", err)
 	}
@@ -160,7 +138,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 	var cssAbsPath string
 	if flags.ClusterSecretStorePath != "" {
 		if !filepath.IsAbs(flags.ClusterSecretStorePath) {
-			cssAbsPath = filepath.Join(cwd, flags.ClusterSecretStorePath)
+			cssAbsPath = filepath.Join(ws.WorkDir, flags.ClusterSecretStorePath)
 			cssAbsPath, err = filepath.Abs(cssAbsPath)
 			if err != nil {
 				return nil, fmt.Errorf("getting absolute path for ClusterSecretStore file: %w", err)
@@ -202,8 +180,8 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		DryRun:             flags.DryRun,
 		Timeout:            timeout,
 		ClusterName:        clusterName,
-		WorkDir:            cwd,
-		ConfigFilePath:     configFilePath,
+		WorkDir:            ws.WorkDir,
+		ConfigFilePath:     ws.ConfigFilePath,
 		Catalogs:           catalogOptions.Catalogs,
 		CatalogOverwrite:   catalogOptions.Overwrite,
 		BootstrapCatalog:   bootstrapCatalog,
@@ -236,18 +214,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 		&cli.BoolFlag{
 			Name:  "with-prometheus-crds",
 			Usage: "Deprecated: ignored because CRDs are applied automatically during bootstrap.",
-		},
-		&cli.StringFlag{
-			Name:        "platform-components",
-			Value:       render.DefaultPlatformComponentsPath,
-			Usage:       "Path to the platform-components directory",
-			Destination: &flags.PlatformComponentsPath,
-		},
-		&cli.StringFlag{
-			Name:        "platform-configs",
-			Value:       render.DefaultPlatformConfigsPath,
-			Usage:       "Path to platform-configs directory",
-			Destination: &flags.PlatformConfigsPath,
 		},
 		&cli.StringFlag{
 			Name:        "envVarPrefix",

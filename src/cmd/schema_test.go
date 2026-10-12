@@ -184,12 +184,8 @@ func TestSchemaCmd(t *testing.T) {
 		tt := tt
 		t.Run(tt.name, func(t *testing.T) {
 			tempDir := t.TempDir()
+			t.Chdir(tempDir)
 			createSchemaTestConfig(t, tempDir)
-
-			globalFlags := []string{
-				"--work-dir", tempDir,
-			}
-			tt.flags = append(globalFlags, tt.flags...)
 
 			if tt.setup != nil {
 				tt.setup(t, tempDir)

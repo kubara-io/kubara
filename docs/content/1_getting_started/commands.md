@@ -13,17 +13,14 @@ kubara
 [--catalog-overwrite]
 [--catalog]=[value]
 [--check-update]
-[--config-file|-c]=[value]
 [--decode]
 [--encode]
-[--env-file]=[value]
 [--file]=[value]
 [--help|-h]
 [--kubeconfig]=[value]
 [--string]=[value]
 [--test-connection]
 [--version|-v]
-[--work-dir|-w]=[value]
 ```
 
 # DESCRIPTION
@@ -46,13 +43,9 @@ kubara [command]
 
 **--check-update**: Check online for a newer kubara release
 
-**--config-file, -c**="": Path to the configuration file (default: "config.yaml")
-
 **--decode**: Base64 decode input
 
 **--encode**: Base64 encode input
-
-**--env-file**="": Path to the .env file (default: ".env")
 
 **--file**="": Input file path for base64 operation
 
@@ -65,8 +58,6 @@ kubara [command]
 **--test-connection**: Check if Kubernetes cluster can be reached. List namespaces and exit
 
 **--version, -v**: print the version
-
-**--work-dir, -w**="": Working directory (default: ".")
 
 
 # COMMANDS
@@ -99,13 +90,17 @@ Shows a list of commands or help for one command
 
 Generate files from catalog templates
 
->kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
+>kubara generate [--all|--hubs HUB1,HUB2,...|--hub HUB3] [--terraform|--helm] [--catalog PATH_OR_OCI] [--catalog-overwrite]] [--dry-run]
+
+**--all, -A**: Discover and target all hubs in the working directory
 
 **--dry-run**: Preview generation without creating files
 
 **--helm**: Only generate Helm files
 
 **--help, -h**: show help
+
+**--hub, --hubs**="": Target a list of comma separated hub directories
 
 **--terraform**: Only generate Terraform files
 
@@ -126,10 +121,6 @@ Bootstrap Argo CD onto a cluster
 **--help, -h**: show help
 
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
-
-**--platform-components**="": Path to the platform-components directory (default: "platform-components")
-
-**--platform-configs**="": Path to platform-configs directory (default: "platform-configs")
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"os"
-	"path/filepath"
 	"text/tabwriter"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -22,21 +21,17 @@ func CreateClusterList() *cli.Command {
 		Description: "List all clusters available in the current config.yaml file",
 		Aliases:     []string{"ls"},
 		Action: func(c context.Context, cmd *cli.Command) error {
-			cwd, err := filepath.Abs(cmd.String("work-dir"))
+			ws, err := utils.ResolveWorkspaceFromCommand(cmd)
 			if err != nil {
-				return fmt.Errorf("get working directory: %w", err)
-			}
-			configFilePath, err := utils.GetFullPath(cmd.String("config-file"), cwd)
-			if err != nil {
-				return fmt.Errorf("get config file path: %w", err)
+				return fmt.Errorf("resolve workspace: %w", err)
 			}
 
-			catalogOptions, err := catalog.ResolveLoadOptions(cwd, "", cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
+			catalogOptions, err := catalog.ResolveLoadOptions(ws.WorkDir, "", cmd.StringSlice("catalog"), cmd.Bool("catalog-overwrite"))
 			if err != nil {
 				return fmt.Errorf("could not resolve catalog options: %w", err)
 			}
 
-			configStore := config.NewConfigStore(cwd, configFilePath, catalogOptions)
+			configStore := config.NewConfigStore(ws.WorkDir, ws.ConfigFilePath, catalogOptions)
 			err = configStore.Load()
 			if err != nil {
 				return fmt.Errorf("config load: %w", err)

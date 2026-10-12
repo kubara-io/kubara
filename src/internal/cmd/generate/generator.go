@@ -13,6 +13,7 @@ import (
 	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/service"
+	"github.com/kubara-io/kubara/internal/utils"
 
 	"github.com/fatih/color"
 	"github.com/rs/zerolog/log"
@@ -28,16 +29,48 @@ type Options struct {
 	PlatformComponents string
 	PlatformConfigs    string
 	EnvPath            string
+	GitRelPath         string
 }
 
 type buildContext struct {
-	Catalog  catalog.Catalog
-	EnvMap   envconfig.EnvMap
-	Clusters []config.Cluster
+	Catalog    catalog.Catalog
+	EnvMap     envconfig.EnvMap
+	Clusters   []config.Cluster
+	GitRelPath string
+}
+
+func applyDefaultRepoPaths(clusterMap map[string]any, gitRelPath string) {
+	argocdRaw, ok := clusterMap["argocd"].(map[string]any)
+	if !ok {
+		return
+	}
+	repoRaw, ok := argocdRaw["repo"].(map[string]any)
+	if !ok {
+		return
+	}
+
+	componentsPath, configsPath := utils.ComputeGitOpsRepoPaths(gitRelPath)
+
+	for _, protoKey := range []string{"https", "oci"} {
+		protoRaw, ok := repoRaw[protoKey].(map[string]any)
+		if !ok {
+			continue
+		}
+		if compRaw, ok := protoRaw["components"].(map[string]any); ok {
+			if pathVal, ok := compRaw["path"].(string); !ok || pathVal == "" {
+				compRaw["path"] = componentsPath
+			}
+		}
+		if confRaw, ok := protoRaw["configs"].(map[string]any); ok {
+			if pathVal, ok := confRaw["path"].(string); !ok || pathVal == "" {
+				confRaw["path"] = configsPath
+			}
+		}
+	}
 }
 
 // getSpokeClusters returns a list of all spoke Clusters of a given cluster list
-func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
+func getSpokeClusters(clusters []config.Cluster, gitRelPath string) ([]map[string]any, error) {
 	spokeMaps := make([]map[string]any, 0)
 	for _, cluster := range clusters {
 		if cluster.Type != config.Spoke {
@@ -48,6 +81,7 @@ func getSpokeClusters(clusters []config.Cluster) ([]map[string]any, error) {
 		if err != nil {
 			return nil, fmt.Errorf("convert spoke %q to map: %w", cluster.Name, err)
 		}
+		applyDefaultRepoPaths(spokeMap, gitRelPath)
 		spokeMaps = append(spokeMaps, spokeMap)
 	}
 	return spokeMaps, nil
@@ -66,12 +100,21 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 		}
 	}
 
+	applyDefaultRepoPaths(clusterMap, bctx.GitRelPath)
+
+	componentsPath, configsPath := utils.ComputeGitOpsRepoPaths(bctx.GitRelPath)
+
 	context := map[string]any{
 		"cluster": clusterMap,
 		"catalog": resolveCatalog(bctx.Catalog),
+		"workspace": map[string]any{
+			"gitRelativePath":    bctx.GitRelPath,
+			"platformComponents": componentsPath,
+			"platformConfigs":    configsPath,
+		},
 	}
 	if cluster.Type == config.Hub {
-		spokes, err := getSpokeClusters(bctx.Clusters)
+		spokes, err := getSpokeClusters(bctx.Clusters, bctx.GitRelPath)
 		if err != nil {
 			return nil, err
 		}
@@ -264,6 +307,15 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		return nil, fmt.Errorf("load env: %w", err)
 	}
 
+	gitRelPath := o.GitRelPath
+	if gitRelPath == "" {
+		gitRoot, err := utils.FindGitRepoRoot(o.CWD)
+		if err != nil {
+			return nil, fmt.Errorf("%w", err)
+		}
+		gitRelPath = utils.ComputeGitRelativePath(gitRoot, o.CWD)
+	}
+
 	for _, cluster := range cnf.Clusters {
 		if cluster.Name != filepath.Base(cluster.Name) || cluster.Name == "." || cluster.Name == ".." {
 			return nil, fmt.Errorf("cluster name %q must be a path-safe name", cluster.Name)
@@ -274,9 +326,10 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		}
 
 		tmplContext, err := buildTemplateContext(cluster, buildContext{
-			Catalog:  cat,
-			EnvMap:   dotEnvMap,
-			Clusters: cnf.Clusters,
+			Catalog:    cat,
+			EnvMap:     dotEnvMap,
+			Clusters:   cnf.Clusters,
+			GitRelPath: gitRelPath,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", cluster.Name, err)

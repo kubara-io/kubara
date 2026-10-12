@@ -214,4 +214,4 @@ Add the following settings to your `renovate.json` or GitOps repository's Renova
 }
 ```
 
-Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the configured `--config-file`. The reference matcher supports registries with ports and ignores digest-pinned catalog references.
+Adjust `managerFilePatterns` when the kubara config has a different repository-relative path. `kubara init` does this automatically for the current repository. The reference matcher supports registries with ports and ignores digest-pinned catalog references.

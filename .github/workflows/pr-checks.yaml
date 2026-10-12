@@ -293,8 +293,8 @@ jobs:
       - name: kubara init --prep
         run: |
           set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
+          cd "${{ env.OUTPUT_GENERATED_DIR }}"
+          go run "${GITHUB_WORKSPACE}/src/main.go" init --prep
 
       - name: Update .env (strict template mode)
         run: |
@@ -304,8 +304,8 @@ jobs:
       - name: kubara init
         run: |
           set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
+          cd "${{ env.OUTPUT_GENERATED_DIR }}"
+          go run "${GITHUB_WORKSPACE}/src/main.go" init
 
       - name: Update config.yaml (strict mode)
         run: |
@@ -314,8 +314,9 @@ jobs:
 
       - name: Generate kubara artifacts
         run: |
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" generate
+          set -euo pipefail
+          cd "${{ env.OUTPUT_GENERATED_DIR }}"
+          go run "${GITHUB_WORKSPACE}/src/main.go" generate
 
       - name: Upload generated helm and terraform files
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1

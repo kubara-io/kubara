@@ -39,7 +39,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 	expectedCluster := Cluster{
 		Name:             "kubara-test",
 		Stage:            "dev",
-		Type:             "<hub or spoke>",
+		Type:             "hub",
 		DNSName:          expectedDNSName,
 		SSOOrg:           "<my-org>",
 		SSOTeam:          "<my-team>",

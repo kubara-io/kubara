@@ -60,11 +60,11 @@ func TestNewGenerateCmd(t *testing.T) {
 
 	assert.Equal(t, "generate", command.Name)
 	assert.Equal(t, "Generate files from catalog templates", command.Usage)
-	assert.Equal(t, "kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]", command.UsageText)
-	assert.Equal(t, "Renders Helm and Terraform templates from configured local or OCI catalogs using values from the config file. By default, it generates both template types.", command.Description)
+	assert.Equal(t, "kubara generate [--all|--hubs HUB1,HUB2,...|--hub HUB3] [--terraform|--helm] [--catalog PATH_OR_OCI] [--catalog-overwrite]] [--dry-run]", command.UsageText)
+	assert.Equal(t, "Renders Helm and Terraform templates from configured local or OCI catalogs for the specified hubs.\nBy default, it generates both template types and targets the hub in the current working directory.", command.Description)
 
 	// Check that flags are added
-	require.Len(t, command.Flags, 3)
+	require.Len(t, command.Flags, 5)
 
 	flagNames := make(map[string]bool)
 	for _, flag := range command.Flags {
@@ -74,6 +74,8 @@ func TestNewGenerateCmd(t *testing.T) {
 	assert.True(t, flagNames["terraform"])
 	assert.True(t, flagNames["helm"])
 	assert.True(t, flagNames["dry-run"])
+	assert.True(t, flagNames["all"])
+	assert.True(t, flagNames["hub"])
 }
 
 func TestGenerateCmd(t *testing.T) {
@@ -84,6 +86,8 @@ func TestGenerateCmd(t *testing.T) {
 		wantErr     bool
 		errContains string
 		cluster     *config.Cluster // overrides the default SKE test cluster when set
+		skipConfig  bool
+		skipEnv     bool
 		setup       func(t *testing.T, tempDir string)
 		validate    func(t *testing.T, tempDir string)
 	}{
@@ -111,20 +115,20 @@ func TestGenerateCmd(t *testing.T) {
 			wantErr: false,
 		},
 		{
-			name: "error with non-existent config file",
+			name: "error with missing config file",
 			flags: []string{
-				"--config-file", "/non/existent/config.yaml",
 				"--dry-run",
 			},
+			skipConfig:  true,
 			wantErr:     true,
 			errContains: "load config",
 		},
 		{
-			name: "error with non-existent env file",
+			name: "error with missing env file",
 			flags: []string{
-				"--env-file", "/non/existent/.env",
 				"--dry-run",
 			},
+			skipEnv:     true,
 			wantErr:     true,
 			errContains: "Vars not set",
 		},
@@ -230,9 +234,10 @@ func TestGenerateCmd(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 
 			tempDir := t.TempDir()
+			t.Chdir(tempDir)
+			require.NoError(t, os.Mkdir(filepath.Join(tempDir, ".git"), 0755))
 
-			// Create config file if not testing error case
-			if !tt.wantErr || tt.errContains != "load config" {
+			if !tt.skipConfig {
 				cluster := config.Cluster{
 					Name:             "test-cluster",
 					Stage:            "dev",
@@ -246,7 +251,7 @@ func TestGenerateCmd(t *testing.T) {
 						KubernetesVersion: "1.28.0",
 						DNS: config.DNS{
 							Name:  "example.com",
-							Email: "admin@example.com",
+							Email: "test" + "@" + "example.com",
 						},
 					},
 					ArgoCD: config.ArgoCD{
@@ -268,18 +273,11 @@ func TestGenerateCmd(t *testing.T) {
 				if tt.cluster != nil {
 					cluster = *tt.cluster
 				}
-				configPath := testutil.CreateTestConfig(t, tempDir, cluster)
+				testutil.CreateTestConfig(t, tempDir, cluster)
+			}
 
-				//dummy values
-				envPath := testutil.CreateDefaultGenerateTestEnv(t, tempDir)
-
-				// Add global flags
-				globalFlags := []string{
-					"--config-file", configPath,
-					"--work-dir", tempDir,
-					"--env-file", envPath,
-				}
-				tt.flags = append(globalFlags, tt.flags...)
+			if !tt.skipEnv {
+				testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 			}
 
 			if tt.setup != nil {
@@ -313,8 +311,9 @@ func TestGenerateCmd(t *testing.T) {
 
 func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "no-provider-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -324,7 +323,7 @@ func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
 			KubernetesType:    "ske",
 			KubernetesVersion: "1.28.0",
-			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+			DNS:               config.DNS{Name: "example.com", Email: "test" + "@" + "example.com"},
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
@@ -341,7 +340,7 @@ func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform"}
+	args := []string{"kubara", "generate", "--terraform"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing terraform configuration")
@@ -349,9 +348,10 @@ func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 
 func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 	helperCatalogPath := createHelperCatalog(t, tempDir)
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:     "no-provider-cluster",
 		Stage:    "dev",
 		Type:     "hub",
@@ -362,7 +362,7 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 			ProjectID:         "00000000-0000-0000-0000-000000000000",
 			KubernetesType:    "ske",
 			KubernetesVersion: "1.28.0",
-			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
+			DNS:               config.DNS{Name: "example.com", Email: "test" + "@" + "example.com"},
 		},
 		ArgoCD: config.ArgoCD{
 			Repo: config.RepoProto{
@@ -379,7 +379,7 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	args := []string{"kubara", "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
@@ -389,9 +389,10 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 
 func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 	helperCatalogPath := createHelperCatalog(t, tempDir)
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:     "helm-only-cluster",
 		Stage:    "dev",
 		Type:     "hub",
@@ -417,7 +418,7 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 	require.NoError(t, os.WriteFile(userTerraform, []byte("user\n"), 0o600))
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	args := []string{"kubara", "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
@@ -428,9 +429,10 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 
 func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 	helperCatalogPath := createHelperCatalog(t, tempDir)
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:     "provider-none-cluster",
 		Stage:    "dev",
 		Type:     "hub",
@@ -453,7 +455,7 @@ func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	args := []string{"kubara", "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
@@ -463,8 +465,9 @@ func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 
 func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -484,7 +487,7 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate", "--terraform", "--dry-run"}
+	args := []string{"kubara", "generate", "--terraform", "--dry-run"}
 	err := app.Run(context.Background(), args)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "missing terraform configuration")
@@ -492,13 +495,14 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 
 func TestDisabledServicesDontGetWritten(t *testing.T) {
 	tempDir := t.TempDir()
+	t.Chdir(tempDir)
 	services := testutil.CreateTestServices()
 	serviceName := "cert-manager"
 	certManager := services[serviceName]
 	certManager.Status = "disabled"
 	services[serviceName] = certManager
 
-	configPath := testutil.CreateTestConfig(t, tempDir, config.Cluster{
+	testutil.CreateTestConfig(t, tempDir, config.Cluster{
 		Name:    "missing-terraform-cluster",
 		Stage:   "dev",
 		Type:    "hub",
@@ -517,7 +521,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 	testutil.CreateDefaultGenerateTestEnv(t, tempDir)
 
 	app := CreateTestApp(NewGenerateCmd())
-	args := []string{"kubara", "--config-file", configPath, "--work-dir", tempDir, "generate"}
+	args := []string{"kubara", "generate"}
 	err := app.Run(context.Background(), args)
 	require.NoError(t, err)
 
@@ -529,6 +533,272 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 	}
 	require.NoError(t, err)
 	assert.NotContains(t, names, serviceName)
+}
+
+func TestGenerate_MultiSetup_Isolation(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+	require.NoError(t, os.Mkdir(filepath.Join(tempDir, ".git"), 0755))
+
+	// Setup A
+	setupADir := filepath.Join(tempDir, "setups", "fleet-a")
+	require.NoError(t, os.MkdirAll(setupADir, 0755))
+	clusterA := config.Cluster{
+		Name:    "hub-a",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "a.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setupADir, clusterA)
+	testutil.CreateDefaultGenerateTestEnv(t, setupADir)
+
+	// Setup B
+	setupBDir := filepath.Join(tempDir, "setups", "fleet-b")
+	require.NoError(t, os.MkdirAll(setupBDir, 0755))
+	clusterB := config.Cluster{
+		Name:    "hub-b",
+		Stage:   "prod",
+		Type:    "hub",
+		DNSName: "b.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setupBDir, clusterB)
+	testutil.CreateDefaultGenerateTestEnv(t, setupBDir)
+
+	// 1. Generate Fleet A using kubara generate --hub setups/fleet-a
+	appA := CreateTestApp(NewGenerateCmd())
+	argsA := []string{"kubara", "generate", "--hub", "setups/fleet-a"}
+	err := appA.Run(context.Background(), argsA)
+	require.NoError(t, err)
+
+	assert.DirExists(t, filepath.Join(setupADir, "platform-components"))
+	assert.DirExists(t, filepath.Join(setupADir, "platform-configs", "hub-a"))
+	assert.NoDirExists(t, filepath.Join(setupBDir, "platform-components"))
+
+	// Write a canary file into setupADir platform-components
+	canaryFile := filepath.Join(setupADir, "platform-components", "canary.txt")
+	require.NoError(t, os.WriteFile(canaryFile, []byte("fleet-a canary"), 0644))
+
+	// 2. Generate Fleet B using kubara generate --hub setups/fleet-b
+	appB := CreateTestApp(NewGenerateCmd())
+	argsB := []string{"kubara", "generate", "--hub", "setups/fleet-b"}
+	err = appB.Run(context.Background(), argsB)
+	require.NoError(t, err)
+
+	assert.DirExists(t, filepath.Join(setupBDir, "platform-components"))
+	assert.DirExists(t, filepath.Join(setupBDir, "platform-configs", "hub-b"))
+
+	// Canary file in fleet-a must still exist (fleet-a was not wiped by fleet-b generate!)
+	assert.FileExists(t, canaryFile)
+}
+
+func TestGenerate_All_Workspaces(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+	require.NoError(t, os.Mkdir(filepath.Join(tempDir, ".git"), 0755))
+
+	// Setup 1
+	setup1Dir := filepath.Join(tempDir, "setups", "fleet-1")
+	require.NoError(t, os.MkdirAll(setup1Dir, 0755))
+	cluster1 := config.Cluster{
+		Name:    "hub-1",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "1.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setup1Dir, cluster1)
+	testutil.CreateDefaultGenerateTestEnv(t, setup1Dir)
+
+	// Setup 2
+	setup2Dir := filepath.Join(tempDir, "setups", "fleet-2")
+	require.NoError(t, os.MkdirAll(setup2Dir, 0755))
+	cluster2 := config.Cluster{
+		Name:    "hub-2",
+		Stage:   "prod",
+		Type:    "hub",
+		DNSName: "2.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setup2Dir, cluster2)
+	testutil.CreateDefaultGenerateTestEnv(t, setup2Dir)
+
+	// Generate --all from tempDir
+	app := CreateTestApp(NewGenerateCmd())
+	args := []string{"kubara", "generate", "--all"}
+	err := app.Run(context.Background(), args)
+	require.NoError(t, err)
+
+	assert.DirExists(t, filepath.Join(setup1Dir, "platform-components"))
+	assert.DirExists(t, filepath.Join(setup1Dir, "platform-configs", "hub-1"))
+	assert.DirExists(t, filepath.Join(setup2Dir, "platform-components"))
+	assert.DirExists(t, filepath.Join(setup2Dir, "platform-configs", "hub-2"))
+}
+
+func TestGenerate_Multiple_Hubs(t *testing.T) {
+	tempDir := t.TempDir()
+	t.Chdir(tempDir)
+	require.NoError(t, os.Mkdir(filepath.Join(tempDir, ".git"), 0755))
+
+	// Setup 1
+	setup1Dir := filepath.Join(tempDir, "setups", "fleet-1")
+	require.NoError(t, os.MkdirAll(setup1Dir, 0755))
+	cluster1 := config.Cluster{
+		Name:    "hub-1",
+		Stage:   "dev",
+		Type:    "hub",
+		DNSName: "1.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setup1Dir, cluster1)
+	testutil.CreateDefaultGenerateTestEnv(t, setup1Dir)
+
+	// Setup 2
+	setup2Dir := filepath.Join(tempDir, "setups", "fleet-2")
+	require.NoError(t, os.MkdirAll(setup2Dir, 0755))
+	cluster2 := config.Cluster{
+		Name:    "hub-2",
+		Stage:   "prod",
+		Type:    "hub",
+		DNSName: "2.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setup2Dir, cluster2)
+	testutil.CreateDefaultGenerateTestEnv(t, setup2Dir)
+
+	// Setup 3 (should NOT be generated)
+	setup3Dir := filepath.Join(tempDir, "setups", "fleet-3")
+	require.NoError(t, os.MkdirAll(setup3Dir, 0755))
+	cluster3 := config.Cluster{
+		Name:    "hub-3",
+		Stage:   "staging",
+		Type:    "hub",
+		DNSName: "3.example.com",
+		ArgoCD: config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/repo", TargetRevision: "main"},
+				},
+			},
+		},
+		Services: service.Services{},
+	}
+	testutil.CreateTestConfig(t, setup3Dir, cluster3)
+	testutil.CreateDefaultGenerateTestEnv(t, setup3Dir)
+
+	tests := []struct {
+		name              string
+		args              []string
+		wantErr           bool
+		errContains       string
+		expectedGenerated []string
+		expectedSkipped   []string
+	}{
+		{
+			name:              "comma-separated hubs",
+			args:              []string{"kubara", "generate", "--hub", "setups/fleet-1,setups/fleet-2"},
+			expectedGenerated: []string{setup1Dir, setup2Dir},
+			expectedSkipped:   []string{setup3Dir},
+		},
+		{
+			name:              "repeated --hub flags",
+			args:              []string{"kubara", "generate", "--hub", "setups/fleet-1", "--hub", "setups/fleet-2"},
+			expectedGenerated: []string{setup1Dir, setup2Dir},
+			expectedSkipped:   []string{setup3Dir},
+		},
+		{
+			name:        "both --all and --hub returns error",
+			args:        []string{"kubara", "generate", "--all", "--hub", "setups/fleet-1"},
+			wantErr:     true,
+			errContains: "cannot specify both --all and --hub",
+		},
+		{
+			name:        "empty hub string returns error",
+			args:        []string{"kubara", "generate", "--hub", "  "},
+			wantErr:     true,
+			errContains: "no valid hub specified in --hub",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Clean up output directories before each run
+			for _, dir := range []string{setup1Dir, setup2Dir, setup3Dir} {
+				_ = os.RemoveAll(filepath.Join(dir, "platform-components"))
+				_ = os.RemoveAll(filepath.Join(dir, "platform-configs"))
+			}
+
+			app := CreateTestApp(NewGenerateCmd())
+			err := app.Run(context.Background(), tt.args)
+
+			if tt.wantErr {
+				require.Error(t, err)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
+				}
+				return
+			}
+
+			require.NoError(t, err)
+			for _, dir := range tt.expectedGenerated {
+				assert.DirExists(t, filepath.Join(dir, "platform-components"))
+				assert.DirExists(t, filepath.Join(dir, "platform-configs"))
+			}
+			for _, dir := range tt.expectedSkipped {
+				assert.NoDirExists(t, filepath.Join(dir, "platform-components"))
+			}
+		})
+	}
 }
 
 // Helper function

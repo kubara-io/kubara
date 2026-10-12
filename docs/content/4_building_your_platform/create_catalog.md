@@ -140,7 +140,7 @@ clusters:
       - oci://ghcr.io/acme/platform-catalogs/security:1.4.0
 ```
 
-Catalog order is significant. Cluster catalogs are loaded first in the listed order, followed by repeated `--catalog` values. Local references are resolved relative to `--work-dir`.
+Catalog order is significant. Cluster catalogs are loaded first in the listed order, followed by repeated `--catalog` values. Local references are resolved relative to the workspace directory.
 
 `kubara schema` automatically discovers cluster catalogs when `config.yaml` exists. Before creating a configuration, pass the catalog explicitly as shown above.
 

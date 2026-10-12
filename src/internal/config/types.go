@@ -134,6 +134,7 @@ type RepoType struct {
 type Repository struct {
 	URL            string `json:"url" yaml:"url" jsonschema:"required,title=Repository URL,description=The Git repository URL used by Argo CD. Use an HTTP(S) URL for https/github-app auth modes or an SSH URL for ssh auth mode.,minLength=1"`
 	TargetRevision string `json:"targetRevision" yaml:"targetRevision" jsonschema:"title=Target Revision,description=The Git branch or tag to track.,minLength=1,default=main"`
+	Path           string `json:"path,omitempty" yaml:"path,omitempty" jsonschema:"title=Repository Path,description=The path inside the Git repository."`
 }
 
 type HelmRepository struct {
