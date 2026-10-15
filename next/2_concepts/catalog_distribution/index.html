@@ -2945,6 +2945,12 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <p>You can automatically keep catalog versions up-to-date in your GitOps configuration using a custom Renovate configuration.</p>
 <p>Add the following settings to your <code>renovate.json</code> or GitOps repository's Renovate configuration:</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nt">"ignorePaths"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"platform-components/**"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"platform-configs/**/helm/**/values.generated.yaml"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"platform-configs/**/terraform/infrastructure/terraform.tf"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"platform-configs/**/terraform/bootstrap-tfstate-backend/main.tf"</span>
+<span class="w">  </span><span class="p">],</span>
 <span class="w">  </span><span class="nt">"customManagers"</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
 <span class="w">    </span><span class="p">{</span>
 <span class="w">      </span><span class="nt">"customType"</span><span class="p">:</span><span class="w"> </span><span class="s2">"regex"</span><span class="p">,</span>
@@ -2958,6 +2964,9 @@ kubara<span class="w"> </span>generate<span class="w"> </span>--catalog<span cla
 <span class="p">}</span>
 </code></pre></div>
 <p>Adjust <code>managerFilePatterns</code> when the kubara config has a different repository-relative path. <code>kubara init</code> does this automatically for the configured <code>--config-file</code>. The reference matcher supports registries with ports and ignores digest-pinned catalog references.</p>
+<p>The generated configuration excludes catalog-rendered components, Helm values, and provider declarations in the infrastructure and state-backend roots from direct dependency updates to avoid duplicate chart, image, and provider update PRs. Local catalog sources, hand-maintained overlays, and custom Terraform roots remain eligible. After updating a catalog reference, run <code>kubara generate</code> and review the generated changes before merging.</p>
+<p>The generated <code>ignorePaths</code> replaces Renovate’s default and preset-provided exclusions, so other paths (including test and example directories) remain eligible for updates.</p>
+<p>Existing Renovate configurations are not overwritten. Add the exclusions above to their <code>ignorePaths</code>, preserving any existing entries.</p>
 
 
 
