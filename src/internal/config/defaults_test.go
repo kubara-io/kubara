@@ -87,7 +87,7 @@ func TestApplyDefaults_RepositoryTargetRevision(t *testing.T) {
 	cfg := &Config{
 		Clusters: []Cluster{
 			{
-				ArgoCD: ArgoCD{
+				ArgoCD: &ArgoCD{
 					Repo: RepoProto{
 						AuthMode: GitAuthModeHTTPS,
 						Git: &RepoType{
