@@ -1,6 +1,7 @@
 package bootstrap
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
@@ -9,7 +10,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes/fake"
 )
 
 const completionMessageTemplate = `
@@ -161,4 +165,56 @@ func TestWriteLocalOpenBaoValuesUsesChartServerImageForAutoUnsealer(t *testing.T
 
 	assert.Contains(t, string(content), `image: '{{ .Values.server.image.registry | default "docker.io" }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default (trimPrefix "v" .Chart.AppVersion) }}'`)
 	assert.NotContains(t, string(content), "openbao/openbao:2.0.1")
+}
+
+func TestUpsertInitialSpokeSecret_CreatesSecretInKubaraSystem(t *testing.T) {
+	ctx := context.Background()
+	client := fake.NewSimpleClientset()
+
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"), "kubara")
+	require.NoError(t, err)
+
+	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, v1.SecretType(clusterCredentialsSecretType), secret.Type)
+	assert.Equal(t, "kubara", secret.Annotations[agentNamespaceAnnotation])
+	assert.Equal(t, []byte("kubeconfig-bytes"), secret.Data[bootstrapKubeconfigKey])
+}
+
+func TestUpsertInitialSpokeSecret_RefusesToOverwriteWhenGeneratedKubeconfigExists(t *testing.T) {
+	ctx := context.Background()
+	existing := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "spoke-a-cluster-secret",
+			Namespace: "kubara-system",
+		},
+		Type: v1.SecretType(clusterCredentialsSecretType),
+		Data: map[string][]byte{
+			generatedKubeconfigKey: []byte("already-generated"),
+		},
+	}
+	client := fake.NewSimpleClientset(existing)
+
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"), "kubara")
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "already contains generated credentials")
+}
+
+func TestGetCredsRotatorCronJob_FindsCronJobInKubaraSystem(t *testing.T) {
+	ctx := context.Background()
+	cronJob := &batchv1.CronJob{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "cluster-credential-rotator",
+			Namespace: "kubara-system",
+			Labels: map[string]string{
+				"app.kubernetes.io/name": "cluster-credential-rotator",
+			},
+		},
+	}
+	client := fake.NewSimpleClientset(cronJob)
+
+	found, err := getCredsRotatorCronJob(ctx, client)
+	require.NoError(t, err)
+	assert.Equal(t, "cluster-credential-rotator", found.Name)
+	assert.Equal(t, "kubara-system", found.Namespace)
 }

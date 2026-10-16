@@ -59,7 +59,7 @@ func TestNewClusterFromEnv(t *testing.T) {
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD: ArgoCD{
+		ArgoCD: &ArgoCD{
 			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
 				AuthMode: GitAuthModeHTTPS,
@@ -94,11 +94,16 @@ func TestNewClusterFromEnv(t *testing.T) {
 		},
 	}
 	expectedClusterWithoutHelmRepo := expectedCluster
-	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
+	argoWithoutHelm := *expectedCluster.ArgoCD
+	argoWithoutHelm.HelmRepo = nil
+	expectedClusterWithoutHelmRepo.ArgoCD = &argoWithoutHelm
+
 	expectedClusterWithOCIHelmRepo := expectedCluster
-	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
+	argoWithOCIHelm := *expectedCluster.ArgoCD
+	argoWithOCIHelm.HelmRepo = &HelmRepository{
 		URL: "registry-1.docker.io/bitnamicharts",
 	}
+	expectedClusterWithOCIHelmRepo.ArgoCD = &argoWithOCIHelm
 
 	// --- Test Cases Definition ---
 	type args struct {
@@ -180,6 +185,7 @@ func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
 
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.Nil(t, cluster.ArgoCD)
 	assert.Equal(t, ClusterNetworking{
 		Type: NetworkingIngress,
 		Ingress: &IngressNetworking{
@@ -192,4 +198,5 @@ func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", testCatalogLoadOptions())
 
 	assert.Equal(t, testClusterCatalogs(), cluster.Catalogs)
+	assert.Nil(t, cluster.ArgoCD)
 }

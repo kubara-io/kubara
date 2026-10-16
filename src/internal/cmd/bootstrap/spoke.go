@@ -21,17 +21,16 @@ import (
 )
 
 const (
-	spokeCredentialsNamespace = "argocd"
+	spokeCredentialsNamespace = "kubara-system"
 
 	agentNamespaceAnnotation = "kubara.io/agent-namespace"
 
 	bootstrapKubeconfigKey = "bootstrapKubeconfig"
-	generatedConfigKey     = "config"
+	generatedKubeconfigKey = "kubeconfig"
 
 	clusterCredentialsSecretType = "kubara.io/cluster-credentials"
 
-	argoClusterLabel      = "argocd.argoproj.io/secret-type"
-	argoClusterLabelValue = "cluster"
+	clusterNameLabel = "kubara.io/cluster-name"
 
 	targetSecretEnvName = "KUBARA_TARGET_SECRET_NAME"
 )
@@ -102,12 +101,12 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 		)
 	}
 
-	if configMap.Labels[argoClusterLabel] != argoClusterLabelValue {
+	if configMap.Labels[clusterNameLabel] != opts.ClusterName {
 		return fmt.Errorf(
 			"ConfigMap %q does not contain required label %s=%s",
 			configMapName,
-			argoClusterLabel,
-			argoClusterLabelValue,
+			clusterNameLabel,
+			opts.ClusterName,
 		)
 	}
 
@@ -153,7 +152,7 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 		return fmt.Errorf("read onboarded cluster secret %q: %w", secretName, err)
 	}
 
-	if len(secret.Data[generatedConfigKey]) == 0 {
+	if len(secret.Data[generatedKubeconfigKey]) == 0 {
 		return fmt.Errorf(
 			"credential rotator job completed but secret %q contains no generated credentials",
 			secretName,
@@ -235,7 +234,7 @@ func upsertInitialSpokeSecret(
 		return fmt.Errorf("read initial cluster secret %q: %w", secretName, err)
 	}
 
-	if len(secret.Data[generatedConfigKey]) > 0 {
+	if len(secret.Data[generatedKubeconfigKey]) > 0 {
 		return fmt.Errorf(
 			"cluster secret %q already contains generated credentials; refusing to re-onboard it",
 			secretName,
