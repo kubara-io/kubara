@@ -72,7 +72,7 @@ Run:
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu init
@@ -88,7 +88,7 @@ Use the output to configure Terraform backend credentials:
     terraform output debug | grep -E "credential_access_key|credential_secret_access_key"
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output debug | grep -E "credential_access_key|credential_secret_access_key"
@@ -197,7 +197,7 @@ cd platform-configs/<cluster-name>/terraform/infrastructure
     terraform apply -target=module.edge_instance
     ```
 
-===  "Tofu"
+===  "OpenTofu"
 
     ```bash
     tofu init
@@ -214,7 +214,7 @@ cd platform-configs/<cluster-name>/terraform/infrastructure
     export KUBECONFIG="$PWD/edge-kubeconfig.yaml"
     ```
 
-===  "Tofu"
+===  "OpenTofu"
 
     ```bash
     tofu output -raw edge_kubeconfig > edge-kubeconfig.yaml
@@ -348,7 +348,7 @@ edge_image = {
     terraform output edge_host_metadata
     ```
 
-===  "Tofu"
+===  "OpenTofu"
 
     ```bash
     tofu apply
