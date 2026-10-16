@@ -271,6 +271,19 @@ func applyClusterSpecificSchemaBranches(schemaDoc map[string]any, clusters []Clu
 			return fmt.Errorf("build service schema for cluster %q: %w", cluster.Name, err)
 		}
 		properties["services"] = servicesSchema
+		if cluster.Type == Hub {
+			required, _ := branch["required"].([]any)
+			hasArgoCD := false
+			for _, req := range required {
+				if req == "argocd" {
+					hasArgoCD = true
+					break
+				}
+			}
+			if !hasArgoCD {
+				branch["required"] = append(required, "argocd")
+			}
+		}
 		branches = append(branches, branch)
 	}
 	defs["Cluster"] = map[string]any{"oneOf": branches}
