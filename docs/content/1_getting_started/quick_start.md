@@ -97,9 +97,22 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 ```
 
 And then start `cloud-provider-kind` in another terminal:
-```bash
-sudo cloud-provider-kind
-```
+
+=== "Linux / macOS"
+
+    ```bash
+    sudo cloud-provider-kind
+    ```
+
+=== "Windows / WSL2"
+
+    When running Docker Engine inside WSL2, use:
+
+    ```bash
+    sudo cloud-provider-kind \
+      --enable-lb-tunnel=false \
+      --enable-lb-port-mapping=true
+    ```
 
 Cloud-Provider-Kind works by automatically allocating a local IP address in the range of your Docker network for each Service of type LoadBalancer. For example in the next steps you will see `172.18.0.3`. It will most likely be different for your local environment.
 
