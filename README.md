@@ -79,6 +79,15 @@ Join the #kubara [Slack channel](https://kubernetes.slack.com/archives/C0B2X0DLP
 - Team and contributor guidance: [CONTRIBUTING.md](./CONTRIBUTING.md)
 - Code of conduct: [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)
 
+## Roadmap
+
+As we work toward our major v1.0.0 release, our efforts are structured around three core operational capabilities:
+- GitOps Engine Flexibility: Making Kubara truly GitOps Agnostic, giving users the freedom to choose between Argo CD or Flux as underlying GitOps Engines.
+- Gateway API Support: Full support for Kubernetes Gateway API, offering flexibility alongside traditional Ingress resources.
+- Air-Gapped Compatibility: Enhancing Kubara to support fully disconnected/air-gapped environments through Source Downloading and Helm Hydration.
+
+Please find more detailed information here: [Milestone 1.0.0](https://github.com/kubara-io/kubara/milestone/1)
+
 ## Contributing
 
 Contributions are welcome.
