@@ -2940,7 +2940,12 @@ That is done so workloads inside the cluster can trust the same CA bundle when t
 </ul>
 <p>kubara then waits until the service gets an external IP.</p>
 <p>At this point it prints the instruction to start:</p>
-<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
+<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
+</code></pre></div>
+On Windows with Docker Engine running inside WSL2, start <code>cloud-provider-kind</code> with load balancer port mapping enabled and the load balancer tunnel disabled:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-lb-tunnel<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-lb-port-mapping<span class="o">=</span><span class="nb">true</span>
 </code></pre></div>
 <p><code>cloud-provider-kind</code> assigns a local IP from the Docker network to the Traefik <code>LoadBalancer</code> service.</p>
 <h3 id="3-derive-the-local-dns-names">3. Derive the local DNS names</h3>

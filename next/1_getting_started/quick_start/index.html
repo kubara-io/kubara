@@ -2877,9 +2877,22 @@ You're not viewing the latest stable version.
 <span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:40:01<span class="w"> </span>INF
 Now<span class="w"> </span>start<span class="w"> </span>cloud-provider-kind<span class="w"> </span><span class="k">in</span><span class="w"> </span>another<span class="w"> </span>terminal<span class="w"> </span>with:<span class="w"> </span>sudo<span class="w"> </span>cloud-provider-kind
 </code></pre></div></p>
-<p>And then start <code>cloud-provider-kind</code> in another terminal:
+<p>And then start <code>cloud-provider-kind</code> in another terminal:</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux / macOS</label><label for="__tabbed_1_2">Windows / WSL2</label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
-</code></pre></div></p>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>When running Docker Engine inside WSL2, use:</p>
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-lb-tunnel<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--enable-lb-port-mapping<span class="o">=</span><span class="nb">true</span>
+</code></pre></div>
+</div>
+</div>
+</div>
 <p>Cloud-Provider-Kind works by automatically allocating a local IP address in the range of your Docker network for each Service of type LoadBalancer. For example in the next steps you will see <code>172.18.0.3</code>. It will most likely be different for your local environment.</p>
 <p>kubara should then continue with the bootstrapping after just a couple seconds (If not look into the Troubleshooting section at the bottom of this page):</p>
 <div class="highlight"><pre><span></span><code>...
@@ -3002,7 +3015,7 @@ Ctrl+C
 </ol>
 <p>Optional: check whether the local LoadBalancer IP is still attached. Sometimes the LoadBalancer IP added by <code>cloud-provider-kind</code>
 may still be present on the loopback device after cleanup. This is optional to fix and usually disappears after a reboot anyway.</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux</label><label for="__tabbed_1_2">macOS</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:2"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><input id="__tabbed_2_2" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1">Linux</label><label for="__tabbed_2_2">macOS</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <p>Check whether the IP is still present:</p>
