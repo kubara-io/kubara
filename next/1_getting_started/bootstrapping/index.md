@@ -74,11 +74,18 @@ kubara creates the initial Argo CD repository secret during `kubara bootstrap`.
 | Mode | Required values | Notes |
 | --- | --- | --- |
 | `https` | `ARGOCD_GIT_URL` or legacy `ARGOCD_GIT_HTTPS_URL` | Backward-compatible default. `ARGOCD_GIT_USERNAME` + `ARGOCD_GIT_PAT_OR_PASSWORD` are optional: omit them for public repositories, set both for private ones. `PAT` usually means Personal Access Token and is often tied to a user account. Prefer a technical or machine account and use that account name for `ARGOCD_GIT_USERNAME`; exact username behavior is provider-dependent. |
-| `ssh` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_SSH_PRIVATE_KEY` | Use an SSH repository URL such as `git@github.com:org/repo.git`. Argo CD must know the SSH host key before it can connect securely. |
-| `github-app` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_GITHUB_APP_ID`, `ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID`, `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. |
+| `ssh` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_SSH_PRIVATE_KEY` | Use an SSH repository URL such as `git@github.com:org/repo.git`. Argo CD must know the SSH host key before it can connect securely. In `.env`, format the private key as a single line with `\n` linebreaks enclosed in double quotes (e.g. `ARGOCD_GIT_SSH_PRIVATE_KEY="-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"`). |
+| `github-app` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_GITHUB_APP_ID`, `ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID`, `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. In `.env`, format the private key as a single line with `\n` linebreaks enclosed in double quotes (e.g. `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"`). |
 
 For new setups, prefer `ARGOCD_GIT_URL`.
 `ARGOCD_GIT_HTTPS_URL` is still supported for existing HTTPS/PAT setups.
+
+!!! note "Formatting private keys in .env"
+    Both `ARGOCD_GIT_SSH_PRIVATE_KEY` and `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` must be written on a single line in `.env` with literal `\n` representing newlines, enclosed in double quotes:
+    ```env
+    ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
+    ```
+    This ensures standard dotenv parsers correctly decode the multiline key when creating the Argo CD Kubernetes secret during bootstrap.
 
 For SSH, keep strict host verification enabled.
 The bundled Argo CD Helm chart already includes known hosts for common public providers.

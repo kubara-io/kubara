@@ -3182,17 +3182,24 @@ platform will be publicly available by default via your DNS zone.</p>
 <tr>
 <td><code>ssh</code></td>
 <td><code>ARGOCD_GIT_URL</code>, <code>ARGOCD_GIT_SSH_PRIVATE_KEY</code></td>
-<td>Use an SSH repository URL such as <code>git@github.com:org/repo.git</code>. Argo CD must know the SSH host key before it can connect securely.</td>
+<td>Use an SSH repository URL such as <code>git@github.com:org/repo.git</code>. Argo CD must know the SSH host key before it can connect securely. In <code>.env</code>, format the private key as a single line with <code>\n</code> linebreaks enclosed in double quotes (e.g. <code>ARGOCD_GIT_SSH_PRIVATE_KEY="-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"</code>).</td>
 </tr>
 <tr>
 <td><code>github-app</code></td>
 <td><code>ARGOCD_GIT_URL</code>, <code>ARGOCD_GIT_GITHUB_APP_ID</code>, <code>ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID</code>, <code>ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY</code></td>
-<td>Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set <code>ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL</code> as well.</td>
+<td>Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set <code>ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL</code> as well. In <code>.env</code>, format the private key as a single line with <code>\n</code> linebreaks enclosed in double quotes (e.g. <code>ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"</code>).</td>
 </tr>
 </tbody>
 </table>
 <p>For new setups, prefer <code>ARGOCD_GIT_URL</code>.
 <code>ARGOCD_GIT_HTTPS_URL</code> is still supported for existing HTTPS/PAT setups.</p>
+<div class="admonition note">
+<p class="admonition-title">Formatting private keys in .env</p>
+<p>Both <code>ARGOCD_GIT_SSH_PRIVATE_KEY</code> and <code>ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY</code> must be written on a single line in <code>.env</code> with literal <code>\n</code> representing newlines, enclosed in double quotes:
+<div class="highlight"><pre><span></span><code>ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
+</code></pre></div>
+This ensures standard dotenv parsers correctly decode the multiline key when creating the Argo CD Kubernetes secret during bootstrap.</p>
+</div>
 <p>For SSH, keep strict host verification enabled.
 The bundled Argo CD Helm chart already includes known hosts for common public providers.
 For private Git hosts, add trusted host keys to the generated Argo CD values before bootstrapping, for example in <code>platform-configs/&lt;cluster&gt;/helm/argo-cd/values-additional.yaml</code>:</p>
