@@ -44,7 +44,7 @@ func NewBootstrapFlags() *BootstrapFlags {
 		EnvFile:        ".env",
 		EnvPrefixFlag:  "KUBARA_",
 		Timeout:        2 * time.Minute,
-		AgentNamespace: "kubara",
+		AgentNamespace: "kubara-system",
 	}
 }
 
@@ -132,10 +132,6 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		return nil, fmt.Errorf("cluster %q not found in config file %q", clusterName, configFilePath)
 	}
 
-	if clusterConfig.Type == config.Spoke {
-		return flags.bootstrapSpoke(cwd, kubeconf, configFilePath, clusterConfig)
-	}
-
 	loadedCatalog, err := cs.GetCatalogForCluster(*clusterConfig)
 	if err != nil {
 		return nil, fmt.Errorf("load catalog for cluster %q: %w", clusterConfig.Name, err)
@@ -146,27 +142,27 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		bootstrapCatalog = *cs.GetConfig().BootstrapCatalog
 	}
 
-	return flags.bootstrapHub(
-		cmd,
-		&bootstrap.Options{
-			Kubeconfig:       kubeconf,
-			Catalog:          loadedCatalog,
-			ClusterConfig:    clusterConfig,
-			ClusterName:      clusterName,
-			WorkDir:          cwd,
-			ConfigFilePath:   configFilePath,
-			Catalogs:         catalogOptions.Catalogs,
-			CatalogOverwrite: catalogOptions.Overwrite,
-			BootstrapCatalog: bootstrapCatalog,
-		},
-	)
+	opts := &bootstrap.Options{
+		Kubeconfig:       kubeconf,
+		Catalog:          loadedCatalog,
+		ClusterConfig:    clusterConfig,
+		ClusterName:      clusterName,
+		WorkDir:          cwd,
+		ConfigFilePath:   configFilePath,
+		Catalogs:         catalogOptions.Catalogs,
+		CatalogOverwrite: catalogOptions.Overwrite,
+		BootstrapCatalog: bootstrapCatalog,
+	}
+
+	if clusterConfig.Type == config.Spoke {
+		return flags.bootstrapSpoke(opts)
+	}
+
+	return flags.bootstrapHub(cmd, opts)
 }
 
 func (flags *BootstrapFlags) bootstrapSpoke(
-	cwd string,
-	kubeconf string,
-	configFilePath string,
-	clusterConfig *config.Cluster,
+	opts *bootstrap.Options,
 ) (*bootstrap.Options, error) {
 	if flags.InitialKubeconfig == "" {
 		return nil, fmt.Errorf("--initial-kubeconfig is required for spoke clusters")
@@ -176,7 +172,7 @@ func (flags *BootstrapFlags) bootstrapSpoke(
 		return nil, fmt.Errorf("--dry-run is not supported for spoke clusters")
 	}
 
-	initialKubeconfig, err := utils.GetFullPath(flags.InitialKubeconfig, cwd)
+	initialKubeconfig, err := utils.GetFullPath(flags.InitialKubeconfig, opts.WorkDir)
 	if err != nil {
 		return nil, fmt.Errorf("resolve initial kubeconfig path: %w", err)
 	}
@@ -188,16 +184,30 @@ func (flags *BootstrapFlags) bootstrapSpoke(
 		)
 	}
 
-	return &bootstrap.Options{
-		Kubeconfig:        kubeconf,
-		InitialKubeconfig: initialKubeconfig,
-		AgentNamespace:    flags.AgentNamespace,
-		ClusterConfig:     clusterConfig,
-		ClusterName:       clusterConfig.Name,
-		Timeout:           flags.Timeout,
-		WorkDir:           cwd,
-		ConfigFilePath:    configFilePath,
-	}, nil
+	componentsAbsPath, err := utils.GetFullPath(flags.PlatformComponentsPath, opts.WorkDir)
+	if err != nil {
+		return nil, fmt.Errorf("resolve absolute path: %w", err)
+	}
+
+	var cssAbsPath string
+	if flags.ClusterSecretStorePath != "" {
+		cssAbsPath, err = utils.GetFullPath(flags.ClusterSecretStorePath, opts.WorkDir)
+		if err != nil {
+			return nil, fmt.Errorf("getting absolute path for ClusterSecretStore file: %w", err)
+		}
+
+		if _, err := os.Stat(cssAbsPath); err != nil {
+			return nil, fmt.Errorf("cluster secret store file not found: %w", err)
+		}
+	}
+
+	opts.InitialKubeconfig = initialKubeconfig
+	opts.AgentNamespace = flags.AgentNamespace
+	opts.PlatformComponents = componentsAbsPath
+	opts.WithESCSSPath = cssAbsPath
+	opts.Timeout = flags.Timeout
+
+	return opts, nil
 }
 
 func (flags *BootstrapFlags) bootstrapHub(
