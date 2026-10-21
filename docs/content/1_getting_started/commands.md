@@ -130,7 +130,7 @@ Bootstrap a hub or onboard a spoke cluster
 
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
-**--namespace**="": Namespace for the kubara-agent ServiceAccount on the spoke cluster (default: "kubara")
+**--namespace**="": Namespace for the kubara-agent ServiceAccount on the spoke cluster (default: "kubara-system")
 
 **--platform-components**="": Path to the platform-components directory (default: "platform-components")
 
