@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"time"
@@ -15,8 +16,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
+	"sigs.k8s.io/yaml"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
+	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/rs/zerolog/log"
 )
 
@@ -56,7 +60,7 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 
 	agentNamespace := opts.AgentNamespace
 	if agentNamespace == "" {
-		agentNamespace = "kubara"
+		agentNamespace = "kubara-system"
 	}
 
 	if errs := validation.IsDNS1123Label(agentNamespace); len(errs) > 0 {
@@ -112,6 +116,10 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 
 	cronJob, err := getCredsRotatorCronJob(ctx, client)
 	if err != nil {
+		return err
+	}
+
+	if err := prepareSpokeCluster(ctx, opts); err != nil {
 		return err
 	}
 
@@ -189,6 +197,68 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 		opts.ClusterName,
 		agentNamespace,
 	)
+
+	return nil
+}
+
+func prepareSpokeCluster(ctx context.Context, opts *Options) error {
+	crdsChartPath, err := chartPathForService(opts.Catalog, catalog.BootstrapServiceCRDs)
+	if err != nil {
+		return err
+	}
+
+	spokeClient, err := k8s.NewClient(k8s.Config{
+		KubeconfigPath: opts.InitialKubeconfig,
+		QPS:            50,
+		Burst:          100,
+		Timeout:        30 * time.Second,
+		UserAgent:      "kubara-spoke-bootstrap",
+	})
+	if err != nil {
+		return fmt.Errorf("create spoke kubernetes client: %w", err)
+	}
+
+	bootstrapCharts := []BootstrapChart{
+		{
+			Name:      catalog.BootstrapServiceCRDs,
+			Path:      filepath.Join(opts.PlatformComponents, "helm", crdsChartPath),
+			Enabled:   true,
+			EnsureCRD: true,
+		},
+	}
+
+	if err := addHelmRepositories(ctx, bootstrapCharts); err != nil {
+		return fmt.Errorf("add helm repositories for spoke: %w", err)
+	}
+
+	if err := updateHelmDependencies(ctx, opts, bootstrapCharts); err != nil {
+		return fmt.Errorf("update helm repositories for spoke: %w", err)
+	}
+
+	if err := applyCRDs(ctx, spokeClient, opts, bootstrapCharts); err != nil {
+		return fmt.Errorf("apply CRDs to spoke: %w", err)
+	}
+	spokeClient.RefreshDiscovery()
+
+	if opts.WithESCSSPath != "" {
+		secretManager := NewSecretManager(spokeClient)
+		clusterSecStore, err := secretManager.createClusterSecretStore(opts)
+		if err != nil {
+			return fmt.Errorf("create ClusterSecretStore for spoke: %w", err)
+		}
+		if clusterSecStore != nil {
+			yamlData, err := yaml.Marshal(clusterSecStore)
+			if err != nil {
+				return fmt.Errorf("marshal ClusterSecretStore for spoke: %w", err)
+			}
+			k8sOpts := k8s.DefaultApplyOptions()
+			k8sOpts.FieldManager = "kubara-spoke-secrets"
+			if err := spokeClient.ApplyManifest(ctx, yamlData, k8sOpts); err != nil {
+				return fmt.Errorf("applying ClusterSecretStore to spoke: %w", err)
+			}
+			log.Info().Msg("Applied ClusterSecretStore to spoke cluster")
+		}
+	}
 
 	return nil
 }

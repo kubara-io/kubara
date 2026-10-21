@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	batchv1 "k8s.io/api/batch/v1"
@@ -171,13 +172,13 @@ func TestUpsertInitialSpokeSecret_CreatesSecretInKubaraSystem(t *testing.T) {
 	ctx := context.Background()
 	client := fake.NewSimpleClientset()
 
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"), "kubara")
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"), "kubara-system")
 	require.NoError(t, err)
 
 	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, v1.SecretType(clusterCredentialsSecretType), secret.Type)
-	assert.Equal(t, "kubara", secret.Annotations[agentNamespaceAnnotation])
+	assert.Equal(t, "kubara-system", secret.Annotations[agentNamespaceAnnotation])
 	assert.Equal(t, []byte("kubeconfig-bytes"), secret.Data[bootstrapKubeconfigKey])
 }
 
@@ -195,7 +196,7 @@ func TestUpsertInitialSpokeSecret_RefusesToOverwriteWhenGeneratedKubeconfigExist
 	}
 	client := fake.NewSimpleClientset(existing)
 
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"), "kubara")
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"), "kubara-system")
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "already contains generated credentials")
 }
@@ -217,4 +218,12 @@ func TestGetCredsRotatorCronJob_FindsCronJobInKubaraSystem(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, "cluster-credential-rotator", found.Name)
 	assert.Equal(t, "kubara-system", found.Namespace)
+}
+
+func TestPrepareSpokeCluster_FailsWhenBootstrapCRDsMissingFromCatalog(t *testing.T) {
+	err := prepareSpokeCluster(context.Background(), &Options{
+		Catalog: catalog.Catalog{},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `bootstrap service "bootstrap-crds" is missing from catalog`)
 }
