@@ -11,7 +11,7 @@ This guide provides a step-by-step process for bootstrapping your platform runni
 kubara can run on any Kubernetes cluster as long as the required surrounding capabilities exist, especially a secret backend for `external-secrets` and DNS handling for `external-dns`.
 
 For the ready-made example flows, use the [Infrastructure Presets](../3_infrastructure/overview.md) section. Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, 
-or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions to Setup your Infrastructure.
+or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/OpenTofu, Pulumi or other solutions to Setup your Infrastructure.
 
 If you already have a Kubernetes cluster with DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
 
