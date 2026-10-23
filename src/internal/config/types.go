@@ -64,7 +64,7 @@ type Cluster struct {
 	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
 
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
-	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
+	ArgoCD    *ArgoCD          `json:"argocd,omitempty" yaml:"argocd,omitempty" jsonschema:"title=ArgoCD,description=Configuration for argoCD."`
 	Catalogs  []string         `json:"catalogs,omitempty" yaml:"catalogs,omitempty" jsonschema:"title=Catalogs,description=Catalogs to be used by this cluster"`
 	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }

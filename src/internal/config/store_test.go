@@ -39,7 +39,7 @@ func newValidTestConfig() *Config {
 						Email: "admin@example.com",
 					},
 				},
-				ArgoCD: ArgoCD{
+				ArgoCD: &ArgoCD{
 					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
 						AuthMode: GitAuthModeHTTPS,
@@ -419,7 +419,7 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
-				ArgoCD:   ArgoCD{},
+				ArgoCD:   &ArgoCD{},
 				Services: service.Services{},
 			},
 		},
@@ -675,6 +675,7 @@ func TestGenerateSchema_ComposesCatalogServiceKeys(t *testing.T) {
 	assert.NotContains(t, properties, "argocd")
 	assert.NotContains(t, properties, "argo-cd")
 	assert.NotContains(t, properties, "bootstrap-crds")
+	assert.NotContains(t, properties, "cluster-credential-rotator")
 }
 
 func TestConfigStore_LoadAppliesDefaultsPerClusterCatalog(t *testing.T) {
@@ -725,16 +726,23 @@ func TestGenerateSchema_UsesClusterSpecificServiceBranches(t *testing.T) {
 	require.Len(t, branches, 2)
 
 	servicesByCluster := make(map[string]map[string]any, len(branches))
+	requiredByCluster := make(map[string][]any, len(branches))
 	for _, rawBranch := range branches {
-		properties := rawBranch.(map[string]any)["properties"].(map[string]any)
+		branch := rawBranch.(map[string]any)
+		properties := branch["properties"].(map[string]any)
 		name := properties["name"].(map[string]any)["const"].(string)
 		services := properties["services"].(map[string]any)["properties"].(map[string]any)
 		servicesByCluster[name] = services
+		if req, ok := branch["required"].([]any); ok {
+			requiredByCluster[name] = req
+		}
 	}
 	assert.Contains(t, servicesByCluster["test-cluster"], "cert-manager")
 	assert.NotContains(t, servicesByCluster["test-cluster"], "loki")
+	assert.Contains(t, requiredByCluster["test-cluster"], "argocd")
 	assert.Contains(t, servicesByCluster["logging-cluster"], "loki")
 	assert.NotContains(t, servicesByCluster["logging-cluster"], "cert-manager")
+	assert.NotContains(t, requiredByCluster["logging-cluster"], "argocd")
 }
 
 func TestLoadAndValidate_MinimalConfigWithDefaults(t *testing.T) {
@@ -863,4 +871,56 @@ clusters:
 
 	require.Len(t, cs.GetConfig().Clusters, 1)
 	assert.Nil(t, cs.GetConfig().Clusters[0].Terraform)
+}
+
+func TestLoadAndValidate_SpokeWithoutArgoCDSucceedsAndHubWithoutArgoCDFails(t *testing.T) {
+	validWithSpokeYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: hub-cluster
+    type: hub
+    dnsName: hub.example.com
+    catalogs:
+      - %q
+    argocd:
+      repo:
+        git:
+          configs:
+            url: "https://github.com/customer/repo.git"
+          components:
+            url: "https://github.com/managed/repo.git"
+  - name: spoke-cluster
+    type: spoke
+    dnsName: spoke.example.com
+    catalogs:
+      - %q
+`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(validWithSpokeYAML), 0644))
+
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
+	require.NoError(t, cs.Load())
+	require.Len(t, cs.GetConfig().Clusters, 2)
+	assert.NotNil(t, cs.GetConfig().Clusters[0].ArgoCD)
+	assert.Nil(t, cs.GetConfig().Clusters[1].ArgoCD)
+
+	invalidHubWithoutArgoCDYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: hub-cluster
+    type: hub
+    dnsName: hub.example.com
+    catalogs:
+      - %q
+`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	invalidConfigPath := filepath.Join(tempDir, "invalid-config.yaml")
+	require.NoError(t, os.WriteFile(invalidConfigPath, []byte(invalidHubWithoutArgoCDYAML), 0644))
+
+	invalidCS := NewConfigStore(".", invalidConfigPath, testCatalogLoadOptions())
+	require.Error(t, invalidCS.Load())
 }

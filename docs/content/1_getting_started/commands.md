@@ -115,9 +115,10 @@ Shows a list of commands or help for one command
 
 ## bootstrap
 
-Bootstrap Argo CD onto a cluster
+Bootstrap a hub or onboard a spoke cluster
 
->kubara bootstrap CLUSTER_NAME [--local]
+    kubara bootstrap CLUSTER_NAME [--local]
+    kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH [--namespace NAMESPACE]
 
 **--dry-run**: Run with dry-run
 
@@ -125,7 +126,11 @@ Bootstrap Argo CD onto a cluster
 
 **--help, -h**: show help
 
+**--initial-kubeconfig**="": Path to the initial kubeconfig used to onboard a spoke cluster
+
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
+
+**--namespace**="": Namespace for the kubara-agent ServiceAccount on the spoke cluster (default: "kubara-system")
 
 **--platform-components**="": Path to the platform-components directory (default: "platform-components")
 

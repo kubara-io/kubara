@@ -1,28 +1,38 @@
-# How to add a Spoke Cluster
+# How to add a spoke cluster
 
-After your hub cluster is running, you can add more Kubernetes spoke clusters and manage them through Argo CD.
+After your hub cluster is running, you can add Kubernetes spoke clusters and manage them through Argo CD.
 
 You can onboard:
 
 * a new cluster provisioned with kubara Terraform templates, or
 * an existing cluster you already operate.
 
-The Argo CD integration flow is the same in both cases.
+The GitOps reconciliation and Argo CD integration flow are the same in both cases.
 
-## 1. Add spoke cluster to `config.yaml`
+## Prerequisites
 
-To add a new cluster to your `config.yaml` simply type:
+Before onboarding a spoke cluster, verify you have:
+
+* A running hub cluster bootstrapped with Argo CD and `cluster-credential-rotator`.
+* Administrative access to the hub cluster (`KUBECONFIG` pointing to the hub, for example `/tmp/hub.yaml`).
+* An initial kubeconfig for the spoke cluster (for example `/tmp/spoke.yaml`) with sufficient permissions to create namespaces, ServiceAccounts, and cluster role bindings.
+* Access to an External Secrets compatible secret manager or vault (such as HashiCorp Vault, OpenBao, STACKIT Secrets Manager, GCP Secret Manager, Azure Key Vault, AWS Secrets Manager, or Bitwarden). This can either be a separate instance for the spoke or the same instance used by the hub.
+
+## 1. Add the spoke cluster to config.yaml
+
+Run `cluster add` to register the new cluster:
+
 ```bash
-kubara cluster add <spoke-name> --catalog /path/to/catalog
+kubara cluster add spoke-1
 ```
 
-Repeat `--catalog` to assign multiple ordered catalogs. The command stores those references in the new cluster's `catalogs` list. Without `--catalog`, it assigns kubara's general catalog.
+To assign custom or ordered catalogs, pass `--catalog /path/to/catalog` (repeat `--catalog` for multiple catalogs). Without `--catalog`, kubara assigns its default general catalog.
 
-Later `schema`, `generate`, and `bootstrap` runs automatically resolve the catalogs configured for that spoke. Additional `--catalog` values are appended temporarily and are not persisted.
+Spoke cluster entries are added with `type: spoke`. They do not contain an `argocd` section because GitOps reconciliation is centrally coordinated from the hub cluster.
 
 ### Optional: Ingress annotation overrides
 
-Each service supports an optional `networking.annotations` map that is merged with kubara's default annotations when rendering the service values files.
+Each service supports an optional `networking.annotations` map that is merged with kubara default annotations when rendering service values files.
 This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.
 
 ```yaml
@@ -35,69 +45,117 @@ services:
         nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
 ```
 
-User-provided annotations are merged on top of kubara defaults using `mergeOverwrite`: values for the same key are overwritten, but kubara defaults that are not present in the override map are preserved.
+User-provided annotations are merged on top of kubara defaults using `mergeOverwrite`. Values for the same key are overwritten, while kubara defaults not present in the override map are preserved.
 
-## 2. Regenerate Terraform and Helm templates
+## 2. Update config.yaml
+
+Open `config.yaml` and make the necessary changes for your spoke cluster:
+
+* Set the appropriate `stage` and cluster settings.
+* Configure base domain and networking options.
+* Enable or disable platform services (such as `cert-manager`, `external-secrets`, `traefik`, or `kube-prometheus-stack`).
+* If you provision the spoke cluster through kubara Terraform, configure provider credentials and node pool specifications.
+
+If this is a new cluster that you plan to provision using kubara Terraform, apply the Terraform configuration for the spoke cluster before continuing to onboarding. If the cluster already exists, continue directly to the next step.
+
+## 3. Generate manifests
+
+Generate the configuration artifacts:
 
 ```bash
-# kubara generate creates both helm and terraform files by default
 kubara generate
 ```
 
-This creates/updates the spoke cluster overlays in:
+This creates or updates:
 
-* `platform-configs/<spoke-cluster-name>/terraform/...`
-* `platform-configs/<spoke-cluster-name>/helm/...`
+* Spoke cluster overlays in `platform-configs/<spoke-cluster-name>/terraform/...` and `platform-configs/<spoke-cluster-name>/helm/...`
+* Spoke cluster registration in the hub cluster's `cluster-credential-rotator` (an authoritative ConfigMap named `<spoke-cluster-name>-config` in `kubara-system`)
+* Argo CD Application manifests on the hub that point to the spoke cluster
 
-This also registers the spokes in the Argo CD `values.generated.yaml`.
+## 4. Commit and push changes
 
-## 3. Prepare the spoke cluster
+Commit and push all generated manifests to your Git repository:
 
-If this is a new cluster, apply Terraform for the spoke entry.
-If the cluster already exists, skip Terraform and continue.
-
-You need the spoke cluster kubeconfig for registration in Argo CD.
-Store it in your secret backend (Vault/Secret Manager), for example:
-The config expects the kubeconfig to be reachable under:
-<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>
-And the secret itself simply be named `kubeconfig`.
-
-By default kubara keeps the original client-certificate based Argo CD cluster config.
-If your kubeconfig should be used with bearer token auth in addition to the certificates, set
-`bootstrapValues.cluster[].authMethod: token` in your Argo CD values. Note that `authMethod` must be exactly `token` or `clientCertificate` (defaults to `clientCertificate`); any other value will trigger a template rendering error.
-
-If Argo CD should only manage selected namespaces on the spoke cluster, set `bootstrapValues.cluster[].namespaces` to the allowed list of namespaces in your Argo CD values (as a YAML list):
-
-```yaml
-bootstrapValues:
-  cluster:
-    - name: spoke-dev
-      namespaces:
-        - team-a
-        - team-b
+```bash
+git add .
+git commit -m "feat: add spoke-1 cluster"
+git push
 ```
 
+Pushing these changes allows the hub cluster's Argo CD to reconcile the updated platform configuration. During reconciliation, Argo CD applies the `<spoke-cluster-name>-config` ConfigMap and prepares the `cluster-credential-rotator` CronJob on the hub.
 
+If `argocd.selfManaged` is disabled on your hub cluster, run `kubara bootstrap <hub-cluster-name>` to apply the changes instead.
 
-## 4. Prepare external-secrets credentials on the spoke cluster
+## 5. Onboard the spoke cluster
 
-Create provider credentials as Kubernetes secret(s), for example:
+Once the hub reconciles the spoke configuration, onboard the spoke cluster by targeting the hub cluster with `KUBECONFIG` and passing the spoke's initial kubeconfig:
+
+```bash
+KUBECONFIG=/tmp/hub.yaml kubara bootstrap spoke-1 \
+  --with-es-css-file css.yaml \
+  --initial-kubeconfig /tmp/spoke.yaml
+```
+
+You can also pass `--kubeconfig /tmp/hub.yaml` instead of setting the environment variable. To customize the namespace where the `kubara-agent` ServiceAccount is created on the spoke (defaults to `kubara-system`), pass `--namespace <name>`.
+
+Output:
+
+```text
+2026-10-20 08:40:47 INF Created initial cluster secret "spoke-1-cluster-secret"
+2026-10-20 08:40:47 INF Started credential rotator job "cluster-credential-rotator-bootstrap-zrrmg" for spoke "spoke-1"
+2026-10-20 08:40:53 INF Spoke cluster "spoke-1" onboarded successfully with kubara-agent namespace "kubara-system"
+```
+
+### How onboarding works under the hood
+
+``` mermaid
+sequenceDiagram
+    autonumber
+    actor Operator as Operator (CLI)
+    participant Hub as Hub (kubara-system)
+    participant Rotator as Hub (Credential Rotator)
+    participant Spoke as Spoke Cluster
+    participant Argo as Hub (Argo CD)
+
+    Operator->>Hub: kubara bootstrap spoke-1 (passes initial kubeconfig)
+    Operator->>Spoke: Apply bootstrap CRDs (and optional ClusterSecretStore)
+    Hub->>Hub: Upsert spoke-1-cluster-secret with bootstrapKubeconfig
+    Hub->>Rotator: Start onboarding Job from CronJob template
+    Rotator->>Spoke: Connect via initial kubeconfig
+    Rotator->>Spoke: Create kubara-agent SA & ClusterRoleBinding
+    Rotator->>Rotator: Mint short-lived rotating bearer token
+    Rotator->>Hub: Update spoke-1-cluster-secret & project into argocd
+    Argo->>Spoke: Connect via rotating token & reconcile workloads
+```
+
+During the onboarding command:
+
+1. **Hub connection**: `kubara` connects to the hub cluster via `KUBECONFIG`. It verifies that the authoritative `<spoke-name>-config` ConfigMap exists in `kubara-system`.
+2. **Spoke CRD and secret store setup**: `kubara` connects to the spoke cluster using `--initial-kubeconfig`, applies and waits for the required CRDs from the bootstrap catalog's `bootstrap-crds` service, and (if `--with-es-css-file` is provided) applies the `ClusterSecretStore` manifest.
+3. **Initial secret creation**: `kubara` creates an initial cluster credentials secret (`<spoke-name>-cluster-secret`) in `kubara-system` on the hub, storing the provided `--initial-kubeconfig` under the `bootstrapKubeconfig` key.
+4. **Rotator job execution**: `kubara` triggers a one-time onboarding Job (`cluster-credential-rotator-bootstrap-<suffix>`) from the `cluster-credential-rotator` CronJob on the hub.
+5. **Agent setup on the spoke**: The rotator job uses the initial kubeconfig to connect directly to the spoke cluster. It creates the `kubara-agent` ServiceAccount in the specified namespace (default: `kubara-system`) and configures cluster role permissions.
+6. **Credential minting and projection**: The rotator mints short-lived rotating bearer token credentials for the `kubara-agent` ServiceAccount. It updates the secret in `kubara-system` and projects the cluster secret into `argocd`, allowing Argo CD to connect to the spoke.
+7. **Continuous rotation**: The `cluster-credential-rotator` CronJob on the hub continues to rotate the spoke credentials on schedule. The initial kubeconfig is not needed again after onboarding.
+
+## 6. Configure External Secrets and roll out workloads
+
+After Argo CD connects to the spoke cluster, it synchronizes platform services onto it. If enabled services require secrets (such as TLS certificates or ingress credentials), configure the External Secrets Operator on the spoke cluster to reach your secret manager.
+
+Create provider credentials as a Kubernetes Secret on the spoke cluster, for example:
 
 ```bash
 # Bitwarden
-kubectl -n external-secrets create secret generic bitwarden-access-token \
+kubectl --kubeconfig /tmp/spoke.yaml -n external-secrets create secret generic bitwarden-access-token \
   --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
 
 # STACKIT Secrets Manager
-kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
+kubectl --kubeconfig /tmp/spoke.yaml -n external-secrets create secret generic stackit-secrets-manager-cred \
   --from-literal=username="<USERNAME>" \
   --from-literal=password="<PASSWORD>"
 ```
 
-Then configure the spoke ClusterSecretStore in a chart overlay file, for example:
-`platform-configs/<spoke-cluster-name>/helm/external-secrets/values-additional.yaml`
-
-Example:
+Then configure the spoke `ClusterSecretStore` in a chart overlay file, for example `platform-configs/<spoke-cluster-name>/helm/external-secrets/values-additional.yaml`:
 
 ```yaml
 clusterSecretStores:
@@ -119,27 +177,43 @@ clusterSecretStores:
         version: v2
 ```
 
+Alternatively, apply your `ClusterSecretStore` manifest (`css.yaml`) directly to the spoke cluster with `kubectl apply -f css.yaml --kubeconfig /tmp/spoke.yaml`.
+
+Once the secret store connects to your secret backend, Argo CD reconciles all remaining workloads and dependencies on the spoke cluster.
+
 ![Hub_n_Spoke](../assets/diagrams.drawio)
 
-## 6. Commit and roll out
+### Fallback: Static ExternalSecrets (when selfManaged is disabled)
 
-Commit and push all updated files.
+When `argocd.selfManaged` is set to `disabled` on the hub cluster (or `clusterSecrets.useExternalSecrets: true`), Argo CD renders static `ExternalSecret` manifests for spoke clusters instead of using `cluster-credential-rotator`.
 
-If Argo CD manages itself, it will reconcile automatically.
-If not, run bootstrap again for your hub cluster:
+In that mode, store the spoke kubeconfig in your secret backend (Vault/Secret Manager) under:
+`<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>`
+with the secret property named `kubeconfig`.
 
-```bash
-kubara bootstrap <hub-cluster-name-from-config-yaml>
+By default kubara keeps the original client-certificate based Argo CD cluster config for static ExternalSecrets.
+If your kubeconfig should be used with bearer token auth in addition to the certificates, set
+`bootstrapValues.cluster[].authMethod: token` in your Argo CD values. Note that `authMethod` must be exactly `token` or `clientCertificate` (defaults to `clientCertificate`); any other value triggers a template rendering error.
+
+If Argo CD should only manage selected namespaces on the spoke cluster, set `bootstrapValues.cluster[].namespaces` to the allowed list of namespaces in your Argo CD values (as a YAML list):
+
+```yaml
+bootstrapValues:
+  cluster:
+    - name: spoke-dev
+      namespaces:
+        - team-a
+        - team-b
 ```
 
 ## Additional notes
 
 * If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.
-* Extra overlay files can use any `values-*.yaml` name. `values-additional.yaml` is a common choice, and it keeps provider-specific overrides separate from the generated `values.generated.yaml`.
+* Extra overlay files can use any `values-*.yaml` name. `values-additional.yaml` is a common choice that keeps provider-specific overrides separate from generated `values.generated.yaml` files.
 
 ### Alternative multi-cluster architectures
 
-The standard spoke flow assumes the hub cluster can directly reach the spoke cluster's Kubernetes API endpoint using stored credentials. For alternative topologies and fleet management patterns, see the following reference setups in `platform-setup-examples`:
+The standard spoke flow assumes the hub cluster can directly reach the spoke cluster API endpoint using stored credentials. For alternative topologies and fleet management patterns, see these reference setups in `platform-setup-examples`:
 
-* **Outbound-only agent topology**: [Argo CD Agent Managed-Mode Lab](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents) demonstrates a hub-and-spoke setup where spoke clusters initiate outbound mTLS connections to the hub and run their own application controllers, eliminating the need to store spoke kubeconfigs on the hub.
-* **Fleet add-on distribution**: [Scalable Cluster Management with Project Sveltos](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management) demonstrates delegating add-on and configuration lifecycle across large cluster fleets to Project Sveltos using declarative selectors.
+* [Argo CD Agent Managed-Mode Lab](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents): Outbound-only agent topology where spoke clusters initiate outbound mTLS connections to the hub and run their own application controllers, eliminating the need to store spoke kubeconfigs on the hub.
+* [Scalable Cluster Management with Project Sveltos](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management): Offloads add-on and configuration lifecycle across large cluster fleets to Project Sveltos using declarative selectors.

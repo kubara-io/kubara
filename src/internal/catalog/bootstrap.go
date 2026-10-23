@@ -7,13 +7,15 @@ const (
 )
 
 const (
-	BootstrapServiceArgoCD = "argo-cd"
-	BootstrapServiceCRDs   = "bootstrap-crds"
+	BootstrapServiceArgoCD                   = "argo-cd"
+	BootstrapServiceCRDs                     = "bootstrap-crds"
+	BootstrapServiceClusterCredentialRotator = "cluster-credential-rotator"
 )
 
 var bootstrapServices = map[string]struct{}{
-	BootstrapServiceArgoCD: {},
-	BootstrapServiceCRDs:   {},
+	BootstrapServiceArgoCD:                   {},
+	BootstrapServiceCRDs:                     {},
+	BootstrapServiceClusterCredentialRotator: {},
 }
 
 // IsBootstrapService reports whether the service is part of the implicit bootstrap foundation.

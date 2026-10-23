@@ -189,7 +189,7 @@ func TestGenerateCmd(t *testing.T) {
 					KubernetesVersion: "1.34.0",
 					DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
 				},
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -249,7 +249,7 @@ func TestGenerateCmd(t *testing.T) {
 							Email: "admin@example.com",
 						},
 					},
-					ArgoCD: config.ArgoCD{
+					ArgoCD: &config.ArgoCD{
 						Repo: config.RepoProto{
 							Git: &config.RepoType{
 								Configs: config.Repository{
@@ -326,7 +326,7 @@ func TestGenerateCmd_MissingProviderFailsForTerraform(t *testing.T) {
 			KubernetesVersion: "1.28.0",
 			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
 		},
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -364,7 +364,7 @@ func TestGenerateCmd_MissingProviderUsesAllByDefault(t *testing.T) {
 			KubernetesVersion: "1.28.0",
 			DNS:               config.DNS{Name: "example.com", Email: "admin@example.com"},
 		},
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -397,7 +397,7 @@ func TestGenerateCmd_MissingTerraformUsesAllByDefault(t *testing.T) {
 		Type:     "hub",
 		DNSName:  "test.example.com",
 		Catalogs: []string{helperCatalogPath},
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -439,7 +439,7 @@ func TestGenerateCmd_TerraformProviderNoneUsesAllByDefault(t *testing.T) {
 		Terraform: &config.Terraform{
 			Provider: config.TerraformProviderNone,
 		},
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -469,7 +469,7 @@ func TestGenerateCmd_MissingTerraformFailsForTerraform(t *testing.T) {
 		Stage:   "dev",
 		Type:    "hub",
 		DNSName: "test.example.com",
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
@@ -503,7 +503,7 @@ func TestDisabledServicesDontGetWritten(t *testing.T) {
 		Stage:   "dev",
 		Type:    "hub",
 		DNSName: "test.example.com",
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{
 					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
