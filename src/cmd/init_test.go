@@ -214,3 +214,61 @@ func TestRunNormalModeDoesNotCreateRenovateConfigOnValidationError(t *testing.T)
 	require.ErrorContains(t, err, "validate env")
 	assert.NoFileExists(t, filepath.Join(workDir, "renovate.json"))
 }
+
+func TestInitCatalogUpdateCI(t *testing.T) {
+	for _, tt := range []struct {
+		name   string
+		flags  []string
+		github bool
+		gitlab bool
+		prep   bool
+	}{
+		{name: "default"},
+		{name: "github", flags: []string{"--github-actions"}, github: true},
+		{name: "gitlab", flags: []string{"--gitlab-ci"}, gitlab: true},
+		{name: "both", flags: []string{"--github-actions", "--gitlab-ci"}, github: true, gitlab: true},
+		{name: "prep", flags: []string{"--prep", "--github-actions", "--gitlab-ci"}, prep: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			workDir := t.TempDir()
+			bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
+			require.NoError(t, err)
+			envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
+			args := []string{"kubara", "--work-dir", workDir, "--env-file", envPath,
+				"init", "--bootstrap-catalog", bootstrapPath, "--catalog", generalPath,
+				"--catalog-overwrite", "--renovate=false"}
+			args = append(args, tt.flags...)
+			run := func(args []string) {
+				app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+				require.NoError(t, app.Run(context.Background(), args))
+			}
+			run(args)
+			paths := map[string]bool{
+				".github/workflows/kubara-update.yaml": tt.github,
+				".gitlab-ci.yml":                       tt.gitlab,
+				".scripts/kubara-catalog-update.sh":    tt.github || tt.gitlab,
+				".scripts/install-oras.sh":             tt.gitlab,
+			}
+			for path, wanted := range paths {
+				target := filepath.Join(workDir, path)
+				if wanted {
+					assert.FileExists(t, target)
+					require.NoError(t, os.WriteFile(target, []byte("existing content"), 0o644))
+				} else {
+					assert.NoFileExists(t, target)
+				}
+			}
+			if !tt.prep {
+				run(args)
+				run(append(args, "--overwrite"))
+				for path, wanted := range paths {
+					if wanted {
+						contents, err := os.ReadFile(filepath.Join(workDir, path))
+						require.NoError(t, err)
+						assert.Equal(t, "existing content", string(contents))
+					}
+				}
+			}
+		})
+	}
+}

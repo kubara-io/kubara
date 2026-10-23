@@ -2,6 +2,7 @@ package catalog
 
 import (
 	"context"
+	"embed"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -13,12 +14,25 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
+//go:embed catalog-validation-*.yaml
+var catalogCITemplates embed.FS
+
 func NewCatalogCreate() *cli.Command {
 	cmd := &cli.Command{
 		Name:        "create",
 		Usage:       "Create a custom catalog directory skeleton",
-		UsageText:   "kubara catalog create CATALOG_NAME",
+		UsageText:   "kubara catalog create [--github-actions] [--gitlab-ci] CATALOG_NAME",
 		Description: "Scaffolds a custom catalog directory with Catalog.yaml plus platform-configs, platform-components, and services directories.",
+		Flags: []cli.Flag{
+			&cli.BoolFlag{
+				Name:  "github-actions",
+				Usage: "Include a GitHub Actions catalog validation workflow",
+			},
+			&cli.BoolFlag{
+				Name:  "gitlab-ci",
+				Usage: "Include a GitLab catalog validation pipeline",
+			},
+		},
 		Arguments: []cli.Argument{
 			&cli.StringArg{
 				Name: "catalog-name",
@@ -33,13 +47,14 @@ func NewCatalogCreate() *cli.Command {
 				cli.ShowSubcommandHelpAndExit(cmd, 1)
 			}
 
-			return CreateCatalog(catalogName)
+			return createCatalog(catalogName, cmd.Bool("github-actions"), cmd.Bool("gitlab-ci"))
 		},
 	}
 
 	return cmd
 }
-func CreateCatalog(catalogName string) (err error) {
+
+func createCatalog(catalogName string, githubActions, gitlabCI bool) (err error) {
 	if !catalogTypes.RFC1123Label.MatchString(catalogName) {
 		return fmt.Errorf("catalog name must adhere to rfc 1123: must be 1-63 characters, start with a lowercase letter, contain only lowercase letters, digits, or '-', and end with a letter or digit")
 	}
@@ -83,6 +98,30 @@ func CreateCatalog(catalogName string) (err error) {
 
 	if err = os.WriteFile(filepath.Join(catalogName, "Catalog.yaml"), catalogYaml, 0o600); err != nil {
 		return fmt.Errorf("cannot create Catalog.yaml: %w", err)
+	}
+
+	for _, template := range []struct {
+		enabled bool
+		source  string
+		target  string
+	}{
+		{githubActions, "catalog-validation-github.yaml", ".github/workflows/catalog.yaml"},
+		{gitlabCI, "catalog-validation-gitlab.yaml", ".gitlab-ci.yml"},
+	} {
+		if !template.enabled {
+			continue
+		}
+		contents, readErr := catalogCITemplates.ReadFile(template.source)
+		if readErr != nil {
+			return fmt.Errorf("read CI template: %w", readErr)
+		}
+		path := filepath.Join(catalogName, template.target)
+		if err = os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+			return fmt.Errorf("create CI directory: %w", err)
+		}
+		if err = os.WriteFile(path, contents, 0o600); err != nil {
+			return fmt.Errorf("write CI template: %w", err)
+		}
 	}
 
 	log.Info().Msg("Catalog has been successfully created")
