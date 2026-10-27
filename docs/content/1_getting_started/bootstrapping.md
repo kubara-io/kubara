@@ -365,6 +365,11 @@ the generated image pull secret is in use for a private registry or commerical a
   
 ---  
 
+#### Optional registry pull secret
+
+Image pull secrets are optional. To disable them, set `imagePullSecretName: ""`
+for the cluster in `config.yaml` and leave `DOCKERCONFIG_BASE64` empty.
+
 #### Changing generated secret references
 
 Do not edit `values.generated.yaml`. `kubara generate --helm` replaces them on every run. To use different backend 

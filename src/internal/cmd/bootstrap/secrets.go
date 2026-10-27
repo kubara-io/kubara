@@ -39,7 +39,7 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 	k8sOpts.DryRun = o.DryRun
 
 	var manifest []byte
-	imagePullSecret, err := sm.createImagePullSecret(o.EnvMap, argocdNamespace)
+	imagePullSecret, err := sm.createImagePullSecret(o.EnvMap, argocdNamespace, o.ClusterConfig.RegistrySecretName())
 	if err != nil {
 		return fmt.Errorf("create image pull secret: %w", err)
 	}
@@ -143,8 +143,8 @@ func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1
 }
 
 // createImagePullSecret creates the docker registry pull secret
-func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace string) (*corev1.Secret, error) {
-	if !envconfig.IsConfiguredEnvValue(em.DockerconfigBase64) {
+func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace, name string) (*corev1.Secret, error) {
+	if name == "" || !envconfig.IsConfiguredEnvValue(em.DockerconfigBase64) {
 		return nil, nil
 	}
 
@@ -159,7 +159,7 @@ func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace s
 			Kind:       "Secret",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "image-pull-secret",
+			Name:      name,
 			Namespace: namespace,
 		},
 		Type: corev1.SecretTypeDockerConfigJson,
