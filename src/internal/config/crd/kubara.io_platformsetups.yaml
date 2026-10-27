@@ -208,6 +208,12 @@ spec:
                       description: DNSName is the primary domain name for the cluster.
                       format: hostname
                       type: string
+                    imagePullSecretName:
+                      description: Image Pull Secret Name,description=Shared registry
+                        secret name.
+                      maxLength: 249
+                      pattern: ^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$
+                      type: string
                     name:
                       description: Name is the unique identifier for the cluster.
                       minLength: 1

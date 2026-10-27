@@ -563,7 +563,7 @@ path "kv/metadata/*" {
 		return err
 	}
 
-	if envconfig.IsConfiguredEnvValue(dockerconfigBase64) {
+	if cluster.DefaultImagePullSecretName() != "" && envconfig.IsConfiguredEnvValue(dockerconfigBase64) {
 		dockerconfig, err := utils.DecodeB64(dockerconfigBase64)
 		if err != nil {
 			return fmt.Errorf("decode DOCKERCONFIG_BASE64 for local OpenBao: %w", err)
