@@ -77,6 +77,11 @@ func isConfigOfVersion(raw map[string]any, version string) bool {
 	return v == version && hasVersion
 }
 
+func isV1Alpha5Config(raw map[string]any) bool {
+	version, hasVersion := raw["version"]
+	return version == ConfigVersionV1Alpha5 && hasVersion
+}
+
 func clusterLabel(cluster map[string]any, clusterIndex int) string {
 	if name, ok := cluster["name"].(string); ok && strings.TrimSpace(name) != "" {
 		return fmt.Sprintf("cluster %q", name)

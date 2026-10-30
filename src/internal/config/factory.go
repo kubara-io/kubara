@@ -31,6 +31,9 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 				},
 			},
 		},
+		ClusterSecrets: ClusterSecrets{
+			Provider: ClusterSecretsProviderAutoRotator,
+		},
 	}
 	if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 		helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)

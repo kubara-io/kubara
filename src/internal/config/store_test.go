@@ -59,6 +59,9 @@ func newValidTestConfig() *Config {
 							},
 						},
 					},
+					ClusterSecrets: ClusterSecrets{
+						Provider: ClusterSecretsProviderAutoRotator,
+					},
 				},
 				Services: service.Services{
 					"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
@@ -1259,7 +1262,7 @@ clusters:
     dnsName: spoke.example.com
     catalogs:
       - %q
-`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
@@ -1280,7 +1283,7 @@ clusters:
     dnsName: hub.example.com
     catalogs:
       - %q
-`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
 
 	invalidConfigPath := filepath.Join(tempDir, "invalid-config.yaml")
 	require.NoError(t, os.WriteFile(invalidConfigPath, []byte(invalidHubWithoutArgoCDYAML), 0644))

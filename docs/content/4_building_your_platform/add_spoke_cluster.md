@@ -96,14 +96,20 @@ KUBECONFIG=/tmp/hub.yaml kubara bootstrap spoke-1 \
   --initial-kubeconfig /tmp/spoke.yaml
 ```
 
-You can also pass `--kubeconfig /tmp/hub.yaml` instead of setting the environment variable. To customize the namespace where the `kubara-agent` ServiceAccount is created on the spoke (defaults to `kubara-system`), pass `--namespace <name>`.
+You can also pass `--kubeconfig /tmp/hub.yaml` instead of setting the environment variable. Re-running this command with a valid `--initial-kubeconfig` resets the spoke credential secret on the hub and restarts the onboarding flow if recovery is ever needed.
 
 Output:
 
 ```text
-2026-10-20 08:40:47 INF Created initial cluster secret "spoke-1-cluster-secret"
-2026-10-20 08:40:47 INF Started credential rotator job "cluster-credential-rotator-bootstrap-zrrmg" for spoke "spoke-1"
-2026-10-20 08:40:53 INF Spoke cluster "spoke-1" onboarded successfully with kubara-agent namespace "kubara-system"
+2026-10-20 08:40:45 INF Adding helm repositories
+2026-10-20 08:40:46 INF Refreshed helm repository index
+2026-10-20 08:40:46 INF Updating helm chart dependencies
+2026-10-20 08:40:47 INF Applying CRDs
+2026-10-20 08:40:49 INF CRDs applied and established for: "bootstrap-crds"
+2026-10-20 08:40:49 INF Applied ClusterSecretStore to spoke cluster
+2026-10-20 08:40:49 INF Created initial cluster secret "spoke-1-cluster-secret"
+2026-10-20 08:40:49 INF Waiting for credential rotator to onboard spoke "spoke-1"...
+2026-10-20 08:41:05 INF Spoke cluster "spoke-1" onboarded successfully
 ```
 
 ### How onboarding works under the hood
@@ -119,24 +125,24 @@ sequenceDiagram
 
     Operator->>Hub: kubara bootstrap spoke-1 (passes initial kubeconfig)
     Operator->>Spoke: Apply bootstrap CRDs (and optional ClusterSecretStore)
-    Hub->>Hub: Upsert spoke-1-cluster-secret with bootstrapKubeconfig
-    Hub->>Rotator: Start onboarding Job from CronJob template
+    Operator->>Hub: Upsert spoke-1-cluster-secret with bootstrapKubeconfig
+    Rotator->>Hub: Scheduled CronJob picks up spoke-1-cluster-secret
     Rotator->>Spoke: Connect via initial kubeconfig
-    Rotator->>Spoke: Create kubara-agent SA & ClusterRoleBinding
+    Rotator->>Spoke: Create kubara-agent SA & ClusterRoleBinding in kubara-system
     Rotator->>Rotator: Mint short-lived rotating bearer token
-    Rotator->>Hub: Update spoke-1-cluster-secret & project into argocd
+    Rotator->>Hub: Wipe bootstrapKubeconfig, update spoke-1-cluster-secret & project into argocd
     Argo->>Spoke: Connect via rotating token & reconcile workloads
 ```
 
 During the onboarding command:
 
-1. **Hub connection**: `kubara` connects to the hub cluster via `KUBECONFIG`. It verifies that the authoritative `<spoke-name>-config` ConfigMap exists in `kubara-system`.
-2. **Spoke CRD and secret store setup**: `kubara` connects to the spoke cluster using `--initial-kubeconfig`, applies and waits for the required CRDs from the bootstrap catalog's `bootstrap-crds` service, and (if `--with-es-css-file` is provided) applies the `ClusterSecretStore` manifest.
-3. **Initial secret creation**: `kubara` creates an initial cluster credentials secret (`<spoke-name>-cluster-secret`) in `kubara-system` on the hub, storing the provided `--initial-kubeconfig` under the `bootstrapKubeconfig` key.
-4. **Rotator job execution**: `kubara` triggers a one-time onboarding Job (`cluster-credential-rotator-bootstrap-<suffix>`) from the `cluster-credential-rotator` CronJob on the hub.
-5. **Agent setup on the spoke**: The rotator job uses the initial kubeconfig to connect directly to the spoke cluster. It creates the `kubara-agent` ServiceAccount in the specified namespace (default: `kubara-system`) and configures cluster role permissions.
-6. **Credential minting and projection**: The rotator mints short-lived rotating bearer token credentials for the `kubara-agent` ServiceAccount. It updates the secret in `kubara-system` and projects the cluster secret into `argocd`, allowing Argo CD to connect to the spoke.
-7. **Continuous rotation**: The `cluster-credential-rotator` CronJob on the hub continues to rotate the spoke credentials on schedule. The initial kubeconfig is not needed again after onboarding.
+1. **Hub verification**: `kubara` connects to the hub cluster via `KUBECONFIG` and verifies that both the authoritative `<spoke-name>-config` ConfigMap and the `cluster-credential-rotator` CronJob exist in `kubara-system`.
+2. **Spoke CRD and secret store setup**: `kubara` connects to the spoke cluster using `--initial-kubeconfig`, applies and waits for the required CRDs from the bootstrap catalog's `bootstrap-crds` service, and (if `--with-es-css-file` is provided) renders and applies the `ClusterSecretStore` manifest.
+3. **Initial secret creation**: `kubara` creates or resets the cluster credentials secret (`<spoke-name>-cluster-secret`) in `kubara-system` on the hub, storing `--initial-kubeconfig` under the `bootstrapKubeconfig` key.
+4. **Scheduled rotator pickup**: `kubara` waits for the `cluster-credential-rotator` CronJob on the hub (running every 3 minutes) to process `<spoke-name>-cluster-secret`.
+5. **Agent setup on the spoke**: The rotator uses the initial kubeconfig to connect to the spoke cluster, creates the `kubara-agent` ServiceAccount in `kubara-system`, and configures its cluster role binding.
+6. **Credential minting, cleanup, and projection**: The rotator mints a 1-hour bearer token for `kubara-agent`, removes `bootstrapKubeconfig` from `<spoke-name>-cluster-secret`, marks `kubara.io/rotation-status: ready`, and projects the cluster secret into `argocd` so Argo CD can connect to the spoke.
+7. **Continuous rotation**: The `cluster-credential-rotator` CronJob refreshes tokens expiring within 15 minutes. The initial kubeconfig is wiped from the hub after onboarding.
 
 ## 6. Configure External Secrets and roll out workloads
 
@@ -183,9 +189,9 @@ Once the secret store connects to your secret backend, Argo CD reconciles all re
 
 ![Hub_n_Spoke](../assets/diagrams.drawio)
 
-### Fallback: Static ExternalSecrets (when selfManaged is disabled)
+### Fallback: Static ExternalSecrets
 
-When `argocd.selfManaged` is set to `disabled` on the hub cluster (or `clusterSecrets.useExternalSecrets: true`), Argo CD renders static `ExternalSecret` manifests for spoke clusters instead of using `cluster-credential-rotator`.
+When `argocd.clusterSecrets.provider` is set to `external-secrets` on the hub cluster in `config.yaml` (or `clusterSecrets.useExternalSecrets: true` in Argo CD chart values), Argo CD renders static `ExternalSecret` manifests for spoke clusters instead of using `cluster-credential-rotator`.
 
 In that mode, store the spoke kubeconfig in your secret backend (Vault/Secret Manager) under:
 `<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>`

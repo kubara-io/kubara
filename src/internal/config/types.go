@@ -137,9 +137,21 @@ func (m GitAuthMode) Validate() error {
 }
 
 type ArgoCD struct {
-	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
-	Repo        RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	HelmRepo    *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	SelfManaged    ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
+	Repo           RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo       *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	ClusterSecrets ClusterSecrets          `json:"clusterSecrets,omitempty" yaml:"clusterSecrets,omitempty"`
+}
+
+type ClusterSecretsProvider string
+
+const (
+	ClusterSecretsProviderAutoRotator     ClusterSecretsProvider = "auto-rotator"
+	ClusterSecretsProviderExternalSecrets ClusterSecretsProvider = "external-secrets"
+)
+
+type ClusterSecrets struct {
+	Provider ClusterSecretsProvider `json:"provider,omitempty" yaml:"provider,omitempty" jsonschema:"title=Cluster Secrets Provider,description=The provider used for provisioning spoke cluster credentials into Argo CD.,enum=auto-rotator,enum=external-secrets,default=auto-rotator"`
 }
 
 type RepoProto struct {
