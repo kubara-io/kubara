@@ -53,6 +53,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 			},
 		},
 		Terraform: &Terraform{
+			EphemeralSecrets:  true,
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge, ske or cce>",
@@ -132,6 +133,7 @@ func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Clu
 			},
 		},
 		Terraform: &Terraform{
+			EphemeralSecrets:  true,
 			Provider:          "<provider>",
 			ProjectID:         "<project-id>",
 			KubernetesType:    "<edge or ske>",
