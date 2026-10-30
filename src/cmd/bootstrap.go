@@ -31,7 +31,6 @@ type BootstrapFlags struct {
 	DryRun                 bool
 	Timeout                time.Duration
 	InitialKubeconfig      string
-	AgentNamespace         string
 }
 
 var deprecatedBootstrapCRDFlags = []string{
@@ -41,10 +40,9 @@ var deprecatedBootstrapCRDFlags = []string{
 
 func NewBootstrapFlags() *BootstrapFlags {
 	return &BootstrapFlags{
-		EnvFile:        ".env",
-		EnvPrefixFlag:  "KUBARA_",
-		Timeout:        2 * time.Minute,
-		AgentNamespace: "kubara-system",
+		EnvFile:       ".env",
+		EnvPrefixFlag: "KUBARA_",
+		Timeout:       5 * time.Minute,
 	}
 }
 
@@ -55,7 +53,7 @@ func NewBootstrapCmd() *cli.Command {
 		Name:  "bootstrap",
 		Usage: "Bootstrap a hub or onboard a spoke cluster",
 		UsageText: `kubara bootstrap CLUSTER_NAME [--local]
-kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH [--namespace NAMESPACE]`,
+kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH`,
 		ArgsUsage:   "CLUSTER_NAME",
 		Description: "Bootstraps Argo CD onto a hub cluster, or onboards a spoke cluster. When --local is defined for a hub cluster, it automatically provisions an isolated local environment using kind.",
 		Arguments: []cli.Argument{
@@ -97,6 +95,9 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		if envKubeconfig := os.Getenv("KUBECONFIG"); envKubeconfig != "" {
 			kubeconfigPath = envKubeconfig
 		}
+	}
+	if strings.TrimSpace(kubeconfigPath) == "" {
+		kubeconfigPath = defaultKubeconfigPath
 	}
 
 	kubeconf, err := utils.GetFullPath(kubeconfigPath, cwd)
@@ -142,16 +143,29 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		bootstrapCatalog = *cs.GetConfig().BootstrapCatalog
 	}
 
+	clusterSecretsProvider := config.ClusterSecretsProviderAutoRotator
+	if cs.GetConfig() != nil {
+		for _, c := range cs.GetConfig().Clusters {
+			if c.Type == config.Hub && c.ArgoCD != nil {
+				if c.ArgoCD.ClusterSecrets.Provider != "" {
+					clusterSecretsProvider = c.ArgoCD.ClusterSecrets.Provider
+				}
+				break
+			}
+		}
+	}
+
 	opts := &bootstrap.Options{
-		Kubeconfig:       kubeconf,
-		Catalog:          loadedCatalog,
-		ClusterConfig:    clusterConfig,
-		ClusterName:      clusterName,
-		WorkDir:          cwd,
-		ConfigFilePath:   configFilePath,
-		Catalogs:         catalogOptions.Catalogs,
-		CatalogOverwrite: catalogOptions.Overwrite,
-		BootstrapCatalog: bootstrapCatalog,
+		Kubeconfig:             kubeconf,
+		Catalog:                loadedCatalog,
+		ClusterConfig:          clusterConfig,
+		ClusterName:            clusterName,
+		WorkDir:                cwd,
+		ConfigFilePath:         configFilePath,
+		Catalogs:               catalogOptions.Catalogs,
+		CatalogOverwrite:       catalogOptions.Overwrite,
+		BootstrapCatalog:       bootstrapCatalog,
+		ClusterSecretsProvider: clusterSecretsProvider,
 	}
 
 	if clusterConfig.Type == config.Spoke {
@@ -202,7 +216,6 @@ func (flags *BootstrapFlags) bootstrapSpoke(
 	}
 
 	opts.InitialKubeconfig = initialKubeconfig
-	opts.AgentNamespace = flags.AgentNamespace
 	opts.PlatformComponents = componentsAbsPath
 	opts.WithESCSSPath = cssAbsPath
 	opts.Timeout = flags.Timeout
@@ -214,18 +227,9 @@ func (flags *BootstrapFlags) bootstrapHub(
 	cmd *cli.Command,
 	opts *bootstrap.Options,
 ) (*bootstrap.Options, error) {
-	if cmd.IsSet("namespace") {
-		return nil, fmt.Errorf("--namespace can only be used with spoke clusters")
-	}
-
 	envFilePath, err := utils.GetFullPath(cmd.String("env-file"), opts.WorkDir)
 	if err != nil {
 		return nil, fmt.Errorf("get env file path: %w", err)
-	}
-
-	kubeconfig := cmd.String("kubeconfig")
-	if strings.TrimSpace(kubeconfig) == "" {
-		kubeconfig = defaultKubeconfigPath
 	}
 
 	componentsAbsPath := flags.PlatformComponentsPath
@@ -344,15 +348,6 @@ func (flags *BootstrapFlags) AddFlags(cmd *cli.Command) {
 			Name:        "initial-kubeconfig",
 			Usage:       "Path to the initial kubeconfig used to onboard a spoke cluster",
 			Destination: &flags.InitialKubeconfig,
-			Config: cli.StringConfig{
-				TrimSpace: true,
-			},
-		},
-		&cli.StringFlag{
-			Name:        "namespace",
-			Value:       flags.AgentNamespace,
-			Usage:       "Namespace for the kubara-agent ServiceAccount on the spoke cluster",
-			Destination: &flags.AgentNamespace,
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},

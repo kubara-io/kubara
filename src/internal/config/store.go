@@ -401,7 +401,7 @@ func (cs *ConfigStore) GetFilepath() string {
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
-		cs.config.Version = ConfigVersionV1Alpha5
+		cs.config.Version = ConfigVersionV1Alpha6
 	}
 
 	// Ensure directory exists

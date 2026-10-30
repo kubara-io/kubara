@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -232,6 +233,12 @@ func buildServiceTemplateFilter(cluster config.Cluster, cat catalog.Catalog) ren
 		if serviceName == "" {
 			return true
 		}
+
+		def, exists := cat.Services[serviceName]
+		if exists && cluster.Type != "" && len(def.Spec.ClusterTypes) > 0 && !slices.Contains(def.Spec.ClusterTypes, string(cluster.Type)) {
+			return false
+		}
+
 		if catalog.IsBootstrapService(serviceName) {
 			return true
 		}

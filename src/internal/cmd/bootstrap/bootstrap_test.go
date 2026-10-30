@@ -172,33 +172,84 @@ func TestUpsertInitialSpokeSecret_CreatesSecretInKubaraSystem(t *testing.T) {
 	ctx := context.Background()
 	client := fake.NewSimpleClientset()
 
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"), "kubara-system")
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"))
 	require.NoError(t, err)
 
 	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
 	require.NoError(t, err)
 	assert.Equal(t, v1.SecretType(clusterCredentialsSecretType), secret.Type)
-	assert.Equal(t, "kubara-system", secret.Annotations[agentNamespaceAnnotation])
 	assert.Equal(t, []byte("kubeconfig-bytes"), secret.Data[bootstrapKubeconfigKey])
 }
 
-func TestUpsertInitialSpokeSecret_RefusesToOverwriteWhenGeneratedKubeconfigExists(t *testing.T) {
+func TestUpsertInitialSpokeSecret_ResetsExistingSecretForRecovery(t *testing.T) {
 	ctx := context.Background()
 	existing := &v1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "spoke-a-cluster-secret",
 			Namespace: "kubara-system",
+			Annotations: map[string]string{
+				rotationStatusAnnotation: "failed",
+				rotationErrorAnnotation:  "token expired",
+			},
 		},
 		Type: v1.SecretType(clusterCredentialsSecretType),
 		Data: map[string][]byte{
-			generatedKubeconfigKey: []byte("already-generated"),
+			generatedKubeconfigKey: []byte("expired-generated"),
+			"token":                []byte("expired-token"),
 		},
 	}
 	client := fake.NewSimpleClientset(existing)
 
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"), "kubara-system")
+	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"))
+	require.NoError(t, err)
+
+	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
+	require.NoError(t, err)
+	assert.Equal(t, map[string][]byte{bootstrapKubeconfigKey: []byte("new-bootstrap")}, secret.Data)
+	assert.Empty(t, secret.Annotations[rotationStatusAnnotation])
+	assert.Empty(t, secret.Annotations[rotationErrorAnnotation])
+}
+
+func TestWaitForSpokeOnboarding_SucceedsWhenReady(t *testing.T) {
+	ctx := context.Background()
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "spoke-a-cluster-secret",
+			Namespace: "kubara-system",
+			Annotations: map[string]string{
+				rotationStatusAnnotation: "ready",
+			},
+		},
+		Data: map[string][]byte{
+			generatedKubeconfigKey: []byte("generated-kubeconfig"),
+			"server":               []byte("https://spoke.example.com:6443"),
+			"name":                 []byte("spoke-a"),
+		},
+	}
+	client := fake.NewSimpleClientset(secret)
+
+	err := waitForSpokeOnboarding(ctx, client, "spoke-a-cluster-secret")
+	require.NoError(t, err)
+}
+
+func TestWaitForSpokeOnboarding_ReturnsErrorWhenFailed(t *testing.T) {
+	ctx := context.Background()
+	secret := &v1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "spoke-a-cluster-secret",
+			Namespace: "kubara-system",
+			Annotations: map[string]string{
+				rotationStatusAnnotation: "failed",
+				rotationErrorAnnotation:  "failed to provision kubara-agent",
+			},
+		},
+	}
+	client := fake.NewSimpleClientset(secret)
+
+	err := waitForSpokeOnboarding(ctx, client, "spoke-a-cluster-secret")
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "already contains generated credentials")
+	assert.Contains(t, err.Error(), "failed to provision kubara-agent")
+	assert.Contains(t, err.Error(), "check cluster-credential-rotator logs")
 }
 
 func TestGetCredsRotatorCronJob_FindsCronJobInKubaraSystem(t *testing.T) {

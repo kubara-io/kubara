@@ -72,6 +72,9 @@ func TestNewClusterFromEnv(t *testing.T) {
 			HelmRepo: &HelmRepository{
 				URL: "https://charts.example.com",
 			},
+			ClusterSecrets: ClusterSecrets{
+				Provider: ClusterSecretsProviderAutoRotator,
+			},
 		},
 		Catalogs: testClusterCatalogs(),
 		// The service defaults are catalog-driven; mirror expected default values.

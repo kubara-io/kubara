@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version:          ConfigVersionV1Alpha5,
+		Version:          ConfigVersionV1Alpha6,
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
@@ -53,6 +53,9 @@ func newValidTestConfig() *Config {
 								TargetRevision: "main",
 							},
 						},
+					},
+					ClusterSecrets: ClusterSecrets{
+						Provider: ClusterSecretsProviderAutoRotator,
 					},
 				},
 				Services: service.Services{
@@ -895,7 +898,7 @@ clusters:
     dnsName: spoke.example.com
     catalogs:
       - %q
-`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
 
 	tempDir := t.TempDir()
 	configPath := filepath.Join(tempDir, "config.yaml")
@@ -916,7 +919,7 @@ clusters:
     dnsName: hub.example.com
     catalogs:
       - %q
-`, ConfigVersionV1Alpha5, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
 
 	invalidConfigPath := filepath.Join(tempDir, "invalid-config.yaml")
 	require.NoError(t, os.WriteFile(invalidConfigPath, []byte(invalidHubWithoutArgoCDYAML), 0644))

@@ -44,9 +44,9 @@ type Options struct {
 	Catalogs           []string
 	CatalogOverwrite   bool
 	LocalState         *LocalState
-	BootstrapCatalog   string
-	InitialKubeconfig  string
-	AgentNamespace     string
+	BootstrapCatalog       string
+	InitialKubeconfig      string
+	ClusterSecretsProvider config.ClusterSecretsProvider
 }
 
 type BootstrapChart struct {

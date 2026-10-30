@@ -118,7 +118,7 @@ Shows a list of commands or help for one command
 Bootstrap a hub or onboard a spoke cluster
 
     kubara bootstrap CLUSTER_NAME [--local]
-    kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH [--namespace NAMESPACE]
+    kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH
 
 **--dry-run**: Run with dry-run
 
@@ -129,8 +129,6 @@ Bootstrap a hub or onboard a spoke cluster
 **--initial-kubeconfig**="": Path to the initial kubeconfig used to onboard a spoke cluster
 
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
-
-**--namespace**="": Namespace for the kubara-agent ServiceAccount on the spoke cluster (default: "kubara-system")
 
 **--platform-components**="": Path to the platform-components directory (default: "platform-components")
 
