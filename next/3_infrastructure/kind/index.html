@@ -1825,6 +1825,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/network_gateway_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gateway API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2966,7 +2994,7 @@ On Windows with Docker Engine running inside WSL2, start <code>cloud-provider-ki
 <li>Forces <code>type: hub</code></li>
 <li>Sets <code>dnsName</code> to the generated <code>traefik.me</code> host</li>
 <li>Sets <code>ssoOrg</code> and <code>ssoTeam</code> to <code>local</code></li>
-<li>Forces <code>ingressClassName: traefik</code></li>
+<li>Forces <code>networking.type: ingress</code> and <code>networking.ingress.className: traefik</code></li>
 <li>Only enables a minimal set of services:</li>
 <li><code>cert-manager</code></li>
 <li><code>external-secrets</code></li>

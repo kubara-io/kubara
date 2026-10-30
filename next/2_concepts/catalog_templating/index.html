@@ -741,6 +741,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label=".cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -1792,6 +1809,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/network_gateway_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gateway API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2716,6 +2761,23 @@ You're not viewing the latest stable version.
     </span>
   </a>
   
+    <nav class="md-nav" aria-label=".cluster">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#networking" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Networking
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
         
           <li class="md-nav__item">
@@ -2849,7 +2911,7 @@ before you will feel right at home.</p>
 <li><code>.cluster.stage</code></li>
 <li><code>.cluster.type</code></li>
 <li><code>.cluster.dnsName</code></li>
-<li><code>.cluster.ingressClassName</code></li>
+<li><code>.cluster.networking.ingress.className</code></li>
 <li><code>.cluster.publicLoadbalancerIP</code></li>
 <li><code>.cluster.terraform.provider</code></li>
 </ul>
@@ -2861,6 +2923,44 @@ before you will feel right at home.</p>
 <li><code>.cluster.services.traefik.status</code></li>
 <li><code>.cluster.services.cert-manager.config.clusterIssuer.name</code></li>
 </ul>
+<h4 id="networking">Networking</h4>
+<p><code>.cluster.networking</code> contains the current cluster's routing settings.</p>
+<p>The networking block is defined as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">networking</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ingress</span><span class="w"> </span><span class="c1"># or gateway</span>
+<span class="w">  </span><span class="nt">ingress</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">className</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-class-name</span><span class="w"> </span><span class="c1"># defaults to traefik</span>
+<span class="w">  </span><span class="nt">gateway</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">your-gateway</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">namespace-of-controller</span><span class="w"> </span><span class="c1"># e.g. traefik</span>
+<span class="w">    </span><span class="nt">sectionName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">optional-listener-section</span>
+</code></pre></div>
+<p><code>type</code> selects <code>ingress</code> (the default) or <code>gateway</code>. Ingress defaults to class <code>traefik</code>.
+Both blocks may be configured; templates must use <code>type</code> to select the active routing API.
+Unknown configuration fields are rejected during decoding. Keys in service-specific <code>config</code> and annotation maps remain governed by their schemas.
+A Gateway reference requires <code>name</code> and <code>namespace</code>; <code>sectionName</code> optionally selects a listener.</p>
+<p>For example, this cluster configuration supplies a parent Gateway:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">networking</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">gateway</span>
+<span class="w">  </span><span class="nt">gateway</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">platform</span>
+<span class="w">    </span><span class="nt">namespace</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">traefik</span>
+<span class="w">    </span><span class="nt">sectionName</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">websecure</span>
+</code></pre></div>
+<p>Use <code>dig</code> to read the optional reference:</p>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">{{</span><span class="nv">- $gateway</span><span class="w"> </span><span class="p p-Indicator">:</span><span class="nv">= dig "cluster" "networking" "gateway" (dict) . -</span><span class="p p-Indicator">}}</span>
+</code></pre></div>
+<p>Services can provide their own routing settings under:</p>
+<ul>
+<li><code>.cluster.services.&lt;service-name&gt;.networking.gateway</code></li>
+<li><code>.cluster.services.&lt;service-name&gt;.networking.annotations</code></li>
+</ul>
+<p>A service Gateway replaces the complete cluster reference and requires <code>networking.type: gateway</code>.
+An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.</p>
+<p>kubara migrates <code>v1alpha5</code> configs to <code>v1alpha6</code>, moving the legacy <code>ingressClassName</code> to <code>networking.ingress.className</code> when no <code>networking</code> block exists. The migrated config is saved only after successful validation.
+In <code>v1alpha6</code>, the top-level <code>ingressClassName</code> is rejected, even if <code>networking</code> is absent. Configs containing both the legacy field and a structured <code>networking</code> block are rejected to avoid overwriting explicit routing settings.
+For existing catalogs, <code>.cluster.ingressClassName</code> is populated from the Ingress block in memory only.
+Templates supporting older CLI versions can fall back to this field.</p>
 <h3 id="env"><code>.env</code></h3>
 <p><code>.env</code> exposes the loaded <code>.env</code> values that kubara already uses while running.</p>
 <p>Use this only when a template really needs environment-derived data.</p>

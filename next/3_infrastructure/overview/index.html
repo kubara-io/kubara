@@ -1698,6 +1698,34 @@ You're not viewing the latest stable version.
 
               
             
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../6_components/network_gateway_api/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Gateway API
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -2674,7 +2702,7 @@ If your environment gives kubara the same core capabilities, you can skip these 
 <li>Your cluster must be reachable with a kubeconfig.</li>
 <li>You need a secret manager or vault that <code>external-secrets</code> can read from.</li>
 <li>You should have a DNS zone that <code>external-dns</code> can manage automatically, or you need to replace that part with your own process.</li>
-<li>You need an ingress setup that matches your <code>ingressClassName</code> and service annotations.</li>
+<li>You need routing that matches <code>networking.type</code> and its <code>networking.ingress</code> or <code>networking.gateway</code> settings and the service networking settings supported by your catalog.</li>
 </ol>
 <h2 id="available-presets">Available presets</h2>
 <ul>
