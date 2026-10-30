@@ -11,10 +11,7 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/fake"
 )
 
 const completionMessageTemplate = `
@@ -166,109 +163,6 @@ func TestWriteLocalOpenBaoValuesUsesChartServerImageForAutoUnsealer(t *testing.T
 
 	assert.Contains(t, string(content), `image: '{{ .Values.server.image.registry | default "docker.io" }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default (trimPrefix "v" .Chart.AppVersion) }}'`)
 	assert.NotContains(t, string(content), "openbao/openbao:2.0.1")
-}
-
-func TestUpsertInitialSpokeSecret_CreatesSecretInKubaraSystem(t *testing.T) {
-	ctx := context.Background()
-	client := fake.NewSimpleClientset()
-
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("kubeconfig-bytes"))
-	require.NoError(t, err)
-
-	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
-	require.NoError(t, err)
-	assert.Equal(t, v1.SecretType(clusterCredentialsSecretType), secret.Type)
-	assert.Equal(t, []byte("kubeconfig-bytes"), secret.Data[bootstrapKubeconfigKey])
-}
-
-func TestUpsertInitialSpokeSecret_ResetsExistingSecretForRecovery(t *testing.T) {
-	ctx := context.Background()
-	existing := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "spoke-a-cluster-secret",
-			Namespace: "kubara-system",
-			Annotations: map[string]string{
-				rotationStatusAnnotation: "failed",
-				rotationErrorAnnotation:  "token expired",
-			},
-		},
-		Type: v1.SecretType(clusterCredentialsSecretType),
-		Data: map[string][]byte{
-			generatedKubeconfigKey: []byte("expired-generated"),
-			"token":                []byte("expired-token"),
-		},
-	}
-	client := fake.NewSimpleClientset(existing)
-
-	err := upsertInitialSpokeSecret(ctx, client, "spoke-a-cluster-secret", []byte("new-bootstrap"))
-	require.NoError(t, err)
-
-	secret, err := client.CoreV1().Secrets("kubara-system").Get(ctx, "spoke-a-cluster-secret", metav1.GetOptions{})
-	require.NoError(t, err)
-	assert.Equal(t, map[string][]byte{bootstrapKubeconfigKey: []byte("new-bootstrap")}, secret.Data)
-	assert.Empty(t, secret.Annotations[rotationStatusAnnotation])
-	assert.Empty(t, secret.Annotations[rotationErrorAnnotation])
-}
-
-func TestWaitForSpokeOnboarding_SucceedsWhenReady(t *testing.T) {
-	ctx := context.Background()
-	secret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "spoke-a-cluster-secret",
-			Namespace: "kubara-system",
-			Annotations: map[string]string{
-				rotationStatusAnnotation: "ready",
-			},
-		},
-		Data: map[string][]byte{
-			generatedKubeconfigKey: []byte("generated-kubeconfig"),
-			"server":               []byte("https://spoke.example.com:6443"),
-			"name":                 []byte("spoke-a"),
-		},
-	}
-	client := fake.NewSimpleClientset(secret)
-
-	err := waitForSpokeOnboarding(ctx, client, "spoke-a-cluster-secret")
-	require.NoError(t, err)
-}
-
-func TestWaitForSpokeOnboarding_ReturnsErrorWhenFailed(t *testing.T) {
-	ctx := context.Background()
-	secret := &v1.Secret{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "spoke-a-cluster-secret",
-			Namespace: "kubara-system",
-			Annotations: map[string]string{
-				rotationStatusAnnotation: "failed",
-				rotationErrorAnnotation:  "failed to provision kubara-agent",
-			},
-		},
-	}
-	client := fake.NewSimpleClientset(secret)
-
-	err := waitForSpokeOnboarding(ctx, client, "spoke-a-cluster-secret")
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "failed to provision kubara-agent")
-	assert.Contains(t, err.Error(), "check cluster-credential-rotator logs")
-}
-
-func TestGetCredsRotatorCronJob_FindsCronJobInKubaraSystem(t *testing.T) {
-	ctx := context.Background()
-	cronJob := &batchv1.CronJob{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "cluster-credential-rotator",
-			Namespace: "kubara-system",
-			Labels: map[string]string{
-				"app.kubernetes.io/name": "cluster-credential-rotator",
-			},
-		},
-	}
-	client := fake.NewSimpleClientset(cronJob)
-
-	found, err := getCredsRotatorCronJob(ctx, client)
-	require.NoError(t, err)
-	assert.Equal(t, "cluster-credential-rotator", found.Name)
-	assert.Equal(t, "kubara-system", found.Namespace)
 }
 
 func TestPrepareSpokeCluster_FailsWhenBootstrapCRDsMissingFromCatalog(t *testing.T) {

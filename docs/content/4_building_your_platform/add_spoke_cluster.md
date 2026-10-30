@@ -136,13 +136,12 @@ sequenceDiagram
 
 During the onboarding command:
 
-1. **Hub verification**: `kubara` connects to the hub cluster via `KUBECONFIG` and verifies that both the authoritative `<spoke-name>-config` ConfigMap and the `cluster-credential-rotator` CronJob exist in `kubara-system`.
-2. **Spoke CRD and secret store setup**: `kubara` connects to the spoke cluster using `--initial-kubeconfig`, applies and waits for the required CRDs from the bootstrap catalog's `bootstrap-crds` service, and (if `--with-es-css-file` is provided) renders and applies the `ClusterSecretStore` manifest.
-3. **Initial secret creation**: `kubara` creates or resets the cluster credentials secret (`<spoke-name>-cluster-secret`) in `kubara-system` on the hub, storing `--initial-kubeconfig` under the `bootstrapKubeconfig` key.
-4. **Scheduled rotator pickup**: `kubara` waits for the `cluster-credential-rotator` CronJob on the hub (running every 3 minutes) to process `<spoke-name>-cluster-secret`.
-5. **Agent setup on the spoke**: The rotator uses the initial kubeconfig to connect to the spoke cluster, creates the `kubara-agent` ServiceAccount in `kubara-system`, and configures its cluster role binding.
-6. **Credential minting, cleanup, and projection**: The rotator mints a 1-hour bearer token for `kubara-agent`, removes `bootstrapKubeconfig` from `<spoke-name>-cluster-secret`, marks `kubara.io/rotation-status: ready`, and projects the cluster secret into `argocd` so Argo CD can connect to the spoke.
-7. **Continuous rotation**: The `cluster-credential-rotator` CronJob refreshes tokens expiring within 15 minutes. The initial kubeconfig is wiped from the hub after onboarding.
+1. **Spoke CRD and secret store setup**: `kubara` connects to the spoke cluster using `--initial-kubeconfig`, applies and waits for the required CRDs from the bootstrap catalog's `bootstrap-crds` service, and (if `--with-es-css-file` is provided) renders and applies the `ClusterSecretStore` manifest.
+2. **Initial secret creation**: `kubara` connects to the hub cluster via `KUBECONFIG` and creates or resets the cluster credentials secret (`<spoke-name>-cluster-secret`) in `kubara-system`, storing `--initial-kubeconfig` under the `bootstrapKubeconfig` key.
+3. **Scheduled rotator pickup**: `kubara` waits for the `cluster-credential-rotator` CronJob on the hub (running every 3 minutes) to process `<spoke-name>-cluster-secret`.
+4. **Agent setup on the spoke**: The rotator uses the initial kubeconfig to connect to the spoke cluster, creates the `kubara-agent` ServiceAccount in `kubara-system`, and configures its cluster role binding.
+5. **Credential minting, cleanup, and projection**: The rotator mints a 1-hour bearer token for `kubara-agent`, removes `bootstrapKubeconfig` from `<spoke-name>-cluster-secret`, marks `kubara.io/rotation-status: ready`, and projects the cluster secret into `argocd` so Argo CD can connect to the spoke.
+6. **Continuous rotation**: The `cluster-credential-rotator` CronJob refreshes tokens expiring within 15 minutes. The initial kubeconfig is wiped from the hub after onboarding.
 
 ## 6. Configure External Secrets and roll out workloads
 

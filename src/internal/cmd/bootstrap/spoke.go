@@ -5,35 +5,16 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
-	batchv1 "k8s.io/api/batch/v1"
-	corev1 "k8s.io/api/core/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	"sigs.k8s.io/yaml"
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
 	"github.com/kubara-io/kubara/internal/k8s"
+	"github.com/kubara-io/kubara/internal/spoke"
 	"github.com/rs/zerolog/log"
-)
-
-const (
-	spokeCredentialsNamespace = "kubara-system"
-
-	bootstrapKubeconfigKey = "bootstrapKubeconfig"
-	generatedKubeconfigKey = "kubeconfig"
-
-	clusterCredentialsSecretType = "kubara.io/cluster-credentials"
-
-	clusterNameLabel = "kubara.io/cluster-name"
-
-	rotationStatusAnnotation = "kubara.io/rotation-status"
-	rotationErrorAnnotation  = "kubara.io/rotation-error"
 )
 
 // BootstrapSpoke onboards an already-existing spoke cluster through the
@@ -85,51 +66,17 @@ func BootstrapSpoke(ctx context.Context, opts *Options) error {
 	}
 	client := hubClient.Clientset
 
-	configMapName := opts.ClusterName + "-config"
-
-	configMap, err := client.CoreV1().
-		ConfigMaps(spokeCredentialsNamespace).
-		Get(ctx, configMapName, metav1.GetOptions{})
-	if err != nil {
-		return fmt.Errorf(
-			"get cluster configuration ConfigMap %q in namespace %q: %w",
-			configMapName,
-			spokeCredentialsNamespace,
-			err,
-		)
-	}
-
-	if configMap.Labels[clusterNameLabel] != opts.ClusterName {
-		return fmt.Errorf(
-			"ConfigMap %q does not contain required label %s=%s",
-			configMapName,
-			clusterNameLabel,
-			opts.ClusterName,
-		)
-	}
-
-	if _, err := getCredsRotatorCronJob(ctx, client); err != nil {
-		return err
-	}
-
 	if err := prepareSpokeCluster(ctx, opts); err != nil {
 		return err
 	}
 
-	secretName := opts.ClusterName + "-cluster-secret"
-
-	if err := upsertInitialSpokeSecret(
-		ctx,
-		client,
-		secretName,
-		initialKubeconfig,
-	); err != nil {
+	if err := spoke.UpsertBootstrapSecret(ctx, client, opts.ClusterName, initialKubeconfig); err != nil {
 		return err
 	}
 
 	log.Info().Msgf("Waiting for credential rotator to onboard spoke %q...", opts.ClusterName)
 
-	if err := waitForSpokeOnboarding(ctx, client, secretName); err != nil {
+	if err := spoke.WaitForOnboarding(ctx, client, opts.ClusterName); err != nil {
 		return err
 	}
 
@@ -198,152 +145,4 @@ func prepareSpokeCluster(ctx context.Context, opts *Options) error {
 	}
 
 	return nil
-}
-
-func upsertInitialSpokeSecret(
-	ctx context.Context,
-	client kubernetes.Interface,
-	secretName string,
-	initialKubeconfig []byte,
-) error {
-	secrets := client.CoreV1().Secrets(spokeCredentialsNamespace)
-
-	secret, err := secrets.Get(ctx, secretName, metav1.GetOptions{})
-
-	if apierrors.IsNotFound(err) {
-		_, err = secrets.Create(
-			ctx,
-			&corev1.Secret{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      secretName,
-					Namespace: spokeCredentialsNamespace,
-				},
-				Type: corev1.SecretType(clusterCredentialsSecretType),
-				Data: map[string][]byte{
-					bootstrapKubeconfigKey: initialKubeconfig,
-				},
-			},
-			metav1.CreateOptions{},
-		)
-		if err != nil {
-			return fmt.Errorf("create initial cluster secret %q: %w", secretName, err)
-		}
-
-		log.Info().Msgf("Created initial cluster secret %q", secretName)
-		return nil
-	}
-
-	if err != nil {
-		return fmt.Errorf("read initial cluster secret %q: %w", secretName, err)
-	}
-
-	updated := secret.DeepCopy()
-	updated.Data = map[string][]byte{
-		bootstrapKubeconfigKey: initialKubeconfig,
-	}
-
-	if updated.Annotations != nil {
-		delete(updated.Annotations, rotationStatusAnnotation)
-		delete(updated.Annotations, rotationErrorAnnotation)
-	}
-
-	updated.Type = corev1.SecretType(clusterCredentialsSecretType)
-
-	if _, err := secrets.Update(ctx, updated, metav1.UpdateOptions{}); err != nil {
-		return fmt.Errorf("update initial cluster secret %q: %w", secretName, err)
-	}
-
-	log.Info().Msgf("Reset initial cluster secret %q for onboarding", secretName)
-	return nil
-}
-
-func getCredsRotatorCronJob(ctx context.Context, client kubernetes.Interface) (batchv1.CronJob, error) {
-	cronJobs, err := client.BatchV1().
-		CronJobs(spokeCredentialsNamespace).
-		List(ctx, metav1.ListOptions{
-			LabelSelector: "app.kubernetes.io/name=cluster-credential-rotator",
-		})
-	if err != nil {
-		return batchv1.CronJob{}, fmt.Errorf("discover credential rotator CronJob: %w", err)
-	}
-
-	if len(cronJobs.Items) == 1 {
-		return cronJobs.Items[0], nil
-	}
-
-	if len(cronJobs.Items) > 1 {
-		return batchv1.CronJob{}, fmt.Errorf(
-			"invalid setup: found multiple credential rotator CronJobs in namespace %q",
-			spokeCredentialsNamespace,
-		)
-	}
-
-	return batchv1.CronJob{}, fmt.Errorf(
-		"credential rotator CronJob not found in namespace %q; ensure the Hub has reconciled the credential rotator",
-		spokeCredentialsNamespace,
-	)
-}
-
-func waitForSpokeOnboarding(ctx context.Context, client kubernetes.Interface, secretName string) error {
-	ticker := time.NewTicker(2 * time.Second)
-	defer ticker.Stop()
-
-	for {
-		secret, err := client.CoreV1().
-			Secrets(spokeCredentialsNamespace).
-			Get(ctx, secretName, metav1.GetOptions{})
-		if err != nil {
-			return fmt.Errorf("read cluster secret %q: %w", secretName, err)
-		}
-
-		switch secret.Annotations[rotationStatusAnnotation] {
-		case "ready":
-			if len(secret.Data[generatedKubeconfigKey]) == 0 {
-				return fmt.Errorf(
-					"credential rotator marked secret %q ready but it contains no generated credentials",
-					secretName,
-				)
-			}
-			if len(secret.Data["server"]) == 0 {
-				return fmt.Errorf(
-					"credential rotator marked secret %q ready but it contains no cluster server",
-					secretName,
-				)
-			}
-			if len(secret.Data["name"]) == 0 {
-				return fmt.Errorf(
-					"credential rotator marked secret %q ready but it contains no cluster name",
-					secretName,
-				)
-			}
-			return nil
-
-		case "failed":
-			reason := strings.TrimSpace(secret.Annotations[rotationErrorAnnotation])
-			if reason != "" {
-				return fmt.Errorf(
-					"credential rotation failed for secret %q: %s (check cluster-credential-rotator logs in namespace %q)",
-					secretName,
-					reason,
-					spokeCredentialsNamespace,
-				)
-			}
-			return fmt.Errorf(
-				"credential rotation failed for secret %q (check cluster-credential-rotator logs in namespace %q)",
-				secretName,
-				spokeCredentialsNamespace,
-			)
-		}
-
-		select {
-		case <-ctx.Done():
-			return fmt.Errorf(
-				"waiting for credential rotator to onboard secret %q: %w (check cluster-credential-rotator logs in namespace %q)",
-				secretName,
-				ctx.Err(),
-				spokeCredentialsNamespace,
-			)
-		case <-ticker.C:
-		}
-	}
 }
