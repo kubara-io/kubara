@@ -13,6 +13,7 @@ const (
 	ConfigVersionV1Alpha3 = "v1alpha3"
 	ConfigVersionV1Alpha4 = "v1alpha4"
 	ConfigVersionV1Alpha5 = "v1alpha5"
+	ConfigVersionV1Alpha6 = "v1alpha6"
 )
 
 const (
@@ -46,7 +47,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha5,default=v1alpha5"`
+	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha6,default=v1alpha6"`
 	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty" jsonschema:"title=Bootstrap Catalog,description=The global bootstrap catalog to use."`
 	Clusters         []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }
@@ -64,7 +65,7 @@ type Cluster struct {
 	IngressClassName string `json:"ingressClassName,omitempty" yaml:"ingressClassName,omitempty" jsonschema:"title=Ingress Class,description=The ingress class to use for this cluster.,minLength=1,default=traefik"`
 
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
-	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
+	ArgoCD    *ArgoCD          `json:"argocd,omitempty" yaml:"argocd,omitempty" jsonschema:"title=ArgoCD,description=Configuration for argoCD."`
 	Catalogs  []string         `json:"catalogs,omitempty" yaml:"catalogs,omitempty" jsonschema:"title=Catalogs,description=Catalogs to be used by this cluster"`
 	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
 }
@@ -114,9 +115,21 @@ func (m GitAuthMode) Validate() error {
 }
 
 type ArgoCD struct {
-	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
-	Repo        RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
-	HelmRepo    *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	SelfManaged    ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty" jsonschema:"title=ArgoCD Self Managed,description=Whether the cluster manages its own bootstrap Argo CD installation.,enum=enabled,enum=disabled,default=enabled"`
+	Repo           RepoProto               `json:"repo" yaml:"repo" jsonschema:"required,title=ArgoCD Git Repository"`
+	HelmRepo       *HelmRepository         `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty" jsonschema:"title=ArgoCD Helm Charts Repository"`
+	ClusterSecrets ClusterSecrets          `json:"clusterSecrets,omitempty" yaml:"clusterSecrets,omitempty"`
+}
+
+type ClusterSecretsProvider string
+
+const (
+	ClusterSecretsProviderAutoRotator     ClusterSecretsProvider = "auto-rotator"
+	ClusterSecretsProviderExternalSecrets ClusterSecretsProvider = "external-secrets"
+)
+
+type ClusterSecrets struct {
+	Provider ClusterSecretsProvider `json:"provider,omitempty" yaml:"provider,omitempty" jsonschema:"title=Cluster Secrets Provider,description=The provider used for provisioning spoke cluster credentials into Argo CD.,enum=auto-rotator,enum=external-secrets,default=auto-rotator"`
 }
 
 type RepoProto struct {

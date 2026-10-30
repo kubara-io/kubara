@@ -125,7 +125,7 @@ Kubara does not modify an existing Renovate configuration. In that case, `init` 
 If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
 The generated Argo CD repository config records the selected Git auth mode in `argocd.repo.authMode`.
 Repository URLs are stored under `argocd.repo.git`.
-Older configs are migrated up to `v1alpha5` when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`.
+Older configs are migrated up to `v1alpha6` when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`, `argocd` blocks are removed from spoke clusters, and existing multi-cluster configs preserve `argocd.clusterSecrets.provider: external-secrets` on the hub.
 
 By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:
 
@@ -224,7 +224,7 @@ supported version as described in [STACKIT SKE configuration](../3_infrastructur
 
 `terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
-`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd` and `bootstrap-crds` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
+`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd`, `bootstrap-crds`, and `cluster-credential-rotator` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
 
 `ingressClassName` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `networking.annotations` map under `services.<service>.networking.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.

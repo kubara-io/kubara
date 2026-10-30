@@ -41,7 +41,7 @@ func TestCreateOrUpdateCluster_UpdatesExistingClusterIncludingHelmRepo(t *testin
 						Name: "kubara-test-stage.example.com",
 					},
 				},
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -87,7 +87,7 @@ func TestCreateOrUpdateCluster_UpdatesExistingClusterWithoutTerraform(t *testing
 				Stage:     "stage",
 				DNSName:   "kubara-test-stage.example.com",
 				Terraform: nil,
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -154,7 +154,7 @@ func TestCreateOrUpdateCluster_DoesNotOverrideHelmRepoWhenEnvMissing(t *testing.
 						Name: "kubara-test-stage.example.com",
 					},
 				},
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{

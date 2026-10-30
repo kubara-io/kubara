@@ -31,6 +31,9 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 				},
 			},
 		},
+		ClusterSecrets: ClusterSecrets{
+			Provider: ClusterSecretsProviderAutoRotator,
+		},
 	}
 	if envconfig.IsConfiguredEnvValue(e.ArgocdHelmRepoUrl) {
 		helmRepoURL := envconfig.NormalizeHelmRepoURL(e.ArgocdHelmRepoUrl)
@@ -57,7 +60,7 @@ func NewClusterFromEnvWithCatalog(e *envconfig.EnvMap, catalogOptions catalog.Lo
 				Email: "my-test@nowhere.com",
 			},
 		},
-		ArgoCD:   argoCD,
+		ArgoCD:   &argoCD,
 		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),
 		Services: services,
 	}, nil
@@ -128,16 +131,6 @@ func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Clu
 			DNS: DNS{
 				Name:  "<dns-name>",
 				Email: "<dns-mail>",
-			},
-		},
-		ArgoCD: ArgoCD{
-			SelfManaged: ArgoCDSelfManagedEnabled,
-			Repo: RepoProto{
-				AuthMode: GitAuthModeHTTPS,
-				Git: &RepoType{
-					Configs:    Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
-					Components: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
-				},
 			},
 		},
 		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),

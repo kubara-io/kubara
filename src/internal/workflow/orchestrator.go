@@ -19,6 +19,9 @@ func CreateOrUpdateCluster(cfg *config.Config, e *envconfig.EnvMap, catalogOptio
 			// Apply the new values from the environment to the found cluster.
 			gitRepoURL := e.GitRepositoryURL()
 			cfg.Clusters[i].Stage = e.ProjectStage
+			if cfg.Clusters[i].ArgoCD == nil {
+				cfg.Clusters[i].ArgoCD = &config.ArgoCD{}
+			}
 			cfg.Clusters[i].ArgoCD.Repo.AuthMode = config.GitAuthMode(e.GitAuthMode())
 			if cfg.Clusters[i].ArgoCD.Repo.Git == nil {
 				cfg.Clusters[i].ArgoCD.Repo.Git = &config.RepoType{}
