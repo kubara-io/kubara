@@ -103,8 +103,8 @@ Services can provide their own routing settings under:
 A service Gateway replaces the complete cluster reference and requires `networking.type: gateway`.
 An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
 
-kubara migrates `v1alpha4` configs to `v1alpha5`, moving the legacy `ingressClassName` to `networking.ingress.className` when no `networking` block exists. The migrated config is saved only after successful validation.
-In `v1alpha5`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
+kubara migrates `v1alpha5` configs to `v1alpha6`, moving the legacy `ingressClassName` to `networking.ingress.className` when no `networking` block exists. The migrated config is saved only after successful validation.
+In `v1alpha6`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
 For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
 Templates supporting older CLI versions can fall back to this field.
 

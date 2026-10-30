@@ -13,6 +13,7 @@ const (
 	ConfigVersionV1Alpha3 = "v1alpha3"
 	ConfigVersionV1Alpha4 = "v1alpha4"
 	ConfigVersionV1Alpha5 = "v1alpha5"
+	ConfigVersionV1Alpha6 = "v1alpha6"
 )
 
 const (
@@ -46,7 +47,7 @@ func SupportedTerraformProviders() []TerraformProvider {
 
 // Config is the root of the configuration structure.
 type Config struct {
-	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha5,default=v1alpha5"`
+	Version          string    `json:"version,omitempty" yaml:"version,omitempty" jsonschema:"title=Config Version,description=The schema version of this config file.,enum=v1alpha6,default=v1alpha6"`
 	BootstrapCatalog *string   `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty" jsonschema:"title=Bootstrap Catalog,description=The global bootstrap catalog to use."`
 	Clusters         []Cluster `json:"clusters" yaml:"clusters" jsonschema:"title=Clusters,description=A list of cluster configurations."`
 }

@@ -238,7 +238,12 @@ func (cs *ConfigStore) validate() error {
 	if err := validateHubCount(cs.config); err != nil {
 		return fmt.Errorf("each config must contain exactly one hub: %w", err)
 	}
-	if err := validateAgainstSchema(schemaDoc, cs.config); err != nil {
+	cfgForSchema := *cs.config
+	cfgForSchema.Clusters = slices.Clone(cs.config.Clusters)
+	for i := range cfgForSchema.Clusters {
+		cfgForSchema.Clusters[i].IngressClassName = ""
+	}
+	if err := validateAgainstSchema(schemaDoc, &cfgForSchema); err != nil {
 		return fmt.Errorf("validate config: %w", err)
 	}
 	if err := validateProviderKubernetesTypes(cs.config); err != nil {
@@ -416,7 +421,7 @@ func (cs *ConfigStore) GetFilepath() string {
 // SaveToFile saves the configuration to a YAML file
 func (cs *ConfigStore) SaveToFile() error {
 	if strings.TrimSpace(cs.config.Version) == "" {
-		cs.config.Version = ConfigVersionV1Alpha5
+		cs.config.Version = ConfigVersionV1Alpha6
 	}
 
 	// Ensure directory exists

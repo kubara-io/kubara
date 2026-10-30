@@ -180,6 +180,12 @@ func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
 
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.Equal(t, ClusterNetworking{
+		Type: NetworkingIngress,
+		Ingress: &IngressNetworking{
+			ClassName: "traefik",
+		},
+	}, cluster.Networking)
 }
 
 func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {

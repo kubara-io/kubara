@@ -19,7 +19,7 @@ import (
 // Helper function to create a valid test config
 func newValidTestConfig() *Config {
 	return &Config{
-		Version:          ConfigVersionV1Alpha5,
+		Version:          ConfigVersionV1Alpha6,
 		BootstrapCatalog: testBootstrapCatalogPtr(),
 		Clusters: []Cluster{
 			{
@@ -293,7 +293,7 @@ func TestConfigStore_LoadNetworking(t *testing.T) {
 
 func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	cfg := newValidTestConfig()
-	cfg.Version = ConfigVersionV1Alpha4
+	cfg.Version = ConfigVersionV1Alpha5
 	cfg.Clusters[0].Networking = ClusterNetworking{}
 	cfg.Clusters[0].IngressClassName = "custom"
 	rawConfig := configInstance(t, cfg)
@@ -306,7 +306,7 @@ func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 	store := NewConfigStore(dir, path, catalog.LoadOptions{})
 	require.NoError(t, store.Load())
 	cluster := store.GetConfig().Clusters[0]
-	assert.Equal(t, ConfigVersionV1Alpha5, store.GetConfig().Version)
+	assert.Equal(t, ConfigVersionV1Alpha6, store.GetConfig().Version)
 	assert.Equal(t, NetworkingIngress, cluster.Networking.Type)
 	assert.Equal(t, "custom", cluster.Networking.Ingress.ClassName)
 	assert.Equal(t, "custom", cluster.IngressClassName)
@@ -332,7 +332,7 @@ func TestConfigStore_MigrateIngressClassName(t *testing.T) {
 }
 
 func TestConfigStore_RejectReintroducedIngressClassName(t *testing.T) {
-	for _, version := range []string{ConfigVersionV1Alpha4, ConfigVersionV1Alpha5} {
+	for _, version := range []string{ConfigVersionV1Alpha5, ConfigVersionV1Alpha6} {
 		for _, value := range []any{"custom", "traefik", "", nil} {
 			t.Run(fmt.Sprintf("%s/value_%v", version, value), func(t *testing.T) {
 				cfg := newValidTestConfig()
@@ -341,7 +341,7 @@ func TestConfigStore_RejectReintroducedIngressClassName(t *testing.T) {
 				cluster := instance["clusters"].([]any)[0].(map[string]any)
 				cluster["ingressClassName"] = value
 				// New configs must reject the legacy field even without networking.
-				if version == ConfigVersionV1Alpha5 {
+				if version == ConfigVersionV1Alpha6 {
 					delete(cluster, "networking")
 				}
 				data, err := yaml.Marshal(instance)
@@ -1024,6 +1024,7 @@ clusters:
 	assert.Equal(t, "hub", c.Type, "Type should be defaulted")
 	assert.Equal(t, "traefik", c.Networking.Ingress.ClassName, "IngressClassName should be defaulted")
 
+	assert.NoError(t, cs.validate(), "Validate should pass after defaults are applied")
 }
 
 func TestConfigStore_LoadStripsBootstrapServicesFromV1Alpha4Clusters(t *testing.T) {
