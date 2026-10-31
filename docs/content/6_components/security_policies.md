@@ -56,6 +56,30 @@ When determining whether a rule runs in `Audit` or `Enforce` mode, `kubara gener
 2. **Group mode:** Set in `config.yaml` under `services.kyverno-policies.config.<group>.mode` (for example, `itGrundschutz: mode: Enforce`). This applies to all rules in that group unless a specific rule override exists.
 3. **Global default:** Falls back to `Audit` if no group mode or rule override is configured.
 
+## Policy exclusions
+
+With the catalog's `kyverno-policies` chart 2.0.0+, add exclusions in
+`platform-configs/<cluster>/helm/kyverno-policies/values-override.yaml`:
+
+```yaml
+kyverno-policies:
+  policyExclude:
+    disallow-privileged-containers:
+      any:
+        - resources:
+            kinds: [Pod]
+            namespaces: [demo]
+            names: [demo-worker]
+```
+
+This excludes only the Pod `demo-worker` in namespace `demo`. In `names`, `*` matches
+zero or more characters (e.g. `demo-worker-*`) and `?` exactly one character
+(e.g. `demo-worker-?` matches `demo-worker-0`, but not `demo-worker-10`).
+Explicitly include controller kinds when needed. Overriding
+`any` replaces its existing list, so retain bundled entries you still need.
+Before upgrading to 2.0.0, review custom exclusions: earlier versions ignored kinds
+and also matched suffixes on literal names.
+
 ## Policy groups
 
 ### Workload hardening (`itGrundschutz` & PSS baseline)
