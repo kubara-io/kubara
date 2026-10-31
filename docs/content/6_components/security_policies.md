@@ -72,8 +72,10 @@ kyverno-policies:
             names: [demo-worker]
 ```
 
-This excludes only the Pod `demo-worker` in namespace `demo`. Use `demo-worker-*`
-for generated names and explicitly include controller kinds when needed. Overriding
+This excludes only the Pod `demo-worker` in namespace `demo`. In `names`, `*` matches
+zero or more characters (e.g. `demo-worker-*`) and `?` exactly one character
+(e.g. `demo-worker-?` matches `demo-worker-0`, but not `demo-worker-10`).
+Explicitly include controller kinds when needed. Overriding
 `any` replaces its existing list, so retain bundled entries you still need.
 Before upgrading to 2.0.0, review custom exclusions: earlier versions ignored kinds
 and also matched suffixes on literal names.
