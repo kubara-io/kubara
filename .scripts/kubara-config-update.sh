@@ -27,7 +27,8 @@ apply_yaml_if_set() {
   [[ "$current" == "__MISSING__" ]] \
     && die "YAML path missing in config.yaml: ${yaml_path} (because ${src_env} is set)"
 
-  yq eval "${yaml_path} = \"${val}\"" -i "$CFG"
+  # Use strenv to safely read the value from the environment without string interpolation
+  KUBARA_YAML_VAL="$val" yq eval "${yaml_path} = strenv(KUBARA_YAML_VAL)" -i "$CFG"
 }
 
 log "Updating config.yaml (strict mode): $CFG"
@@ -37,8 +38,7 @@ TYPE_PATH=".clusters[0].type"
 type_current="$(yq eval "${TYPE_PATH} // \"__MISSING__\"" "$CFG")"
 [[ "$type_current" == "__MISSING__" ]] && die "YAML path missing in config.yaml: ${TYPE_PATH}"
 
-CLUSTER_TYPE="${KUBARA_CLUSTER_TYPE:-hub}"
-yq eval "${TYPE_PATH} = \"${CLUSTER_TYPE}\"" -i "$CFG"
+KUBARA_YAML_VAL="${KUBARA_CLUSTER_TYPE:-hub}" yq eval "${TYPE_PATH} = strenv(KUBARA_YAML_VAL)" -i "$CFG"
 
 apply_yaml_if_set KUBARA_SSO_ORG             ".clusters[0].ssoOrg"
 apply_yaml_if_set KUBARA_SSO_TEAM            ".clusters[0].ssoTeam"

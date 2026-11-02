@@ -67,7 +67,6 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 	}
 
 	context := map[string]any{
-		"env":     bctx.EnvMap,
 		"cluster": clusterMap,
 		"catalog": resolveCatalog(bctx.Catalog),
 	}

@@ -43,7 +43,7 @@ const (
 	localExternalSecretsPolicy  = "read-access"
 	localOpenBaoInternalAddress = "http://openbao.openbao.svc:8200"
 	// renovate: datasource=helm depName=openbao registryUrl=https://openbao.github.io/openbao-helm
-	localOpenBaoChartVersion = "0.30.2"
+	localOpenBaoChartVersion = "0.30.3"
 )
 
 type localChart struct {
@@ -747,7 +747,7 @@ func writeLocalOpenBaoValues(state *LocalState) error {
 	content := fmt.Sprintf(`# WARNING: This configuration is for LOCAL DEVELOPMENT ONLY.
 # It intentionally stores the unseal keys and initial root token on the persistent volume
 # to bypass the manual unseal process across reboots. Do NOT use this in production!
-# The encrypted storage backend and unseal credentials reside on the same PVC.
+# The encrypted storage and unseal credentials reside on the same PVC.
 
 server:
   dev:
@@ -760,8 +760,8 @@ server:
         address = "[::]:8200"
         tls_disable = 1
       }
-      storage "file" {
-        path = "/openbao/data/backend"
+      storage "pebbledb" {
+        path = "/openbao/data/pebble"
       }
   dataStorage:
     enabled: true
@@ -787,7 +787,7 @@ server:
           umask 077
 
           echo "Starting local auto-unsealer sidecar..."
-          mkdir -p /openbao/data/local-bootstrap /openbao/data/backend
+          mkdir -p /openbao/data/local-bootstrap /openbao/data/pebble
 
           INIT_FILE="/openbao/data/local-bootstrap/init.json"
           TMP_FILE="/openbao/data/local-bootstrap/init.json.tmp"
@@ -832,7 +832,7 @@ server:
               exit 1
             fi
 
-            # 3. Detect mismatched backend storage / init state
+            # 3. Detect mismatched storage / init state
             if [ "$INITIALIZED" = "false" ] && [ -f "$INIT_FILE" ]; then
               echo "FATAL: OpenBao reports initialized=false, but bootstrap file ($INIT_FILE) already exists." >&2
               echo "The OpenBao storage backend and local bootstrap state do not match." >&2

@@ -71,6 +71,13 @@ At this point it prints the instruction to start:
 ```bash
 sudo cloud-provider-kind
 ```
+On Windows with Docker Engine running inside WSL2, start `cloud-provider-kind` with load balancer port mapping enabled and the load balancer tunnel disabled:
+
+```bash
+sudo cloud-provider-kind \
+  --enable-lb-tunnel=false \
+  --enable-lb-port-mapping=true
+```
 
 `cloud-provider-kind` assigns a local IP from the Docker network to the Traefik `LoadBalancer` service.
 
@@ -95,7 +102,7 @@ The local profile does all of the following:
 - Forces `type: hub`
 - Sets `dnsName` to the generated `traefik.me` host
 - Sets `ssoOrg` and `ssoTeam` to `local`
-- Forces `ingressClassName: traefik`
+- Forces `networking.type: ingress` and `networking.ingress.className: traefik`
 - Only enables a minimal set of services:
   - `cert-manager`
   - `external-secrets`
