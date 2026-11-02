@@ -2,7 +2,7 @@ package catalog
 
 // TODO: renovate automatically upgrade / open PRs for releases of our catalogs
 const (
-	DefaultBootstrapCatalog = "oci://ghcr.io/kubara-io/catalogs/bootstrap:6.1.0"
+	DefaultBootstrapCatalog = "oci://ghcr.io/kubara-io/catalogs/bootstrap:6.1.1"
 	DefaultGeneralCatalog   = "oci://ghcr.io/kubara-io/catalogs/general:7.0.0"
 )
 
