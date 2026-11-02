@@ -66,7 +66,7 @@ kubara resolves catalogs in layers:
 New configurations use kubara's general catalog unless catalogs are supplied during `init`. The selected catalog references are stored on the cluster:
 
 ```yaml
-bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:6.1.0
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:6.1.1
 clusters:
   - name: production
     catalogs:
