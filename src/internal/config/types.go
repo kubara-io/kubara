@@ -66,10 +66,19 @@ type Cluster struct {
 	IngressClassName string            `json:"ingressClassName,omitempty" yaml:"-" jsonschema:"-"`
 	Networking       ClusterNetworking `json:"networking,omitempty" yaml:"networking,omitempty" jsonschema:"title=Networking,description=Routing settings consumed by catalog templates."`
 
+	ImagePullSecretName *string `json:"imagePullSecretName,omitempty" yaml:"imagePullSecretName,omitempty" jsonschema:"title=Image Pull Secret Name,description=Shared registry secret name. Empty disables creation and references.,default=image-pull-secret,maxLength=249,pattern=^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$"`
+
 	Terraform *Terraform       `json:"terraform,omitempty" yaml:"terraform,omitempty" jsonschema:"title=Terraform,description=Configuration for terraform resources."`
 	ArgoCD    ArgoCD           `json:"argocd" yaml:"argocd" jsonschema:"required,title=ArgoCD,description=Configuration for argoCD."`
 	Catalogs  []string         `json:"catalogs,omitempty" yaml:"catalogs,omitempty" jsonschema:"title=Catalogs,description=Catalogs to be used by this cluster"`
 	Services  service.Services `json:"services" yaml:"services" jsonschema:"required,title=Services,description=Configuration for deployed services."`
+}
+
+func (c *Cluster) RegistrySecretName() string {
+	if c == nil || c.ImagePullSecretName == nil {
+		return "image-pull-secret"
+	}
+	return *c.ImagePullSecretName
 }
 
 // ClusterNetworking supplies shared routing inputs to catalog templates.

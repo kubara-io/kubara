@@ -169,3 +169,36 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 		assert.Equal(t, "true", secret.StringData["enableOCI"])
 	})
 }
+
+func TestCreateImagePullSecret(t *testing.T) {
+	for _, tt := range []struct {
+		name        string
+		secretName  string
+		credentials string
+		wantSecret  bool
+		wantError   bool
+	}{
+		{"disabled despite credentials", "", "invalid", false, false},
+		{"missing credentials", "image-pull-secret", "", false, false},
+		{"default name", "image-pull-secret", "eyJhdXRocyI6e319", true, false},
+		{"custom name", "registry-auth", "eyJhdXRocyI6e319", true, false},
+		{"invalid credentials", "registry-auth", "invalid", false, true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			secret, err := (&SecretManager{}).createImagePullSecret(&envconfig.EnvMap{DockerconfigBase64: tt.credentials}, "argocd", tt.secretName)
+			if tt.wantError {
+				require.Error(t, err)
+				return
+			}
+			require.NoError(t, err)
+			if !tt.wantSecret {
+				require.Nil(t, secret)
+				return
+			}
+			require.NotNil(t, secret)
+			assert.Equal(t, tt.secretName, secret.Name)
+			assert.Equal(t, "argocd", secret.Namespace)
+			assert.Equal(t, `{"auths":{}}`, secret.StringData[".dockerconfigjson"])
+		})
+	}
+}

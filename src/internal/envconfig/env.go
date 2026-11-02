@@ -38,7 +38,6 @@ type EnvMap struct {
 	_                                   struct{} `doc:"# ✅ These values MUST be known BEFORE running Terraform."`
 	_                                   struct{} `doc:"# 🔁 Everything in <angle brackets> MUST be replaced."`
 	_                                   struct{} `doc:"# 💡 Values without <> are optional and can be left as-is if not needed (e.g. no private image registry)."`
-	_                                   struct{} `doc:"#    It will still create a secret, but it won't be valid."`
 	_                                   struct{} `doc:"\n# Project related values"`
 	ProjectName                         string   `default:"<...>" koanf:"PROJECT_NAME"`
 	ProjectStage                        string   `default:"<...>" koanf:"PROJECT_STAGE"`
@@ -68,7 +67,7 @@ type EnvMap struct {
 	ArgocdHelmRepoUsername              string   `default:"" koanf:"ARGOCD_HELM_REPO_USERNAME" optional:"true"`
 	ArgocdHelmRepoPassword              string   `default:"" koanf:"ARGOCD_HELM_REPO_PASSWORD" optional:"true"`
 	ArgocdHelmRepoUrl                   string   `default:"" koanf:"ARGOCD_HELM_REPO_URL" optional:"true"`
-	_                                   struct{} `doc:"\n# Optional: Container Registry Config"`
+	_                                   struct{} `doc:"\n# Optional: Container Registry Config (leave empty if not needed)."`
 	_                                   struct{} `doc:"# the variable must be base64 encoded - how to: https://docs.kubara.io/latest-stable/9_reference/faq/#how-do-i-create-a-dockerconfigjson-for-env-file"`
 	DockerconfigBase64                  string   `default:"" koanf:"DOCKERCONFIG_BASE64" optional:"true"`
 }
