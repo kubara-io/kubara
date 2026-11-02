@@ -227,3 +227,21 @@ The generated configuration excludes catalog-rendered components, Helm values, a
 The generated `ignorePaths` replaces Renovate’s default and preset-provided exclusions, so other paths (including test and example directories) remain eligible for updates.
 
 Existing Renovate configurations are not overwritten. Add the exclusions above to their `ignorePaths`, preserving any existing entries.
+
+### Generate artifacts in GitHub Actions
+
+Run from the repository root:
+
+```bash
+kubara github-action
+```
+
+Creates `.github/workflows/kubara-generate.yml`. Use `--overwrite` to replace an existing workflow.
+
+PRs changing `config.yaml` trigger generation. Add local catalog paths to the workflow's `paths` filter as needed.
+Generated changes are committed to the same PR, with the output posted as a comment.
+
+Commits use `GITHUB_TOKEN`. To automatically trigger downstream validation, lint, or Terraform/OpenTofu workflows, use a GitHub App token for the push instead.
+
+For Kubara CLI updates, add `customManagers:githubActionsVersions` to your Renovate `extends` list.
+New configurations created by `kubara init` include it. The workflow verifies the download against the selected release's checksums.
