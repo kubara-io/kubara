@@ -44,6 +44,7 @@ nav:
       - Backup & Recovery: 6_components/backup_and_recovery.md
       - Network:
           - ExternalDNS: 6_components/network_external_dns.md
+          - Gateway API: 6_components/network_gateway_api.md
       - Security:
           - Certificates: 6_components/security_certificates.md
           - Policies: 6_components/security_policies.md
