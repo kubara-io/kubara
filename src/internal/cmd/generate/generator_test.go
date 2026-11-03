@@ -49,3 +49,30 @@ func TestBuildEnabledServiceTemplatePathPredicate_AlwaysIncludesBootstrapService
 
 	assert.True(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
 }
+
+func TestBuildEnabledServiceTemplatePathPredicate_SkipsHubOnlyBootstrapServiceForSpoke(t *testing.T) {
+	predicate := buildServiceTemplateFilter(
+		config.Cluster{
+			Type: config.Spoke,
+		},
+		catalog.Catalog{
+			Services: map[string]catalog.ServiceDefinition{
+				"argo-cd": {
+					Spec: catalog.ServiceSpec{
+						ChartPath:    "argo-cd",
+						ClusterTypes: []string{"hub"},
+					},
+				},
+				"cluster-credential-rotator": {
+					Spec: catalog.ServiceSpec{
+						ChartPath:    "cluster-credential-rotator",
+						ClusterTypes: []string{"hub"},
+					},
+				},
+			},
+		},
+	)
+
+	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
+	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "cluster-credential-rotator", "values.generated.yaml.tplt")))
+}

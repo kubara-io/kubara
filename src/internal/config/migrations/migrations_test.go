@@ -38,6 +38,76 @@ func TestMigrateV1Alpha2FilesCleansUpEmptyLegacyCategoryDirs(t *testing.T) {
 	assert.FileExists(t, filepath.Join(otherTerraformSource, "keep.tf"))
 }
 
+func TestMigrateV1Alpha5Config(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha5,
+		"clusters": []any{
+			map[string]any{
+				"name": "hub-cluster",
+				"type": "hub",
+				"argocd": map[string]any{
+					"repo": map[string]any{
+						"git": map[string]any{
+							"configs":    map[string]any{"url": "https://github.com/example/configs.git"},
+							"components": map[string]any{"url": "https://github.com/example/components.git"},
+						},
+					},
+				},
+			},
+			map[string]any{
+				"name": "spoke-cluster",
+				"type": "spoke",
+				"argocd": map[string]any{
+					"repo": map[string]any{
+						"git": map[string]any{
+							"configs": map[string]any{"url": "https://github.com/example/configs.git"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha5Config(config))
+
+	assert.Equal(t, ConfigVersionV1Alpha6, config["version"])
+
+	clusters := config["clusters"].([]any)
+	hub := clusters[0].(map[string]any)
+	hubArgoCD := hub["argocd"].(map[string]any)
+	assert.Equal(t, map[string]any{"provider": "external-secrets"}, hubArgoCD["clusterSecrets"])
+
+	spoke := clusters[1].(map[string]any)
+	assert.NotContains(t, spoke, "argocd")
+}
+
+func TestMigrateV1Alpha5ConfigSingleCluster(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha5,
+		"clusters": []any{
+			map[string]any{
+				"name": "single-hub",
+				"type": "hub",
+				"argocd": map[string]any{
+					"repo": map[string]any{
+						"git": map[string]any{
+							"configs": map[string]any{"url": "https://github.com/example/configs.git"},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha5Config(config))
+	assert.Equal(t, ConfigVersionV1Alpha6, config["version"])
+
+	clusters := config["clusters"].([]any)
+	hub := clusters[0].(map[string]any)
+	hubArgoCD := hub["argocd"].(map[string]any)
+	assert.NotContains(t, hubArgoCD, "clusterSecrets")
+}
+
 func TestMigrateV1Alpha4ConfigRenamesRepo(t *testing.T) {
 	config := map[string]any{
 		"version": ConfigVersionV1Alpha4,

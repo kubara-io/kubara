@@ -1,12 +1,14 @@
 package bootstrap
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -161,4 +163,12 @@ func TestWriteLocalOpenBaoValuesUsesChartServerImageForAutoUnsealer(t *testing.T
 
 	assert.Contains(t, string(content), `image: '{{ .Values.server.image.registry | default "docker.io" }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default (trimPrefix "v" .Chart.AppVersion) }}'`)
 	assert.NotContains(t, string(content), "openbao/openbao:2.0.1")
+}
+
+func TestPrepareSpokeCluster_FailsWhenBootstrapCRDsMissingFromCatalog(t *testing.T) {
+	err := prepareSpokeCluster(context.Background(), &Options{
+		Catalog: catalog.Catalog{},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `bootstrap service "bootstrap-crds" is missing from catalog`)
 }
