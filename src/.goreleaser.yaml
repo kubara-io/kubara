@@ -8,6 +8,7 @@ release:
   github:
     owner: kubara-io
     name: kubara
+  prerelease: auto
   draft: false
   replace_existing_draft: true
   replace_existing_artifacts: true
