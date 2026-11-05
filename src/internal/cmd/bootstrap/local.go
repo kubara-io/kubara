@@ -16,7 +16,6 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 	generatecmd "github.com/kubara-io/kubara/internal/cmd/generate"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/helm"
 	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/localmode"
@@ -155,9 +154,13 @@ Now start cloud-provider-kind in another terminal with: sudo cloud-provider-kind
 	}
 
 	log.Info().Msg("Configuring OpenBao for local external-secrets access")
-	// Intentianolly using the ArgoCD Wizard password for grafana as well. For convenience on the local evaluation
+	// Intentionally using the ArgoCD Wizard password for grafana as well. For convenience on the local evaluation
 	// environment and not requiring the user to fill out yet another variable during bootstrapping.
-	if err := configureLocalOpenBao(ctx, state.KubeconfigPath, opts.ClusterConfig, opts.EnvMap.ArgocdWizardAccountPassword, opts.EnvMap.DockerconfigBase64); err != nil {
+	dockerconfigBase64 := ""
+	if opts.Credentials != nil {
+		dockerconfigBase64 = opts.Credentials.DockerconfigBase64
+	}
+	if err := configureLocalOpenBao(ctx, state.KubeconfigPath, opts.ClusterConfig, opts.WizardPassword, dockerconfigBase64); err != nil {
 		return err
 	}
 	log.Info().
@@ -210,7 +213,6 @@ func newLocalState(opts *Options) *LocalState {
 		LonghornValuesPath:     filepath.Join(opts.PlatformConfigs, opts.ClusterName, "helm", "longhorn", "values-additional.yaml"),
 		OAuth2ProxyValuesPath:  filepath.Join(opts.PlatformConfigs, opts.ClusterName, "helm", "oauth2-proxy", "values-additional.yaml"),
 		ClusterSecretStorePath: filepath.Join(repoLocalRuntime, "external-secrets", "clustersecretstore.yaml"),
-		GenerateEnvPath:        filepath.Join(repoLocalRuntime, "generate.env"),
 	}
 }
 
@@ -466,14 +468,7 @@ func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error
 	}
 	opts.ClusterConfig = clusterConfig
 
-	localEnvPath, err := writeLocalGenerateEnvFile(state, opts.EnvMap)
-	if err != nil {
-		return err
-	}
-
-	log.Info().
-		Str("envFile", localEnvPath).
-		Msg("Regenerating local Helm artifacts")
+	log.Info().Msg("Regenerating local Helm artifacts")
 	generateOptions := &generatecmd.Options{
 		TemplateType:       render.Helm,
 		DryRun:             false,
@@ -483,24 +478,11 @@ func updateLocalClusterConfigAndGenerate(opts *Options, state *LocalState) error
 		CatalogOverwrite:   opts.CatalogOverwrite,
 		PlatformComponents: opts.PlatformComponents,
 		PlatformConfigs:    opts.PlatformConfigs,
-		EnvPath:            localEnvPath,
 	}
 	if err := generateOptions.Run(); err != nil {
 		return fmt.Errorf("generate Helm catalog for local profile: %w", err)
 	}
 	return nil
-}
-
-func writeLocalGenerateEnvFile(state *LocalState, envMap *envconfig.EnvMap) (string, error) {
-	envPath := state.GenerateEnvPath
-	content, err := envconfig.RenderEnvFileFromValues(envMap)
-	if err != nil {
-		return "", fmt.Errorf("render local env file for generation: %w", err)
-	}
-	if err := writeLocalFile(envPath, string(content)); err != nil {
-		return "", fmt.Errorf("write local env file for generation: %w", err)
-	}
-	return envPath, nil
 }
 
 func configureLocalOpenBao(ctx context.Context, kubeconfigPath string, cluster *config.Cluster, grafanaAdminPassword, dockerconfigBase64 string) error {
@@ -563,7 +545,7 @@ path "kv/metadata/*" {
 		return err
 	}
 
-	if envconfig.IsConfiguredEnvValue(dockerconfigBase64) {
+	if isConfigured(dockerconfigBase64) {
 		dockerconfig, err := utils.DecodeB64(dockerconfigBase64)
 		if err != nil {
 			return fmt.Errorf("decode DOCKERCONFIG_BASE64 for local OpenBao: %w", err)

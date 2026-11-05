@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"testing"
 
-	"github.com/kubara-io/kubara/internal/envconfig"
+	"github.com/kubara-io/kubara/internal/config"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,20 +14,31 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		env        *envconfig.EnvMap
+		cluster    *config.Cluster
+		creds      *Credentials
 		wantName   string
 		wantURL    string
 		wantData   map[string]string
 		unwantKeys []string
 	}{
 		{
-			name: "creates legacy HTTPS repository secret",
-			env: &envconfig.EnvMap{
-				ProjectName:            "test",
-				ProjectStage:           "dev",
-				ArgocdGitHttpsUrl:      "https://github.com/example/repo.git",
-				ArgocdGitPatOrPassword: "token",
-				ArgocdGitUsername:      "machine-user",
+			name: "creates standard HTTPS repository secret from GITOPS credentials",
+			cluster: &config.Cluster{
+				Name:  "test",
+				Stage: "dev",
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						Git: &config.RepoType{
+							Configs: config.Repository{
+								URL: "https://github.com/example/repo.git",
+							},
+						},
+					},
+				},
+			},
+			creds: &Credentials{
+				GitUsername: "machine-user",
+				GitPassword: "token",
 			},
 			wantName: "https-init-repo-access",
 			wantURL:  "https://github.com/example/repo.git",
@@ -36,57 +47,57 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 				"password":           "token",
 				"forceHttpBasicAuth": "true",
 				"type":               "git",
+				"project":            "test-dev",
 			},
 			unwantKeys: []string{"sshPrivateKey", "githubAppPrivateKey"},
 		},
 		{
-			name: "creates standard HTTPS repository secret",
-			env: &envconfig.EnvMap{
-				ProjectName:            "test",
-				ProjectStage:           "dev",
-				ArgocdGitAuthMode:      envconfig.GitAuthModeHTTPS,
-				ArgocdGitUrl:           "https://github.com/example/repo.git",
-				ArgocdGitPatOrPassword: "token",
-				ArgocdGitUsername:      "machine-user",
+			name: "creates SSH repository secret from GITOPS credentials",
+			cluster: &config.Cluster{
+				Name:  "test",
+				Stage: "dev",
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						Git: &config.RepoType{
+							Configs: config.Repository{
+								URL: "ssh://git.example.com/example/repo.git",
+							},
+						},
+					},
+				},
 			},
-			wantName: "https-init-repo-access",
-			wantURL:  "https://github.com/example/repo.git",
-			wantData: map[string]string{
-				"username":           "machine-user",
-				"password":           "token",
-				"forceHttpBasicAuth": "true",
-				"type":               "git",
-			},
-			unwantKeys: []string{"sshPrivateKey", "githubAppPrivateKey"},
-		},
-		{
-			name: "creates SSH repository secret",
-			env: &envconfig.EnvMap{
-				ProjectName:            "test",
-				ProjectStage:           "dev",
-				ArgocdGitAuthMode:      envconfig.GitAuthModeSSH,
-				ArgocdGitUrl:           "[EMAIL_REDACTED]:example/repo.git",
-				ArgocdGitSshPrivateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----",
+			creds: &Credentials{
+				GitSSHPrivateKey: "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----",
 			},
 			wantName: "ssh-init-repo-access",
-			wantURL:  "[EMAIL_REDACTED]:example/repo.git",
+			wantURL:  "ssh://git.example.com/example/repo.git",
 			wantData: map[string]string{
 				"sshPrivateKey": "-----BEGIN OPENSSH PRIVATE KEY-----\nkey\n-----END OPENSSH PRIVATE KEY-----",
 				"type":          "git",
+				"project":       "test-dev",
 			},
 			unwantKeys: []string{"username", "password", "forceHttpBasicAuth"},
 		},
 		{
-			name: "creates GitHub App repository secret",
-			env: &envconfig.EnvMap{
-				ProjectName:                         "test",
-				ProjectStage:                        "dev",
-				ArgocdGitAuthMode:                   envconfig.GitAuthModeGitHubApp,
-				ArgocdGitUrl:                        "https://github.com/example/repo.git",
-				ArgocdGitGithubAppID:                "123",
-				ArgocdGitGithubAppInstallationID:    "456",
-				ArgocdGitGithubAppPrivateKey:        "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----",
-				ArgocdGitGithubAppEnterpriseBaseUrl: "https://github.example.com/api/v3",
+			name: "creates GitHub App repository secret from GITOPS credentials",
+			cluster: &config.Cluster{
+				Name:  "test",
+				Stage: "dev",
+				ArgoCD: config.ArgoCD{
+					Repo: config.RepoProto{
+						Git: &config.RepoType{
+							Configs: config.Repository{
+								URL: "https://github.com/example/repo.git",
+							},
+						},
+					},
+				},
+			},
+			creds: &Credentials{
+				GitGitHubAppID:                "123",
+				GitGitHubAppInstallationID:    "456",
+				GitGitHubAppPrivateKey:        "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----",
+				GitGitHubAppEnterpriseBaseURL: "https://github.example.com/api/v3",
 			},
 			wantName: "github-app-init-repo-access",
 			wantURL:  "https://github.com/example/repo.git",
@@ -96,6 +107,7 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 				"githubAppPrivateKey":        "-----BEGIN RSA PRIVATE KEY-----\nkey\n-----END RSA PRIVATE KEY-----",
 				"githubAppEnterpriseBaseUrl": "https://github.example.com/api/v3",
 				"type":                       "git",
+				"project":                    "test-dev",
 			},
 			unwantKeys: []string{"username", "password", "forceHttpBasicAuth", "sshPrivateKey"},
 		},
@@ -103,7 +115,7 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			secret := sm.createGitRepositorySecret(tt.env)
+			secret := sm.createGitRepositorySecret(tt.cluster, tt.creds)
 			require.NotNil(t, secret)
 			assert.Equal(t, tt.wantName, secret.Name)
 			assert.Equal(t, tt.wantURL, secret.StringData["url"])
@@ -123,30 +135,27 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	sm := &SecretManager{}
 
 	t.Run("returns nil when helm repo URL is missing", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
-			ProjectName:       "test",
-			ProjectStage:      "dev",
-			ArgocdHelmRepoUrl: "",
-		})
-		assert.Nil(t, secret)
-	})
-
-	t.Run("returns nil when helm repo URL is legacy placeholder", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
-			ProjectName:       "test",
-			ProjectStage:      "dev",
-			ArgocdHelmRepoUrl: "<...>",
-		})
+		cluster := &config.Cluster{
+			Name:  "test",
+			Stage: "dev",
+		}
+		secret := sm.createHelmRepositorySecret(cluster, &Credentials{})
 		assert.Nil(t, secret)
 	})
 
 	t.Run("creates secret for classic https helm repo", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
-			ProjectName:            "test",
-			ProjectStage:           "dev",
-			ArgocdHelmRepoUrl:      "https://charts.example.com",
-			ArgocdHelmRepoUsername: "user",
-			ArgocdHelmRepoPassword: "pass",
+		cluster := &config.Cluster{
+			Name:  "test",
+			Stage: "dev",
+			ArgoCD: config.ArgoCD{
+				HelmRepo: &config.HelmRepository{
+					URL: "https://charts.example.com",
+				},
+			},
+		}
+		secret := sm.createHelmRepositorySecret(cluster, &Credentials{
+			HelmRepoUsername: "user",
+			HelmRepoPassword: "pass",
 		})
 
 		require.NotNil(t, secret)
@@ -158,11 +167,16 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 	})
 
 	t.Run("creates secret for OCI helm registry and strips oci scheme", func(t *testing.T) {
-		secret := sm.createHelmRepositorySecret(&envconfig.EnvMap{
-			ProjectName:       "test",
-			ProjectStage:      "dev",
-			ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
-		})
+		cluster := &config.Cluster{
+			Name:  "test",
+			Stage: "dev",
+			ArgoCD: config.ArgoCD{
+				HelmRepo: &config.HelmRepository{
+					URL: "oci://registry-1.docker.io/bitnamicharts",
+				},
+			},
+		}
+		secret := sm.createHelmRepositorySecret(cluster, &Credentials{})
 
 		require.NotNil(t, secret)
 		assert.Equal(t, "registry-1.docker.io/bitnamicharts", secret.StringData["url"])

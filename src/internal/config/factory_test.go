@@ -1,157 +1,78 @@
 package config
 
 import (
+	"os"
+	"os/exec"
 	"path/filepath"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/catalog"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func TestNewClusterFromEnv(t *testing.T) {
-	// --- Test Data Setup ---
-	// 1. Create a sample environment map that will be the input to the function.
-	sampleEnvMap := &envconfig.EnvMap{
-		ProjectName:       "kubara-test",
-		ProjectStage:      "dev",
-		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
-		ArgocdHelmRepoUrl: "https://charts.example.com",
-	}
-	sampleEnvMapWithoutHelmRepo := &envconfig.EnvMap{
-		ProjectName:       "kubara-test",
-		ProjectStage:      "dev",
-		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
-	}
-	sampleEnvMapWithOCIHelmRepo := &envconfig.EnvMap{
-		ProjectName:       "kubara-test",
-		ProjectStage:      "dev",
-		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
-		ArgocdHelmRepoUrl: "oci://registry-1.docker.io/bitnamicharts",
-	}
+func TestNewDefaultClusterWithCatalog(t *testing.T) {
+	tempDir := t.TempDir()
 
-	// 2. Manually construct the expected Cluster struct based on the sampleEnvMap.
-	// This is what we expect the function to return.
-	expectedDNSName := "<subdomain.my-domain.com>"
-	expectedCluster := Cluster{
-		Name:    "kubara-test",
-		Stage:   "dev",
-		Type:    "<hub or spoke>",
-		DNSName: expectedDNSName,
-		SSOOrg:  "<my-org>",
-		SSOTeam: "<my-team>",
-		Networking: ClusterNetworking{
-			Type: NetworkingIngress,
-			Ingress: &IngressNetworking{
-				ClassName: "traefik",
-			},
-		},
-		Terraform: &Terraform{
-			Provider:          TerraformProviderNone,
-			ProjectID:         "<project-id>",
-			KubernetesType:    "<edge, ske or cce>",
-			KubernetesVersion: "1.36",
-			DNS: DNS{
-				Name:  expectedDNSName,
-				Email: "my-test@nowhere.com",
-			},
-		},
-		ArgoCD: ArgoCD{
-			SelfManaged: ArgoCDSelfManagedEnabled,
-			Repo: RepoProto{
-				AuthMode: GitAuthModeHTTPS,
-				Git: &RepoType{
-					Configs: Repository{
-						URL:            "https://github.com/org/repo.git",
-						TargetRevision: "main",
-					},
-					Components: Repository{
-						URL:            "https://github.com/org/repo.git",
-						TargetRevision: "main",
-					},
-				},
-			},
-			HelmRepo: &HelmRepository{
-				URL: "https://charts.example.com",
-			},
-		},
-		Catalogs: testClusterCatalogs(),
-		// The service defaults are catalog-driven; mirror expected default values.
-		Services: service.Services{
-			"cert-manager": {
-				Status: service.StatusEnabled,
-				Config: service.Config{
-					"clusterIssuer": map[string]any{
-						"name":   "letsencrypt-staging",
-						"email":  "yourname@your-domain.de",
-						"server": "https://acme-staging-v02.api.letsencrypt.org/directory",
-					},
-				},
-			},
-		},
-	}
+	t.Run("creates normal cluster scaffolding with default placeholders", func(t *testing.T) {
+		got, err := NewDefaultClusterWithCatalog(tempDir, testCatalogLoadOptions())
+		require.NoError(t, err)
 
-	expectedClusterWithoutHelmRepo := expectedCluster
-	expectedClusterWithoutHelmRepo.ArgoCD.HelmRepo = nil
-
-	expectedClusterWithOCIHelmRepo := expectedCluster
-	expectedClusterWithOCIHelmRepo.ArgoCD.HelmRepo = &HelmRepository{
-		URL: "registry-1.docker.io/bitnamicharts",
-	}
-
-	// --- Test Cases Definition ---
-	type args struct {
-		e *envconfig.EnvMap
-	}
-	tests := []struct {
-		name string
-		args args
-		want Cluster
-	}{
-		{
-			name: "should correctly create a cluster config from a given EnvMap",
-			args: args{
-				e: sampleEnvMap,
-			},
-			want: expectedCluster,
-		},
-		{
-			name: "should not set helmRepo when no helm repo URL is provided",
-			args: args{
-				e: sampleEnvMapWithoutHelmRepo,
-			},
-			want: expectedClusterWithoutHelmRepo,
-		},
-		{
-			name: "should normalize oci helm repo URL",
-			args: args{
-				e: sampleEnvMapWithOCIHelmRepo,
-			},
-			want: expectedClusterWithOCIHelmRepo,
-		},
-	}
-
-	// --- Test Execution ---
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := NewClusterFromEnvWithCatalog(tt.args.e, testCatalogLoadOptions())
-			require.NoError(t, err)
-			assert.Equal(t, tt.want, got, "NewClusterFromEnv(%v) should return the expected Cluster struct", tt.args.e)
-		})
-	}
+		assert.Equal(t, "<cluster-name>", got.Name)
+		assert.Equal(t, "<stage>", got.Stage)
+		assert.Equal(t, Hub, got.Type)
+		assert.Equal(t, "<subdomain.my-domain.com>", got.DNSName)
+		assert.Equal(t, "https://git.example.com/platform/repo.git", got.ArgoCD.Repo.Git.Configs.URL)
+		assert.Equal(t, GitAuthModeHTTPS, got.ArgoCD.Repo.AuthMode)
+		assert.Equal(t, testClusterCatalogs(), got.Catalogs)
+		assert.Equal(t, service.StatusEnabled, got.Services["cert-manager"].Status)
+	})
 }
 
-func TestNewClusterFromEnvWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
-	sampleEnvMap := &envconfig.EnvMap{
-		ProjectName:       "kubara-test",
-		ProjectStage:      "dev",
-		ArgocdGitHttpsUrl: "https://github.com/org/repo.git",
-	}
+func TestInferGitRemote(t *testing.T) {
+	tempDir := t.TempDir()
 
-	_, err := NewClusterFromEnvWithCatalog(sampleEnvMap, catalog.LoadOptions{
+	t.Run("returns empty and https when not in git repository", func(t *testing.T) {
+		url, authMode := InferGitRemote(tempDir)
+		assert.Empty(t, url)
+		assert.Equal(t, GitAuthModeHTTPS, authMode)
+	})
+
+	t.Run("infers HTTPS remote and auth mode from git config", func(t *testing.T) {
+		repoDir := filepath.Join(tempDir, "https-repo")
+		require.NoError(t, os.MkdirAll(repoDir, 0o755))
+
+		cmd := exec.Command("git", "init", repoDir)
+		require.NoError(t, cmd.Run())
+
+		cmd = exec.Command("git", "-C", repoDir, "remote", "add", "origin", "https://github.com/org/repo.git")
+		require.NoError(t, cmd.Run())
+
+		url, authMode := InferGitRemote(repoDir)
+		assert.Equal(t, "https://github.com/org/repo.git", url)
+		assert.Equal(t, GitAuthModeHTTPS, authMode)
+	})
+
+	t.Run("infers SSH remote and auth mode from git config", func(t *testing.T) {
+		repoDir := filepath.Join(tempDir, "ssh-repo")
+		require.NoError(t, os.MkdirAll(repoDir, 0o755))
+
+		cmd := exec.Command("git", "init", repoDir)
+		require.NoError(t, cmd.Run())
+
+		cmd = exec.Command("git", "-C", repoDir, "remote", "add", "origin", "ssh://[EMAIL_REDACTED]/org/repo.git")
+		require.NoError(t, cmd.Run())
+
+		url, authMode := InferGitRemote(repoDir)
+		assert.Equal(t, "ssh://[EMAIL_REDACTED]/org/repo.git", url)
+		assert.Equal(t, GitAuthModeSSH, authMode)
+	})
+}
+
+func TestNewDefaultClusterWithCatalog_ReturnsErrorWhenCatalogLoadFails(t *testing.T) {
+	_, err := NewDefaultClusterWithCatalog(t.TempDir(), catalog.LoadOptions{
 		Catalogs: []string{filepath.Join(t.TempDir(), "does-not-exist")},
 	})
 	require.Error(t, err)

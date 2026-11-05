@@ -16,7 +16,6 @@ kubara
 [--config-file|-c]=[value]
 [--decode]
 [--encode]
-[--env-file]=[value]
 [--file]=[value]
 [--help|-h]
 [--kubeconfig]=[value]
@@ -52,8 +51,6 @@ kubara [command]
 
 **--encode**: Base64 encode input
 
-**--env-file**="": Path to the .env file (default: ".env")
-
 **--file**="": Input file path for base64 operation
 
 **--help, -h**: show help
@@ -75,19 +72,13 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]
+>kubara init [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]
 
 **--bootstrap-catalog**="": Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
-
-**--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
 
 **--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use.
-
-**--overwrite**: Overwrite config if exists
-
-**--prep**: Copy embedded prep/ folder into current working directory
 
 **--renovate**: Generate a Renovate configuration for kubara catalog updates if none exists
 
@@ -120,8 +111,6 @@ Bootstrap Argo CD onto a cluster
 >kubara bootstrap CLUSTER_NAME [--local]
 
 **--dry-run**: Run with dry-run
-
-**--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
 **--help, -h**: show help
 
