@@ -1,6 +1,6 @@
 | status       | date       | decision-makers | consulted          | informed           |
 |--------------|------------|-----------------|--------------------|--------------------|
-| **accepted** | 2026-09-23 | kubara-Team     |                    |                    |
+| **accepted** | 2026-10-22 | kubara-Team     | kubara-Team        | -                  |
 
 # Improve Environment Variable Handling
 
