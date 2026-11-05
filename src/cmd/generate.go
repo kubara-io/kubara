@@ -72,10 +72,6 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 	if err != nil {
 		return nil, fmt.Errorf("get catalog options: %w", err)
 	}
-	envPath, err := utils.GetFullPath(cmd.String("env-file"), cwd)
-	if err != nil {
-		return nil, fmt.Errorf("get env path: %w", err)
-	}
 
 	o := &generate.Options{
 		TemplateType:       render.All,
@@ -86,7 +82,6 @@ func (flags *GenerateFlags) ToOptions(cmd *cli.Command) (*generate.Options, erro
 		CatalogOverwrite:   catalogOptions.Overwrite,
 		PlatformComponents: platformComponents,
 		PlatformConfigs:    platformConfigs,
-		EnvPath:            envPath,
 	}
 
 	if flags.Helm && !flags.Terraform {

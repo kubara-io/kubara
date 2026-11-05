@@ -120,13 +120,11 @@ func TestGenerateCmd(t *testing.T) {
 			errContains: "load config",
 		},
 		{
-			name: "error with non-existent env file",
+			name: "success without env file",
 			flags: []string{
-				"--env-file", "/non/existent/.env",
 				"--dry-run",
 			},
-			wantErr:     true,
-			errContains: "Vars not set",
+			wantErr: false,
 		},
 		{
 			name: "successful terraform file generation",
@@ -275,14 +273,10 @@ func TestGenerateCmd(t *testing.T) {
 				}
 				configPath := testutil.CreateTestConfig(t, tempDir, cluster)
 
-				//dummy values
-				envPath := testutil.CreateDefaultGenerateTestEnv(t, tempDir)
-
 				// Add global flags
 				globalFlags := []string{
 					"--config-file", configPath,
 					"--work-dir", tempDir,
-					"--env-file", envPath,
 				}
 				tt.flags = append(globalFlags, tt.flags...)
 			}

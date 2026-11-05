@@ -11,7 +11,6 @@ import (
 
 	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/render"
 	"github.com/kubara-io/kubara/internal/service"
 
@@ -30,12 +29,10 @@ type Options struct {
 	CatalogOverwrite   bool
 	PlatformComponents string
 	PlatformConfigs    string
-	EnvPath            string
 }
 
 type buildContext struct {
 	Catalog  catalog.Catalog
-	EnvMap   envconfig.EnvMap
 	Clusters []config.Cluster
 }
 
@@ -276,11 +273,6 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 	resultIndex := make(map[string]int)
 	resultCluster := make(map[string]string)
 
-	dotEnvMap, err := envconfig.GetCurrentDotEnv(o.EnvPath)
-	if err != nil {
-		return nil, fmt.Errorf("load env: %w", err)
-	}
-
 	for _, cluster := range cnf.Clusters {
 		if cluster.Name != filepath.Base(cluster.Name) || cluster.Name == "." || cluster.Name == ".." {
 			return nil, fmt.Errorf("cluster name %q must be a path-safe name", cluster.Name)
@@ -292,7 +284,6 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 
 		tmplContext, err := buildTemplateContext(cluster, buildContext{
 			Catalog:  cat,
-			EnvMap:   dotEnvMap,
 			Clusters: cnf.Clusters,
 		})
 		if err != nil {

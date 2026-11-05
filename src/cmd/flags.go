@@ -15,7 +15,6 @@ type GlobalFlags struct {
 	KubeconfigFilePath string
 	WorkDir            string
 	ConfigFilePath     string
-	EnvFilePath        string
 	Catalogs           []string
 	CatalogOverwrite   bool
 	TestK8sConnection  bool
@@ -49,7 +48,6 @@ func NewGlobalFlags() *GlobalFlags {
 		KubeconfigFilePath: defaultKubeconfigPath,
 		WorkDir:            ".",
 		ConfigFilePath:     "config.yaml",
-		EnvFilePath:        ".env",
 	}
 }
 
@@ -103,15 +101,6 @@ func (flags *GlobalFlags) CLIFlags() []cli.Flag {
 			Value:       flags.ConfigFilePath,
 			Usage:       "Path to the configuration file",
 			Destination: &flags.ConfigFilePath,
-			Config: cli.StringConfig{
-				TrimSpace: true,
-			},
-		},
-		&cli.StringFlag{
-			Name:        "env-file",
-			Value:       flags.EnvFilePath,
-			Usage:       "Path to the .env file",
-			Destination: &flags.EnvFilePath,
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},

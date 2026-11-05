@@ -25,11 +25,11 @@ Files without the `.tplt` suffix are copied as-is.
 
 ## What data is available in templates?
 
-kubara builds a template context with three top-level objects:
+kubara builds a template context with top-level objects:
 
 - `.cluster`
-- `.env`
 - `.catalog`
+- `.spokes` (on hub clusters)
 
 ### `.cluster`
 
@@ -107,12 +107,6 @@ kubara migrates `v1alpha5` configs to `v1alpha6`, moving the legacy `ingressClas
 In `v1alpha6`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
 For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
 Templates supporting older CLI versions can fall back to this field.
-
-### `.env`
-
-`.env` exposes the loaded `.env` values that kubara already uses while running.
-
-Use this only when a template really needs environment-derived data.
 
 ### `.catalog`
 

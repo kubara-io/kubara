@@ -3,7 +3,6 @@ package cmd
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -25,12 +24,8 @@ func TestNewInitFlags(t *testing.T) {
 
 	flags := NewInitFlags()
 
-	assert.False(t, flags.PrepFlag)
-	assert.False(t, flags.ForceFlag)
 	assert.False(t, flags.LocalFlag)
 	assert.True(t, flags.RenovateFlag)
-	assert.Equal(t, ".env", flags.EnvFileFlag)
-	assert.Equal(t, "KUBARA_", flags.EnvPrefixFlag)
 	assert.Empty(t, flags.BootstrapCatalogFlag)
 }
 
@@ -44,12 +39,75 @@ func TestNewInitCmd(t *testing.T) {
 	}
 
 	assert.Equal(t, "init", command.Name)
-	assert.True(t, flagNames["prep"])
-	assert.True(t, flagNames["overwrite"])
+	assert.False(t, flagNames["prep"])
+	assert.False(t, flagNames["overwrite"])
+	assert.False(t, flagNames["envVarPrefix"])
 	assert.True(t, flagNames["local"])
 	assert.True(t, flagNames["renovate"])
-	assert.True(t, flagNames["envVarPrefix"])
 	assert.True(t, flagNames["bootstrap-catalog"])
+}
+
+func TestInitFailsIfConfigAlreadyExists(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	configPath := filepath.Join(workDir, "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte("existing: true\n"), 0o600))
+
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+	err := app.Run(context.Background(), []string{
+		"kubara",
+		"--work-dir", workDir,
+		"--config-file", configPath,
+		"init",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "config file already exists")
+}
+
+func TestInitLocalModeScaffoldsLocalCluster(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	configPath := filepath.Join(workDir, "config.yaml")
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+
+	err := app.Run(context.Background(), []string{
+		"kubara",
+		"--work-dir", workDir,
+		"--config-file", configPath,
+		"init",
+		"--local",
+		"--renovate=false",
+	})
+	require.NoError(t, err)
+
+	data, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+	var generated struct {
+		Spec config.Config `json:"spec"`
+	}
+	require.NoError(t, yaml.Unmarshal(data, &generated))
+	require.Len(t, generated.Spec.Clusters, 1)
+	assert.Equal(t, "test-cluster", generated.Spec.Clusters[0].Name)
+	assert.Equal(t, "local", generated.Spec.Clusters[0].Stage)
+	assert.Equal(t, "test-cluster-local.traefik.me", generated.Spec.Clusters[0].DNSName)
+	assert.Nil(t, generated.Spec.Clusters[0].Terraform)
+
+	// Verify .gitignore is created and contains .env and env.example
+	gitignorePath := filepath.Join(workDir, ".gitignore")
+	assert.FileExists(t, gitignorePath)
+	gitignoreBytes, err := os.ReadFile(gitignorePath)
+	require.NoError(t, err)
+	assert.Contains(t, string(gitignoreBytes), ".env")
+	assert.Contains(t, string(gitignoreBytes), "env.example")
+
+	// Verify env.example is generated
+	envExamplePath := filepath.Join(workDir, "env.example")
+	assert.FileExists(t, envExamplePath)
+	envExampleBytes, err := os.ReadFile(envExamplePath)
+	require.NoError(t, err)
+	assert.Contains(t, string(envExampleBytes), "GITOPS_GIT_USERNAME")
 }
 
 func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
@@ -58,7 +116,6 @@ func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
 	workDir := t.TempDir()
 	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
 	require.NoError(t, err)
-	envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
 	configPath := filepath.Join(workDir, "config.yaml")
 	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
 
@@ -66,7 +123,6 @@ func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
 		"kubara",
 		"--work-dir", workDir,
 		"--config-file", configPath,
-		"--env-file", envPath,
 		"init",
 		"--bootstrap-catalog", bootstrapPath,
 		"--catalog", generalPath,
@@ -205,14 +261,25 @@ func TestEnsureRenovateConfigPreservesExistingConfig(t *testing.T) {
 	}
 }
 
-func TestRunNormalModeDoesNotCreateRenovateConfigOnValidationError(t *testing.T) {
+func TestInitPreservesExistingEnvExample(t *testing.T) {
 	t.Parallel()
 
 	workDir := t.TempDir()
-	store := config.NewConfigStore(workDir, filepath.Join(workDir, "config.yaml"), catalog.LoadOptions{})
-	options := &InitOptions{cwd: workDir, renovate: true}
+	configPath := filepath.Join(workDir, "config.yaml")
+	envExamplePath := filepath.Join(workDir, "env.example")
+	require.NoError(t, os.WriteFile(envExamplePath, []byte("CUSTOM_CONTENT=1\n"), 0o600))
 
-	err := options.runNormalMode(nil, store, errors.New("invalid environment"))
-	require.ErrorContains(t, err, "validate env")
-	assert.NoFileExists(t, filepath.Join(workDir, "renovate.json"))
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+	err := app.Run(context.Background(), []string{
+		"kubara",
+		"--work-dir", workDir,
+		"--config-file", configPath,
+		"init",
+		"--renovate=false",
+	})
+	require.NoError(t, err)
+
+	content, err := os.ReadFile(envExamplePath)
+	require.NoError(t, err)
+	assert.Equal(t, "CUSTOM_CONTENT=1\n", string(content))
 }
