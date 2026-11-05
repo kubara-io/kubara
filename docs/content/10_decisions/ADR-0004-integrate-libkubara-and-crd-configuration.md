@@ -1,6 +1,6 @@
 | status       | date       | decision-makers | consulted                 | informed          |
 |:-------------|:-----------|:----------------|:--------------------------|:------------------|
-| **proposed** | 2026-10-08 | kubara-Team     |                           |                   |
+| **accepted** | 2026-11-03 | kubara-Team     | kubara-Team               | -                 |
 
 # Integrate libkubara and Declarative CRD-Based Platform Configuration
 
@@ -82,7 +82,7 @@ This eliminates `defaults.go`, `invopop/jsonschema`, and `santhosh-tekuri/jsonsc
 
 #### 5. Structured template data context
 
-`generator.go` builds execution contexts using `libtemplate.NewData()`. Data is cleanly namespaced into `cluster`, `env`, `catalog`, and `spokes`. This prevents naming collisions between cluster configurations and environment variables.
+`generator.go` builds execution contexts using `libtemplate.NewData()`. Data is cleanly namespaced into `cluster`, `catalog` and `spokes`. This prevents naming collisions between cluster configurations and environment variables.
 
 #### 6. Transparent legacy configuration migration
 
