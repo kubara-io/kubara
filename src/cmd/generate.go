@@ -41,6 +41,7 @@ func NewGenerateCmd() *cli.Command {
 			if err != nil {
 				return fmt.Errorf("convert flags to options: %w", err)
 			}
+			o.Context = c
 			return o.Run()
 		},
 	}

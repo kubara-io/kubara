@@ -1,13 +1,14 @@
 package catalog
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	catalogTypes "github.com/kubara-io/kubara/internal/catalog"
-	"sigs.k8s.io/yaml"
+	"go.yaml.in/yaml/v3"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
@@ -76,10 +77,13 @@ func CreateCatalog(catalogName string) (err error) {
 		},
 	}
 
-	catalogYaml, err := yaml.Marshal(catalogScaffold)
-	if err != nil {
+	var output bytes.Buffer
+	encoder := yaml.NewEncoder(&output)
+	encoder.SetIndent(2)
+	if err := encoder.Encode(catalogScaffold); err != nil {
 		return fmt.Errorf("cannot marshal Catalog.yaml: %w", err)
 	}
+	catalogYaml := output.Bytes()
 
 	if err = os.WriteFile(filepath.Join(catalogName, "Catalog.yaml"), catalogYaml, 0o600); err != nil {
 		return fmt.Errorf("cannot create Catalog.yaml: %w", err)

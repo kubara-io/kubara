@@ -2,7 +2,6 @@ package catalog
 
 import (
 	"fmt"
-	"maps"
 	"regexp"
 	"strings"
 
@@ -86,12 +85,6 @@ type CatalogSpec struct {
 type Catalog struct {
 	// Services maps canonical service names to definitions.
 	Services map[string]ServiceDefinition
-}
-
-func (c Catalog) Clone() Catalog {
-	out := Catalog{Services: make(map[string]ServiceDefinition, len(c.Services))}
-	maps.Copy(out.Services, c.Services)
-	return out
 }
 
 func validateApiObject(apiVersion, kind, name, expectedAPIVersion, expectedKind string) error {

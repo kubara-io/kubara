@@ -1,5 +1,5 @@
 # Mono-repo orchestration Makefile
-.PHONY: all clean test docs-serve docs-build docs-deploy build-binary build-all install-deps help
+.PHONY: all clean test generate docs-serve docs-build docs-deploy build-binary build-all install-deps help
 
 # Default target - build everything
 all: build-binary docs-build
@@ -14,6 +14,10 @@ clean:
 # Run all tests
 test:
 	@$(MAKE) -C src test
+
+# Generate CRD manifests
+generate:
+	@$(MAKE) -C src generate
 
 # Documentation targets
 docs-serve:
@@ -53,6 +57,7 @@ help:
 	@echo "  all              - Build binary and docs"
 	@echo "  clean            - Clean all projects"
 	@echo "  test             - Run Go tests"
+	@echo "  generate         - Generate CRD manifests"
 	@echo "  build-binary     - Build Go binary for current platform"
 	@echo "  build-all        - Build Go binary for all platforms"
 	@echo "  run-binary       - Run Go application"
