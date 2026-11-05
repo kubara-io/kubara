@@ -21,6 +21,10 @@
          <lastmod>2026-11-05</lastmod>
     </url>
     <url>
+         <loc>https://docs.kubara.io/next/10_decisions/ADR-0005-improve-env-var-handling/</loc>
+         <lastmod>2026-11-05</lastmod>
+    </url>
+    <url>
          <loc>https://docs.kubara.io/next/10_decisions/ADR-index/</loc>
          <lastmod>2026-11-05</lastmod>
     </url>
