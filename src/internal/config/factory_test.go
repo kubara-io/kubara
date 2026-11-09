@@ -37,13 +37,18 @@ func TestNewClusterFromEnv(t *testing.T) {
 	// This is what we expect the function to return.
 	expectedDNSName := "<subdomain.my-domain.com>"
 	expectedCluster := Cluster{
-		Name:             "kubara-test",
-		Stage:            "dev",
-		Type:             "<hub or spoke>",
-		DNSName:          expectedDNSName,
-		SSOOrg:           "<my-org>",
-		SSOTeam:          "<my-team>",
-		IngressClassName: "traefik",
+		Name:    "kubara-test",
+		Stage:   "dev",
+		Type:    "<hub or spoke>",
+		DNSName: expectedDNSName,
+		SSOOrg:  "<my-org>",
+		SSOTeam: "<my-team>",
+		Networking: ClusterNetworking{
+			Type: NetworkingIngress,
+			Ingress: &IngressNetworking{
+				ClassName: "traefik",
+			},
+		},
 		Terraform: &Terraform{
 			Provider:          TerraformProviderNone,
 			ProjectID:         "<project-id>",
@@ -175,6 +180,12 @@ func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
 
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.Equal(t, ClusterNetworking{
+		Type: NetworkingIngress,
+		Ingress: &IngressNetworking{
+			ClassName: "traefik",
+		},
+	}, cluster.Networking)
 }
 
 func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {

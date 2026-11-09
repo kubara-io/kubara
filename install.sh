@@ -98,16 +98,21 @@ esac
 echo "Detected Platform: $OS ($ARCH)"
 
 FILENAME="kubara_${VERSION}_${OS}_${ARCH}.tar.gz"
+SBOM_FILE="kubara_${VERSION}_${OS}_${ARCH}.tar.gz.sbom.json"
 CHECKSUM_FILE="kubara_${VERSION}_checksums.txt"
 
 DOWNLOAD_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$FILENAME"
 CHECKSUM_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$CHECKSUM_FILE"
+SBOM_URL="https://github.com/$REPO/releases/download/$LATEST_TAG/$FILENAME.sbom.json"
 
 TMP_DIR=$(mktemp -d)
 cd "$TMP_DIR"
 
 echo "Downloading $FILENAME..."
 curl_wrap -L -o "$FILENAME" "$DOWNLOAD_URL"
+
+echo "Downloading $SBOM_FILE..."
+curl_wrap -L -o "$SBOM_FILE" "$SBOM_URL"
 
 echo "Downloading checksum file..."
 curl_wrap -L -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
