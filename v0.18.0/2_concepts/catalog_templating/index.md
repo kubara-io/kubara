@@ -1,0 +1,206 @@
+# Catalog templating
+
+This page explains how kubara renders catalog templates and allows for cross templating between helm charts, scripts, terraform
+and more. 
+
+## What is a `.tplt` file?
+
+A file ending in `.tplt` is rendered as a Go template during `kubara generate`.
+Utilizing the power of [Sprig template functions](https://masterminds.github.io/sprig/). If you authored Helm charts
+before you will feel right at home.
+
+Example:
+
+```text
+platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
+```
+
+becomes a generated file such as:
+
+```text
+platform-configs/my-hub-dev/helm/homer-dashboard/values.generated.yaml
+```
+
+Files without the `.tplt` suffix are copied as-is.
+
+## What data is available in templates?
+
+kubara builds a template context with three top-level objects:
+
+- `.cluster`
+- `.env`
+- `.catalog`
+
+### `.cluster`
+
+`.cluster` contains the current cluster entry from `config.yaml`.
+
+That means templates can read fields such as:
+
+- `.cluster.name`
+- `.cluster.stage`
+- `.cluster.type`
+- `.cluster.dnsName`
+- `.cluster.networking.ingress.className`
+- `.cluster.publicLoadbalancerIP`
+- `.cluster.terraform.provider`
+
+It also includes the current cluster's resolved services under:
+
+```text
+.cluster.services.<service-name>
+```
+
+For example:
+
+- `.cluster.services.traefik.status`
+- `.cluster.services.cert-manager.config.clusterIssuer.name`
+
+#### Networking
+
+`.cluster.networking` contains the current cluster's routing settings.
+
+The networking block is defined as follows:
+
+```yaml
+networking:
+  type: ingress # or gateway
+  ingress:
+    className: your-class-name # defaults to traefik
+  gateway:
+    name: your-gateway
+    namespace: namespace-of-controller # e.g. traefik
+    sectionName: optional-listener-section
+```
+
+`type` selects `ingress` (the default) or `gateway`. Ingress defaults to class `traefik`.
+Both blocks may be configured; templates must use `type` to select the active routing API.
+Unknown configuration fields are rejected during decoding. Keys in service-specific `config` and annotation maps remain governed by their schemas.
+A Gateway reference requires `name` and `namespace`; `sectionName` optionally selects a listener.
+
+For example, this cluster configuration supplies a parent Gateway:
+
+```yaml
+networking:
+  type: gateway
+  gateway:
+    name: platform
+    namespace: traefik
+    sectionName: websecure
+```
+
+Use `dig` to read the optional reference:
+
+```yaml
+{{- $gateway := dig "cluster" "networking" "gateway" (dict) . -}}
+```
+
+Services can provide their own routing settings under:
+
+- `.cluster.services.<service-name>.networking.gateway`
+- `.cluster.services.<service-name>.networking.annotations`
+
+A service Gateway replaces the complete cluster reference and requires `networking.type: gateway`.
+An omitted listener does not inherit the cluster listener. Catalog templates use these settings to generate routes; Ingress annotations are not automatically translated.
+
+kubara migrates `v1alpha5` configs to `v1alpha6`, moving the legacy `ingressClassName` to `networking.ingress.className` when no `networking` block exists. The migrated config is saved only after successful validation.
+In `v1alpha6`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
+For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
+Templates supporting older CLI versions can fall back to this field.
+
+### `.env`
+
+`.env` exposes the loaded `.env` values that kubara already uses while running.
+
+Use this only when a template really needs environment-derived data.
+
+### `.catalog`
+
+`.catalog` exposes catalog metadata for all known services.
+
+Today this is mainly service metadata such as:
+
+- `.catalog.services.<service-name>.status`
+- `.catalog.services.<service-name>.chartPath`
+- `.catalog.services.<service-name>.clusterTypes`
+
+This is useful when template logic needs catalog-level defaults or service metadata.
+
+## Cross-templating in practice
+
+The Homer example shows the main idea well: one service template can react to settings from other services and from the cluster itself.
+
+From:
+
+```text
+platform-configs/helm/homer-dashboard/values.generated.yaml.tplt
+```
+
+kubara reads values such as:
+
+- The current cluster DNS name `.cluster.dnsName`
+- Whether `oauth2-proxy` is enabled
+- Whether `traefik` is enabled
+- Whether `metallb` is enabled
+- Values from the `cert-manager` service config
+
+This is called **cross-templating**: A template for one service can use data from:
+
+- The cluster
+- Other services in the same cluster
+- Catalog metadata
+
+## Small example
+
+```yaml
+# Dig can traverse a nested map like "cluster.services.<service-name>.status" while staying null safe
+# Meaning if any of the keys listed below is missing it will default to the last value in the
+# list below: "disabled"
+{{- $oauth2ProxyStatus := dig "cluster" "services" "oauth2-proxy" "status" "disabled" . -}}
+{{- $traefikStatus := dig "cluster" "services" "traefik" "status" "disabled" . -}}
+
+ingress:
+  {{- if (eq $oauth2ProxyStatus "enabled") }}
+  enabled: true
+  {{- end }}
+  host: {{ .cluster.dnsName }}
+```
+
+kubara templates can use the [Sprig template functions](https://masterminds.github.io/sprig/).
+The [`dig` function](https://masterminds.github.io/sprig/dicts.html#dig) is especially useful when you need to read nested fields that might be missing or `null`.
+
+This snippet does two things:
+
+1. It checks service state from `.cluster.services`
+2. It renders the hostname from `.cluster.dnsName`
+
+That is the core power of kubara templating: One template can adapt itself to the full cluster configuration and it can
+be applied independent of the ecosystem no matter if the resulting file will be HCL for Terraform, yaml templates for Helm
+charts, custom scripts or others.
+
+## Good template authoring rules
+
+- Prefer simple conditions and simple defaults.
+- Read from `.cluster` first when the value is cluster-specific.
+- Use service config instead of hard-coding environment-specific values.
+- Keep cross-service dependencies obvious and at the top of your templates.
+- Keep chart structure and template path names predictable.
+
+## Terraform-specific note
+
+Provider-specific Terraform template variants are selected from a directory directly below `terraform`:
+
+```text
+platform-configs/terraform/<provider>/
+platform-components/terraform/<provider>/
+```
+
+kubara selects only the matching provider. It removes the provider selector from generated `platform-configs` paths and retains it in reusable `platform-components` module paths.
+
+When a cluster omits Terraform or uses `provider: none`, the default `kubara generate` run skips its Terraform templates. Non-Terraform catalog assets are still copied. Existing generated Terraform output under `platform-configs/<cluster>/terraform/` is left untouched, so any files you keep there (for example Terraform state) are preserved; remove obsolete generated Terraform manually if you no longer need it.
+
+## Where to go next
+
+- To understand the catalog model: [Catalogs](../2_concepts/catalogs.md)
+- To package and share catalogs: [Catalog distribution](../2_concepts/catalog_distribution.md)
+- To author a full catalog: [How to create a Catalog](../4_building_your_platform/create_catalog.md)

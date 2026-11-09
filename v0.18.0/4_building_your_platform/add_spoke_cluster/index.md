@@ -1,0 +1,145 @@
+# How to add a Spoke Cluster
+
+After your hub cluster is running, you can add more Kubernetes spoke clusters and manage them through Argo CD.
+
+You can onboard:
+
+* a new cluster provisioned with kubara Terraform templates, or
+* an existing cluster you already operate.
+
+The Argo CD integration flow is the same in both cases.
+
+## 1. Add spoke cluster to `config.yaml`
+
+To add a new cluster to your `config.yaml` simply type:
+```bash
+kubara cluster add <spoke-name> --catalog /path/to/catalog
+```
+
+Repeat `--catalog` to assign multiple ordered catalogs. The command stores those references in the new cluster's `catalogs` list. Without `--catalog`, it assigns kubara's general catalog.
+
+Later `schema`, `generate`, and `bootstrap` runs automatically resolve the catalogs configured for that spoke. Additional `--catalog` values are appended temporarily and are not persisted.
+
+### Optional: Ingress annotation overrides
+
+Each service supports an optional `networking.annotations` map that is merged with kubara's default annotations when rendering the service values files.
+This is useful when you use an ingress controller other than Traefik that requires controller-specific annotations.
+
+```yaml
+services:
+  kube-prometheus-stack:
+    status: enabled
+    networking:
+      annotations:
+        nginx.ingress.kubernetes.io/auth-url: "https://$host/oauth2/auth"
+        nginx.ingress.kubernetes.io/auth-signin: "https://$host/oauth2/start?rd=$escaped_request_uri"
+```
+
+User-provided annotations are merged on top of kubara defaults using `mergeOverwrite`: values for the same key are overwritten, but kubara defaults that are not present in the override map are preserved.
+
+## 2. Regenerate Terraform and Helm templates
+
+```bash
+# kubara generate creates both helm and terraform files by default
+kubara generate
+```
+
+This creates/updates the spoke cluster overlays in:
+
+* `platform-configs/<spoke-cluster-name>/terraform/...`
+* `platform-configs/<spoke-cluster-name>/helm/...`
+
+This also registers the spokes in the Argo CD `values.generated.yaml`.
+
+## 3. Prepare the spoke cluster
+
+If this is a new cluster, apply Terraform for the spoke entry.
+If the cluster already exists, skip Terraform and continue.
+
+You need the spoke cluster kubeconfig for registration in Argo CD.
+Store it in your secret backend (Vault/Secret Manager), for example:
+The config expects the kubeconfig to be reachable under:
+<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>
+And the secret itself simply be named `kubeconfig`.
+
+By default kubara keeps the original client-certificate based Argo CD cluster config.
+If your kubeconfig should be used with bearer token auth in addition to the certificates, set
+`bootstrapValues.cluster[].authMethod: token` in your Argo CD values. Note that `authMethod` must be exactly `token` or `clientCertificate` (defaults to `clientCertificate`); any other value will trigger a template rendering error.
+
+If Argo CD should only manage selected namespaces on the spoke cluster, set `bootstrapValues.cluster[].namespaces` to the allowed list of namespaces in your Argo CD values (as a YAML list):
+
+```yaml
+bootstrapValues:
+  cluster:
+    - name: spoke-dev
+      namespaces:
+        - team-a
+        - team-b
+```
+
+
+
+## 4. Prepare external-secrets credentials on the spoke cluster
+
+Create provider credentials as Kubernetes secret(s), for example:
+
+```bash
+# Bitwarden
+kubectl -n external-secrets create secret generic bitwarden-access-token \
+  --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
+
+# STACKIT Secrets Manager
+kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
+  --from-literal=username="<USERNAME>" \
+  --from-literal=password="<PASSWORD>"
+```
+
+Then configure the spoke ClusterSecretStore in a chart overlay file, for example:
+`platform-configs/<spoke-cluster-name>/helm/external-secrets/values-additional.yaml`
+
+Example:
+
+```yaml
+clusterSecretStores:
+  workload-0-dev:
+    labels:
+      argocd.argoproj.io/instance: workload-0-external-secrets
+    provider:
+      vault:
+        auth:
+          userPass:
+            path: userpass
+            secretRef:
+              name: stackit-secrets-manager-cred
+              namespace: external-secrets
+              key: password
+            username: "<USERNAME>"
+        path: "<VAULT_PATH>"
+        server: "https://vault.example.com"
+        version: v2
+```
+
+![Hub_n_Spoke](../assets/diagrams.drawio)
+
+## 6. Commit and roll out
+
+Commit and push all updated files.
+
+If Argo CD manages itself, it will reconcile automatically.
+If not, run bootstrap again for your hub cluster:
+
+```bash
+kubara bootstrap <hub-cluster-name-from-config-yaml>
+```
+
+## Additional notes
+
+* If you enable `oauth2-proxy`, provide valid OAuth credentials in the secret backend used by external-secrets on the spoke cluster.
+* Extra overlay files can use any `values-*.yaml` name. `values-additional.yaml` is a common choice, and it keeps provider-specific overrides separate from the generated `values.generated.yaml`.
+
+### Alternative multi-cluster architectures
+
+The standard spoke flow assumes the hub cluster can directly reach the spoke cluster's Kubernetes API endpoint using stored credentials. For alternative topologies and fleet management patterns, see the following reference setups in `platform-setup-examples`:
+
+* **Outbound-only agent topology**: [Argo CD Agent Managed-Mode Lab](https://github.com/kubara-io/platform-setup-examples/tree/main/argo-cd-agents) demonstrates a hub-and-spoke setup where spoke clusters initiate outbound mTLS connections to the hub and run their own application controllers, eliminating the need to store spoke kubeconfigs on the hub.
+* **Fleet add-on distribution**: [Scalable Cluster Management with Project Sveltos](https://github.com/kubara-io/platform-setup-examples/tree/main/sveltos-cluster-management) demonstrates delegating add-on and configuration lifecycle across large cluster fleets to Project Sveltos using declarative selectors.
