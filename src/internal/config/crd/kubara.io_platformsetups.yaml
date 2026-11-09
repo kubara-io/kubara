@@ -16,7 +16,7 @@ spec:
     singular: platformsetup
   scope: Cluster
   versions:
-  - name: v1alpha5
+  - name: v1alpha7
     schema:
       openAPIV3Schema:
         description: PlatformSetup is the Schema for the platformsetups API.
@@ -39,60 +39,90 @@ spec:
           metadata:
             type: object
           spec:
-            description: Config is the root of the configuration structure.
+            description: Spec defines the desired state of the platform setup configuration.
             properties:
               bootstrapCatalog:
-                description: Global bootstrap catalog reference.
+                description: BootstrapCatalog is the global bootstrap catalog reference.
+                minLength: 1
                 type: string
               clusters:
+                description: Clusters defines the list of Kubernetes clusters managed
+                  by the platform.
                 items:
                   description: Cluster defines the configuration for a single Kubernetes
                     cluster.
                   properties:
                     argocd:
+                      description: ArgoCD configures the Argo CD deployment and repository
+                        settings for the cluster.
                       properties:
                         helmRepo:
+                          description: HelmRepo configures an optional Helm chart
+                            repository for Argo CD.
                           properties:
                             url:
+                              description: URL is the Helm chart repository URL.
                               format: uri
                               type: string
                           required:
                           - url
                           type: object
                         repo:
+                          description: Repo configures the Git or OCI repository sources
+                            for Argo CD applications.
                           properties:
                             authMode:
+                              description: AuthMode specifies the authentication mechanism
+                                used for Git operations.
                               enum:
                               - https
                               - ssh
                               - github-app
                               type: string
                             git:
+                              description: Git configures Git repositories for platform
+                                configs and components.
                               properties:
                                 components:
+                                  description: Components is the repository containing
+                                    platform component manifests.
                                   properties:
                                     path:
+                                      description: Path is an optional subdirectory
+                                        path within the repository.
                                       type: string
                                     targetRevision:
                                       default: main
+                                      description: TargetRevision is the branch, tag,
+                                        or commit to track.
                                       minLength: 1
                                       type: string
                                     url:
-                                      format: uri
+                                      description: URL is the repository address (e.g.
+                                        HTTPS or SSH URL).
+                                      minLength: 1
                                       type: string
                                   required:
                                   - url
                                   type: object
                                 configs:
+                                  description: Configs is the repository containing
+                                    platform configuration definitions.
                                   properties:
                                     path:
+                                      description: Path is an optional subdirectory
+                                        path within the repository.
                                       type: string
                                     targetRevision:
                                       default: main
+                                      description: TargetRevision is the branch, tag,
+                                        or commit to track.
                                       minLength: 1
                                       type: string
                                     url:
-                                      format: uri
+                                      description: URL is the repository address (e.g.
+                                        HTTPS or SSH URL).
+                                      minLength: 1
                                       type: string
                                   required:
                                   - url
@@ -102,31 +132,49 @@ spec:
                               - configs
                               type: object
                             oci:
+                              description: OCI configures OCI registry repositories
+                                for platform configs and components.
                               properties:
                                 components:
+                                  description: Components is the repository containing
+                                    platform component manifests.
                                   properties:
                                     path:
+                                      description: Path is an optional subdirectory
+                                        path within the repository.
                                       type: string
                                     targetRevision:
                                       default: main
+                                      description: TargetRevision is the branch, tag,
+                                        or commit to track.
                                       minLength: 1
                                       type: string
                                     url:
-                                      format: uri
+                                      description: URL is the repository address (e.g.
+                                        HTTPS or SSH URL).
+                                      minLength: 1
                                       type: string
                                   required:
                                   - url
                                   type: object
                                 configs:
+                                  description: Configs is the repository containing
+                                    platform configuration definitions.
                                   properties:
                                     path:
+                                      description: Path is an optional subdirectory
+                                        path within the repository.
                                       type: string
                                     targetRevision:
                                       default: main
+                                      description: TargetRevision is the branch, tag,
+                                        or commit to track.
                                       minLength: 1
                                       type: string
                                     url:
-                                      format: uri
+                                      description: URL is the repository address (e.g.
+                                        HTTPS or SSH URL).
+                                      minLength: 1
                                       type: string
                                   required:
                                   - url
@@ -141,6 +189,8 @@ spec:
                             rule: has(self.git) != has(self.oci)
                         selfManaged:
                           default: enabled
+                          description: SelfManaged indicates whether Argo CD should
+                            be self-managed by the platform.
                           enum:
                           - enabled
                           - disabled
@@ -149,20 +199,25 @@ spec:
                       - repo
                       type: object
                     catalogs:
+                      description: Catalogs specifies additional catalog references
+                        available to this cluster.
                       items:
                         type: string
                       type: array
                     dnsName:
+                      description: DNSName is the primary domain name for the cluster.
                       format: hostname
                       type: string
                     name:
+                      description: Name is the unique identifier for the cluster.
                       minLength: 1
                       type: string
                     networking:
-                      description: Routing settings consumed by catalog templates.
+                      description: Networking configures routing settings consumed
+                        by catalog templates.
                       properties:
                         gateway:
-                          description: Global Gateway settings.
+                          description: Gateway configures global Gateway settings.
                           properties:
                             name:
                               description: Name of the parent Gateway.
@@ -181,18 +236,19 @@ spec:
                           - namespace
                           type: object
                         ingress:
-                          description: Global Ingress settings.
+                          description: Ingress configures global Ingress settings.
                           properties:
                             className:
                               default: traefik
-                              description: Ingress class.
+                              description: ClassName is the Ingress class name to
+                                use for routing resources.
                               minLength: 1
                               type: string
                           type: object
                         type:
                           default: ingress
-                          description: Routing API (Ingress or Gateway API) used by
-                            catalog templates
+                          description: Type selects the routing API (Ingress or Gateway
+                            API) used by catalog templates.
                           enum:
                           - ingress
                           - gateway
@@ -202,25 +258,41 @@ spec:
                       - message: networking.gateway is required when type is gateway
                         rule: '!has(self.type) || self.type != ''gateway'' || has(self.gateway)'
                     services:
+                      description: Services configures the platform services deployed
+                        on this cluster.
                       x-kubernetes-preserve-unknown-fields: true
                     ssoOrg:
+                      description: SSOOrg is the single sign-on organization identifier
+                        for access control.
                       minLength: 1
                       type: string
                     ssoTeam:
+                      description: SSOTeam is the single sign-on team identifier within
+                        the organization.
                       minLength: 1
                       type: string
                     stage:
                       default: dev
+                      description: Stage is the deployment environment stage (e.g.,
+                        dev, staging, prod).
                       minLength: 1
                       type: string
                     terraform:
+                      description: Terraform configures infrastructure provisioning
+                        for the cluster.
                       properties:
                         dns:
+                          description: DNS configures the DNS settings for the infrastructure
+                            provider.
                           properties:
                             email:
+                              description: Email is the administrator contact email
+                                for DNS records.
                               format: email
                               type: string
                             name:
+                              description: Name is the managed DNS zone or domain
+                                name.
                               format: hostname
                               type: string
                           required:
@@ -229,21 +301,27 @@ spec:
                           type: object
                         kubernetesType:
                           default: ske
+                          description: KubernetesType specifies the managed Kubernetes
+                            offering (e.g., ske, edge, cce).
                           enum:
                           - edge
                           - ske
                           - cce
                           type: string
                         kubernetesVersion:
+                          description: KubernetesVersion specifies the target Kubernetes
+                            version (e.g., 1.30 or 1.30.1).
                           pattern: ^[0-9]\.[0-9]+(\.[0-9]+)?$
                           type: string
                         projectId:
+                          description: ProjectID is the cloud provider project or
+                            tenant identifier.
                           minLength: 1
                           type: string
                         provider:
                           default: none
-                          description: TerraformProvider identifies an infrastructure
-                            provider supported by catalog generation.
+                          description: Provider specifies the infrastructure provider
+                            to use for cluster provisioning.
                           enum:
                           - none
                           - stackit
@@ -265,6 +343,8 @@ spec:
                           == 'cce'
                     type:
                       default: hub
+                      description: Type specifies whether this cluster is a hub or
+                        spoke cluster.
                       enum:
                       - hub
                       - spoke

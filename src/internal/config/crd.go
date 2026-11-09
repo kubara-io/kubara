@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	PlatformSetupAPIVersion = "kubara.io/v1alpha5"
+	PlatformSetupAPIVersion = "kubara.io/v1alpha7"
 	PlatformSetupKind       = "PlatformSetup"
 )
 
