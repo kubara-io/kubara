@@ -43,7 +43,7 @@ jobs:
       - name: Set up Python
         run: |
           cd docs
-          uv python install 3.14.3
+          uv python install 3.15.2
 
       - name: Install dependencies
         run: |
