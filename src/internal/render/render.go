@@ -15,7 +15,7 @@ import (
 	"github.com/kubara-io/kubara/internal/catalog"
 
 	"github.com/Masterminds/sprig/v3"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 )
 
 type TemplateType int
