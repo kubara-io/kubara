@@ -1102,7 +1102,7 @@ func writeLocalIngressOverrides(state *LocalState) error {
       requests:
         memory: 256Mi
       limits:
-        memory: 256Mi
+        memory: 512Mi
     initChownData:
       resources:
         requests:
@@ -1114,7 +1114,7 @@ func writeLocalIngressOverrides(state *LocalState) error {
         requests:
           memory: 100Mi
         limits:
-          memory: 100Mi
+          memory: 256Mi
   kube-state-metrics:
     resources:
       requests:
