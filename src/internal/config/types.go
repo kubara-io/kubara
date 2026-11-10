@@ -96,6 +96,12 @@ type Cluster struct {
 	// +optional
 	Networking ClusterNetworking `json:"networking,omitempty"`
 
+	// Image Pull Secret Name,description=Shared registry secret name.
+	// +kubebuilder:validation:Pattern=`^$|^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
+	// +kubebuilder:validation:MaxLength=249
+	// +optional
+	ImagePullSecretName *string `json:"imagePullSecretName,omitempty"`
+
 	// DNSName is the primary domain name for the cluster.
 	// +kubebuilder:validation:Format=hostname
 	DNSName string `json:"dnsName"`
@@ -136,6 +142,16 @@ func (c Cluster) MarshalJSON() ([]byte, error) {
 		Alias:            Alias(c),
 		IngressClassName: c.IngressClassName,
 	})
+}
+
+// DefaultImagePullSecretName defaults an non-existend ImagePullSecretName field
+// to the default value "image-pull-secret" but differentiates between non-existens
+// and empty/zero value "" and returns an empty string if explicitely set by the user
+func (c *Cluster) DefaultImagePullSecretName() string {
+	if c.ImagePullSecretName == nil {
+		return "image-pull-secret"
+	}
+	return *c.ImagePullSecretName
 }
 
 // ClusterNetworking contains the shared routing inputs for catalog templates.
