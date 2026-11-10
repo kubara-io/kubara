@@ -299,6 +299,11 @@ spec:
                           - email
                           - name
                           type: object
+                        ephemeralSecrets:
+                          description: |-
+                            Ephemeral Secrets generate supported secret inputs and payloads without persisting their values in state or plans.
+                            Requires compatible catalog templates. Omitted or false preserves the existing stateful workflow.
+                          type: boolean
                         kubernetesType:
                           default: ske
                           description: KubernetesType specifies the managed Kubernetes

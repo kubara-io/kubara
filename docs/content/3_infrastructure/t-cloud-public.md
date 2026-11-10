@@ -21,6 +21,11 @@ terraform:
 
 For T Cloud Public, set `projectId` to the tenant/project name used as `tenant_name`, not to a UUID.
 
+**Required: Terraform/OpenTofu 1.11+ in both modes.** With `terraform.ephemeralSecrets: true`,
+supply API access and secret keys for both plan and apply, including saved-plan applies.
+Omitted or `false` keeps the stateful secret workflow. See
+[ephemeral secret management](../2_concepts/overview_core_concept.md#ephemeral-secret-management).
+
 ## 1. Generate Terraform modules
 
 ```bash
@@ -123,7 +128,7 @@ Run:
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu init
@@ -140,7 +145,7 @@ Use the output to configure Terraform backend credentials:
     export AWS_SECRET_ACCESS_KEY="$(terraform output -raw credential_secret_access_key)"
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     export AWS_ACCESS_KEY_ID="$(tofu output -raw credential_access_key)"
@@ -189,7 +194,7 @@ Run:
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu init
@@ -324,7 +329,7 @@ Then apply the OpenBao Terraform layer:
     terraform apply
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     cd ../openbao
@@ -341,6 +346,62 @@ cp secrets.tf-oauth2 secrets.tf
 ```
 
 Each block declares a `variable` and the matching `vault_kv_secret_v2` resource. The values come from `TF_VAR_*` environment variables in your sourced `set-env.sh`, which already has commented-out templates for each one, so no secret is ever written into a committed file. Delete the blocks you do not use before applying.
+
+### Secret updates and migration
+
+This section applies with `terraform.ephemeralSecrets: true`. New cluster configurations enable
+it explicitly; existing configurations without the field retain the stateful workflow.
+Use CLI and catalog releases containing these changes; verify `data_json_wo` in the generated files
+before following this workflow. Older templates still persist payloads.
+
+With the updated catalog, all six optional KV payloads and the Grafana admin payload use
+write-only attributes. Secret inputs and generated passwords are ephemeral and do not enter new
+state or saved plans. Keep the enabled resources managed; no `state rm` is needed. Supply secret
+inputs for both plan and apply, including when applying a saved plan.
+
+Set the following non-secret counters in an override `.tfvars` file. Increment only the entry
+whose payload should be written again, including changes to usernames or client IDs:
+
+```hcl
+oauth2_secret_versions = {
+  image_pull_secret         = 1
+  oauth2_credentials         = 1
+  argo_oauth2_credentials    = 1
+  grafana_oauth2_credentials = 1
+  t_cloud_public_clouds_yaml = 1
+  velero_credentials        = 1
+}
+grafana_admin_credentials_version = 1
+```
+
+Changing secret inputs alone does not trigger a write. Payload drift is not compared with
+OpenBao. Ordinary applies retain the stored cookie and passwords; incrementing
+`oauth2_credentials` generates a new cookie and ends existing OAuth2 Proxy sessions.
+`openbao_token` and `openbao_oidc_client_secret` are also ephemeral; the existing
+`openbao_oidc_client_secret_version` controls OIDC secret updates.
+
+For migration, enable the option in the cluster configuration and run `kubara generate --terraform`.
+Replace the active `.tf` copy of `secrets.tf-oauth2` with the newly generated example, retaining
+service exclusions and avoiding duplicate active files. Review changes in all three roots.
+Retain existing registry, OAuth client, ExternalDNS and Velero values. Supply the
+current Grafana admin password through `TF_VAR_grafana_admin_password` and keep its username
+unchanged: updating its OpenBao entry does not reset an initialized Grafana database password.
+Coordinate later Grafana password rotations with Grafana itself. Read the admin password from
+OpenBao; the `grafana_admin_password` Terraform output is omitted in ephemeral mode:
+
+```bash
+bao kv get -mount=secret -field=admin-password <cluster>/<stage>/kube-prometheus-stack/grafana_credentials
+```
+
+Existing managed KV entries update in place. Import entries previously removed from state before
+applying, using `<mount>/data/<path>` as the import ID. The old managed random password resources
+leave state; the OAuth cookie changes once during migration. Verify the next plan is empty.
+Migration plans, backups and historical state versions can still contain old secret values.
+
+The optional userpass fallback still stores its password: `vault_generic_endpoint` has no
+write-only payload. Cloud-generated keys, kubeconfigs and SSH private keys also remain in their
+producing infrastructure resources. In particular, the ephemeral Velero inputs avoid another copy
+in the OpenBao state; they do not remove the original infrastructure state copy.
 
 ### Namespace-isolated secret access
 
@@ -390,7 +451,7 @@ Export the kubeconfig:
     terraform output -raw kubeconfig > $HOME/.kube/kubara.yaml
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output -raw kubeconfig > $HOME/.kube/kubara.yaml
@@ -406,7 +467,7 @@ Review the Terraform outputs:
     terraform output
     ```
 
-=== "Tofu"
+=== "OpenTofu"
 
     ```bash
     tofu output

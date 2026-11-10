@@ -188,6 +188,11 @@ type Terraform struct {
 	// +optional
 	ProjectID string `json:"projectId,omitempty"`
 
+	// Ephemeral Secrets generate supported secret inputs and payloads without persisting their values in state or plans.
+	// Requires compatible catalog templates. Omitted or false preserves the existing stateful workflow.
+	// +optional
+	EphemeralSecrets bool `json:"ephemeralSecrets,omitempty"`
+
 	// KubernetesType specifies the managed Kubernetes offering (e.g., ske, edge, cce).
 	// +kubebuilder:default=ske
 	// +kubebuilder:validation:Enum=edge;ske;cce
