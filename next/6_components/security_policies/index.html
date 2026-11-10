@@ -1883,6 +1883,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#policy-exclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy exclusions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-groups" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2854,6 +2865,17 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
+  <a href="#policy-exclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy exclusions
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#policy-groups" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -3031,6 +3053,25 @@ You're not viewing the latest stable version.
 <li><strong>Group mode:</strong> Set in <code>config.yaml</code> under <code>services.kyverno-policies.config.&lt;group&gt;.mode</code> (for example, <code>itGrundschutz: mode: Enforce</code>). This applies to all rules in that group unless a specific rule override exists.</li>
 <li><strong>Global default:</strong> Falls back to <code>Audit</code> if no group mode or rule override is configured.</li>
 </ol>
+<h2 id="policy-exclusions">Policy exclusions</h2>
+<p>With the catalog's <code>kyverno-policies</code> chart 2.0.0+, add exclusions in
+<code>platform-configs/&lt;cluster&gt;/helm/kyverno-policies/values-override.yaml</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="nt">kyverno-policies</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">policyExclude</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">disallow-privileged-containers</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">any</span><span class="p">:</span>
+<span class="w">        </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">            </span><span class="nt">kinds</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">Pod</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">namespaces</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">demo</span><span class="p p-Indicator">]</span>
+<span class="w">            </span><span class="nt">names</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">demo-worker</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p>This excludes only the Pod <code>demo-worker</code> in namespace <code>demo</code>. In <code>names</code>, <code>*</code> matches
+zero or more characters (e.g. <code>demo-worker-*</code>) and <code>?</code> exactly one character
+(e.g. <code>demo-worker-?</code> matches <code>demo-worker-0</code>, but not <code>demo-worker-10</code>).
+Explicitly include controller kinds when needed. Overriding
+<code>any</code> replaces its existing list, so retain bundled entries you still need.
+Before upgrading to 2.0.0, review custom exclusions: earlier versions ignored kinds
+and also matched suffixes on literal names.</p>
 <h2 id="policy-groups">Policy groups</h2>
 <h3 id="workload-hardening-itgrundschutz-pss-baseline">Workload hardening (<code>itGrundschutz</code> &amp; PSS baseline)</h3>
 <ul>
