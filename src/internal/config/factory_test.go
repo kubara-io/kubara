@@ -62,11 +62,11 @@ func TestInferGitRemote(t *testing.T) {
 		cmd := exec.Command("git", "init", repoDir)
 		require.NoError(t, cmd.Run())
 
-		cmd = exec.Command("git", "-C", repoDir, "remote", "add", "origin", "ssh://[EMAIL_REDACTED]/org/repo.git")
+		cmd = exec.Command("git", "-C", repoDir, "remote", "add", "origin", "ssh://my-git.local/org/repo.git")
 		require.NoError(t, cmd.Run())
 
 		url, authMode := InferGitRemote(repoDir)
-		assert.Equal(t, "ssh://[EMAIL_REDACTED]/org/repo.git", url)
+		assert.Equal(t, "ssh://my-git.local/org/repo.git", url)
 		assert.Equal(t, GitAuthModeSSH, authMode)
 	})
 }

@@ -28,10 +28,10 @@ type Credentials struct {
 }
 
 var removedVariables = map[string]string{
-	"ARGOCD_WIZARD_ACCOUNT_PASSWORD": "wizard password is now randomly generated during bootstrap",
 	"ARGOCD_GIT_URL":                 "repository URL is configured in config.yaml",
 	"ARGOCD_GIT_HTTPS_URL":           "repository URL is configured in config.yaml",
 	"ARGOCD_HELM_REPO_URL":           "Helm repository URL is configured in config.yaml",
+	"ARGOCD_WIZARD_ACCOUNT_PASSWORD": "wizard password is now randomly generated during bootstrap",
 }
 
 // LoadCredentials loads bootstrap credentials from the OS environment and an optional .env file in workDir.
@@ -54,23 +54,23 @@ func LoadCredentials(workDir string) (*Credentials, error) {
 	warnRemovedVariables(fileVars)
 
 	creds := &Credentials{
-		GitUsername:                   resolveVar(fileVars, "GITOPS_GIT_USERNAME", "ARGOCD_GIT_USERNAME"),
-		GitPassword:                   resolveVar(fileVars, "GITOPS_GIT_PASSWORD", "GITOPS_GIT_PAT_OR_PASSWORD", "ARGOCD_GIT_PASSWORD", "ARGOCD_GIT_PAT_OR_PASSWORD"),
-		GitGitHubAppID:                resolveVar(fileVars, "GITOPS_GIT_GITHUB_APP_ID", "ARGOCD_GIT_GITHUB_APP_ID"),
-		GitGitHubAppInstallationID:    resolveVar(fileVars, "GITOPS_GIT_GITHUB_APP_INSTALLATION_ID", "ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID"),
-		GitGitHubAppEnterpriseBaseURL: resolveVar(fileVars, "GITOPS_GIT_GITHUB_APP_ENTERPRISE_BASE_URL", "ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL"),
+		GitUsername:                   resolveVar(fileVars, "GITOPS_USERNAME", "ARGOCD_GIT_USERNAME"),
+		GitPassword:                   resolveVar(fileVars, "GITOPS_PASSWORD", "GITOPS_PAT_OR_PASSWORD", "ARGOCD_GIT_PASSWORD", "ARGOCD_GIT_PAT_OR_PASSWORD"),
+		GitGitHubAppID:                resolveVar(fileVars, "GITOPS_GITHUB_APP_ID", "ARGOCD_GIT_GITHUB_APP_ID"),
+		GitGitHubAppInstallationID:    resolveVar(fileVars, "GITOPS_GITHUB_APP_INSTALLATION_ID", "ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID"),
+		GitGitHubAppEnterpriseBaseURL: resolveVar(fileVars, "GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL", "ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL"),
 		HelmRepoUsername:              resolveVar(fileVars, "GITOPS_HELM_REPO_USERNAME", "ARGOCD_HELM_REPO_USERNAME"),
 		HelmRepoPassword:              resolveVar(fileVars, "GITOPS_HELM_REPO_PASSWORD", "ARGOCD_HELM_REPO_PASSWORD"),
 		DockerconfigBase64:            resolveVar(fileVars, "DOCKERCONFIG_BASE64"),
 	}
 
-	sshKey, err := resolveKeyOrPath(workDir, fileVars, "GITOPS_GIT_SSH_PRIVATE_KEY", "ARGOCD_GIT_SSH_PRIVATE_KEY", "GITOPS_GIT_SSH_PRIVATE_KEY_PATH")
+	sshKey, err := resolveKeyOrPath(workDir, fileVars, "GITOPS_SSH_PRIVATE_KEY", "ARGOCD_GIT_SSH_PRIVATE_KEY", "GITOPS_SSH_PRIVATE_KEY_PATH")
 	if err != nil {
 		return nil, err
 	}
 	creds.GitSSHPrivateKey = sshKey
 
-	githubAppKey, err := resolveKeyOrPath(workDir, fileVars, "GITOPS_GIT_GITHUB_APP_PRIVATE_KEY", "ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY", "GITOPS_GIT_GITHUB_APP_PRIVATE_KEY_PATH")
+	githubAppKey, err := resolveKeyOrPath(workDir, fileVars, "GITOPS_GITHUB_APP_PRIVATE_KEY", "ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY", "GITOPS_GITHUB_APP_PRIVATE_KEY_PATH")
 	if err != nil {
 		return nil, err
 	}
@@ -93,15 +93,15 @@ func (c *Credentials) ValidateForCluster(cluster *config.Cluster) error {
 	switch {
 	case utils.IsSSHGitURL(trimmedURL):
 		if c.GitSSHPrivateKey == "" {
-			return errors.New("SSH git repository URL requires GITOPS_GIT_SSH_PRIVATE_KEY or GITOPS_GIT_SSH_PRIVATE_KEY_PATH")
+			return errors.New("SSH git repository URL requires GITOPS_SSH_PRIVATE_KEY or GITOPS_SSH_PRIVATE_KEY_PATH")
 		}
 	case c.GitSSHPrivateKey != "":
 		if !utils.IsSSHGitURL(trimmedURL) {
-			return fmt.Errorf("GITOPS_GIT_SSH_PRIVATE_KEY is configured, but git repository URL %q is not an SSH URL", trimmedURL)
+			return fmt.Errorf("GITOPS_SSH_PRIVATE_KEY is configured, but git repository URL %q is not an SSH URL", trimmedURL)
 		}
 	case c.GitGitHubAppID != "":
 		if c.GitGitHubAppInstallationID == "" || c.GitGitHubAppPrivateKey == "" {
-			return errors.New("GitHub App authentication requires GITOPS_GIT_GITHUB_APP_ID, GITOPS_GIT_GITHUB_APP_INSTALLATION_ID, and GITOPS_GIT_GITHUB_APP_PRIVATE_KEY")
+			return errors.New("GitHub App authentication requires GITOPS_GITHUB_APP_ID, GITOPS_GITHUB_APP_INSTALLATION_ID, and GITOPS_GITHUB_APP_PRIVATE_KEY")
 		}
 		if !utils.IsHTTPGitURL(trimmedURL) {
 			return fmt.Errorf("GitHub App authentication requires an HTTP(S) git URL, got %q", trimmedURL)
@@ -110,7 +110,7 @@ func (c *Credentials) ValidateForCluster(cluster *config.Cluster) error {
 		hasUsername := c.GitUsername != ""
 		hasPassword := c.GitPassword != ""
 		if hasUsername != hasPassword {
-			return errors.New("GITOPS_GIT_USERNAME and GITOPS_GIT_PASSWORD must either both be set for a private repository or both be omitted for a public repository")
+			return errors.New("GITOPS_USERNAME and GITOPS_PASSWORD must either both be set for a private repository or both be omitted for a public repository")
 		}
 		if hasUsername && !utils.IsHTTPGitURL(trimmedURL) {
 			return fmt.Errorf("username/password authentication requires an HTTP(S) git URL, got %q", trimmedURL)

@@ -98,8 +98,8 @@ func CreateDefaultGenerateTestEnv(t *testing.T, dir string) string {
 
 	return CreateTestEnv(t, dir, map[string]string{
 		"DOCKERCONFIG_BASE64":       "DockerConfig",
-		"GITOPS_GIT_USERNAME":       "CoolCapybara",
-		"GITOPS_GIT_PASSWORD":       "password",
+		"GITOPS_USERNAME":           "CoolCapybara",
+		"GITOPS_PASSWORD":           "password",
 		"GITOPS_HELM_REPO_USERNAME": "CoolCapybara",
 		"GITOPS_HELM_REPO_PASSWORD": "password",
 	})

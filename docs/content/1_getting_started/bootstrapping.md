@@ -59,8 +59,8 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 Bootstrap credentials are only needed when running `kubara bootstrap`. You can provide them via OS environment variables or an optional `.env` file (checked in that order):
 
 ```bash
-export GITOPS_GIT_USERNAME="<machine-user>"
-export GITOPS_GIT_PASSWORD="<pat-or-token>"
+export GITOPS_USERNAME="<machine-user>"
+export GITOPS_PASSWORD="<pat-or-token>"
 ```
 
 The initial Argo CD `wizard` account password is automatically generated during `kubara bootstrap` and printed in the completion output.
@@ -72,9 +72,9 @@ Authentication mode is determined by the repository URL in `config.yaml` and you
 
 | Mode | Environment variables | Notes |
 | --- | --- | --- |
-| `https` | `GITOPS_GIT_USERNAME`, `GITOPS_GIT_PASSWORD` | Optional for public repositories (omit both); set both for private ones. `GITOPS_GIT_PASSWORD` is your Personal Access Token (PAT) or technical user password. (Legacy: `ARGOCD_GIT_USERNAME`, `ARGOCD_GIT_PAT_OR_PASSWORD`). |
-| `ssh` | `GITOPS_GIT_SSH_PRIVATE_KEY` or `GITOPS_GIT_SSH_PRIVATE_KEY_PATH` | Use an SSH repository URL such as `ssh://[EMAIL_REDACTED]/org/repo.git`. You can supply the private key inline via `GITOPS_GIT_SSH_PRIVATE_KEY` or provide a file path via `GITOPS_GIT_SSH_PRIVATE_KEY_PATH`. (Legacy: `ARGOCD_GIT_SSH_PRIVATE_KEY`). |
-| `github-app` | `GITOPS_GIT_GITHUB_APP_ID`, `GITOPS_GIT_GITHUB_APP_INSTALLATION_ID`, `GITOPS_GIT_GITHUB_APP_PRIVATE_KEY` (or `_PATH`) | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `GITOPS_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. (Legacy: `ARGOCD_GIT_GITHUB_APP_*`). |
+| `https` | `GITOPS_USERNAME`, `GITOPS_PASSWORD` | Optional for public repositories (omit both); set both for private ones. `GITOPS_PASSWORD` is your Personal Access Token (PAT) or technical user password. (Legacy: `ARGOCD_GIT_USERNAME`, `ARGOCD_GIT_PAT_OR_PASSWORD`). |
+| `ssh` | `GITOPS_SSH_PRIVATE_KEY` or `GITOPS_SSH_PRIVATE_KEY_PATH` | Use an SSH repository URL such as `git@github.com:org/repo.git`. You can supply the private key inline via `GITOPS_SSH_PRIVATE_KEY` or provide a file path via `GITOPS_SSH_PRIVATE_KEY_PATH`. (Legacy: `ARGOCD_GIT_SSH_PRIVATE_KEY`). |
+| `github-app` | `GITOPS_GITHUB_APP_ID`, `GITOPS_GITHUB_APP_INSTALLATION_ID`, `GITOPS_GITHUB_APP_PRIVATE_KEY` (or `_PATH`) | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL` as well. (Legacy: `ARGOCD_GIT_GITHUB_APP_*`). |
 
 For SSH, keep strict host verification enabled.
 The bundled Argo CD Helm chart already includes known hosts for common public providers.

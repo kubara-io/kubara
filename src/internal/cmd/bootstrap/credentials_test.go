@@ -14,15 +14,15 @@ func TestLoadCredentials_Precedence(t *testing.T) {
 	tempDir := t.TempDir()
 
 	envContent := `
-GITOPS_GIT_USERNAME=file-user
-GITOPS_GIT_PASSWORD=file-pass
+GITOPS_USERNAME=file-user
+GITOPS_PASSWORD=file-pass
 GITOPS_HELM_REPO_USERNAME=file-helm-user
 ARGOCD_HELM_REPO_PASSWORD=file-helm-legacy-pass
 `
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
 
 	// OS env overrides file
-	t.Setenv("GITOPS_GIT_USERNAME", "os-user")
+	t.Setenv("GITOPS_USERNAME", "os-user")
 	// OS legacy overrides file canonical
 	t.Setenv("ARGOCD_GIT_PASSWORD", "os-legacy-pass")
 
@@ -38,7 +38,7 @@ ARGOCD_HELM_REPO_PASSWORD=file-helm-legacy-pass
 func TestLoadCredentials_MissingEnvFile(t *testing.T) {
 	tempDir := t.TempDir()
 
-	t.Setenv("GITOPS_GIT_USERNAME", "direct-env-user")
+	t.Setenv("GITOPS_USERNAME", "direct-env-user")
 
 	creds, err := LoadCredentials(tempDir)
 	require.NoError(t, err)
@@ -50,8 +50,8 @@ func TestLoadCredentials_PlaceholdersIgnored(t *testing.T) {
 	tempDir := t.TempDir()
 
 	envContent := `
-GITOPS_GIT_USERNAME=<...>
-GITOPS_GIT_PASSWORD=valid-pass
+GITOPS_USERNAME=<...>
+GITOPS_PASSWORD=valid-pass
 `
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
 
@@ -67,7 +67,7 @@ func TestLoadCredentials_KeyPathResolution(t *testing.T) {
 	keyPath := filepath.Join(tempDir, "id_rsa")
 	require.NoError(t, os.WriteFile(keyPath, []byte("fake-ssh-private-key\n"), 0600))
 
-	envContent := "GITOPS_GIT_SSH_PRIVATE_KEY_PATH=id_rsa\n"
+	envContent := "GITOPS_SSH_PRIVATE_KEY_PATH=id_rsa\n"
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
 
 	creds, err := LoadCredentials(tempDir)
@@ -81,7 +81,7 @@ func TestLoadCredentials_KeyPathAndInlineConflict(t *testing.T) {
 	keyPath := filepath.Join(tempDir, "id_rsa")
 	require.NoError(t, os.WriteFile(keyPath, []byte("fake-key"), 0600))
 
-	envContent := "GITOPS_GIT_SSH_PRIVATE_KEY=inline-key\nGITOPS_GIT_SSH_PRIVATE_KEY_PATH=id_rsa\n"
+	envContent := "GITOPS_SSH_PRIVATE_KEY=inline-key\nGITOPS_SSH_PRIVATE_KEY_PATH=id_rsa\n"
 	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
 
 	_, err := LoadCredentials(tempDir)
@@ -163,7 +163,7 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 				},
 			},
 			creds:   &Credentials{},
-			wantErr: "requires GITOPS_GIT_SSH_PRIVATE_KEY",
+			wantErr: "requires GITOPS_SSH_PRIVATE_KEY",
 		},
 		{
 			name: "ssh repository with key",

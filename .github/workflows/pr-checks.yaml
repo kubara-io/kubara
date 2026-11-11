@@ -261,17 +261,12 @@ jobs:
     outputs:
       success: ${{ steps.commit.outputs.success }}
     env:
-      # .env updates (must match src/internal/envconfig/env)
-      KUBARA_PROJECT_NAME: "kubara"
-      KUBARA_PROJECT_STAGE: "tst"
+      # Credentials for bootstrap (.env / OS environment)
       KUBARA_DOCKERCONFIG_BASE64: "000000"
-      KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD: "000000"
-      KUBARA_ARGOCD_HELM_REPO_USERNAME: "git"
-      KUBARA_ARGOCD_HELM_REPO_PASSWORD: "000000"
-      KUBARA_ARGOCD_HELM_REPO_URL: "https://kubara.io/kubara.git"
-      KUBARA_ARGOCD_GIT_URL: "https://kubara.io/kubara.git"
-      KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
-      KUBARA_ARGOCD_GIT_USERNAME: "git"
+      KUBARA_GITOPS_USERNAME: "git"
+      KUBARA_GITOPS_PASSWORD: "000000"
+      KUBARA_GITOPS_HELM_REPO_USERNAME: "git"
+      KUBARA_GITOPS_HELM_REPO_PASSWORD: "000000"
 
       # config.yaml updates
       KUBARA_DNS_NAME: "kubara-tst.stackit.run"

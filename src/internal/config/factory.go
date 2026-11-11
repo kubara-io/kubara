@@ -66,7 +66,7 @@ func NewDefaultClusterWithCatalog(cwd string, catalogOptions catalog.LoadOptions
 			KubernetesVersion: "1.36",
 			DNS: DNS{
 				Name:  "<subdomain.my-domain.com>",
-				Email: "[EMAIL_REDACTED]",
+				Email: "<your-email@my-domain.com>",
 			},
 		},
 		ArgoCD: ArgoCD{

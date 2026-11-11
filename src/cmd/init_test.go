@@ -107,7 +107,7 @@ func TestInitLocalModeScaffoldsLocalCluster(t *testing.T) {
 	assert.FileExists(t, envExamplePath)
 	envExampleBytes, err := os.ReadFile(envExamplePath)
 	require.NoError(t, err)
-	assert.Contains(t, string(envExampleBytes), "GITOPS_GIT_USERNAME")
+	assert.Contains(t, string(envExampleBytes), "GITOPS_USERNAME")
 }
 
 func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {

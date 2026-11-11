@@ -293,25 +293,25 @@ func renovateConfigContainsKubaraManager(path string) (bool, error) {
 	return bytes.Contains(content, []byte(kubaraRenovateManagerDescription)), nil
 }
 
-const envExampleTemplate = `# ✅ These variables are optional credentials for 'kubara bootstrap'.
-# 💡 You can set them as OS environment variables or copy this file to .env.
+const envExampleTemplate = `# ✅ These variables are optional credentials for 'kubara bootstrap'
+# 💡 You can set them as OS environment variables or copy this file to .env
 
 # Git repository credentials (mutually exclusive: choose HTTPS, SSH, or GitHub App)
 
 # https mode: username + password/PAT (if repository is private)
-# GITOPS_GIT_USERNAME=""
-# GITOPS_GIT_PASSWORD=""
+# GITOPS_USERNAME=""
+# GITOPS_PASSWORD=""
 
 # ssh mode: private key (inline) or path to private key file
-# GITOPS_GIT_SSH_PRIVATE_KEY=""
-# GITOPS_GIT_SSH_PRIVATE_KEY_PATH=""
+# GITOPS_SSH_PRIVATE_KEY=""
+# GITOPS_SSH_PRIVATE_KEY_PATH=""
 
 # github-app mode: GitHub App IDs and private key (inline or path)
-# GITOPS_GIT_GITHUB_APP_ID=""
-# GITOPS_GIT_GITHUB_APP_INSTALLATION_ID=""
-# GITOPS_GIT_GITHUB_APP_PRIVATE_KEY=""
-# GITOPS_GIT_GITHUB_APP_PRIVATE_KEY_PATH=""
-# GITOPS_GIT_GITHUB_APP_ENTERPRISE_BASE_URL=""
+# GITOPS_GITHUB_APP_ID=""
+# GITOPS_GITHUB_APP_INSTALLATION_ID=""
+# GITOPS_GITHUB_APP_PRIVATE_KEY=""
+# GITOPS_GITHUB_APP_PRIVATE_KEY_PATH=""
+# GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL=""
 
 # Optional: Private Helm/OCI repository credentials
 # GITOPS_HELM_REPO_USERNAME=""
