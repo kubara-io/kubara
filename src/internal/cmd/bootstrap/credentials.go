@@ -25,13 +25,15 @@ type Credentials struct {
 	HelmRepoUsername              string
 	HelmRepoPassword              string
 	DockerconfigBase64            string
+	ArgoCDPassword                string
 }
 
 var removedVariables = map[string]string{
-	"ARGOCD_GIT_URL":                 "repository URL is configured in config.yaml",
-	"ARGOCD_GIT_HTTPS_URL":           "repository URL is configured in config.yaml",
-	"ARGOCD_HELM_REPO_URL":           "Helm repository URL is configured in config.yaml",
-	"ARGOCD_WIZARD_ACCOUNT_PASSWORD": "wizard password is now randomly generated during bootstrap",
+	"PROJECT_NAME":         "project name is not used anymore. define each cluster name in config.yaml",
+	"PROJECT_STAGE":        "project stage is not used anymore. define per cluster in config.yaml",
+	"ARGOCD_GIT_URL":       "repository URL is configured in config.yaml",
+	"ARGOCD_GIT_HTTPS_URL": "repository URL is configured in config.yaml",
+	"ARGOCD_HELM_REPO_URL": "Helm repository URL is configured in config.yaml",
 }
 
 // LoadCredentials loads bootstrap credentials from the OS environment and an optional .env file in workDir.
@@ -62,6 +64,7 @@ func LoadCredentials(workDir string) (*Credentials, error) {
 		HelmRepoUsername:              resolveVar(fileVars, "GITOPS_HELM_REPO_USERNAME", "ARGOCD_HELM_REPO_USERNAME"),
 		HelmRepoPassword:              resolveVar(fileVars, "GITOPS_HELM_REPO_PASSWORD", "ARGOCD_HELM_REPO_PASSWORD"),
 		DockerconfigBase64:            resolveVar(fileVars, "DOCKERCONFIG_BASE64"),
+		ArgoCDPassword:                resolveVar(fileVars, "ARGOCD_PASSWORD", "ARGOCD_WIZARD_ACCOUNT_PASSWORD"),
 	}
 
 	sshKey, err := resolveKeyOrPath(workDir, fileVars, "GITOPS_SSH_PRIVATE_KEY", "ARGOCD_GIT_SSH_PRIVATE_KEY", "GITOPS_SSH_PRIVATE_KEY_PATH")

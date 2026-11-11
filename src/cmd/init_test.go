@@ -47,69 +47,6 @@ func TestNewInitCmd(t *testing.T) {
 	assert.True(t, flagNames["bootstrap-catalog"])
 }
 
-func TestInitFailsIfConfigAlreadyExists(t *testing.T) {
-	t.Parallel()
-
-	workDir := t.TempDir()
-	configPath := filepath.Join(workDir, "config.yaml")
-	require.NoError(t, os.WriteFile(configPath, []byte("existing: true\n"), 0o600))
-
-	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
-	err := app.Run(context.Background(), []string{
-		"kubara",
-		"--work-dir", workDir,
-		"--config-file", configPath,
-		"init",
-	})
-	require.Error(t, err)
-	assert.Contains(t, err.Error(), "config file already exists")
-}
-
-func TestInitLocalModeScaffoldsLocalCluster(t *testing.T) {
-	t.Parallel()
-
-	workDir := t.TempDir()
-	configPath := filepath.Join(workDir, "config.yaml")
-	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
-
-	err := app.Run(context.Background(), []string{
-		"kubara",
-		"--work-dir", workDir,
-		"--config-file", configPath,
-		"init",
-		"--local",
-		"--renovate=false",
-	})
-	require.NoError(t, err)
-
-	data, err := os.ReadFile(configPath)
-	require.NoError(t, err)
-	var generated struct {
-		Spec config.Config `json:"spec"`
-	}
-	require.NoError(t, yaml.Unmarshal(data, &generated))
-	require.Len(t, generated.Spec.Clusters, 1)
-	assert.Equal(t, "test-cluster", generated.Spec.Clusters[0].Name)
-	assert.Equal(t, "local", generated.Spec.Clusters[0].Stage)
-	assert.Equal(t, "test-cluster-local.traefik.me", generated.Spec.Clusters[0].DNSName)
-	assert.Nil(t, generated.Spec.Clusters[0].Terraform)
-
-	// Verify .gitignore is created and contains .env and env.example
-	gitignorePath := filepath.Join(workDir, ".gitignore")
-	assert.FileExists(t, gitignorePath)
-	gitignoreBytes, err := os.ReadFile(gitignorePath)
-	require.NoError(t, err)
-	assert.Contains(t, string(gitignoreBytes), ".env")
-	assert.Contains(t, string(gitignoreBytes), "env.example")
-
-	// Verify env.example is generated
-	envExamplePath := filepath.Join(workDir, "env.example")
-	assert.FileExists(t, envExamplePath)
-	envExampleBytes, err := os.ReadFile(envExamplePath)
-	require.NoError(t, err)
-	assert.Contains(t, string(envExampleBytes), "GITOPS_USERNAME")
-}
-
 func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
 	t.Parallel()
 

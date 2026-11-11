@@ -186,6 +186,7 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 		Local:              flags.Local,
 		WithESCSSPath:      cssAbsPath,
 		Credentials:        creds,
+		WizardPassword:     creds.ArgoCDPassword,
 		Catalog:            loadedCatalog,
 		ClusterConfig:      clusterConfig,
 		DryRun:             flags.DryRun,

@@ -17,13 +17,13 @@ ENV_FILE="${1:-}"
 # If $KUBARA_* is set, replace KEY=... with KEY="value" in the existing template.
 # Fails if KEY does not exist in the template.
 apply_if_set() {
-  local src_env="$1"  # e.g. KUBARA_PROJECT_NAME
-  local dst_key="$2"  # e.g. PROJECT_NAME
+  local src_env="$1"  # e.g. KUBARA_GITOPS_USERNAME
+  local dst_key="$2"  # e.g. GITOPS_USERNAME
 
   local val="${!src_env:-}"
   [[ -n "$val" ]] || return 0
 
-  grep -qE "^${dst_key}=" "$ENV_FILE" \
+  grep -qE "^[#[:space:]]*${dst_key}=" "$ENV_FILE" \
     || die "Template key missing in .env: ${dst_key} (because ${src_env} is set)"
 
   # Escape special characters before passing to sed:
@@ -45,7 +45,7 @@ apply_if_set() {
   # 5. Escape the sed pattern delimiter '|'
   escaped="${escaped//|/\\|}"
 
-  sed -i -e "s|^${dst_key}=.*$|${dst_key}=\"${escaped}\"|g" "$ENV_FILE"
+  sed -i -e "s|^[#[:space:]]*${dst_key}=.*$|${dst_key}=\"${escaped}\"|g" "$ENV_FILE"
 }
 
 log "Updating .env (strict mode, no secret output): $ENV_FILE"
@@ -69,16 +69,8 @@ apply_if_set KUBARA_GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL GITOPS_GITHUB_APP_ENTE
 apply_if_set KUBARA_GITOPS_HELM_REPO_USERNAME             GITOPS_HELM_REPO_USERNAME
 apply_if_set KUBARA_GITOPS_HELM_REPO_PASSWORD             GITOPS_HELM_REPO_PASSWORD
 
-# Legacy ARGOCD_* aliases
-apply_if_set KUBARA_ARGOCD_GIT_USERNAME                   GITOPS_USERNAME
-apply_if_set KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD            GITOPS_PASSWORD
-apply_if_set KUBARA_ARGOCD_GIT_SSH_PRIVATE_KEY            GITOPS_SSH_PRIVATE_KEY
-apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_ID              GITOPS_GITHUB_APP_ID
-apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID GITOPS_GITHUB_APP_INSTALLATION_ID
-apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY     GITOPS_GITHUB_APP_PRIVATE_KEY
-apply_if_set KUBARA_ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL
-apply_if_set KUBARA_ARGOCD_HELM_REPO_USERNAME             GITOPS_HELM_REPO_USERNAME
-apply_if_set KUBARA_ARGOCD_HELM_REPO_PASSWORD             GITOPS_HELM_REPO_PASSWORD
+# Argo CD initial password
+apply_if_set KUBARA_ARGOCD_PASSWORD                       ARGOCD_PASSWORD
 # ----------------------------
 
 log "✅ .env updated"

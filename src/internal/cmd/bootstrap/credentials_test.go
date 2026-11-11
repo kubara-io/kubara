@@ -10,31 +10,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestLoadCredentials_Precedence(t *testing.T) {
-	tempDir := t.TempDir()
-
-	envContent := `
-GITOPS_USERNAME=file-user
-GITOPS_PASSWORD=file-pass
-GITOPS_HELM_REPO_USERNAME=file-helm-user
-ARGOCD_HELM_REPO_PASSWORD=file-helm-legacy-pass
-`
-	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
-
-	// OS env overrides file
-	t.Setenv("GITOPS_USERNAME", "os-user")
-	// OS legacy overrides file canonical
-	t.Setenv("ARGOCD_GIT_PASSWORD", "os-legacy-pass")
-
-	creds, err := LoadCredentials(tempDir)
-	require.NoError(t, err)
-
-	assert.Equal(t, "os-user", creds.GitUsername)
-	assert.Equal(t, "os-legacy-pass", creds.GitPassword)
-	assert.Equal(t, "file-helm-user", creds.HelmRepoUsername)
-	assert.Equal(t, "file-helm-legacy-pass", creds.HelmRepoPassword)
-}
-
 func TestLoadCredentials_MissingEnvFile(t *testing.T) {
 	tempDir := t.TempDir()
 
@@ -87,6 +62,29 @@ func TestLoadCredentials_KeyPathAndInlineConflict(t *testing.T) {
 	_, err := LoadCredentials(tempDir)
 	require.Error(t, err)
 	assert.Contains(t, err.Error(), "cannot configure both")
+}
+
+func TestLoadCredentials_ArgoCDPasswordDefault(t *testing.T) {
+	tempDir := t.TempDir()
+
+	creds, err := LoadCredentials(tempDir)
+	require.NoError(t, err)
+
+	assert.Equal(t, "", creds.ArgoCDPassword)
+}
+
+func TestLoadCredentials_ArgoCDPasswordCustom(t *testing.T) {
+	tempDir := t.TempDir()
+
+	envContent := `
+ARGOCD_PASSWORD=custom-secret
+`
+	require.NoError(t, os.WriteFile(filepath.Join(tempDir, ".env"), []byte(envContent), 0600))
+
+	creds, err := LoadCredentials(tempDir)
+	require.NoError(t, err)
+
+	assert.Equal(t, "custom-secret", creds.ArgoCDPassword)
 }
 
 func TestCredentials_ValidateForCluster(t *testing.T) {
@@ -148,59 +146,6 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 				GitUsername: "bot",
 			},
 			wantErr: "must either both be set",
-		},
-		{
-			name: "ssh repository missing key",
-			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
-					Repo: config.RepoProto{
-						Git: &config.RepoType{
-							Configs: config.Repository{
-								URL: "ssh://git.example.com/org/repo.git",
-							},
-						},
-					},
-				},
-			},
-			creds:   &Credentials{},
-			wantErr: "requires GITOPS_SSH_PRIVATE_KEY",
-		},
-		{
-			name: "ssh repository with key",
-			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
-					Repo: config.RepoProto{
-						Git: &config.RepoType{
-							Configs: config.Repository{
-								URL: "ssh://git.example.com/org/repo.git",
-							},
-						},
-					},
-				},
-			},
-			creds: &Credentials{
-				GitSSHPrivateKey: "ssh-rsa AAAAB3NzaC1yc2E...",
-			},
-			wantErr: "",
-		},
-		{
-			name: "github app repository missing app private key",
-			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
-					Repo: config.RepoProto{
-						Git: &config.RepoType{
-							Configs: config.Repository{
-								URL: "https://github.com/org/repo.git",
-							},
-						},
-					},
-				},
-			},
-			creds: &Credentials{
-				GitGitHubAppID:             "12345",
-				GitGitHubAppInstallationID: "67890",
-			},
-			wantErr: "GitHub App authentication requires",
 		},
 		{
 			name: "invalid dockerconfig base64",

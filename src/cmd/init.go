@@ -302,6 +302,9 @@ const envExampleTemplate = `# ✅ These variables are optional credentials for '
 # GITOPS_USERNAME=""
 # GITOPS_PASSWORD=""
 
+# Optional: Initial Argo CD wizard account password (if empty, auto-generated during bootstrap)
+# ARGOCD_PASSWORD=""
+
 # ssh mode: private key (inline) or path to private key file
 # GITOPS_SSH_PRIVATE_KEY=""
 # GITOPS_SSH_PRIVATE_KEY_PATH=""

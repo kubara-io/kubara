@@ -93,11 +93,15 @@ func generatePassword(length int) (string, error) {
 // Bootstrap orchestrates the complete ArgoCD bootstrap process
 func Bootstrap(ctx context.Context, opts *Options) error {
 	if opts.WizardPassword == "" {
-		pw, err := generatePassword(24)
-		if err != nil {
-			return fmt.Errorf("generate wizard password: %w", err)
+		if opts.Credentials != nil && opts.Credentials.ArgoCDPassword != "" {
+			opts.WizardPassword = opts.Credentials.ArgoCDPassword
+		} else {
+			pw, err := generatePassword(24)
+			if err != nil {
+				return fmt.Errorf("generate wizard password: %w", err)
+			}
+			opts.WizardPassword = pw
 		}
-		opts.WizardPassword = pw
 	}
 	if opts.Local && opts.DryRun {
 		return fmt.Errorf("--dry-run is not supported together with --local")

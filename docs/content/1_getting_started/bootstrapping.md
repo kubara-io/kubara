@@ -63,7 +63,7 @@ export GITOPS_USERNAME="<machine-user>"
 export GITOPS_PASSWORD="<pat-or-token>"
 ```
 
-The initial Argo CD `wizard` account password is automatically generated during `kubara bootstrap` and printed in the completion output.
+The initial Argo CD `wizard` account password is automatically generated during `kubara bootstrap` and printed in the completion output (or can optionally be set via `ARGOCD_PASSWORD`).
 
 #### Git repository authentication modes
 
