@@ -3,6 +3,8 @@
 # Exit immediately if a command exits with a non-zero status
 set -e
 
+# Note: kubara-action and CI workflows depend on this script and its
+# KUBARA_VERSION and KUBARA_INSTALL_DIR environment variables.
 REPO="kubara-io/kubara"
 
 # Wrapper for curl to handle HTTP errors gracefully and show progress for downloads
