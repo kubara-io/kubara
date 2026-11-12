@@ -60,7 +60,7 @@ jobs:
 
       - name: Install Kubara
         # renovate: datasource=github-releases depName=kubara-io/kubara extractVersion=^v(?<version>.*)$
-        uses: kubara-io/kubara@main
+        uses: kubara-io/kubara-action@v1
         with:
           version: latest
           args: '[]'

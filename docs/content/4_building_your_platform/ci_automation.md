@@ -41,12 +41,12 @@ Catalog versions in `config.yaml` can be updated in two ways:
 
 ## Using the GitHub Action Directly
 
-You can use the root `kubara` action in your own GitHub workflows:
+You can use the `kubara-action` in your own GitHub workflows:
 
 ```yaml
 steps:
   - uses: actions/checkout@v4
-  - uses: kubara-io/kubara@main
+  - uses: kubara-io/kubara-action@v1
     with:
       version: latest
       args: '["generate"]'

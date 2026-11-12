@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: kubara-io/kubara@main
+      - uses: kubara-io/kubara-action@v1
         with:
           args: '["schema", "--catalog", ".", "--output", "/tmp/catalog.schema.json"]'
       - name: Check catalog packaging
