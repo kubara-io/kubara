@@ -294,22 +294,17 @@ jobs:
           echo "output dir: ${{ env.OUTPUT_GENERATED_DIR }}"
           mkdir -p "${{ env.OUTPUT_GENERATED_DIR }}"
 
-      - name: kubara init --prep
-        run: |
-          set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
-
-      - name: Update .env (strict template mode)
-        run: |
-          set -euo pipefail
-          .scripts/kubara-env-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/.env"
-
       - name: kubara init
         run: |
           set -euo pipefail
           cd src
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
+
+      - name: Update .env (strict template mode)
+        run: |
+          set -euo pipefail
+          cp "${{ env.OUTPUT_GENERATED_DIR }}/env.example" "${{ env.OUTPUT_GENERATED_DIR }}/.env"
+          .scripts/kubara-env-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/.env"
 
       - name: Update config.yaml (strict mode)
         run: |
