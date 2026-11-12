@@ -116,34 +116,43 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 func (o *InitOptions) Run() error {
 	cs := config.NewConfigStore(o.cwd, o.configFilePath, o.catalogOptions)
 
-	fileExists, err := utils.FileExist(cs.GetFilepath())
+	configExists, err := utils.FileExist(cs.GetFilepath())
 	if err != nil {
 		return err
 	}
-	if fileExists {
-		return fmt.Errorf("config file already exists: %s", cs.GetFilepath())
+
+	clusterName := "test-cluster"
+	if configExists {
+		log.Warn().Str("path", cs.GetFilepath()).Msg("config file already exists; skipping creation")
+	} else {
+		newCluster, err := config.NewDefaultClusterWithCatalog(o.cwd, o.catalogOptions)
+		if err != nil {
+			return fmt.Errorf("create cluster: %w", err)
+		}
+
+		if o.local {
+			localmode.ApplyClusterProfile(&newCluster, localmode.DefaultDNSName("test-cluster", localmode.DefaultProjectStage))
+			newCluster.Name = "test-cluster"
+			newCluster.Stage = localmode.DefaultProjectStage
+		}
+		clusterName = newCluster.Name
+
+		cs.GetConfig().Clusters = []config.Cluster{newCluster}
+		o.applyBootstrapCatalogOverride(cs.GetConfig())
+
+		if err := cs.SaveToFile(); err != nil {
+			return fmt.Errorf("write config file: %w", err)
+		}
+
+		if o.local {
+			log.Info().Msgf("Generated local-evaluation config in path: %v", cs.GetFilepath())
+		} else {
+			log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
+		}
 	}
 
 	if err := utils.AddGitignore(o.cwd); err != nil {
 		return err
-	}
-
-	newCluster, err := config.NewDefaultClusterWithCatalog(o.cwd, o.catalogOptions)
-	if err != nil {
-		return fmt.Errorf("create cluster: %w", err)
-	}
-
-	if o.local {
-		localmode.ApplyClusterProfile(&newCluster, localmode.DefaultDNSName("test-cluster", localmode.DefaultProjectStage))
-		newCluster.Name = "test-cluster"
-		newCluster.Stage = localmode.DefaultProjectStage
-	}
-
-	cs.GetConfig().Clusters = []config.Cluster{newCluster}
-	o.applyBootstrapCatalogOverride(cs.GetConfig())
-
-	if err := cs.SaveToFile(); err != nil {
-		return fmt.Errorf("write config file: %w", err)
 	}
 
 	if err := o.ensureEnvExample(); err != nil {
@@ -155,12 +164,10 @@ func (o *InitOptions) Run() error {
 	}
 
 	if o.local {
-		log.Info().Msgf("Generated local-evaluation config in path: %v", cs.GetFilepath())
-		log.Info().Msgf("Next steps: review config.yaml, then run 'kubara bootstrap --local %s'.", newCluster.Name)
+		log.Info().Msgf("Next steps: review config.yaml, then run 'kubara bootstrap --local %s'.", clusterName)
 		return nil
 	}
 
-	log.Info().Msgf("Generated config in path: %v", cs.GetFilepath())
 	log.Info().Msg("Next steps: review config.yaml, then run 'kubara generate'.")
 	return nil
 }
@@ -225,7 +232,7 @@ func (o *InitOptions) ensureRenovateConfig(cs *config.ConfigStore) error {
 				return err
 			}
 			if containsKubaraManager {
-				log.Info().Str("path", path).Msg("Renovate config already contains the kubara custom manager")
+				log.Warn().Str("path", path).Msg("Renovate config already exists and contains the kubara custom manager; skipping creation")
 				return nil
 			}
 			log.Warn().Str("path", path).Msg("Renovate config already exists; add the kubara custom manager manually if needed")
@@ -331,7 +338,7 @@ func (o *InitOptions) ensureEnvExample() error {
 		return fmt.Errorf("check env.example %q: %w", path, err)
 	}
 	if exists {
-		log.Info().Str("path", path).Msg("env.example already exists; skipping creation")
+		log.Warn().Str("path", path).Msg("env.example already exists; skipping creation")
 		return nil
 	}
 

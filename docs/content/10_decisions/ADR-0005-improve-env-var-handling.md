@@ -101,7 +101,7 @@ Environment variables are generically prefixed with `GITOPS_` instead of `ARGOCD
 - The `--prep` flag is removed.
 - The `--overwrite` flag is removed.
 - Running `kubara init` scaffolds `config.yaml`, `env.example` (if not already existing, documenting available bootstrap credentials), and `renovate.json` (if enabled). Both `.env` and `env.example` are added to the generated `.gitignore`.
-- If `config.yaml` already exists, `kubara init` fails rather than overwriting existing configuration.
+- If `config.yaml` already exists, `kubara init` logs a warning and skips writing it, but continues checking and creating any missing files (such as `env.example`, `renovate.json`, or `.gitignore`).
 - `kubara init --local` generates `config.yaml` pre-filled with local evaluation settings in one step without creating a `.env` file.
 
 ### Secret resolution during bootstrap
