@@ -269,6 +269,8 @@ jobs:
       KUBARA_GITOPS_HELM_REPO_PASSWORD: "000000"
 
       # config.yaml updates
+      KUBARA_CLUSTER_NAME: "kubara"
+      KUBARA_CLUSTER_STAGE: "tst"
       KUBARA_DNS_NAME: "kubara-tst.stackit.run"
       KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
       KUBARA_TERRAFORM_PROVIDER: "stackit"
