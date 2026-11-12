@@ -1,0 +1,18 @@
+---
+name: Validate catalog
+'on':
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: kubara-io/kubara@main
+        with:
+          args: '["schema", "--catalog", ".", "--output", "/tmp/catalog.schema.json"]'
+      - name: Check catalog packaging
+        run: kubara catalog package

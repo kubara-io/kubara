@@ -29,6 +29,8 @@ func TestNewInitFlags(t *testing.T) {
 	assert.False(t, flags.ForceFlag)
 	assert.False(t, flags.LocalFlag)
 	assert.True(t, flags.RenovateFlag)
+	assert.False(t, flags.GitHubActionsFlag)
+	assert.False(t, flags.GitLabCIFlag)
 	assert.Equal(t, ".env", flags.EnvFileFlag)
 	assert.Equal(t, "KUBARA_", flags.EnvPrefixFlag)
 	assert.Empty(t, flags.BootstrapCatalogFlag)
@@ -48,6 +50,8 @@ func TestNewInitCmd(t *testing.T) {
 	assert.True(t, flagNames["overwrite"])
 	assert.True(t, flagNames["local"])
 	assert.True(t, flagNames["renovate"])
+	assert.True(t, flagNames["github-actions"])
+	assert.True(t, flagNames["gitlab-ci"])
 	assert.True(t, flagNames["envVarPrefix"])
 	assert.True(t, flagNames["bootstrap-catalog"])
 }
@@ -108,6 +112,8 @@ func TestEnsureRenovateConfig(t *testing.T) {
 
 	var generated renovateConfig
 	require.NoError(t, json.Unmarshal(content, &generated))
+	assert.Contains(t, generated.Extends, "config:recommended")
+	assert.Contains(t, generated.Extends, "customManagers:githubActionsVersions")
 	require.Len(t, generated.CustomManagers, 1)
 	manager := generated.CustomManagers[0]
 	assert.Equal(t, []string{`/^clusters\/prod\/config\.yaml$/`}, manager.ManagerFilePatterns)
@@ -215,4 +221,71 @@ func TestRunNormalModeDoesNotCreateRenovateConfigOnValidationError(t *testing.T)
 	err := options.runNormalMode(nil, store, errors.New("invalid environment"))
 	require.ErrorContains(t, err, "validate env")
 	assert.NoFileExists(t, filepath.Join(workDir, "renovate.json"))
+}
+
+func TestInitCIPipelines(t *testing.T) {
+	for _, tt := range []struct {
+		name   string
+		flags  []string
+		github bool
+		gitlab bool
+		prep   bool
+	}{
+		{name: "default"},
+		{name: "github", flags: []string{"--github-actions"}, github: true},
+		{name: "gitlab", flags: []string{"--gitlab-ci"}, gitlab: true},
+		{name: "both", flags: []string{"--github-actions", "--gitlab-ci"}, github: true, gitlab: true},
+		{name: "prep", flags: []string{"--prep", "--github-actions", "--gitlab-ci"}, prep: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			workDir := t.TempDir()
+			bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
+			require.NoError(t, err)
+			envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
+			args := []string{
+				"kubara", "--work-dir", workDir, "--env-file", envPath,
+				"init", "--bootstrap-catalog", bootstrapPath, "--catalog", generalPath,
+				"--catalog-overwrite", "--renovate=false",
+			}
+			args = append(args, tt.flags...)
+			run := func(args []string) {
+				app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+				require.NoError(t, app.Run(context.Background(), args))
+			}
+			run(args)
+			paths := map[string]bool{
+				".github/workflows/kubara-generate.yml": tt.github,
+				".gitlab-ci.yml":                        tt.gitlab,
+			}
+			for path, wanted := range paths {
+				target := filepath.Join(workDir, path)
+				if wanted {
+					assert.FileExists(t, target)
+					require.NoError(t, os.WriteFile(target, []byte("existing content"), 0o644))
+				} else {
+					assert.NoFileExists(t, target)
+				}
+			}
+			if !tt.prep {
+				// Running again without --overwrite preserves existing file
+				run(args)
+				for path, wanted := range paths {
+					if wanted {
+						contents, err := os.ReadFile(filepath.Join(workDir, path))
+						require.NoError(t, err)
+						assert.Equal(t, "existing content", string(contents))
+					}
+				}
+				// Running with --overwrite overwrites file
+				run(append(args, "--overwrite"))
+				for path, wanted := range paths {
+					if wanted {
+						contents, err := os.ReadFile(filepath.Join(workDir, path))
+						require.NoError(t, err)
+						assert.NotEqual(t, "existing content", string(contents))
+					}
+				}
+			}
+		})
+	}
 }
