@@ -54,6 +54,10 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 
     Open `config.yaml` and configure your project name, stage, DNS name, and repository settings. `config.yaml` is the single source of truth for all cluster and platform configuration.
 
+    !!! note "Upgrading from v0.18.0 or earlier"
+        Prior to v0.19.0, kubara enforced a `.env` workflow (`kubara init --prep`) where cluster configuration was split between `.env` and `config.yaml`.
+        Starting in v0.19.0, `config.yaml` is the single source of truth for all platform settings.i A `.env` file is now strictly optional and restricted to initial bootstrap credentials (`GITOPS_*`, `DOCKERCONFIG_BASE64`, `ARGOCD_PASSWORD`), which can also be supplied via OS environment variables. See the [Migration Guide](../9_reference/migrations.md#migrating-from-v018x-to-v0190) for full details.
+
 #### Repository credentials for bootstrap
 
 Bootstrap credentials are only needed when running `kubara bootstrap`. You can provide them via OS environment variables or an optional `.env` file (checked in that order):
@@ -505,13 +509,13 @@ Render Terraform modules and Helm charts for the new Hub cluster:
 ```bash
 # default: generates both Helm and Terraform
 # use --helm or --terraform to generate only one type
-./kubara --config-file another-config.yaml generate
+./kubara generate --config-file another-config.yaml 
 ```
 
 Finally, bootstrap your additional Hub cluster:
 
 ```bash
-kubara --config-file another-config.yaml bootstrap <cluster name from another-config.yaml>
+kubara bootstrap --config-file another-config.yaml <cluster name from another-config.yaml>
 ```
 
 ## What's Next?

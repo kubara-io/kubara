@@ -52,7 +52,7 @@ All based on real-world usage at Schwarz Group and the experience of multiple en
 
 The usual flow is:
 
-1. 📄 Initial configuration via `config.yaml`
+1. 📄 Initialize configuration in `config.yaml`
 2. 🧩 Rendering and deploying Terraform and Helm modules using `kubara generate`
 3. 📦 Commit the output to your GitOps repository.
 4. 🚀 Bootstrapping the Hub cluster and Argo CD using `kubara bootstrap`
