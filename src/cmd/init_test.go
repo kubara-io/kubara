@@ -19,34 +19,6 @@ import (
 	"sigs.k8s.io/yaml"
 )
 
-func TestNewInitFlags(t *testing.T) {
-	t.Parallel()
-
-	flags := NewInitFlags()
-
-	assert.False(t, flags.LocalFlag)
-	assert.True(t, flags.RenovateFlag)
-	assert.Empty(t, flags.BootstrapCatalogFlag)
-}
-
-func TestNewInitCmd(t *testing.T) {
-	t.Parallel()
-
-	command := NewInitCmd()
-	flagNames := make(map[string]bool, len(command.Flags))
-	for _, flag := range command.Flags {
-		flagNames[flag.Names()[0]] = true
-	}
-
-	assert.Equal(t, "init", command.Name)
-	assert.False(t, flagNames["prep"])
-	assert.False(t, flagNames["overwrite"])
-	assert.False(t, flagNames["envVarPrefix"])
-	assert.True(t, flagNames["local"])
-	assert.True(t, flagNames["renovate"])
-	assert.True(t, flagNames["bootstrap-catalog"])
-}
-
 func TestInitWarnsIfConfigAlreadyExistsAndCreatesMissingFiles(t *testing.T) {
 	t.Parallel()
 

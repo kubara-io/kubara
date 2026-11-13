@@ -31,6 +31,7 @@ type InitFlags struct {
 	LocalFlag            bool
 	RenovateFlag         bool
 	BootstrapCatalogFlag string
+	PrepFlag             bool
 }
 
 func NewInitFlags() *InitFlags {
@@ -63,6 +64,10 @@ func NewInitCmd() *cli.Command {
 }
 
 func (flags *InitFlags) ToOptions(cmd *cli.Command) (*InitOptions, error) {
+	if cmd.IsSet("prep") || flags.PrepFlag {
+		return nil, fmt.Errorf("in v0.18.0+, the --prep flag was removed in favor of just using 'kubara init'")
+	}
+
 	cwd, err := filepath.Abs(cmd.String("work-dir"))
 	if err != nil {
 		return nil, fmt.Errorf("get working directory: %w", err)
@@ -107,6 +112,12 @@ func (flags *InitFlags) AddFlags(cmd *cli.Command) {
 			Config: cli.StringConfig{
 				TrimSpace: true,
 			},
+		},
+		&cli.BoolFlag{
+			Name:        "prep",
+			Usage:       "Deprecated: --prep was removed in v0.18.0+ in favor of 'kubara init'",
+			Hidden:      true,
+			Destination: &flags.PrepFlag,
 		},
 	}
 
