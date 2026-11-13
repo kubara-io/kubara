@@ -84,7 +84,7 @@ func LoadCredentials(workDir string) (*Credentials, error) {
 
 // ValidateForCluster validates the credentials against the cluster's repository configurations.
 func (c *Credentials) ValidateForCluster(cluster *config.Cluster) error {
-	if cluster == nil {
+	if cluster == nil || cluster.ArgoCD == nil {
 		return nil
 	}
 	gitURL := ""
