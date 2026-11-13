@@ -28,24 +28,26 @@ const (
 
 // Options for bootstrap operations
 type Options struct {
-	Kubeconfig         string
-	PlatformComponents string
-	PlatformConfigs    string
-	Local              bool
-	WithESCSSPath      string
-	Credentials        *Credentials
-	Catalog            catalog.Catalog
-	ClusterConfig      *config.Cluster
-	DryRun             bool
-	Timeout            time.Duration
-	ClusterName        string
-	WorkDir            string
-	ConfigFilePath     string
-	Catalogs           []string
-	CatalogOverwrite   bool
-	LocalState         *LocalState
-	BootstrapCatalog   string
-	WizardPassword     string
+	Kubeconfig             string
+	PlatformComponents     string
+	PlatformConfigs        string
+	Local                  bool
+	WithESCSSPath          string
+	Credentials            *Credentials
+	Catalog                catalog.Catalog
+	ClusterConfig          *config.Cluster
+	DryRun                 bool
+	Timeout                time.Duration
+	ClusterName            string
+	WorkDir                string
+	ConfigFilePath         string
+	Catalogs               []string
+	CatalogOverwrite       bool
+	LocalState             *LocalState
+	BootstrapCatalog       string
+	WizardPassword         string
+	InitialKubeconfig      string
+	ClusterSecretsProvider config.ClusterSecretsProvider
 }
 
 type BootstrapChart struct {
@@ -111,7 +113,9 @@ func Bootstrap(ctx context.Context, opts *Options) error {
 		ctx, cancel = context.WithTimeout(ctx, opts.Timeout)
 		defer cancel()
 	}
-
+	if opts.ClusterConfig.Type == config.Spoke {
+		return BootstrapSpoke(ctx, opts)
+	}
 	if opts.Local {
 		if err := prepareLocalBootstrap(ctx, opts); err != nil {
 			return fmt.Errorf("prepare local bootstrap: %w", err)
