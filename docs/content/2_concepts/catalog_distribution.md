@@ -239,7 +239,7 @@ kubara github-action
 Creates `.github/workflows/kubara-generate.yml`. Use `--overwrite` to replace an existing workflow.
 
 PRs changing `config.yaml` trigger generation. Add local catalog paths to the workflow's `paths` filter as needed.
-Generated changes are committed to the same PR, with the output posted as a comment.
+Generated changes, including schema migrations written back to `config.yaml`, are committed to the same PR, with the output posted as a comment.
 
 Commits use `GITHUB_TOKEN`. To automatically trigger downstream validation, lint, or Terraform/OpenTofu workflows, use a GitHub App token for the push instead.
 
