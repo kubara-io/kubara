@@ -41,7 +41,7 @@ Catalog versions in `config.yaml` can be updated in two ways:
 
 ## Using the GitHub Action Directly
 
-You can use the `kubara-action` in your own GitHub workflows (also compatible with Forgejo Actions):
+The scaffolded generation workflow relies on GitHub-specific features (such as `gh` CLI for PR comments), but the standalone `kubara-action` has no GitHub-specific dependencies and is also compatible with Forgejo Actions:
 
 ```yaml
 steps:
