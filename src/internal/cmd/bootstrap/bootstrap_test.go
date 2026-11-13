@@ -162,3 +162,17 @@ func TestWriteLocalOpenBaoValuesUsesChartServerImageForAutoUnsealer(t *testing.T
 	assert.Contains(t, string(content), `image: '{{ .Values.server.image.registry | default "docker.io" }}/{{ .Values.server.image.repository }}:{{ .Values.server.image.tag | default (trimPrefix "v" .Chart.AppVersion) }}'`)
 	assert.NotContains(t, string(content), "openbao/openbao:2.0.1")
 }
+
+func TestGeneratePassword(t *testing.T) {
+	pw, err := generatePassword(24)
+	require.NoError(t, err)
+	assert.Len(t, pw, 24)
+	for _, c := range pw {
+		assert.Contains(t, wizardPasswordLetters, string(c))
+	}
+
+	// Verify randomness across multiple invocations
+	pw2, err := generatePassword(24)
+	require.NoError(t, err)
+	assert.NotEqual(t, pw, pw2)
+}

@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/service"
 	internaltestutil "github.com/kubara-io/kubara/internal/testutil"
 	"github.com/stretchr/testify/require"
@@ -98,43 +96,27 @@ func CreateTestCluster(t *testing.T) config.Cluster {
 func CreateDefaultGenerateTestEnv(t *testing.T, dir string) string {
 	t.Helper()
 
-	return CreateTestEnv(t, dir, envconfig.EnvMap{
-		ProjectName:                 "project-name",
-		ProjectStage:                "project-stage",
-		DockerconfigBase64:          "DockerConfig",
-		ArgocdWizardAccountPassword: "wizardpassword",
-		ArgocdGitHttpsUrl:           "https://example.com",
-		ArgocdGitUsername:           "CoolCapybara",
-		ArgocdGitPatOrPassword:      "password",
-		ArgocdHelmRepoUrl:           "https://example.com",
-		ArgocdHelmRepoUsername:      "CoolCapybara",
-		ArgocdHelmRepoPassword:      "password",
+	return CreateTestEnv(t, dir, map[string]string{
+		"DOCKERCONFIG_BASE64":       "DockerConfig",
+		"GITOPS_USERNAME":           "CoolCapybara",
+		"GITOPS_PASSWORD":           "password",
+		"GITOPS_HELM_REPO_USERNAME": "CoolCapybara",
+		"GITOPS_HELM_REPO_PASSWORD": "password",
 	})
 }
 
-// createTestEnv writes an envMap to the file system
-// It returns the file path
-// Takes a directory and an EnvMap and validates the envMap before writing it
-func CreateTestEnv(t *testing.T, dir string, env envconfig.EnvMap) string {
+// CreateTestEnv writes key-value pairs as a .env file to the file system.
+// It returns the file path.
+func CreateTestEnv(t *testing.T, dir string, env map[string]string) string {
+	t.Helper()
 	envPath := filepath.Join(dir, ".env")
-	err := env.Validate()
-	require.NoError(t, err)
 
 	var b strings.Builder
-	v := reflect.ValueOf(&env).Elem()
-	typ := v.Type()
-	for i := 0; i < v.NumField(); i++ {
-		fieldVal := v.Field(i)
-		fieldType := typ.Field(i)
-		koanfKey := fieldType.Tag.Get("koanf")
-		if koanfKey == "" {
-			continue
-		}
-		fmt.Fprintf(&b, "%s='%v'\n", koanfKey, fieldVal.Interface())
+	for k, v := range env {
+		fmt.Fprintf(&b, "%s='%s'\n", k, v)
 	}
 
-	err = os.WriteFile(envPath, []byte(b.String()), 0600)
-
+	err := os.WriteFile(envPath, []byte(b.String()), 0600)
 	require.NoError(t, err)
 
 	return envPath

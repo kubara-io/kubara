@@ -261,19 +261,16 @@ jobs:
     outputs:
       success: ${{ steps.commit.outputs.success }}
     env:
-      # .env updates (must match src/internal/envconfig/env)
-      KUBARA_PROJECT_NAME: "kubara"
-      KUBARA_PROJECT_STAGE: "tst"
+      # Credentials for bootstrap (.env / OS environment)
       KUBARA_DOCKERCONFIG_BASE64: "000000"
-      KUBARA_ARGOCD_WIZARD_ACCOUNT_PASSWORD: "000000"
-      KUBARA_ARGOCD_HELM_REPO_USERNAME: "git"
-      KUBARA_ARGOCD_HELM_REPO_PASSWORD: "000000"
-      KUBARA_ARGOCD_HELM_REPO_URL: "https://kubara.io/kubara.git"
-      KUBARA_ARGOCD_GIT_URL: "https://kubara.io/kubara.git"
-      KUBARA_ARGOCD_GIT_PAT_OR_PASSWORD: "000000"
-      KUBARA_ARGOCD_GIT_USERNAME: "git"
+      KUBARA_GITOPS_USERNAME: "git"
+      KUBARA_GITOPS_PASSWORD: "000000"
+      KUBARA_GITOPS_HELM_REPO_USERNAME: "git"
+      KUBARA_GITOPS_HELM_REPO_PASSWORD: "000000"
 
       # config.yaml updates
+      KUBARA_CLUSTER_NAME: "kubara"
+      KUBARA_CLUSTER_STAGE: "tst"
       KUBARA_DNS_NAME: "kubara-tst.stackit.run"
       KUBARA_STACKIT_PROJECT_ID: "00000000-0000-0000-0000-000000000000"
       KUBARA_TERRAFORM_PROVIDER: "stackit"
@@ -299,22 +296,17 @@ jobs:
           echo "output dir: ${{ env.OUTPUT_GENERATED_DIR }}"
           mkdir -p "${{ env.OUTPUT_GENERATED_DIR }}"
 
-      - name: kubara init --prep
-        run: |
-          set -euo pipefail
-          cd src
-          go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init --prep
-
-      - name: Update .env (strict template mode)
-        run: |
-          set -euo pipefail
-          .scripts/kubara-env-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/.env"
-
       - name: kubara init
         run: |
           set -euo pipefail
           cd src
           go run main.go --work-dir "${{ env.OUTPUT_GENERATED_DIR }}" init
+
+      - name: Update .env (strict template mode)
+        run: |
+          set -euo pipefail
+          cp "${{ env.OUTPUT_GENERATED_DIR }}/env.example" "${{ env.OUTPUT_GENERATED_DIR }}/.env"
+          .scripts/kubara-env-update.sh "${{ env.OUTPUT_GENERATED_DIR }}/.env"
 
       - name: Update config.yaml (strict mode)
         run: |

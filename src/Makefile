@@ -13,7 +13,7 @@ CONTROLLER_GEN = go run sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTRO
 all: build
 
 # Build the binary in the project root
-build:
+build: generate
 	@echo "Building $(BINARY_NAME) for current platform..."
 	@$(BUILD_ENV) go build -o $(BINARY_NAME) $(SRC)
 

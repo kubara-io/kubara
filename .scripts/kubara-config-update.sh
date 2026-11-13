@@ -45,6 +45,10 @@ type_current="$(yq eval "${TYPE_PATH} // \"__MISSING__\"" "$CFG")"
 
 KUBARA_YAML_VAL="${KUBARA_CLUSTER_TYPE:-hub}" yq eval "${TYPE_PATH} = strenv(KUBARA_YAML_VAL)" -i "$CFG"
 
+apply_yaml_if_set KUBARA_CLUSTER_NAME        "${PREFIX}.clusters[0].name"
+apply_yaml_if_set KUBARA_PROJECT_NAME        "${PREFIX}.clusters[0].name"
+apply_yaml_if_set KUBARA_CLUSTER_STAGE       "${PREFIX}.clusters[0].stage"
+apply_yaml_if_set KUBARA_PROJECT_STAGE       "${PREFIX}.clusters[0].stage"
 apply_yaml_if_set KUBARA_SSO_ORG             "${PREFIX}.clusters[0].ssoOrg"
 apply_yaml_if_set KUBARA_SSO_TEAM            "${PREFIX}.clusters[0].ssoTeam"
 apply_yaml_if_set KUBARA_TERRAFORM_PROVIDER  "${PREFIX}.clusters[0].terraform.provider"
@@ -53,5 +57,8 @@ apply_yaml_if_set KUBARA_KUBERNETES_TYPE     "${PREFIX}.clusters[0].terraform.ku
 apply_yaml_if_set KUBARA_KUBERNETES_VERSION  "${PREFIX}.clusters[0].terraform.kubernetesVersion"
 apply_yaml_if_set KUBARA_DNS_NAME            "${PREFIX}.clusters[0].dnsName"
 apply_yaml_if_set KUBARA_DNS_NAME            "${PREFIX}.clusters[0].terraform.dns.name"
+apply_yaml_if_set KUBARA_DNS_EMAIL           "${PREFIX}.clusters[0].terraform.dns.email"
+apply_yaml_if_set KUBARA_GIT_REPO_URL        "${PREFIX}.clusters[0].argocd.repo.git.configs.url"
+apply_yaml_if_set KUBARA_GIT_REPO_URL        "${PREFIX}.clusters[0].argocd.repo.git.components.url"
 
 log "✅ config.yaml updated"

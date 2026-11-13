@@ -6,10 +6,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 	"text/template"
 
 	"github.com/kubara-io/kubara/internal/config"
-	"github.com/kubara-io/kubara/internal/envconfig"
 	"github.com/kubara-io/kubara/internal/k8s"
 	"github.com/kubara-io/kubara/internal/utils"
 
@@ -39,14 +39,14 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 	k8sOpts.DryRun = o.DryRun
 
 	var manifest []byte
-	imagePullSecret, err := sm.createImagePullSecret(o.EnvMap, argocdNamespace)
+	imagePullSecret, err := sm.createImagePullSecret(o.Credentials, argocdNamespace)
 	if err != nil {
 		return fmt.Errorf("create image pull secret: %w", err)
 	}
 	secrets := []*corev1.Secret{
-		sm.createGitRepositorySecret(o.EnvMap),
+		sm.createGitRepositorySecret(o.ClusterConfig, o.Credentials),
 		imagePullSecret,
-		sm.createHelmRepositorySecret(o.EnvMap),
+		sm.createHelmRepositorySecret(o.ClusterConfig, o.Credentials),
 	}
 
 	for _, secret := range secrets {
@@ -91,34 +91,48 @@ func (sm *SecretManager) CreateHubSecrets(ctx context.Context, o *Options) error
 }
 
 // createGitRepositorySecret creates the ArgoCD git repository secret
-func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
+func (sm *SecretManager) createGitRepositorySecret(cluster *config.Cluster, creds *Credentials) *corev1.Secret {
+	if cluster == nil {
+		return nil
+	}
+
+	gitURL := ""
+	if cluster.ArgoCD.Repo.Git != nil {
+		gitURL = cluster.ArgoCD.Repo.Git.Configs.URL
+	}
+	projectName := fmt.Sprintf("%s-%s", cluster.Name, cluster.Stage)
+
 	secretName := "https-init-repo-access"
 	stringData := map[string]string{
 		"enableLfs": "true",
 		"insecure":  "false",
-		"project":   fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
+		"project":   projectName,
 		"type":      "git",
-		"url":       em.GitRepositoryURL(),
+		"url":       gitURL,
 	}
 
-	switch em.GitAuthMode() {
-	case envconfig.GitAuthModeSSH:
+	if creds != nil {
+		switch {
+		case creds.GitSSHPrivateKey != "" || utils.IsSSHGitURL(gitURL):
+			secretName = "ssh-init-repo-access"
+			stringData["sshPrivateKey"] = creds.GitSSHPrivateKey
+		case creds.GitGitHubAppID != "":
+			secretName = "github-app-init-repo-access"
+			stringData["githubAppID"] = creds.GitGitHubAppID
+			stringData["githubAppInstallationID"] = creds.GitGitHubAppInstallationID
+			stringData["githubAppPrivateKey"] = creds.GitGitHubAppPrivateKey
+			if creds.GitGitHubAppEnterpriseBaseURL != "" {
+				stringData["githubAppEnterpriseBaseUrl"] = creds.GitGitHubAppEnterpriseBaseURL
+			}
+		default:
+			if creds.GitUsername != "" && creds.GitPassword != "" {
+				stringData["username"] = creds.GitUsername
+				stringData["password"] = creds.GitPassword
+				stringData["forceHttpBasicAuth"] = "true"
+			}
+		}
+	} else if utils.IsSSHGitURL(gitURL) {
 		secretName = "ssh-init-repo-access"
-		stringData["sshPrivateKey"] = em.ArgocdGitSshPrivateKey
-	case envconfig.GitAuthModeGitHubApp:
-		secretName = "github-app-init-repo-access"
-		stringData["githubAppID"] = em.ArgocdGitGithubAppID
-		stringData["githubAppInstallationID"] = em.ArgocdGitGithubAppInstallationID
-		stringData["githubAppPrivateKey"] = em.ArgocdGitGithubAppPrivateKey
-		if envconfig.IsConfiguredEnvValue(em.ArgocdGitGithubAppEnterpriseBaseUrl) {
-			stringData["githubAppEnterpriseBaseUrl"] = em.ArgocdGitGithubAppEnterpriseBaseUrl
-		}
-	default:
-		if envconfig.IsConfiguredEnvValue(em.ArgocdGitUsername) && envconfig.IsConfiguredEnvValue(em.ArgocdGitPatOrPassword) {
-			stringData["username"] = em.ArgocdGitUsername
-			stringData["password"] = em.ArgocdGitPatOrPassword
-			stringData["forceHttpBasicAuth"] = "true"
-		}
 	}
 	stringData["name"] = secretName
 
@@ -143,12 +157,12 @@ func (sm *SecretManager) createGitRepositorySecret(em *envconfig.EnvMap) *corev1
 }
 
 // createImagePullSecret creates the docker registry pull secret
-func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace string) (*corev1.Secret, error) {
-	if !envconfig.IsConfiguredEnvValue(em.DockerconfigBase64) {
+func (sm *SecretManager) createImagePullSecret(creds *Credentials, namespace string) (*corev1.Secret, error) {
+	if creds == nil || creds.DockerconfigBase64 == "" {
 		return nil, nil
 	}
 
-	secretString, err := utils.DecodeB64(em.DockerconfigBase64)
+	secretString, err := utils.DecodeB64(creds.DockerconfigBase64)
 	if err != nil {
 		return nil, fmt.Errorf("decode DOCKERCONFIG_BASE64: %w", err)
 	}
@@ -170,20 +184,24 @@ func (sm *SecretManager) createImagePullSecret(em *envconfig.EnvMap, namespace s
 }
 
 // createHelmRepositorySecret creates the Helm repository secret
-func (sm *SecretManager) createHelmRepositorySecret(em *envconfig.EnvMap) *corev1.Secret {
-	if !envconfig.IsConfiguredEnvValue(em.ArgocdHelmRepoUrl) {
+func (sm *SecretManager) createHelmRepositorySecret(cluster *config.Cluster, creds *Credentials) *corev1.Secret {
+	if cluster == nil || cluster.ArgoCD.HelmRepo == nil || strings.TrimSpace(cluster.ArgoCD.HelmRepo.URL) == "" {
 		return nil
 	}
-	helmRepoURL := envconfig.NormalizeHelmRepoURL(em.ArgocdHelmRepoUrl)
+	helmRepoURL := utils.NormalizeHelmRepoURL(cluster.ArgoCD.HelmRepo.URL)
 	stringData := map[string]string{
 		"url":      helmRepoURL,
 		"name":     "helm-chart-repository",
-		"password": em.ArgocdHelmRepoPassword,
-		"project":  fmt.Sprintf("%s-%s", em.ProjectName, em.ProjectStage),
+		"password": "",
+		"project":  fmt.Sprintf("%s-%s", cluster.Name, cluster.Stage),
 		"type":     "helm",
-		"username": em.ArgocdHelmRepoUsername,
+		"username": "",
 	}
-	if envconfig.IsOCIHelmRepoURL(em.ArgocdHelmRepoUrl) {
+	if creds != nil {
+		stringData["username"] = creds.HelmRepoUsername
+		stringData["password"] = creds.HelmRepoPassword
+	}
+	if utils.IsOCIHelmRepoURL(cluster.ArgoCD.HelmRepo.URL) {
 		stringData["enableOCI"] = "true"
 	}
 

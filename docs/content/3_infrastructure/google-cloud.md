@@ -28,7 +28,7 @@ You'll also need kubara installed. See the [Installation guide](../1_getting_sta
 
 ## TL;DR / Sneak preview:
 
-1. We will generate an `.env` file and configure all necessary values, after that generate the config.yaml and fill it out too. `kubara init (--prep)`
+1. We will initialize `config.yaml` and configure all necessary values: `kubara init`
 Then we will generate all the rendered Helm-Charts: `kubara generate`
 
 2. We will create and configure a GKE Cluster, set up Google Secret Manager, configure Google DNS with an existing domain by delegating a subdomain for ExternalDNS and set up SSO.
@@ -64,7 +64,6 @@ Follow the kubara [Bootstrapping Guide](../1_getting_started/bootstrapping.md), 
 ```bash
 # pseudo-workflow, please check the up2date official guide!
 
-kubara init --prep # generate .env file & set values accordingly
 kubara init # generate config.yaml & set values accordingly
 kubara generate # generate helm charts
 
