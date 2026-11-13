@@ -39,7 +39,6 @@ The local runtime data goes into `.local/` in your GitOps repository:
 
 - `.local/kind.kubeconfig`: kubeconfig exported from `kind`
 - `.local/kind-config.yaml`: the generated `kind` cluster definition
-- `.local/generate.env`: environment snapshot used for the local `kubara generate --helm` rerun
 - `.local/openbao/values.yaml`: Helm values for the persistent OpenBao setup
 - `.local/external-secrets/clustersecretstore.yaml`: local `ClusterSecretStore` manifest
 
@@ -113,7 +112,7 @@ The local profile does all of the following:
 
 Argo CD is installed from the bootstrap catalog and is therefore not part of the configurable service list.
 
-After changing the cluster profile, kubara writes `.local/generate.env` and reruns `kubara generate --helm` so the rendered Helm artifacts match the local profile.
+After changing the cluster profile, kubara reruns `kubara generate --helm` so the rendered Helm artifacts match the local profile.
 
 ### 5. Install and configure OpenBao
 

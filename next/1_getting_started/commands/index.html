@@ -2365,6 +2365,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -2583,7 +2611,6 @@ You're not viewing the latest stable version.
 [--config-file|-c]=[value]
 [--decode]
 [--encode]
-[--env-file]=[value]
 [--file]=[value]
 [--help|-h]
 [--kubeconfig]=[value]
@@ -2598,34 +2625,30 @@ You're not viewing the latest stable version.
 <div class="highlight"><pre><span></span><code>kubara [command]
 </code></pre></div>
 <h1 id="global-options">GLOBAL OPTIONS</h1>
-<p><strong>--base64</strong>: Enable base64 encode/decode mode</p>
+<p><strong>--base64</strong>: Enable base64 encode/decode mode (default: false)</p>
 <p><strong>--catalog</strong>="": Path to a catalog directory or an OCI reference in the form oci://registry/repository:x.y.z</p>
-<p><strong>--catalog-overwrite</strong>: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions</p>
-<p><strong>--check-update</strong>: Check online for a newer kubara release</p>
-<p><strong>--config-file, -c</strong>="": Path to the configuration file (default: "config.yaml")</p>
-<p><strong>--decode</strong>: Base64 decode input</p>
-<p><strong>--encode</strong>: Base64 encode input</p>
-<p><strong>--env-file</strong>="": Path to the .env file (default: ".env")</p>
+<p><strong>--catalog-overwrite</strong>: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions (default: false)</p>
+<p><strong>--check-update</strong>: Check online for a newer kubara release (default: false)</p>
+<p><strong>--config-file, -c</strong>="": Path to the configuration file (default: config.yaml)</p>
+<p><strong>--decode</strong>: Base64 decode input (default: false)</p>
+<p><strong>--encode</strong>: Base64 encode input (default: false)</p>
 <p><strong>--file</strong>="": Input file path for base64 operation</p>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--kubeconfig</strong>="": Path to kubeconfig file (default: "~/.kube/config")</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--kubeconfig</strong>="": Path to kubeconfig file (default: ~/.kube/config)</p>
 <p><strong>--string</strong>="": Input string for base64 operation</p>
-<p><strong>--test-connection</strong>: Check if Kubernetes cluster can be reached. List namespaces and exit</p>
-<p><strong>--version, -v</strong>: print the version</p>
-<p><strong>--work-dir, -w</strong>="": Working directory (default: ".")</p>
+<p><strong>--test-connection</strong>: Check if Kubernetes cluster can be reached. List namespaces and exit (default: false)</p>
+<p><strong>--version, -v</strong>: print the version (default: false)</p>
+<p><strong>--work-dir, -w</strong>="": Working directory (default: .)</p>
 <h1 id="commands">COMMANDS</h1>
 <h2 id="init">init</h2>
 <p>Initialize kubara config for your GitOps repository</p>
 <blockquote>
-<p>kubara init [--prep] [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]</p>
+<p>kubara init [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]</p>
 </blockquote>
 <p><strong>--bootstrap-catalog</strong>="": Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z</p>
-<p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--local</strong>: Initialize files for the local evaluation workflow. Local testing only; not for production use.</p>
-<p><strong>--overwrite</strong>: Overwrite config if exists</p>
-<p><strong>--prep</strong>: Copy embedded prep/ folder into current working directory</p>
-<p><strong>--renovate</strong>: Generate a Renovate configuration for kubara catalog updates if none exists</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--local</strong>: Initialize files for the local evaluation workflow. Local testing only; not for production use. (default: false)</p>
+<p><strong>--renovate</strong>: Generate a Renovate configuration for kubara catalog updates if none exists (default: true)</p>
 <h3 id="help-h">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="generate">generate</h2>
@@ -2633,10 +2656,10 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]</p>
 </blockquote>
-<p><strong>--dry-run</strong>: Preview generation without creating files</p>
-<p><strong>--helm</strong>: Only generate Helm files</p>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--terraform</strong>: Only generate Terraform files</p>
+<p><strong>--dry-run</strong>: Preview generation without creating files (default: false)</p>
+<p><strong>--helm</strong>: Only generate Helm files (default: false)</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--terraform</strong>: Only generate Terraform files (default: false)</p>
 <h3 id="help-h_1">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="bootstrap">bootstrap</h2>
@@ -2644,25 +2667,24 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara bootstrap CLUSTER_NAME [--local]</p>
 </blockquote>
-<p><strong>--dry-run</strong>: Run with dry-run</p>
-<p><strong>--envVarPrefix</strong>="": Prefix for envs read from envVars (default: "KUBARA_")</p>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--local</strong>: Provision an isolated local evaluation environment. Local testing only; not for production use.</p>
-<p><strong>--platform-components</strong>="": Path to the platform-components directory (default: "platform-components")</p>
-<p><strong>--platform-configs</strong>="": Path to platform-configs directory (default: "platform-configs")</p>
+<p><strong>--dry-run</strong>: Run with dry-run (default: false)</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--local</strong>: Provision an isolated local evaluation environment. Local testing only; not for production use. (default: false)</p>
+<p><strong>--platform-components</strong>="": Path to the platform-components directory (default: platform-components)</p>
+<p><strong>--platform-configs</strong>="": Path to platform-configs directory (default: platform-configs)</p>
 <p><strong>--timeout</strong>="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)</p>
-<p><strong>--with-es-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap.</p>
+<p><strong>--with-es-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap. (default: false)</p>
 <p><strong>--with-es-css-file</strong>="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)</p>
-<p><strong>--with-prometheus-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap.</p>
+<p><strong>--with-prometheus-crds</strong>: Deprecated: ignored because CRDs are applied automatically during bootstrap. (default: false)</p>
 <h3 id="help-h_2">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="schema">schema</h2>
 <p>Generate a JSON schema for the config yaml structure</p>
 <blockquote>
-<p>kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]</p>
+<p>kubara schema [--output PATH]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--output, -o</strong>="": Output file path for the JSON schema (default: "config.schema.json")</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--output, -o</strong>="": Output file path for the JSON schema (default: config.schema.json)</p>
 <h3 id="help-h_3">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="agents">agents</h2>
@@ -2670,8 +2692,8 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara agents [--overwrite]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--overwrite</strong>: Overwrite an existing AGENTS.md</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--overwrite</strong>: Overwrite an existing AGENTS.md (default: false)</p>
 <h3 id="help-h_4">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="catalog">catalog</h2>
@@ -2679,13 +2701,13 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog [command]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h3 id="create">create</h3>
 <p>Create a custom catalog directory skeleton</p>
 <blockquote>
 <p>kubara catalog create CATALOG_NAME</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_5">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="add">add</h3>
@@ -2693,7 +2715,7 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog add SERVICE_NAME</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_6">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="pull">pull</h3>
@@ -2701,8 +2723,8 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog pull [--insecure] oci://registry/repository:x.y.z</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for the registry connection.</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for the registry connection. (default: false)</p>
 <h4 id="help-h_7">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="push">push</h3>
@@ -2711,8 +2733,8 @@ You're not viewing the latest stable version.
 <p>kubara catalog push [--from oci://registry-source/repository:x.y.z] [--insecure] oci://registry-target/repository:x.y.z</p>
 </blockquote>
 <p><strong>--from</strong>="": Push an existing cached catalog reference to another registry.</p>
-<p><strong>--help, -h</strong>: show help</p>
-<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for registry connections.</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for registry connections. (default: false)</p>
 <h4 id="help-h_8">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="login">login</h3>
@@ -2720,12 +2742,12 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog login [flags] <registry></p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <p><strong>--identity-token</strong>="": identity token</p>
-<p><strong>--identity-token-stdin</strong>: Log in with identity token from stdin</p>
-<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for registry connections.</p>
+<p><strong>--identity-token-stdin</strong>: Log in with identity token from stdin (default: false)</p>
+<p><strong>--insecure</strong>: Ignore TLS certificate verification issues for registry connections. (default: false)</p>
 <p><strong>--password, -p</strong>="": registry password</p>
-<p><strong>--password-stdin</strong>: Log in with password from stdin</p>
+<p><strong>--password-stdin</strong>: Log in with password from stdin (default: false)</p>
 <p><strong>--username, -u</strong>="": registry username</p>
 <h4 id="help-h_9">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
@@ -2734,7 +2756,7 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog list</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_10">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="package-pkg">package, pkg</h3>
@@ -2742,7 +2764,7 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog package [oci://REGISTRY/BASE/PATH/]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_11">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="unpackage-unpkg">unpackage, unpkg</h3>
@@ -2750,7 +2772,7 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara catalog unpackage oci://registry/repository:x.y.z [directory]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_12">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="help-h_13">help, h</h3>
@@ -2760,13 +2782,13 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara cluster [command]</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h3 id="list-ls_1">list, ls</h3>
 <p>List all clusters in the config file</p>
 <blockquote>
 <p>kubara cluster ls</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_14">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="add_1">add</h3>
@@ -2774,7 +2796,7 @@ You're not viewing the latest stable version.
 <blockquote>
 <p>kubara cluster add CLUSTER_NAME</p>
 </blockquote>
-<p><strong>--help, -h</strong>: show help</p>
+<p><strong>--help, -h</strong>: show help (default: false)</p>
 <h4 id="help-h_15">help, h</h4>
 <p>Shows a list of commands or help for one command</p>
 <h3 id="help-h_16">help, h</h3>

@@ -2551,6 +2551,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -2947,7 +2975,6 @@ You're not viewing the latest stable version.
 <ul>
 <li><code>.local/kind.kubeconfig</code>: kubeconfig exported from <code>kind</code></li>
 <li><code>.local/kind-config.yaml</code>: the generated <code>kind</code> cluster definition</li>
-<li><code>.local/generate.env</code>: environment snapshot used for the local <code>kubara generate --helm</code> rerun</li>
 <li><code>.local/openbao/values.yaml</code>: Helm values for the persistent OpenBao setup</li>
 <li><code>.local/external-secrets/clustersecretstore.yaml</code>: local <code>ClusterSecretStore</code> manifest</li>
 </ul>
@@ -3004,7 +3031,7 @@ On Windows with Docker Engine running inside WSL2, start <code>cloud-provider-ki
 <li><code>traefik</code></li>
 </ul>
 <p>Argo CD is installed from the bootstrap catalog and is therefore not part of the configurable service list.</p>
-<p>After changing the cluster profile, kubara writes <code>.local/generate.env</code> and reruns <code>kubara generate --helm</code> so the rendered Helm artifacts match the local profile.</p>
+<p>After changing the cluster profile, kubara reruns <code>kubara generate --helm</code> so the rendered Helm artifacts match the local profile.</p>
 <h3 id="5-install-and-configure-openbao">5. Install and configure OpenBao</h3>
 <p>kubara installs the OpenBao Helm chart with local values that:</p>
 <ul>

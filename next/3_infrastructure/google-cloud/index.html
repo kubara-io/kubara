@@ -2624,6 +2624,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -3085,7 +3113,7 @@ You're not viewing the latest stable version.
 <h2 id="tldr-sneak-preview">TL;DR / Sneak preview:</h2>
 <ol>
 <li>
-<p>We will generate an <code>.env</code> file and configure all necessary values, after that generate the config.yaml and fill it out too. <code>kubara init (--prep)</code>
+<p>We will initialize <code>config.yaml</code> and configure all necessary values: <code>kubara init</code>
 Then we will generate all the rendered Helm-Charts: <code>kubara generate</code></p>
 </li>
 <li>
@@ -3119,7 +3147,6 @@ gcloud<span class="w"> </span>config<span class="w"> </span><span class="nb">set
 <p>Follow the kubara <a href="../../1_getting_started/bootstrapping/">Bootstrapping Guide</a>, generate your helm charts and stop before bootstrapping <a href="../../1_getting_started/bootstrapping/#4-deploying-argo-cd">Step 4: Bootstrapping</a>. The bootstrapping will be handled as part of this page.</p>
 <div class="highlight"><pre><span></span><code><span class="c1"># pseudo-workflow, please check the up2date official guide!</span>
 
-kubara<span class="w"> </span>init<span class="w"> </span>--prep<span class="w"> </span><span class="c1"># generate .env file &amp; set values accordingly</span>
 kubara<span class="w"> </span>init<span class="w"> </span><span class="c1"># generate config.yaml &amp; set values accordingly</span>
 kubara<span class="w"> </span>generate<span class="w"> </span><span class="c1"># generate helm charts</span>
 

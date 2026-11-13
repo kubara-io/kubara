@@ -28,19 +28,19 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
 
 ---
 
-### 1.2 Generate preparation files
+### 1.2 Initialize Platform Configuration
 
-1. Run this command to scaffold essential setup files:
+1. Run this command to initialize your GitOps repository:
 
     ```bash
-    kubara init --prep
+    kubara init
     ```
 
     This will generate:
 
-    * A `.gitignore` file to help prevent accidental commits of sensitive or unnecessary files
-    * An `.env` file that serves as a template for your environment configuration.
-      Fill all placeholders (`<...>`) before running `kubara init`.
+    * A `config.yaml` file pre-filled with platform and cluster configuration (and repository URLs inferred from your Git repository).
+    * A `.gitignore` file to prevent accidental commits of secrets and local artifacts.
+    * A `renovate.json` file (if none exists) to keep versioned catalog references up to date.
 
     !!! tip "Working with coding agents"
         Run `kubara agents` to scaffold an `AGENTS.md` into your repository so tools like Claude
@@ -50,42 +50,35 @@ The easiest way is to run `kubara` inside the repository (but do not add the bin
         travels with the repository, and re-run `kubara agents --overwrite` to refresh it after
         upgrading kubara.
 
-2. Update the values inside `.env`
+2. Review and edit `config.yaml`:
 
-    !!! danger "Handling .env Files"
-        `.env` files contain sensitive credentials and must be treated as secrets.
-        Never commit a plain `.env` file directly into Git.
-        If you really need it in the repository, make sure it is stored in encrypted form only.
-        Always add `.env` to `.gitignore` to avoid accidental commits.
-        For team collaboration, proven approaches include encrypted `.env` files in the repository, centralized secret management, or helper tools like `dotenv`.
-        Important: A plain `.env` file in Git exposes all secrets and must be avoided.
+    Open `config.yaml` and configure your project name, stage, DNS name, and repository settings. `config.yaml` is the single source of truth for all cluster and platform configuration.
 
-3. Check your values
+    !!! note "Upgrading from v0.18.0 or earlier"
+        Prior to v0.19.0, kubara enforced a `.env` workflow (`kubara init --prep`) where cluster configuration was split between `.env` and `config.yaml`.
+        Starting in v0.19.0, `config.yaml` is the single source of truth for all platform settings.i A `.env` file is now strictly optional and restricted to initial bootstrap credentials (`GITOPS_*`, `DOCKERCONFIG_BASE64`, `ARGOCD_PASSWORD`), which can also be supplied via OS environment variables. See the [Migration Guide](../9_reference/migrations.md#migrating-from-v018x-to-v0190) for full details.
 
-    !!! warning
-        Keep in mind that weak passwords such as `123456` for `ARGOCD_WIZARD_ACCOUNT_PASSWORD` are a bad idea, since your
-        platform will be publicly available by default via your DNS zone.
+#### Repository credentials for bootstrap
 
-#### Git repository authentication
+Bootstrap credentials are only needed when running `kubara bootstrap`. You can provide them via OS environment variables or an optional `.env` file (checked in that order):
+
+```bash
+export GITOPS_USERNAME="<machine-user>"
+export GITOPS_PASSWORD="<pat-or-token>"
+```
+
+The initial Argo CD `wizard` account password is automatically generated during `kubara bootstrap` and printed in the completion output (or can optionally be set via `ARGOCD_PASSWORD`).
+
+#### Git repository authentication modes
 
 kubara creates the initial Argo CD repository secret during `kubara bootstrap`.
-`ARGOCD_GIT_AUTH_MODE` controls which credential fields are written:
+Authentication mode is determined by the repository URL in `config.yaml` and your configured credentials:
 
-| Mode | Required values | Notes |
+| Mode | Environment variables | Notes |
 | --- | --- | --- |
-| `https` | `ARGOCD_GIT_URL` or legacy `ARGOCD_GIT_HTTPS_URL` | Backward-compatible default. `ARGOCD_GIT_USERNAME` + `ARGOCD_GIT_PAT_OR_PASSWORD` are optional: omit them for public repositories, set both for private ones. `PAT` usually means Personal Access Token and is often tied to a user account. Prefer a technical or machine account and use that account name for `ARGOCD_GIT_USERNAME`; exact username behavior is provider-dependent. |
-| `ssh` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_SSH_PRIVATE_KEY` | Use an SSH repository URL such as `git@github.com:org/repo.git`. Argo CD must know the SSH host key before it can connect securely. In `.env`, format the private key as a single line with `\n` linebreaks enclosed in double quotes (e.g. `ARGOCD_GIT_SSH_PRIVATE_KEY="-----BEGIN OPENSSH PRIVATE KEY-----\n...\n-----END OPENSSH PRIVATE KEY-----"`). |
-| `github-app` | `ARGOCD_GIT_URL`, `ARGOCD_GIT_GITHUB_APP_ID`, `ARGOCD_GIT_GITHUB_APP_INSTALLATION_ID`, `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `ARGOCD_GIT_GITHUB_APP_ENTERPRISE_BASE_URL` as well. In `.env`, format the private key as a single line with `\n` linebreaks enclosed in double quotes (e.g. `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\n...\n-----END RSA PRIVATE KEY-----"`). |
-
-For new setups, prefer `ARGOCD_GIT_URL`.
-`ARGOCD_GIT_HTTPS_URL` is still supported for existing HTTPS/PAT setups.
-
-!!! note "Formatting private keys in .env"
-    Both `ARGOCD_GIT_SSH_PRIVATE_KEY` and `ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY` must be written on a single line in `.env` with literal `\n` representing newlines, enclosed in double quotes:
-    ```env
-    ARGOCD_GIT_GITHUB_APP_PRIVATE_KEY="-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA...\n-----END RSA PRIVATE KEY-----"
-    ```
-    This ensures standard dotenv parsers correctly decode the multiline key when creating the Argo CD Kubernetes secret during bootstrap.
+| `https` | `GITOPS_USERNAME`, `GITOPS_PASSWORD` | Optional for public repositories (omit both); set both for private ones. `GITOPS_PASSWORD` is your Personal Access Token (PAT) or technical user password. (Legacy: `ARGOCD_GIT_USERNAME`, `ARGOCD_GIT_PAT_OR_PASSWORD`). |
+| `ssh` | `GITOPS_SSH_PRIVATE_KEY` or `GITOPS_SSH_PRIVATE_KEY_PATH` | Use an SSH repository URL such as `git@github.com:org/repo.git`. You can supply the private key inline via `GITOPS_SSH_PRIVATE_KEY` or provide a file path via `GITOPS_SSH_PRIVATE_KEY_PATH`. (Legacy: `ARGOCD_GIT_SSH_PRIVATE_KEY`). |
+| `github-app` | `GITOPS_GITHUB_APP_ID`, `GITOPS_GITHUB_APP_INSTALLATION_ID`, `GITOPS_GITHUB_APP_PRIVATE_KEY` (or `_PATH`) | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL` as well. (Legacy: `ARGOCD_GIT_GITHUB_APP_*`). |
 
 For SSH, keep strict host verification enabled.
 The bundled Argo CD Helm chart already includes known hosts for common public providers.
@@ -103,31 +96,9 @@ If the required host key is missing, Argo CD will reject the SSH connection as a
 
 
 
-### 1.3 Generate Base Configuration
+### 1.3 Custom Catalogs (Optional)
 
-Initialize your configuration:
-
-```bash
-kubara init
-```
-
-This command creates a `config.yaml` file based on the values from your `.env`.
-It also creates a `renovate.json` in the working directory when no supported Renovate configuration exists. The generated custom manager keeps versioned OCI catalog references in this config up to date. Use `--renovate=false` if the repository does not use Renovate:
-
-```bash
-kubara init --renovate=false
-```
-
-For Renovate to discover the generated file, use the Git repository root as kubara's working directory. The generated file uses Renovate's `config:recommended` preset and enables automatic updates for kubara catalog versions in `config.yaml`. Renovate can also update other supported dependencies it detects in the repository.
-
-Kubara does not modify an existing Renovate configuration. In that case, `init` logs a warning and you can add the [Renovate settings for catalog updates](../2_concepts/catalog_distribution.md#automatic-catalog-updates-with-renovate) manually.
-
-If you make changes to `.env` later, you can re-run the command with `--overwrite` to update the configuration.
-The generated Argo CD repository config records the selected Git auth mode in `argocd.repo.authMode`.
-Repository URLs are stored under `argocd.repo.git`.
-Older configs are migrated when kubara loads and saves the config: the old `argocd.repo.https` key moves to `argocd.repo.git`, and the legacy `ingressClassName` moves to `networking.ingress.className`.
-
-By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags to initialize it with a different ordered catalog set:
+By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags when running `kubara init` to initialize it with a different ordered catalog set:
 
 ```bash
 kubara init \
@@ -146,9 +117,11 @@ kubara init \
 
 The bootstrap reference is stored in the root `bootstrapCatalog` field, while repeated `--catalog` values are stored on the generated cluster. Local paths are resolved relative to `--work-dir` when kubara loads them.
 
-When using `--overwrite`, only values from `.env` are replaced.
-Additional settings in your existing `config.yaml` are preserved and merged.
-This currently applies **only to the first cluster entry**.
+Use `--renovate=false` if your repository does not use Renovate:
+
+```bash
+kubara init --renovate=false
+```
 
 !!! info 
     If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../6_components/backup_and_recovery.md).
@@ -264,7 +237,7 @@ kubara generate --helm
 ```
 
 
-The generated `values.generated.yaml` files are pre-filled from your `config.yaml` and `.env`. Review them if you 
+The generated `values.generated.yaml` files are pre-filled from your `config.yaml`. Review them if you 
 want to understand more details about the predefined settings but DO NOT edit those files as they will be regenerated
 with future updates. If you need customization you can add as many files to the charts with the pattern `values-*.yaml`.
 Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
@@ -502,7 +475,7 @@ After a successful bootstrap run, your platform should be operational.
 
 !!! info "Argocd Local Login"
     **Username:** `wizard`  
-    **Password:** From `.env` (`ARGOCD_WIZARD_ACCOUNT_PASSWORD`)
+    **Password:** Autogenerated and printed once in the `kubara bootstrap` completion output.
 
 1. Start port-forwarding:
 
@@ -529,34 +502,20 @@ You can bootstrap multiple Hub clusters.
 You **cannot** reuse the same `config.yaml` file for multiple Hub clusters. Only one hub per config is supported.
 
 **Why?**
-During the bootstrap process, the `.env` file is used to provide credentials.
-If you reuse the same `.env` file, you would have to constantly adjust it for each Hub - which is error-prone.
-
-Since version `0.2.0`, this is much easier. You can simply provide a different env file:
-
-```bash
-kubara init --prep --env-file .another-env
-```
-Fill out `.another-env` with the required values. Generate a new config file from it:
-
-```bash
-kubara --config-file another-config.yaml --env-file .another-env init
-```
-
-This will use the values from `.another-env` to generate `another-config.yaml`.
+A single configuration defines a single platform scope with one Hub cluster. To manage multiple Hub clusters, maintain separate configuration files (or repositories) and supply cluster-specific credentials via OS environment variables or a `.env` file in the repository:
 
 Render Terraform modules and Helm charts for the new Hub cluster:
 
 ```bash
 # default: generates both Helm and Terraform
 # use --helm or --terraform to generate only one type
-./kubara --config-file another-config.yaml generate
+./kubara generate --config-file another-config.yaml 
 ```
 
 Finally, bootstrap your additional Hub cluster:
 
 ```bash
-kubara bootstrap --config-file another-config.yaml --env-file .another-env <cluster name from another-config.yaml>
+kubara bootstrap --config-file another-config.yaml <cluster name from another-config.yaml>
 ```
 
 ## What's Next?

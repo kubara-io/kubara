@@ -62,7 +62,7 @@ like `api`, `firewall` and `proxy`.
 
 ---
 
-## How do i create a dockerconfig.json for .env-file
+## How do I create a dockerconfig.json for DOCKERCONFIG_BASE64
 
 ```bash
 kubectl create secret docker-registry regcred

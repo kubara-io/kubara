@@ -65,6 +65,7 @@
 ## Reference
 - [Commands](1_getting_started/commands/index.md)
 - [Release Cycle & Updates](9_reference/release_cycle_and_updates/index.md)
+- [Migration Guides](9_reference/migrations/index.md)
 - [Known Issues](9_reference/known_issues/index.md)
 - [FAQ](9_reference/faq/index.md)
 - [Code of Conduct](https://github.com/kubara-io/kubara/blob/main/CODE_OF_CONDUCT.md)

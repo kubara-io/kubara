@@ -449,10 +449,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-generate-the-env-file" class="md-nav__link">
+  <a href="#2-initialize-the-platform-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Generate the .env file
+        2. Initialize the platform configuration
       
     </span>
   </a>
@@ -460,10 +460,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-update-the-argo-cd-settings" class="md-nav__link">
+  <a href="#3-bootstrap-the-local-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Update the Argo CD settings
+        3. Bootstrap the local cluster
       
     </span>
   </a>
@@ -471,10 +471,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-generate-configyaml" class="md-nav__link">
+  <a href="#4-whats-next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Generate config.yaml
+        4. What's next?
       
     </span>
   </a>
@@ -482,32 +482,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-bootstrap-the-local-cluster" class="md-nav__link">
+  <a href="#5-understanding-the-generated-files" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Bootstrap the local cluster
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-whats-next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. What's next?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#7-understanding-the-generated-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. Understanding the generated files
+        5. Understanding the generated files
       
     </span>
   </a>
@@ -2512,6 +2490,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -2729,10 +2735,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#2-generate-the-env-file" class="md-nav__link">
+  <a href="#2-initialize-the-platform-configuration" class="md-nav__link">
     <span class="md-ellipsis">
       
-        2. Generate the .env file
+        2. Initialize the platform configuration
       
     </span>
   </a>
@@ -2740,10 +2746,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#3-update-the-argo-cd-settings" class="md-nav__link">
+  <a href="#3-bootstrap-the-local-cluster" class="md-nav__link">
     <span class="md-ellipsis">
       
-        3. Update the Argo CD settings
+        3. Bootstrap the local cluster
       
     </span>
   </a>
@@ -2751,10 +2757,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#4-generate-configyaml" class="md-nav__link">
+  <a href="#4-whats-next" class="md-nav__link">
     <span class="md-ellipsis">
       
-        4. Generate config.yaml
+        4. What's next?
       
     </span>
   </a>
@@ -2762,32 +2768,10 @@ You're not viewing the latest stable version.
 </li>
       
         <li class="md-nav__item">
-  <a href="#5-bootstrap-the-local-cluster" class="md-nav__link">
+  <a href="#5-understanding-the-generated-files" class="md-nav__link">
     <span class="md-ellipsis">
       
-        5. Bootstrap the local cluster
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#6-whats-next" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        6. What's next?
-      
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#7-understanding-the-generated-files" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        7. Understanding the generated files
+        5. Understanding the generated files
       
     </span>
   </a>
@@ -2857,42 +2841,37 @@ You're not viewing the latest stable version.
 <li>GitLab: <a href="https://docs.gitlab.com/user/profile/personal_access_tokens/" target="_blank" rel="noopener">https://docs.gitlab.com/user/profile/personal_access_tokens/</a></li>
 </ul>
 <p>Run the remaining steps from inside that repository.</p>
-<h2 id="2-generate-the-env-file">2. Generate the <code>.env</code> file</h2>
-<div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span>--prep<span class="w"> </span>--local
-</code></pre></div>
-<p>This creates the local evaluation <code>.env</code> template.</p>
-<div class="highlight"><pre><span></span><code><span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:37:42<span class="w"> </span>INF<span class="w"> </span>✓<span class="w"> </span>copied<span class="w"> </span>prep<span class="w"> </span>file<span class="w"> </span><span class="nv">file</span><span class="o">=</span>/Users/&lt;user&gt;/kubara-local/.gitignore
-<span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:37:42<span class="w"> </span>INF<span class="w"> </span>Generated<span class="w"> </span>local-evaluation<span class="w"> </span>dotenv<span class="w"> </span><span class="k">in</span><span class="w"> </span>path:<span class="w"> </span>/Users/&lt;user&gt;/kubara-local/.env
-<span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:37:42<span class="w"> </span>INF<span class="w"> </span>Next<span class="w"> </span>steps:<span class="w"> </span>update<span class="w"> </span>your<span class="w"> </span>.env<span class="w"> </span>file,<span class="w"> </span><span class="k">then</span><span class="w"> </span>run<span class="w"> </span><span class="s1">'kubara init --local'</span>.
-</code></pre></div>
-<h2 id="3-update-the-argo-cd-settings">3. Update the Argo CD settings</h2>
-<p>Open the generated <code>.env</code> file and change:</p>
-<ul>
-<li><code>ARGOCD_WIZARD_ACCOUNT_PASSWORD</code> to <code>magic</code></li>
-<li>the Argo CD repository URL to your GitOps repository URL</li>
-<li>if your repository is private, also add your PAT</li>
-</ul>
-<h2 id="4-generate-configyaml">4. Generate <code>config.yaml</code></h2>
+<h2 id="2-initialize-the-platform-configuration">2. Initialize the platform configuration</h2>
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>init<span class="w"> </span>--local
 </code></pre></div>
-<p>This creates <code>config.yaml</code>. For this local flow you do not need to change it yet, but it is worth looking through once: it defines your cluster profile and the services Argo CD will manage for that cluster.</p>
+<p>This creates your <code>config.yaml</code> pre-configured for local evaluation. It automatically infers your Git repository URL from your local Git clone.</p>
 <div class="highlight"><pre><span></span><code><span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:39:00<span class="w"> </span>INF<span class="w"> </span>✓<span class="w"> </span>copied<span class="w"> </span>prep<span class="w"> </span>file<span class="w"> </span><span class="nv">file</span><span class="o">=</span>/Users/&lt;user&gt;/kubara-local/.gitignore
-<span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:39:00<span class="w"> </span>INF<span class="w"> </span>Skipping<span class="w"> </span>dotenv<span class="w"> </span>creation.<span class="w"> </span>File<span class="w"> </span>exist:<span class="w"> </span>/Users/&lt;user&gt;/kubara-local/.env
 <span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:39:00<span class="w"> </span>INF<span class="w"> </span>Generated<span class="w"> </span>local-evaluation<span class="w"> </span>config<span class="w"> </span><span class="k">in</span><span class="w"> </span>path:<span class="w"> </span>/Users/&lt;user&gt;/kubara-local/config.yaml
 <span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:39:00<span class="w"> </span>INF<span class="w"> </span>Next<span class="w"> </span>steps:<span class="w"> </span>review<span class="w"> </span>config.yaml,<span class="w"> </span><span class="k">then</span><span class="w"> </span>run<span class="w"> </span><span class="s1">'kubara bootstrap --local test-cluster'</span>.
 </code></pre></div>
-<h2 id="5-bootstrap-the-local-cluster">5. Bootstrap the local cluster</h2>
+<p>Review the <code>config.yaml</code> to confirm your repository URL. Depending on your authentication method it should either be an
+HTTPS or SSH URL. If your repository is private, you can provide repository credentials via environment variables:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># HTTPS</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GITOPS_USERNAME</span><span class="o">=</span><span class="s2">"&lt;your-user&gt;"</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GITOPS_PASSWORD</span><span class="o">=</span><span class="s2">"&lt;your-pat&gt;"</span>
+
+<span class="c1"># SSH</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">GITOPS_SSH_PRIVATE_KEY_PATH</span><span class="o">=</span><span class="s2">"&lt;path-to-your-ssh-key&gt;"</span>
+</code></pre></div>
+<p>(You can also put these into an optional <code>.env</code> file if preferred). If your repository is public, no credentials are required for local evaluation.</p>
+<p>The initial Argo CD <code>wizard</code> password is autogenerated during bootstrap and printed in the completion message (or can optionally be set via <code>ARGOCD_PASSWORD</code>).</p>
+<h2 id="3-bootstrap-the-local-cluster">3. Bootstrap the local cluster</h2>
 <p>Run the bootstrap command. It will do the following:</p>
 <ul>
-<li>creates a local <code>kind</code> cluster named <code>test-cluster</code></li>
-<li>installs the required CRDs and namespaces</li>
-<li>installs and configures Argo CD</li>
-<li>installs OpenBao with persistent local storage and automatic unsealing as the local secret engine (use a managed service in production)</li>
-<li>applies less strict defaults for local testing and generates local deployment values</li>
-<li>creates the placeholder Traefik <code>LoadBalancer</code> service</li>
-<li>waits for you to start <code>cloud-provider-kind</code> manually so the local LoadBalancer IP can be assigned</li>
+<li>Creates a local <code>kind</code> cluster named <code>test-cluster</code></li>
+<li>Installs the required CRDs and namespaces</li>
+<li>Installs and configures Argo CD</li>
+<li>Installs OpenBao with persistent local storage and automatic unsealing as the local secret engine (use a managed service in production)</li>
+<li>Applies less strict defaults for local testing and generates local deployment values</li>
+<li>Creates the placeholder Traefik <code>LoadBalancer</code> service</li>
+<li>Waits for you to start <code>cloud-provider-kind</code> manually so the local LoadBalancer IP can be assigned</li>
 </ul>
-<p>After that, Argo CD takes over the ongoing deployments. kubara is a bootstrap and generation tool, <strong>not</strong> a runtime controller.</p>
+<p>After that, Argo CD takes over the ongoing deployments. kubara itself is just the bootstrapping and generation tool, <strong>not</strong> your GitOps runtime controller.</p>
 <p>Run the bootstrapping:
 <div class="highlight"><pre><span></span><code>kubara<span class="w"> </span>bootstrap<span class="w"> </span>--local<span class="w"> </span>test-cluster
 </code></pre></div></p>
@@ -2934,7 +2913,7 @@ Now<span class="w"> </span>start<span class="w"> </span>cloud-provider-kind<span
 📝<span class="w"> </span>Next<span class="w"> </span>steps:
 <span class="m">1</span>.<span class="w"> </span>Commit<span class="w"> </span>and<span class="w"> </span>push<span class="w"> </span>all<span class="w"> </span>repository<span class="w"> </span>contents<span class="w"> </span>generated<span class="w"> </span>by<span class="w"> </span>kubara.
 <span class="m">2</span>.<span class="w"> </span>Ensure<span class="w"> </span>the<span class="w"> </span>Git<span class="w"> </span>repository<span class="w"> </span>is<span class="w"> </span>reachable<span class="w"> </span>by<span class="w"> </span>Argo<span class="w"> </span>CD.
-<span class="w">   </span>If<span class="w"> </span>you<span class="w"> </span>did<span class="w"> </span>not<span class="w"> </span>provide<span class="w"> </span>both<span class="w"> </span>ARGOCD_GIT_USERNAME<span class="w"> </span>and<span class="w"> </span>ARGOCD_GIT_PAT_OR_PASSWORD,<span class="w"> </span>ensure<span class="w"> </span>the<span class="w"> </span>Git<span class="w"> </span>repository<span class="w"> </span>is<span class="w"> </span>public<span class="w"> </span>so<span class="w"> </span>Argo<span class="w"> </span>CD<span class="w"> </span>can<span class="w"> </span>pull<span class="w"> </span>it.
+<span class="w">   </span>If<span class="w"> </span>you<span class="w"> </span>did<span class="w"> </span>not<span class="w"> </span>provide<span class="w"> </span>both<span class="w"> </span>GITOPS_PASSWORD<span class="w"> </span>or<span class="w"> </span>GITOPS_SSH_PRIVATE_KEY_PATH,<span class="w"> </span>ensure<span class="w"> </span>the<span class="w"> </span>Git<span class="w"> </span>repository<span class="w"> </span>is<span class="w"> </span>public<span class="w"> </span>so<span class="w"> </span>Argo<span class="w"> </span>CD<span class="w"> </span>can<span class="w"> </span>pull<span class="w"> </span>it.
 
 Argo<span class="w"> </span>CD<span class="w"> </span>should<span class="w"> </span>be<span class="w"> </span>reachable<span class="w"> </span><span class="k">in</span><span class="w"> </span>a<span class="w"> </span>couple<span class="w"> </span>of<span class="w"> </span>minutes<span class="w"> </span>via:
 <span class="w">    </span>https://172.18.0.3.traefik.me/argocd
@@ -2944,7 +2923,7 @@ You<span class="w"> </span>can<span class="w"> </span>otherwise<span class="w"> 
 <span class="w">    </span><span class="k">then</span><span class="w"> </span>open<span class="w"> </span>http://localhost:8080/argocd<span class="w"> </span><span class="k">in</span><span class="w"> </span>your<span class="w"> </span>browser
 
 Log<span class="w"> </span><span class="k">in</span><span class="w"> </span>with:
-<span class="w">    </span>wizard<span class="w"> </span>/<span class="w"> </span>magic
+<span class="w">    </span>wizard<span class="w"> </span>/<span class="w"> </span>&lt;autogenerated-password&gt;
 
 Other<span class="w"> </span>useful<span class="w"> </span>links:
 <span class="w">  </span>-<span class="w"> </span>Portal:<span class="w">  </span>https://172.18.0.3.traefik.me
@@ -2957,13 +2936,13 @@ Retrieve<span class="w"> </span>the<span class="w"> </span>generated<span class=
 
 <span class="m">2026</span>-06-11<span class="w"> </span><span class="m">12</span>:42:02<span class="w"> </span>INF<span class="w"> </span>ArgoCD<span class="w"> </span>bootstrap<span class="w"> </span>completed<span class="w"> </span>successfully
 </code></pre></div>
-<h2 id="6-whats-next">6. What's next?</h2>
+<h2 id="4-whats-next">4. What's next?</h2>
 <p>One more step and you should have a running platform in the next couple of minutes. Read the instructions in your terminal, they will look similar to the example in the section above but most likely with a different ip range.</p>
 <p>They essentially give instructions to do the following:</p>
 <ol>
 <li>IMPORTANT: Commit and push all repository contents generated by kubara.</li>
 <li>Once more ensure the Git repository is reachable by Argo CD.
-   If you did not provide both ARGOCD_GIT_USERNAME and ARGOCD_GIT_PAT_OR_PASSWORD, ensure the Git repository is public so Argo CD can pull it.</li>
+   If you did not provide GITOPS_PASSWORD or GITOPS_SSH_PRIVATE_KEY_PATH, ensure the Git repository is public so Argo CD can pull it.</li>
 <li>Wait a few minutes until Argo CD syncs the applications from your repository or force a refresh via the UI.<ul>
 <li>Connect to ArgoCD via port-forwarding and open http://localhost:8080/argocd</li>
 <li>Open Argo CD and check whether all apps become <code>Healthy</code> and <code>Synced</code>. (Maybe force a refresh)</li>
@@ -2973,8 +2952,8 @@ Retrieve<span class="w"> </span>the<span class="w"> </span>generated<span class=
 <li>Once the platform components are ready, open the exposed UIs through the local ingress host.</li>
 <li>You should be able to reach the kubara Developer Portal via <code>https://&lt;your-ip&gt;.traefik.me</code></li>
 </ol>
-<p>If Argo CD cannot fetch your repository, double-check the repository URL and credentials in your <code>.env</code>. If you did not provide Git credentials, the repository must be public for this local evaluation flow.</p>
-<h2 id="7-understanding-the-generated-files">7. Understanding the generated files</h2>
+<p>If Argo CD cannot fetch your repository, double-check the repository URL in <code>config.yaml</code> and any credentials provided in environment variables or <code>.env</code>. If you did not provide Git credentials, the repository must be public for this local evaluation flow.</p>
+<h2 id="5-understanding-the-generated-files">5. Understanding the generated files</h2>
 <p>After the bootstrap finished, you will usually see three important areas in your repository:</p>
 <ul>
 <li><code>platform-components/</code>: the generated Helm charts and shared templates Argo CD uses for deployments</li>
@@ -2985,7 +2964,6 @@ Retrieve<span class="w"> </span>the<span class="w"> </span>generated<span class=
 <ul>
 <li><code>kind.kubeconfig</code>: kubeconfig for the local <code>kind</code> cluster</li>
 <li><code>kind-config.yaml</code>: the <code>kind</code> cluster definition used during bootstrap</li>
-<li><code>generate.env</code>: the environment snapshot kubara used for local generation</li>
 <li><code>openbao/</code>: local Helm values for the persistent OpenBao bootstrap step</li>
 <li><code>external-secrets/</code>: the generated local <code>ClusterSecretStore</code> manifest</li>
 </ul>

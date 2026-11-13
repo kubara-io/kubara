@@ -761,17 +761,6 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#env" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        .env
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2535,6 +2524,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -2781,17 +2798,6 @@ You're not viewing the latest stable version.
 </li>
         
           <li class="md-nav__item">
-  <a href="#env" class="md-nav__link">
-    <span class="md-ellipsis">
-      
-        .env
-      
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#catalog" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -2897,11 +2903,11 @@ before you will feel right at home.</p>
 </code></pre></div>
 <p>Files without the <code>.tplt</code> suffix are copied as-is.</p>
 <h2 id="what-data-is-available-in-templates">What data is available in templates?</h2>
-<p>kubara builds a template context with three top-level objects:</p>
+<p>kubara builds a template context with top-level objects:</p>
 <ul>
 <li><code>.cluster</code></li>
-<li><code>.env</code></li>
 <li><code>.catalog</code></li>
+<li><code>.spokes</code> (on hub clusters)</li>
 </ul>
 <h3 id="cluster"><code>.cluster</code></h3>
 <p><code>.cluster</code> contains the current cluster entry from <code>config.yaml</code>.</p>
@@ -2961,9 +2967,6 @@ An omitted listener does not inherit the cluster listener. Catalog templates use
 In <code>v1alpha6</code>, the top-level <code>ingressClassName</code> is rejected, even if <code>networking</code> is absent. Configs containing both the legacy field and a structured <code>networking</code> block are rejected to avoid overwriting explicit routing settings.
 For existing catalogs, <code>.cluster.ingressClassName</code> is populated from the Ingress block in memory only.
 Templates supporting older CLI versions can fall back to this field.</p>
-<h3 id="env"><code>.env</code></h3>
-<p><code>.env</code> exposes the loaded <code>.env</code> values that kubara already uses while running.</p>
-<p>Use this only when a template really needs environment-derived data.</p>
 <h3 id="catalog"><code>.catalog</code></h3>
 <p><code>.catalog</code> exposes catalog metadata for all known services.</p>
 <p>Today this is mainly service metadata such as:</p>

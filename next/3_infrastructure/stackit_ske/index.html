@@ -2501,6 +2501,34 @@ You're not viewing the latest stable version.
   
   
     <li class="md-nav__item">
+      <a href="../../9_reference/migrations/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Migration Guides
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../9_reference/known_issues/" class="md-nav__link">
         
   
@@ -3000,7 +3028,7 @@ Do <strong>not</strong> export Secrets Manager credentials into <code>.env</code
 <p>If you want Terraform to create OAuth2-related Vault entries:</p>
 <ul>
 <li>Use <code>set-env.sh</code> / <code>set-env.ps1</code> for <code>TF_VAR_*</code> in <code>platform-configs/&lt;cluster-name&gt;/terraform/</code></li>
-<li><code>TF_Var_image_pull_secret</code> will already be set by kubara with what is present in the <code>.env</code></li>
+<li>Set <code>TF_VAR_image_pull_secret</code> if you configure a private container registry pull secret</li>
 <li>In <code>platform-configs/&lt;cluster-name&gt;/terraform/infrastructure</code>, copy <code>secrets.tf-oauth2</code> to <code>oauth2-secrets.tf</code> and adjust values if needed</li>
 </ul>
 <p>Load the variables and apply:</p>

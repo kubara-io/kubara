@@ -74,7 +74,7 @@ The diagram below shows the typical kubara workflow when following the [bootstra
 
 ``` mermaid
 graph TD
-    A[⚙️ Set .env-File & config.yaml] --> B;
+    A[⚙️ Define config.yaml] --> B;
     B[🤖 'kubara generate' <br> generates tf & charts] --> C;
     C[📤 Commit & Push to Git] --> D{Apply Terraform?};
     D -- Yes --> G[☁️ Apply Cloud Resources];
@@ -85,7 +85,7 @@ graph TD
 
 ---
 
-1. Platform Engineer defines intent in `.env` and `config.yaml`.
+1. Platform Engineer defines intent in `config.yaml`.
 2. Run `kubara generate` to render Terraform and Helm output.
 3. Commit and push the generated result to Git.
 4. Apply infrastructure where needed 
