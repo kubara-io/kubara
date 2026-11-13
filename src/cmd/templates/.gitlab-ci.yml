@@ -31,7 +31,8 @@ kubara-generate:
         exit 1
       fi
     - |
-      for path in platform-configs platform-components; do
+      # Kubara also persists schema migrations to its source configuration.
+      for path in config.yaml platform-configs platform-components; do
         if [ -e "$path" ] || [ -n "$(git ls-files -- "$path")" ]; then
           git add -A -- "$path"
         fi

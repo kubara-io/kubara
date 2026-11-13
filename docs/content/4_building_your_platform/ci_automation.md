@@ -4,7 +4,7 @@ This guide explains how to run `kubara generate` automatically in GitHub Actions
 
 The pipeline keeps your GitOps repository in sync:
 
-1. When a pull request or merge request changes `config.yaml`, the pipeline runs `kubara generate` and commits the updated manifests back to the branch.
+1. When a pull request or merge request changes `config.yaml`, the pipeline runs `kubara generate` and commits the updated manifests (including schema migrations written back to `config.yaml`) back to the branch.
 2. A daily scheduled run checks the default branch for drift and opens a pull request or merge request if changes are detected.
 
 ## Adding the Pipeline
