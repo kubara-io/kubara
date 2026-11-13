@@ -38,35 +38,35 @@ kubara [command]
 
 # GLOBAL OPTIONS
 
-**--base64**: Enable base64 encode/decode mode (default: false)
+**--base64**: Enable base64 encode/decode mode
 
 **--catalog**="": Path to a catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
-**--catalog-overwrite**: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions (default: false)
+**--catalog-overwrite**: Allow later catalogs from --catalog to overwrite earlier definitions on name collisions
 
-**--check-update**: Check online for a newer kubara release (default: false)
+**--check-update**: Check online for a newer kubara release
 
-**--config-file, -c**="": Path to the configuration file (default: config.yaml)
+**--config-file, -c**="": Path to the configuration file (default: "config.yaml")
 
-**--decode**: Base64 decode input (default: false)
+**--decode**: Base64 decode input
 
-**--encode**: Base64 encode input (default: false)
+**--encode**: Base64 encode input
 
-**--env-file**="": Path to the .env file (default: .env)
+**--env-file**="": Path to the .env file (default: ".env")
 
 **--file**="": Input file path for base64 operation
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--kubeconfig**="": Path to kubeconfig file (default: ~/.kube/config)
+**--kubeconfig**="": Path to kubeconfig file (default: "~/.kube/config")
 
 **--string**="": Input string for base64 operation
 
-**--test-connection**: Check if Kubernetes cluster can be reached. List namespaces and exit (default: false)
+**--test-connection**: Check if Kubernetes cluster can be reached. List namespaces and exit
 
-**--version, -v**: print the version (default: false)
+**--version, -v**: print the version
 
-**--work-dir, -w**="": Working directory (default: .)
+**--work-dir, -w**="": Working directory (default: ".")
 
 
 # COMMANDS
@@ -79,21 +79,21 @@ Initialize kubara config for your GitOps repository
 
 **--bootstrap-catalog**="": Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
 
-**--envVarPrefix**="": Prefix for envs read from envVars (default: KUBARA_)
+**--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
-**--github-actions**: Generate a GitHub Actions workflow for kubara generation if none exists (default: false)
+**--github-actions**: Generate a GitHub Actions workflow for kubara generation if none exists
 
-**--gitlab-ci**: Generate a GitLab CI pipeline for kubara generation if none exists (default: false)
+**--gitlab-ci**: Generate a GitLab CI pipeline for kubara generation if none exists
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use. (default: false)
+**--local**: Initialize files for the local evaluation workflow. Local testing only; not for production use.
 
-**--overwrite**: Overwrite config if exists (default: false)
+**--overwrite**: Overwrite config if exists
 
-**--prep**: Copy embedded prep/ folder into current working directory (default: false)
+**--prep**: Copy embedded prep/ folder into current working directory
 
-**--renovate**: Generate a Renovate configuration for kubara catalog updates if none exists (default: true)
+**--renovate**: Generate a Renovate configuration for kubara catalog updates if none exists
 
 ### help, h
 
@@ -105,13 +105,13 @@ Generate files from catalog templates
 
 >kubara generate [--terraform|--helm] [--catalog PATH_OR_OCI [--catalog-overwrite]] [--dry-run]
 
-**--dry-run**: Preview generation without creating files (default: false)
+**--dry-run**: Preview generation without creating files
 
-**--helm**: Only generate Helm files (default: false)
+**--helm**: Only generate Helm files
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--terraform**: Only generate Terraform files (default: false)
+**--terraform**: Only generate Terraform files
 
 ### help, h
 
@@ -123,25 +123,25 @@ Bootstrap Argo CD onto a cluster
 
 >kubara bootstrap CLUSTER_NAME [--local]
 
-**--dry-run**: Run with dry-run (default: false)
+**--dry-run**: Run with dry-run
 
-**--envVarPrefix**="": Prefix for envs read from envVars (default: KUBARA_)
+**--envVarPrefix**="": Prefix for envs read from envVars (default: "KUBARA_")
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--local**: Provision an isolated local evaluation environment. Local testing only; not for production use. (default: false)
+**--local**: Provision an isolated local evaluation environment. Local testing only; not for production use.
 
-**--platform-components**="": Path to the platform-components directory (default: platform-components)
+**--platform-components**="": Path to the platform-components directory (default: "platform-components")
 
-**--platform-configs**="": Path to platform-configs directory (default: platform-configs)
+**--platform-configs**="": Path to platform-configs directory (default: "platform-configs")
 
 **--timeout**="": Timeout for kubernetes API calls (e.g. 10s, 1m) (default: 5m0s)
 
-**--with-es-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap. (default: false)
+**--with-es-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
 
 **--with-es-css-file**="": Path to the ClusterSecretStore manifest file (supports go-template + sprig)
 
-**--with-prometheus-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap. (default: false)
+**--with-prometheus-crds**: Deprecated: ignored because CRDs are applied automatically during bootstrap.
 
 ### help, h
 
@@ -151,11 +151,11 @@ Shows a list of commands or help for one command
 
 Generate a JSON schema for the config yaml structure
 
->kubara schema [--output PATH]
+>kubara schema [--output PATH] [--catalog PATH_OR_OCI [--catalog-overwrite]]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--output, -o**="": Output file path for the JSON schema (default: config.schema.json)
+**--output, -o**="": Output file path for the JSON schema (default: "config.schema.json")
 
 ### help, h
 
@@ -167,9 +167,9 @@ Scaffold an onboarding file for AI coding assistants (AGENTS.md)
 
 >kubara agents [--overwrite]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--overwrite**: Overwrite an existing AGENTS.md (default: false)
+**--overwrite**: Overwrite an existing AGENTS.md
 
 ### help, h
 
@@ -181,7 +181,7 @@ Manage platform catalogs
 
 >kubara catalog [command]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 ### create
 
@@ -189,11 +189,11 @@ Create a custom catalog directory skeleton
 
 >kubara catalog create [--github-actions] [--gitlab-ci] CATALOG_NAME
 
-**--github-actions**: Include a GitHub Actions catalog validation workflow (default: false)
+**--github-actions**: Include a GitHub Actions catalog validation workflow
 
-**--gitlab-ci**: Include a GitLab catalog validation pipeline (default: false)
+**--gitlab-ci**: Include a GitLab catalog validation pipeline
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -205,7 +205,7 @@ Add a service definition to the current catalog
 
 >kubara catalog add SERVICE_NAME
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -217,9 +217,9 @@ Pull a catalog from a remote registry
 
 >kubara catalog pull [--insecure] oci://registry/repository:x.y.z
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--insecure**: Ignore TLS certificate verification issues for the registry connection. (default: false)
+**--insecure**: Ignore TLS certificate verification issues for the registry connection.
 
 #### help, h
 
@@ -233,9 +233,9 @@ Push catalog to a remote registry
 
 **--from**="": Push an existing cached catalog reference to another registry.
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
-**--insecure**: Ignore TLS certificate verification issues for registry connections. (default: false)
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
 
 #### help, h
 
@@ -247,17 +247,17 @@ Log into a registry and store credentials
 
 >kubara catalog login [flags] <registry>
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 **--identity-token**="": identity token
 
-**--identity-token-stdin**: Log in with identity token from stdin (default: false)
+**--identity-token-stdin**: Log in with identity token from stdin
 
-**--insecure**: Ignore TLS certificate verification issues for registry connections. (default: false)
+**--insecure**: Ignore TLS certificate verification issues for registry connections.
 
 **--password, -p**="": registry password
 
-**--password-stdin**: Log in with password from stdin (default: false)
+**--password-stdin**: Log in with password from stdin
 
 **--username, -u**="": registry username
 
@@ -271,7 +271,7 @@ List cached local and OCI-backed catalogs
 
 >kubara catalog list
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -283,7 +283,7 @@ Package the current catalog directory into the local cache
 
 >kubara catalog package [oci://REGISTRY/BASE/PATH/]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -295,7 +295,7 @@ Materialize a cached OCI catalog as an editable directory
 
 >kubara catalog unpackage oci://registry/repository:x.y.z [directory]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -311,7 +311,7 @@ Manage your kubara cluster configurations
 
 >kubara cluster [command]
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 ### list, ls
 
@@ -319,7 +319,7 @@ List all clusters in the config file
 
 >kubara cluster ls
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
@@ -331,7 +331,7 @@ Add a new spoke cluster to your config
 
 >kubara cluster add CLUSTER_NAME
 
-**--help, -h**: show help (default: false)
+**--help, -h**: show help
 
 #### help, h
 
