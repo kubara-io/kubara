@@ -72,6 +72,7 @@ type Config struct {
 }
 
 // Cluster defines the configuration for a single Kubernetes cluster.
+// +kubebuilder:validation:XValidation:rule="(has(self.type) && self.type == 'spoke') || has(self.argocd)",message="argocd is required when type is hub"
 type Cluster struct {
 	// Name is the unique identifier for the cluster.
 	// +kubebuilder:validation:MinLength=1
@@ -115,7 +116,8 @@ type Cluster struct {
 	Terraform *Terraform `json:"terraform,omitempty"`
 
 	// ArgoCD configures the Argo CD deployment and repository settings for the cluster.
-	ArgoCD ArgoCD `json:"argocd"`
+	// +optional
+	ArgoCD *ArgoCD `json:"argocd,omitempty"`
 
 	// Catalogs specifies additional catalog references available to this cluster.
 	// +optional
@@ -232,7 +234,8 @@ const (
 
 // ArgoCD defines configuration for Argo CD cluster integration and repository tracking.
 type ArgoCD struct {
-	// SelfManaged indicates whether Argo CD should be self-managed by the platform.
+	// SelfManaged indicates whether Argo CD should own its own Application and can
+	// update itself based on a Git state.
 	// +kubebuilder:default=enabled
 	// +kubebuilder:validation:Enum=enabled;disabled
 	// +optional
@@ -244,6 +247,26 @@ type ArgoCD struct {
 	// HelmRepo configures an optional Helm chart repository for Argo CD.
 	// +optional
 	HelmRepo *HelmRepository `json:"helmRepo,omitempty"`
+
+	// ClusterSecrets configures spoke cluster credential provisioning into Argo CD.
+	// +optional
+	ClusterSecrets ClusterSecrets `json:"clusterSecrets,omitempty"`
+}
+
+type ClusterSecretsProvider string
+
+const (
+	ClusterSecretsProviderAutoRotator     ClusterSecretsProvider = "auto-rotator"
+	ClusterSecretsProviderExternalSecrets ClusterSecretsProvider = "external-secrets"
+)
+
+// ClusterSecrets contains settings for spoke cluster credential provisioning.
+type ClusterSecrets struct {
+	// The provider used for provisioning spoke cluster credentials into Argo CD.
+	// +kubebuilder:default=auto-rotator
+	// +kubebuilder:validation:Enum=auto-rotator;external-secrets
+	// +optional
+	Provider ClusterSecretsProvider `json:"provider,omitempty"`
 }
 
 // RepoProto configures repository protocol sources and authentication for Argo CD.

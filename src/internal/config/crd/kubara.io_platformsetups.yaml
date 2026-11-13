@@ -56,6 +56,19 @@ spec:
                       description: ArgoCD configures the Argo CD deployment and repository
                         settings for the cluster.
                       properties:
+                        clusterSecrets:
+                          description: ClusterSecrets configures spoke cluster credential
+                            provisioning into Argo CD.
+                          properties:
+                            provider:
+                              default: auto-rotator
+                              description: The provider used for provisioning spoke
+                                cluster credentials into Argo CD.
+                              enum:
+                              - auto-rotator
+                              - external-secrets
+                              type: string
+                          type: object
                         helmRepo:
                           description: HelmRepo configures an optional Helm chart
                             repository for Argo CD.
@@ -189,8 +202,9 @@ spec:
                             rule: has(self.git) != has(self.oci)
                         selfManaged:
                           default: enabled
-                          description: SelfManaged indicates whether Argo CD should
-                            be self-managed by the platform.
+                          description: |-
+                            SelfManaged indicates whether Argo CD should own its own Application and can
+                            update itself based on a Git state.
                           enum:
                           - enabled
                           - disabled
@@ -350,11 +364,13 @@ spec:
                       - spoke
                       type: string
                   required:
-                  - argocd
                   - dnsName
                   - name
                   - services
                   type: object
+                  x-kubernetes-validations:
+                  - message: argocd is required when type is hub
+                    rule: (has(self.type) && self.type == 'spoke') || has(self.argocd)
                 type: array
                 x-kubernetes-list-map-keys:
                 - name

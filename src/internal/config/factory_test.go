@@ -26,6 +26,7 @@ func TestNewDefaultClusterWithCatalog(t *testing.T) {
 		assert.Equal(t, "<subdomain.my-domain.com>", got.DNSName)
 		assert.Equal(t, "https://git.example.com/platform/repo.git", got.ArgoCD.Repo.Git.Configs.URL)
 		assert.Equal(t, GitAuthModeHTTPS, got.ArgoCD.Repo.AuthMode)
+		assert.Equal(t, ClusterSecretsProviderAutoRotator, got.ArgoCD.ClusterSecrets.Provider)
 		assert.Equal(t, testClusterCatalogs(), got.Catalogs)
 		assert.Equal(t, service.StatusEnabled, got.Services["cert-manager"].Status)
 	})
@@ -103,6 +104,7 @@ func TestCreateSpokeScaffolding_DefaultsToGeneralCatalog(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", catalog.LoadOptions{})
 
 	assert.Equal(t, []string{catalog.DefaultGeneralCatalog}, cluster.Catalogs)
+	assert.Nil(t, cluster.ArgoCD)
 	assert.Equal(t, ClusterNetworking{
 		Type: NetworkingIngress,
 		Ingress: &IngressNetworking{
@@ -115,4 +117,5 @@ func TestCreateSpokeScaffolding_PersistsExplicitCatalogs(t *testing.T) {
 	cluster := CreateSpokeScaffolding("spoke-a", testCatalogLoadOptions())
 
 	assert.Equal(t, testClusterCatalogs(), cluster.Catalogs)
+	assert.Nil(t, cluster.ArgoCD)
 }

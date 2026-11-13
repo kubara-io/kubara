@@ -44,7 +44,7 @@ func newValidTestConfig() *Config {
 						Email: "admin@example.com",
 					},
 				},
-				ArgoCD: ArgoCD{
+				ArgoCD: &ArgoCD{
 					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
 						AuthMode: GitAuthModeHTTPS,
@@ -58,6 +58,9 @@ func newValidTestConfig() *Config {
 								TargetRevision: "main",
 							},
 						},
+					},
+					ClusterSecrets: ClusterSecrets{
+						Provider: ClusterSecretsProviderAutoRotator,
 					},
 				},
 				Services: service.Services{
@@ -682,7 +685,7 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
-				ArgoCD:   ArgoCD{},
+				ArgoCD:   &ArgoCD{},
 				Services: service.Services{},
 			},
 		},
@@ -1059,4 +1062,56 @@ func TestConfigStore_LoadRejectsUnknownFields(t *testing.T) {
 			require.ErrorContains(t, store.Load(), "invalid keys: unknownField")
 		})
 	}
+}
+
+func TestLoadAndValidate_SpokeWithoutArgoCDSucceedsAndHubWithoutArgoCDFails(t *testing.T) {
+	validWithSpokeYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: hub-cluster
+    type: hub
+    dnsName: hub.example.com
+    catalogs:
+      - %q
+    argocd:
+      repo:
+        git:
+          configs:
+            url: "https://github.com/customer/repo.git"
+          components:
+            url: "https://github.com/managed/repo.git"
+  - name: spoke-cluster
+    type: spoke
+    dnsName: spoke.example.com
+    catalogs:
+      - %q
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath, testGeneralCatalogPath)
+
+	tempDir := t.TempDir()
+	configPath := filepath.Join(tempDir, "config.yaml")
+	require.NoError(t, os.WriteFile(configPath, []byte(validWithSpokeYAML), 0644))
+
+	cs := NewConfigStore(".", configPath, testCatalogLoadOptions())
+	require.NoError(t, cs.Load())
+	require.Len(t, cs.GetConfig().Clusters, 2)
+	assert.NotNil(t, cs.GetConfig().Clusters[0].ArgoCD)
+	assert.Nil(t, cs.GetConfig().Clusters[1].ArgoCD)
+
+	invalidHubWithoutArgoCDYAML := fmt.Sprintf(`
+version: %s
+bootstrapCatalog: %q
+clusters:
+  - name: hub-cluster
+    type: hub
+    dnsName: hub.example.com
+    catalogs:
+      - %q
+`, ConfigVersionV1Alpha6, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	invalidConfigPath := filepath.Join(tempDir, "invalid-config.yaml")
+	require.NoError(t, os.WriteFile(invalidConfigPath, []byte(invalidHubWithoutArgoCDYAML), 0644))
+
+	invalidCS := NewConfigStore(".", invalidConfigPath, testCatalogLoadOptions())
+	require.Error(t, invalidCS.Load())
 }

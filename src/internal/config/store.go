@@ -173,6 +173,19 @@ func (cs *ConfigStore) DynamicJSONSchema() (map[string]any, error) {
 		properties := branch["properties"].(map[string]any)
 		properties["name"].(map[string]any)["const"] = cluster.Name
 		properties["services"] = services
+		if cluster.Type == Hub {
+			required, _ := branch["required"].([]any)
+			hasArgoCD := false
+			for _, req := range required {
+				if req == "argocd" {
+					hasArgoCD = true
+					break
+				}
+			}
+			if !hasArgoCD {
+				branch["required"] = append(required, "argocd")
+			}
+		}
 		branches = append(branches, branch)
 	}
 	clusters["items"] = map[string]any{"oneOf": branches}

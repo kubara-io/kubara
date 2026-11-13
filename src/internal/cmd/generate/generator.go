@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
 	"github.com/kubara-io/kubara/internal/catalog"
@@ -65,12 +66,14 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 			"provider": config.TerraformProviderNone,
 		}
 	}
-	argocd, ok := clusterMap["argocd"].(map[string]any)
-	if !ok {
-		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
-	}
-	if _, configured := argocd["helmRepo"]; !configured {
-		argocd["helmRepo"] = map[string]any{"url": ""}
+	if cluster.ArgoCD != nil {
+		argocd, ok := clusterMap["argocd"].(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
+		}
+		if _, configured := argocd["helmRepo"]; !configured {
+			argocd["helmRepo"] = map[string]any{"url": ""}
+		}
 	}
 
 	data := libtemplate.NewData()
@@ -246,6 +249,12 @@ func buildServiceTemplateFilter(cluster config.Cluster, cat catalog.Catalog) ren
 		if serviceName == "" {
 			return true
 		}
+
+		def, exists := cat.Services[serviceName]
+		if exists && cluster.Type != "" && len(def.Spec.ClusterTypes) > 0 && !slices.Contains(def.Spec.ClusterTypes, string(cluster.Type)) {
+			return false
+		}
+
 		if catalog.IsBootstrapService(serviceName) {
 			return true
 		}
