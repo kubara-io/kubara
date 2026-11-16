@@ -47,7 +47,7 @@ The scaffolded generation workflow relies on GitHub-specific features (such as `
 ```yaml
 steps:
   - uses: actions/checkout@v4
-  - uses: kubara-io/kubara-action@v1
+  - uses: kubara-io/kubara-action@80b6dab277ecb99b8d8f3cd267e2128047e6dbac # v0.1.0
     with:
       version: latest
       args: '["generate"]'
