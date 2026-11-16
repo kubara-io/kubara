@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 
 	catalogTypes "github.com/kubara-io/kubara/internal/catalog"
-	"go.yaml.in/yaml/v3"
+	"go.yaml.in/yaml/v4"
 
 	"github.com/rs/zerolog/log"
 	"github.com/urfave/cli/v3"
