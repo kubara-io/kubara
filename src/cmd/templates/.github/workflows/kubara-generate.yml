@@ -74,7 +74,7 @@ jobs:
             PROJECT_NAME=generation PROJECT_STAGE=ci \
             ARGOCD_WIZARD_ACCOUNT_PASSWORD=unused-generation-placeholder \
             ARGOCD_GIT_HTTPS_URL=https://example.invalid/config.git \
-            kubara --env-file /dev/null generate 2>&1 | tee "$RUNNER_TEMP/kubara/generate.log"
+            kubara generate 2>&1 | tee "$RUNNER_TEMP/kubara/generate.log"
           find platform-components platform-configs -type f \
             \( -name 'set-env-changeme.sh' -o -name 'set-env-changeme.ps1' \) -delete
           if grep -rFq 'unused-generation-placeholder' platform-components platform-configs; then

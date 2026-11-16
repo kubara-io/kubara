@@ -298,9 +298,8 @@ func TestInitCIPipelines(t *testing.T) {
 			workDir := t.TempDir()
 			bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
 			require.NoError(t, err)
-			envPath := cmdtestutil.CreateDefaultGenerateTestEnv(t, workDir)
 			args := []string{
-				"kubara", "--work-dir", workDir, "--env-file", envPath,
+				"kubara", "--work-dir", workDir,
 				"init", "--bootstrap-catalog", bootstrapPath, "--catalog", generalPath,
 				"--catalog-overwrite", "--renovate=false",
 			}
@@ -321,6 +320,15 @@ func TestInitCIPipelines(t *testing.T) {
 					require.NoError(t, os.WriteFile(target, []byte("existing content"), 0o644))
 				} else {
 					assert.NoFileExists(t, target)
+				}
+			}
+			run(args)
+			for path, wanted := range paths {
+				target := filepath.Join(workDir, path)
+				if wanted {
+					content, err := os.ReadFile(target)
+					require.NoError(t, err)
+					assert.Equal(t, "existing content", string(content))
 				}
 			}
 		})
