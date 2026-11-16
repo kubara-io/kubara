@@ -24,7 +24,7 @@ kubara-generate:
     - export PATH="$KUBARA_INSTALL_DIR:$PATH"
   script:
     - mkdir -p /tmp/kubara-home
-    - env -i PATH="$PATH" HOME="/tmp/kubara-home" LANG=C.UTF-8 PROJECT_NAME=generation PROJECT_STAGE=ci ARGOCD_WIZARD_ACCOUNT_PASSWORD=unused-generation-placeholder ARGOCD_GIT_HTTPS_URL=https://example.invalid/config.git kubara generate
+    - env -i PATH="$PATH" HOME="/tmp/kubara-home" LANG=C.UTF-8 kubara generate
     - |
       existing_dirs=""
       for d in platform-components platform-configs; do
@@ -34,10 +34,6 @@ kubara-generate:
       done
       if [ -n "$existing_dirs" ]; then
         find $existing_dirs -type f \( -name 'set-env-changeme.sh' -o -name 'set-env-changeme.ps1' \) -delete
-        if grep -rFq 'unused-generation-placeholder' $existing_dirs; then
-          echo 'A catalog rendered the placeholder password; refusing to publish.' >&2
-          exit 1
-        fi
       fi
     - |
       # Kubara also persists schema migrations to its source configuration.
