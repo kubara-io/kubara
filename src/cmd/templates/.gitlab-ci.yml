@@ -5,6 +5,7 @@ stages:
 
 variables:
   GIT_DEPTH: '0'
+  # renovate: datasource=github-releases depName=kubara-io/kubara extractVersion=^v(?<version>.*)$
   KUBARA_VERSION: latest
   KUBARA_INSTALL_DIR: /tmp/kubara-ci-bin
 
@@ -24,11 +25,19 @@ kubara-generate:
   script:
     - mkdir -p /tmp/kubara-home
     - env -i PATH="$PATH" HOME="/tmp/kubara-home" LANG=C.UTF-8 PROJECT_NAME=generation PROJECT_STAGE=ci ARGOCD_WIZARD_ACCOUNT_PASSWORD=unused-generation-placeholder ARGOCD_GIT_HTTPS_URL=https://example.invalid/config.git kubara generate
-    - find platform-components platform-configs -type f \( -name 'set-env-changeme.sh' -o -name 'set-env-changeme.ps1' \) -delete
     - |
-      if grep -rFq 'unused-generation-placeholder' platform-components platform-configs; then
-        echo 'A catalog rendered the placeholder password; refusing to publish.' >&2
-        exit 1
+      existing_dirs=""
+      for d in platform-components platform-configs; do
+        if [ -d "$d" ]; then
+          existing_dirs="$existing_dirs $d"
+        fi
+      done
+      if [ -n "$existing_dirs" ]; then
+        find $existing_dirs -type f \( -name 'set-env-changeme.sh' -o -name 'set-env-changeme.ps1' \) -delete
+        if grep -rFq 'unused-generation-placeholder' $existing_dirs; then
+          echo 'A catalog rendered the placeholder password; refusing to publish.' >&2
+          exit 1
+        fi
       fi
     - |
       # Kubara also persists schema migrations to its source configuration.

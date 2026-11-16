@@ -136,7 +136,11 @@ curl_wrap -L -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
 
 echo "Verifying checksum..."
 awk -v file="$FILENAME" '$2 == file {print}' "$CHECKSUM_FILE" > checksum_check.txt
-test "$(wc -l < checksum_check.txt)" -eq 1
+CHECKSUM_COUNT=$(wc -l < checksum_check.txt | tr -d ' ')
+if [ "$CHECKSUM_COUNT" -ne 1 ]; then
+    echo "Error: Expected exactly 1 checksum entry for $FILENAME, found $CHECKSUM_COUNT." >&2
+    exit 1
+fi
 
 if command -v sha256sum >/dev/null 2>&1; then
     sha256sum -c checksum_check.txt

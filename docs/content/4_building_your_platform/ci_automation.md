@@ -31,6 +31,7 @@ Use `kubara init` with the flag for your platform. Existing files are preserved 
     This creates `.gitlab-ci.yml`.
 
     For automatic merge request creation on scheduled drift runs, ensure your CI token or project access token has repository write permissions.
+    By default, the pipeline uses `$CI_JOB_TOKEN`. If your `$CI_JOB_TOKEN` does not have write access to the repository, configure a project or group access token with repository write permissions and provide it via the masked CI/CD variable `KUBARA_UPDATE_TOKEN`.
 
 ## Updating Catalog Versions
 

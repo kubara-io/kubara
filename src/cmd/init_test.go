@@ -162,6 +162,7 @@ func TestEnsureRenovateConfig(t *testing.T) {
 	require.NoError(t, json.Unmarshal(content, &generated))
 	assert.Contains(t, generated.Extends, "config:recommended")
 	assert.Contains(t, generated.Extends, "customManagers:githubActionsVersions")
+	assert.Contains(t, generated.Extends, "customManagers:gitlabPipelineVersions")
 	require.Len(t, generated.CustomManagers, 1)
 	manager := generated.CustomManagers[0]
 	assert.Equal(t, []string{`/^clusters\/prod\/config\.yaml$/`}, manager.ManagerFilePatterns)
