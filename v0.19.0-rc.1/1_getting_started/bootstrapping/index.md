@@ -1,0 +1,530 @@
+# Bootstrap Your Own Platform
+
+## Introduction
+
+This guide provides a step-by-step process for bootstrapping your platform running on Kubernetes, including the necessary [prerequisites](prerequisites.md), architecture setup, and deployment instructions. Try to follow the instructions first. If you have any questions or issues, please reach out directly via Teams. If you're interested in the setup details, explore the Wiki pages.
+
+---
+
+## 1. Getting Started
+
+kubara can run on any Kubernetes cluster as long as the required surrounding capabilities exist, especially a secret backend for `external-secrets` and DNS handling for `external-dns`.
+
+For the ready-made example flows, use the [Infrastructure Presets](../3_infrastructure/overview.md) section. Whether you're running on STACKIT Cloud, STACKIT Edge, T Cloud Public, 
+or other cloud providers, we recommend you to use IaC (Infrastructure-as-Code) be it Terraform/Tofu, Pulumi or other solutions to Setup your Infrastructure.
+
+If you already have a Kubernetes cluster with DNS, secrets management, etc., simply disable those services in the `config.yaml` file, which will be generated in the next steps.
+
+!!! warning
+    **Keep in mind, that if you use kubara without a [Infrastructure Presets](../3_infrastructure/overview.md) and its contained IaC Code,
+    that you have to create your [Secrets] manually and also create an according secret store**
+
+
+### 1.1 Environment Configuration
+
+Refer to the [Prerequisites](prerequisites.md) guide and ensure all non-optional tasks in that guide are completed.<br>
+Don't forget to create a new Git repository - all following steps should be executed from within that newly created repository.<br>
+The easiest way is to run `kubara` inside the repository (but do not add the binary to Git).
+
+---
+
+### 1.2 Initialize Platform Configuration
+
+1. Run this command to initialize your GitOps repository:
+
+    ```bash
+    kubara init
+    ```
+
+    This will generate:
+
+    * A `config.yaml` file pre-filled with platform and cluster configuration (and repository URLs inferred from your Git repository).
+    * A `.gitignore` file to prevent accidental commits of secrets and local artifacts.
+    * A `renovate.json` file (if none exists) to keep versioned catalog references up to date.
+
+    !!! tip "Working with coding agents"
+        Run `kubara agents` to scaffold an `AGENTS.md` into your repository so tools like Claude
+        Code or Codex get a compact, token-lean entry point instead of crawling the full docs site.
+        It points at `kubara --help` and `kubara schema` as the source of truth and links the
+        **raw Markdown** documentation pinned to your installed kubara version. Commit it so it
+        travels with the repository, and re-run `kubara agents --overwrite` to refresh it after
+        upgrading kubara.
+
+2. Review and edit `config.yaml`:
+
+    Open `config.yaml` and configure your project name, stage, DNS name, and repository settings. `config.yaml` is the single source of truth for all cluster and platform configuration.
+
+    !!! note "Upgrading from v0.18.0 or earlier"
+        Prior to v0.19.0, kubara enforced a `.env` workflow (`kubara init --prep`) where cluster configuration was split between `.env` and `config.yaml`.
+        Starting in v0.19.0, `config.yaml` is the single source of truth for all platform settings.i A `.env` file is now strictly optional and restricted to initial bootstrap credentials (`GITOPS_*`, `DOCKERCONFIG_BASE64`, `ARGOCD_PASSWORD`), which can also be supplied via OS environment variables. See the [Migration Guide](../9_reference/migrations.md#migrating-from-v018x-to-v0190) for full details.
+
+#### Repository credentials for bootstrap
+
+Bootstrap credentials are only needed when running `kubara bootstrap`. You can provide them via OS environment variables or an optional `.env` file (checked in that order):
+
+```bash
+export GITOPS_USERNAME="<machine-user>"
+export GITOPS_PASSWORD="<pat-or-token>"
+```
+
+The initial Argo CD `wizard` account password is automatically generated during `kubara bootstrap` and printed in the completion output (or can optionally be set via `ARGOCD_PASSWORD`).
+
+#### Git repository authentication modes
+
+kubara creates the initial Argo CD repository secret during `kubara bootstrap`.
+Authentication mode is determined by the repository URL in `config.yaml` and your configured credentials:
+
+| Mode | Environment variables | Notes |
+| --- | --- | --- |
+| `https` | `GITOPS_USERNAME`, `GITOPS_PASSWORD` | Optional for public repositories (omit both); set both for private ones. `GITOPS_PASSWORD` is your Personal Access Token (PAT) or technical user password. (Legacy: `ARGOCD_GIT_USERNAME`, `ARGOCD_GIT_PAT_OR_PASSWORD`). |
+| `ssh` | `GITOPS_SSH_PRIVATE_KEY` or `GITOPS_SSH_PRIVATE_KEY_PATH` | Use an SSH repository URL such as `git@github.com:org/repo.git`. You can supply the private key inline via `GITOPS_SSH_PRIVATE_KEY` or provide a file path via `GITOPS_SSH_PRIVATE_KEY_PATH`. (Legacy: `ARGOCD_GIT_SSH_PRIVATE_KEY`). |
+| `github-app` | `GITOPS_GITHUB_APP_ID`, `GITOPS_GITHUB_APP_INSTALLATION_ID`, `GITOPS_GITHUB_APP_PRIVATE_KEY` (or `_PATH`) | Use GitHub App authentication for organization-owned automation. For GitHub Enterprise, set `GITOPS_GITHUB_APP_ENTERPRISE_BASE_URL` as well. (Legacy: `ARGOCD_GIT_GITHUB_APP_*`). |
+
+For SSH, keep strict host verification enabled.
+The bundled Argo CD Helm chart already includes known hosts for common public providers.
+For private Git hosts, add trusted host keys to the generated Argo CD values before bootstrapping, for example in `platform-configs/<cluster>/helm/argo-cd/values-additional.yaml`:
+
+```yaml
+argo-cd:
+  configs:
+    ssh:
+      extraHosts: |
+        git.example.com ssh-ed25519 <trusted-host-key>
+```
+
+If the required host key is missing, Argo CD will reject the SSH connection as an unknown SSH host.
+
+
+
+### 1.3 Custom Catalogs (Optional)
+
+By default, the generated cluster references kubara's versioned general catalog. Use repeated `--catalog` flags when running `kubara init` to initialize it with a different ordered catalog set:
+
+```bash
+kubara init \
+  --catalog ./company-platform \
+  --catalog oci://ghcr.io/acme/platform-catalogs/security:1.4.0
+```
+
+Use `--bootstrap-catalog` when the new configuration should also reference a custom bootstrap catalog:
+
+```bash
+kubara init \
+  --bootstrap-catalog ./bootstrap \
+  --catalog ./company-platform \
+  --catalog-overwrite
+```
+
+The bootstrap reference is stored in the root `bootstrapCatalog` field, while repeated `--catalog` values are stored on the generated cluster. Local paths are resolved relative to `--work-dir` when kubara loads them.
+
+Use `--renovate=false` if your repository does not use Renovate:
+
+```bash
+kubara init --renovate=false
+```
+
+!!! info 
+    If you plan to use Velero here, and have velero enabled, you need to also put in the s3Url inside the service definition file. More info about this [here](../6_components/backup_and_recovery.md).
+
+### 1.4 Validate your `config.yaml` against schema (optional, recommended)
+
+Generate a JSON schema file:
+
+```bash
+kubara schema
+```
+
+By default this creates `config.schema.json` in your current directory.
+You can set a custom output file:
+
+```bash
+kubara schema --output custom-config.schema.json
+```
+
+For editor integration (e.g. VS Code with YAML language server), reference the schema in your `config.yaml`:
+
+```yaml
+# yaml-language-server: $schema=./config.schema.json
+```
+
+### 1.5 Update and Prepare Templates
+
+!!! info
+    What is "type:" in `config.yaml`: `hub` is your hub cluster, `spoke` is your spoke cluster [Hub and Spoke Cluster](../7_architecture/architecture_overview.md#hubnspoke)
+
+!!! tip
+    **Not using STACKIT Edge?** Just remove the load balancer IPs from your `config.yaml`.  
+    **Not using an SSO provider?** Just set the ssoOrg and ssoTeam to "none"
+
+
+Example:
+
+```yaml
+bootstrapCatalog: oci://ghcr.io/kubara-io/catalogs/bootstrap:6.1.1
+clusters:
+  - name: project-name-from-env-file
+    stage: project-stage-something-like-dev
+    type: <hub or spoke>
+    dnsName: <cp.demo-42.stackit.run>
+    # Hint: If you don't use an SSO provider, you can set ssoOrg and ssoTeam to "none"
+    ssoOrg: <oidc-org> 
+    ssoTeam: <org-team>
+    catalogs:
+      - oci://ghcr.io/kubara-io/catalogs/general:7.0.0
+    terraform:
+      provider: stackit # currently supported: stackit, t-cloud-public
+      projectId: <project-id-or-tenant-name>
+      kubernetesType: <ske, edge or cce>
+      kubernetesVersion: "1.36" # select a minor version supported by your provider
+      dns:
+        name: <dns-name>
+        email: <email>
+...
+    services:  
+      ...
+      metallb:
+        status: enabled
+        config:
+          loadBalancerAddressPool:
+            - 0.0.0.0
+          publicLoadBalancerIPs: 0.0.0.0
+...
+```
+
+The Kubernetes version above is a generic example. For STACKIT SKE, select a currently
+supported version as described in [STACKIT SKE configuration](../3_infrastructure/stackit_ske.md#configuration).
+
+
+`terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
+
+`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd`, `bootstrap-crds`, and `cluster-credential-rotator` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
+
+`networking.type` defaults to `ingress`, and `networking.ingress.className` defaults to `traefik`. Set it explicitly when using a different ingress controller.
+Each service also accepts an optional `networking.annotations` map under `services.<service>.networking.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.
+User-provided annotations are merged on top using `mergeOverwrite`: equal keys are overwritten, while kubara default keys that are not present in the override remain.
+
+kubara generates resources in two stages:
+
+* **Terraform modules and overlays** to provision infrastructure and the Kubernetes cluster
+* **Helm templates** to deploy Argo CD and platform services
+
+If you are not using Terraform, you can skip directly to Step 3.
+
+## 2. Infrastructure Provisioning
+
+kubara is mainly focused on the platform layer on top of Kubernetes.
+For some environments we provide ready-made infrastructure presets and generated Terraform examples.
+
+Visit the [Infrastructure Presets](../3_infrastructure/overview.md) section for:
+
+- [STACKIT SKE](../3_infrastructure/stackit_ske.md)
+- [STACKIT Edge Cloud](../3_infrastructure/stackit_edge_cloud.md)
+- [T Cloud Public](../3_infrastructure/t-cloud-public.md)
+- More provider support is in the works
+
+If you already have an existing Kubernetes cluster and a secret manager supported by `external-secrets`, continue with the next section.
+
+---
+## 3. Helm
+
+This step extends the service catalog:
+
+* Generates an umbrella Helm chart in `platform-components/`
+* Creates cluster-specific overlays in `platform-configs/`
+
+```bash
+kubara generate --helm
+```
+
+
+The generated `values.generated.yaml` files are pre-filled from your `config.yaml`. Review them if you 
+want to understand more details about the predefined settings but DO NOT edit those files as they will be regenerated
+with future updates. If you need customization you can add as many files to the charts with the pattern `values-*.yaml`.
+Which will be merged in lexical order. Hint: Lists in YAML files cannot be merged by ArgoCD/Helm. They will be completely
+overwritten by the last file that includes the list.
+
+Source templates come from the bootstrap catalog and the catalogs selected by each cluster. Treat generated files in your repository as output; customize the catalog source or add supported overlay files instead of editing generated files directly.
+
+The chart directories where values usually need review are:
+
+* argo-cd
+* cert-manager
+* external-dns
+* external-secrets
+* homer-dashboard
+* kube-prometheus-stack
+* kyverno
+* kyverno-policy-reporter
+* loki
+* longhorn
+* metallb
+* metrics-server
+* oauth2-proxy
+* traefik
+* velero
+
+### 3.1 Additional value files and CI value files
+
+Every generated app supports:
+
+* `values.generated.yaml` as the main generated overlay file
+* optional `values-*.yaml` for overrides/extra values (merged in lexical order)
+
+Merge behavior reminder:
+
+* maps/dictionaries are merged recursively
+* lists/arrays replace previous values completely
+
+CI-specific values can be stored in chart-local CI files (for example `ci/ci-values.yaml`) to keep pipeline-only settings out of runtime overlays.
+
+!!! info "T Cloud Public CCE: provider-specific Helm adjustments"
+    After `kubara generate --helm` and before `kubara bootstrap`, replace the Traefik service annotation placeholder with the shared load balancer ID from Terraform:
+
+    ```bash
+    cd platform-configs/<cluster>/terraform/infrastructure
+    terraform output -raw load_balancer_id
+    ```
+
+    Set the value in `platform-configs/<cluster>/helm/traefik/values.generated.yaml` under `traefik.service.annotations["kubernetes.io/elb.id"]`. Keep `kubernetes.io/elb.class: "union"`.
+
+    ExternalDNS also needs a Kubernetes Secret named `tcloudpubliccloudsyaml` with a `clouds.yaml` key. With the default OpenBao and External Secrets setup, copy the ExternalDNS block from `platform-configs/<cluster>/terraform/openbao/secrets.tf-oauth2` to `secrets.tf`, set `TF_VAR_external_dns_os_username` and `TF_VAR_external_dns_os_password` in `set-env.sh`, and apply the OpenBao Terraform layer before bootstrap. If you need Terraform value overrides in the OpenBao layer, use [Terraform value overrides](../2_concepts/overview_core_concept.md#terraform-value-overrides).
+
+!!! warning
+    **Don't forget to commit and push your changes to Git!**
+
+---
+
+### 3.2 Secret handling & preparation
+
+!!! tip "Infrastructure Presets"
+    Infrastructure presets already contain the logic to create and configure the secret backend for you.
+    But you must still provide optional platform credentials before bootstrapping yourself.
+
+    For STACKIT SKE, use:
+    [OAuth2-related Vault entries via Terraform](../3_infrastructure/stackit_ske.md#7-optional-oauth2-related-vault-entries-via-terraform)
+
+    For T Cloud Public, use:
+    [OpenBao configuration and secrets](../3_infrastructure/t-cloud-public.md#7-openbao-configuration-and-secrets)
+
+    Both guides explain which example secret files to copy, the required `TF_VAR_*` values in `set-env.sh`
+    and when to apply the Terraform/OpenTofu parts.
+
+
+!!! danger "Manual Installation"
+    Without an Infrastructure Preset, you have to ensure the required secrets are created in your chosen 
+    backend and need to prepare a `ClusterSecretStore` before running `kubara bootstrap`. The next sections
+    list the platform secrets and show how the generated ExternalSecrets locate them.
+
+
+The generated charts create ExternalSecrets during bootstrap. Those resources cannot synchronize until the secret
+backend contains the referenced values and the cluster has a working `ClusterSecretStore`.
+
+#### Platform secret paths
+
+kubara reads these backend paths. Replace `<cluster>` and `<stage>` with the values from `config.yaml`.
+The key names are the fields that must exist in the stored secret.
+
+| Purpose | Backend path | Keys |
+|---|---|---|
+| Grafana admin account | `<cluster>/<stage>/kube-prometheus-stack/grafana_credentials` | `admin-user`, `admin-password` |
+| Container registry pull credentials | `<cluster>/<stage>/cluster_secrets/docker_config` | `pull-secret` |
+| OAuth2 Proxy | `<cluster>/<stage>/oauth2-proxy/oauth2_credentials` | `client-id`, `client-secret`, `cookie-secret` |
+| Argo CD OAuth2 | `<cluster>/<stage>/argocd/argo_oauth2_credentials` | `client-id`, `client-secret` |
+| Grafana OAuth2 | `<cluster>/<stage>/kube-prometheus-stack/grafana_oauth2_credentials` | `client-id`, `client-secret` |
+| Velero backup storage | `<cluster>/<stage>/velero/velero_s3_credentials` | `cloud` |
+
+Create only the secrets for enabled services. The container registry secret for example is only needed when 
+the generated image pull secret is in use for a private registry or commerical access to something like DockerHub.
+  
+---  
+
+#### Changing generated secret references
+
+Do not edit `values.generated.yaml`. `kubara generate --helm` replaces them on every run. To use different backend 
+paths, add a `values-*.yaml` file in the specific chart directory and override that chart's `externalSecrets` settings.
+The generated values files show the required Kubernetes secret names and fields.
+
+---
+The following commands show the expected value format. Store their output in your secret manager.
+
+```bash title="Docker Pull Secret"
+# Decode the base64-encoded Docker pull secret and store it as JSON field "pull-secret" in your Secret Manager
+printf '%s' "$YOUR_PASSWORD_IN_BASE64" | base64 -d | jq -Rs '{"pull-secret":.}'
+```
+
+```bash title="Grafana Admin Secret"
+# Replace "$YOUR_PASSWORD" with your desired Grafana admin account password.
+jq -n --arg password "$YOUR_PASSWORD" \
+  '{"admin-user": "admin", "admin-password": $password}'
+```
+
+```bash title="Grafana SSO Secret"
+# Replace secret values according to your SSO App Client ID and Secret
+jq -n --arg clientID "$YOUR_GRAFANA_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  '{"client-id": $clientID, "client-secret": $clientSecret}'
+```
+
+```bash title="OAuth2 Proxy Secret"
+# Based on the [OAuth2 Proxy Docs - Generating a Cookie Secret](https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview/).
+# Generate the cookie secret locally
+dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo
+
+# Replace secret values accordingly
+jq -n --arg clientID "$YOUR_OAUTH2_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  --arg cookieSecret "$YOUR_COOKIE_SECRET_CREATED_ABOVE" \
+  '{"client-id": $clientID, "client-secret": $clientSecret, "cookie-secret": $cookieSecret}'
+```
+
+```bash title="ArgoCD SSO Secret"
+# Replace the secret name according to your cluster name and stage (for example "gcp-dev"), and replace the secret values accordingly
+jq -n --arg clientID "$YOUR_ARGO_CLIENT_ID" --arg clientSecret "$YOUR_SECRET" \
+  '{"client-id": $clientID, "client-secret": $clientSecret}'
+```
+
+Use the [External Secrets Operator documentation](https://external-secrets.io/latest/) to create a
+`ClusterSecretStore` for your backend. Continue only after the secret manager contains the required values and
+the `ClusterSecretStore` can reach it.
+
+
+---
+
+## 4. Deploying Argo CD
+
+### 4.1 Bootstrap the Hub cluster
+
+!!! warning
+    This command requires access to a Kubernetes cluster and, by default, uses `~/.kube/config`.
+    To target a specific cluster, provide your own config with `--kubeconfig your-kubeconfig`
+
+External Secrets needs a `ClusterSecretStore`.
+
+For T Cloud Public CCE, kubara already renders the OpenBao-backed `ClusterSecretStore` into `external-secrets/values.yaml`. Do not pass `--with-es-css-file` and do not create a separate provider credential secret.
+
+For other providers, create the provider credential secret first and either pass a `ClusterSecretStore` manifest during bootstrap with `--with-es-css-file`, or apply the `ClusterSecretStore` manually after bootstrap.
+
+Bootstrap always installs the required CRDs from the bootstrap catalog's `bootstrap-crds` service. Separate External Secrets and Prometheus CRD flags are no longer required.
+
+If the namespace does not exist yet, create it once before creating the provider credential secret(s):
+
+```bash
+kubectl create namespace external-secrets
+```
+
+Example provider credential secret(s) for the `ClusterSecretStore`:
+
+```bash
+## Bitwarden
+kubectl -n external-secrets create secret generic bitwarden-access-token \
+  --from-literal=token="<BITWARDEN_MACHINE_ACCOUNT_TOKEN>"
+
+## STACKIT Secrets Manager
+kubectl -n external-secrets create secret generic stackit-secrets-manager-cred \
+  --from-literal=username="<USERNAME>" \
+  --from-literal=password="<PASSWORD>"
+```
+
+Example `clustersecretstore.yaml` for `--with-es-css-file` (templating with `{{ .cluster.name }}` / `{{ .cluster.stage }}` is supported):
+
+```yaml
+apiVersion: external-secrets.io/v1
+kind: ClusterSecretStore
+metadata:
+  labels:
+    argocd.argoproj.io/instance: {{ .cluster.name }}-external-secrets
+  name: "{{ .cluster.name }}-{{ .cluster.stage }}"
+spec:
+  provider:
+    vault:
+      auth:
+        userPass:
+          path: userpass
+          secretRef:
+            key: password
+            name: stackit-secrets-manager-cred
+            namespace: external-secrets
+          username: "<USERNAME>"
+      path: "<VAULT_PATH>"
+      server: "https://<your-secrets-manager-endpoint>"
+      version: v2
+```
+
+kubara scopes secret paths by cluster and stage. Namespace-specific secrets use
+`<cluster-name>/<stage>/<namespace>/<secret>`, while cluster-wide secrets use
+`<cluster-name>/<stage>/cluster_secrets/<secret>`. For example, Grafana credentials for the
+`controlplane` production cluster live at
+`controlplane/production/kube-prometheus-stack/grafana_credentials`.
+This path layout is the same for every provider and secret backend, including the local OpenBao setup.
+
+```bash
+kubara bootstrap <cluster-name-from-config-yaml>
+```
+
+For providers that need an external `ClusterSecretStore` manifest, pass it during bootstrap:
+
+```bash
+kubara bootstrap <cluster-name-from-config-yaml> \
+  --kubeconfig k8s.yaml \
+  --with-es-css-file clustersecretstore.yaml
+```
+
+After a successful bootstrap run, your platform should be operational.
+
+---
+
+## 5. Access the Argo CD Dashboard
+
+!!! info "Argocd Local Login"
+    **Username:** `wizard`  
+    **Password:** Autogenerated and printed once in the `kubara bootstrap` completion output.
+
+1. Start port-forwarding:
+
+   ```bash
+   kubectl port-forward svc/argocd-server -n argocd 8080:443
+   ```
+
+2. Open your browser at: [http://localhost:8080/argocd](http://localhost:8080/argocd)
+
+3. Log in with the credentials above.
+
+Enjoy your new platform!
+
+---
+
+## What's also possible?
+
+This section will be extended in the future to describe not just technical changes,
+but also other supported possibilities when bootstrapping.
+
+### Bootstrapping Multiple Hub Clusters
+
+You can bootstrap multiple Hub clusters.
+You **cannot** reuse the same `config.yaml` file for multiple Hub clusters. Only one hub per config is supported.
+
+**Why?**
+A single configuration defines a single platform scope with one Hub cluster. To manage multiple Hub clusters, maintain separate configuration files (or repositories) and supply cluster-specific credentials via OS environment variables or a `.env` file in the repository:
+
+Render Terraform modules and Helm charts for the new Hub cluster:
+
+```bash
+# default: generates both Helm and Terraform
+# use --helm or --terraform to generate only one type
+./kubara generate --config-file another-config.yaml 
+```
+
+Finally, bootstrap your additional Hub cluster:
+
+```bash
+kubara bootstrap --config-file another-config.yaml <cluster name from another-config.yaml>
+```
+
+## What's Next?
+
+After bootstrapping your platform, you can:
+
+* [How to add Argo CD projects](../5_workload_onboarding/add_app_project.md)
+* [How to add Git repositories](../5_workload_onboarding/add_app_repository.md)
+* [How to add Argo CD applications](../5_workload_onboarding/add_application.md)
+* [How to add Argo CD appset](../5_workload_onboarding/add_appset.md)
+* [How to add SSO Configuration](../4_building_your_platform/sso/sso.md)
+* [How to add spoke clusters](../4_building_your_platform/add_spoke_cluster.md)
