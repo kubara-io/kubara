@@ -1,6 +1,6 @@
 ---
 image:
-  name: ghcr.io/kubara-io/kubara:latest
+  name: ghcr.io/kubara-io/kubara:0.18.0
   entrypoint: ['']
 workflow:
   rules:

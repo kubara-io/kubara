@@ -117,10 +117,24 @@ jobs:
           path: ${{ runner.temp }}/kubara/generated.patch
           retention-days: 7
 
+      # Optional: use a GitHub App token so pushes and PRs trigger other workflows.
+      # Set APP_CLIENT_ID (variable) and APP_PRIVATE_KEY (secret), then uncomment:
+      # - name: Create automation token
+      #   id: app-token
+      #   if: steps.render.outputs.changed == 'true' && (github.event_name != 'workflow_dispatch' || inputs.write)
+      #   uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+      #   with:
+      #     client-id: ${{ vars.APP_CLIENT_ID }}
+      #     private-key: ${{ secrets.APP_PRIVATE_KEY }}
+      #     owner: ${{ github.repository_owner }}
+      #     repositories: ${{ github.event.repository.name }}
+      #     permission-contents: write
+      #     permission-pull-requests: write
+
       - name: Commit generated changes to PR
         if: steps.render.outputs.changed == 'true' && steps.target.outputs.is_pr == 'true' && (github.event_name != 'workflow_dispatch' || inputs.write)
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           REPOSITORY: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
           EXPECTED_HEAD: ${{ steps.target.outputs.head }}
@@ -167,16 +181,21 @@ jobs:
       - name: Open PR for drift on default branch
         if: steps.render.outputs.changed == 'true' && steps.target.outputs.is_pr == 'false' && (github.event_name != 'workflow_dispatch' || inputs.write)
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token || github.token }}
           DEFAULT_BRANCH: ${{ steps.target.outputs.branch }}
           DRIFT_BRANCH: automation/kubara-drift
         run: |
+          remote_ref="refs/heads/$DRIFT_BRANCH"
+          remote_state=$(git -c core.hooksPath=/dev/null -c credential.helper= \
+            -c 'credential.helper=!gh auth git-credential' ls-remote origin "$remote_ref") || exit 1
+          expected_sha=$(printf '%s\n' "$remote_state" | awk '{print $1}')
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git checkout -B "$DRIFT_BRANCH"
           git -c core.hooksPath=/dev/null commit -m 'chore: regenerate kubara artifacts'
           git -c core.hooksPath=/dev/null -c credential.helper= \
-            -c 'credential.helper=!gh auth git-credential' push origin "HEAD:refs/heads/$DRIFT_BRANCH" --force
+            -c 'credential.helper=!gh auth git-credential' push origin \
+            --force-with-lease="$remote_ref:$expected_sha" "HEAD:$remote_ref"
           existing_pr=$(gh pr list --head "$DRIFT_BRANCH" --base "$DEFAULT_BRANCH" --json number --jq '.[0].number')
           if [[ -z "$existing_pr" ]]; then
             gh pr create \

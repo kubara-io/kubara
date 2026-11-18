@@ -9,7 +9,7 @@ kubara-generate:
     GIT_DEPTH: '0'
   resource_group: kubara-generate
   rules:
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_EVENT_TYPE != "merge_train"'
     - if: '$CI_PIPELINE_SOURCE == "schedule" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   before_script:
@@ -21,6 +21,11 @@ kubara-generate:
     #     --password-stdin \
     #     "$CI_REGISTRY"
   script:
+    - |
+      if [ "$CI_MERGE_REQUEST_EVENT_TYPE" = "merged_result" ]; then
+        git fetch origin "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
+        git checkout --detach "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA"
+      fi
     - mkdir -p /tmp/kubara-home
     - |
       if [ -f "$HOME/.kubara/credentials.json" ]; then
@@ -61,7 +66,13 @@ kubara-generate:
         cat > "$askpass" <<'SH'
       #!/bin/sh
       case "$1" in
-        *Username*) echo oauth2 ;;
+        *Username*)
+          if [ -n "${KUBARA_UPDATE_TOKEN:-}" ]; then
+            echo oauth2
+          else
+            echo gitlab-ci-token
+          fi
+          ;;
         *) printf '%s\n' "${KUBARA_UPDATE_TOKEN:-$CI_JOB_TOKEN}" ;;
       esac
       SH
@@ -69,25 +80,37 @@ kubara-generate:
         GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 git -c credential.helper= push "$CI_PROJECT_URL.git" "HEAD:refs/heads/$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
       else
         echo 'Drift detected on default branch. Opening or updating merge request.'
-        branch=automation/kubara-drift
-        git checkout -B "$branch"
-        git config user.name 'kubara automation'
-        git config user.email '[EMAIL_REDACTED]'
-        git commit -m 'chore: regenerate kubara artifacts'
         askpass=$(mktemp)
         trap 'rm -f "$askpass"' EXIT
         cat > "$askpass" <<'SH'
       #!/bin/sh
       case "$1" in
-        *Username*) echo oauth2 ;;
+        *Username*)
+          if [ -n "${KUBARA_UPDATE_TOKEN:-}" ]; then
+            echo oauth2
+          else
+            echo gitlab-ci-token
+          fi
+          ;;
         *) printf '%s\n' "${KUBARA_UPDATE_TOKEN:-$CI_JOB_TOKEN}" ;;
       esac
       SH
         chmod 700 "$askpass"
-        GIT_ASKPASS="$askpass" GIT_TERMINAL_PROMPT=0 git -c credential.helper= push \
+        export GIT_ASKPASS="$askpass"
+        export GIT_TERMINAL_PROMPT=0
+        branch=automation/kubara-drift
+        remote_ref="refs/heads/$branch"
+        remote_state=$(git -c credential.helper= ls-remote "$CI_PROJECT_URL.git" "$remote_ref") || exit 1
+        expected_sha=$(printf '%s\n' "$remote_state" | awk '{print $1}')
+        git checkout -B "$branch"
+        git config user.name 'kubara automation'
+        git config user.email '[EMAIL_REDACTED]'
+        git commit -m 'chore: regenerate kubara artifacts'
+        git -c credential.helper= push \
+          --force-with-lease="$remote_ref:$expected_sha" \
           -o merge_request.create \
           -o merge_request.target="$CI_DEFAULT_BRANCH" \
           -o merge_request.title="chore: regenerate kubara artifacts" \
           -o merge_request.remove_source_branch \
-          "$CI_PROJECT_URL.git" "HEAD:refs/heads/$branch"
+          "$CI_PROJECT_URL.git" "HEAD:$remote_ref"
       fi

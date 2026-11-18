@@ -22,6 +22,8 @@ Use `kubara init` with the flag for your platform. Existing CI files are always 
     In repository settings under **Actions > General**, enable **Allow GitHub Actions to create and approve pull requests**.
     The workflow requires `contents: write` and `pull-requests: write` permissions.
 
+    By default, changes are committed using `GITHUB_TOKEN`. Because GitHub does not trigger downstream workflow runs from `GITHUB_TOKEN` pushes, repositories that require validation or status checks on generated commits can authenticate via a GitHub App. Install the App on the repository with `contents: write` and `pull-requests: write` permissions, set the `APP_CLIENT_ID` repository variable and `APP_PRIVATE_KEY` secret, and uncomment the `Create automation token` step in `.github/workflows/kubara-generate.yml`.
+
 === "GitLab CI"
 
     ```bash
@@ -31,7 +33,7 @@ Use `kubara init` with the flag for your platform. Existing CI files are always 
     This creates `.gitlab/kubara.gitlab-ci.yml` and includes it in `.gitlab-ci.yml` (or preserves an existing `.gitlab-ci.yml` and logs instructions to include it).
 
     For automatic merge request creation on scheduled drift runs, ensure your CI token or project access token has repository write permissions.
-    By default, the pipeline uses `$CI_JOB_TOKEN`. If your `$CI_JOB_TOKEN` does not have write access to the repository, configure a project or group access token with repository write permissions and provide it via the masked CI/CD variable `KUBARA_UPDATE_TOKEN`.
+    By default, the pipeline uses `$CI_JOB_TOKEN`. Pushing with `$CI_JOB_TOKEN` requires enabling **Allow Git push requests to the repository** in your project's CI/CD Job token permissions (note that pushes made with `$CI_JOB_TOKEN` do not trigger a new pipeline). If your `$CI_JOB_TOKEN` does not have write access to the repository, configure a project or group access token with repository write permissions and provide it via the masked CI/CD variable `KUBARA_UPDATE_TOKEN`.
 
 ## Updating Catalog Versions
 
