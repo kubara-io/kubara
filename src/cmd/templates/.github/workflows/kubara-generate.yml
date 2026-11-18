@@ -46,6 +46,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number || inputs.pull-request }}
         run: |
           if [[ -n "$PR_NUMBER" ]]; then
+            # Ensure PR number input is strictly an integer before querying GitHub API
             [[ "$PR_NUMBER" =~ ^[0-9]+$ ]]
             gh api "repos/$REPOSITORY/pulls/$PR_NUMBER" > "$RUNNER_TEMP/pr.json"
             jq -e --arg repo "$REPOSITORY" \
@@ -162,11 +163,13 @@ jobs:
             echo '<!-- kubara-generate -->'
             printf '### Kubara generate: %s\n\n[Workflow run](%s)\n\n' "$RESULT" "$RUN_URL"
             echo '<details><summary>Generation output (last 40 KB)</summary><pre>'
+            # Strip ANSI terminal escape codes and HTML-escape characters for comment rendering
             tail -c 40000 "$RUNNER_TEMP/kubara/generate.log" \
               | sed -E $'s/\x1b\\[[0-9;]*[[:alpha:]]//g' \
               | sed 's/\&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g'
             echo '</pre></details>'
           } > "$RUNNER_TEMP/kubara/comment.md"
+          # Locate existing bot comment by HTML marker to update it in-place instead of spamming new comments
           comment_id=$(gh api --paginate "repos/$REPOSITORY/issues/$PR_NUMBER/comments" \
             --jq '.[] | select(.user.login == "github-actions[bot]" and (.body | startswith("<!-- kubara-generate -->"))) | .id' | head -n 1)
           endpoint="repos/$REPOSITORY/issues/$PR_NUMBER/comments"
@@ -185,6 +188,7 @@ jobs:
           DEFAULT_BRANCH: ${{ steps.target.outputs.branch }}
           DRIFT_BRANCH: automation/kubara-drift
         run: |
+          # Query remote SHA to update an existing drift branch with --force-with-lease safely
           remote_ref="refs/heads/$DRIFT_BRANCH"
           remote_state=$(git -c core.hooksPath=/dev/null -c credential.helper= \
             -c 'credential.helper=!gh auth git-credential' ls-remote origin "$remote_ref") || exit 1

@@ -83,6 +83,7 @@ if [ -z "$LATEST_TAG" ]; then
     exit 1
 fi
 
+# Validate that LATEST_TAG adheres to semver (e.g., v1.2.3 or v1.2.3-rc.1)
 if ! printf '%s\n' "$LATEST_TAG" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$'; then
     echo "Error: KUBARA_VERSION must be latest or a release version." >&2
     exit 1
@@ -135,6 +136,7 @@ echo "Downloading checksum file..."
 curl_wrap -L -o "$CHECKSUM_FILE" "$CHECKSUM_URL"
 
 echo "Verifying checksum..."
+# Match exact filename in column 2 (avoids substring matches on .sbom.json files)
 awk -v file="$FILENAME" '$2 == file {print}' "$CHECKSUM_FILE" > checksum_check.txt
 CHECKSUM_COUNT=$(wc -l < checksum_check.txt | tr -d ' ')
 if [ "$CHECKSUM_COUNT" -ne 1 ]; then

@@ -22,6 +22,7 @@ kubara-generate:
     #     "$CI_REGISTRY"
   script:
     - |
+      # In merged-results pipelines HEAD is a temporary merge commit; detach on source branch HEAD instead
       if [ "$CI_MERGE_REQUEST_EVENT_TYPE" = "merged_result" ]; then
         git fetch origin "$CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"
         git checkout --detach "$CI_MERGE_REQUEST_SOURCE_BRANCH_SHA"
@@ -99,6 +100,7 @@ kubara-generate:
         export GIT_ASKPASS="$askpass"
         export GIT_TERMINAL_PROMPT=0
         branch=automation/kubara-drift
+        # Query remote SHA to update an existing drift branch with --force-with-lease safely
         remote_ref="refs/heads/$branch"
         remote_state=$(git -c credential.helper= ls-remote "$CI_PROJECT_URL.git" "$remote_ref") || exit 1
         expected_sha=$(printf '%s\n' "$remote_state" | awk '{print $1}')
