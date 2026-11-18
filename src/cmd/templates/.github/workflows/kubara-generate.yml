@@ -67,11 +67,24 @@ jobs:
           # renovate: datasource=github-releases depName=kubara-io/kubara extractVersion=^v(?<version>.*)$
           KUBARA_VERSION: latest
 
+      # Optional: log into a private catalog registry. Set CATALOG_REGISTRY_USER and CATALOG_REGISTRY_TOKEN,
+      # replace ghcr.io with your private registry, then uncomment:
+      # - name: Log into private catalog registry
+      #   run: |
+      #     echo "${{ secrets.CATALOG_REGISTRY_TOKEN }}" | kubara catalog login \
+      #       --username "${{ secrets.CATALOG_REGISTRY_USER }}" \
+      #       --password-stdin \
+      #       ghcr.io
+
       - name: Generate artifacts
         id: render
         shell: bash
         run: |
           mkdir -p "$RUNNER_TEMP/kubara/home"
+          if [ -f "$HOME/.kubara/credentials.json" ]; then
+            mkdir -p "$RUNNER_TEMP/kubara/home/.kubara"
+            cp "$HOME/.kubara/credentials.json" "$RUNNER_TEMP/kubara/home/.kubara/credentials.json"
+          fi
           env -i PATH="$PATH" HOME="$RUNNER_TEMP/kubara/home" LANG=C.UTF-8 \
             kubara generate 2>&1 | tee "$RUNNER_TEMP/kubara/generate.log"
           existing_dirs=""

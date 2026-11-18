@@ -14,8 +14,19 @@ kubara-generate:
     - if: '$CI_PIPELINE_SOURCE == "web" && $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
   before_script:
     - apk add --no-cache git
+    # Optional: log into a private catalog registry. Set CI_REGISTRY_USER and CI_REGISTRY_PASSWORD, then uncomment:
+    # - >-
+    #   echo "$CI_REGISTRY_PASSWORD" | /kubara catalog login \
+    #     --username "$CI_REGISTRY_USER" \
+    #     --password-stdin \
+    #     "$CI_REGISTRY"
   script:
     - mkdir -p /tmp/kubara-home
+    - |
+      if [ -f "$HOME/.kubara/credentials.json" ]; then
+        mkdir -p /tmp/kubara-home/.kubara
+        cp "$HOME/.kubara/credentials.json" /tmp/kubara-home/.kubara/credentials.json
+      fi
     - env -i PATH="$PATH" HOME="/tmp/kubara-home" LANG=C.UTF-8 /kubara generate
     - |
       existing_dirs=""
