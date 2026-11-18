@@ -114,25 +114,7 @@ Output:
 
 ### How onboarding works under the hood
 
-``` mermaid
-sequenceDiagram
-    autonumber
-    actor Operator as Operator (CLI)
-    participant Hub as Hub (kubara-system)
-    participant Rotator as Hub (Credential Rotator)
-    participant Spoke as Spoke Cluster
-    participant Argo as Hub (Argo CD)
-
-    Operator->>Hub: kubara bootstrap spoke-1 (passes initial kubeconfig)
-    Operator->>Spoke: Apply bootstrap CRDs (and optional ClusterSecretStore)
-    Operator->>Hub: Upsert spoke-1-cluster-secret with bootstrapKubeconfig
-    Rotator->>Hub: Scheduled CronJob picks up spoke-1-cluster-secret
-    Rotator->>Spoke: Connect via initial kubeconfig
-    Rotator->>Spoke: Create kubara-agent SA & ClusterRoleBinding in kubara-system
-    Rotator->>Rotator: Mint short-lived rotating bearer token
-    Rotator->>Hub: Wipe bootstrapKubeconfig, update spoke-1-cluster-secret & project into argocd
-    Argo->>Spoke: Connect via rotating token & reconcile workloads
-```
+![Spoke-Onboarding-Sequence](../assets/diagrams.drawio)
 
 During the onboarding command:
 
