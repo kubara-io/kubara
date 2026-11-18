@@ -106,13 +106,16 @@ Shows a list of commands or help for one command
 
 ## bootstrap
 
-Bootstrap Argo CD onto a cluster
+Bootstrap a hub or onboard a spoke cluster
 
->kubara bootstrap CLUSTER_NAME [--local]
+    kubara bootstrap CLUSTER_NAME [--local]
+    kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH
 
 **--dry-run**: Run with dry-run (default: false)
 
 **--help, -h**: show help (default: false)
+
+**--initial-kubeconfig**="": Path to the initial kubeconfig used to onboard a spoke cluster
 
 **--local**: Provision an isolated local evaluation environment. Local testing only; not for production use. (default: false)
 

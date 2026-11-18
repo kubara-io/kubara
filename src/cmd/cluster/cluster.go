@@ -11,6 +11,7 @@ func NewClusterCommand() *cli.Command {
 		Commands: []*cli.Command{
 			CreateClusterList(),
 			CreateAddClusterCommand(),
+			CreateRotateCredentialsCommand(),
 		},
 	}
 }
