@@ -20,7 +20,7 @@ import (
 	"github.com/urfave/cli/v3"
 )
 
-//go:embed templates/.github/workflows/kubara-generate.yml templates/.gitlab-ci.yml
+//go:embed templates/.github/workflows/kubara-generate.yml templates/.gitlab/kubara.gitlab-ci.yml
 var ciTemplates embed.FS
 
 type InitOptions struct {
@@ -390,35 +390,53 @@ func (o *InitOptions) ensureEnvExample() error {
 }
 
 func (o *InitOptions) ensureCIPipelines() error {
-	for _, file := range []struct {
-		enabled bool
-		source  string
-		target  string
-	}{
-		{o.githubActions, "templates/.github/workflows/kubara-generate.yml", ".github/workflows/kubara-generate.yml"},
-		{o.gitlabCI, "templates/.gitlab-ci.yml", ".gitlab-ci.yml"},
-	} {
-		if !file.enabled {
-			continue
+	if o.githubActions {
+		path := filepath.Join(o.cwd, ".github/workflows/kubara-generate.yml")
+		if err := writeTemplateIfNotExists(path, "templates/.github/workflows/kubara-generate.yml"); err != nil {
+			return err
 		}
-		path := filepath.Join(o.cwd, file.target)
-		if _, err := os.Lstat(path); err == nil {
-			log.Info().Msgf("Skipping existing CI file: %s", path)
-			continue
-		} else if err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("check CI file %q: %w", path, err)
-		}
-		contents, err := ciTemplates.ReadFile(file.source)
-		if err != nil {
-			return fmt.Errorf("read CI template: %w", err)
-		}
-		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
-			return fmt.Errorf("create CI directory: %w", err)
-		}
-		if err := os.WriteFile(path, contents, 0o644); err != nil {
-			return fmt.Errorf("write CI file: %w", err)
-		}
-		log.Info().Msgf("Generated CI file: %s", path)
 	}
+
+	if o.gitlabCI {
+		path := filepath.Join(o.cwd, ".gitlab/kubara.gitlab-ci.yml")
+		if err := writeTemplateIfNotExists(path, "templates/.gitlab/kubara.gitlab-ci.yml"); err != nil {
+			return err
+		}
+
+		rootPath := filepath.Join(o.cwd, ".gitlab-ci.yml")
+		if _, err := os.Lstat(rootPath); err == nil {
+			log.Info().Msg("Existing .gitlab-ci.yml found; add the following include to use the generated pipeline:\ninclude:\n  - local: '/.gitlab/kubara.gitlab-ci.yml'")
+		} else if err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("check CI file %q: %w", rootPath, err)
+		} else {
+			rootContent := "---\ninclude:\n  - local: '/.gitlab/kubara.gitlab-ci.yml'\n"
+			if err := os.WriteFile(rootPath, []byte(rootContent), 0o644); err != nil {
+				return fmt.Errorf("write root CI file: %w", err)
+			}
+			log.Info().Msgf("Generated root CI file: %s", rootPath)
+		}
+	}
+
+	return nil
+}
+
+func writeTemplateIfNotExists(targetPath, sourceTemplate string) error {
+	if _, err := os.Lstat(targetPath); err == nil {
+		log.Info().Msgf("Skipping existing CI file: %s", targetPath)
+		return nil
+	} else if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("check CI file %q: %w", targetPath, err)
+	}
+	contents, err := ciTemplates.ReadFile(sourceTemplate)
+	if err != nil {
+		return fmt.Errorf("read CI template: %w", err)
+	}
+	if err := os.MkdirAll(filepath.Dir(targetPath), 0o755); err != nil {
+		return fmt.Errorf("create CI directory: %w", err)
+	}
+	if err := os.WriteFile(targetPath, contents, 0o644); err != nil {
+		return fmt.Errorf("write CI file: %w", err)
+	}
+	log.Info().Msgf("Generated CI file: %s", targetPath)
 	return nil
 }
