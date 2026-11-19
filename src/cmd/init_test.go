@@ -160,6 +160,9 @@ func TestEnsureRenovateConfig(t *testing.T) {
 
 	var generated renovateConfig
 	require.NoError(t, json.Unmarshal(content, &generated))
+	assert.Contains(t, generated.Extends, "config:recommended")
+	assert.Contains(t, generated.Extends, "customManagers:githubActionsVersions")
+	assert.Contains(t, generated.Extends, "customManagers:gitlabPipelineVersions")
 	require.Len(t, generated.CustomManagers, 1)
 	manager := generated.CustomManagers[0]
 	assert.Equal(t, []string{`/^clusters\/prod\/config\.yaml$/`}, manager.ManagerFilePatterns)
@@ -278,4 +281,89 @@ func TestInitPreservesExistingEnvExample(t *testing.T) {
 	content, err := os.ReadFile(envExamplePath)
 	require.NoError(t, err)
 	assert.Equal(t, "CUSTOM_CONTENT=1\n", string(content))
+}
+
+func TestInitCIPipelines(t *testing.T) {
+	for _, tt := range []struct {
+		name   string
+		flags  []string
+		github bool
+		gitlab bool
+	}{
+		{name: "default"},
+		{name: "github", flags: []string{"--github-actions"}, github: true},
+		{name: "gitlab", flags: []string{"--gitlab-ci"}, gitlab: true},
+		{name: "both", flags: []string{"--github-actions", "--gitlab-ci"}, github: true, gitlab: true},
+	} {
+		t.Run(tt.name, func(t *testing.T) {
+			workDir := t.TempDir()
+			bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
+			require.NoError(t, err)
+			args := []string{
+				"kubara", "--work-dir", workDir,
+				"init", "--bootstrap-catalog", bootstrapPath, "--catalog", generalPath,
+				"--catalog-overwrite", "--renovate=false",
+			}
+			args = append(args, tt.flags...)
+			run := func(args []string) {
+				app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+				require.NoError(t, app.Run(context.Background(), args))
+			}
+			run(args)
+			paths := map[string]bool{
+				".github/workflows/kubara-generate.yml": tt.github,
+				".gitlab/kubara.gitlab-ci.yml":          tt.gitlab,
+				".gitlab-ci.yml":                        tt.gitlab,
+			}
+			for path, wanted := range paths {
+				target := filepath.Join(workDir, path)
+				if wanted {
+					assert.FileExists(t, target)
+					if path == ".gitlab-ci.yml" {
+						content, err := os.ReadFile(target)
+						require.NoError(t, err)
+						assert.Contains(t, string(content), "local: '/.gitlab/kubara.gitlab-ci.yml'")
+					}
+					require.NoError(t, os.WriteFile(target, []byte("existing content"), 0o644))
+				} else {
+					assert.NoFileExists(t, target)
+				}
+			}
+			run(args)
+			for path, wanted := range paths {
+				target := filepath.Join(workDir, path)
+				if wanted {
+					content, err := os.ReadFile(target)
+					require.NoError(t, err)
+					assert.Equal(t, "existing content", string(content))
+				}
+			}
+		})
+	}
+}
+
+func TestInitGitLabCIPreservesExistingRootPipeline(t *testing.T) {
+	t.Parallel()
+
+	workDir := t.TempDir()
+	bootstrapPath, generalPath, err := internaltestutil.CreateCatalogFixtures(filepath.Join(workDir, "catalogs"))
+	require.NoError(t, err)
+
+	rootGitLabPath := filepath.Join(workDir, ".gitlab-ci.yml")
+	require.NoError(t, os.WriteFile(rootGitLabPath, []byte("custom: pipeline\n"), 0o644))
+
+	app := cmdtestutil.CreateTestAppWithFlags(NewGlobalFlags().CLIFlags(), NewInitCmd())
+	err = app.Run(context.Background(), []string{
+		"kubara", "--work-dir", workDir,
+		"init", "--bootstrap-catalog", bootstrapPath, "--catalog", generalPath,
+		"--catalog-overwrite", "--renovate=false", "--gitlab-ci",
+	})
+	require.NoError(t, err)
+
+	content, err := os.ReadFile(rootGitLabPath)
+	require.NoError(t, err)
+	assert.Equal(t, "custom: pipeline\n", string(content))
+
+	includePath := filepath.Join(workDir, ".gitlab/kubara.gitlab-ci.yml")
+	assert.FileExists(t, includePath)
 }
