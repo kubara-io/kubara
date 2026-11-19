@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
-      - uses: kubara-io/kubara-action@80b6dab277ecb99b8d8f3cd267e2128047e6dbac  # v0.1.0
+      - uses: kubara-io/kubara-action@7525333662824339b4df949ef5e5e82a518cae65  # v0.1.0
         with:
           version: 0.18.0
           args: '["schema", "--catalog", ".", "--output", "/tmp/catalog.schema.json"]'

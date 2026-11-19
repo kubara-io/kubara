@@ -65,7 +65,7 @@ jobs:
           persist-credentials: false
 
       - name: Install Kubara
-        uses: kubara-io/kubara-action@80b6dab277ecb99b8d8f3cd267e2128047e6dbac # v0.1.0
+        uses: kubara-io/kubara-action@7525333662824339b4df949ef5e5e82a518cae65 # v0.1.0
         with:
           version: ${{ env.KUBARA_VERSION }}
           args: '[]'
