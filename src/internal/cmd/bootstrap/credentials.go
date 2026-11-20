@@ -88,7 +88,7 @@ func (c *Credentials) ValidateForCluster(cluster *config.Cluster) error {
 		return nil
 	}
 	gitURL := ""
-	if cluster.ArgoCD.Repo.Git != nil {
+	if cluster.ArgoCD != nil && cluster.ArgoCD.Repo.Git != nil {
 		gitURL = cluster.ArgoCD.Repo.Git.Configs.URL
 	}
 	trimmedURL := strings.TrimSpace(gitURL)
@@ -120,7 +120,7 @@ func (c *Credentials) ValidateForCluster(cluster *config.Cluster) error {
 		}
 	}
 
-	if cluster.ArgoCD.HelmRepo != nil && cluster.ArgoCD.HelmRepo.URL != "" {
+	if cluster.ArgoCD != nil && cluster.ArgoCD.HelmRepo != nil && cluster.ArgoCD.HelmRepo.URL != "" {
 		hasHelmUser := c.HelmRepoUsername != ""
 		hasHelmPass := c.HelmRepoPassword != ""
 		if hasHelmUser != hasHelmPass {

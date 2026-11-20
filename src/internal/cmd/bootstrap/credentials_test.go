@@ -97,7 +97,7 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 		{
 			name: "public https repository",
 			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -113,7 +113,7 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 		{
 			name: "private https repository with valid credentials",
 			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -132,7 +132,7 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 		{
 			name: "private https repository missing password",
 			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -150,7 +150,7 @@ func TestCredentials_ValidateForCluster(t *testing.T) {
 		{
 			name: "invalid dockerconfig base64",
 			cluster: &config.Cluster{
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{

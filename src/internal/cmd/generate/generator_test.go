@@ -10,6 +10,7 @@ import (
 	"github.com/kubara-io/kubara/internal/service"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBuildEnabledServiceTemplatePathPredicate_SkipsDisabledConfigsService(t *testing.T) {
@@ -52,7 +53,7 @@ func TestBuildEnabledServiceTemplatePathPredicate_AlwaysIncludesBootstrapService
 
 func TestBuildTemplateContext_IncludesEmptyHelmRepoWhenUnconfigured(t *testing.T) {
 	context, err := buildTemplateContext(config.Cluster{
-		ArgoCD: config.ArgoCD{
+		ArgoCD: &config.ArgoCD{
 			Repo: config.RepoProto{
 				Git: &config.RepoType{},
 			},
@@ -66,4 +67,71 @@ func TestBuildTemplateContext_IncludesEmptyHelmRepoWhenUnconfigured(t *testing.T
 	cluster := context["cluster"].(map[string]any)
 	argocd := cluster["argocd"].(map[string]any)
 	assert.Equal(t, map[string]any{"url": ""}, argocd["helmRepo"])
+}
+
+func TestBuildTemplateContext_IncludesGitOpsNamespace(t *testing.T) {
+	context, err := buildTemplateContext(config.Cluster{
+		Name: "test-hub",
+		Type: config.Hub,
+		ArgoCD: &config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	}, buildContext{
+		GitOps: &config.GitOps{
+			Engine:      config.GitOpsEngineArgoCD,
+			SelfManaged: config.ArgoCDSelfManagedEnabled,
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+	gitops, ok := context["gitops"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "argocd", gitops["engine"])
+	assert.Equal(t, "enabled", gitops["selfManaged"])
+}
+
+func TestBuildTemplateContext_SynthesizesClusterArgoCDFromGitOps(t *testing.T) {
+	context, err := buildTemplateContext(config.Cluster{
+		Name: "test-hub",
+		Type: config.Hub,
+	}, buildContext{
+		GitOps: &config.GitOps{
+			Engine:      config.GitOpsEngineArgoCD,
+			SelfManaged: config.ArgoCDSelfManagedEnabled,
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+	cluster, ok := context["cluster"].(map[string]any)
+	require.True(t, ok)
+	argocd, ok := cluster["argocd"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "enabled", argocd["selfManaged"])
+	repo, ok := argocd["repo"].(map[string]any)
+	require.True(t, ok)
+	git, ok := repo["git"].(map[string]any)
+	require.True(t, ok)
+	configs, ok := git["configs"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "https://git.example.com/configs.git", configs["url"])
 }

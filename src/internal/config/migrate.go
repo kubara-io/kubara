@@ -8,6 +8,26 @@ import (
 )
 
 func applyLegacyDefaults(raw map[string]any) {
+	if gitops, ok := raw["gitops"].(map[string]any); ok {
+		setDefault(gitops, "engine", string(GitOpsEngineArgoCD))
+		setDefault(gitops, "selfManaged", string(ArgoCDSelfManagedEnabled))
+		if repo, ok := gitops["repo"].(map[string]any); ok {
+			for _, protocol := range []string{"https", "oci", "git"} {
+				repositoryType, ok := repo[protocol].(map[string]any)
+				if !ok {
+					continue
+				}
+				for _, name := range []string{"configs", "components"} {
+					repository, ok := repositoryType[name].(map[string]any)
+					if ok {
+						setDefault(repository, "path", "")
+						setDefault(repository, "targetRevision", "main")
+					}
+				}
+			}
+		}
+	}
+
 	clusters, _ := raw["clusters"].([]any)
 	for _, value := range clusters {
 		cluster, ok := value.(map[string]any)
@@ -81,6 +101,8 @@ func platformSetupDocument(cfg *Config, name string) ([]byte, error) {
 	cleanCfg.Clusters = slices.Clone(cfg.Clusters)
 	for i := range cleanCfg.Clusters {
 		cleanCfg.Clusters[i].IngressClassName = ""
+		// In the saved PlatformSetup document, clusters should not have the deprecated argocd field
+		cleanCfg.Clusters[i].ArgoCD = nil
 	}
 
 	document := map[string]any{

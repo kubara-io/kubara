@@ -28,6 +28,7 @@ Files without the `.tplt` suffix are copied as-is.
 kubara builds a template context with top-level objects:
 
 - `.cluster`
+- `.gitops`
 - `.catalog`
 - `.spokes` (on hub clusters)
 
@@ -107,6 +108,17 @@ kubara migrates `v1alpha5` configs to `v1alpha6`, moving the legacy `ingressClas
 In `v1alpha6`, the top-level `ingressClassName` is rejected, even if `networking` is absent. Configs containing both the legacy field and a structured `networking` block are rejected to avoid overwriting explicit routing settings.
 For existing catalogs, `.cluster.ingressClassName` is populated from the Ingress block in memory only.
 Templates supporting older CLI versions can fall back to this field.
+
+### `.gitops`
+
+`.gitops` contains the top-level GitOps configuration:
+
+- `.gitops.engine` (e.g. `argocd`)
+- `.gitops.selfManaged` (`enabled` or `disabled`)
+- `.gitops.repo` (repository sources and target revisions)
+- `.gitops.helmRepo.url` (optional Helm chart repository)
+
+kubara migrates `v1alpha6` configs to `v1alpha7`, moving `clusters[].argocd` to top-level `gitops` with `engine: argocd`. For existing catalogs, `.cluster.argocd` is populated in memory for backwards compatibility.
 
 ### `.catalog`
 

@@ -103,6 +103,7 @@ func (cs *ConfigStore) loadLegacy(raw map[string]any) error {
 	}
 
 	normalizeDisabledTerraform(cs.config)
+	normalizeGitOps(cs.config)
 	stripBootstrapServices(cs.config)
 	ensureClusterServices(cs.config)
 	return nil

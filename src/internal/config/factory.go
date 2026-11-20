@@ -69,7 +69,7 @@ func NewDefaultClusterWithCatalog(cwd string, catalogOptions catalog.LoadOptions
 				Email: "<your-email@my-domain.com>",
 			},
 		},
-		ArgoCD: ArgoCD{
+		ArgoCD: &ArgoCD{
 			SelfManaged: ArgoCDSelfManagedEnabled,
 			Repo: RepoProto{
 				AuthMode: authMode,
@@ -161,16 +161,6 @@ func CreateSpokeScaffolding(name string, catalogOptions catalog.LoadOptions) Clu
 			DNS: DNS{
 				Name:  "<dns-name>",
 				Email: "<dns-mail>",
-			},
-		},
-		ArgoCD: ArgoCD{
-			SelfManaged: ArgoCDSelfManagedEnabled,
-			Repo: RepoProto{
-				AuthMode: GitAuthModeHTTPS,
-				Git: &RepoType{
-					Configs:    Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
-					Components: Repository{URL: "https://git.example.com/platform/repo.git", TargetRevision: "main"},
-				},
 			},
 		},
 		Catalogs: append([]string(nil), effectiveCatalogOptions.Catalogs...),

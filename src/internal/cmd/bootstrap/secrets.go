@@ -97,7 +97,7 @@ func (sm *SecretManager) createGitRepositorySecret(cluster *config.Cluster, cred
 	}
 
 	gitURL := ""
-	if cluster.ArgoCD.Repo.Git != nil {
+	if cluster.ArgoCD != nil && cluster.ArgoCD.Repo.Git != nil {
 		gitURL = cluster.ArgoCD.Repo.Git.Configs.URL
 	}
 	projectName := fmt.Sprintf("%s-%s", cluster.Name, cluster.Stage)
@@ -185,7 +185,7 @@ func (sm *SecretManager) createImagePullSecret(creds *Credentials, namespace str
 
 // createHelmRepositorySecret creates the Helm repository secret
 func (sm *SecretManager) createHelmRepositorySecret(cluster *config.Cluster, creds *Credentials) *corev1.Secret {
-	if cluster == nil || cluster.ArgoCD.HelmRepo == nil || strings.TrimSpace(cluster.ArgoCD.HelmRepo.URL) == "" {
+	if cluster == nil || cluster.ArgoCD == nil || cluster.ArgoCD.HelmRepo == nil || strings.TrimSpace(cluster.ArgoCD.HelmRepo.URL) == "" {
 		return nil
 	}
 	helmRepoURL := utils.NormalizeHelmRepoURL(cluster.ArgoCD.HelmRepo.URL)
