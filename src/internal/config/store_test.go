@@ -21,6 +21,23 @@ import (
 func newValidTestConfig() *Config {
 	return &Config{
 		BootstrapCatalog: testBootstrapCatalogPtr(),
+		GitOps: &GitOps{
+			Engine:      GitOpsEngineArgoCD,
+			SelfManaged: ArgoCDSelfManagedEnabled,
+			Repo: RepoProto{
+				AuthMode: GitAuthModeHTTPS,
+				Git: &RepoType{
+					Configs: Repository{
+						URL:            "https://github.com/example/configs.git",
+						TargetRevision: "main",
+					},
+					Components: Repository{
+						URL:            "https://github.com/example/components.git",
+						TargetRevision: "main",
+					},
+				},
+			},
+		},
 		Clusters: []Cluster{
 			{
 				Name:  "test-cluster",
@@ -41,10 +58,10 @@ func newValidTestConfig() *Config {
 					KubernetesVersion: "1.34",
 					DNS: DNS{
 						Name:  "example.com",
-						Email: "admin@example.com",
+						Email: "dns@example.com",
 					},
 				},
-				ArgoCD: ArgoCD{
+				ArgoCD: &ArgoCD{
 					SelfManaged: ArgoCDSelfManagedEnabled,
 					Repo: RepoProto{
 						AuthMode: GitAuthModeHTTPS,
@@ -61,7 +78,7 @@ func newValidTestConfig() *Config {
 					},
 				},
 				Services: service.Services{
-					"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "cert@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
+					"cert-manager": {Status: service.StatusEnabled, Config: service.Config{"clusterIssuer": map[string]any{"name": "letsencrypt-prod", "email": "dns@example.com", "server": "https://acme-v02.api.letsencrypt.org/directory"}}},
 				},
 			},
 		},
@@ -682,7 +699,7 @@ func TestConfigStore_SaveToFile(t *testing.T) {
 				Terraform: &Terraform{
 					ProjectID: "00000000-0000-0000-0000-000000000000",
 				},
-				ArgoCD:   ArgoCD{},
+
 				Services: service.Services{},
 			},
 		},
@@ -1059,4 +1076,142 @@ func TestConfigStore_LoadRejectsUnknownFields(t *testing.T) {
 			require.ErrorContains(t, store.Load(), "invalid keys: unknownField")
 		})
 	}
+}
+
+func TestConfigStore_LoadMigratesV1Alpha6ArgocdToGitOps(t *testing.T) {
+	v1alpha6YAML := fmt.Sprintf(`
+version: v1alpha6
+bootstrapCatalog: %q
+clusters:
+  - name: test-hub
+    type: hub
+    stage: dev
+    dnsName: hub.example.com
+    catalogs:
+      - %q
+    argocd:
+      selfManaged: enabled
+      repo:
+        git:
+          configs:
+            url: "https://github.com/example/configs.git"
+            targetRevision: main
+          components:
+            url: "https://github.com/example/components.git"
+            targetRevision: main
+      helmRepo:
+        url: "https://charts.example.com"
+    services:
+      cert-manager:
+        status: enabled
+`, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	require.NoError(t, os.WriteFile(path, []byte(v1alpha6YAML), 0600))
+
+	store := NewConfigStore(dir, path, testCatalogLoadOptions())
+	require.NoError(t, store.Load())
+
+	cfg := store.GetConfig()
+	require.NotNil(t, cfg.GitOps)
+	assert.Equal(t, GitOpsEngineArgoCD, cfg.GitOps.Engine)
+	assert.Equal(t, ArgoCDSelfManagedEnabled, cfg.GitOps.SelfManaged)
+	assert.Equal(t, "https://github.com/example/configs.git", cfg.GitOps.Repo.Git.Configs.URL)
+	assert.Equal(t, "https://github.com/example/components.git", cfg.GitOps.Repo.Git.Components.URL)
+	require.NotNil(t, cfg.GitOps.HelmRepo)
+	assert.Equal(t, "https://charts.example.com", cfg.GitOps.HelmRepo.URL)
+
+	// Cluster has compatibility ArgoCD populated in memory
+	require.Len(t, cfg.Clusters, 1)
+	require.NotNil(t, cfg.Clusters[0].ArgoCD)
+	assert.Equal(t, ArgoCDSelfManagedEnabled, cfg.Clusters[0].ArgoCD.SelfManaged)
+
+	// When persisted, it is written as PlatformSetup with top-level gitops and without cluster.argocd
+	saved, err := os.ReadFile(path)
+	require.NoError(t, err)
+
+	var doc struct {
+		APIVersion string `yaml:"apiVersion"`
+		Kind       string `yaml:"kind"`
+		Spec       Config `yaml:"spec"`
+	}
+	require.NoError(t, yaml.Unmarshal(saved, &doc))
+	assert.Equal(t, PlatformSetupAPIVersion, doc.APIVersion)
+	assert.Equal(t, PlatformSetupKind, doc.Kind)
+	assert.NotNil(t, doc.Spec.GitOps)
+	assert.Nil(t, doc.Spec.Clusters[0].ArgoCD)
+}
+
+func TestConfigStore_ParsesManualClusterArgoCDWithWarning(t *testing.T) {
+	manualPlatformSetup := fmt.Sprintf(`
+apiVersion: %s
+kind: %s
+metadata:
+  name: platform
+spec:
+  bootstrapCatalog: %q
+  clusters:
+    - name: manual-cluster
+      type: hub
+      stage: dev
+      dnsName: manual.example.com
+      catalogs:
+        - %q
+      argocd:
+        selfManaged: enabled
+        repo:
+          git:
+            configs:
+              url: "https://github.com/example/configs.git"
+              targetRevision: main
+            components:
+              url: "https://github.com/example/components.git"
+              targetRevision: main
+      services:
+        cert-manager:
+          status: enabled
+`, PlatformSetupAPIVersion, PlatformSetupKind, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	require.NoError(t, os.WriteFile(path, []byte(manualPlatformSetup), 0600))
+
+	store := NewConfigStore(dir, path, testCatalogLoadOptions())
+	require.NoError(t, store.Load())
+
+	cfg := store.GetConfig()
+	require.NotNil(t, cfg.GitOps)
+	assert.Equal(t, GitOpsEngineArgoCD, cfg.GitOps.Engine)
+	assert.Equal(t, "https://github.com/example/configs.git", cfg.GitOps.Repo.Git.Configs.URL)
+}
+
+func TestConfigStore_RejectsPlatformSetupWithoutGitOps(t *testing.T) {
+	noGitOpsYAML := fmt.Sprintf(`
+apiVersion: %s
+kind: %s
+metadata:
+  name: platform
+spec:
+  bootstrapCatalog: %q
+  clusters:
+    - name: test-hub
+      type: hub
+      stage: dev
+      dnsName: hub.example.com
+      catalogs:
+        - %q
+      services:
+        cert-manager:
+          status: enabled
+`, PlatformSetupAPIVersion, PlatformSetupKind, *testBootstrapCatalogPtr(), testGeneralCatalogPath)
+
+	dir := t.TempDir()
+	path := filepath.Join(dir, "config.yaml")
+	require.NoError(t, os.WriteFile(path, []byte(noGitOpsYAML), 0600))
+
+	store := NewConfigStore(dir, path, testCatalogLoadOptions())
+	err := store.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "gitops configuration is required")
 }

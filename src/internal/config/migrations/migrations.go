@@ -17,6 +17,7 @@ const (
 	ConfigVersionV1Alpha4 = "v1alpha4"
 	ConfigVersionV1Alpha5 = "v1alpha5"
 	ConfigVersionV1Alpha6 = "v1alpha6"
+	ConfigVersionV1Alpha7 = "v1alpha7"
 )
 
 // Apply runs all registered schema and repository layout migrations.
@@ -60,6 +61,13 @@ func Apply(cwd string, config map[string]any) (bool, error) {
 	if isConfigOfVersion(config, ConfigVersionV1Alpha5) {
 		if err := migrateV1Alpha5Config(config); err != nil {
 			return false, fmt.Errorf("migrate V1Alpha5 config: %w", err)
+		}
+		migrated = true
+	}
+
+	if isConfigOfVersion(config, ConfigVersionV1Alpha6) {
+		if err := migrateV1Alpha6Config(config); err != nil {
+			return false, fmt.Errorf("migrate V1Alpha6 config: %w", err)
 		}
 		migrated = true
 	}

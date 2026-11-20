@@ -26,7 +26,7 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 			cluster: &config.Cluster{
 				Name:  "test",
 				Stage: "dev",
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -56,7 +56,7 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 			cluster: &config.Cluster{
 				Name:  "test",
 				Stage: "dev",
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -83,7 +83,7 @@ func TestCreateGitRepositorySecret(t *testing.T) {
 			cluster: &config.Cluster{
 				Name:  "test",
 				Stage: "dev",
-				ArgoCD: config.ArgoCD{
+				ArgoCD: &config.ArgoCD{
 					Repo: config.RepoProto{
 						Git: &config.RepoType{
 							Configs: config.Repository{
@@ -147,7 +147,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 		cluster := &config.Cluster{
 			Name:  "test",
 			Stage: "dev",
-			ArgoCD: config.ArgoCD{
+			ArgoCD: &config.ArgoCD{
 				HelmRepo: &config.HelmRepository{
 					URL: "https://charts.example.com",
 				},
@@ -170,7 +170,7 @@ func TestCreateHelmRepositorySecret(t *testing.T) {
 		cluster := &config.Cluster{
 			Name:  "test",
 			Stage: "dev",
-			ArgoCD: config.ArgoCD{
+			ArgoCD: &config.ArgoCD{
 				HelmRepo: &config.HelmRepository{
 					URL: "oci://registry-1.docker.io/bitnamicharts",
 				},
