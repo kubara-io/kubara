@@ -53,8 +53,9 @@ spec:
                     cluster.
                   properties:
                     argocd:
-                      description: ArgoCD configures the Argo CD deployment and repository
-                        settings for the cluster.
+                      description: |-
+                        ArgoCD configures the Argo CD deployment and repository settings for the cluster.
+                        Deprecated: use top-level GitOps configuration instead.
                       properties:
                         clusterSecrets:
                           description: ClusterSecrets configures spoke cluster credential
@@ -368,13 +369,173 @@ spec:
                   - name
                   - services
                   type: object
-                  x-kubernetes-validations:
-                  - message: argocd is required when type is hub
-                    rule: (has(self.type) && self.type == 'spoke') || has(self.argocd)
                 type: array
                 x-kubernetes-list-map-keys:
                 - name
                 x-kubernetes-list-type: map
+              gitops:
+                description: GitOps defines the GitOps engine and repository tracking
+                  configuration.
+                properties:
+                  clusterSecrets:
+                    description: ClusterSecrets configures spoke cluster credential
+                      provisioning into the GitOps engine.
+                    properties:
+                      provider:
+                        default: auto-rotator
+                        description: The provider used for provisioning spoke cluster
+                          credentials into Argo CD.
+                        enum:
+                        - auto-rotator
+                        - external-secrets
+                        type: string
+                    type: object
+                  engine:
+                    default: argocd
+                    description: Engine specifies the GitOps engine implementation.
+                    enum:
+                    - argocd
+                    type: string
+                  helmRepo:
+                    description: HelmRepo configures an optional Helm chart repository.
+                    properties:
+                      url:
+                        description: URL is the Helm chart repository URL.
+                        format: uri
+                        type: string
+                    required:
+                    - url
+                    type: object
+                  repo:
+                    description: Repo configures the Git or OCI repository sources.
+                    properties:
+                      authMode:
+                        description: AuthMode specifies the authentication mechanism
+                          used for Git operations.
+                        enum:
+                        - https
+                        - ssh
+                        - github-app
+                        type: string
+                      git:
+                        description: Git configures Git repositories for platform
+                          configs and components.
+                        properties:
+                          components:
+                            description: Components is the repository containing platform
+                              component manifests.
+                            properties:
+                              path:
+                                description: Path is an optional subdirectory path
+                                  within the repository.
+                                type: string
+                              targetRevision:
+                                default: main
+                                description: TargetRevision is the branch, tag, or
+                                  commit to track.
+                                minLength: 1
+                                type: string
+                              url:
+                                description: URL is the repository address (e.g. HTTPS
+                                  or SSH URL).
+                                minLength: 1
+                                type: string
+                            required:
+                            - url
+                            type: object
+                          configs:
+                            description: Configs is the repository containing platform
+                              configuration definitions.
+                            properties:
+                              path:
+                                description: Path is an optional subdirectory path
+                                  within the repository.
+                                type: string
+                              targetRevision:
+                                default: main
+                                description: TargetRevision is the branch, tag, or
+                                  commit to track.
+                                minLength: 1
+                                type: string
+                              url:
+                                description: URL is the repository address (e.g. HTTPS
+                                  or SSH URL).
+                                minLength: 1
+                                type: string
+                            required:
+                            - url
+                            type: object
+                        required:
+                        - components
+                        - configs
+                        type: object
+                      oci:
+                        description: OCI configures OCI registry repositories for
+                          platform configs and components.
+                        properties:
+                          components:
+                            description: Components is the repository containing platform
+                              component manifests.
+                            properties:
+                              path:
+                                description: Path is an optional subdirectory path
+                                  within the repository.
+                                type: string
+                              targetRevision:
+                                default: main
+                                description: TargetRevision is the branch, tag, or
+                                  commit to track.
+                                minLength: 1
+                                type: string
+                              url:
+                                description: URL is the repository address (e.g. HTTPS
+                                  or SSH URL).
+                                minLength: 1
+                                type: string
+                            required:
+                            - url
+                            type: object
+                          configs:
+                            description: Configs is the repository containing platform
+                              configuration definitions.
+                            properties:
+                              path:
+                                description: Path is an optional subdirectory path
+                                  within the repository.
+                                type: string
+                              targetRevision:
+                                default: main
+                                description: TargetRevision is the branch, tag, or
+                                  commit to track.
+                                minLength: 1
+                                type: string
+                              url:
+                                description: URL is the repository address (e.g. HTTPS
+                                  or SSH URL).
+                                minLength: 1
+                                type: string
+                            required:
+                            - url
+                            type: object
+                        required:
+                        - components
+                        - configs
+                        type: object
+                    type: object
+                    x-kubernetes-validations:
+                    - message: exactly one of git or oci must be configured
+                      rule: has(self.git) != has(self.oci)
+                  selfManaged:
+                    default: enabled
+                    description: SelfManaged indicates whether the GitOps engine should
+                      be self-managed by the platform.
+                    enum:
+                    - enabled
+                    - disabled
+                    type: string
+                required:
+                - repo
+                type: object
             required:
             - clusters
             type: object

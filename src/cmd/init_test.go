@@ -135,6 +135,9 @@ func TestInitPersistsBootstrapCatalogOverride(t *testing.T) {
 	require.NoError(t, yaml.Unmarshal(data, &generated))
 	require.NotNil(t, generated.Spec.BootstrapCatalog)
 	assert.Equal(t, bootstrapPath, *generated.Spec.BootstrapCatalog)
+	require.NotNil(t, generated.Spec.GitOps)
+	assert.Equal(t, config.GitOpsEngineArgoCD, generated.Spec.GitOps.Engine)
+	assert.Equal(t, config.ArgoCDSelfManagedEnabled, generated.Spec.GitOps.SelfManaged)
 	require.Len(t, generated.Spec.Clusters, 1)
 	assert.Equal(t, []string{generalPath}, generated.Spec.Clusters[0].Catalogs)
 }

@@ -35,6 +35,7 @@ type Options struct {
 type buildContext struct {
 	Catalog  catalog.Catalog
 	Clusters []config.Cluster
+	GitOps   *config.GitOps
 }
 
 // getSpokeClusters returns a list of all spoke Clusters of a given cluster list
@@ -74,6 +75,24 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 		if _, configured := argocd["helmRepo"]; !configured {
 			argocd["helmRepo"] = map[string]any{"url": ""}
 		}
+	} else if cluster.Type != config.Spoke && bctx.GitOps != nil {
+		legacyArgoCD := config.ArgoCD{
+			SelfManaged:    bctx.GitOps.SelfManaged,
+			Repo:           bctx.GitOps.Repo,
+			HelmRepo:       bctx.GitOps.HelmRepo,
+			ClusterSecrets: bctx.GitOps.ClusterSecrets,
+		}
+		var err error
+		argocd, err := toJSONMap(legacyArgoCD)
+		if err != nil {
+			return nil, fmt.Errorf("convert Argo CD config for cluster %q to map: %w", cluster.Name, err)
+		}
+		if _, configured := argocd["helmRepo"]; !configured {
+			argocd["helmRepo"] = map[string]any{"url": ""}
+		}
+		clusterMap["argocd"] = argocd
+	} else if cluster.Type != config.Spoke {
+		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
 	}
 
 	data := libtemplate.NewData()
@@ -82,6 +101,18 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 	}
 	if err := data.Namespace("catalog", resolveCatalog(bctx.Catalog)); err != nil {
 		return nil, err
+	}
+	if bctx.GitOps != nil {
+		gitopsMap, err := toJSONMap(bctx.GitOps)
+		if err != nil {
+			return nil, fmt.Errorf("convert GitOps config to map: %w", err)
+		}
+		if _, configured := gitopsMap["helmRepo"]; !configured {
+			gitopsMap["helmRepo"] = map[string]any{"url": ""}
+		}
+		if err := data.Namespace("gitops", gitopsMap); err != nil {
+			return nil, err
+		}
 	}
 	if cluster.Type == config.Hub {
 		spokes, err := getSpokeClusters(bctx.Clusters)
@@ -294,6 +325,7 @@ func (o *Options) processClusters() ([]render.TemplateResult, error) {
 		tmplContext, err := buildTemplateContext(cluster, buildContext{
 			Catalog:  cat,
 			Clusters: cnf.Clusters,
+			GitOps:   cnf.GitOps,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("build template context for cluster %q: %w", cluster.Name, err)

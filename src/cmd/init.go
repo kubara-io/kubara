@@ -149,6 +149,15 @@ func (o *InitOptions) Run() error {
 		clusterName = newCluster.Name
 
 		cs.GetConfig().Clusters = []config.Cluster{newCluster}
+		if newCluster.ArgoCD != nil {
+			cs.GetConfig().GitOps = &config.GitOps{
+				Engine:         config.GitOpsEngineArgoCD,
+				SelfManaged:    newCluster.ArgoCD.SelfManaged,
+				Repo:           newCluster.ArgoCD.Repo,
+				HelmRepo:       newCluster.ArgoCD.HelmRepo,
+				ClusterSecrets: newCluster.ArgoCD.ClusterSecrets,
+			}
+		}
 		o.applyBootstrapCatalogOverride(cs.GetConfig())
 
 		if err := cs.SaveToFile(); err != nil {

@@ -15,6 +15,7 @@ const (
 	ConfigVersionV1Alpha4 = "v1alpha4"
 	ConfigVersionV1Alpha5 = "v1alpha5"
 	ConfigVersionV1Alpha6 = "v1alpha6"
+	ConfigVersionV1Alpha7 = "v1alpha7"
 )
 
 const (
@@ -65,14 +66,50 @@ type Config struct {
 	// +optional
 	BootstrapCatalog *string `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty"`
 
+	// GitOps defines the GitOps engine and repository tracking configuration.
+	// +optional
+	GitOps *GitOps `json:"gitops,omitempty" yaml:"gitops,omitempty"`
+
 	// Clusters defines the list of Kubernetes clusters managed by the platform.
 	// +listType=map
 	// +listMapKey=name
 	Clusters []Cluster `json:"clusters" yaml:"clusters"`
 }
 
+// GitOpsEngine identifies the GitOps controller engine.
+type GitOpsEngine string
+
+const (
+	GitOpsEngineArgoCD GitOpsEngine = "argocd"
+)
+
+// GitOps defines top-level GitOps configuration.
+type GitOps struct {
+	// Engine specifies the GitOps engine implementation.
+	// +kubebuilder:default=argocd
+	// +kubebuilder:validation:Enum=argocd
+	// +optional
+	Engine GitOpsEngine `json:"engine,omitempty" yaml:"engine,omitempty"`
+
+	// SelfManaged indicates whether the GitOps engine should be self-managed by the platform.
+	// +kubebuilder:default=enabled
+	// +kubebuilder:validation:Enum=enabled;disabled
+	// +optional
+	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty"`
+
+	// Repo configures the Git or OCI repository sources.
+	Repo RepoProto `json:"repo" yaml:"repo"`
+
+	// HelmRepo configures an optional Helm chart repository.
+	// +optional
+	HelmRepo *HelmRepository `json:"helmRepo,omitempty" yaml:"helmRepo,omitempty"`
+
+	// ClusterSecrets configures spoke cluster credential provisioning into the GitOps engine.
+	// +optional
+	ClusterSecrets ClusterSecrets `json:"clusterSecrets,omitempty" yaml:"clusterSecrets,omitempty"`
+}
+
 // Cluster defines the configuration for a single Kubernetes cluster.
-// +kubebuilder:validation:XValidation:rule="(has(self.type) && self.type == 'spoke') || has(self.argocd)",message="argocd is required when type is hub"
 type Cluster struct {
 	// Name is the unique identifier for the cluster.
 	// +kubebuilder:validation:MinLength=1
@@ -116,8 +153,9 @@ type Cluster struct {
 	Terraform *Terraform `json:"terraform,omitempty"`
 
 	// ArgoCD configures the Argo CD deployment and repository settings for the cluster.
+	// Deprecated: use top-level GitOps configuration instead.
 	// +optional
-	ArgoCD *ArgoCD `json:"argocd,omitempty"`
+	ArgoCD *ArgoCD `json:"argocd,omitempty" yaml:"argocd,omitempty"`
 
 	// Catalogs specifies additional catalog references available to this cluster.
 	// +optional

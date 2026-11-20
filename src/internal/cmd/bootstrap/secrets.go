@@ -97,7 +97,7 @@ func (sm *SecretManager) createGitRepositorySecret(cluster *config.Cluster, cred
 	}
 
 	gitURL := ""
-	if cluster.ArgoCD.Repo.Git != nil {
+	if cluster.ArgoCD != nil && cluster.ArgoCD.Repo.Git != nil {
 		gitURL = cluster.ArgoCD.Repo.Git.Configs.URL
 	}
 	projectName := fmt.Sprintf("%s-%s", cluster.Name, cluster.Stage)
