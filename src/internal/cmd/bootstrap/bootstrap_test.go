@@ -1,12 +1,14 @@
 package bootstrap
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/kubara-io/kubara/internal/catalog"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -175,4 +177,12 @@ func TestGeneratePassword(t *testing.T) {
 	pw2, err := generatePassword(24)
 	require.NoError(t, err)
 	assert.NotEqual(t, pw, pw2)
+}
+
+func TestPrepareSpokeCluster_FailsWhenBootstrapCRDsMissingFromCatalog(t *testing.T) {
+	err := prepareSpokeCluster(context.Background(), &Options{
+		Catalog: catalog.Catalog{},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), `bootstrap service "bootstrap-crds" is missing from catalog`)
 }
