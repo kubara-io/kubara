@@ -42,7 +42,7 @@ const (
 	localExternalSecretsPolicy  = "read-access"
 	localOpenBaoInternalAddress = "http://openbao.openbao.svc:8200"
 	// renovate: datasource=helm depName=openbao registryUrl=https://openbao.github.io/openbao-helm
-	localOpenBaoChartVersion = "0.30.7"
+	localOpenBaoChartVersion = "0.30.8"
 )
 
 type localChart struct {
