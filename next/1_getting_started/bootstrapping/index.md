@@ -197,7 +197,7 @@ supported version as described in [STACKIT SKE configuration](../3_infrastructur
 
 `terraform.projectId` is provider-specific. For `t-cloud-public`, use the T Cloud Public tenant/project name that the Terraform provider expects as `tenant_name`, not a UUID.
 
-`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd` and `bootstrap-crds` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
+`bootstrapCatalog` is optional and defaults to kubara's versioned bootstrap catalog. It provides the fixed `argo-cd`, `bootstrap-crds`, and `cluster-credential-rotator` services, which do not appear under the configurable `services` map. Each cluster's ordered `catalogs` list provides its configurable platform services and templates.
 
 `networking.type` defaults to `ingress`, and `networking.ingress.className` defaults to `traefik`. Set it explicitly when using a different ingress controller.
 Each service also accepts an optional `networking.annotations` map under `services.<service>.networking.annotations` that is merged with kubara's defaults, allowing you to add controller-specific annotations without overwriting the full set.

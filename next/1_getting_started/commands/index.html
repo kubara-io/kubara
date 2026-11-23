@@ -2663,12 +2663,13 @@ You're not viewing the latest stable version.
 <h3 id="help-h_1">help, h</h3>
 <p>Shows a list of commands or help for one command</p>
 <h2 id="bootstrap">bootstrap</h2>
-<p>Bootstrap Argo CD onto a cluster</p>
-<blockquote>
-<p>kubara bootstrap CLUSTER_NAME [--local]</p>
-</blockquote>
+<p>Bootstrap a hub or onboard a spoke cluster</p>
+<pre><code>kubara bootstrap CLUSTER_NAME [--local]
+kubara bootstrap CLUSTER_NAME --initial-kubeconfig PATH
+</code></pre>
 <p><strong>--dry-run</strong>: Run with dry-run (default: false)</p>
 <p><strong>--help, -h</strong>: show help (default: false)</p>
+<p><strong>--initial-kubeconfig</strong>="": Path to the initial kubeconfig used to onboard a spoke cluster</p>
 <p><strong>--local</strong>: Provision an isolated local evaluation environment. Local testing only; not for production use. (default: false)</p>
 <p><strong>--platform-components</strong>="": Path to the platform-components directory (default: platform-components)</p>
 <p><strong>--platform-configs</strong>="": Path to platform-configs directory (default: platform-configs)</p>
