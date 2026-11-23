@@ -117,6 +117,7 @@ Templates supporting older CLI versions can fall back to this field.
 - `.gitops.selfManaged` (`enabled` or `disabled`)
 - `.gitops.repo` (repository sources and target revisions)
 - `.gitops.helmRepo.url` (optional Helm chart repository)
+- `.gitops.clusterSecrets.provider` (optional spoke credential provisioning provider)
 
 kubara migrates `v1alpha6` configs to `v1alpha7`, moving `clusters[].argocd` to top-level `gitops` with `engine: argocd`. For existing catalogs, `.cluster.argocd` is populated in memory for backwards compatibility.
 
