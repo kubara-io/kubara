@@ -67,8 +67,7 @@ type Config struct {
 	BootstrapCatalog *string `json:"bootstrapCatalog,omitempty" yaml:"bootstrapCatalog,omitempty"`
 
 	// GitOps defines the GitOps engine and repository tracking configuration.
-	// +optional
-	GitOps *GitOps `json:"gitops,omitempty" yaml:"gitops,omitempty"`
+	GitOps *GitOps `json:"gitops" yaml:"gitops"`
 
 	// Clusters defines the list of Kubernetes clusters managed by the platform.
 	// +listType=map
@@ -83,6 +82,21 @@ const (
 	GitOpsEngineArgoCD GitOpsEngine = "argocd"
 )
 
+type GitOpsSelfManagedStatus string
+
+const (
+	GitOpsSelfManagedEnabled  GitOpsSelfManagedStatus = "enabled"
+	GitOpsSelfManagedDisabled GitOpsSelfManagedStatus = "disabled"
+)
+
+// Deprecated: use GitOpsSelfManagedStatus instead.
+type ArgoCDSelfManagedStatus = GitOpsSelfManagedStatus
+
+const (
+	ArgoCDSelfManagedEnabled  = GitOpsSelfManagedEnabled
+	ArgoCDSelfManagedDisabled = GitOpsSelfManagedDisabled
+)
+
 // GitOps defines top-level GitOps configuration.
 type GitOps struct {
 	// Engine specifies the GitOps engine implementation.
@@ -95,7 +109,7 @@ type GitOps struct {
 	// +kubebuilder:default=enabled
 	// +kubebuilder:validation:Enum=enabled;disabled
 	// +optional
-	SelfManaged ArgoCDSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty"`
+	SelfManaged GitOpsSelfManagedStatus `json:"selfManaged,omitempty" yaml:"selfManaged,omitempty"`
 
 	// Repo configures the Git or OCI repository sources.
 	Repo RepoProto `json:"repo" yaml:"repo"`
@@ -154,8 +168,7 @@ type Cluster struct {
 
 	// ArgoCD configures the Argo CD deployment and repository settings for the cluster.
 	// Deprecated: use top-level GitOps configuration instead.
-	// +optional
-	ArgoCD *ArgoCD `json:"argocd,omitempty" yaml:"argocd,omitempty"`
+	ArgoCD *ArgoCD `json:"-" yaml:"-"`
 
 	// Catalogs specifies additional catalog references available to this cluster.
 	// +optional
@@ -254,13 +267,6 @@ type DNS struct {
 	// +kubebuilder:validation:Format=email
 	Email string `json:"email"`
 }
-
-type ArgoCDSelfManagedStatus string
-
-const (
-	ArgoCDSelfManagedEnabled  ArgoCDSelfManagedStatus = "enabled"
-	ArgoCDSelfManagedDisabled ArgoCDSelfManagedStatus = "disabled"
-)
 
 type GitAuthMode string
 

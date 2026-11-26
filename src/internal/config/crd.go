@@ -10,7 +10,6 @@ import (
 
 	"github.com/kubara-io/libkubara/crdvalidate"
 	"github.com/kubara-io/libkubara/manifest"
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -97,9 +96,6 @@ func decodePlatformSetup(data []byte) (*Config, error) {
 	normalizeDisabledTerraform(&doc.Spec)
 	normalizeNetworking(&doc.Spec)
 	normalizeGitOps(&doc.Spec)
-	if err := validateGitOps(&doc.Spec); err != nil {
-		return nil, fmt.Errorf("validate gitops: %w", err)
-	}
 	if err := validateNetworking(&doc.Spec); err != nil {
 		return nil, fmt.Errorf("validate networking: %w", err)
 	}
@@ -134,73 +130,30 @@ func ValidatePlatformSetupTransition(ctx context.Context, oldData, proposedData 
 	normalizeDisabledTerraform(&doc.Spec)
 	normalizeNetworking(&doc.Spec)
 	normalizeGitOps(&doc.Spec)
-	if err := validateGitOps(&doc.Spec); err != nil {
-		return nil, fmt.Errorf("validate gitops: %w", err)
-	}
 	if err := validateNetworking(&doc.Spec); err != nil {
 		return nil, fmt.Errorf("validate networking: %w", err)
 	}
 	return &doc.Spec, nil
 }
 
-func validateGitOps(cfg *Config) error {
-	if cfg.GitOps == nil {
-		return fmt.Errorf("gitops configuration is required")
-	}
-	return nil
-}
-
 func normalizeGitOps(cfg *Config) {
-	// If gitops is missing but a cluster specifies argocd (e.g. manual config or legacy), migrate it
 	if cfg.GitOps == nil {
-		var hubArgoCD *ArgoCD
-		for i := range cfg.Clusters {
-			cluster := &cfg.Clusters[i]
-			if (cluster.Type == Hub || cluster.Type == "") && cluster.ArgoCD != nil {
-				hubArgoCD = cluster.ArgoCD
-				break
-			}
-		}
-		if hubArgoCD == nil {
-			for i := range cfg.Clusters {
-				if cfg.Clusters[i].ArgoCD != nil {
-					hubArgoCD = cfg.Clusters[i].ArgoCD
-					break
-				}
-			}
-		}
-		if hubArgoCD != nil {
-			log.Warn().Msg("cluster.argocd is deprecated, migrating to top-level gitops configuration")
-			selfManaged := hubArgoCD.SelfManaged
-			if selfManaged == "" {
-				selfManaged = ArgoCDSelfManagedEnabled
-			}
-			cfg.GitOps = &GitOps{
-				Engine:         GitOpsEngineArgoCD,
-				SelfManaged:    selfManaged,
-				Repo:           hubArgoCD.Repo,
-				HelmRepo:       hubArgoCD.HelmRepo,
-				ClusterSecrets: hubArgoCD.ClusterSecrets,
-			}
-		}
+		return
 	}
-
-	if cfg.GitOps != nil {
-		if cfg.GitOps.Engine == "" {
-			cfg.GitOps.Engine = GitOpsEngineArgoCD
-		}
-		if cfg.GitOps.SelfManaged == "" {
-			cfg.GitOps.SelfManaged = ArgoCDSelfManagedEnabled
-		}
-		// Populate cluster.ArgoCD for catalog compatibility on hub clusters
-		for i := range cfg.Clusters {
-			if cfg.Clusters[i].Type == Hub || cfg.Clusters[i].Type == "" {
-				cfg.Clusters[i].ArgoCD = &ArgoCD{
-					SelfManaged:    cfg.GitOps.SelfManaged,
-					Repo:           cfg.GitOps.Repo,
-					HelmRepo:       cfg.GitOps.HelmRepo,
-					ClusterSecrets: cfg.GitOps.ClusterSecrets,
-				}
+	if cfg.GitOps.Engine == "" {
+		cfg.GitOps.Engine = GitOpsEngineArgoCD
+	}
+	if cfg.GitOps.SelfManaged == "" {
+		cfg.GitOps.SelfManaged = GitOpsSelfManagedEnabled
+	}
+	// Populate cluster.ArgoCD in memory for catalog template compatibility on hub clusters
+	for i := range cfg.Clusters {
+		if cfg.Clusters[i].Type == Hub || cfg.Clusters[i].Type == "" {
+			cfg.Clusters[i].ArgoCD = &ArgoCD{
+				SelfManaged:    cfg.GitOps.SelfManaged,
+				Repo:           cfg.GitOps.Repo,
+				HelmRepo:       cfg.GitOps.HelmRepo,
+				ClusterSecrets: cfg.GitOps.ClusterSecrets,
 			}
 		}
 	}

@@ -67,22 +67,21 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 			"provider": config.TerraformProviderNone,
 		}
 	}
+	var legacyArgoCD *config.ArgoCD
 	if cluster.ArgoCD != nil {
-		argocd, ok := clusterMap["argocd"].(map[string]any)
-		if !ok {
-			return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
-		}
-		if _, configured := argocd["helmRepo"]; !configured {
-			argocd["helmRepo"] = map[string]any{"url": ""}
-		}
+		legacyArgoCD = cluster.ArgoCD
 	} else if cluster.Type != config.Spoke && bctx.GitOps != nil {
-		legacyArgoCD := config.ArgoCD{
+		legacyArgoCD = &config.ArgoCD{
 			SelfManaged:    bctx.GitOps.SelfManaged,
 			Repo:           bctx.GitOps.Repo,
 			HelmRepo:       bctx.GitOps.HelmRepo,
 			ClusterSecrets: bctx.GitOps.ClusterSecrets,
 		}
-		var err error
+	} else if cluster.Type != config.Spoke {
+		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
+	}
+
+	if legacyArgoCD != nil {
 		argocd, err := toJSONMap(legacyArgoCD)
 		if err != nil {
 			return nil, fmt.Errorf("convert Argo CD config for cluster %q to map: %w", cluster.Name, err)
@@ -91,8 +90,6 @@ func buildTemplateContext(cluster config.Cluster, bctx buildContext) (map[string
 			argocd["helmRepo"] = map[string]any{"url": ""}
 		}
 		clusterMap["argocd"] = argocd
-	} else if cluster.Type != config.Spoke {
-		return nil, fmt.Errorf("convert Argo CD config for cluster %q to map", cluster.Name)
 	}
 
 	data := libtemplate.NewData()

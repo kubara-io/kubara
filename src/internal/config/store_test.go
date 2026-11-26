@@ -1200,7 +1200,7 @@ clusters:
 	assert.Nil(t, doc.Spec.Clusters[0].ArgoCD)
 }
 
-func TestConfigStore_ParsesManualClusterArgoCDWithWarning(t *testing.T) {
+func TestConfigStore_RejectsPlatformSetupWithClusterArgoCD(t *testing.T) {
 	manualPlatformSetup := fmt.Sprintf(`
 apiVersion: %s
 kind: %s
@@ -1208,6 +1208,17 @@ metadata:
   name: platform
 spec:
   bootstrapCatalog: %q
+  gitops:
+    engine: argocd
+    selfManaged: enabled
+    repo:
+      git:
+        configs:
+          url: "https://github.com/example/configs.git"
+          targetRevision: main
+        components:
+          url: "https://github.com/example/components.git"
+          targetRevision: main
   clusters:
     - name: manual-cluster
       type: hub
@@ -1235,12 +1246,9 @@ spec:
 	require.NoError(t, os.WriteFile(path, []byte(manualPlatformSetup), 0600))
 
 	store := NewConfigStore(dir, path, testCatalogLoadOptions())
-	require.NoError(t, store.Load())
-
-	cfg := store.GetConfig()
-	require.NotNil(t, cfg.GitOps)
-	assert.Equal(t, GitOpsEngineArgoCD, cfg.GitOps.Engine)
-	assert.Equal(t, "https://github.com/example/configs.git", cfg.GitOps.Repo.Git.Configs.URL)
+	err := store.Load()
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "field is not declared by the CRD schema")
 }
 
 func TestConfigStore_RejectsPlatformSetupWithoutGitOps(t *testing.T) {
@@ -1270,5 +1278,5 @@ spec:
 	store := NewConfigStore(dir, path, testCatalogLoadOptions())
 	err := store.Load()
 	require.Error(t, err)
-	assert.Contains(t, err.Error(), "gitops configuration is required")
+	assert.Contains(t, err.Error(), "spec.gitops: Required value")
 }

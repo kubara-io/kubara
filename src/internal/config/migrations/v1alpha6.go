@@ -15,7 +15,7 @@ func migrateV1Alpha6Config(config map[string]any) error {
 
 	clusters, _ := config["clusters"].([]any)
 
-	// If gitops is not already set, find argocd from the hub cluster (or first cluster).
+	// If gitops is not already set, find argocd from the hub cluster.
 	if _, hasGitOps := config["gitops"]; !hasGitOps {
 		var hubArgoCD map[string]any
 		for _, item := range clusters {
@@ -32,40 +32,26 @@ func migrateV1Alpha6Config(config map[string]any) error {
 			}
 		}
 
-		// Fallback to the first cluster that has an argocd block if not found on hub
 		if hubArgoCD == nil {
-			for _, item := range clusters {
-				cluster, ok := item.(map[string]any)
-				if !ok {
-					continue
-				}
-				if argoCD, ok := cluster["argocd"].(map[string]any); ok {
-					hubArgoCD = argoCD
-					break
-				}
-			}
+			return fmt.Errorf("no argocd configuration found on hub cluster to migrate to top-level gitops")
 		}
 
-		if hubArgoCD != nil {
-			gitops := map[string]any{
-				"engine": "argocd",
-			}
-			if selfManaged, ok := hubArgoCD["selfManaged"]; ok {
-				gitops["selfManaged"] = selfManaged
-			}
-			if repo, ok := hubArgoCD["repo"]; ok {
-				gitops["repo"] = repo
-			}
-			if helmRepo, ok := hubArgoCD["helmRepo"]; ok {
-				gitops["helmRepo"] = helmRepo
-			}
-			if clusterSecrets, ok := hubArgoCD["clusterSecrets"]; ok {
-				gitops["clusterSecrets"] = clusterSecrets
-			}
-			config["gitops"] = gitops
-		} else {
-			return fmt.Errorf("no argocd configuration found to migrate to top-level gitops")
+		gitops := map[string]any{
+			"engine": "argocd",
 		}
+		if selfManaged, ok := hubArgoCD["selfManaged"]; ok {
+			gitops["selfManaged"] = selfManaged
+		}
+		if repo, ok := hubArgoCD["repo"]; ok {
+			gitops["repo"] = repo
+		}
+		if helmRepo, ok := hubArgoCD["helmRepo"]; ok {
+			gitops["helmRepo"] = helmRepo
+		}
+		if clusterSecrets, ok := hubArgoCD["clusterSecrets"]; ok {
+			gitops["clusterSecrets"] = clusterSecrets
+		}
+		config["gitops"] = gitops
 	}
 
 	// Remove argocd key from all clusters
