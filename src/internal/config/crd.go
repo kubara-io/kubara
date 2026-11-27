@@ -95,6 +95,7 @@ func decodePlatformSetup(data []byte) (*Config, error) {
 	}
 	normalizeDisabledTerraform(&doc.Spec)
 	normalizeNetworking(&doc.Spec)
+	normalizeGitOps(&doc.Spec)
 	if err := validateNetworking(&doc.Spec); err != nil {
 		return nil, fmt.Errorf("validate networking: %w", err)
 	}
@@ -128,10 +129,34 @@ func ValidatePlatformSetupTransition(ctx context.Context, oldData, proposedData 
 	}
 	normalizeDisabledTerraform(&doc.Spec)
 	normalizeNetworking(&doc.Spec)
+	normalizeGitOps(&doc.Spec)
 	if err := validateNetworking(&doc.Spec); err != nil {
 		return nil, fmt.Errorf("validate networking: %w", err)
 	}
 	return &doc.Spec, nil
+}
+
+func normalizeGitOps(cfg *Config) {
+	if cfg.GitOps == nil {
+		return
+	}
+	if cfg.GitOps.Engine == "" {
+		cfg.GitOps.Engine = GitOpsEngineArgoCD
+	}
+	if cfg.GitOps.SelfManaged == "" {
+		cfg.GitOps.SelfManaged = GitOpsSelfManagedEnabled
+	}
+	// Populate cluster.ArgoCD in memory for catalog template compatibility on hub clusters
+	for i := range cfg.Clusters {
+		if cfg.Clusters[i].Type == Hub || cfg.Clusters[i].Type == "" {
+			cfg.Clusters[i].ArgoCD = &ArgoCD{
+				SelfManaged:    cfg.GitOps.SelfManaged,
+				Repo:           cfg.GitOps.Repo,
+				HelmRepo:       cfg.GitOps.HelmRepo,
+				ClusterSecrets: cfg.GitOps.ClusterSecrets,
+			}
+		}
+	}
 }
 
 func normalizeNetworking(cfg *Config) {

@@ -58,7 +58,18 @@ func CreateTestConfig(t *testing.T, dir string, clusters ...config.Cluster) stri
 
 	cfg := config.Config{
 		BootstrapCatalog: &testBootstrapCatalogPath,
-		Clusters:         clusters,
+		GitOps: &config.GitOps{
+			Engine:      config.GitOpsEngineArgoCD,
+			SelfManaged: config.GitOpsSelfManagedEnabled,
+			Repo: config.RepoProto{
+				AuthMode: config.GitAuthModeHTTPS,
+				Git: &config.RepoType{
+					Configs:    config.Repository{URL: "https://github.com/example/configs", TargetRevision: "main"},
+					Components: config.Repository{URL: "https://github.com/example/components", TargetRevision: "main"},
+				},
+			},
+		},
+		Clusters: clusters,
 	}
 
 	// Convert to YAML

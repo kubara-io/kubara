@@ -168,12 +168,16 @@ func (flags *BootstrapFlags) ToOptions(cmd *cli.Command) (*bootstrap.Options, er
 
 	clusterSecretsProvider := config.ClusterSecretsProviderAutoRotator
 	if cs.GetConfig() != nil {
-		for _, c := range cs.GetConfig().Clusters {
-			if c.Type == config.Hub && c.ArgoCD != nil {
-				if c.ArgoCD.ClusterSecrets.Provider != "" {
-					clusterSecretsProvider = c.ArgoCD.ClusterSecrets.Provider
+		if cs.GetConfig().GitOps != nil && cs.GetConfig().GitOps.ClusterSecrets.Provider != "" {
+			clusterSecretsProvider = cs.GetConfig().GitOps.ClusterSecrets.Provider
+		} else {
+			for _, c := range cs.GetConfig().Clusters {
+				if c.Type == config.Hub && c.ArgoCD != nil {
+					if c.ArgoCD.ClusterSecrets.Provider != "" {
+						clusterSecretsProvider = c.ArgoCD.ClusterSecrets.Provider
+					}
+					break
 				}
-				break
 			}
 		}
 	}

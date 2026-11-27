@@ -84,7 +84,7 @@ git push
 
 Pushing these changes allows the hub cluster's Argo CD to reconcile the updated platform configuration. During reconciliation, Argo CD applies the `<spoke-cluster-name>-config` ConfigMap and prepares the `cluster-credential-rotator` CronJob on the hub.
 
-If `argocd.selfManaged` is disabled on your hub cluster, run `kubara bootstrap <hub-cluster-name>` to apply the changes instead.
+If `gitops.selfManaged` is disabled on your hub cluster, run `kubara bootstrap <hub-cluster-name>` to apply the changes instead.
 
 ## 5. Onboard the spoke cluster
 
@@ -172,7 +172,7 @@ Once the secret store connects to your secret backend, Argo CD reconciles all re
 
 ### Fallback: Static ExternalSecrets
 
-When `argocd.clusterSecrets.provider` is set to `external-secrets` on the hub cluster in `config.yaml` (or `clusterSecrets.useExternalSecrets: true` in Argo CD chart values), Argo CD renders static `ExternalSecret` manifests for spoke clusters instead of using `cluster-credential-rotator`.
+When `gitops.clusterSecrets.provider` is set to `external-secrets` in `config.yaml` (or `clusterSecrets.useExternalSecrets: true` in Argo CD chart values), Argo CD renders static `ExternalSecret` manifests for spoke clusters instead of using `cluster-credential-rotator`.
 
 In that mode, store the spoke kubeconfig in your secret backend (Vault/Secret Manager) under:
 `<cluster-name>/<cluster-stage>/argocd/<spoke-name>-<spoke-stage>`

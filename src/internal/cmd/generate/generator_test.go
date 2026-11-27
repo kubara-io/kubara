@@ -106,3 +106,70 @@ func TestBuildEnabledServiceTemplatePathPredicate_SkipsHubOnlyBootstrapServiceFo
 	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "argo-cd", "values.generated.yaml.tplt")))
 	assert.False(t, predicate(filepath.Join(render.DefaultPlatformConfigsPath, render.Helm.String(), "cluster-credential-rotator", "values.generated.yaml.tplt")))
 }
+
+func TestBuildTemplateContext_IncludesGitOpsNamespace(t *testing.T) {
+	context, err := buildTemplateContext(config.Cluster{
+		Name: "test-hub",
+		Type: config.Hub,
+		ArgoCD: &config.ArgoCD{
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	}, buildContext{
+		GitOps: &config.GitOps{
+			Engine:      config.GitOpsEngineArgoCD,
+			SelfManaged: config.ArgoCDSelfManagedEnabled,
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+	gitops, ok := context["gitops"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "argocd", gitops["engine"])
+	assert.Equal(t, "enabled", gitops["selfManaged"])
+}
+
+func TestBuildTemplateContext_SynthesizesClusterArgoCDFromGitOps(t *testing.T) {
+	context, err := buildTemplateContext(config.Cluster{
+		Name: "test-hub",
+		Type: config.Hub,
+	}, buildContext{
+		GitOps: &config.GitOps{
+			Engine:      config.GitOpsEngineArgoCD,
+			SelfManaged: config.ArgoCDSelfManagedEnabled,
+			Repo: config.RepoProto{
+				Git: &config.RepoType{
+					Configs: config.Repository{
+						URL: "https://git.example.com/configs.git",
+					},
+				},
+			},
+		},
+	})
+
+	require.NoError(t, err)
+	cluster, ok := context["cluster"].(map[string]any)
+	require.True(t, ok)
+	argocd, ok := cluster["argocd"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "enabled", argocd["selfManaged"])
+	repo, ok := argocd["repo"].(map[string]any)
+	require.True(t, ok)
+	git, ok := repo["git"].(map[string]any)
+	require.True(t, ok)
+	configs, ok := git["configs"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "https://git.example.com/configs.git", configs["url"])
+}

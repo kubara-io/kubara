@@ -1156,16 +1156,21 @@ middleware:
 }
 
 func localProjectSourceRepos(opts *Options) []string {
-	repos := []string{
-		opts.ClusterConfig.ArgoCD.Repo.Git.Components.URL,
-		opts.ClusterConfig.ArgoCD.Repo.Git.Configs.URL,
+	repos := []string{}
+	if opts.ClusterConfig.ArgoCD != nil && opts.ClusterConfig.ArgoCD.Repo.Git != nil {
+		repos = append(repos,
+			opts.ClusterConfig.ArgoCD.Repo.Git.Components.URL,
+			opts.ClusterConfig.ArgoCD.Repo.Git.Configs.URL,
+		)
+	}
+	repos = append(repos,
 		"https://charts.external-secrets.io/",
 		"https://charts.jetstack.io",
 		"https://prometheus-community.github.io/helm-charts",
 		"ghcr.io/traefik/helm",
 		"oci://ghcr.io/traefik/helm",
-	}
-	if opts.ClusterConfig.ArgoCD.HelmRepo != nil && strings.TrimSpace(opts.ClusterConfig.ArgoCD.HelmRepo.URL) != "" {
+	)
+	if opts.ClusterConfig.ArgoCD != nil && opts.ClusterConfig.ArgoCD.HelmRepo != nil && strings.TrimSpace(opts.ClusterConfig.ArgoCD.HelmRepo.URL) != "" {
 		repos = append(repos, opts.ClusterConfig.ArgoCD.HelmRepo.URL)
 	}
 

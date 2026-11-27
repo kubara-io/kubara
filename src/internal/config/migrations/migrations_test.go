@@ -347,3 +347,60 @@ func TestMigrateV1Alpha3Config(t *testing.T) {
 	assert.Equal(t, "disabled", cluster["argocd"].(map[string]any)["selfManaged"])
 	assert.NotContains(t, cluster["services"], "argocd")
 }
+
+func TestMigrateV1Alpha6Config(t *testing.T) {
+	config := map[string]any{
+		"version": ConfigVersionV1Alpha6,
+		"clusters": []any{
+			map[string]any{
+				"name": "hub-cluster",
+				"type": "hub",
+				"argocd": map[string]any{
+					"selfManaged": "enabled",
+					"repo": map[string]any{
+						"git": map[string]any{
+							"configs": map[string]any{
+								"url":            "https://github.com/example/configs.git",
+								"targetRevision": "main",
+							},
+							"components": map[string]any{
+								"url":            "https://github.com/example/components.git",
+								"targetRevision": "main",
+							},
+						},
+					},
+					"helmRepo": map[string]any{
+						"url": "https://charts.example.com",
+					},
+					"clusterSecrets": map[string]any{
+						"provider": "auto-rotator",
+					},
+				},
+			},
+			map[string]any{
+				"name": "spoke-cluster",
+				"type": "spoke",
+				"argocd": map[string]any{
+					"selfManaged": "disabled",
+				},
+			},
+		},
+	}
+
+	require.NoError(t, migrateV1Alpha6Config(config))
+	assert.Equal(t, ConfigVersionV1Alpha7, config["version"])
+
+	gitops, ok := config["gitops"].(map[string]any)
+	require.True(t, ok)
+	assert.Equal(t, "argocd", gitops["engine"])
+	assert.Equal(t, "enabled", gitops["selfManaged"])
+	assert.NotNil(t, gitops["repo"])
+	assert.NotNil(t, gitops["helmRepo"])
+	assert.Equal(t, map[string]any{"provider": "auto-rotator"}, gitops["clusterSecrets"])
+
+	clusters := config["clusters"].([]any)
+	for _, item := range clusters {
+		cluster := item.(map[string]any)
+		assert.NotContains(t, cluster, "argocd")
+	}
+}
