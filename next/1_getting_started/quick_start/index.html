@@ -2885,10 +2885,21 @@ HTTPS or SSH URL. If your repository is private, you can provide repository cred
 Now<span class="w"> </span>start<span class="w"> </span>cloud-provider-kind<span class="w"> </span><span class="k">in</span><span class="w"> </span>another<span class="w"> </span>terminal<span class="w"> </span>with:<span class="w"> </span>sudo<span class="w"> </span>cloud-provider-kind
 </code></pre></div></p>
 <p>And then start <code>cloud-provider-kind</code> in another terminal:</p>
-<div class="tabbed-set tabbed-alternate" data-tabs="1:2"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux / macOS</label><label for="__tabbed_1_2">Windows / WSL2</label></div>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:3"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><input id="__tabbed_1_2" name="__tabbed_1" type="radio" /><input id="__tabbed_1_3" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1">Linux / macOS</label><label for="__tabbed_1_2">Linux with Docker Desktop</label><label for="__tabbed_1_3">Windows / WSL2</label></div>
 <div class="tabbed-content">
 <div class="tabbed-block">
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<p>When running Docker Desktop on Linux the Docker Engine
+is isolated inside a VM which is why the routing will
+work differently.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Requires sudo for the loadbalancer tunnel from the host to the VM</span>
+<span class="c1"># Requires setting the correct docker host / socket address located inside the users directory that runs docker desktop</span>
+<span class="c1"># Requires the full path to the installation of cloud-provider-kind which most likely is user scoped as well</span>
+
+sudo<span class="w"> </span><span class="nv">DOCKER_HOST</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>context<span class="w"> </span>inspect<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Endpoints.docker.Host}}'</span><span class="k">)</span><span class="w"> </span><span class="k">$(</span>which<span class="w"> </span>cloud-provider-kind<span class="k">)</span><span class="w"> </span>--enable-lb-tunnel
 </code></pre></div>
 </div>
 <div class="tabbed-block">

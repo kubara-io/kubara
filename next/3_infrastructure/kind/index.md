@@ -70,6 +70,17 @@ At this point it prints the instruction to start:
 ```bash
 sudo cloud-provider-kind
 ```
+
+When running Docker Desktop on Linux the Docker Engine is isolated inside a VM which is why the network routing works differently.
+
+```bash
+# Requires sudo for the loadbalancer tunnel from the host to the VM
+# Requires setting the correct docker host / socket address located inside the users directory that runs docker desktop
+# Requires the full path to the installation of cloud-provider-kind which most likely is user scoped as well
+
+sudo DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}') $(which cloud-provider-kind) --enable-lb-tunnel
+```
+
 On Windows with Docker Engine running inside WSL2, start `cloud-provider-kind` with load balancer port mapping enabled and the load balancer tunnel disabled:
 
 ```bash

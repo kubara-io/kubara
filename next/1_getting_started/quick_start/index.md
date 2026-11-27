@@ -97,6 +97,20 @@ And then start `cloud-provider-kind` in another terminal:
     sudo cloud-provider-kind
     ```
 
+=== "Linux with Docker Desktop"
+
+    When running Docker Desktop on Linux the Docker Engine
+    is isolated inside a VM which is why the routing will
+    work differently.
+
+    ```bash
+    # Requires sudo for the loadbalancer tunnel from the host to the VM
+    # Requires setting the correct docker host / socket address located inside the users directory that runs docker desktop
+    # Requires the full path to the installation of cloud-provider-kind which most likely is user scoped as well
+
+    sudo DOCKER_HOST=$(docker context inspect --format '{{.Endpoints.docker.Host}}') $(which cloud-provider-kind) --enable-lb-tunnel
+    ```
+
 === "Windows / WSL2"
 
     When running Docker Engine inside WSL2, use:

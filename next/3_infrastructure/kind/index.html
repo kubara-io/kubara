@@ -2995,9 +2995,16 @@ That is done so workloads inside the cluster can trust the same CA bundle when t
 </ul>
 <p>kubara then waits until the service gets an external IP.</p>
 <p>At this point it prints the instruction to start:</p>
-<p><div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
+<div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind
 </code></pre></div>
-On Windows with Docker Engine running inside WSL2, start <code>cloud-provider-kind</code> with load balancer port mapping enabled and the load balancer tunnel disabled:</p>
+<p>When running Docker Desktop on Linux the Docker Engine is isolated inside a VM which is why the network routing works differently.</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Requires sudo for the loadbalancer tunnel from the host to the VM</span>
+<span class="c1"># Requires setting the correct docker host / socket address located inside the users directory that runs docker desktop</span>
+<span class="c1"># Requires the full path to the installation of cloud-provider-kind which most likely is user scoped as well</span>
+
+sudo<span class="w"> </span><span class="nv">DOCKER_HOST</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>context<span class="w"> </span>inspect<span class="w"> </span>--format<span class="w"> </span><span class="s1">'{{.Endpoints.docker.Host}}'</span><span class="k">)</span><span class="w"> </span><span class="k">$(</span>which<span class="w"> </span>cloud-provider-kind<span class="k">)</span><span class="w"> </span>--enable-lb-tunnel
+</code></pre></div>
+<p>On Windows with Docker Engine running inside WSL2, start <code>cloud-provider-kind</code> with load balancer port mapping enabled and the load balancer tunnel disabled:</p>
 <div class="highlight"><pre><span></span><code>sudo<span class="w"> </span>cloud-provider-kind<span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--enable-lb-tunnel<span class="o">=</span><span class="nb">false</span><span class="w"> </span><span class="se">\</span>
 <span class="w">  </span>--enable-lb-port-mapping<span class="o">=</span><span class="nb">true</span>
