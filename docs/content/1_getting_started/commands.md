@@ -72,9 +72,13 @@ kubara [command]
 
 Initialize kubara config for your GitOps repository
 
->kubara init [--local] [--renovate=false] [--bootstrap-catalog PATH_OR_OCI]
+>kubara init [--local] [--renovate=false] [--github-actions] [--gitlab-ci] [--bootstrap-catalog PATH_OR_OCI]
 
 **--bootstrap-catalog**="": Path to the bootstrap catalog directory or an OCI reference in the form oci://registry/repository:x.y.z
+
+**--github-actions**: Generate a GitHub Actions workflow for kubara generation if none exists (default: false)
+
+**--gitlab-ci**: Generate a GitLab CI pipeline for kubara generation if none exists (default: false)
 
 **--help, -h**: show help (default: false)
 
@@ -175,7 +179,11 @@ Manage platform catalogs
 
 Create a custom catalog directory skeleton
 
->kubara catalog create CATALOG_NAME
+>kubara catalog create [--github-actions] [--gitlab-ci] CATALOG_NAME
+
+**--github-actions**: Include a GitHub Actions catalog validation workflow (default: false)
+
+**--gitlab-ci**: Include a GitLab catalog validation pipeline (default: false)
 
 **--help, -h**: show help (default: false)
 

@@ -28,6 +28,7 @@ nav:
       - Argo CD App-of-Apps: 4_building_your_platform/argocd-add-app-of-apps.md
       - How to add a Spoke Cluster: 4_building_your_platform/add_spoke_cluster.md
       - How to create a Catalog: 4_building_your_platform/create_catalog.md
+      - CI Automation: 4_building_your_platform/ci_automation.md
       - SSO:
           - About SSO: 4_building_your_platform/sso/sso.md
           - GitHub: 4_building_your_platform/sso/add_sso_github.md
